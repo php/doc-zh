@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- $Revision: 1.12 $ -->
-<!-- $Author: yincheng $ -->
-<!-- EN-Revision: 1.28 Maintainer: verdana Status: ready -->
+<!-- $Revision: 1.13 $ -->
+<!-- $Author: gregory $ -->
+<!-- EN-Revision: 1.31 Maintainer: verdana Status: ready -->
+<!-- CREDITS: Gregory -->
  <chapter id="functions">
   <title>º¯Êý</title>
 
@@ -37,8 +38,74 @@ function foo ($arg_1, $arg_2, ..., $arg_n)
    </simpara>
    <simpara>
     ÔÚ PHP 3 ÖÐ£¬º¯Êý±ØÐëÔÚ±»µ÷ÓÃÖ®Ç°¶¨Òå¡£¶ø PHP 4 Ôò²»ÔÙÓÐÕâÑùµÄ
-    Ìõ¼þ¡£
+    Ìõ¼þ¡£<emphasis>³ý·Ç</emphasis>º¯ÊýÈçÒÔÏÂÁ½¸ö·¶ÀýÖÐÓÐÌõ¼þµÄ¶¨Òå¡£
    </simpara>
+   <para>
+    Èç¹ûÒ»¸öº¯ÊýÒÔÒÔÏÂÁ½¸ö·¶ÀýµÄ·½Ê½ÓÐÌõ¼þµÄ¶¨Òå£¬Æä¶¨Òå±ØÐëÔÚµ÷ÓÃ<emphasis>Ö®Ç°</emphasis>Íê³É¡£
+    <example>
+     <title>ÓÐÌõ¼þµÄº¯Êý</title>
+     <programlisting role="php">
+<![CDATA[
+<?php
+
+$makefoo = true;
+
+/* We can't call foo() from here 
+   since it doesn't exist yet,
+   but we can call bar() */
+
+bar();
+
+if ($makefoo) {
+  function foo ()
+  {
+    echo "I don't exist until program execution reaches me.\n";
+  }
+}
+
+/* Now we can safely call foo()
+   since $makefoo evaluated to true */
+
+if ($makefoo) foo();
+
+function bar() {
+{
+  echo "I exist immediately upon program start.\n";
+}
+
+?>
+]]>
+     </programlisting>
+    </example>
+    <example>
+     <title>º¯ÊýÖÐµÄº¯Êý</title>
+     <programlisting role="php">
+<![CDATA[
+<?php
+function foo() 
+{
+  function bar() 
+  {
+    echo "I don't exist until foo() is called.\n";
+  }
+}
+
+/* We can't call bar() yet
+   since it doesn't exist. */
+
+foo();
+
+/* Now we can call bar(),
+   foo()'s processesing has
+   made it accessable. */
+
+bar();
+
+?>  
+]]>
+     </programlisting>
+    </example>
+   </para>
    <simpara>
     PHP ²»Ö§³Öº¯ÊýÖØÔØ£¬¿ÉÄÜÒ²²»Ö§³ÖÈ¡Ïû¶¨Òå»òÕßÖØ¶¨ÒåÒÑÉùÃ÷µÄº¯Êý¡£
    </simpara>
@@ -305,12 +372,7 @@ $newref =& returns_reference();
     ÓÃÓÚÊµÏÖ»Øµ÷º¯Êý£¬º¯Êý±íµÈµÈ¡£
     </para>
    <para>
-    ±äÁ¿º¯Êý²»ÄÜÓÃÓÚÓïÑÔ½á¹¹£¬ÀýÈç <function>echo</function>£¬
-    <function>unset</function>£¬<function>isset</function>£¬
-    <function>empty</function> ºÍ <function>include</function>¡£
-    ¾¡¹ÜÈç´Ë£¬½á¹¹ <function>print</function> È´ÊÇ¸öÀýÍâ£¬¿ÉÒÔÔËÐÐ¡£
-    ÕâÊÇ PHP º¯ÊýºÍÓïÑÔ½á¹¹Ö®¼äµÄÖ÷Òª²»Í¬Ö®Ò»¡£
-
+    ±äÁ¿º¯Êý²»ÄÜÓÃÓÚÓïÑÔ½á¹¹£¬ÀýÈç <function>echo</function>¡¢<function>print</function>¡¢<function>unset</function>¡¢<function>isset</function>¡¢<function>empty</function>¡¢<function>include</function>¡¢<function>require</function> ÒÔ¼°ÀàËÆµÄÓï¾ä¡£ÄúÐèÒªÊ¹ÓÃÄú×Ô¼ºµÄÍâ¿Çº¯ÊýÀ´½«ÕâÐ©½á¹¹ÓÃ×÷±äÁ¿º¯Êý¡£
    </para>
    <para>
     <example>
@@ -328,18 +390,57 @@ function bar($arg = '')
     echo "In bar(); argument was '$arg'.<br>\n";
 }
 
+// This is a wrapper function around echo
+function echoit($string)
+{
+    echo $string;
+}
+
 $func = 'foo';
-$func();
+$func();        // This calls foo()
+
 $func = 'bar';
-$func('test');
+$func('test');  // This calls bar()
+
+$func = 'echoit';
+$func('test');  // This calls echoit()
 ?>
 ]]>
      </programlisting>
     </example>
    </para>
    <para>
-    Ïà¹ØÄÚÈÝ²Î¿¼ <link linkend="language.variables.variable">
-    ±äÁ¿µÄ±äÁ¿</link> ºÍ <function>function_exists</function>.
+    Äú»¹¿ÉÒÔÀûÓÃ±äÁ¿º¯ÊýµÄÌØÐÔÀ´µ÷ÓÃÒ»¸ö¶ÔÏóµÄ·½·¨¡£
+    <example>
+     <title>±äÁ¿·½·¨·¶Àý</title>
+     <programlisting role="php">
+<![CDATA[
+<?php
+class Foo
+{
+    function Var()
+    {
+        $name = 'Bar';
+        $this->$name(); // This calls the Bar() method
+    }
+    
+    function Bar()
+    {
+        echo "This is Bar";
+    }
+}
+
+$foo = new Foo();
+$funcname = "Var";
+$foo->$varname();   // This calls $foo->Var()
+
+?>
+]]>
+     </programlisting>
+    </example>
+   </para>
+   <para>
+    Çë²ÎÔÄ <function>call_user_func</function>¡¢<link linkend="language.variables.variable">±äÁ¿±äÁ¿</link> ºÍ <function>function_exists</function>¡£
    </para>
 
   </sect1>
