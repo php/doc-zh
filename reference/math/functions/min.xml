@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.2 $ -->
+<!-- $Revision: 1.3 $ -->
 <!-- $Author: dallas $ -->
-<!-- EN-Revision: 1.3 Maintainer: dallas Status: ready -->
+<!-- EN-Revision: 1.4 Maintainer: dallas Status: ready -->
   <refentry id="function.min">
    <refnamediv>
     <refname>min</refname>
@@ -9,58 +9,58 @@
    </refnamediv>
    <refsect1>
     <title>说明</title>
-     <methodsynopsis>
-      <type>number</type><methodname>min</methodname>
-      <methodparam><type>number</type><parameter>arg1</parameter></methodparam>
-      <methodparam><type>number</type><parameter>arg2</parameter></methodparam>
-      <methodparam choice="opt"><parameter>...</parameter></methodparam>
-     </methodsynopsis>
-     <methodsynopsis>
-      <type>number</type><methodname>min</methodname>
-      <methodparam><type>array</type><parameter>numbers</parameter></methodparam>
-     </methodsynopsis>
+    <methodsynopsis>
+     <type>mixed</type><methodname>min</methodname>
+     <methodparam><type>number</type><parameter>arg1</parameter></methodparam>
+     <methodparam><type>number</type><parameter>arg2</parameter></methodparam>
+     <methodparam choice="opt"><type>number</type><parameter>...</parameter></methodparam>
+    </methodsynopsis>
+    <methodsynopsis>
+     <type>mixed</type><methodname>min</methodname>
+     <methodparam><type>array</type><parameter>numbers</parameter></methodparam>
+     <methodparam choice="opt"><type>array</type><parameter>...</parameter></methodparam>
+    </methodsynopsis>
     <para>
      <function>min</function> 返回参数中数值最小的。
     </para>
     <para>
-     在第一种格式中，至少还需要两个参数而 <function>min</function>
-     会返回这些值中最小的一个。可以比较无限多个值。如果其中一个变量没有定义，<function>min</function> 会失败。
+     如果仅有一个参数且为数组，<function>min</function>
+     返回该数组中最小的值。如果第一个参数是整数、字符串或浮点数，则至少需要两个参数而
+     <function>min</function> 会返回这些值中最小的一个。可以比较无限多个值。
     </para>
+    <note>
+     <para>
+      PHP 会将非数值的 <type>string</type> 当成
+      <literal>0</literal>，但如果这个正是最小的数值则仍然会返回一个字符串。如果多个参数的值都是
+      <literal>0</literal>，<function>min</function> 将返回第一个（最左边的值）。
+     </para>
+    </note>
     <para>
-     In the second variant, <function>min</function>
-     returns the lowest value in <parameter>numbers</parameter>.  
-    </para>
-    <para>
-     如果一个或多个值是浮点数，所有的值都会被当成浮点数并返回一个浮点数。如果参数中没有浮点数，所有的值都会被当成整数并返回一个整数。如果失败，<function>min</function>
-     返回 <type>NULL</type> 并产生一条 <constant>E_WARNING</constant> 级别的错误。
-    </para>
-    <para>
-     <informalexample>
-      <programlisting>
+     <example>
+      <title>使用 <function>min</function> 的例子</title>
+      <programlisting role="php">
 <![CDATA[
 <?php
-$a = 4; 
-$b = 9; 
-$c = 3;
-$arr = array(99, 34, 11);
+echo min(2, 3, 1, 6, 7);  // 1
+echo min(array(2, 4, 5)); // 2
+echo min(0, 'hello');     // 0
+echo min('hello', 0);     // hello
+echo min('hello', -1);    // -1
 
-// You may want to implement your own error checking in 
-// case of failure (a variable may not be set)
-if (!$min_value = @min($a, $b, $c)) {
-    echo "Could not get min value, please try again.";
-} else {
-    echo "min value is $min_value";
-}
+// 对多个数组，min 从左向右比较。
+// 因此在本例中：2 == 2，但 4 < 5
+$val = min(array(2, 4, 8), array(2, 5, 1)); // array(2, 4, 8)
 
-print min($arr);  // 11
-
+// 如果同时给出数组和非数组作为参数，则不可能返回数组，因为
+// 数组被视为最大的
+$val = min('string', array(2, 5, 7), 42);   // string
 ?>
 ]]>
       </programlisting>
-     </informalexample>
+     </example>
     </para>
     <para>
-     参见 <function>max</function>。
+     参见 <function>max</function> 和 <function>count</function>。
     </para>
    </refsect1>
   </refentry>
