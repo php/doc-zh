@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.12 $ -->
+<!-- $Revision: 1.13 $ -->
 <!-- $Author: dallas $ -->
-<!-- EN-Revision:1.13 Maintainer: dallas Status: ready -->
+<!-- EN-Revision:1.16 Maintainer: dallas Status: ready -->
 <appendix id="wrappers">
  <title>支持的协议／封装协议列表</title>
  <para>
@@ -49,19 +49,20 @@
   </note>
   <para>
    <table>
-    <title>Context 选项（自 <literal>PHP 5.0</literal> 起）</title>
+    <title>上下文选项（context option，自 <literal>PHP 5.0</literal> 起）</title>
     <tgroup cols="3">
      <thead>
       <row>
        <entry>名称</entry>
        <entry>用法</entry>
+       <entry>默认值</entry>
       </row>
      </thead>
      <tbody>
       <row>
        <entry><literal>method</literal></entry>
-       <entry><constant>GET</constant> 或 <constant>POST</constant>（默认为 <constant>GET</constant>）。
-       </entry>
+       <entry><constant>GET</constant> 或 <constant>POST</constant></entry>
+       <entry><constant>GET</constant></entry>
       </row>
       <row>
        <entry><literal>header</literal></entry>
@@ -70,17 +71,41 @@
         <literal>User-agent:</literal>，<literal>Host:</literal> 和
         <literal>Authentication:</literal>）。
        </entry>
+       <entry></entry>
+      </row>
+      <row>
+       <entry><literal>user_agent</literal></entry>
+       <entry>
+        在 User-Agent: 头信息中要发送的值。此值仅用于<emphasis>没有</emphasis>在上面
+        <literal>header</literal> 的上下文选项中指定 user-agent 时。
+       </entry>
+       <entry>
+        <literal>php.ini</literal> 设置：<literal>user_agent</literal>
+       </entry>
       </row>
       <row>
        <entry><literal>content</literal></entry>
        <entry>
         头信息之后要发送的附加数据。典型用于 POST 请求。
        </entry>
+       <entry></entry>
       </row>
      </tbody>
     </tgroup>
    </table>
   </para>
+
+  <note>
+   <title>底层的套接字流（socket stream）上下文选项</title>
+   <simpara>
+    有可能通过<link
+    linkend="transports.inet">底层传输（underlying transport）</link>支持附加的上下文选项。对于
+    <literal>http://</literal> 流，参考
+    <literal>tcp://</literal> 传输的上下文选项。对于
+    <literal>https://</literal> 流，参考
+    <literal>ssl://</literal> 传输的上下文选项。
+   </simpara>
+  </note>
  </section>
 
  <section id="wrappers.ftp">
@@ -100,9 +125,20 @@
   </simpara>
   <simpara>
    可以用读或者写的方式打开文件，但不能同时是读写。如果 ftp
-   服务器上已经存在远程文件而你试图用写的方式打开，则连接会失败。如果你想通过
-   ftp 更新已有的文件，用 <function>ftp_connect</function>。
+   服务器上已经存在远程文件而你试图用写的方式打开但又没有指定
+   <literal>overwrite</literal> 的上下文选项，则连接会失败。如果你想通过
+   ftp 更新已有的文件，则在上下文中指定
+   <literal>overwrite</literal> 选项并用写的方式打开。还可以用
+   <link linkend="ref.ftp">FTP 扩展</link>。
   </simpara>
+  <note>
+   <title>追加文件</title>
+   <simpara>
+    自 <literal>PHP 5.0</literal> 起可以通过
+    <literal>ftp://</literal> url 协议来追加文件。在之前的版本试图通过
+    <literal>ftp://</literal> 来追加文件会导致失败。
+   </simpara>
+  </note>
   <simpara>
    <filename>ftps://</filename> 是 PHP 4.3 引进的。它和 <filename>ftp://</filename> 相同，但是尝试和
    ftp 服务器建立一个安全连接。如果服务器不支持 SSL，则会返回一个普通的未加密的
@@ -115,25 +151,36 @@
   </note>
   <para>
    <table>
-    <title>Context 选项（自 <literal>PHP 5.0</literal> 起）</title>
+    <title>上下文选项（自 <literal>PHP 5.0</literal> 起）</title>
     <tgroup cols="3">
      <thead>
       <row>
        <entry>名称</entry>
        <entry>用法</entry>
+       <entry>默认值</entry>
       </row>
      </thead>
      <tbody>
       <row>
        <entry><literal>overwrite</literal></entry>
-       <entry>
-        允许覆盖远程服务器上已存在的文件。默认为禁用。
-       </entry>
+       <entry>允许覆盖远程服务器上已存在的文件。</entry>
+       <entry>&false;（禁用）</entry>
       </row>
      </tbody>
     </tgroup>
    </table>
   </para>
+  <note>
+   <title>底层套接字流上下文选项（Underlying socket stream context options）</title>
+   <simpara>
+    有可能通过<link
+    linkend="transports.inet">底层传输（underlying transport）</link>支持附加的上下文选项。对于
+    <literal>ftp://</literal> 流，参考
+    <literal>tcp://</literal> 传输的上下文选项。对于
+    <literal>ftps://</literal> 流，参考
+    <literal>ssl://</literal> 传输的上下文选项。
+   </simpara>
+  </note>
 
  </section>
 
