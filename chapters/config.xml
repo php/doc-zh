@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.22 $ -->
+<!-- $Revision: 1.23 $ -->
 <!-- $Author: dallas $ -->
-<!-- EN-Revision: 1.101 Maintainer: dallas Status: ready -->
+<!-- EN-Revision: 1.110 Maintainer: dallas Status: ready -->
  <chapter id="configuration">
-  <title>配置</title>
+  <title>运行时配置</title>
 
   <sect1 id="configuration.file">
    <title>配置文件</title>
@@ -29,8 +29,7 @@
    <note>
     <para>
      Apache 服务器在启动时将目录更改到根目录，致使
-     PHP 会尝试在根目录下读取
-     <filename>php.ini</filename>，如果存在的话。
+     PHP 会尝试在根目录下读取 &php.ini;，如果存在的话。
     </para>
    </note>
    <para>
@@ -113,14 +112,13 @@ include_path = ".;c:\php\lib"
          设定指定指令的值。仅能用于
          <constant>PHP_INI_ALL</constant> 和 <constant>PHP_INI_PERDIR</constant>
          类型的指令。要清除上一个设定的值，将值设为 <literal>none</literal>。
-         <informalexample>
-          <programlisting role="ini">
-<![CDATA[
-php_value auto_prepend_file none
-]]>
-          </programlisting>
-         </informalexample>
         </para>
+        <note>
+         <simpara>
+          不要用 <literal>php_value</literal> 来设定布尔值。应该用
+          <literal>php_flag</literal>（见下面）来替代。
+         </simpara>
+        </note>
        </listitem>
       </varlistentry>
       <varlistentry>
@@ -145,22 +143,10 @@ php_value auto_prepend_file none
        </term>
        <listitem>
         <para>
-         设定指定指令的值。不能在
-         &htaccess;
-         文件中使用。任何在
+         设定指定指令的值。不能在 &htaccess; 文件中使用。任何在
          <systemitem role="directive">php_admin_value</systemitem>
-         中设定的值不能被
-         &htaccess;
-         或者
-         virtualhost
+         中设定的值不能被 &htaccess; 或者 virtualhost
          中的指令覆盖。要清除上一个设定的值，将值设为 <literal>none</literal>。
-         <informalexample>
-          <programlisting role="ini">
-<![CDATA[
-php_admin_value open_basedir none
-]]>
-          </programlisting>
-         </informalexample>
         </para>
        </listitem>
       </varlistentry>
@@ -172,15 +158,9 @@ php_admin_value open_basedir none
        </term>
        <listitem>
         <para>
-         用于设定布尔值类型的配置指令。不能在
-         &htaccess;
-         文件中使用。任何在
+         用于设定布尔值类型的配置指令。不能在 &htaccess; 文件中使用。任何在
          <systemitem role="directive">php_admin_flag</systemitem>
-         中设定的值不能被
-         &htaccess;
-         或者
-         virtualhost
-         中的指令覆盖。
+         中设定的值不能被 &htaccess; 或者 virtualhost 中的指令覆盖。
         </para>
        </listitem>
       </varlistentry>
@@ -202,21 +182,20 @@ php_admin_value open_basedir none
 ]]>
       </programlisting>
      </example>
-
-     <note>
-      <para>
-       PHP 常量不存在于 PHP 之外。例如，在
-       &httpd.conf;
-       中可以使用 PHP 常量如
-       <constant>E_ALL</constant> 或者 <constant>E_NOTICE</constant>
-       来设定
-       <link linkend="ini.error-reporting">error_reporting</link>
-       指令的值，但它们其实没有意义并被认为是
-       <emphasis>0</emphasis>。应该使用相应的位掩码。这些常量可以在
-       &php.ini; 中使用。
-      </para>
-     </note>
     </para>
+
+    <caution>
+     <para>
+      PHP 常量不存在于 PHP 之外。例如，在 &httpd.conf;
+      中可以使用 PHP 常量如
+      <constant>E_ALL</constant> 或者 <constant>E_NOTICE</constant>
+      来设定
+      <link linkend="ini.error-reporting">error_reporting</link>
+      指令的值，但它们其实没有意义并被认为是
+      <emphasis>0</emphasis>。应该使用相应的位掩码。这些常量可以在
+      &php.ini; 中使用。
+     </para>
+    </caution>
    </sect2>
 
    <sect2 id="configuration.changes.other">
@@ -509,6 +488,10 @@ php_admin_value open_basedir none
         一行中应该包括：<literal>--enable-memory-limit</literal>。如果不需要任何内存上的限制，必须将其设为
         -1。
        </para>
+       <para>
+        自 4.3.2 起，当激活了 memory_limit，PHP 函数
+        <function>memory_get_usage</function> 成为可用。
+       </para>
       </listitem>
      </varlistentry>
     </variablelist>
@@ -561,6 +544,11 @@ php_admin_value open_basedir none
          <entry>register_argc_argv</entry>
          <entry>"On"</entry>
          <entry>PHP_INI_PERDIR|PHP_INI_SYSTEM</entry>
+       </row>
+       <row>
+        <entry>register_long_arrays</entry>
+        <entry>"On"</entry>
+        <entry>PHP_INI_PERDIR|PHP_INI_SYSTEM</entry>
        </row>
        <row>
         <entry>post_max_size</entry>
@@ -727,6 +715,25 @@ php_admin_value open_basedir none
         <simpara>
          参见<link linkend="features.commandline">命令行方式</link>。此外，本选项自
          PHP 4.0.0 起可用，在此之前总是“On”。
+        </simpara>
+       </listitem>
+      </varlistentry>
+
+      <varlistentry id="ini.register-long-arrays">
+       <term>
+        <parameter>register_long_arrays</parameter>
+        <type>boolean</type>
+       </term>
+       <listitem>
+        <simpara>
+         设定 PHP 是否注册已过时的 <varname>$HTTP_*_VARS</varname> 之类的<link
+         linkend="language.variables.predefined">预定义变量</link>。如果为
+         On（默认值），则类似 <varname>$HTTP_GET_VARS</varname>
+         的 PHP 变量会被注册。如果不使用，为性能考虑建议关闭此选项，而使用超全局数组例如
+         <varname>$_GET</varname> 替代之。
+        </simpara>
+        <simpara>
+         本指令自 PHP 5.0.0 起可用。
         </simpara>
        </listitem>
       </varlistentry>
@@ -922,6 +929,11 @@ php_admin_value open_basedir none
          <entry>"0"</entry>
          <entry>PHP_INI_SYSTEM</entry>
         </row>
+        <row>
+         <entry>cgi.rfc2616_headers</entry>
+         <entry>"0"</entry>
+         <entry>PHP_INI_SYSTEM</entry>
+        </row>
        </tbody>
       </tgroup>
      </table>
@@ -1081,6 +1093,20 @@ include_path=".;c:\php\includes"
          能够定义运行时所基于的请求的安全上下文。Apache
          中的 mod_fastcgi 不支持此特性（03/17/2002）。如果在
          IIS 中运行则设为 1。默认为 0。
+        </para>
+       </listitem>
+      </varlistentry>
+      <varlistentry id="ini.cgi.rfc2616-headers">
+       <term>
+        <parameter>cgi.rfc2616_headers</parameter>
+        <type>int</type>
+       </term>
+       <listitem>
+        <para>
+         指定 PHP 在发送 HTTP 响应代码时使用何种报头。如果设定为 0，PHP
+         发送一个 Status: 报头，Apache 和其它 web server 都支持。如果此选项设定为 1，PHP
+         将发送 <ulink url="&url.rfc;2616">RFC 2616</ulink>
+         兼容的报头。除非你知道自己在做什么，否则保留其值为 0。
         </para>
        </listitem>
       </varlistentry>

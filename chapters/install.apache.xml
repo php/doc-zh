@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.6 $ -->
+<!-- $Revision: 1.7 $ -->
 <!-- $Author: dallas $ -->
-<!-- EN-Revision: 1.17 Maintainer: dallas Status: ready -->
+<!-- EN-Revision: 1.20 Maintainer: dallas Status: ready -->
   <sect1 id="install.apache">
    <title>Apache 服务器 1.x 版本</title>
    <para>
@@ -22,7 +22,7 @@
 
     <example id="install.apache.unix.longer">
      <title>
-      PHP 4 的 Apache 共享模块版本安装说明
+      PHP 的 Apache 共享模块版本安装说明
      </title>
      <screen>
 <![CDATA[
@@ -35,32 +35,45 @@
 7.  make
 8.  make install
 9.  cd ../php-xxx
-10. ./configure --with-mysql --with-apxs=/www/bin/apxs
+10. 现在，配置你的 PHP。这是你定制 PHP 的不同选项的时候，例如要
+    加载哪些扩展库。使用
+      ./configure --help
+    来列出可用的选项。在下面的示例中我们只是简单地配置 Apache 1
+    和 MySQL 支持。你的 apxs 的路径可能和此示例中的不同。
+      ./configure --with-mysql --with-apxs=/www/bin/apxs
 11. make
 12. make install
-
-  如果在安装之后你决定修改配置选项，那么只需重复以上最后三步。
-  只须重新启动 Apache 就可以使新模块生效。不需要重新编译 Apache。
-
-13. cp php.ini-dist /usr/local/lib/php.ini
-
-  你可以编辑 php.ini 来设置 PHP 选项。如果你想把 php.ini 放在
-  其它目录，在第 10 步加上以下选项：
-  --with-config-file-path=/path
-
-14. 编辑 httpd.conf 或者 srm.conf 文件，确认以下两行存在并且没有被注释：
-  
-   AddType application/x-httpd-php .php
-
-   LoadModule php4_module        libexec/libphp4.so
- 
-  你可以在这里使用任何后缀。.php 只是我们建议的一个。你甚至可以 
-  加上 .html 以及 .php3 以确保向下兼容。
- 
-  在 LoadModule 语句右边的路径必须指向你的 PHP 模块所在的路径。 
-  如果按照以上步骤进行那么上面的语句是正确的。
-
-15. 用你通常的过程启动 Apache。(你必须完全停止 Apache 再重新启动，
+    如果在安装之后你决定修改配置选项，那么只需重复以上最后三步。
+    只须重新启动 Apache 就可以使新模块生效。不需要重新编译 Apache。
+    注意除非特别指出，'make install' 总是会安装 PEAR，各种 PHP
+    工具例如 phpize，安装 PHP CLI 以及其它。
+13. 建立你的 php.ini 文件。
+      cp php.ini-dist /usr/local/lib/php.ini
+    你可以编辑 php.ini 来设置 PHP 选项。如果你想把 php.ini 放在
+    其它目录，在第 10 步加上以下选项：
+      --with-config-file-path=/path
+    如果你选择了 php.ini-recommended，确保阅读一下其中的变更说明，
+    因为这些会影响到 PHP 的行为。
+14. 编辑你的 httpd.conf 来加载 PHP 模块。在 LoadModule 语句右边的
+    路径必须指向你系统中 PHP 模块所在的路径。上面的 make install
+    步骤可能已经添加了，但还是检查确认一下。
+    对 PHP 4：
+      LoadModule php4_module        libexec/libphp4.so
+    对 PHP 5：
+      LoadModule php5_module        libexec/libphp5.so
+15. 在 httpd.conf 中加入 AddModule 部分，在 ClearModuleList 下面的
+    某处，加上这一句：
+    对 PHP 4：
+      AddModule mod_php4.c
+    对 PHP 5：
+      AddModule mod_php5.c
+16. 告诉 Apache 将哪些后缀作为 PHP 解析。例如，让 Apache 把 .php
+    后缀的文件解析为 PHP。可以将任何后缀的文件解析为 PHP，只要在
+    以下语句中加入并用空格分开。我们添加一个 .phtml 来示例。
+      AddType application/x-httpd-php .php .phtml
+    为了将 .phps 作为 PHP 的源文件进行语法高亮显示，还可以加上：
+      AddType application/x-httpd-php-source .phps
+17. 用你通常的过程启动 Apache。(你必须完全停止 Apache 再重新启动，
     而不是用 HUP 或者 USR1 信号使 Apache 重新加载。)
 ]]>
       </screen>
@@ -70,8 +83,11 @@
       根据你的 Unix 系统和 Apache 安装方法的不同，有很多方法停止和重启动
       Apache。以下是一些不同的 Apache/Unix 下重启动 Apache
       的典型命令。你需要把 <literal>/path/to/</literal> 替换成你系统上的确切路径。
-      <informalexample>
-       <screen>
+     </para>
+     <para>
+      <example>
+       <title>重启动 Apache 的示例命令</title>
+       <programlisting role="shell">
 <![CDATA[
 1. 在一些 Linux 和 SysV 的变种下：
 /etc/rc.d/init.d/httpd restart
@@ -88,8 +104,10 @@
 /path/to/apachectl stop
 /path/to/apachectl startssl
 ]]>
-       </screen>
-      </informalexample>
+       </programlisting>
+      </example>
+     </para>
+     <para>
       apachectl 和 http(s)dctl 程序所在的路径在不同系统中通常不一样。如果你的系统中有
       <literal>locate</literal> 或者 <literal>whereis</literal> 或者
       <literal>which</literal> 命令，那么可以帮你找到这些控制程序。
@@ -251,11 +269,10 @@ Group "#-1"
      <itemizedlist>
       <listitem>
        <simpara>
-        用自己喜爱的编辑器打开 &httpd.conf，找到
-        <literal>LoadModule</literal> 指令的部分，在其列表的<emphasis>最后部分</emphasis>加上如下一行：
-        <literal>
-         LoadModule php4_module c:/php/sapi/php4apache.dll
-        </literal>
+        用自己喜爱的编辑器打开 &httpd.conf，找到 <literal>LoadModule</literal>
+        指令的部分，在其列表的<emphasis>最后部分</emphasis>加上如下一行，对
+        PHP 4：<literal>LoadModule php4_module c:/php/sapi/php4apache.dll</literal>，对
+        PHP 5：<literal>LoadModule php5_module "c:/php/sapi/php5apache.dll"</literal>。
        </simpara>
       </listitem>
       <listitem>
@@ -267,8 +284,9 @@ Group "#-1"
         <literal>ClearModuleList</literal>
         指令时格外重要，向下滚动几行可以找到该指令。你将会看到
         <literal>AddModule</literal>
-        项目的列表，并且在列表的<emphasis>最后</emphasis>有这一行：
-        <literal>AddModule mod_php4.c</literal>。
+        项目的列表，在列表的<emphasis>最后</emphasis>加上这一行：<literal>AddModule mod_php4.c</literal>，对于
+        PHP 5 则为
+        <literal>AddModule mod_php5.c</literal>。
        </simpara>  
       </listitem>  
       <listitem>  
