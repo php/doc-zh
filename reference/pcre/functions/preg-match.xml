@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="gb2312"?>
+<!-- $Revision: 1.1 $ -->
+<!-- $Author: dallas $ -->
+<!-- EN-Revision: 1.7 Maintainer: dallas Status: ready -->
+  <refentry id="function.preg-match">
+   <refnamediv>
+    <refname>preg_match</refname>
+    <refpurpose>进行正则表达式匹配</refpurpose>
+   </refnamediv>
+   <refsect1>
+    <title>说明</title>
+     <methodsynopsis>
+      <type>int</type><methodname>preg_match</methodname>
+      <methodparam><type>string</type><parameter>pattern</parameter></methodparam>
+      <methodparam><type>string</type><parameter>subject</parameter></methodparam>
+      <methodparam choice="opt"><type>array</type><parameter>matches</parameter></methodparam>
+      <methodparam choice="opt"><type>int</type><parameter>flags</parameter></methodparam>
+     </methodsynopsis>
+    <para>
+     在 <parameter>subject</parameter> 字符串中搜索与
+     <parameter>pattern</parameter> 给出的正则表达式相匹配的内容。
+    </para>
+    <para>
+     如果提供了
+     <parameter>matches</parameter>，则其会被搜索的结果所填充。<varname>$matches[0]</varname>
+     将包含与整个模式匹配的文本，<varname>$matches[1]</varname>
+     将包含与第一个捕获的括号中的子模式所匹配的文本，以此类推。
+    </para>
+    <para>
+     <parameter>flags</parameter> 可以是下列标记：
+     <variablelist>
+      <varlistentry>
+       <term>PREG_OFFSET_CAPTURE</term>
+       <listitem>
+        <simpara>
+         如果设定本标记，对每个出现的匹配结果也同时返回其附属的字符串偏移量。注意这改变了返回的数组的值，使其中的每个单元也是一个数组，其中第一项为匹配字符串，第二项为其偏移量。本标记自
+         <literal>PHP 4.3.0</literal> 起可用。
+        </simpara>
+       </listitem>
+      </varlistentry>
+     </variablelist>
+     <parameter>flags</parameter> 参数自
+     <literal>PHP</literal> 4.3.0 起可用。
+    </para>
+
+    <para>
+     <function>preg_match</function> 返回
+     <parameter>pattern</parameter> 所匹配的次数。要么是
+     0 次（没有匹配）或 1 次，因为 <function>preg_match</function>
+     在第一次匹配之后将停止搜索。<function>preg_match_all</function>
+     则相反，会一直搜索到 <parameter>subject</parameter>
+     的结尾处。如果出错 <function>preg_match</function> 返回 &false;。
+    </para>
+    <tip>
+     <para>
+      如果只想查看一个字符串是否包含在另一个字符串中，不要用
+      <function>preg_match</function>。可以用
+      <function>strpos</function> 或 <function>strstr</function>
+      替代，要快得多。
+     </para>
+    </tip>
+    <para>
+     <example>
+      <title>在文本中搜索“php”</title>
+      <programlisting role="php">
+<![CDATA[
+<?php
+// 模式定界符后面的 "i" 表示不区分大小写字母的搜索
+if (preg_match ("/php/i", "PHP is the web scripting language of choice.")) {
+    print "A match was found.";
+} else {
+    print "A match was not found.";
+}
+?>
+]]>
+      </programlisting>
+     </example>
+    </para>
+    <para>
+     <example>
+      <title>搜索单词“web”</title>
+      <programlisting role="php">
+<![CDATA[
+<?php
+/* 模式中的 \b 表示单词的边界，因此只有独立的 "web" 单词会被匹配，
+ * 而不会匹配例如 "webbing" 或 "cobweb" 中的一部分 */
+if (preg_match ("/\bweb\b/i", "PHP is the web scripting language of choice.")) {
+    print "A match was found.";
+} else {
+    print "A match was not found.";
+}
+
+if (preg_match ("/\bweb\b/i", "PHP is the website scripting language of choice.")) {
+    print "A match was found.";
+} else {
+    print "A match was not found.";
+}
+?>
+]]>
+      </programlisting>
+     </example>
+    </para>
+    <para>
+     <example>
+      <title>从 URL 中取出域名</title>
+      <programlisting role="php">
+<![CDATA[
+<?php
+// 从 URL 中取得主机名
+preg_match("/^(http:\/\/)?([^\/]+)/i",
+    "http://www.php.net/index.html", $matches);
+$host = $matches[2];
+
+// 从主机名中取得后面两段
+preg_match("/[^\.\/]+\.[^\.\/]+$/", $host, $matches);
+echo "domain name is: {$matches[0]}\n";
+?>
+]]>
+      </programlisting>
+      <para>
+       本例将输出：
+      </para>
+      <screen>
+<![CDATA[
+domain name is: php.net
+]]>
+      </screen>
+     </example>
+    </para>
+    <para>
+     参见 <function>preg_match_all</function>，<function>preg_replace</function>
+     和 <function>preg_split</function>。
+    </para>
+   </refsect1>
+  </refentry>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"../../../../manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
