@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="gb2312"?>
+<!-- $Revision: 1.1 $ -->
+<!-- $Author: dallas $ -->
+<!-- EN-Revision: 1.14 Maintainer: dallas Status: ready -->
+  <sect1 id="install.apache">
+   <title>Apache 服务器</title>
+   <para>
+    本节包括 Apache 下安装 PHP 的说明和提示，包括
+    <link linkend="install.apache.unix">Unix</link> 和
+    <link linkend="install.apache.windows">Windows</link> 版本。 
+   </para>   
+   <sect2 id="install.apache.unix">
+    <title>Unix 下的 Apache 中安装 PHP 的详细资料</title>
+    <para>
+     你可以根据<link
+     linkend="install.configure">完整配置选项列表</link>在以下第 10
+     行中加入你选择的参数。这里把具体版本号略去了以确保本说明的不会出错。你需要把下面的
+     'xxx' 替换成你得到的文件中确切的数值。
+    </para>
+
+    <example id="install.apache.unix.longer">
+     <title>
+      PHP 4 的 Apache 共享模块版本安装说明
+     </title>
+     <screen>
+<![CDATA[
+1.  gunzip apache_xxx.tar.gz
+2.  tar -xvf apache_xxx.tar
+3.  gunzip php-xxx.tar.gz
+4.  tar -xvf php-xxx.tar
+5.  cd apache_xxx
+6.  ./configure --prefix=/www --enable-module=so
+7.  make
+8.  make install
+9.  cd ../php-xxx
+10. ./configure --with-mysql --with-apxs=/www/bin/apxs
+11. make
+12. make install
+
+  如果在安装之后你决定修改配置选项，那么只需重复以上最后三步。
+  只须重新启动 Apache 就可以使新模块生效。不需要重新编译 Apache。
+
+13. cp php.ini-dist /usr/local/lib/php.ini
+
+  你可以编辑 php.ini 来设置 PHP 选项。如果你想把 php.ini 放在
+  其它目录，在第 10 步加上以下选项：
+  --with-config-file-path=/path
+
+14. 编辑 httpd.conf 或者 srm.conf 文件，确认以下两行存在并且没有被注释：
+  
+   AddType application/x-httpd-php .php
+
+   LoadModule php4_module        libexec/libphp4.so
+ 
+  你可以在这里使用任何后缀。.php 只是我们建议的一个。你甚至可以 
+  加上 .html 以及 .php3 以确保向下兼容。
+ 
+  在 LoadModule 语句右边的路径必须指向你的 PHP 模块所在的路径。 
+  如果按照以上步骤进行那么上面的语句是正确的。
+
+15. 用你通常的过程启动 Apache。(你必须完全停止 Apache 再重新启动，
+    而不是用 HUP 或者 USR1 信号使 Apache 重新加载。)
+]]>
+      </screen>
+     </example>
+
+     <para>
+      根据你的 Unix 系统和 Apache 安装方法的不同，有很多方法停止和重启动
+      Apache。以下是一些不同的 Apache/Unix 下重启动 Apache
+      的典型命令。你需要把 <literal>/path/to/</literal> 替换成你系统上的确切路径。
+      <informalexample>
+       <screen>
+<![CDATA[
+1. 在一些 Linux 和 SysV 的变种下：
+/etc/rc.d/init.d/httpd restart
+
+2. 使用 apachectl 脚本：
+/path/to/apachectl stop
+/path/to/apachectl start
+
+3. httpdctl 和 httpsdctl（使用了 OpenSSL），类似 apachectl：
+/path/to/httpsdctl stop
+/path/to/httpsdctl start
+
+4. 使用了 mod_ssl，或其他 SSL 服务器，你可能需要手工重启动：
+/path/to/apachectl stop
+/path/to/apachectl startssl
+]]>
+       </screen>
+      </informalexample>
+      apachectl 和 http(s)dctl 程序所在的路径在不同系统中通常不一样。如果你的系统中有
+      <literal>locate</literal> 或者 <literal>whereis</literal> 或者
+      <literal>which</literal> 命令，那么可以帮你找到这些控制程序。
+     </para>
+
+     <para>
+      编译 PHP 和 Apache 的不同例子还有：
+      <informalexample>
+       <programlisting role="shell">
+<![CDATA[
+./configure --with-apxs --with-pgsql
+]]>
+       </programlisting>
+      </informalexample>
+     </para>
+     <para>
+      这个配置将生成在 Apache 的 httpd.conf 文件中用 LoadModule 加载的
+      <filename>libphp4.so</filename> 共享库。而 PostgreSQL 支持将嵌入到
+      <filename>libphp4.so</filename> 库中。
+     </para>
+     <para>
+      <informalexample>
+       <programlisting>
+<![CDATA[
+./configure --with-apxs --with-pgsql=shared
+]]>
+       </programlisting>
+      </informalexample>
+     </para>
+     <para>
+      这个配置将生成 Apache 的 <filename>libphp4.so</filename> 共享库，并且还生成
+      <filename>pgsql.so</filename> 共享库，可以在 &php.ini; 文件中用
+      extension 指令加载，或者在 PHP 脚本中用 <function>dl</function> 函数明确地加载。
+     </para>
+     <para>
+      <informalexample>
+       <programlisting>
+<![CDATA[
+./configure --with-apache=/path/to/apache_source --with-pgsql
+]]>
+       </programlisting>
+      </informalexample>
+     </para>
+     <para>
+      这个配置将生成 <filename>libmodphp4.a</filename> 库，<filename>mod_php4.c</filename>
+      和一些相关的文件并且拷贝到 Apache 源程序目录中的 <literal>src/modules/php4</literal>
+      目录下。然后用 <literal>--activate-module=src/modules/php4/libphp4.a</literal>
+      编译 Apache，Apache 编译系统会生成 <filename>libphp4.a</filename>
+      并且将其静态地连接到 <filename>httpd</filename> 程序中。PostgreSQL
+      支持也直接包括在这个 <filename>httpd</filename>
+      程序中了，因此最终结果是单一的一个包括了所有 Apache 和 PHP 支持的
+      <filename>httpd</filename> 可执行文件。
+     </para>
+     <para>
+      <informalexample>
+       <programlisting>
+<![CDATA[
+./configure --with-apache=/path/to/apache_source --with-pgsql=shared
+]]>
+       </programlisting>
+      </informalexample>
+     </para>
+     <para>
+      这个配置和上面一样 － 除了没有在最后的 <filename>httpd</filename>
+      可执行文件中包括 PostgreSQL 的支持以及生成了一个 <filename>pgsql.so</filename>
+      共享库以外。该共享库可以在 &php.ini; 文件中或者用 <function>dl</function> 函数加载。
+     </para>
+     <para>
+      当选择不同的方法编译 PHP 时，需要考虑每种方法的优势和缺点。用共享对象方式编译
+      PHP 意味着可以单独编译 Apache，并且不用在添加或修改了 PHP
+      的时候重新编译所有程序。用内置方法编译 PHP（静态方式）意味着
+      PHP 可以加载和运行得更快。更多信息见 Apache 的
+      <ulink url="&url.apachedso;">DSO 支持页面</ulink>。
+     </para>
+    <note>
+     <para>
+      Apache 默认的 httpd.conf 文件中目前包括类似如下的内容：
+      <informalexample>
+       <programlisting>
+<![CDATA[
+User nobody
+Group "#-1"
+]]>
+       </programlisting>
+      </informalexample>
+      除非你把它修改成“Group nogroup”或者其它类似的（“Group daemon”也很通用），PHP
+      将不能打开文件。
+     </para>
+    </note>  
+    <note>
+     <para>
+     确认在使用 --with-apxs=/path/to/apxs 时指向 Apache 安装后的目录中的
+     apxs。绝对不能用 Apache 源程序中的 apxs 而要用安装后的 apxs。
+     </para>
+    </note>   
+   </sect2>
+   <sect2 id="install.apache.windows">
+    <title>Windows 下在 Apache 1.3.x 中安装 PHP</title>
+    
+    <simpara>
+     有两种方式使 PHP 工作于 Windows 下的 Apache 1.3.x。一种是
+     CGI 方式（php.exe），另一种是使用 Apache 模块 DLL。不管哪种方式都需要停止
+     Apache，编辑 <filename>srm.conf</filename> 或者
+     <filename>httpd.conf</filename> 来配置 Apache 以加入PHP支持。
+    </simpara>
+    <simpara>
+     值得在这里指出现在 Windows 下的 SAPI
+     模块更加稳定了，我们推荐使用模块方式，因为更加透明和安全。
+    </simpara>
+    <simpara>
+     尽管有几种不同方法在 Apache 下配置
+     PHP，但是对新手来说还是非常简单易用的。有关更多的 httpd.conf 配置指令请参考 Apache 文档。
+    </simpara>
+  
+    <para>
+     如果你按照<link linkend="install.windows.manual">手工安装步骤</link>一节中的说明把
+     PHP 解压缩到了 c:\php\ 目录下，那么需要加入以下三行到 Apache 配置文件中以 CGI 方式安装：
+     <itemizedlist>
+      <listitem>
+       <simpara>
+        <literal>
+         ScriptAlias /php/ "c:/php/"
+        </literal>
+       </simpara>
+      </listitem>
+      <listitem>
+       <simpara>
+        <literal>
+         AddType application/x-httpd-php .php .phtml
+        </literal>
+       </simpara>
+      </listitem>
+      <listitem>
+       <simpara>
+        <literal>
+         Action application/x-httpd-php "/php/php.exe"
+        </literal>
+       </simpara>
+      </listitem>
+     </itemizedlist>
+     注意上面的第二行在原来的 <filename>httpd.conf</filename>
+     中就有的，不过被注释了。还有记住用你自己放置 PHP 的路径替换
+     <filename>c:/php/</filename>。
+     </para>
+
+    <warning>
+     <para>
+      在 CGI 方式下，你的服务器可能会受到几种攻击的影响。阅读
+      <link linkend="security.cgi-bin">CGI 安全</link>一节学习如何防止攻击。
+     </para>
+    </warning>
+
+    <para>
+     如果你想在 Apache 中用模块方式使用 PHP，确认把 <filename>php4ts.dll</filename>
+     拷贝到 windows/system（Windows 9x/Me）或者
+     winnt/system32（Windows NT/2000/XP）目录下，覆盖原来的文件。然后在
+     Apache 配置文件中加入以下两行：
+     <itemizedlist>
+      <listitem>
+       <simpara>
+        <literal>
+         LoadModule php4_module c:/php/sapi/php4apache.dll
+        </literal>
+       </simpara>
+      </listitem>
+      <listitem>
+       <simpara>
+        <literal>
+          AddType application/x-httpd-php .php .phtml
+        </literal>
+       </simpara>
+      </listitem>
+     </itemizedlist>
+    </para>
+
+    <simpara>
+     修改了配置文件之后记住重新启动 Apache，例如如果你的 Apache 是作为
+     Windows 的服务安装的，<literal>NET STOP APACHE</literal> 后面接上
+     <literal>NET START APACHE</literal>。或者用你通常使用的快捷方式。
+    </simpara>
+    
+    <note>
+     <simpara>
+      在用 Apache 的 Windows installer
+      安装之后，你可能发现需要在配置文件（<filename>httpd.conf</filename>）中用
+      <literal>AddModule</literal> 指令定义
+      <filename>mod_php4.c</filename>。在配置文件接近开头的地方有一些
+      <literal>AddModule</literal> 指令，在其中加入 <literal>AddModule mod_php4.c</literal>
+      一行。如果定义了 <literal>ClearModuleList</literal>
+      指令的话这一步尤其重要。如果不这么做可能会导致
+      PHP 不能被注册为 Apache 的模块。
+     </simpara>
+    </note>
+    
+    <simpara>
+     有两种方式使用源程序语法彩色显示特色，但是取决于你的安装方法。如果你配置了
+     Apache 的 SAPI 模块方式使用 PHP，那么加入下面一行就可以使用本特色：<literal>AddType application/x-httpd-php-source .phps</literal>
+    </simpara>
+    <simpara>
+     如果你用 CGI 方式使用 PHP，那你需要用 <function>show_source</function>
+     函数。建立一个 PHP 文件，加入以下代码：<literal>&lt;?php
+     show_source ("original_php_script.php"); ?></literal>。用你想要显示源代码的文件名替换掉
+     <literal>original_php_script.php</literal>。
+    </simpara>
+    
+    <note>
+     <simpara>
+      在 Windows-Apache 组合中，所有路径中的反斜线例如
+      "c:\directory\file.ext" 都必须转换成斜线，如 "c:/directory/file.ext"。
+     </simpara>
+    </note>
+   </sect2>
+  </sect1>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"../../manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
