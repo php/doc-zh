@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.2 $ -->
+<!-- $Revision: 1.3 $ -->
 <!-- $Author: dallas $ -->
-<!-- EN-Revision: 1.2 Maintainer: dallas Status: ready -->
+<!-- EN-Revision: 1.3 Maintainer: dallas Status: ready -->
   <refentry id="function.opendir">
    <refnamediv>
     <refname>opendir</refname>
@@ -21,8 +21,9 @@
     <para>
      如果 <parameter>path</parameter>
      不是一个合法的目录或者因为权限限制或文件系统错误而不能打开目录，<function>opendir</function>
-     返回 &false; 并产生一个 PHP 错误信息。可以在 <function>opendir</function>
-     前面加上“@”符号来抑制错误信息的输出。
+     返回 &false; 并产生一个 <link linkend="errorfunc.constants">E_WARNING</link>
+     级别的 PHP 错误信息。可以在 <function>opendir</function>
+     前面加上“<link linkend="language.operators.errorcontrol">@</link>”符号来抑制错误信息的输出。
     </para>
     <para>
      <example>
@@ -30,20 +31,25 @@
       <programlisting role="php">
 <![CDATA[
 <?php
-
-if ($dir = @opendir("/tmp")) {
-  while (($file = readdir($dir)) !== false) {
-    echo "$file\n";
-  }  
-  closedir($dir);
+$dir = "/tmp/";
+// Open a known directory, and proceed to read its contents
+if (is_dir($dir)) {
+    if ($dh = opendir($dir)) {
+        while (($file = readdir($dh)) !== false) {
+            print "filename: $file : filetype: " . filetype($dir . $file) . "\n";
+        }
+    closedir($dh);
+    }
 }
-
 ?>
 ]]>
       </programlisting>
      </example>
     </para>
-    <para>参见 <function>is_dir</function>。</para>
+    <para>
+     参见 <function>is_dir</function>，<function>readdir</function>
+     和 <link linkend="class.dir">Dir</link>。
+    </para>
    </refsect1>
   </refentry>
 
