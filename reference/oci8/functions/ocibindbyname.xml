@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- $Revision: 1.5 $ -->
+<!-- $Revision: 1.6 $ -->
 <!-- $Author: yincheng $ -->
-<!-- EN-Revision: 1.6 Maintainer: yincheng Status: ready -->
+<!-- EN-Revision: 1.9 Maintainer: yincheng Status: ready -->
 <!-- CREDITS: xuke, Gregory -->
 <!-- splitted from ./en/functions/oci8.xml, last change in rev 1.2 -->
   <refentry id="function.ocibindbyname">
@@ -15,13 +15,11 @@
     <title>ÃèÊö</title>
      <methodsynopsis>
       <type>bool</type><methodname>ocibindbyname</methodname>
-      <methodparam><type>int</type><parameter>stmt</parameter></methodparam>
+      <methodparam><type>resource</type><parameter>stmt</parameter></methodparam>
       <methodparam><type>string</type><parameter>ph_name</parameter></methodparam>
-      <methodparam><type>mixed &amp;</type><parameter>variable</parameter></methodparam>
-      <methodparam><type>int</type><parameter>length</parameter></methodparam>
-      <methodparam choice="opt">
-       <type>int</type><parameter>type</parameter>
-      </methodparam>
+      <methodparam><type>mixed</type><parameter>&amp;variable</parameter></methodparam>
+      <methodparam choice="opt"><type>int</type><parameter>maxlength</parameter></methodparam>
+      <methodparam choice="opt"><type>int</type><parameter>type</parameter></methodparam>
      </methodsynopsis>
     <para>
      <function>ocibindbyname</function> ²ÎÊý
@@ -34,12 +32,13 @@
      (Character-File), OCI_B_CLOB (Character-LOB), OCI_B_BLOB
      (Binary-LOB) and OCI_B_ROWID (ROWID)¡£
     </para>
+    <para>
     <example>
      <title><function>ocibindbyname</function></title> 
-     <programlisting>
+     <programlisting role="php">
 <![CDATA[
 <?php
-/* OCIBindByPos example thies@thieso.net (980221)
+/* OCIBindByPos example thies at thieso dot net (980221)
   inserts 3 records into emp, and uses the ROWID for updating the 
   records just after the insert.
 */
@@ -54,13 +53,13 @@ $data = array(1111 => "Larry", 2222 => "Bill", 3333 => "Jim");
 
 $rowid = OCINewDescriptor($conn,OCI_D_ROWID);
 
-OCIBindByName($stmt,":empno",&$empno,32);
-OCIBindByName($stmt,":ename",&$ename,32);
-OCIBindByName($stmt,":rid",&$rowid,-1,OCI_B_ROWID);
+OCIBindByName($stmt,":empno",$empno,32);
+OCIBindByName($stmt,":ename",$ename,32);
+OCIBindByName($stmt,":rid",$rowid,-1,OCI_B_ROWID);
 
 $update = OCIParse($conn,"update emp set sal = :sal where ROWID = :rid");
-OCIBindByName($update,":rid",&$rowid,-1,OCI_B_ROWID);
-OCIBindByName($update,":sal",&$sal,32);
+OCIBindByName($update,":rid",$rowid,-1,OCI_B_ROWID);
+OCIBindByName($update,":sal",$sal,32);
 
 $sal = 10000;
 
@@ -91,6 +90,7 @@ OCILogoff($conn);
 ]]>
      </programlisting>
     </example>
+   </para>
     <warning>
      <para>
        Í¬Ê±Ê¹ÓÃÄ§ÊõÒýÓÃºÍ <function>ocibindbyname</function> º¯ÊýÊÇÒ»¸ö»µÖ÷Òâ£»ÕâÊÇÒòÎª£º1¡¢±»ÒýÓÃµÄ±äÁ¿²»ÐèÒªÈÎºÎÒýÓÃ£»2¡¢ÓÉ <function>ocibindbyname</function> º¯Êý²»ÄÜ·Ö±æ×Ô¶¯Ìí¼ÓµÄÒýÓÃºÍ×¨ÃÅ¼ÓÉÏµÄÒýÓÃ£¬ÕâÑùËùÓÐÄ§ÊõÓ¦ÓÃ¶¼»á±»Ð´µ½Êý¾Ý¿âÖÐ¡£
