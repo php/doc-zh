@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.1 $ -->
+<!-- $Revision: 1.2 $ -->
 <!-- $Author: dallas $ -->
-<!-- EN-Revision: 1.4 Maintainer: dallas Status: ready -->
+<!-- EN-Revision: 1.6 Maintainer: dallas Status: ready -->
   <refentry id="function.pg-fetch-assoc">
    <refnamediv>
     <refname>pg_fetch_assoc</refname>
-    <refpurpose>提取一行作为数组</refpurpose>
+    <refpurpose>提取一行作为关联数组</refpurpose>
    </refnamediv>
    <refsect1>
     <title>说明</title>
@@ -15,8 +15,9 @@
       <methodparam choice="opt"><type>int</type><parameter>row</parameter></methodparam>
      </methodsynopsis>
     <para>
-     <function>pg_fetch_assoc</function>
-     返回一个与所提取的行（元组/记录）相一致的关联数组。如果没有更多行可供提取，则返回 &false;。
+     <function>pg_fetch_assoc</function> 和调用 <function>pg_fetch_array</function>
+     加上第三个可选参数 PGSQL_ASSOC 是等价的。它只返回一个关联数组。如果需要数字索引，用
+     <function>pg_fetch_row</function>。
     </para>
     <para>
      <function>pg_fetch_assoc</function> 是
@@ -33,24 +34,26 @@
     </para>
     <para>
      <example>
-      <title>PostgreSQL fetch array</title>
+      <title><function>pg_fetch_assoc</function> 例子</title>
       <programlisting role="php">
 <![CDATA[
-<?php 
-$conn = pg_pconnect ("dbname=publisher");
+<?php
+$conn = pg_pconnect("dbname=publisher");
 if (!$conn) {
     echo "An error occured.\n";
     exit;
 }
 
-$result = pg_query ($conn, "SELECT * FROM authors");
+$result = pg_query($conn, "SELECT id, author, email FROM authors");
 if (!$result) {
     echo "An error occured.\n";
     exit;
 }
-
-$arr = pg_fetch_assoc ($result, 1, PGSQL_ASSOC);
-echo $arr["author"] . " <- array\n";
+while ($row = pg_fetch_assoc($result)) {
+    echo $row['id'];
+    echo $row['author'];
+    echo $row['email'];
+}
 ?>
 ]]>
       </programlisting>

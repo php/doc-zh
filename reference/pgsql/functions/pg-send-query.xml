@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.2 $ -->
+<!-- $Revision: 1.3 $ -->
 <!-- $Author: dallas $ -->
-<!-- EN-Revision: 1.3 Maintainer: dallas Status: ready -->
+<!-- EN-Revision: 1.6 Maintainer: dallas Status: ready -->
   <refentry id='function.pg-send-query'>
    <refnamediv>
     <refname>pg_send_query</refname>
@@ -21,13 +21,54 @@
       <methodparam><type>string</type><parameter>query</parameter></methodparam>
      </methodsynopsis>
     <para>
-     <function>pg_send_query</function> 向 <parameter>connection</parameter> 连接发送异步查询。和 <function>pg_query</function> 不同，它可以向 PostgreSQL 发送多个查询并用 <function>pg_get_result</function> 依次得到结果。当执行查询时脚本的执行不会被锁定。用 <function>pg_connection_busy</function> 来检查连接连接是否为忙（例如查询正在执行中）。调用 <function>pg_cancel_query</function> 则有可能取消查询。
+     <function>pg_send_query</function> 向 <parameter>connection</parameter>
+     连接发送异步查询。和 <function>pg_query</function> 不同，它可以向 PostgreSQL
+     发送多个查询并用 <function>pg_get_result</function>
+     依次得到结果。当执行查询时脚本的执行不会被锁定。用
+     <function>pg_connection_busy</function> 来检查连接连接是否为忙（即查询正在执行中）。调用
+     <function>pg_cancel_query</function> 则有可能取消查询。
     </para>
     <para>
      尽管用户可以一次发送多个查询，但用户不能通过正忙的连接发送多个查询。如果向正忙的连接发送了查询，则会等待上一条查询结束并丢弃所有结果。
     </para>
     <para>
-     参见 <function>pg_query</function>，<function>pg_cancel_query</function>，<function>pg_get_result</function> 和 <function>pg_connection_busy</function>。
+     <example>
+      <title>异步查询</title>
+      <programlisting role="php">
+<![CDATA[
+<?php
+    $dbconn = pg_connect("dbname=publisher") or die("Could not connect");
+    if (!pg_connection_busy($dbconn)) {
+        pg_send_query($dbconn,"select * from authors; select count(*) from authors;");
+    }
+    $res1 = pg_get_result($dbconn);
+    echo "First call to pg_get_result(): $res1\n";
+    $rows1 = pg_num_rows($res1);
+    echo "$res1 has $rows1 records\n\n";
+    $res2 = pg_get_result($dbconn);
+    echo "second call to pg_get_result(): $res2\n";
+    $rows2 = pg_num_rows($res2);
+    echo "$res2 has $rows2 records\n";
+?>
+]]>
+      </programlisting>
+      <para>
+       上例输出如下：
+      </para>
+      <screen>
+<![CDATA[
+first call to pg_get_result(): Resource id #3
+Resource id #3 has 3 records
+
+second call to pg_get_result(): Resource id #4
+Resource id #4 has 1 records
+]]>
+      </screen>
+     </example>
+    </para>
+    <para>
+     参见 <function>pg_query</function>，<function>pg_cancel_query</function>，<function>pg_get_result</function>
+     和 <function>pg_connection_busy</function>。
     </para>
    </refsect1>
   </refentry>
