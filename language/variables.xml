@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.9 $ -->
-<!-- $Author: gregory $ -->
-<!-- EN-Revision: 1.58 Maintainer: verdana Status:  -->
-<!-- CREDITS: dallas -->
-<!-- CREDITS: Gregory -->
+<!-- $Revision: 1.10 $ -->
+<!-- $Author: dallas $ -->
+<!-- EN-Revision: 1.69 Maintainer: verdana Status:  -->
+<!-- CREDITS: dallas, Gregory -->
  <chapter id="language.variables">
   <title>变量</title>
 
@@ -35,7 +34,7 @@ echo "$var, $Var";      // outputs "Bob, Joe"
 
 $4site = 'not yet';     // invalid; starts with a number
 $_4site = 'not yet';    // valid; starts with an underscore
-$t?yte = 'mansikka';    // valid; '�' is ASCII 228.
+$t?yte = 'mansikka';    // valid; '�' is (Extended) ASCII 228.
 ?>
 ]]>
      </programlisting>
@@ -114,7 +113,14 @@ $bar = &test();    // Invalid.
    </warning>
 
    <simpara>
-    从 PHP 4.1.0 开始，PHP 提供了一套附加的预定数组，这些数组变量包含了来自 Web 服务器（如果可用），运行环境，和用户输入的数据。这些数组非常特别，它们在全局范围内自动生效，例如，在任何范围内自动生效。为此，它们常因是 "autoglobals" 或者 "superglobals" 而闻名。（PHP 中尚且没有一种可使用户自定义超级全局变量的机制）超级全局变量罗列于下文中；但是为了得到它们的内容和关于 PHP 预定义变量的进一步的讨论以及它们的本质，请参阅 <link linkend="reserved.variables">预定义变量</link>。而且，你也将注意到旧的地预定义数组（<varname>$HTTP_*_VARS</varname>）仍旧存在。
+    从 PHP 4.1.0 开始，PHP 提供了一套附加的预定数组，这些数组变量包含了来自 Web
+    服务器（如果可用），运行环境，和用户输入的数据。这些数组非常特别，它们在全局范围内自动生效，例如，在任何范围内自动生效。为此，它们常因是
+    "autoglobals" 或者 "superglobals" 而闻名。（PHP
+    中尚且没有一种可使用户自定义超级全局变量的机制）超级全局变量罗列于下文中；但是为了得到它们的内容和关于
+    PHP 预定义变量的进一步的讨论以及它们的本质，请参阅<link
+    linkend="reserved.variables">预定义变量</link>。而且，你也将注意到旧的预定义数组（<varname>$HTTP_*_VARS</varname>）仍旧存在。
+
+    &avail.register-long-arrays;
    </simpara>
 
    <note>
@@ -197,10 +203,18 @@ $bar = &test();    // Invalid.
      <term><link linkend="reserved.variables.request">$_REQUEST</link></term>
      <listitem>
       <simpara>
-       经由任何用户输入机制提交至脚本的变量，因此该数组并不值得信任。所有包含在该数组中的变量的存在与否
-       以及变量的顺序均按照 &php.ini; 中的 <link linkend="ini.variables-order">variables_order</link>
-       配置指示来定义。该数组没有直接模拟 PHP 4.1.0 的早期版本。参照 <function>import_request_variables</function>。
+       经由 GET，POST 和 COOKIE
+       机制提交至脚本的变量，因此该数组并不值得信任。所有包含在该数组中的变量的存在与否以及变量的顺序均按照
+       &php.ini; 中的 <link linkend="ini.variables-order">variables_order</link>
+       配置指示来定义。该数组没有直接模拟 PHP 4.1.0 的早期版本。参见
+       <function>import_request_variables</function>。
       </simpara>
+      <caution>
+       <simpara>
+        自 PHP 4.3.0 起，<varname>$_FILES</varname> 中的文件信息不再存在于
+        <varname>$_REQUEST</varname> 中。
+       </simpara>
+      </caution>
       <note>
        <simpara>
         当运行于<link linkend="features.commandline">命令行</link>模式时，这个数组将<emphasis>不会</emphasis>包含 <varname>argv</varname> 和 <varname>argc</varname> 入口；它们已经存在于数组 <varname>$_SERVER</varname> 中。
@@ -261,15 +275,22 @@ Test();
    </informalexample>
 
    <simpara>
-    这个脚本不会有任何输出因为 echo 语句引用了一个局部版本的变量
-    <varname>$a</varname>，	而且在这个范围内，它并没有被赋值。你可能注意到
+    这个脚本不会有任何输出，因为 echo 语句引用了一个局部版本的变量
+    <varname>$a</varname>，而且在这个范围内，它并没有被赋值。你可能注意到
     PHP 的全局变量和 C 语言有一点点不同，在 C
-    语言中，全局变量在函数中自动生效，除非被局部变量覆盖。这可能引起一些问题，有些人可能漫不经心的改变一个全局变量。 PHP
-    中全局变量在函数中使用时必须申明为全局。例如：
+    语言中，全局变量在函数中自动生效，除非被局部变量覆盖。这可能引起一些问题，有些人可能漫不经心的改变一个全局变量。PHP
+    中全局变量在函数中使用时必须申明为全局。
    </simpara>
 
-   <informalexample>
-    <programlisting role="php">
+   <sect2 id="language.variables.scope.global">
+    <title>The global keyword</title>
+    <simpara>
+     首先，一个使用 <literal>global</literal> 的例子：
+    </simpara>
+    <para>
+     <example>
+      <title>使用 global</title>
+      <programlisting role="php">
 <![CDATA[
 <?php
 $a = 1;
@@ -286,20 +307,23 @@ Sum();
 echo $b;
 ?>
 ]]>
-    </programlisting>
-   </informalexample>
+      </programlisting>
+     </example>
+    </para>
 
-   <simpara>
-    以上脚本的输出将是 &quot;3&quot;。在函数中申明了全局变量
-    <varname>$a</varname> 和 <varname>$b</varname>，任何变量的所有引用变量都会指向到全局变量。对于一个函数能够申明的全局变量的最大个数，PHP 没有限制。
-   </simpara>
+    <simpara>
+     以上脚本的输出将是 &quot;3&quot;。在函数中申明了全局变量
+     <varname>$a</varname> 和 <varname>$b</varname>，任何变量的所有引用变量都会指向到全局变量。对于一个函数能够申明的全局变量的最大个数，PHP 没有限制。
+    </simpara>
 
-   <simpara>
-    在全局范围内访问变量的第二个办法，是用特殊的 PHP 自定义 <varname>$GLOBALS</varname> 数组。前面的例子可以写成：
-   </simpara>
+    <simpara>
+     在全局范围内访问变量的第二个办法，是用特殊的 PHP 自定义 <varname>$GLOBALS</varname> 数组。前面的例子可以写成：
+    </simpara>
 
-   <informalexample>
-    <programlisting role="php">
+    <para>
+     <example>
+      <title>使用 <varname>$GLOBALS</varname> 替代 global</title>
+      <programlisting role="php">
 <![CDATA[
 <?php
 $a = 1;
@@ -314,19 +338,20 @@ Sum();
 echo $b;
 ?>
 ]]>
-    </programlisting>
-   </informalexample>
+      </programlisting>
+     </example>
+    </para>
 
-   <simpara>
-    在 <varname>$GLOBALS</varname>
-    数组中，每一个变量为一个元素，键名对应变量名，值变量的内容。<varname>$GLOBALS</varname>
-    之所以在全局范围内存在，是因为 $GLOBALS 是一个<link
-    linkend="language.variables.superglobals">超全局变量</link>。以下范例显示了超全局变量的用处：
-   </simpara>
-   <para>
+    <simpara>
+     在 <varname>$GLOBALS</varname>
+     数组中，每一个变量为一个元素，键名对应变量名，值变量的内容。<varname>$GLOBALS</varname>
+     之所以在全局范围内存在，是因为 $GLOBALS 是一个<link
+     linkend="language.variables.superglobals">超全局变量</link>。以下范例显示了超全局变量的用处：
+    </simpara>
 
-   <informalexample>
-    <programlisting role="php">
+    <para>
+     <example>
+      <programlisting role="php">
 <![CDATA[
 <?php
 function test_global()
@@ -341,17 +366,23 @@ function test_global()
 }
 ?>
 ]]>
-     </programlisting>
-    </informalexample>
-   </para>
+      </programlisting>
+     </example>
+    </para>
+   </sect2>
 
-   <simpara>
-    变量范围的另一个重要特性是<emphasis>静态变量</emphasis>（static
-    variable）。静态变量仅在局部函数域中存在，但当程序执行离开此作用域时，其值并不丢失。看看下面的例子：
-   </simpara>
+   <sect2 id="language.variables.scope.static">
+    <title>使用静态变量</title>
 
-   <informalexample>
-    <programlisting role="php">
+    <simpara>
+     变量范围的另一个重要特性是<emphasis>静态变量</emphasis>（static
+     variable）。静态变量仅在局部函数域中存在，但当程序执行离开此作用域时，其值并不丢失。看看下面的例子：
+    </simpara>
+
+    <para>
+     <example>
+      <title>演示需要静态变量的例子</title>
+      <programlisting role="php">
 <![CDATA[
 <?php
 function Test ()
@@ -362,20 +393,23 @@ function Test ()
 }
 ?>
 ]]>
-    </programlisting>
-   </informalexample>
+      </programlisting>
+     </example>
+    </para>
 
-   <simpara>
-    本函数没什么用处，因为每次调用时都会将
-    <varname>$a</varname> 的值设为 <literal>0</literal> 并输出
-    &quot;0&quot;。将变量加一的 <varname>$a</varname>++
-    没有作用，因为一旦退出本函数则变量
-    <varname>$a</varname> 就不存在了。要写一个不会丢失本次计数值的计数函数，要将变量
-    <varname>$a</varname> 定义为静态的：
-   </simpara>
+    <simpara>
+     本函数没什么用处，因为每次调用时都会将
+     <varname>$a</varname> 的值设为 <literal>0</literal> 并输出
+     &quot;0&quot;。将变量加一的 <varname>$a</varname>++
+     没有作用，因为一旦退出本函数则变量
+     <varname>$a</varname> 就不存在了。要写一个不会丢失本次计数值的计数函数，要将变量
+     <varname>$a</varname> 定义为静态的：
+    </simpara>
 
-   <informalexample>
-    <programlisting role="php">
+    <para>
+     <example>
+      <title>使用静态变量的例子</title>
+      <programlisting role="php">
 <![CDATA[
 <?php
 function Test()
@@ -386,22 +420,25 @@ function Test()
 }
 ?>
 ]]>
-    </programlisting>
-   </informalexample>
+      </programlisting>
+     </example>
+    </para>
 
-   <simpara>
-    现在，每次调用 Test() 函数都会输出
-    <varname>$a</varname> 的值并加一。
-   </simpara>
+    <simpara>
+     现在，每次调用 Test() 函数都会输出
+     <varname>$a</varname> 的值并加一。
+    </simpara>
 
-   <simpara>
-    静态变量也提供了一种处理递归函数的方法。递归函数是一种调用自己的函数。写递归函数时要小心，因为可能会无穷递归下去。必须确保有充分的方法来中止递归。一下这个简单的函数递归计数到
-    10，使用静态变量
-    <varname>$count</varname> 来判断何时停止：
-   </simpara>
+    <simpara>
+     静态变量也提供了一种处理递归函数的方法。递归函数是一种调用自己的函数。写递归函数时要小心，因为可能会无穷递归下去。必须确保有充分的方法来中止递归。一下这个简单的函数递归计数到
+     10，使用静态变量
+     <varname>$count</varname> 来判断何时停止：
+    </simpara>
 
-   <informalexample>
-    <programlisting role="php">
+    <para>
+     <example>
+      <title>静态变量与递归函数</title>
+      <programlisting role="php">
 <![CDATA[
 <?php
 function Test()
@@ -417,20 +454,50 @@ function Test()
 }
 ?>
 ]]>
-    </programlisting>
-   </informalexample>
+      </programlisting>
+     </example>
+    </para>
 
-   <simpara>
-    在 Zend 引擎 1，即 <literal>PHP4</literal>
-    的驱动器中，对于变量的
-    <literal>static</literal> 和 <literal>global</literal>
-    定义是以引用的方式实现的。例如，在一个函数域内部用
-    <literal>global</literal>
-    语句导入的一个真正的全局变量实际上是建立了一个到全局变量的引用。这有可能导致预料之外的行为，如以下例子所演示的：
-   </simpara>
+    <note>
+     <para>
+      静态变量可以按照上面的例子声明。如果在声明中用表达式的结果对其赋值会导致解析错误。
+     </para>
+     <para>
+      <example>
+       <title>声明静态变量</title>
+       <programlisting role="php">
+<![CDATA[
+<?php
+function foo(){
+    static $int = 0;          // correct
+    static $int = 1+2;        // wrong  (as it is an expression)
+    static $int = sqrt(121);  // wrong  (as it is an expression too)
 
-   <informalexample>
-    <programlisting role="php">
+    $int++;
+    echo $int;
+}
+?>
+]]>
+       </programlisting>
+      </example>
+     </para>
+    </note>
+   </sect2>
+
+   <sect2 id="language.variables.scope.references">
+    <title>全局和静态变量的引用</title>
+    <simpara>
+     在 Zend 引擎 1 代，驱动了 <literal>PHP4</literal>，对于变量的
+     <link linkend="language.variables.scope.static">static</link> 和
+     <link linkend="language.variables.scope.global">global</link>
+     定义是以 <link linkend="language.references">references</link>
+     的方式实现的。例如，在一个函数域内部用
+     <literal>global</literal>
+     语句导入的一个真正的全局变量实际上是建立了一个到全局变量的引用。这有可能导致预料之外的行为，如以下例子所演示的：
+    </simpara>
+
+    <informalexample>
+     <programlisting role="php">
 <![CDATA[
 <?php
 function test_global_ref() {
@@ -449,26 +516,26 @@ test_global_noref();
 var_dump($obj);
 ?>
 ]]>
-    </programlisting>
-   </informalexample>
+     </programlisting>
+    </informalexample>
 
-   <simpara>
-    执行以上例子会导致如下输出：
-   </simpara>
+    <simpara>
+     执行以上例子会导致如下输出：
+    </simpara>
 
-   <screen>
+    <screen>
 NULL
 object(stdClass)(0) {
 }
-   </screen>
+    </screen>
 
-   <simpara>
-    类似的行为也适用于
-    <literal>static</literal> 语句。引用并不是静态地存储的：
-   </simpara>
+    <simpara>
+     类似的行为也适用于
+     <literal>static</literal> 语句。引用并不是静态地存储的：
+    </simpara>
 
-   <informalexample>
-    <programlisting role="php">
+    <informalexample>
+     <programlisting role="php">
 <![CDATA[
 <?php
 function &get_instance_ref() {
@@ -504,14 +571,14 @@ $obj2 = get_instance_noref();
 $still_obj2 = get_instance_noref();
 ?>
 ]]>
-    </programlisting>
-   </informalexample>
+     </programlisting>
+    </informalexample>
 
-   <simpara>
-    执行以上例子会导致如下输出：
-   </simpara>
+    <simpara>
+     执行以上例子会导致如下输出：
+    </simpara>
 
-   <screen>
+    <screen>
 Static object: NULL
 Static object: NULL
 
@@ -520,14 +587,13 @@ Static object: object(stdClass)(1) {
   ["property"]=>
   int(1)
 }
-   </screen>
+    </screen>
 
-   <simpara>
-    上例演示了当把一个引用赋值给一个静态变量时，第二次调用
-    <literal>&amp;get_instance_ref()</literal> 函数时其值并没有被<emphasis>记住</emphasis>。
-   </simpara>
-
-
+    <simpara>
+     上例演示了当把一个引用赋值给一个静态变量时，第二次调用
+     <literal>&amp;get_instance_ref()</literal> 函数时其值并没有被<emphasis>记住</emphasis>。
+    </simpara>
+   </sect2>
   </sect1>
 
   <sect1 id="language.variables.variable">
@@ -635,7 +701,7 @@ echo "$a $hello";
       <title>一个简单的 HTML 表单</title>
       <programlisting role="html">
 <![CDATA[
-<form action="foo.php" method="post">
+<form action="foo.php" method="POST">
     Name:  <input type="text" name="username"><br>
     Email: <input type="text" name="email"><br>
     <input type="submit" name="submit" value="Submit me!">
@@ -664,7 +730,8 @@ echo "$a $hello";
    import_request_variables('p', 'p_');
    print $p_username;
 
-// 自 PHP 3 起可用
+// 自 PHP 3 起可用。自 PHP 5.0.0 起，这些较长的预定义变量
+// 可用 register_long_arrays 指令关闭。
 
    print $HTTP_POST_VARS['username'];
 
@@ -727,16 +794,16 @@ echo "$a $hello";
       <programlisting role="php">
 <![CDATA[
 <?php
-if ($HTTP_POST_VARS['action'] == 'submitted') {
+if (isset($_POST['action']) && $_POST['action'] == 'submitted') {
     print '<pre>';
 
-    print_r($HTTP_POST_VARS);
-    print '<a href="'. $HTTP_SERVER_VARS['PHP_SELF'] .'">Please try again</a>';
+    print_r($_POST);
+    print '<a href="'. $_SERVER['PHP_SELF'] .'">Please try again</a>';
 
     print '</pre>';
 } else {
 ?>
-<form action="<?php echo $HTTP_SERVER_VARS['PHP_SELF']; ?>" method="post">
+<form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="POST">
     Name:  <input type="text" name="personal[name]"><br>
     Email: <input type="text" name="personal[email]"><br>
     Beer: <br>
@@ -837,7 +904,11 @@ if ($HTTP_POST_VARS['action'] == 'submitted') {
      <programlisting role="php">
 <![CDATA[
 <?php
-$count++;
+if (isset($_COOKIE['count'])) {
+    $count = $_COOKIE['count'] + 1;
+} else {
+    $count = 1;
+}
 setcookie("count", $count, time()+3600);
 setcookie("Cart[$count]", $item, time()+3600);
 ?>

@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.14 $ -->
-<!-- $Author: gregory $-->
-<!-- EN-Revision: 1.40 Maintainer: verdana  Status: ready -->
-<!-- CREDITS: dallas -->
-<!-- CREDITS: Gregory -->
+<!-- $Revision: 1.15 $ -->
+<!-- $Author: dallas $-->
+<!-- EN-Revision: 1.43 Maintainer: verdana  Status: ready -->
+<!-- CREDITS: dallas, Gregory -->
  <chapter id="language.oop">
   <title>类与对象</title>
 
@@ -18,16 +17,16 @@
 class Cart
 {
     var $items;  // 购物车中的项目
-   
+
     // 把 $num 个 $artnr 放入车中
- 
+
     function add_item ($artnr, $num)
     {
         $this->items[$artnr] += $num;
     }
-   
+
     // 把 $num 个 $artnr 从车中取出
- 
+
     function remove_item ($artnr, $num)
     {
         if ($this->items[$artnr] > $num) {
@@ -35,7 +34,7 @@ class Cart
             return true;
         } else {
             return false;
-        }   
+        }
     }
 }
 ?>
@@ -43,41 +42,68 @@ class Cart
      </programlisting>
     </informalexample>
    </para>
- 
+
    <para>
     上面的例子定义了一个 Cart
     类，这个类由购物车中的商品构成的数组和两个用于从购物车中添加和删除商品的函数组成。
    </para>
 
-   <caution>
+   <warning>
     <simpara>
-     下面的警告注解对 PHP4 有效。
+     你<emphasis>不能</emphasis>将一个类的定义放到多个文件中，或多个
+     PHP 块中。以下用法将不起作用：
     </simpara>
-    
+    <para>
+     <informalexample>
+      <programlisting>
+<![CDATA[
+<?php
+class test {
+?>
+<?php
+    function test() {
+        print 'OK';
+    }
+}
+?>
+]]>
+      </programlisting>
+     </informalexample>
+    </para>
+   </warning>
+
+   <simpara>
+    以下警告仅用于 PHP 4。
+   </simpara>
+
+   <caution> 
     <simpara>
      名称 <literal>stdClass</literal> 已经被 Zend 使用并保留。您不能在您的 PHP
      代码中定义名为 <literal>stdClass</literal> 的类。
     </simpara>
-    
+   </caution>
+
+   <caution>
     <simpara>
      函数名 <literal>__sleep</literal> 和
      <literal>__wakeup</literal> 在
      PHP 类中是魔术函数。除非想要与之联系的魔术功能，否则在任何类中都不能以此命名函数。
     </simpara>
-    
+   </caution>
+
+   <caution>
     <simpara>
      PHP 将所有以 __ 开头的函数名保留为魔术函数。除非想要使用一些见于文档中的魔术功能，否则建议不要在
      PHP 中将函数名以 __ 开头。
     </simpara>
    </caution>
 
-   <note>
-    <simpara>
-     在 PHP 4 中，<literal>var</literal>
-     变量的值只能初始化为常量。用非常量值初始化变量，您需要一个初始化函数，该函数在对象被创建时自动被调用。这样一个函数被称之为构造函数（见下面）。
-    </simpara>
-    <informalexample>
-     <programlisting role="php">
+   <simpara>
+    在 PHP 4 中，<literal>var</literal>
+    变量的值只能初始化为常量。用非常量值初始化变量，您需要一个初始化函数，该函数在对象被创建时自动被调用。这样一个函数被称之为构造函数（见下面）。
+   </simpara>
+   <informalexample>
+    <programlisting role="php">
 <![CDATA[
 <?php
 /* PHP 4 中不能这样用 */
@@ -106,15 +132,14 @@ class Cart
 }
 ?>
 ]]>
-     </programlisting>
-    </informalexample>
-   </note>
+    </programlisting>
+   </informalexample>
 
    <para>
     类也是一种类型，就是说，它们是实际变量的蓝图。必须用
     <literal>new</literal> 运算符来创建相应类型的变量。
    </para>
- 
+
    <informalexample>
     <programlisting role="php">
 <![CDATA[
@@ -124,30 +149,36 @@ $cart->add_item("10", 1);
 
 $another_cart = new Cart;
 $another_cart->add_item("0815", 3);
+?>
 ]]>
     </programlisting>
    </informalexample>
- 
+
    <para>
-    上述代码创建了两个 Cart 类的对象 $cart 和 $another_cart, 对象 $cart 的方法 add_item()
-    被调用时，添加了 1 件 10 号商品。对于对象 $another_cart, 3 件 0815 号商品被添加到购物车中。
+    上述代码创建了两个 Cart 类的对象 <varname>$cart</varname> 和
+    <varname>$another_cart</varname>，对象 <varname>$cart</varname> 的方法 add_item()
+    被调用时，添加了 1 件 10 号商品。对于对象 <varname>$another_cart</varname>，3
+    件 0815 号商品被添加到购物车中。
    </para>
-   
+
    <para>
-    $cart 和 $another_cart 都有方法 add_item(), remove_item() 和一个 items
+    <varname>$cart</varname> 和 <varname>$another_cart</varname> 都有方法
+    add_item()，remove_item() 和一个 items
     变量。它们都是明显的函数和变量。你可以把它们当作文件系统中的某些类似目录的东西来考虑。在文件系统中，你可以拥有两个不同的
     README.TXT 文件，只要不在相同的目录中。正如从为了根目录访问每个文件你需要输入该文件的完整的路径名一样，你必须指定需要调用的函数的完整名称：在
     PHP 术语中，根目录将是全局名称空间，路径名符号将是
-    -&gt;。因而，名称 $cart-&gt;items 和 $another_cart-&gt;items
-    命名了两个不同的变量。注意变量 $cart-&gt;items，不是
-    $cart-&gt;$items，那是因为在 PHP 中一个变量名只有一个单独的美元符号。
+    <literal>-&gt;</literal>。因而，名称 <varname>$cart-&gt;items</varname>
+    和 <varname>$another_cart-&gt;items</varname>
+    命名了两个不同的变量。注意变量名为 <varname>$cart-&gt;items</varname>，不是
+    <varname>$cart-&gt;$items</varname>，那是因为在 PHP 中一个变量名只有一个单独的美元符号。
    </para>
 
    <informalexample>
     <programlisting role="php">
 <![CDATA[
+<?php
 // 正确，只有一个 $
-$cart->items = array("10" => 1); 
+$cart->items = array("10" => 1);
 
 // 不正确，因为 $cart->$items 变成了 $cart->""
 $cart->$items = array("10" => 1);
@@ -155,18 +186,23 @@ $cart->$items = array("10" => 1);
 // 正确，但可能不是想要的结果：
 // $cart->$myvar 变成了 $cart->items
 $myvar = 'items';
-$cart->$myvar = array("10" => 1);  
+$cart->$myvar = array("10" => 1);
+?>
 ]]>
     </programlisting>
    </informalexample>
 
    <para>
     在一个类的定义内部，你无法得知使用何种名称的对象是可以访问的：在编写 Cart
-    类时，并不知道之后对象的名称将会命名为 $cart 或者 $another_cart。因而你不能在类中使用
-    $cart-&gt;items。然而为了类定义的内部访问自身的函数和变量， 可以使用伪变量 $this
-    来达到这个目的。$this 变量可以理解为“我自己的”或者“当前对象”。因而
-    '$this->&gt;items[$artnr] += $num' 可以理解为“我自己的物品数组的 $artnr 计数器加
-    $num”或者“在当前对象的物品数组的 $artnr 计数器加 $num”。
+    类时，并不知道之后对象的名称将会命名为 <varname>$cart</varname>
+    或者 <varname>$another_cart</varname>。因而你不能在类中使用
+    <varname>$cart-&gt;items</varname>。然而为了类定义的内部访问自身的函数和变量，可以使用伪变量
+    <varname>$this</varname>
+    来达到这个目的。<varname>$this</varname> 变量可以理解为“我自己的”或者“当前对象”。因而
+    '<varname>$this->&gt;items[$artnr]</varname> += <varname>$num</varname>' 可以理解为“我自己的物品数组的
+    <varname>$artnr</varname> 计数器加
+    <varname>$num</varname>”或者“在当前对象的物品数组的
+    <varname>$artnr</varname> 计数器加 <varname>$num</varname>”。
    </para>
 
    <note>
@@ -175,43 +211,47 @@ $cart->$myvar = array("10" => 1);
     </para>
    </note>
   </sect1>
-  
+
   <sect1 id="keyword.extends">
    <title><literal>继承</literal></title>
 
    <para>
     通常你需要这样一些类，这些类与其它现有的类拥有相同变量和函数。实际上，定义一个通用类，用于你所有的项目，并且不断丰富这个类以适应你的每个具体项目，将是一个不错的练习。为了使这一点变得更加容易，类可以从其它的类中扩展出来。扩展或派生出来的类拥有其基类（这称为“继承”，只不过没人死）的所有变量和函数，并包含所有你在派生类中定义的部分。类中的元素不可能减少，就是说，不可以注销任何存在的函数或者变量。一个扩充类总是依赖一个单独的基类，也就是说，多继承是不支持的。使用关键字“extends”来扩展一个类。
    </para>
- 
+
    <informalexample>
     <programlisting role="php">
 <![CDATA[
+<?php
 class Named_Cart extends Cart
 {
     var $owner;
-  
+
     function set_owner ($name)
     {
         $this->owner = $name;
     }
 }
+?>
 ]]>
     </programlisting>
    </informalexample>
- 
+
    <para>
     上述示例定义了名为 Named_Cart 的类，该类拥有 Cart
-    类的所有变量和函数，加上附加的变量 $owner 和一个附加函数
+    类的所有变量和函数，加上附加的变量 <varname>$owner</varname> 和一个附加函数
     set_owner()。现在，你以正常的方式创建了一个有名字的购物车，并且可以设置并取得该购物车的主人。而正常的购物车类的函数依旧可以在有名字的购物车类中使用：
    </para>
- 
+
    <informalexample>
     <programlisting role="php">
 <![CDATA[
+<?php
 $ncart = new Named_Cart;    // 新建一个有名字的购物车
 $ncart->set_owner("kris");  // 给该购物车命名
 print $ncart->owner;        // 输出该购物车主人的名字
 $ncart->add_item("10", 1);  // （从购物车类中继承来的功能）
+?>
 ]]>
     </programlisting>
    </informalexample>
@@ -243,13 +283,14 @@ $ncart->add_item("10", 1);  // （从购物车类中继承来的功能）
    <para>
     构造函数是类中的一个特殊函数，当使用 <literal>new</literal>
     操作符创建一个类的实例时，构造函数将会自动调用。PHP 3
-    中，当函数与类同名时，这个函数将成为构造函数。PHP 4 
+    中，当函数与类同名时，这个函数将成为构造函数。PHP 4
     中，在类里定义的函数与类同名时，这个函数将成为一个构造函数 － 区别很微妙，但非常关键（见下文）。
    </para>
- 
+
    <informalexample>
     <programlisting role="php">
 <![CDATA[
+<?php
 // PHP 3 和 PHP 4 中都能用
 class Auto_Cart extends Cart
 {
@@ -258,18 +299,20 @@ class Auto_Cart extends Cart
         $this->add_item ("10", 1);
     }
 }
+?>
 ]]>
     </programlisting>
    </informalexample>
- 
+
    <para>
     上文定义了一个 Auto_Cart 类，即 Cart 类加上一个构造函数，当每次使用“new”创建一个新的 Auto_Cart
     类实例时，构造函数将自动调用并将一件商品的数目初始化为“10”。构造函数可以使用参数，而且这些参数可以是可选的，它们可以使构造函数更加有用。为了依然可以不带参数地使用类，所有构造函数的参数应该提供默认值，使其可选。
    </para>
- 
+
    <informalexample>
     <programlisting role="php">
 <![CDATA[
+<?php
 // PHP 3 和 PHP 4 中都能用
 class Constructor_Cart extends Cart
 {
@@ -278,14 +321,15 @@ class Constructor_Cart extends Cart
         $this->add_item ($item, $num);
     }
 }
- 
+
 // 买些同样无聊的老货
- 
+
 $default_cart = new Constructor_Cart;
- 
+
 // 买些新东西...
- 
+
 $different_cart = new Constructor_Cart("20", 17);
+?>
 ]]>
     </programlisting>
    </informalexample>
@@ -299,12 +343,13 @@ $different_cart = new Constructor_Cart("20", 17);
    <caution>
     <simpara>
      PHP 3 中派生类和构造函数有许多限制。仔细阅读下列范例以理解这些限制。
-    </simpara> 
+    </simpara>
    </caution>
-   
+
    <informalexample>
     <programlisting role="php">
 <![CDATA[
+<?php
 class A
 {
     function A()
@@ -323,6 +368,7 @@ class B extends A
 
 // PHP 3 中没有构造函数被调用
 $b = new B;
+?>
 ]]>
     </programlisting>
    </informalexample>
@@ -332,7 +378,7 @@ $b = new B;
     的规则是：“构造函数是与类同名的函数”。这里，类的名字是 B，但是类 B
     中没有函数 B()。什么也不会发生。
    </para>
-   
+
    <para>
     PHP 4 修正了这个问题，并介绍了另外的新规则：如果一个类没有构造函数，如果父类有构造函数的话，父类的构造函数将会被调用。PHP 4
     中，上面的例子将会输出“I am the constructor of A.&lt;br&gt;”。
@@ -341,6 +387,7 @@ $b = new B;
    <informalexample>
     <programlisting role="php">
 <![CDATA[
+<?php
 class A
 {
     function A()
@@ -365,10 +412,11 @@ class B extends A
 
 // 调用 B() 作为构造函数
 $b = new B;
+?>
 ]]>
     </programlisting>
    </informalexample>
-   
+
    <para>
     如果是 PHP 3，类 A 中的函数 B() 将立即成为类 B
     中的构造函数，虽然并不是有意如此。PHP 3
@@ -376,7 +424,7 @@ $b = new B;
     并不关心函数是不是在类 B
     中定义的，或者是否已经被继承。
    </para>
-   
+
    <para>
     PHP 4 修改了规则：“构造函数与定义其自身的类同名”。因而在 PHP 4
     中，类 B 将不会有属于自身的构造函数，并且父类的构造函数将会被调用，输出“I
@@ -388,21 +436,21 @@ $b = new B;
     的内容。也就是说，例子中的注释“This will call B() as a constructor”是正确的。如果从 A
     类中移除函数 B()，那么将输出 A() 的内容。
    </para>
-   
+
    <caution>
     <simpara>
      不管是 PHP 3 还是 PHP 4
      都不会从派生类的构造函数中自动调用基类的构造函数。恰当地逐次调用上一级的构造函数是用户的责任。
     </simpara>
    </caution>
-   
+
    <note>
     <simpara>
      PHP 3 或者 PHP 4 中都没有析构函数。你可以使用 <function>register_shutdown_function</function>
      函数来模拟多数析构函数的效果。
     </simpara>
    </note>
-   
+
    <para>
     析构函数是一种当对象被销毁时，无论使用了 <function>unset</function>
     或者简单的脱离范围，都会被自动调用的函数。但 PHP 中没有析构函数。
@@ -414,7 +462,7 @@ $b = new B;
 
    <caution>
     <simpara>
-     下列内容仅在 PHP 4 中有效。
+     下列内容仅在 PHP 4 及以后版本中有效。
     </simpara>
    </caution>
 
@@ -422,10 +470,11 @@ $b = new B;
     有时，在没有声明任何实例的情况下访问类中的函数或者基类中的函数和变量很有用处。而
     :: 运算符即用于此情况。
    </para>
-   
+
    <informalexample>
     <programlisting role="php">
 <![CDATA[
+<?php
 class A
 {
     function example()
@@ -454,6 +503,7 @@ $b = new B;
 //   I am the redefined function B::example().<br>
 //   I am the original function A::example().<br>
 $b->example();
+?>
 ]]>
     </programlisting>
    </informalexample>
@@ -464,9 +514,10 @@ $b->example();
     example()。反而我们将 example()
     作为一个类函数来调用，也就是说，作为一个类自身的函数来调用，而不是这个类的任何对象。
    </para>
-   
+
    <para>
-    这里有类函数，但没有类的变量。实际上，在调用函数时完全没有任何对象。因而一个类的函数可以不使用任何对象（但可以使用局部或者全局变量），并且可以根本不使用 $this 变量。
+    这里有类函数，但没有类的变量。实际上，在调用函数时完全没有任何对象。因而一个类的函数可以不使用任何对象（但可以使用局部或者全局变量），并且可以根本不使用
+    <varname>$this</varname> 变量。
    </para>
 
    <para>
@@ -476,9 +527,10 @@ $b->example();
     运算符来访问 A 类中的 example() 函数。如：A::example()（实际上，应该写为
     parent::example()，下一章介绍该内容。）
    </para>
-   
+
    <para>
-    就此而论，对于当前对象，它可能有对象变量。因而，你可以在对象函数的内部使用 $this 和对象变量。
+    就此而论，对于当前对象，它可能有对象变量。因而，你可以在对象函数的内部使用
+    <varname>$this</varname> 和对象变量。
    </para>
 
  </sect1>
@@ -489,7 +541,7 @@ $b->example();
   <para>
    你可能会发现自己写的代码访问了基类的变量和函数。如果派生类非常精炼或者基类非常专业化的时候尤其是这样。
   </para>
-  
+
   <para>
    不要用代码中基类文字上的名字，应该用特殊的名字
    <literal>parent</literal>，它指的就是派生类在
@@ -501,6 +553,7 @@ $b->example();
   <informalexample>
    <programlisting role="php">
 <![CDATA[
+<?php
 class A
 {
     function example()
@@ -522,6 +575,7 @@ $b = new B;
 
 // 这将调用 B::example()，而它会去调用 A::example()。
 $b->example();
+?>
 ]]>
    </programlisting>
   </informalexample>
@@ -547,34 +601,35 @@ $b->example();
    返回一个字符串，包含着可以储存于 PHP 的任何值的字节流表示。<function>unserialize</function>
    可以用此字符串来重建原始的变量值。用序列化来保存对象可以保存对象中的所有变量。对象中的函数不会被保存，只有类的名称。
   </para>
-  
+
   <para>
    要能够 <function>unserialize</function>
    一个对象，需要定义该对象的类。也就是，如果序列化了
-   page1.php 中类 A 的对象 $a，将得到一个指向类 A
-   的字符串并包含有所有 $a 中变量的值。如果要在
+   page1.php 中类 A 的对象 <varname>$a</varname>，将得到一个指向类 A
+   的字符串并包含有所有 <varname>$a</varname> 中变量的值。如果要在
    page2.php 中将其解序列化，重建类 A 的对象
-   $a，则 page2.php 中必须要出现类 A 的定义。这可以例如这样实现，将类
+   <varname>$a</varname>，则 page2.php 中必须要出现类 A 的定义。这可以例如这样实现，将类
    A 的定义放在一个包含文件中，并在 page1.php 和 page2.php 都包含此文件。
   </para>
-  
+
   <informalexample>
    <programlisting role="php">
 <![CDATA[
-classa.inc:
-  class A 
+<?php
+// classa.inc:
+  class A
   {
       var $one = 1;
-    
+
       function show_one()
       {
           echo $this->one;
       }
   }
-  
-page1.php:
+
+// page1.php:
   include("classa.inc");
-  
+
   $a = new A;
   $s = serialize($a);
   // 将 $s 存放在某处使 page2.php 能够找到
@@ -582,7 +637,7 @@ page1.php:
   fputs($fp, $s);
   fclose($fp);
 
-page2.php:
+// page2.php:
   // 为了正常解序列化需要这一行
   include("classa.inc");
 
@@ -591,25 +646,26 @@ page2.php:
 
   // 现在可以用 $a 对象的 show_one() 函数了
   $a->show_one();
+?>
 ]]>
    </programlisting>
   </informalexample>
-  
+
   <para>
    如果在用会话并使用了
    <function>session_register</function>
    来注册对象，这些对象会在每个 PHP
    页面结束时被自动序列化，并在接下来的每个页面中自动解序列化。基本上是说这些对象一旦成为会话的一部分，就能在任何页面中出现。
   </para>
-  
+
   <para>
    强烈建议在所有的页面中都包括这些注册的对象的类的定义，即使并不是在所有的页面中都用到了这些类。如果没有这样做，一个对象被解序列化了但却没有其类的定义，它将失去与之关联的类并成为
    <literal>stdClass</literal>
    的一个对象而完全没有任何可用的函数，这样就很没有用处。
   </para>
-  
+
   <para>
-   因此如果在以上的例子中 $a 通过运行
+   因此如果在以上的例子中 <varname>$a</varname> 通过运行
    <literal>session_register("a")</literal>
    成为了会话的一部分，应该在所有的页面中包含
    <literal>classa.inc</literal> 文件，而不只是
@@ -625,33 +681,34 @@ page2.php:
    <literal>__sleep</literal>
    的函数。如果这样，该函数将在任何序列化之前运行。它可以清除对象并应该返回一个包含有该对象中应被序列化的所有变量名的数组。
   </para>
-  
+
   <para>
    使用 <literal>__sleep</literal>
    的目的是关闭对象可能具有的任何数据库连接，提交等待中的数据或进行类似的清除任务。此外，如果有非常大的对象而并不需要完全储存下来时此函数也很有用。
   </para>
-  
+
   <para>
    相反地，<function>unserialize</function>
    检查具有魔术名称
    <literal>__wakeup</literal>
    的函数的存在。如果存在，此函数可以重建对象可能具有的任何资源。
   </para>
-  
+
   <para>
     使用 <literal>__wakeup</literal>
     的目的是重建在序列化中可能丢失的任何数据库连接以及处理其它重新初始化的任务。
   </para>
  </sect1>
-  
+
  <sect1 id="language.oop.newref">
    <title>构造函数中的引用</title>
    <para>
     在构造函数中创建引用可能会导致混淆的结果。本节以教程形式帮助避免问题。
- 
+
     <informalexample>
      <programlisting role="php">
 <![CDATA[
+<?php
 class Foo
 {
     function Foo($name)
@@ -669,17 +726,18 @@ class Foo
     {
         echo "<br>",$this->name;
     }
-	
+
     function setName($name)
     {
         $this->name = $name;
     }
 }
+?>
 ]]>
     </programlisting>
    </informalexample>
   </para>
-    
+
    <para>
     下面来检查一下用拷贝运算符
     <literal>=</literal>
@@ -694,6 +752,7 @@ class Foo
     <informalexample>
      <programlisting role="php">
 <![CDATA[
+<?php
 $bar1 = new Foo('set in constructor');
 $bar1->echoName();
 $globalref[0]->echoName();
@@ -711,6 +770,7 @@ $globalref[1]->echoName();
 set in constructor
 set in constructor
 set in constructor */
+?>
 ]]>
      </programlisting>
     </informalexample>
@@ -730,6 +790,7 @@ set in constructor */
     <informalexample>
      <programlisting role="php">
 <![CDATA[
+<?php
 // 现在改个名字，你预期什么结果？
 // 你可能预期 $bar1 和 $globalref[0] 二者的名字都改了...
 $bar1->setName('set from outside');
@@ -753,16 +814,18 @@ $globalref[1]->echoName();
 /* 输出为：
 set from outside
 set from outside */
+?>
 ]]>
      </programlisting>
-    </informalexample>   
-   </para>   
+    </informalexample>
+   </para>
    <para>
    最后给出另一个例子，试着理解它。
-   
+
     <informalexample>
      <programlisting role="php">
 <![CDATA[
+<?php
 class A
 {
     function A($i)
@@ -821,6 +884,7 @@ class A: 11
 class B: 11
 class B: 11
 */
+?>
 ]]>
      </programlisting>
     </informalexample>
@@ -839,6 +903,7 @@ class B: 11
     <title>PHP 4 中对象比较范例</title>
     <programlisting role='php'>
 <![CDATA[
+<?php
 function bool2str($bool) {
     if ($bool === false) {
             return 'FALSE';
@@ -887,6 +952,7 @@ compareObjects($o, $p);
 
 echo "\nCompare an instance of a parent class with one from a subclass\n";
 compareObjects($o, $r);
+?>
 ]]>
     </programlisting>
    </example>
@@ -918,6 +984,7 @@ o1 !== o2 : TRUE
     <title>PHP 4 中复合对象的比较</title>
     <programlisting role='php'>
 <![CDATA[
+<?php
 class FlagSet {
     var $set;
 
@@ -948,7 +1015,7 @@ compareObjects($u, $v);
 
 echo "\nu(o,p) and w(q)\n";
 compareObjects($u, $w);
-     
+?>
 ]]>
     </programlisting>
    </example>
@@ -988,6 +1055,7 @@ o1 !== o2 : TRUE
      <title>PHP 5 中对象比较范例</title>
      <programlisting role='php'>
 <![CDATA[
+<?php
 function bool2str($bool) {
     if ($bool === false) {
             return 'FALSE';
@@ -1036,6 +1104,7 @@ compareObjects($o, $q);
 
 echo "\nInstances of similarly named classes in different namespaces\n";
 compareObjects($o, $r);
+?>
 ]]>
      </programlisting>
     </example>
@@ -1060,9 +1129,9 @@ o1 === o2 : FALSE
 o1 !== o2 : TRUE
     </screen>
    </para>
- </sect1>
-</chapter>
- 
+  </sect1>
+ </chapter>
+
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
