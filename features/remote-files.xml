@@ -1,48 +1,40 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="iso-8859-1"?>
 <!-- $Revision: 1.10 $ -->
-<!-- $AUTHOR$ -->
+<!-- $Author$ -->
 <!-- EN-Revision: 1.18 Maintainer: thomaslio Status: ready -->
+<!-- CREDITS: Gregory -->
  <chapter id="features.remote-files">
   <title>使用远程文件</title>
 
   <para>
-  需要支持 &quot;URL fopen wrapper&quot; 功能，你需配置PHP
-    (除非你明确的使用
-   <option>--disable-url-fopen-wrapper</option>标志( 
-   一直到版本 4.0.3)或者设置<parameter>allow_url_fopen</parameter>在 &php.ini 关闭; 
-   (对于新版本))，
-   你可以使用 HTTP 和 FTP 地址在更多函数中，也可以把
-   文件名作为参数，包括<function>require</function>
-   和 <function>include</function>。
+   由于 PHP 建立了设置中对 &quot;URL fopen wrapper&quot; 的支持（在 4.0.3 以前的版本，明确的使用 <option>--disable-url-fopen-wrapper</option> 参数来编译 PHP，或在新版本中，将 &php.ini; 文件中的 <parameter>allow_url_fopen</parameter> 参数设为 off，将屏蔽该功能），您可以在大多数需要用文件名作为参数的函数中使用 HTTP 和 FTP URL 来代替文件名，包括 <function>require</function> 和 <function>include</function> 语句。
   </para>
   <para>
    <note>
     <para>
-     Windows版本的 <literal>PHP</literal>在当前不支持以下函数的
-     远程文件访问:
-     <function>include</function>，<function>include_once</function>，
-     <function>require</function>和<function>require_once</function>。
+	 Windows 版本的 <literal>PHP</literal>中，以下函数当前不支持远程文件的访问：
+     <function>include</function>、<function>include_once</function>、<function>require</function> 和 <function>require_once</function>。
     </para>
    </note>
   </para>
   <para>
-   比如，你可以使用这个在远程web服务器打开一个文件，解析你需要输出的数据，然后使用这些数据在数据库或者简单的输出到装饰你的网站。
+   例如，您可以用以下范例来打开远程 WEB 服务器上的文件，解析您需要的输出数据，然后将这些数据用在数据库的检索中，或者简单地将其输出到您网站剩下内容的样式匹配中。
   </para>
   <para>
    <example>
-    <title>获得一个远程页面的标题</title>
+    <title>获取远程文件的标题</title>
     <programlisting role="php">
 <![CDATA[
 <?php
-$file = fopen ("http://www.example.com/"， "r");
+$file = fopen ("http://www.example.com/", "r");
 if (!$file) {
     echo "<p>Unable to open remote file.\n";
     exit;
 }
 while (!feof ($file)) {
-    $line = fgets ($file， 1024);
+    $line = fgets ($file, 1024);
     /* This only works if the title and its tags are on one line */
-    if (eregi ("<title>(.*)</title>"， $line， $out)) {
+    if (eregi ("<title>(.*)</title>", $line, $out)) {
         $title = $out[1];
         break;
     }
@@ -54,21 +46,28 @@ fclose($file);
    </example>
   </para>
   <para>
-   当你连接到一个拥有恰当的访问权限的FTP以及该文件不存在的时候，你可以写文件。在用户连接的时候，除了'匿名'，你必须指定一个名字 (正确的密码)和地址，比如'ftp://user:password@ftp.example.com/path/to/file'.(它们需要基本的认证，你可以使用相同的语法去访问http的文件。)
+   
+   You can also write to files on an FTP as long you connect as a user
+   with the correct access rights, and the file doesn't exist already.
+   To connect as a user other than 'anonymous', you need to specify
+   the username (and possibly password) within the URL, such as
+   'ftp://user:password@ftp.example.com/path/to/file'. (You can use the
+   same sort of syntax to access files via HTTP when they require Basic
+   authentication.)
   </para>
   <para>
    <example>
-    <title>保存数据到远程服务器</title>
+    <title>Storing data on a remote server</title>
     <programlisting role="php">
 <![CDATA[
 <?php
-$file = fopen ("ftp://ftp.example.com/incoming/outputfile"， "w");
+$file = fopen ("ftp://ftp.example.com/incoming/outputfile", "w");
 if (!$file) {
     echo "<p>Unable to open remote file for writing.\n";
     exit;
 }
 /* Write the data here. */
-fputs ($file， $_SERVER['HTTP_USER_AGENT'] . "\n");
+fputs ($file, $_SERVER['HTTP_USER_AGENT'] . "\n");
 fclose ($file);
 ?>
 ]]>  
@@ -78,8 +77,11 @@ fclose ($file);
   <para>
    <note>
     <para>
-     你可以从上面的例子获得主意去写远程访问日志。从以上例子中，你可以用fopen()写你所喜欢的访问日志的方式，你应该去参考
-     <function>syslog</function>函数。
+     You might get the idea from the example above to use this
+     technique to write to a remote log, but as mentioned above, you
+     can only write to a new file using the URL fopen() wrappers. To
+     do distributed logging like that, you should take a look at
+     <function>syslog</function>.
     </para> 
    </note>
   </para>
