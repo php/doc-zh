@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.4 $ -->
+<!-- $Revision: 1.5 $ -->
 <!-- $Author: dallas $ -->
-<!-- EN-Revision:1.19 Maintainer: dallas Status: ready -->
+<!-- EN-Revision:1.21 Maintainer: dallas Status: ready -->
  <chapter id="faq.html">
   <title>PHP 和 HTML</title>
   <titleabbrev>PHP 和 HTML</titleabbrev>
@@ -233,6 +233,51 @@ variable = documents.forms[0].elements['var[]'];
      </para>
     </answer>
    </qandaentry>
+
+   <qandaentry id="faq.html.javascript-variable">
+    <question>
+     <para>
+      怎样从 Javascript 传递一个变量到 PHP？
+     </para>
+    </question>
+    <answer>
+     <para>
+      由于 Javascript （通常情况下）是客户端技术，而
+      PHP （通常情况下）是服务器端技术，而且
+      HTTP 是一种“无状态”协议，因此两种语言之间不能直接共享变量。
+     </para>
+     <para>
+      但是，有可能在二者之间传递变量。一种实现的方法是用
+      PHP 生成 Javascript 代码，并让浏览器自动刷新，将特定的变量传递回
+      PHP 脚本。以下例子显示了如何这样做 -- 让
+      PHP 代码取得显示屏幕的高度和宽度，通常只能在客户端这么做。
+     </para>
+     <para>
+      <programlisting>
+<![CDATA[
+<?php
+if (isset($_GET['width']) AND isset($_GET['height'])) {
+  // output the geometry variables
+  echo "Screen width is: ". $_GET['width'] ."<br />\n";
+  echo "Screen height is: ". $_GET['height'] ."<br />\n";
+} else {
+  // pass the geometry variables
+  // (preserve the original query string
+  //   -- post variables will need to handled differently)
+
+  echo "<script language=\"javascript\">\n";
+  echo "  location.href=\"${_SERVER['SCRIPT_NAME']}?${_SERVER['QUERY_STRING']}"
+            . "&width=\" + screen.width + \"&height=\" + screen.height;\n";
+  echo "</script>\n";
+  exit();
+}
+?>
+]]>
+      </programlisting>
+     </para>
+    </answer>
+   </qandaentry>
+
   </qandaset>
  </chapter>
 
