@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.8 $ -->
+<!-- $Revision: 1.9 $ -->
 <!-- $Author: dallas $ -->
-<!-- EN-Revision:1.10 Maintainer: dallas Status: ready -->
+<!-- EN-Revision:1.11 Maintainer: dallas Status: ready -->
 <appendix id="wrappers">
  <title>支持的协议／封装协议列表</title>
  <para>
@@ -84,8 +84,12 @@
 
  <section id="wrappers.php">
   <title>PHP 输入／输出流</title>
-  <simpara>PHP 3.0.13 及以上版本，自 PHP 4.3 起支持 <filename>php://output</filename> 
-   和 <filename>php://input</filename>。</simpara>
+  <simpara>
+   <literal>PHP 3.0.13</literal> 及以上版本，自
+   <literal>PHP 4.3<literal> 起支持 <filename>php://output</filename>
+   和 <filename>php://input</filename>，自
+   <literal>PHP 5.0</literal> 起支持 <filename>php://filter</filename>。
+  </simpara>
 
   <itemizedlist>
    <listitem><simpara><filename>php://stdin</filename></simpara></listitem>
@@ -93,6 +97,7 @@
    <listitem><simpara><filename>php://stderr</filename></simpara></listitem>
    <listitem><simpara><filename>php://output</filename></simpara></listitem>
    <listitem><simpara><filename>php://input</filename></simpara></listitem>
+   <listitem><simpara><filename>php://filter</filename></simpara></listitem>
   </itemizedlist>
 
   <simpara>
@@ -112,6 +117,86 @@
    <filename>php://input</filename> 是只读的，同时，<filename>php://stdout</filename>，<filename>php://stderr</filename> 和
    <filename>php://output</filename> 是只写的。
   </simpara>
+
+  <simpara> 
+   <filename>php://filter</filename>
+   是一种设计用来允许过滤器程序在打开时成为流的封装协议。这对于单独具有完整功能的文件函数例如
+   <function>readfile</function>，<function>file</function>
+   和 <function>file_get_contents</function> 很有用，否则就没有机会在读取内容之前将过滤器应用于流之上。
+  </simpara> 
+  <simpara> 
+   <filename>php://filter</filename> 的目标接受随后的&apos;参数&apos;作为其&apos;路径&apos;的一部分。
+  </simpara> 
+  <itemizedlist> 
+   <listitem> 
+    <para> 
+    <literal>/resource=&lt;stream to be filtered&gt;</literal> 
+     (<emphasis>required</emphasis>)  此参数必须位于
+     <filename>php://filter</filename> 的末尾并且需要指向向要过滤的流。
+     <informalexample> 
+      <programlisting role="php"> 
+<![CDATA[ 
+<?php 
+/* This is equivalent to simply: 
+   readfile("http://www.example.com"); 
+   since no filters are actually specified */ 
+  
+readfile("php://filter/resource=http://www.example.com"); 
+?> 
+]]> 
+      </programlisting> 
+     </informalexample> 
+    </para> 
+   </listitem> 
+   <listitem> 
+    <para> 
+     <literal>/read=&lt;filter list to apply to read chain&gt;</literal> 
+     (<emphasis>optional</emphasis>)  本参数接受一个或多个过滤器的名字，用管道字符 <literal>|</literal> 分隔。
+     <informalexample> 
+      <programlisting role="php"> 
+<![CDATA[ 
+<?php 
+/* This will output the contents of 
+   www.example.com entirely in uppercase */ 
+readfile("php://filter/read=string.toupper/resource=http://www.example.com"); 
+  
+/* This will do the same as above 
+   but will also ROT13 encode it */ 
+readfile("php://filter/read=string.toupper|string.rot13/resource=http://www.example.com"); 
+?> 
+]]> 
+      </programlisting> 
+     </informalexample> 
+    </para> 
+   </listitem> 
+   <listitem> 
+    <para> 
+     <literal>/write=&lt;filter list to apply to write chain&gt;</literal> 
+     (<emphasis>optional</emphasis>)  本参数接受一个或多个过滤器的名字，用管道字符 <literal>|</literal> 分隔。
+     <informalexample> 
+      <programlisting role="php"> 
+<![CDATA[ 
+<?php 
+/* This will filter the string "Hello World" 
+   through the rot13 filter, then write to 
+   example.txt in the current directory */ 
+file_set_contents("php://filter/write=string.rot13/resource=example.txt","Hello World"); 
+?> 
+]]> 
+      </programlisting> 
+     </informalexample> 
+    </para> 
+   </listitem> 
+   <listitem> 
+    <simpara> 
+     <literal>/&lt;filter list to apply to both chains&gt;</literal> 
+     (<emphasis>optional</emphasis>)  任何没有被
+     <literal>read=</literal> 或
+     <literal>write=</literal> 指定的过滤器会被同时应用于读写链。
+    </simpara> 
+   </listitem> 
+  </itemizedlist> 
+
  </section>
 
  <section id="wrappers.compression">
@@ -125,7 +210,7 @@
    <listitem><simpara><filename>compress.bzip2://</filename></simpara></listitem>
   </itemizedlist>
 
-  <simpara> 
+  <simpara>
    <filename>zlib:</filename> 和 <function>gzopen</function> 的工作方式相象，只除了流可以用于
    <function>fread</function> 和其它文件系统函数。自 PHP 4.3
    起已不赞成使用，因为可能会和包含有“:”字符的文件名混淆，用 <filename>compress.zlib://</filename> 代替。
