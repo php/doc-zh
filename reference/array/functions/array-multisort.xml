@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.3 $ -->
+<!-- $Revision: 1.4 $ -->
 <!-- $Author: dallas $ -->
 <!-- EN-Revision: 1.4 Maintainer: dallas Status: ready -->
   <refentry id="function.array-multisort">
@@ -93,41 +93,65 @@ array_multisort ($ar[0], SORT_ASC, SORT_STRING,
      1，3，"2"，1（作为数值下降排序）。
     </para>
     <para>
-     【译者注】本函数相当费解，为有助于理解，请再看下面两个例子：
+     【译者注】本函数相当有用，为有助于理解，请看下面这个例子：
     </para>
     <para>
      <example>
-      <title>数组排序</title>
+      <title>名次排列</title>
       <programlisting role="php">
 <![CDATA[
-$ar1 = array ("200", 100.0, 400, "300");
-$ar2 = array (    3,     1, "4",     2);
-array_multisort ($ar1, $ar2);
-// 排序后的结果是：
-// $ar1 = array (100.0, "200", "300", 400);
-// $ar2 = array (    1,     3,     2, "4");
-
-$ar1 = array ("100", 100.0, 100, "100");
-$ar2 = array (    3,     1, "4",     2);
-array_multisort ($ar1, $ar2);
-// 排序后的结果是：
-// $ar1 = array (100.0, "100", "100", 100);
-// $ar2 = array (     1,    2,     3, "4");
+$grade = array("score" => array(70, 95, 70.0, 60, "70"),
+               "name" => array("Zhang San", "Li Si", "Wang Wu",
+                               "Zhao Liu", "Liu Qi"));
+array_multisort($grade["score"], SORT_NUMERIC, SORT_DESC,
+                // 将分数作为数值，由高到低排序
+                $grade["name"], SORT_STRING, SORT_ASC);
+                // 将名字作为字符串，由小到大排序
+var_dump($grade);
 ]]>
       </programlisting>
+      <para>
+       上例输出结果如下：
+       <screen role="php">
+<![CDATA[
+array(2) {
+  ["score"]=>
+  array(5) {
+    [0]=>
+    int(95)
+    [1]=>
+    string(2) "70"
+    [2]=>
+    float(70)
+    [3]=>
+    int(70)
+    [4]=>
+    int(60)
+  }
+  ["name"]=>
+  array(5) {
+    [0]=>
+    string(5) "Li Si"
+    [1]=>
+    string(6) "Liu Qi"
+    [2]=>
+    string(7) "Wang Wu"
+    [3]=>
+    string(9) "Zhang San"
+    [4]=>
+    string(8) "Zhao Liu"
+  }
+}
+]]>
+       </screen>
+       本例中对包含成绩的数组 <varname>$grade</varname>
+       按照分数（score）由高到低进行排序，分数相同的人则按照名字（name）由小到大排序。排序后李四
+       95 分为第一名，赵六 60 分为第五名没有异议。张三、王五和刘七都是
+       70 分，他们的名次则由其姓名的字母顺序排列，Liu 在前，Wang 在后而
+       Zhang 在最后。为了区别，三个 70
+       分分别用了整数，浮点数和字符串来表示，可以在程序输出中清楚地看到它们排序的结果。
+      </para>
      </example>
-    </para>
-    <para>
-     前一个例子中对
-     <literal>$ar1</literal> 的排序当无异议，按照默认的排序标志从小到大排列好，同时
-     <literal>$ar2</literal> 中和
-     <literal>$ar1</literal> 相对应的单元也完全按照
-     <literal>$ar1</literal> 的顺序排列了。但是后一个例子中无论用何种排序标志
-     <literal>$ar1</literal> 中的单元都比较不出顺序，这时
-     <literal>$ar1</literal> 中的单元就会按照
-     <literal>$ar2</literal> 中的单元排序结果来排序。可以用
-     <function>var_dump</function> 函数来查看
-     <literal>$ar1</literal> 中单元的顺序。
     </para>
    </refsect1>
   </refentry>
