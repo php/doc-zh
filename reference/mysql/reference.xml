@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="gb2312"?>
+<!-- $Revision: 1.1 $ -->
+<!-- $Author: yorgo $ -->
+<!-- EN-Revision: 1.12 Maintainer:  Status: ready -->
+ <reference id="ref.mysql">
+  <title>MySQL 函数库</title>
+  <titleabbrev>MySQL</titleabbrev>
+
+  <partintro>
+   <section id="mysql.intro">
+    &reftitle.intro;
+    <para>
+     你可以使用该函数库访问 MySQL 数据库服务器。
+	 有关 MySQL 的详细信息可以到 <ulink
+     url="&url.mysql;">&url.mysql;</ulink> 查询。
+    </para>
+    <para>
+     MySQL 的文档可以在 <ulink
+     url="&url.mysql.docs;">&url.mysql.docs;</ulink> 找到。
+    </para>
+   </section>
+
+   <section id="mysql.requirements">
+    &reftitle.required;
+    <para>
+     为了能够顺利的使用该函数库，你必须在编译 PHP 的时候添加 MySQL 的支持。
+    </para>
+   </section>
+    
+   <section id="mysql.installation">
+    &reftitle.install;
+    <para>
+     当你选择了 <option role="configure">--with-mysql</option> 配置选项的时候，
+     你打开了 PHP 访问 MySQL 数据库的功能。 如果你没有在配置选项中指定 MySQL 的路径信息，
+	 PHP 会使用内建的 MySQL 客户端库函数。在 PHP4 以后的版本中 MySQL 的功能是默认打开的；
+	 即使你没有选择上面的配置选项，默认的 MySQL 功能也会被打开。
+     用户如果需要运行一些特定使用 MySQL 的应用（如：以 Apache 模块化方式运行的 PHP 3 和 PHP 4，或者 auth-mysql 模块）
+	 需要指定 MySQL的路径： <option
+     role="configure">--with-mysql=/path/to/mysql</option>。 这会限制 PHP 使用 MySQL在本地安装的客户端库函数来减少未知的冲突。
+    </para>
+    <warning>
+     <para>
+      当该扩展模块与 recode 扩展模块共同使用的时候，可能会造成 <literal>PHP</literal> 的崩溃和启动时出现问题。
+      请查询 <link linkend="ref.recode">recode</link> 扩展获得更多的信息。
+     </para>
+    </warning>
+   </section>
+
+   <section id="mysql.configuration">
+    &reftitle.runtime;
+    <para>
+	 MySQL 函数库受全局的 <link linkend="configuration.file">配置文件</link> &php.ini; 中的设置所影响。
+     <table>
+      <title>MySQL 配置选项</title>
+      <tgroup cols="3">
+       <thead>
+        <row>
+         <entry>选项名称</entry>
+         <entry>默认值</entry>
+         <entry>可变的</entry>
+        </row>
+       </thead>
+       <tbody>
+        <row>
+         <entry>mysql.allow_persistent</entry>
+         <entry>"On"</entry>
+         <entry>PHP_INI_SYSTEM</entry>
+        </row>
+        <row>
+         <entry>mysql.max_persistent</entry>
+         <entry>"-1"</entry>
+         <entry>PHP_INI_SYSTEM</entry>
+        </row>
+        <row>
+         <entry>mysql.max_links</entry>
+         <entry>"-1"</entry>
+         <entry>PHP_INI_SYSTEM</entry>
+        </row>
+        <row>
+         <entry>mysql.default_port</entry>
+         <entry>NULL</entry>
+         <entry>PHP_INI_ALL</entry>
+        </row>
+        <row>
+         <entry>mysql.default_socket</entry>
+         <entry>NULL</entry>
+         <entry>PHP_INI_ALL</entry>
+        </row>
+        <row>
+         <entry>mysql.default_host</entry>
+         <entry>NULL</entry>
+         <entry>PHP_INI_ALL</entry>
+        </row>
+        <row>
+         <entry>mysql.default_user</entry>
+         <entry>NULL</entry>
+         <entry>PHP_INI_ALL</entry>
+        </row>
+        <row>
+         <entry>mysql.default_password</entry>
+         <entry>NULL</entry>
+         <entry>PHP_INI_ALL</entry>
+        </row>
+        <row>
+         <entry>mysql.connect_timeout</entry>
+         <entry>"-1"</entry>
+         <entry>PHP_INI_SYSTEM</entry>
+        </row>
+       </tbody>
+      </tgroup>
+     </table>
+     更详细的信息以及 PHP_INI_* 常量的定义，请参考
+     <function>ini_set</function>。
+   </para>
+   <para>
+    这里列举了配置参数的简要介绍。
+    <variablelist>
+
+     <varlistentry id="ini.mysql.allow-persistent">
+      <term>
+       <parameter>mysql.allow_persistent</parameter>
+       <type>boolean</type>
+      </term>
+      <listitem>
+       <para>
+        是否允许 
+        <link linkend="features.persistent-connections">保持连接</link>
+        到 MySQL。
+       </para>
+      </listitem>
+     </varlistentry>
+     
+     <varlistentry id="ini.mysql.max-persistent">
+      <term>
+       <parameter>mysql.max_persistent</parameter>
+       <type>integer</type>
+      </term>
+      <listitem>
+       <para>
+        每个进程中最大保持连接数。
+       </para>
+      </listitem>
+     </varlistentry>
+     
+     <varlistentry id="ini.mysql.max-links">
+      <term>
+       <parameter>mysql.max_links</parameter>
+       <type>integer</type>
+      </term>
+      <listitem>
+       <para>
+        每个进程中最大的连接数，包括保持连接。
+       </para>
+      </listitem>
+     </varlistentry>
+
+     <varlistentry id="ini.mysql.default-port">
+      <term>
+       <parameter>mysql.default_port</parameter>
+       <type>string</type>
+      </term>
+      <listitem>
+       <para>
+        指定默认连接数据库的 TCP 端口号。如果没有指定默认端口号，侧顺序从 <literal>MYSQL_TCP_PORT</literal> 环境变量，
+		<filename>/etc/services</filename> 文件中的 <literal>mysql-tcp</literal> 项或者编译时指定的 <literal>MYSQL_PORT</literal>
+		常量中获得。Win32 环境下只会使用  <literal>MYSQL_PORT</literal> 常量。
+       </para>
+      </listitem>
+     </varlistentry>
+     
+     <varlistentry id="ini.mysql.default-socket">
+      <term>
+       <parameter>mysql.default_socket</parameter>
+       <type>string</type>
+      </term>
+      <listitem>
+       <para>
+        当使用本地连接的时候，默认的 socket 名称。
+       </para>
+      </listitem>
+     </varlistentry>
+
+     <varlistentry id="ini.mysql.default-host">
+      <term>
+       <parameter>mysql.default_host</parameter>
+       <type>string</type>
+      </term>
+      <listitem>
+       <para>
+        默认连接的数据库服务器地址。 该参数不能用于
+        <link linkend="ini.safe-mode">safe mode</link>。
+       </para>
+      </listitem>
+     </varlistentry>
+     
+     <varlistentry id="ini.mysql.default-user">
+      <term>
+       <parameter>mysql.default_user</parameter>
+       <type>string</type>
+      </term>
+      <listitem>
+       <para>
+        默认连接数据库时使用的用户名。该参数不能用于
+        <link linkend="ini.safe-mode">safe mode</link>。
+       </para>
+      </listitem>
+     </varlistentry>
+     
+     <varlistentry id="ini.mysql.default-password">
+      <term>
+       <parameter>mysql.default_password</parameter>
+       <type>string</type>
+      </term>
+      <listitem>
+       <para>
+        默认连接数据库时使用的密码。该参数不能用于
+        <link linkend="ini.safe-mode">safe mode</link>。
+       </para>
+      </listitem>
+     </varlistentry>
+
+     <varlistentry id="ini.mysql.connect-timeout">
+      <term>
+       <parameter>mysql.connect_timeout</parameter>
+       <type>integer</type>
+      </term>
+      <listitem>
+       <para>
+        连接超时秒数。在 Linux 中，这个参数设定了等候来自服务器的响应的时长。
+       </para>
+      </listitem>
+     </varlistentry>
+     
+    </variablelist>
+    </para>
+   </section>
+
+   <section id="mysql.resources">
+    &reftitle.resources;
+    <para>
+     在 MySQL 模块中含有两个资源类型。一个是数据库的连接句柄，一个是查询返回的结果集。
+    </para>
+   </section>
+
+   &reference.mysql.constants;
+
+    
+   <section id="mysql.examples">
+   &reftitle.examples;
+    <para>
+     这个简单的例子演示如何连接数据库，执行查询语句，打印返回结果集和断开数据库等一系列基本的 MySQL 操作。
+     <example>
+      <title>MySQL 扩展范例</title>
+      <programlisting role="php">
+<![CDATA[
+<?php
+    /* 连接选择数据库 */
+    $link = mysql_connect("mysql_host", "mysql_user", "mysql_password")
+        or die("Could not connect");
+    print "Connected successfully";
+    mysql_select_db("my_database") or die("Could not select database");
+
+    /* 执行 SQL 查询 */
+    $query = "SELECT * FROM my_table";
+    $result = mysql_query($query) or die("Query failed");
+
+    /* 在 HTML 中打印结果 */
+    print "<table>\n";
+    while ($line = mysql_fetch_array($result, MYSQL_ASSOC)) {
+        print "\t<tr>\n";
+        foreach ($line as $col_value) {
+            print "\t\t<td>$col_value</td>\n";
+        }
+        print "\t</tr>\n";
+    }
+    print "</table>\n";
+
+    /* 释放资源 */
+    mysql_free_result($result);
+
+    /* 断开连接 */
+    mysql_close($link);
+?>
+]]>
+      </programlisting>
+     </example>
+    </para>
+   </section>
+  </partintro>
+
+&reference.mysql.functions;
+
+ </reference>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"../../../manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
+
