@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.4 $ -->
+<!-- $Revision: 1.5 $ -->
 <!-- $Author: dallas $ -->
 <!-- EN-Revision: 1.5 Maintainer: dallas Status: partial -->
   <refentry id="pcre.pattern.syntax">
@@ -757,75 +757,68 @@
     </refsect2>
 
     <refsect2 id="regexp.reference.internal-options">
-     <title>Internal option setting</title>
-     <literallayout>
-     The settings of <link linkend="pcre.pattern.modifiers">PCRE_CASELESS</link> ,
-     <link linkend="pcre.pattern.modifiers">PCRE_MULTILINE</link> ,
-     <link linkend="pcre.pattern.modifiers">PCRE_DOTALL</link> ,
-     and  <link linkend="pcre.pattern.modifiers">PCRE_EXTENDED</link>  can be changed from within the pattern by
-     a sequence of Perl option letters enclosed between "(?"  and
-     ")". The option letters are
-
-       i  for <link linkend="pcre.pattern.modifiers">PCRE_CASELESS</link>
-       m  for <link linkend="pcre.pattern.modifiers">PCRE_MULTILINE</link>
-       s  for <link linkend="pcre.pattern.modifiers">PCRE_DOTALL</link>
-       x  for <link linkend="pcre.pattern.modifiers">PCRE_EXTENDED</link>
-
-     For example, (?im) sets caseless, multiline matching. It  is
-     also possible to unset these options by preceding the letter
-     with a hyphen, and a combined setting and unsetting such  as
-     (?im-sx),  which sets <link linkend="pcre.pattern.modifiers">PCRE_CASELESS</link>  and <link linkend="pcre.pattern.modifiers">PCRE_MULTILINE</link>  while
-     unsetting <link linkend="pcre.pattern.modifiers">PCRE_DOTALL</link>  and <link linkend="pcre.pattern.modifiers">PCRE_EXTENDED</link> , is also  permitted.
-     If  a  letter  appears both before and after the hyphen, the
-     option is unset.
-
-     The scope of these option changes depends on  where  in  the
-     pattern  the  setting  occurs. For settings that are outside
-     any subpattern (defined below), the effect is the same as if
-     the  options were set or unset at the start of matching. The
-     following patterns all behave in exactly the same way:
-
+     <title>内部选项设定</title>
+     <para>
+      <link
+      linkend="pcre.pattern.modifiers">PCRE_CASELESS</link>，<link
+      linkend="pcre.pattern.modifiers">PCRE_MULTILINE</link>，<link
+      linkend="pcre.pattern.modifiers">PCRE_DOTALL</link> 和
+      <link linkend="pcre.pattern.modifiers">PCRE_EXTENDED</link>
+      的设定可以在模式内部通过包含在
+      "(?" 和 ")" 之间的 Perl 选项字母序列来改变。选项字母为：
+      <screen>
+<![CDATA[
+       i 表示 <link linkend="pcre.pattern.modifiers">PCRE_CASELESS</link>
+       m 表示 <link linkend="pcre.pattern.modifiers">PCRE_MULTILINE</link>
+       s 表示 <link linkend="pcre.pattern.modifiers">PCRE_DOTALL</link>
+       x 表示 <link linkend="pcre.pattern.modifiers">PCRE_EXTENDED</link>
+]]>
+      </screen>
+      例如，(?im) 设定了不区分大小写，多行匹配。也可以通过在字母前加上减号来取消这些选项。例如组合的选项
+      (?im-sx)，设定了
+      <link linkend="pcre.pattern.modifiers">PCRE_CASELESS</link> 和
+      <link linkend="pcre.pattern.modifiers">PCRE_MULTILINE</link>，并取消了
+      <link linkend="pcre.pattern.modifiers">PCRE_DOTALL</link> 和
+      <link linkend="pcre.pattern.modifiers">PCRE_EXTENDED</link>。如果一个字母在减号之前与之后都出现了，则该选项被取消设定。
+     </para>
+     <para>
+      这些选项改变的范围依赖于设定在模式出现的位置。子模式（在后面定义）之外的设定，其效果等同于选项在开始匹配时设定或者取消设定。下面的模式行为完全相同：
+      <screen>
+<![CDATA[
        (?i)abc
        a(?i)bc
        ab(?i)c
        abc(?i)
-
-     which in turn is the same as compiling the pattern abc  with
-     <link linkend="pcre.pattern.modifiers">PCRE_CASELESS</link> set.
-     In  other words, such "top level" settings apply to the whole
-     pattern  (unless  there  are  other changes  inside subpatterns).
-     If there is more than one setting of the same option at top level,
-     the rightmost  setting is used.
-
-     If an option change occurs inside a subpattern,  the  effect
-     is  different.  This is a change of behaviour in Perl 5.005.
-     An option change inside a subpattern affects only that  part
-     of the subpattern that follows it, so
-
+]]>
+      </screen>
+      它们等同于将模式 "abc" 加上选项
+      <link linkend="pcre.pattern.modifiers">PCRE_CASELESS</link>。换句话说，这种“顶层”设定适用于整个模式（除非在子模式中又有其它修改）。如果对某个选项有超过一个的顶层设定，则使用最右边的一个。
+     </para>
+     <para>
+      如果选项改变出现于子模式中，则效果不同。这是
+      Perl 5.005 的行为的一个变化。子模式中的选项改变只影响到子模式内部其后的部分，因此
+      <screen>
+<![CDATA[
        (a(?i)b)c
-
-     matches  abc  and  aBc  and  no  other   strings   (assuming
-     <link linkend="pcre.pattern.modifiers">PCRE_CASELESS</link>   is  not used).  By this means, options can be
-     made to have different settings in different  parts  of  the
-     pattern.  Any  changes  made  in one alternative do carry on
-     into subsequent branches within  the  same  subpattern.  For
-     example,
-
+]]>
+      </screen>
+      将只匹配 "abc" 和 "aBc"（假定没有使用
+      <link linkend="pcre.pattern.modifiers">PCRE_CASELESS</link>）。这意味着选项在模式的不同部位可以造成不同的设定。在一个分支中的改变可以传递到同一个子模式中后面的分支中，例如：
+      <screen>
+<![CDATA[
        (a(?i)b|c)
-
-     matches "ab", "aB", "c", and "C", even though when  matching
-     "C" the first branch is abandoned before the option setting.
-     This is because the effects of  option  settings  happen  at
-     compile  time. There would be some very weird behaviour otherwise.
-
-     The PCRE-specific options <link linkend="pcre.pattern.modifiers">PCRE_UNGREEDY</link>  and
-     <link linkend="pcre.pattern.modifiers">PCRE_EXTRA</link>   can
-     be changed in the same way as the Perl-compatible options by
-     using the characters U and X  respectively.  The  (?X)  flag
-     setting  is  special in that it must always occur earlier in
-     the pattern than any of the additional features it turns on,
-     even when it is at top level. It is best put at the start.
-     </literallayout>
+]]>
+      </screen>
+      将匹配 "ab"，"aB"，"c" 和 "C"，尽管在匹配 "C"
+      的时候第一个分支会在选项设定之前就被丢弃。这是因为选项设定的效果是在编译时确定的，否则会造成非常怪异的行为。
+     <para>
+     </para>
+      PCRE 专用选项
+      <link linkend="pcre.pattern.modifiers">PCRE_UNGREEDY</link> 和
+      <link linkend="pcre.pattern.modifiers">PCRE_EXTRA</link>
+      可以和 Perl 兼容选项以同样的方式来改变，分别使用字母
+      U 和 X。(?X) 标记设定有些特殊，它必须出现于任何其它特性之前。最好放在最开头的位置。
+     </para>
     </refsect2>
 
     <refsect2 id="regexp.reference.subpatterns">
