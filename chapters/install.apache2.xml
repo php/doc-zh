@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="gb2312"?>
+<!-- $Revision: 1.1 $ -->
+<!-- $Author: class007 $ -->
+<!-- EN-Revision: 1.7 Maintainer: Gregory  Status: ready -->
+  <sect1 id="install.apache2">
+   <title>Servers-Apache 2.0</title>
+   <para>
+    本部分介绍了 <literal>PHP</literal> 在 Apache 2.0 服务器上安装的提示和注意事项。本文所述的内容同时适用于 <link linkend="install.apache2.unix">Unix</link> 和 <link linkend="install.apache2.windows">Windows</link> 版本的 PHP。
+   </para>
+   <warning>
+    <para>
+     在企业级应用中无论是 Unix 还是 Windows 都不要使用 Apache 2.0 和 <literal>PHP</literal> 的组合。
+    </para>
+   </warning>
+    <para>
+     推荐您查看 <ulink url="&url.apache2.docs;">Apache 文档</ulink>，了解一下 Apache 2.0 服务器。
+    </para>
+
+   <sect2 id="compat.apache2">
+    <title>PHP 和 Apache 2.0 的兼容性</title>
+    <para>
+     如下版本的 PHP 可以正常工作在最新版本的 Apache 2.0 中：
+     <itemizedlist spacing="compact">
+      <listitem>
+       <simpara>
+        PHP 4.3.0 或更高版本，下载地址：<ulink url="&url.php.downloads;">&url.php.downloads;</ulink>。
+       </simpara>
+      </listitem>
+      <listitem>
+       <simpara>
+        最新的稳定开发版本。在 <ulink url="&url.php.snapshots;php4-latest.tar.gz">
+        &url.php.snapshots;php4-latest.tar.gz</ulink> 下载源代码或者在 <ulink url="&url.php.snapshots;win32/php4-win32-latest.zip">        &url.php.snapshots;win32/php4-win32-latest.zip</ulink> 下载为 Windows 编译好的二进制文件。
+       </simpara>
+      </listitem>
+      <listitem>
+       <simpara>
+        预发布版本可以在 <ulink url="&url.php.prerelease;">&url.php.prerelease;</ulink> 下载。
+       </simpara>
+      </listitem>
+      <listitem>
+       <simpara>
+        您也可以通过对<ulink url="&url.php.anoncvs;">匿名 CVS</ulink>的访问随时获得最新的 <literal>PHP</literal>。
+       </simpara>
+      </listitem>
+     </itemizedlist>
+      这些版本的 <literal>PHP</literal> 能够与 Apache 2.0.40 或更高版本兼容。
+    </para>
+    <note>
+     <simpara>
+      Apache 2.0 <literal>SAPI</literal> 从 PHP 4.2.0 开始支持。PHP 4.2.3 可以工作在 Apache 2.0.39 下。不要尝试使用该版本的 <literal>PHP</literal> 在其它任何版本的 Apache 2 下工作。我们也不推荐 PHP 4.2.3 和 Apache 2.0.39 配合工作。
+     </simpara>
+     <simpara>
+      所有提到的 <literal>PHP</literal> 版本仍然能够在 Apache 1.3.x 下工作。
+     </simpara>
+    </note>
+   </sect2>
+
+   <sect2 id="install.apache2.unix">
+    <title>Linux 下的 PHP 和 Apache 2.0</title>
+    <para>
+     下载最新版本的 <ulink url= "&url.apache;">Apache 2.0</ulink>，并且根据上文选择合适版本的 PHP 下载。本向导仅包含最基础的内容，只能让 Apache 2.0 和 <literal>PHP</literal> 能够正常工作。更多信息请阅读 <ulink url="&url.apache2.docs;">Apache 文档</ulink>。这里省略所有的版本号，以保证本文的正确性。您需要将本文的“NN”替换为相应的版本号。
+    </para>
+    <example>
+     <title>
+      安装说明（Apache 2 共享模块版本）
+     </title>
+     <screen>
+<![CDATA[
+1.  gzip -d httpd-2_0_NN.tar.gz
+2.  tar xvf httpd-2_0_NN.tar
+3.  gunzip php-NN.tar.gz
+4.  tar -xvf php-NN.tar
+5.  cd httpd-2_0_NN
+6.  ./configure --enable-so
+7.  make
+8.  make install
+
+    现在您已经将 Apache 2.0.NN 安装在 /usr/local/apache。本安装支持可装载模块和标准的 MPM prefork。之后，可以使用如下命令启动 Apache 服务器：
+    /usr/local/apache2/bin/apachectl start
+    如果成功，您可以停止 Apache 服务器并继续安装 PHP：
+    /usr/local/apache2/bin/apachectl stop.
+
+9.  cd ../php4-NN
+10. ./configure --with-apxs2=/usr/local/apache2/bin/apxs
+11. make
+12. make install
+13. cp php.ini-dist /usr/local/lib/php.ini
+
+    编辑 php.ini 文件以修改 PHP 的选项。如果您想要把此文件放到另外的位置，您需要在步骤 10 添加 --with-config-file-path=/path 选项。
+
+14. 编辑 httpd.conf 文件，确保其包含如下两行：
+  
+   LoadModule php4_module modules/libphp4.so
+   AddType application/x-httpd-php .php
+
+  您可以在这里选择各种扩展名。.php 是我们推荐的最简单的扩展名。
+ 
+  LoadModule 命令的右边参数必须指向您系统中 PHP 模块的路径。如果您完全按照前面的步骤配置，那么此路径就应该为 modules/libphp4.so。
+
+15. 启动您的 Apache 服务器：
+   /usr/local/apache2/bin/apachectl start
+   
+]]>
+
+      </screen>
+     </example>
+    <para>
+     按照上面的步骤您便可以使 Apache 2.0 将 <literal>PHP</literal> 作为 <literal>SAPI</literal> 模块了。当然 Apache and <literal>PHP</literal> 都还有很多配置选项，您可以在相应的源代码目录中使用 <command>./configure --help</command> 获得更多信息。假如您要编译一个多线程版本的 Apache 2.0，您必须覆盖标准的 MPM-Module <filename>prefork</filename>，或者 <filename>worker</filename> 或者 <filename>perchild</filename>。要这样，您需要在上面的第 6 步使用 <option role="configure">--with-mpm=worker</option> 或者 <option role="configure">--with-mpm=perchild</option> 选项。之前您需要了解您正在做什么。更多信息请参考 Apache 文档中关于 <ulink url="&url.apache2.mpm;">MPM-Modules</ulink> 的部分。
+    </para>
+    <note>
+     <para>
+      要编译多线程版本的 Apache，您的系统必须支持多线程。这也意味着需要将 <literal>PHP</literal> 编译为正处在试验阶段的 Zend Thread Safety (ZTS)。因此并不是所有的扩展都可以使用了。推荐编译 Apache 使用标准的 <filename>prefork</filename> MPM-Module。
+     </para>
+    </note>
+   </sect2>
+
+   <sect2 id="install.apache2.windows">
+    <title>Windows 下的 PHP 和 Apache 2.0</title>
+    <para>
+     您可以阅读 Apache 2.0 <ulink url="&url.apache2.windows;">Windows 特别注意事项</ulink>。
+    </para>
+    <warning>
+     <para>
+      Apache 2.0 被设计为运行在 Windows NT 4.0、Windows 2000 或 Windows XP。现在并不支持 Windows 9x。目前不推荐 Apache 2.0 运行在上述平台。
+     </para>
+    </warning>
+    <para>
+     下载最新版本的 <ulink url= "&url.apache;">Apache 2.0</ulink> 和合适的 PHP 版本。 首先请查看 <link linkend="install.windows.manual">手动安装步骤</link>，然后回来继续安装 <literal>PHP</literal> 和 Apache。
+    </para>
+    <para>
+     有两种方法使得 <literal>PHP</literal> 工作在 Windows 下的 Apache。一是使用 CGI 二进制文件，另一是使用 Apache 模块 DLL。无聊那种方法，您首先必须停止 Apache 服务器，然后编辑 <filename>httpd.conf</filename>，以配置 Apache 和 <literal>PHP</literal> 协同工作。
+    </para>
+    <para>
+     您需要将如下指令插入到 Apache 的 <filename>httpd.conf</filename> 配置文件中，以设置<emphasis>CGI 二进制文件</emphasis>：
+     <example>
+      <title>PHP 以 CGI 方式安装到 Apache 2.0</title>
+       <programlisting role="apache">
+<![CDATA[
+ScriptAlias /php/ "c:/php/"
+AddType application/x-httpd-php .php
+Action application/x-httpd-php "/php/php.exe"
+]]>
+       </programlisting>
+     </example>
+    </para>
+    <para>
+     如果您想把 <literal>PHP</literal> 作为 Apache 2.0 的模块，请务必移动 <filename>php4ts.dll</filename> 到 <filename>winnt/system32</filename>（Windows NT/2000）或 <filename>windows/system32</filename> （Windows XP），覆盖原有文件（如果有的话）。然后您需要插入如下两行到 <filename>httpd.conf </filename> 中，以使您的 PHP 作为 Apache 的 <emphasis>PHP-Module</emphasis> 安装：
+     <example>
+      <title>PHP 以模块方式安装到 Apache 2.0</title>
+       <programlisting role="apache">
+<![CDATA[
+LoadModule php4_module c:/php/sapi/php4apache2.dll
+AddType application/x-httpd-php .php
+]]>
+       </programlisting>
+     </example>
+    </para>
+    <note>
+     <simpara>
+      记得替换 <filename>c:/php/</filename> 为您计算机上 <literal>PHP</literal> 的实际路径。
+     </simpara>
+    </note>
+    <warning>
+     <simpara>
+      不要混用<emphasis>不同 PHP 版本</emphasis>的 DLL 文件。您只能使用您下载的一个版本 PHP 中的 DLL 和扩展。
+     </simpara>
+    </warning>
+   </sect2>
+
+  </sect1>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"../../manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
