@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.16 $ -->
-<!-- $Author: gregory $ -->
-<!-- EN-Revision:1.23 Maintainer: dallas Status: ready -->
+<!-- $Revision: 1.17 $ -->
+<!-- $Author: dallas $ -->
+<!-- EN-Revision:1.24 Maintainer: dallas Status: ready -->
 <appendix id="wrappers">
  <title>支持的协议／封装协议列表</title>
  <para>
@@ -31,8 +31,34 @@
    字符串，也会被包括在请求报头中。
   </simpara>
   <simpara>
-   自 PHP 4.0.5 起支持重定向。如果使用较早版本的 PHP 则需要在 URL 末尾包括一个斜线。
+   自 PHP 4.0.5 起支持重定向。如果使用较早版本的 PHP 则需要在 URL
+   末尾包括一个斜线。如果一定要知道文档所在的资源的
+   url（在所有重定向被处理过之后），则需要处理从流返回的一系列响应报头信息。
   </simpara>
+  <informalexample>
+   <programlisting role="php">
+<![CDATA[
+<?php
+$url = 'http://www.example.com/redirecting_page.php';
+
+$fp = fopen($url, 'r');
+
+/* Prior to PHP 4.3.0 use $http_response_header
+   instead of stream_get_meta_data() */
+foreach(stream_get_meta_data($fp) as $response) {
+
+  /* Were we redirected? */
+  if (substr(strtolower($response), 0, 10) == 'location: ') {
+    /* update $url with where we were redirected to */
+    $url = substr($response, 10);
+  }
+
+}
+ 
+?>
+]]>
+   </programlisting>
+  </informalexample>
   <simpara>
    流允许访问资源的<emphasis>正文</emphasis>，报头部分保存在
    <varname>$http_response_header</varname> 变量中。自
