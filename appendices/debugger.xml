@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.1 $ -->
+<!-- $Revision: 1.2 $ -->
 <!-- $AUTHOR$ -->
 <!-- EN-Revision: 1.22 Maintainer: class007 Status: working -->
  <appendix id="debugger">
@@ -54,17 +54,15 @@
   </sect1>
 
   <sect1 id="debugger-protocol">
-   <title>Debugger Protocol</title>
+   <title>除错器协议</title>
    <para>
-    The PHP 3 debugger protocol is line-based. Each line has a
-    <emphasis>type</emphasis>, and several lines compose a
-    <emphasis>message</emphasis>. Each message starts with a line of
-    the type <literal>start</literal> and terminates with a line of
-    the type <literal>end</literal>. PHP 3 may send lines for different
-    messages simultaneously.
+    PHP 3 除错器协议以行为单位。每一行有一个
+    <emphasis>类型(type)</emphasis>，某几行组成一个
+    <emphasis>消息(message)</emphasis>。每一个消息起始于包含类型 <literal>start</literal> 的一行，并终止于包含类型 <literal>end</literal> 的一行。
+    PHP 3 可以同时发送不同的消息行。
    </para>
    <para>
-    A line has this format:
+    行的格式如下：
     <informalexample>
      <literallayout>
 <replaceable>date</replaceable> <replaceable>time</replaceable>
@@ -78,7 +76,7 @@
       <term><replaceable>date</replaceable></term>
       <listitem>
        <simpara>
-	Date in ISO 8601 format
+	date 使用 ISO 8601 格式：
 	(<replaceable>yyyy</replaceable>-<replaceable>mm</replaceable>-<replaceable>dd</replaceable>)
        </simpara>
       </listitem>
@@ -86,7 +84,7 @@
      <varlistentry>
       <term><replaceable>time</replaceable></term>
       <listitem>
-       <simpara>Time including microseconds:
+       <simpara>Time 精确到毫秒：
 	<replaceable>hh</replaceable>:<replaceable>mm</replaceable>:<replaceable>uuuuuu</replaceable>
        </simpara>
       </listitem>
@@ -95,8 +93,7 @@
       <term><replaceable>host</replaceable></term>
       <listitem>
        <simpara>
-	DNS name or IP address of the host where the script error was
-	generated.
+	产生错误的 PHP 脚本所在主机的 DNS 名或 IP 地址。
        </simpara>
       </listitem>
      </varlistentry>
@@ -104,8 +101,7 @@
       <term><replaceable>pid</replaceable></term>
       <listitem>
        <simpara>
-	PID (process id) on <replaceable>host</replaceable> of the
-	process with the PHP 3 script that generated this error.
+	产生错误的 PHP 脚本在 <replaceable>host</replaceable> 中的PID （进程 id）。
        </simpara>
       </listitem>
      </varlistentry>
@@ -113,67 +109,60 @@
       <term><replaceable>type</replaceable></term>
       <listitem>
        <para>
-	Type of line. Tells the receiving program about what it
-	should treat the following data as:
+	行的类型。它告诉接收信息的程序如何处理下面的数据：
 	<table>
-	 <title>Debugger Line Types</title>
+	 <title>除错器行类型</title>
 	 <tgroup cols="2">
 	  <thead>
 	   <row>
-	    <entry>Name</entry>
-	    <entry>Meaning</entry>
+	    <entry>名称</entry>
+	    <entry>含义</entry>
 	   </row>
 	  </thead>
 	  <tbody>
 	   <row>
 	    <entry><literal>start</literal></entry> 
 	    <entry>
-	     Tells the receiving program that a debugger message
-	     starts here. The contents of
-	     <replaceable>data</replaceable> will be the type of error
-	     message, listed below.
+	     告诉接收的程序，除错信息由此开始。
+	     <replaceable>data</replaceable> 的内容将会是错误消息的类型，在本页面下方列出。
 	    </entry>
 	   </row>
 	   <row>
 	    <entry><literal>message</literal></entry>
-	    <entry>The PHP 3 error message.</entry>
+	    <entry>PHP 3 错误消息。</entry>
 	   </row>
 	   <row>
 	    <entry><literal>location</literal></entry>
 	    <entry>
-	     File name and line number where the error occurred. The
-	     first <literal>location</literal> line will always
-	     contain the top-level location.
-	     <replaceable>data</replaceable> will contain
+	     发生错误的文件名和行号。
+	     <literal>location</literal> 的第一行总是包含
+	     顶级(top-level)地址。
+	     <replaceable>data</replaceable> 包含
 	     <literal><replaceable>file</replaceable>:<replaceable>line</replaceable></literal>.
-	     There will always be a <literal>location</literal> line
-	     after <literal>message</literal> and after every
-	     <literal>function</literal>.
+	     在 <literal>message</literal> 和每一个 <literal>function</literal> 之后总有一行 <literal>location</literal> 行。
 	    </entry>
 	   </row>
 	   <row>
 	    <entry>
-	     <literal>frames</literal></entry> <entry>Number of frames
+	     <literal>frames</literal></entry> 
+	     <entry>Number of frames
 	     in the following stack dump. If there are four frames,
 	     expect information about four levels of called functions.
 	     If no "frames" line is given, the depth should be assumed
-	     to be 0 (the error occurred at top-level).
+	     to be 0 (the error occurred at top-level).(TODO)
 	    </entry>
 	   </row>
 	   <row>
 	    <entry>
 	     <literal>function</literal></entry> 
 	    <entry>
-	     Name of function where the error occurred. Will be
-	     repeated once for every level in the function call
-	     stack.
+	     发生错误的函数。在调用函数堆栈的每级只重复一次。
 	    </entry>
 	   </row>
 	   <row>
 	    <entry><literal>end</literal></entry> 
 	    <entry>
-	     Tells the receiving program that a debugger message ends
-	     here.
+	     告诉接收的程序，除错信息到此结束。
 	    </entry>
 	   </row>
 	  </tbody>
@@ -185,18 +174,18 @@
      <varlistentry>
       <term><replaceable>data</replaceable></term>
       <listitem>
-       <simpara>Line data.</simpara>
+       <simpara>每行的数据。</simpara>
       </listitem>
      </varlistentry>
     </variablelist>
 
     <table>
-     <title>Debugger Error Types</title>
+     <title>除错器错误类型</title>
      <tgroup cols="2">
       <thead>
        <row>
-	<entry>Debugger</entry>
-	<entry>PHP 3 Internal</entry>
+	<entry>除错器</entry>
+	<entry>PHP 3 内部</entry>
        </row>
       </thead>
       <tbody>
@@ -226,14 +215,14 @@
        </row>
        <row>
 	<entry><errortype>unknown</errortype></entry>
-	<entry>(any other)</entry>
+	<entry>（其它任何错误）</entry>
        </row>
       </tbody>
      </tgroup>
     </table>
     
     <example>
-     <title>Example Debugger Message</title>
+     <title>除错器错误消息示例</title>
      <literallayout>
 1998-04-05 23:27:400966 lucifer.guardian.no(20481) start: notice
 1998-04-05 23:27:400966 lucifer.guardian.no(20481) message: Uninitialized variable
