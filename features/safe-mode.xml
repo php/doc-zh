@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="gb2312"?>
 <!-- $Revision: 1.14 $ -->
 <!-- $Author: gregory $ -->
-<!-- EN-Revision: 1.39 Maintainer: thomaslio Status: ready -->
+<!-- EN-Revision: 1.42 Maintainer: thomaslio Status: ready -->
 <!-- CREDITS: Gregory, dallas -->
 <chapter id="features.safe-mode">
  <title>安全模式</title>
 
  <para>
-  PHP 的安全模式是为了试图解决共享服务器（shared-server）安全问题而设立的。在结构上，试图在 PHP 层上解决这个问题是不合理的，但修改 WEB 服务器层和操作系统层显得非常不现实。因此许多人，特别是 ISP，目前使用安全模式。
+  PHP 的安全模式是为了试图解决共享服务器（shared-server）安全问题而设立的。在结构上，试图在
+  PHP 层上解决这个问题是不合理的，但修改 WEB
+  服务器层和操作系统层显得非常不现实。因此许多人，特别是 ISP，目前使用安全模式。
  </para>
 
  <sect1 id="ini.sect.safe-mode">
@@ -87,7 +89,7 @@
      <listitem>
       <para>
        是否启用 PHP 的安全模式。更多信息请阅读<link
-       linkend="security">安全</link>一章。
+       linkend="security.index">安全</link>一章。
       </para>
      </listitem>
     </varlistentry>
@@ -121,9 +123,9 @@
        linkend="ini.include-path">include_path</link>
        指令类似的风格用分号隔开的路径，而不只是一个目录。
       </simpara>
-      <simpara> 
-	   指定的限制实际上是一个前缀，而非一个目录名。这也就是说“safe_mode_include_dir = /dir/incl”将允许访问“/dir/include”和“/dir/incls”，如果它们存在。如果您希望将访问控制在一个指定的目录，那么请在结尾加上一个斜线，例如：“safe_mode_include_dir = /dir/incl/”。
-      </simpara> 
+      <simpara>
+       指定的限制实际上是一个前缀，而非一个目录名。这也就是说“safe_mode_include_dir = /dir/incl”将允许访问“/dir/include”和“/dir/incls”，如果它们存在。如果您希望将访问控制在一个指定的目录，那么请在结尾加上一个斜线，例如：“safe_mode_include_dir = /dir/incl/”。
+      </simpara>
      </listitem>
     </varlistentry>
     <varlistentry id="ini.safe-mode-exec-dir">
@@ -178,7 +180,8 @@
        将 PHP 所能打开的文件限制在指定的目录树，包括文件本身。本指令<emphasis>不受</emphasis>安全模式打开或者关闭的影响。
       </para>
       <para>
-       当一个脚本试图用例如 fopen 或者 gzopen 打开一个文件时，该文件的位置将被检查。当文件在指定的目录树之外时
+       当一个脚本试图用例如 <function>fopen</function> 或者 <function>gzopen</function>
+       打开一个文件时，该文件的位置将被检查。当文件在指定的目录树之外时
        PHP 将拒绝打开它。所有的符号连接都会被解析，所以不可能通过符号连接来避开此限制。
       </para>
       <para>
@@ -211,7 +214,7 @@
      </term>
      <listitem>
       <simpara>
-       本指令允许你基于<link linkend="security">安全</link>原因禁止某些函数。接受逗号分隔的函数名列表作为参数。
+       本指令允许你基于<link linkend="security.index">安全</link>原因禁止某些函数。接受逗号分隔的函数名列表作为参数。
        disable_functions 不受<link linkend="ini.safe-mode">安全模式</link>的影响。
       </simpara>
       <simpara>
@@ -227,7 +230,7 @@
      <listitem>
       <simpara>
        本指令可以使你出于<link
-       linkend="security">安全</link>的理由禁用某些类。用逗号分隔类名。disable_classes
+       linkend="security.index">安全</link>的理由禁用某些类。用逗号分隔类名。disable_classes
        不受<link linkend="ini.safe-mode">安全模式</link>的影响。
       </simpara>
       <simpara>
@@ -253,22 +256,22 @@
    当 <link linkend="ini.safe-mode">safe_mode</link> 设置为 on，PHP 将检查当前脚本的拥有者是否和将被文件函数操作的文件的拥有者相匹配。例如：
    <programlisting role="ls">
 <![CDATA[
--rw-rw-r--    1 rasmus   rasmus       33 Jul  1 19:20 script.php 
--rw-r--r--    1 root     root       1116 May 26 18:01 /etc/passwd 
+-rw-rw-r--    1 rasmus   rasmus       33 Jul  1 19:20 script.php
+-rw-r--r--    1 root     root       1116 May 26 18:01 /etc/passwd
 ]]>
    </programlisting>
    运行 script.php
    <programlisting role="php">
 <![CDATA[
 <?php
- readfile('/etc/passwd'); 
+ readfile('/etc/passwd');
 ?>
 ]]>
    </programlisting>
    如果安全模式被激活，则将会导致以下错误：
    <screen>
 <![CDATA[
-Warning: SAFE MODE Restriction in effect. The script whose uid is 500 is not 
+Warning: SAFE MODE Restriction in effect. The script whose uid is 500 is not
 allowed to access /etc/passwd owned by uid 0 in /docroot/script.php on line 2
 ]]>
    </screen>
@@ -281,36 +284,39 @@ allowed to access /etc/passwd owned by uid 0 in /docroot/script.php on line 2
    <programlisting role="ini">
 <![CDATA[
 <Directory /docroot>
-  php_admin_value open_basedir /docroot 
+  php_admin_value open_basedir /docroot
 </Directory>
 ]]>
    </programlisting>
    如果您在设置了 <link linkend="ini.open-basedir">open_basedir</link> 选项后运行同样的 script.php，则其结果会是：
    <screen>
 <![CDATA[
-Warning: open_basedir restriction in effect. File is in wrong directory in 
-/docroot/script.php on line 2 
+Warning: open_basedir restriction in effect. File is in wrong directory in
+/docroot/script.php on line 2
 ]]>
    </screen>
   </para>
   <para>
-   您也可以单独地屏蔽某些函数。请注意 disable_functions 选项不能在 &php.ini; 文件外部使用，也就是说您无法在 &httpd.conf; 文件的按不同虚拟主机或不同目录的方式来屏蔽函数。
+   您也可以单独地屏蔽某些函数。请注意
+   <link linkend="ini.disable-functions">disable_functions</link>
+   选项不能在 &php.ini; 文件外部使用，也就是说您无法在 &httpd.conf;
+   文件的按不同虚拟主机或不同目录的方式来屏蔽函数。
    如果我们将如下内容加入到 &php.ini; 文件：
    <programlisting role="ini">
 <![CDATA[
-disable_functions readfile,system  
+disable_functions readfile,system
 ]]>
    </programlisting>
    则我们会得到如下的输出：
    <screen>
 <![CDATA[
-Warning: readfile() has been disabled for security reasons in 
-/docroot/script.php on line 2 
+Warning: readfile() has been disabled for security reasons in
+/docroot/script.php on line 2
 ]]>
    </screen>
   </para>
  </sect1>
-  
+
  <sect1 id="features.safe-mode.functions">
   <title>被安全模式限制或屏蔽的函数</title>
   <para>
@@ -348,17 +354,17 @@ Warning: readfile() has been disabled for security reasons in
        <entry>&sm.uidcheck;</entry>
       </row>
       <row>
-       <entry><function>ifx_*</function></entry>
+       <entry>ifx_*</entry>
        <entry>sql_safe_mode 限制, (!= safe mode)</entry>
        <!-- TODO: more info on sql-safe-mode -->
       </row>
       <row>
-       <entry><function>ingres_*</function></entry>
+       <entry>ingres_*</entry>
        <entry>sql_safe_mode 限制, (!= safe mode)</entry>
        <!-- TODO: more info on sql-safe-mode -->
       </row>
       <row>
-       <entry><function>mysql_*</function></entry>
+       <entry>mysql_*</entry>
        <entry>sql_safe_mode 限制, (!= safe mode)</entry>
        <!-- TODO: more info on sql-safe-mode -->
       </row>
@@ -442,8 +448,8 @@ Warning: readfile() has been disabled for security reasons in
       </row>
       <row>
        <entry><function>copy</function></entry>
-       <entry>&sm.uidcheck; &sm.uidcheck.dir; (on 
-       <parameter>source</parameter> and 
+       <entry>&sm.uidcheck; &sm.uidcheck.dir; (on
+       <parameter>source</parameter> and
        <parameter>target</parameter>) </entry>
       </row>
       <row>
@@ -479,11 +485,11 @@ Warning: readfile() has been disabled for security reasons in
        <entry><function>header</function></entry>
        <entry>在安全模式下，如果您设置了 <literal>WWW-Authenticate</literal>，当前脚本的 uid 将被添加到该头信息的 <literal>realm</literal> 部分。</entry>
       </row>
-      <row> 
-       <entry><link linkend="features.http-auth">PHP_AUTH 变量</link></entry> 
-       <entry> 
+      <row>
+       <entry><link linkend="features.http-auth">PHP_AUTH 变量</link></entry>
+       <entry>
 	     在安全模式下，变量 <varname>PHP_AUTH_USER</varname>、<varname>PHP_AUTH_PW</varname> 和 <varname>PHP_AUTH_TYPE</varname> 在 <varname>$_SERVER</varname> 中不可用。但无论如何，您仍然可以使用 <varname>REMOTE_USER</varname> 来获取用户名称（USER）。（注意：仅 PHP 4.3.0 以后有效）
-       </entry> 
+       </entry>
       </row>
       <row>
        <entry>
@@ -500,13 +506,13 @@ Warning: readfile() has been disabled for security reasons in
        </entry>
        <entry>
         &sm.uidcheck; &sm.uidcheck.dir; （注意，仅在 4.2.1 版本后有效）
-       </entry> 
-       </row> 
-       <row> 
-        <entry> 
-         <function>set_time_limit</function> 
-        </entry> 
-        <entry> 
+       </entry>
+       </row>
+       <row>
+        <entry>
+         <function>set_time_limit</function>
+        </entry>
+        <entry>
          在&safemode;下不起作用。
        </entry>
       </row>
@@ -514,7 +520,7 @@ Warning: readfile() has been disabled for security reasons in
        <entry>
         <link linkend="ini.max-execution-time">max_execution_time</link>
        </entry>
-       <entry> 
+       <entry>
         在&safemode;下不起作用。
        </entry>
       </row>
