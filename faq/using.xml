@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.6 $ -->
-<!-- $Author: dallas $ -->
-<!-- EN-Revision:1.21 Maintainer: dallas Status: ready -->
+<!-- $Revision: 1.7 $ -->
+<!-- $Author: gregory $ -->
+<!-- EN-Revision:1.23 Maintainer: dallas Status: ready -->
 <chapter id="faq.using">
   <title>使用 PHP</title>
   <titleabbrev>使用 PHP</titleabbrev>
 
   <para>
-   本节汇集了你在写 PHP 脚本时碰到的大多数普通错误。
+   本节汇集了你在写 PHP 脚本时可能碰到的大多数普通错误。
   </para>
 
   <qandaset>
@@ -19,35 +19,71 @@
     </question>
     <answer>
      <para>
-      确保在 &php.ini 文件中激活了 <link linkend="ini.track-vars">track_vars</link> 特性。自从 PHP 4.0.3
-      开始，此特性总是打开的。当 <literal>track_vars</literal>
-      打开时，会建立一些相关的数组，这里最重要的是：<literal>$_POST</literal>（在 <literal>PHP</literal> 4.1.0
-      之前叫做 <literal>$HTTP_POST_VARS</literal>）。因此要写出处理 POST
-      方法变量的通用脚本你需要一些类似如下的方法：
+     <para>
+      PHP 提供很多“<link linkend="language.variables.predefined">预定义变量</link>”，例如超级全局变量 <varname>$_POST</varname>。您可以遍历 <varname>$_POST</varname> 变量，因为它是一个和所有通过 POST 方法传递数据相联系的数组。例如，我们可以用 <link linkend="control-structures.foreach">foreach</link> 简单的遍历它，检查 <function>empty</function> 值，以及将它们输出。
       <programlisting role="php">
 <![CDATA[
-foreach ($_POST as $var => $value) {
-    echo "$var = $value<br>\n";
+<?php
+$empty = $post = array();
+foreach ($_POST as $varname => $varvalue) {
+    if (empty($varvalue)) {
+        $empty[$varname] = $varvalue;
+    } else {
+        $post[$varname] = $varvalue;
+    }
 }
+
+print "<pre>";
+if (empty($empty)) {
+    print "None of the POSTed values are empty, posted:\n";
+    var_dump($post);
+} else {
+    print "We have " . count($empty) . " empty values\n";
+    print "Posted:\n"; var_dump($post);
+    print "Empty:\n";  var_dump($empty);
+    exit;
+}
+?>
 ]]>
       </programlisting>
      </para>
+     
+     &note.superglobals;
+
     </answer>
    </qandaentry>
 
-   <qandaentry id="faq.using.singlequotes">
+   <qandaentry id="faq.using.addslashes">
     <question>
      <para>
-      我需要把所有的单引号（'）转换为反斜线后面跟着单引号。怎样用正则表达式做到呢？
+      我需要在所有的单引号（'）前加一个反斜线（\），使它们变成（\'），我如何能够通过正则表达式来实现？我同样希望能够将（"）转换成（\"），将（\）转换成（\\）。
      </para>
     </question>
     <answer>
      <para>
-      首先看看 <function>addslashes</function> 函数。它正是做这件事的。同样也看看你的
-      &php.ini; 文件中的 <link linkend="ini.magic-quotes-gpc">magic_quotes_gpc</link> 选项。
+      函数 <function>addslashes</function> 能够实现这种操作。请参阅函数 <function>mysql_escape_string</function>。另外，您还可以用函数 <function>stripslashes</function> 来去掉反斜线。
      </para>
+
+     &note.magicquotes.gpc;
+
     </answer>
    </qandaentry>
+
+   <qandaentry id="faq.using.stripslashes"> 
+      <question> 
+       <para> 
+        我所有的（"）和（'）都被变成了（\"）和（\'），我如何才能去掉这些不必要的反斜线？它们为什么及如何出现？
+       </para> 
+      </question> 
+      <answer> 
+       <para> 
+        PHP 函数 <function>stripslashes</function> 能够从<type>字符串</type>中去掉所有的反斜线。这些反斜线出现最有可能的原因是 PHP 设置项 <link linkend="ini.magic-quotes-gpc">magic_quotes_gpc</link> 被开启。
+       </para> 
+    
+       &note.magicquotes.gpc; 
+    
+      </answer> 
+     </qandaentry> 
 
    <qandaentry id="faq.using.wrong-order">
     <question>
@@ -55,12 +91,16 @@ foreach ($_POST as $var => $value) {
       当我这样做时，输出显示的次序是错的：
       
      <programlisting role="php">
+<![CDATA[ 
+<?php 
 function myfunc($argument)
 {
     echo $argument + 10;
 }
 $variable = 10;
 echo "myfunc($variable) = " . myfunc($variable);
+?> 
+]]> 
     </programlisting>
      这是怎么回事？
      </para>
@@ -108,7 +148,7 @@ echo "myfunc($variable) = " . myfunc($variable);
     </question>
     <answer>
      <para>
-      函数 <function>header</function>，<function>setcookie</function> 和 session 函数需要在输出流中增加报头。但是报头只能在其它任何输出内容之前发送，检查你的代码是否在任何已经发送的内容后面发送报头。
+      函数 <function>header</function>，<function>setcookie</function> 和 <link linkend="ref.session">session 函数</link>需要在输出流中增加头信息。但是头信息只能在其它任何输出内容之前发送。在使用这些函数前不能有任何（如 HTML）的输出。函数 <function>headers_sent</function> 能够检查您的脚本是否已经发送了头信息。请参阅“<link linkend="ref.outcontrol">输出控制函数</link>”。
      </para>
     </answer>
    </qandaentry>
@@ -116,7 +156,7 @@ echo "myfunc($variable) = " . myfunc($variable);
    <qandaentry id="faq.using.header">
     <question>
      <para>
-      我需要直接访问请求报头中的信息，怎么能办到?
+      我需要直接访问请求报头中的信息，怎么能办到？
      </para>
     </question>
     <answer>
@@ -124,13 +164,18 @@ echo "myfunc($variable) = " . myfunc($variable);
       如果你以 Apache 的模块方式运行 PHP，那么函数 <function>getallheaders</function> 可以做这件事。因此下面的代码可以显示所有的请求报头：
       <programlisting role="php">
 <![CDATA[
+<?php
 $headers = getallheaders();
 foreach ($headers as $name => $content) {
     echo "headers[$name] = $content<br>\n";
 }
+?>
 ]]>
       </programlisting>
      </para>
+     <para> 
+      请参阅函数 <function>apache_lookup_uri</function>、<function>apache_response_headers</function> 和 <function>fsockopen</function>。
+     </para> 
     </answer>
    </qandaentry>
 
@@ -145,7 +190,7 @@ foreach ($headers as $name => $content) {
       IIS 的安全模型这里有毛病。这是所有 IIS 下运行的 CGI 程序所共有的问题。一个解决办法是建立一个纯
       HTML 文件（不经过 PHP 解析）作为要进入认证目录的登录页面，然后用 META 标记来重定向到
       PHP 页面，或者用一个连接到 PHP 页面。然后 PHP 就可以正确识别认证信息了。如果是用
-      ISAPI 模块，那没有这个问题。其它 NT 下的 web 服务器不受此影响。更多信息见：<ulink url="&url.iis;">&url.iis;</ulink>。
+      ISAPI 模块，那没有这个问题。其它 NT 下的 web 服务器不受此影响。更多信息见：<ulink url="&url.iis;">&url.iis;</ulink>及“<link linkend="features.http-auth">HTTP 认证</link>”的有关章节。
      </para>
     </answer>
    </qandaentry>
@@ -176,13 +221,12 @@ foreach ($headers as $name => $content) {
    <qandaentry id="faq.using.mixml">
     <question>
      <para>
-      我怎样混合使用 XML 和 PHP？它不认我的 &lt;?xml&gt; 标记！
+      我怎样混合使用 XML 和 PHP？它不认我的 &lt;?xml 标记！
      </para>
     </question>
     <answer>
      <para>
-      你需要在 &php.ini; 文件中通过设定 <link linkend="ini.short-open-tag">short_tags</link> 为 0
-      来关闭 PHP 的简短标记格式，或者通过相应的 Apache 选项。你甚至应该用 &lt;File&gt; 段落来选择性地这样做。
+      要能够在 PHP 代码中直接嵌入 &lt;?xml，您需要将将 PHP 设置项 <link linkend="ini.short-open-tag">short_open_tags</link> 设置为 <literal>0</literal> 以关闭短标记格式。您无法通过函数 <function>ini_set</function> 来更改这项设置。不管 <link linkend="ini.short-open-tag">short_open_tags</link> 是开或者关，您都可以用类似于 <literal>&lt;?php echo '&lt;?xml'; ?&gt;</literal> 的方法达到目的。该项设置的默认值为开。
      </para>
     </answer>
    </qandaentry>
@@ -205,14 +249,12 @@ foreach ($headers as $name => $content) {
    <qandaentry id="faq.using.variables">
     <question>
      <para>
-      哪里可以找到所有可用的预定义变量的完整列表？为什么在 PHP 文档中没有？
+      哪里可以找到所有可用的 PHP 预定义变量的完整列表？
      </para>
     </question>
     <answer>
      <para>
-      最好的方法是把 <literal>&lt;?php phpinfo(); ?&gt;</literal> 粘贴到某一页并打开来看看。它将显示你的
-      PHP 的所有分类的设置，包括环境变量和 web 服务器设定的特殊变量的列表。这个列表不能放在
-      PHP 文档中，因为它在不同的服务器中会改变的。
+      请阅读手册“<link linkend="language.variables.predefined">预定义变量</link>”的有关章节，该部分的文档已经包含了一部分可以用于你的脚本的预定义变量的列表。可用变量的完整列表（及更多信息）可以通过调用 <function>phpinfo</function> 函数来查阅。请务必阅读手册“<link linkend="language.variables.external">PHP 外部变量</link>”一节，这部分文档描述了外部变量的概要，如从来自 HTML 表单、Cookie 和 URL 的变量。
      </para>
     </answer>
    </qandaentry>
@@ -225,18 +267,15 @@ foreach ($headers as $name => $content) {
     </question>
     <answer>
      <para>
-      环境变量通常都是全局变量，因此你必须在你的函数中声明它们为全局变量（例如用
-      <literal>global $DOCUMENT_ROOT;</literal>），或者用全局变量数组（例如
-      <literal>$GLOBALS["DOCUMENT_ROOT"]</literal>）。
+      首先非常重要的一点是 PHP 设置项 <link linkend="ini.register-globals">register_globals</link> 同样会对服务器端和环境变量产生影响。当 register_globals = off （从 PHP 4.2.0 开始其默认值为 off），变量 <varname>$DOCUMENT_ROOT</varname> 将不会存在，而只有 <varname>$_SERVER['DOCUMENT_ROOT']</varname>。如果 register_globals = on 则变量 <varname>$DOCUMENT_ROOT</varname> 和 <varname>$GLOBALS['DOCUMENT_ROOT']</varname> 将同时存在。
      </para>
-     <note> 
-      <para> 
-       从 PHP 4.1.0 开始也可以使用超级全局数组
-       <literal>$_SERVER</literal>，它在每个函数中都可用。例如你现在可以用
-       <literal>$_SERVER["DOCUMENT_ROOT"]</literal> 来代替
-       <literal>$DOCUMENT_ROOT</literal>。
-      </para> 
-     </note> 
+     <para>
+      如果您确认 register_globals = on 但不知道为什么 <varname>$DOCUMENT_ROOT</varname> 在函数内部不可用，这是因为它和其它的变量一样需要在函数中执行 <literal>global $DOCUMENT_ROOT</literal>。请参阅手册中“<link linkend="language.variables.scope">变量范围</link>”的有关章节。我们建议您在 register_globals = off 的情况下进行编码。
+     </para>
+     
+     &note.superglobals;
+
+    </answer>
     </answer>
    </qandaentry>
 
