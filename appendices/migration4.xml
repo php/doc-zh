@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.2 $ -->
+<!-- $Revision: 1.3 $ -->
 <!-- $Author: class007 $ -->
 <!-- EN-Revision: 1.24 Maintainer: class007 Status: ready -->
  <appendix id="migration4">
@@ -183,192 +183,110 @@ php_admin_flag [PHP directive name] [On|Off]
      许多已存在的 PHP 3 代码使用的语言样式在现在应当被看做是非常糟糕的。因此，如果用 PHP 4 编译该脚本，会产生很多额外的警告信息。如果您不想看到这些信息，只要简单的把 E_NOTICE 选项关闭。但更好的做法是修正代码。
     </para>
     <para>
-     The most common case that will now produce notice messages is the
-     use of unquoted string constants as array indices. Both PHP 3
-     and 4 will fall back to interpret these as strings if no
-     keyword or constant is known by that name, but whenever a
-     constant by that name had been defined anywhere else in the code
-     it might break your script. This can even become a security risk
-     if some intruder manages to redefine string constants in a way
-     that makes your script give him access rights he wasn't intended
-     to have. So PHP 4 will now warn you whenever you use unquoted
-     string constants as for example in
-     <literal>$_SERVER[REQUEST_METHOD]</literal>. Changing it
-     to <literal>$_SERVER['REQUEST_METHOD']</literal> will
-     make the parser happy and greatly improve the style and security
-     of your code.
-    </para>
+     最常见的出现 notice 提示信息的情况是在数组索引中使用没有加引号的字符串。PHP 3 和 PHP 4 在没有同名的常量定义时都会把它解释为字符串，但是无论何时只要有常量是以该字符串命名，您的脚本就可能会出现错误。如果有黑客利用这一点，设法重定义该常量，这个脚本就存在安全漏洞。所以只要出现未加引号的索引，PHP 4 就会警告您对它加以修正。举例来说，有漏洞的代码 <literal>$_SERVER[REQUEST_METHOD]</literal>，只要将它改为 <literal>$_SERVER['REQUEST_METHOD']</literal>，错误提示就会消失。    </para>
     <para>
-     Another thing PHP 4 will now tell you about is the use of
-     uninitialized variables or array elements.
+     PHP 4 还会对未初始化的变量或数组元素加以提示。
     </para>
    </section>
    
   </section>
 
   <section id='migration4.initializers'>
-   <title>Initializers</title>
+   <title>初始化</title>
    <para>
-    Static variable and class member initializers only accept scalar
-    values while in PHP 3 they accepted any valid expression.  This
-    is, once again, due to the split between parsing and execution as
-    no code has yet been executed when the parser sees the
-    initializer.
+    PHP 4 中静态变量和类成员仅接受标量值，而 PHP 3 中接受任何有效的表达式。这是由于解析和执行的分离，导致只有在解析器看到初始化代码后才能执行。
    </para>
    <para>
-    For classes you should use constructors to initialize member
-    variables instead. For static variables anything but a simple
-    static value rarely makes sense anyway.
+    您应该使用构造器来初始化类。对静态变量，只有静态的值才有意义。
    </para>
   </section>
 
   <section id='migration4.empty'>
    <title><literal>empty("0")</literal></title>
    <para>
-    The perhaps most controversial change in behavior has happened to the
-    behavior of the <function>empty</function>. A String containing
-    only the character '0' (zero) is now considered empty while it
-    wasn't in PHP 3.
+    可能最具争议的改变是对 <function>empty</function> 函数行为的改变。一个仅包含字符“0”（是零，不是英文字母“O”）的字符串现在被认为是空字符串，而 PHP 3 中则相反。
    </para>
    <para> 
-    This new behavior makes sense in web applications, with all input
-    fields returning strings even if numeric input is requested, and
-    with PHP's capabilities of automatic type conversion.  But on the
-    other had it might break your code in a rather subtle way,
-    leading to misbehavior that is hard to track down if you do not
-    know about what to look for.
+    这个改变对 web 程序很有意义，所有的 input 表单返回的都是 string，甚至填写的是数字。PHP 能够自动进行类型转换。但另一方面，这可能不是您代码的原意，可能导致您代码莫名其妙的错误。
    </para>
   </section>
 
   <section id='migration4.missing'>
-   <title>Missing functions</title>
+   <title>缺少的函数</title>
    <para>
-    While PHP 4 comes with a lot of new features, functions and
-    extensions, you may still find some functions from version 3
-    missing. A small number of core functions has vanished because
-    they do not work with the new scheme of splitting parsing and
-    execution as introduced into 4 with the Zend engine.  Other
-    functions and even complete extensions have become obsolete as
-    newer functions and extensions serve the same task better and/or
-    in a more general way. Some functions just simply haven't been
-    ported yet and finally some functions or extensions may be missing
-    due to license conflicts.
+    虽然 PHP 4 带来了许多新功能、函数和扩展，您还是会发现一些本在 PHP 3 中存在的函数不见了。少量的内核函数被取消，因为它们不符合 Zend engine 新的解析——执行的模式。另外一些函数甚至是扩展完全的被荒废，是因为新的函数可以更好的完成旧函数的功能。一些函数只是空函数，而另一些因为版权冲突而取消了。
    </para>
 
    <section id='migration4.missing.concept'>
-    <title>Functions missing due to conceptual changes</title>
+    <title>由于概念的改变而取消的函数</title>
     <para>
-     As PHP 4 now separates parsing from execution it is no longer
-     possible to change the behavior of the parser (now embedded in
-     the Zend engine) at runtime as parsing already happened by
-     then. So the function <function>short_tags</function> no longer
-     exists. You can still change the parsers behavior by setting
-     appropriate values in the &php.ini; file.
+     PHP 4 现在将解析从执行中分离，因此不可能在运行时间改变解析器（现在已经嵌入 Zend engine）的行为，此时已经解析完毕了。所以函数 <function>short_tags</function> 不再存在。您仍然可以对 &php.ini; 文件设置适当的值以改变编译器的行为。
     </para>
     <para>
-     Another feature of PHP 3 that is not a part of PHP 4 is the bundled
-     debugging interface. There are third-party add-ons for the Zend engine
-     which add similar functionality.
-    </para>
+     另一个 PHP 3 的功能在 PHP 4 中不复存在：内部捆绑的 debug 接口。现在有第三方 Zend engine 的 add-ons 有着类似的功能。    </para>
    </section>
 
    <section id='migration4.deprecate'>
-    <title>Deprecate functions and extensions</title>
+    <title>不推荐使用的函数和扩展</title>
     <para>
-     The Adabas and Solid database extensions are no more. Long live
-     the unified ODBC extension instead.
+     Adabas and Solid 数据库扩展不再推荐使用。最好使用统一的 ODBC 扩展代替。
     </para>
    </section>
 
    <section id='migration4.unset'>
-    <title>Changed status for <function>unset</function></title>
+    <title><function>unset</function> 的改变</title>
     <para>
-     <function>unset</function>, although still available, is
-     implemented as a language construct rather than a function.
+     <function>unset</function>，虽然仍然可以使用，但是它成为了语言结构的一部分，而不是一个函数。
     </para>
     <para>
-     This does not have any consequences on the behavior of
-     <function>unset</function>, but testing for "unset" using
-     <function>function_exists</function> will return &false; as it would with
-     other language constructs that look like functions such as
-     <function>echo</function>.
+     这对 <function>unset</function> 的行为不会产生什么影响，但是使用 <function>function_exists</function> 函数测试“unset”时会返回 &false;。它已经是 PHP 语言的一部分，虽然它很像函数。这和 <function>echo</function> 是一样的。
     </para>
     <para>
-     Another more practical change is that it is no longer possible to
-     call <function>unset</function> indirectly, that is
-     <literal>$func="unset"; $func($somevar)</literal> won't work
-     anymore.
+     另一个实际的改变是，不能间接调用 <function>unset</function>。因此 <literal>$func="unset"; $func($somevar)</literal> 不再工作。
     </para>
    </section>
   </section>
 
   <section id='migration4.extensions'>
-   <title>PHP 3 extension</title>
+   <title>PHP 3 扩展</title>
    <para>
-    Extensions written for PHP 3 will not work with PHP 4, neither as binaries
-    nor at the source level. It is not difficult to port extensions to PHP 4
-    if you have access to the original source. A detailed description of the
-     actual porting process is not part of this text.
+    为 PHP 3 写的扩展在 PHP 4 中不再工作，二进制或源代码都不行。但如果您有扩展的原始代码，将它转换为 PHP 4 的扩展很容易。这已经不在本文所讨论的范围中了。
    </para>
   </section>
 
   <section id='migration4.strings'>
-   <title>Variable substitution in strings</title>
+   <title>字符串中的变量替换</title>
    <para>
-    PHP 4 adds a new mechanism to variable substitution in
-    strings. You can now finally access object member variables and
-    elements from multidimensional arrays within strings.
+    PHP 4 添加了一个新的机制以替换字符串中的变量。您现在可以访问字符串中的对象成员变量和多维数组元素。
    </para>
    <para>
-    To do so you have to enclose your variables with curly braces with
-    the dollar sign immediately following the opening brace:
-    <literal>{$...}</literal>
+    如果您想这么做，您需要使用大括号将一个美元符号和变量名括起来，就像这样：<literal>{$...}</literal>。
    </para>
    <para>
-    To embed the value of an object member variable into a string you
-    simply write <literal>"text {$obj-&gt;member} text"</literal> while
-    in PHP 3 you had to use something like <literal>"text
-    ".$obj-&gt;member." text"</literal>.
+    要在字符串中嵌入对象成员变量，只要简单的写 <literal>"text {$obj-&gt;member} text"</literal>。而在 PHP 3 中，您得使用 <literal>"text ".$obj-&gt;member." text"</literal>。
    </para>
    <para>
-    This should lead to more readable code, while it may break
-    existing scripts written for PHP 3. But you can easily check for
-    this kind of problem by checking for the character combination
-    <literal>{$</literal> in your code and by replacing it with
-    <literal>\{$</literal> with your favorite search-and-replace
-    tool.
+    这个改进可以使代码更易读，但这可能会破坏用 PHP 3 写的代码。但是您很容易修正它：在代码中查找字符串中的 <literal>{$</literal>，使用搜索替换工具将它替换为 <literal>\{$</literal>。
    </para>
   </section>
 
   <section id='migration4.cookies'>
    <title>Cookies</title>
    <para>
-    PHP 3 had the bad habit of setting cookies in the reverse order
-    of the <function>setcookie</function> calls in your code. PHP 4
-    breaks with this habit and creates the cookie header lines in
-    exactly the same order as you set the cookies in the code.
+    PHP 3 在设置 cookies 时有一个不好的习惯，它总是将 <function>setcookie</function> 所设置的 cookies 以相反的顺序保存。PHP 4 改变了这个习惯，创建 cookies 时以您的代码中设置 cookies 的顺序保存。
    </para>
    <para>
-    This might break some existing code, but the old behaviour was so
-    strange to understand that it deserved a change to prevent further
-    problems in the future.
+    这可能使得原有代码不能正常工作。但是 PHP 3 的行为的确很古怪，应该加以改变以防止将来产生更多的问题。
    </para>
   </section>
 
   <section id='migration4.variables'>
-   <title>Handling of global variables</title>
+   <title>处理全局变量</title>
    <para>
-    While handling of global variables had the focus on to be easy in
-    PHP 3 and early versions of PHP 4, the focus has changed to be more
-    secure. While in PHP 3 the following example worked fine, in PHP 4 it
-    has to be unset($GLOBALS["id"]);. This is only one issue of global
-    variable handling. You should always have used $GLOBALS, with
-    newer versions of PHP 4 you are forced to do so in most cases.
-    Read more on this subject in the <link linkend="references.global">
-    <literal>global</literal> references section</link>.
+    在 PHP 3 和 PHP 4 早些版本中处理全局变量的重心放在了易用上，而现在，焦点放到了如何更安全的处理它们上。在 PHP 3 中下面的代码工作正常，但是 PHP 4 中就要使用 unset($GLOBALS["id"]);。这仅仅是全局变量处理的一个问题。您应当总是使用 $GLOBALS，在更新版本的 PHP 4 中您应该强迫自己在大部分情况中使用它。更多信息请参考 <link linkend="references.global"> <literal>global</literal> 参考章节</link>.
    </para>
    <example>
-    <title>Migration of global variables</title>
+    <title>全局变量的移植</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -379,7 +297,7 @@ function test()
     unset($id);
 }
 test();
-echo($id); // This will print out 1 in PHP 4
+echo($id); // 在 PHP 4 中这里会打印出 1
 ?>
 ]]>
     </programlisting>
