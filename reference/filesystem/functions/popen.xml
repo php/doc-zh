@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="gb2312"?>
+<!-- $Revision: 1.3 $ -->
+<!-- $Author: dallas $ -->
+<!-- EN-Revision: 1.8 Maintainer: dallas Status: ready -->
+  <refentry id="function.popen">
+   <refnamediv>
+    <refname>popen</refname>
+    <refpurpose>打开进程文件指针</refpurpose>
+   </refnamediv>
+   <refsect1>
+    <title>说明</title>
+     <methodsynopsis>
+      <type>resource</type><methodname>popen</methodname>
+      <methodparam><type>string</type><parameter>command</parameter></methodparam>
+      <methodparam><type>string</type><parameter>mode</parameter></methodparam>
+     </methodsynopsis>
+    <para> 
+     打开一个指向进程的管道，该进程由派生给定的 <parameter>command</parameter> 命令执行而产生。
+    </para>
+    <para> 
+     返回一个和 <function>fopen</function>
+     所返回的相同的文件指针，只不过它是单向的（只能用于读或写）并且必须用
+     <function>pclose</function> 来关闭。此指针可以用于
+     <function>fgets</function>，<function>fgetss</function> 和
+     <function>fputs</function>。
+    </para>
+    <para>
+     如果出错返回 &false;。
+    </para>
+    <note>
+     <para>
+      如果需要双向支持，使用 <function>proc_open</function>。
+     </para>
+    </note>
+    <para>
+     <example>
+      <title><function>popen</function> 例子</title>
+      <programlisting role="php">
+<![CDATA[
+<?php
+$handle = popen ("/bin/ls", "r");
+?>
+]]>
+      </programlisting>
+     </example>
+    </para>
+    <note>
+     <para>
+      如果未找到要执行的命令，会返回一个合法的资源。这看上去很怪，但有道理。它允许你访问
+      shell 返回的任何错误信息：
+      <informalexample>
+       <programlisting role="php">
+<![CDATA[
+<?php
+error_reporting(E_ALL);
+
+/* 加入重定向以得到标准错误输出 stderr。 */
+$handle = popen('/path/to/spooge 2>&1', 'r');
+echo "'$handle'; " . gettype($handle) . "\n";
+$read = fread($handle, 2096);
+echo $read;
+pclose($handle);
+?>
+]]>
+       </programlisting>
+      </informalexample>
+     </para>
+    </note>
+    <para>
+     参见 <function>pclose</function>，<function>fopen</function> 和
+     <function>proc_open</function>。
+    </para>
+   </refsect1>
+  </refentry>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"../../../../manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
