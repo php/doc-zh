@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.6 $ -->
+<!-- $Revision: 1.7 $ -->
 <!-- $Author: dallas $ -->
-<!-- EN-Revision: 1.20 Maintainer: dallas Status: ready -->
+<!-- EN-Revision: 1.26 Maintainer: dallas Status: ready -->
   <sect1 id="install.windows">
    <title>Windows 系统下的安装</title>
    <para>
-    本节内容适用于 Windows 95/98/Me 以及 Windows NT/2000/XP。PHP
-    不能在16位平台例如 Windows 3.1 下运行。有时我们把支持 PHP 的 Windows 平台称为 Win32。 
+    本节内容适用于 Windows 98/Me 以及 Windows NT/2000/XP。PHP
+    不能在16位平台例如 Windows 3.1 下运行。有时我们把支持 PHP 的 Windows 平台称为
+    Win32。自 PHP 4.3.0 开始不再支持 Windows 95。
    </para>
    <para>
     有两种方法安装 PHP for Windows：<link
@@ -118,7 +119,9 @@
     <para>
      PHP 4 for Windows 有两种方式 － CGI 版的可执行文件（php.exe），以及一些
      SAPI 模块（例如：php4isapi.dll）。后一种是 PHP 4
-     新提供的方式，提供了显著的性能增长以及一些新功能。
+     新提供的方式，提供了显著的性能增长以及一些新功能。还有一个
+     CLI 版本在<link linkend="features.commandline">PHP
+     的命令行模式</link>一章中有进一步说明。
     </para>
     <warning>
      <simpara>
@@ -158,7 +161,12 @@
        <para>
         PHP 可执行文件，SAPI 模块和一些扩展库要依靠外部的 DLL
         文件来执行。需要确认这些 DLL 文件所在目录在 Windows
-        的路径中。最好把以下文件拷贝到你的 system 目录中，system
+        的路径中。例如，如果你在 &php.ini; 中加载了
+        <literal>php_oci8.dll</literal>，那你需要确认 Oracle
+        目录包括在路径中以使 PHP 能够找到 <literal>oci.dll</literal>。
+       </para> 
+       <para> 
+        最好把以下文件拷贝到你的 system 目录中，system
         目录通常为：
         <simplelist>
          <member>
@@ -292,188 +300,275 @@
      开始之前，很值得回答一下这个问题：“为什么在 Windows 下编译这么难？”两个原因：
     </para>
     <orderedlist>
-     <listitem><simpara>
-      Windows 下还没有愿意免费共享代码的开发人员群体。直接结果就是没有足够的投资去建立支持这种开发方式的体系。大体上，尽量做到的可用资源都是从
-      UNIX 下的工具来的。不要奇怪这种传统不时会出现。
-     </simpara></listitem>
-     <listitem><simpara>
-      下面几乎所有的说明都是“看过就忘”的类型。所以坐稳当并且尽可能忠实地按照说明来做。
-     </simpara></listitem>
+     <listitem>
+      <simpara>
+       Windows 下还没有愿意免费共享代码的开发人员群体。直接结果就是没有足够的投资去建立支持这种开发方式的体系。大体上，尽量做到的可用资源都是从
+       UNIX 下的工具来的。不要奇怪这种传统不时会出现。
+      </simpara>
+     </listitem>
+     <listitem>
+      <simpara>
+       下面几乎所有的说明都是“看过就忘”的类型。所以坐稳当并且尽可能忠实地按照说明来做。
+      </simpara>
+     </listitem>
     </orderedlist>
 
-    <sect3 id="install.windows.build.prepare">
-     <title>准备</title>
+    <sect3 id="install.windows.build.requirement">
+     &reftitle.required;
      <para>
-      在开始之前，需要下载很多东西...
+      要编译 <literal>PHP</literal> 你需要 Microsoft 开发环境。推荐使用
+      Microsoft Visuaul C++
+      6.0。要释放下载的文件还需要一个解压缩工具（例如：Winzip）。如果你还没有解压缩的工具，可以从
+      <ulink url="&url.infozip;">InfoZip</ulink> 免费下载一个。
+     </para>
+     <para>
+      在开始之前，你需要下载...
      </para>
      <itemizedlist>
-      <listitem><simpara>
-       对初学者，从最近的 <ulink url="http://sources.redhat.com/cygwin/download.html">cygwin</ulink>
-       镜像站点下载 Cygwin 工具包。这将提供在编译中用到的大多数流行的 GNU 工具。
-      </simpara></listitem>
-      <listitem><simpara>
-       从 PHP 站点下载其余需要的编译工具：<ulink
-       url="http://www.php.net/extra/win32build.zip">http://www.php.net/extra/win32build.zip</ulink>。
-      </simpara></listitem>
-      <listitem><simpara>
-       下载 PHP 使用的 DNS 解析器的源代码：<ulink
-       url="http://www.php.net/extra/bindlib_w32.zip">http://www.php.net/extra/bindlib_w32.zip</ulink>。用这个替代
-       <filename>win32build.zip</filename> 中的 <filename>resolv.lib</filename>。
-      </simpara></listitem>
-      <listitem><simpara>
-       如果你还没有 unzip 工具，那你需要一个。可以从 <ulink
-       url="http://www.cdrom.com/pub/infozip/UnZip.html">InfoZip</ulink> 下载一个免费的。
-      </simpara></listitem>
-      <listitem><simpara>
-       如果你计划把 PHP 编译成 Apache 的静态模块那你还需要你用的 Apache 相应版本的<ulink
-       url="http://httpd.apache.org/dist/httpd/">源程序</ulink>。
-      </simpara></listitem>
+      <listitem>
+       <simpara>
+        PHP 站点中 <ulink url="&url.win32.buildtools;">&url.win32.buildtools;</ulink>
+        的 win32 编译工具。
+       </simpara>
+      </listitem>
+      <listitem>
+       <simpara>
+        PHP 使用的 DNS 解析器的源代码：<ulink
+        url="&url.win32.dnsresolver;">&url.win32.dnsresolver;</ulink>。用这个替代
+        <filename>win32build.zip</filename> 中的 <filename>resolv.lib</filename>。
+       </simpara>
+      </listitem>
+      <listitem>
+       <simpara>
+        如果你计划把 PHP 编译成 Apache 的静态模块那你还需要
+        <ulink url="&url.apache.source;">Apache 源程序</ulink>。
+       </simpara>
+      </listitem>
      </itemizedlist>
      <simpara>
-      最后，你还需要 PHP 4 的源代码。你可以通过 <ulink
-      url="http://www.php.net/anoncvs.php">匿名 CVS</ulink> 得到最新的开发版本。如果你有了
-       <ulink url="http://snaps.php.net/">snapshot</ulink> 或者<ulink
-      url="http://www.php.net/downloads.php">源代码</ulink>的 tar.gz
-      文件，你不仅需要 untar 和 unzip 它们，还要在 Microsoft Visual C++
-      处理之前把 <filename>*.dsp</filename> 和 <filename>*.dsw</filename>
-      文件中的换行符转换成回车换行。
+      最后，你还需要 PHP 4 的源代码。你可以通过<ulink
+      url="&url.php.anoncvs;">匿名 CVS</ulink> 得到最新的开发版本，一个<ulink
+      url="&url.php.snapshots;">快照</ulink>或者最新发行版本的<ulink
+      url="&url.php.downloads;">源程序</ulink>的打包文件。
      </simpara>
-     <note>
-      <simpara>
-       把 <filename>Zend</filename> 和 <filename>TSRM</filename> 目录放到
-       PHP 4 目录之中，以便在编译过程中能够找到项目文件。
-      </simpara>
-     </note>
     </sect3>
+
     <sect3 id="install.windows.build.install">
      <title>放到一起</title>
-     <itemizedlist>
-      <listitem><simpara>
-       遵循你选择的解压缩工具的用法。
-      </simpara>
-      </listitem>
-      <listitem>
-       <simpara>
-        运行 <filename>setup.exe</filename>，按照安装说明进行。如果你选择的安装目录不是
-        <filename>c:\cygnus</filename>，设置 Cygwin 环境变量让编译程序知道。在
-        Windows 95/98 下设置环境变量可以通过在 <filename>autoexec.bat</filename>
-        中加入一行做到。在 Windows NT 中，打开我的电脑 =&gt; 控制面板
-        =&gt; 系统，并且选择环境变量标签。
-       </simpara>
-       </listitem>
-       </itemizedlist>
-       <warning>
-        <simpara>
-         建立一个临时目录给 Cygwin 使用，否则很多命令（尤其是 bison）将出错。在
-         Windows 95/98 下，<userinput>mkdir C:\TMP</userinput>。在
-         Windows NT 下，<userinput>mkdir %SystemDrive%\tmp</userinput>。
-        </simpara>
-       </warning>
-       <itemizedlist>
+     <para>
+      下载了所有的包后需要将他们解压缩到适当的位置。
+      <itemizedlist>
        <listitem>
-       <simpara>
-       建一个目录把 <filename>win32build.zip</filename> 解压缩到里面。
-      </simpara></listitem>
-      <listitem>
-       <simpara>
-        运行 Microsoft Visual C++，选择 Tools =&gt; Options 菜单，在对话框中选择
-        Directories 标签。依次在下拉框中选择 Executable，Include 和
-        Library files，确认
-        <filename>cygwin\bin</filename>，<filename>win32build\include</filename> 和
-        <filename>win32build\lib</filename>
-        在每个列表框中都包括。（要加入一项，选择列表框最下面的空行并且输入路径)。典型的列表看上如同：
-       </simpara>
-       <itemizedlist>
-        <listitem><simpara>
-         <filename>c:\cygnus\bin</filename>
-        </simpara></listitem>
-        <listitem><simpara>
-         <filename>c:\php-win32build\include</filename>
-        </simpara></listitem>
-        <listitem><simpara>
-         <filename>c:\php-win32build\lib</filename>
-        </simpara></listitem>
-       </itemizedlist>
-       <simpara>
-        点击 OK，退回到 Visual C++。
-       </simpara>
-      </listitem>
-      <listitem>
-       <simpara>
-        另外建一个目录并且把 <filename>bindlib_w32.zip</filename>
-        解压缩到里面。决定你是需要调试符号（bindlib - Win32 Debug）还是不需要（bindlib - Win32 Release）。建立适当配置：
-       </simpara>
-       <itemizedlist>
-        <listitem><simpara>
-         图形界面用户，运行 VC++，选择 File =&gt; Open Workspace
+        <simpara>
+         建立一个工作目录作为解压缩后存放所有文件的地方，例如：<filename>c:\work</filename>。
+        </simpara>
+       </listitem>
+       <listitem>
+        <simpara>
+         在你的工作目录（<filename>c:\work</filename>）下新建一个目录
+         <filename>win32build</filename> 并将 <filename>win32build.zip</filename>
+         解压缩到其中。
+        </simpara>
+       </listitem>
+       <listitem>
+        <simpara>
+         在你的工作目录（<filename>c:\work</filename>）下新建一个目录
+         <filename>bindlib_w32</filename> 并将 <filename>bindlib_w32.zip</filename>
+         解压缩到其中。
+        </simpara>
+       </listitem>
+       <listitem>
+        <simpara>
+         将下载的 PHP 源程序解压缩到工作目录（<filename>c:\work</filename>）中。
+        </simpara>
+       </listitem>
+      </itemizedlist>
+      经过这些步骤后你的目录结构应该如下：
+      <informalexample>
+       <programlisting>
+<![CDATA[  
+
++--c:\work  
+|  |  
+|  +--bindlib_w32  
+|  |  |  
+|  |  +--arpa  
+|  |  |  
+|  |  +--conf  
+|  |  |  
+|  |  +--...  
+|  |  
+|  +--php-4.x.x  
+|  |  |  
+|  |  +--build  
+|  |  |  
+|  |  +--...  
+|  |  |  
+|  |  +--win32  
+|  |  |  
+|  |  +--...  
+|  |  
+|  +--win32build  
+|  |  |  
+|  |  +--bin  
+|  |  |  
+|  |  +--include  
+|  |  |  
+|  |  +--lib  
+  
+]]>  
+       </programlisting>  
+      </informalexample>  
+      新建一个目录 <filename>c:\usr\local\lib</filename>。将
+      <filename>c:\work\win32build\bin</filename> 中的
+      <filename>bison.simple</filename> 拷贝到
+      <filename>c:\usr\local\lib</filename>中去。
+     </para>  
+     <note>  
+      <simpara>  
+       <ulink url="&url.cygwin;">Cygwin</ulink> 用户应该忽略最后一步。正确安装的
+       Cygwin 环境已经提供了 <filename>bison.simple</filename> 和
+       <filename>bison.exe</filename> 文件。
+      </simpara>  
+     </note>  
+    </sect3>  
+  
+    <sect3 id="install.windows.build.configure">  
+     <title>配置 MVC ++</title>  
+     <para>  
+      下一步是配置 MVC ++ 来准备编译。运行 Microsoft Visual
+      C++，在菜单中选择 Tools =&gt; Options。在对话框中，选择
+      directories 标签。依次将下拉框改为 Executables，Includes 和
+      Library files。将其修改为：
+      <itemizedlist>
+       <listitem>
+        <simpara>
+         Executable files: <filename>c:\work\win32build\bin</filename>，
+         Cygwin 用户：<filename>cygwin\bin</filename>
+        </simpara>
+       </listitem>
+       <listitem>
+        <simpara>
+         Include files: <filename>c:\work\win32build\include</filename>
+        </simpara>
+       </listitem>
+       <listitem>
+        <simpara>
+         Library files: <filename>c:\work\win32build\lib</filename>
+        </simpara>
+       </listitem>
+      </itemizedlist>
+     </para>
+    </sect3>
+
+    <sect3 id="install.windows.build.resolvlib">
+     <title>Build resolv.lib</title>
+     <para>
+      必须编译 <filename>resolv.lib</filename> 库。自己决定是需要调试信息（bindlib
+      - Win32 Debug）还是不需要（bindlib - Win32 Release）。编译适当的配置：
+      <itemizedlist>
+       <listitem>
+        <simpara>
+         图形界面用户，运行 VC++，选择 File =&gt; Open Workspace，找到
+         <filename>c:\work\bindlib_w32</filename> 目录并选择
+         <filename>bindlib.dsw</filename> 文件。
          菜单并选择 bindlib。接着选择 Build =&gt; Set Active Configuration
          菜单并选择需要的配置。最后选择 Build =&gt; Rebuild All。
-        </simpara></listitem>
-        <listitem>
-         <simpara>
-          命令行用户，确认你要么注册了 C++ 环境变量，要么运行了
-          <command>vcvars.bat</command>，然后运行下面任意一个：
-         </simpara>
-         <itemizedlist>
-          <listitem>
-           <simpara>
-            <userinput>msdev bindlib.dsp /MAKE "bindlib - Win32 Debug"</userinput>
-           </simpara>
-          </listitem>
-          <listitem>
-           <simpara>
-            <userinput>msdev bindlib.dsp /MAKE "bindlib - Win32 Release"</userinput>
-           </simpara>
-          </listitem>
-         </itemizedlist>
-        </listitem>
-        <listitem><simpara>
-         到这一步，你应该得到一个 <filename>resolv.lib</filename> 在你的
-         <filename>Debug</filename> 或者 <filename>Release</filename>
-         目录下。拷贝此文件到 <filename>win32build\lib</filename> 目录下并且覆盖同名的文件。
-        </simpara></listitem>
-       </itemizedlist>
-      </listitem>
-     </itemizedlist>
+        </simpara>
+       </listitem>
+       <listitem>
+        <simpara>
+         命令行用户，确认你要么注册了 C++ 环境变量，要么运行了
+         <command>vcvars.bat</command>，然后运行下面任意一个：
+        </simpara>
+        <itemizedlist>
+         <listitem>
+          <simpara>
+           <userinput>msdev bindlib.dsp /MAKE "bindlib - Win32 Debug"</userinput>
+          </simpara>
+         </listitem>
+         <listitem>
+          <simpara>
+           <userinput>msdev bindlib.dsp /MAKE "bindlib - Win32 Release"</userinput>
+          </simpara>
+         </listitem>
+        </itemizedlist>
+       </listitem>
+      </itemizedlist>
+      到这一步，你应该得到一个 <filename>resolv.lib</filename> 在你的
+      <filename>c:\work\bindlib_w32\Debug</filename> 或者 <filename>Release</filename>
+      目录下。拷贝此文件到 <filename>c:\work\win32build\lib</filename>
+      目录下并且覆盖同名的文件。
+     </para>
     </sect3>
 
     <sect3 id="install.windows.build.compile">
      <title>编译</title>
      <simpara>
-      对于初学者最好的上手方法是编译 standalone/CGI 版本。
+      对于初学者最好的上手方法是编译 CGI 版本。
      </simpara>
      <itemizedlist>
-      <listitem><simpara>
-       图形界面用户，运行 VC++，选择 File =&gt; Open Workspace 菜单并选择 php4ts。接着选择
-       Build =&gt; Set Active Configuration 菜单并选择需要的配置。最后选择
-       Build =&gt; Rebuild All。
-      </simpara></listitem>
+      <listitem>
+       <simpara>
+        图形界面用户，运行 VC++，选择 File =&gt; Open Workspace 菜单并选择
+        <filename>c:\work\php-4.x.x\win32\php4ts.dsw</filename>。接着选择
+        Build =&gt; Set Active Configuration 菜单并选择想要的配置，要么
+        <literal>php4ts - Win32 Debug_TS</literal> 或者是
+        <literal>php4ts - Win32 Release_TS</literal>。最后选择
+        Build =&gt; Rebuild All。
+       </simpara>
+      </listitem>
       <listitem>
        <simpara>
         命令行用户，确认你要么注册了 C++ 环境变量，要么运行了
-        <command>vcvars.bat</command>，然后运行下面任意一个：
+        <command>vcvars.bat</command>，然后在
+        <filename>c:\work\php-4.x.x\win32</filename> 目录下运行下面任意一个命令：
        </simpara>
        <itemizedlist>
-        <listitem><simpara>
-         <userinput>msdev php4ts.dsp /MAKE "php4ts - Win32 Debug_TS"</userinput>
-        </simpara></listitem>
-        <listitem><simpara>
-         <userinput>msdev php4ts.dsp /MAKE "php4ts - Win32 Release_TS"</userinput>
-        </simpara></listitem>
-        <listitem><simpara>
-         到这一步，你应该得到一个可用的 <filename>php.exe</filename> 在你的
-         <filename>Debug_TS</filename> 或者 <filename>Release_TS</filename> 目录下。
-        </simpara></listitem>
+        <listitem>
+         <simpara>
+          <userinput>msdev php4ts.dsp /MAKE "php4ts - Win32 Debug_TS"</userinput>
+         </simpara>
+        </listitem>
+        <listitem>
+         <simpara>
+          <userinput>msdev php4ts.dsp /MAKE "php4ts - Win32 Release_TS"</userinput>
+         </simpara>
+        </listitem>
+        <listitem>
+         <simpara>
+          到这一步，你应该得到一个可用的 <filename>php.exe</filename> 在你的
+          <filename>c:\work\php-4.x.x.\Debug_TS</filename> 或者
+          <filename>Release_TS</filename> 目录下。
+         </simpara>
+        </listitem>
        </itemizedlist>
       </listitem>
      </itemizedlist>
      <simpara>
-      重复以上步骤处理 <filename>php4isapi.dsp</filename>（在
-      <filename>sapi\isapi</filename> 目录下）来编译使 PHP 能够和 Microsoft IIS 集成的代码。
+      有可能通过编辑 <filename>main/config.win32.h.in</filename>
+      文件对编译做少量的定制。例如你可以修改内置的扩展库，或者
+      &php.ini; 文件的位置。
      </simpara>
      <simpara>
-      有可能通过编辑 main/config.win32.h.in
-      文件来对编译过程做一些较小的定制。
+      下一步你可能想要编译 CLI 版本，这是设计用于
+      <link linkend="features.commandline">PHP 的命令行方式</link>。步骤和编译
+      CGI 版本相同，只除了要选择 <literal>php4ts_cli - Win32 Debug_TS</literal>
+      或者 <literal>php4ts_cli - Win32 Release_TS</literal>
+      工程文件。在成功编译之后你会在 <filename>Release_TS\cli\</filename>
+      或者 <filename>Debug_TS\cli\</filename> 目录下发现 <filename>php.exe</filename> 文件。
+     </simpara>
+     <note>
+      <simpara>
+       如果你想使用 PEAR 或者舒适的命令行安装程序，就非要用 CLI-SAPI。有关
+       PEAR 和安装程序的更多信息见 <ulink url="&url.php.pear;manual/">PEAR</ulink>
+       网站文档。
+      </simpara>
+     </note>
+     <simpara>
+      要编译 SAPI 模块（<filename>php4isapi.dll</filename>）来将 PHP 和
+      Microsoft IIS 集成起来，将激活的配置设为
+      <filename>php4isapi-whatever-config</filename> 并编译所需要的 dll。
      </simpara>
     </sect3>
    </sect2>
@@ -525,7 +620,6 @@
          <entry>注意</entry>
         </row>
        </thead>
-                                                     
        <tbody>
   <row>
    <entry>php_bz2.dll</entry>
@@ -625,6 +719,11 @@
   <row>
    <entry>php_gd.dll</entry>
    <entry><link linkend="ref.image">GD</link> 库图像处理函数库</entry>
+   <entry>无</entry>
+  </row>
+  <row>
+   <entry>php_gd2.dll</entry>
+   <entry><link linkend="ref.image">GD2</link> 库图像函数库</entry>
    <entry>无</entry>
   </row>
   <row>
