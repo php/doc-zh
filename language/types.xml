@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.5 $ -->
-<!-- $Author: dallas $ -->
-<!-- EN-Revision: 1.88 Maintainer: dallas Status: ready -->
+<!-- $Revision: 1.6 $ -->
+<!-- $Author: gregory $ -->
+<!-- EN-Revision: 1.98 Maintainer: dallas Status: ready -->
+<!-- CREDITS: Gregory -->
  <chapter id="language.types">
   <title>类型</title>
 
@@ -9,11 +10,11 @@
   <title>介绍</title>
   
   <simpara>
-   PHP 支持八种原始类型。<!-- (all types are primitive in php) -->
+   PHP 支持八种原始类型。
   </simpara>
   
   <para>
-   四种标量类型： <!-- (basic, can't be split into parts) -->
+   四种标量类型： 
 
    <itemizedlist>
 
@@ -78,26 +79,33 @@
     </listitem>
 
    </itemizedlist>
+
+   为了确保代码的易读性，本手册还介绍了一些<link linkend="language.pseudo-types">伪类型</link>：
+
+   <itemizedlist>
+ 
+    <listitem>
+     <simpara>
+      <link linkend="language.types.mixed">混和（mixed）</link>
+     </simpara>
+    </listitem>
+ 
+    <listitem>
+     <simpara>
+      <link linkend="language.types.number">数字（number）</link>
+     </simpara>
+    </listitem>
+ 
+    <listitem>
+     <simpara>
+      <link linkend="language.types.mixed">回馈（callback）</link>
+     </simpara>
+    </listitem>
+
+   </itemizedlist>
+   您可能还会读到一些关于“双精度（double）”类型的参考。实际上 double 和 float 是相同的，由于一些历史的原因，这两个名称同时存在。
   </para>
   
-  <note>
-   <simpara>
-    本手册中你经常会碰到 <literal>mixed</literal> 参数。这个伪类型表示该参数有多种可能的类型。
-   </simpara>
-   <!--
-   
-   Just an idea, maybe useful for some func-defs?
-   (at least it is for the operator-defs)
-   
-   <simpara>
-    In parameter definitions you can also encounter the 'number' pseudo-type,
-    that indicates a parameter that is either <type>integer</type> or 
-    <type>float</type>.
-   </simpara>
-   -->
-  </note>
-
-
   <simpara>
    变量的类型通常不是由程序员设定的，确切地说，是由 PHP 根据该变量使用的上下文在运行时决定的。
   </simpara>
@@ -105,20 +113,40 @@
    <simpara>
     如果你想查看某个<link linkend="language.expressions">表达式</link>的值和类型，用 <function>var_dump</function>。
    </simpara>
-   <simpara>
-    如果你只是想得到一个易读懂的类型的表达方式用于调试，用 <function>gettype</function>。要查看某个类型，<emphasis>不要</emphasis>用 <function>gettype</function>，而用 <literal>is_<replaceable>type</replaceable></literal> 函数。
-   </simpara>
-   <!-- TODO: example(s) would be great -->
+   <para>
+    如果你只是想得到一个易读懂的类型的表达方式用于调试，用 <function>gettype</function>。要查看某个类型，<emphasis>不要</emphasis>用 <function>gettype</function>，而用 <literal>is_<replaceable>type</replaceable></literal> 函数。以下是一些范例：
+    <informalexample>
+     <programlisting role="php">
+<![CDATA[
+$bool = TRUE;   // a boolean
+$str  = "foo";  // a string
+$int  = 12;     // an integer
+
+echo gettype($bool); // prints out "boolean"
+echo gettype($str);  // prints out "string"
+
+// If this is an integer, increment it by four
+if (is_int($int)) {
+    $int += 4;
+}
+
+// If $bool is a string, print it out
+// (does not print out anything)
+if (is_string($bool)) {
+    echo "String: $bool";
+}
+]]>
+     </programlisting>
+    </informalexample>
+   </para>
   </note>
   <simpara>
    如果你要将一个变量强制转换为某类型，可以对其使用<link
    linkend="language.types.typecasting">强制转换</link>或者 <function>settype</function> 函数。
   </simpara>
   <simpara>
-   注意变量根据其当时的类型在特定场合下会表现出不同的风格。更多信息见<link linkend="language.types.type-juggling">类型戏法</link>。
+   注意变量根据其当时的类型在特定场合下会表现出不同的值。更多信息见<link linkend="language.types.type-juggling">类型戏法</link>。
   </simpara>
-  
-   
    </sect1>
    
    <sect1 id="language.types.boolean">
@@ -138,11 +166,10 @@
      <title>语法</title>
      <para>
       要指定一个布尔值，使用关键字 &true; 或 &false;。两个都是大小写不敏感的。
-      <!-- technically they are just constants -->
       <informalexample>
        <programlisting role="php">
 <![CDATA[
-$foo = True; // assign the value TRUE to $foo     
+$foo = True; // assign the value TRUE to $foo 
 ]]>
        </programlisting>
       </informalexample>
@@ -153,17 +180,18 @@ $foo = True; // assign the value TRUE to $foo
       <informalexample>
        <programlisting role="php">
 <![CDATA[
-// == is an operator which returns a boolean
+// == is an operator which test
+// equality and returns a boolean
 if ($action == "show_version") {
     echo "The version is 1.23";
 }
 
-// this is not necessary:
+// this is not necessary...
 if ($show_separators == TRUE) {
     echo "<hr>\n";
 }
 
-// because you can simply type this:
+// ...because you can simply type
 if ($show_separators) {
     echo "<hr>\n";
 }
@@ -200,7 +228,7 @@ if ($show_separators) {
          linkend="language.types.string">字符串</link> "0"</simpara>
         </listitem>
         <listitem>
-         <simpara>没有单元的<link linkend="language.types.array">数组</link></simpara>
+         <simpara>没有成员变量的<link linkend="language.types.array">数组</link></simpara>
         </listitem>
         <listitem>
          <simpara>没有单元的<link linkend="language.types.object">对象</link></simpara>
@@ -216,8 +244,19 @@ if ($show_separators) {
          <literal>-1</literal> 和其它非零值（不论正负）一样，被认为是 &true;！
         </simpara>
        </warning>
-       <!-- TODO: add a few examples, for the people only looking at 
-            the examples... -->
+       <informalexample>
+        <programlisting role="php">
+<![CDATA[
+echo gettype((bool) "");        // bool(false)
+echo gettype((bool) 1);         // bool(true)
+echo gettype((bool) -2);        // bool(true)
+echo gettype((bool) "foo");     // bool(true)
+echo gettype((bool) 2.3e5);     // bool(true)
+echo gettype((bool) array(12)); // bool(true)
+echo gettype((bool) array());   // bool(false)
+]]>
+        </programlisting>
+       </informalexample>
       </para>
      
     </sect2>
@@ -253,20 +292,23 @@ $a = 0x1A; # 十六进制数（等于十进制的 26）
 ]]>
        </programlisting>
       </example>
-      <!--
+	  在字面上，整型变量正式的结构可以为：
+      <informalexample>
+       <programlisting>
+<![CDATA[
+decimal     : [1-9][0-9]*
+            | 0
 
-       decimal     : [1-9][0-9]*
-                   | 0
-       
-       hexadecimal : 0[xX][0-9a-fA-F]+
-       
-       octal       : 0[0-7]+
-       
-       integer     : [+-]?decimal
-                   | [+-]?hexadecimal
-                   | [+-]?octal
-       
-       -->
+hexadecimal : 0[xX][0-9a-fA-F]+
+
+octal       : 0[0-7]+
+
+integer     : [+-]?decimal
+            | [+-]?hexadecimal
+            | [+-]?octal
+]]>
+       </programlisting>
+      </informalexample>
       整型数的字长和平台有关，尽管通常最大值是大约二十亿（32 位有符号）。PHP 不支持无符号整数。
      </para>
     </sect2>
@@ -308,12 +350,13 @@ var_dump($large_number);
       </warning>
      </para>
      <para>
-      PHP 中没有整除的运算符。<literal>1/2</literal> 产生出 <type>float</type> <literal>0.5</literal>。
+      PHP 中没有整除的运算符。<literal>1/2</literal> 产生出<type>浮点数</type> <literal>0.5</literal>。您可以总是舍弃小数部分，或者使用 <function>round</function> 函数。
       <informalexample>
        <programlisting role="php">
 <![CDATA[
-var_dump( 25/7 );
-// 输出为：float(3.5714285714286)
+var_dump(25/7);         // float(3.5714285714286) 
+var_dump((int) (25/7)); // int(3)
+var_dump(round(25/7));  // float(4) 
 ]]>
        </programlisting>
       </informalexample>
@@ -324,7 +367,7 @@ var_dump( 25/7 );
     <sect2 id="language.types.integer.casting">
      <title>转换为整形</title>
       <simpara>
-       要明示地将一个值转换为 <type>integer</type>，用 <literal>(int)</literal> 或 <literal>(integer)</literal> 强制转换。不过大多数情况下都不需要强制转换，因为当运算符，函数或流程控制需要一个 <type>integer</type> 参数时，值会自动转换。
+       要明示地将一个值转换为 <type>integer</type>，用 <literal>(int)</literal> 或 <literal>(integer)</literal> 强制转换。不过大多数情况下都不需要强制转换，因为当运算符，函数或流程控制需要一个 <type>integer</type> 参数时，值会自动转换。您还可以通过函数 <function>intval</function> 来将一个值转换成整型。
       </simpara>
       <simpara>
        参见<link linkend="language.types.type-juggling">类型戏法</link>。
@@ -356,7 +399,7 @@ var_dump( 25/7 );
         <informalexample>
          <programlisting role="php">
 <![CDATA[
-echo (int) ( (0.1+0.7) * 10 ); // echoes 7!
+echo (int) ( (0.1+0.7) * 10 ); // 显示 7！
 ]]>
          </programlisting>
         </informalexample>
@@ -367,7 +410,7 @@ echo (int) ( (0.1+0.7) * 10 ); // echoes 7!
       <sect3 id="language.types.integer.casting.from-string">
        <title>从字符串转换</title>
        <simpara>
-        参见<link linkend="language.types.string.conversion">字符串转换</link>。
+        参见<link linkend="language.types.string.conversion">字符串转换为数字</link>。
        </simpara>
       </sect3>
       
@@ -381,16 +424,7 @@ echo (int) ( (0.1+0.7) * 10 ); // echoes 7!
          </simpara>
         </caution>
        </para>
-       <!--
-        
-        IMO, it would more sense as (int) $arr returned the 
-        number of elements in $arr. This won't break anything,
-        since this behaviour was never defined before, and 
-        (bool)(int) $arr will still behave the same.
-        
-        -->
-      </sect3>
-      
+      </sect3>      
     </sect2>
   </sect1>
 
@@ -398,18 +432,22 @@ echo (int) ( (0.1+0.7) * 10 ); // echoes 7!
    <title>浮点型</title>
    <para>
     浮点数（也叫“floats”，“doubles”或“real numbers”）可以用以下任何语法定义：
-    <synopsis>
+    <informalexample>
+     <programlisting role="php">
 $a = 1.234; $a = 1.2e3; $a = 7E-10;
-    </synopsis>
-    <!--  
-    
-LNUM	[0-9]+
-DNUM	([0-9]*[\.][0-9]+)|([0-9]+[\.][0-9]*)
-EXPONENT_DNUM	(({LNUM}|{DNUM})[eE][+-]?{LNUM})
-    
-    -->
+     </programlisting>
+    </informalexample>
+    形式上：
+    <informalexample>
+     <programlisting role="php">
+LNUM          [0-9]+
+DNUM          ([0-9]*[\.]{LNUM}) | ({LNUM}[\.][0-9]*)
+EXPONENT_DNUM ( ({LNUM} | {DNUM}) [eE][+-]? {LNUM})
+     </programlisting>
+    </informalexample>
     浮点数的字长和平台相关，尽管通常最大值是 1.8e308 并具有 14 位十进制数字的精度（64 位 IEEE 格式）。
    </para>
+
    <warning id="warn.float-precision">
     <title>浮点数精度</title>
     <para>
@@ -423,15 +461,21 @@ EXPONENT_DNUM	(({LNUM}|{DNUM})[eE][+-]?{LNUM})
      linkend="ref.bc">任意精度数学函数库</link>或者 <link linkend="ref.gmp">gmp 函数库</link>。
     </para>
    </warning>
+
+   <sect2 id="language.types.float.casting">
+    <title>转换为浮点数</title>
+    
+    <para>
+	 如果您希望了解有关何时和如何将字符串转换成浮点数的信息，请查阅标题为“<link linkend="language.types.string.conversion">将字符串转换为数字</link>”的有关章节。对于其它类型的值，其情况类似于先将值转换成整型，然后再转换成浮点。请参阅“<link linkend="language.types.integer.casting">转换为整型</link>”有关章节以获取更多信息。
+    </para>
+   </sect2>
   </sect1>
 
   <sect1 id="language.types.string">
    <title>字符串</title>
    <para>
-    <type>string</type> 是一系列字符。在 PHP 中，字符和字节一样，也就是说，一共有 256 种不同字符的可能性。这也暗示 PHP 对 Unicode 没有本地支持。
-    <!-- how about unicode? will we support that eventually? Are
-    there current any ways to work with unicode?
-    -->
+    <type>string</type> 是一系列字符。在 PHP 中，字符和字节一样，也就是说，一共有 256 种不同字符的可能性。这也暗示 PHP 对 Unicode 没有本地支持。请参阅函数 <function>utf8_enncode</function>
+    和 <function>utf8_decode</function> 以了解有关 Unicode 支持。
    </para>
    <note>
     <simpara>
@@ -483,8 +527,8 @@ EXPONENT_DNUM	(({LNUM}|{DNUM})[eE][+-]?{LNUM})
        <programlisting role="php">
 <![CDATA[
 echo 'this is a simple string';
-echo 'You can also have embedded newlines in strings,
-like this way.';
+echo 'You can also have embedded newlines in strings
+this way';
 echo 'Arnold once said: "I\'ll be back"';
 // output: ... "I'll be back"
 echo 'Are you sure you want to delete C:\\*.*?';
@@ -620,8 +664,8 @@ EOT;
        定界符支持是 PHP 4 中加入的。
       </para>
      </note>
-  
     </sect3>
+
     <sect3 id="language.types.string.parsing">
      <title>变量解析</title>
      <simpara>
@@ -633,8 +677,8 @@ EOT;
      </simpara>
      <simpara>
       复杂语法是 PHP 4 引进的，可以用花括号括起一个表达式。
-      <!-- XXX was it? and starting with what version exactly? -->
      </simpara>
+
      <sect4 id="language.types.string.parsing.simple">
       <title>简单语法</title>
       <simpara>
@@ -645,7 +689,7 @@ EOT;
 <![CDATA[
 $beer = 'Heineken';
 echo "$beer's taste is great"; // works, "'" is an invalid character for varnames
-echo "He drank some $beers"; // won't work, 's' is a valid character for varnames
+echo "He drank some $beers";   // won't work, 's' is a valid character for varnames
 echo "He drank some ${beer}s"; // works
 ]]>
        </programlisting>
@@ -653,17 +697,14 @@ echo "He drank some ${beer}s"; // works
       <simpara>
        同样也可以解析数组索引或者对象属性。对于数组索引，右方括号（<literal>]</literal>）标志着索引的结束。对象属性则和简单变量适用同样的规则，尽管对于对象属性没有像变量那样的小技巧。
        <!-- XXX isn't &true; :(, this would be the trick
-       Also,
-       the same trick with curly-braces works if you
-       want to limit the greediness of parsers (aren't they
-       paying them enough or something?).
+       Also, the same trick with curly-braces works if you
+       want to limit the greediness of parsers.
        -->
-      
       </simpara>
       <informalexample>
        <programlisting role="php">
 <![CDATA[
-$fruits = array( 'strawberry' => 'red' , 'banana' => 'yellow' );
+$fruits = array('strawberry' => 'red', 'banana' => 'yellow');
 
 // note that this works differently outside string-quotes.
 echo "A banana is $fruits[banana].";
@@ -686,6 +727,7 @@ echo "This square is $square->{width}00 centimeters broad.";
        对于任何更复杂的情况，应该使用复杂语法。
       </simpara>
      </sect4>
+
      <sect4 id="language.types.string.parsing.complex">
       <title>复杂（花括号）语法</title>
       <simpara>
@@ -701,7 +743,7 @@ $great = 'fantastic';
 echo "This is { $great}"; // 不行，输出为：This is { fantastic}
 echo "This is {$great}";  // 可以，输出为：This is fantastic
 echo "This square is {$square->width}00 centimeters broad."; 
-echo "This works: {$arr[4][3]}";     
+echo "This works: {$arr[4][3]}";
 
 // This is wrong for the same reason
 // as $foo[bar] is wrong outside a string. 
@@ -736,35 +778,15 @@ echo "I'd like to have another {${ strrev('reeb') }}, hips";
       <example>
        <title>一些字符串例子</title>
        <programlisting role="php">
-<!-- TODO: either move these examples to a example section,
-as with arrays, or distribute them under the applicable
-sections. -->
 <![CDATA[
 <?php
-/* Assigning a string. */
-$str = "This is a string";
-
-/* Appending to it. */
-$str = $str . " with some more text";
-
-/* Another way to append, includes an escaped newline. */
-$str .= " and a newline at the end.\n";
-
-/* This string will end up being '<p>Number: 9</p>' */
-$num = 9;
-$str = "<p>Number: $num</p>";
-
-/* This one will be '<p>Number: $num</p>' */
-$num = 9;
-$str = '<p>Number: $num</p>';
-
-/* Get the first character of a string  */
+// Get the first character of a string
 $str = 'This is a test.';
 $first = $str{0};
 
-/* Get the last character of a string. */
+// Get the last character of a string.
 $str = 'This is still a test.';
-$last = $str{strlen($str)-1};
+$last = $str{strlen($str)-1}; 
 ?>
 ]]>
        </programlisting>
@@ -775,7 +797,7 @@ $last = $str{strlen($str)-1};
    </sect2><!-- end syntax -->
 
    <sect2 id="language.types.string.useful-funcs">
-    <title>实用函数</title><!-- and operators -->
+    <title>实用函数及操作符</title>
     <para>
      字符串可以用“.”（点）运算符连接。注意这里不能用“+”（加）运算符。更多信息参见<link
      linkend="language.operators.string">字符串运算符</link>。
@@ -795,8 +817,44 @@ $last = $str{strlen($str)-1};
      最后，如果还是找不到你要的函数，参见<link linkend="ref.ctype">字符类型函数库</link>。
     </simpara>
    </sect2>
-   <sect2 id="language.types.string.conversion">
+
+   <sect2 id="language.types.string.casting">
     <title>字符串转换</title>
+    
+    <para>
+	 您可以用 <literal>(string)</literal> 标记或者 <function>strval</function> 函数将一个值转换为字符串。当某表达式需要字符串时，字符串的转换会在表达式范围内自动完成。例如当你使用 <function>echo</function> 或者 <function>print</function> 函数时，或者将一个变量值与一个字符串进行比较的时候。
+    </para>
+    
+    <para>
+	 布尔值 &true; 将被转换为字符串 <literal>"1"</literal>，而值 &false; 将被表示为 <literal>""</literal>（即空字符串）。这样您就可以随意地在布尔值和字符串之间进行比较。
+    </para>
+    <para> 
+	 整数或浮点数数值在转换成字符串时，字符串即为表示这些数值数字（浮点数还包含有指数部分）。
+    </para>
+    <para>
+	 数组将被转换成字符串 <literal>"Array"</literal>，因此您无法通过 <function>echo</function> 或者 <function>print</function> 函数来输出数组的内容。请参考下文以获取更多提示。
+    </para>
+    <para>
+	 对象将被转换成字符串 <literal>"Object"</literal>。如果您因为调试需要，需要将对象的成员变量打印出来，请阅读下文。如果您希望得到该对象所依附的类的名称，请使用函数 <function>get_class</function>。
+    </para>
+    <para>
+	 资源类型将会以 <literal>"Resource id #1"</literal> 的格式被转换成字符串，其中 <literal>1</literal> 是 PHP 在运行时给资源指定的唯一标识。如果您希望获取资源的类型，请使用函数 <function>get_resource_type</function>.
+    </para>
+    <para>
+     &null; 将被转换成空字符串。
+    </para>
+    
+    <para>
+	 正如以上所示，将数组、对象或者资源打印出来，并不能给您提供任何关于这些值本身的有用的信息。请参阅函数 <function>print_r</function> 和 <function>var_dump</function>，对于调试来说，这些是更好的打印值的方法。
+    </para>
+    
+    <para>
+	 您可以将 PHP 的值转换为字符串以永久地储存它们。这种方法被称为串行化，您可以用函数 <function>serialize</function> 来完成该操作。如果您在安装 PHP 时建立了 <link linkend="ref.wddx">WDDX</link> 支持，您还可以将 PHP 的值串行化为 XML 结构。
+    </para>
+   </sect2>
+
+   <sect2 id="language.types.string.conversion">
+    <title>字符串转换为数值</title>
 
     <simpara>
      当一个字符串被当作数字来求值时，根据以下规则来决定结果的类型和值。
@@ -835,6 +893,10 @@ echo "\$foo==$foo; type is " . gettype ($foo) . "<br />\n";
      </informalexample>
     </para>
 
+    <para>
+	 不要指望在将一个字符转换成整型时能够得到该字符的编码（您可能也会在 C 中这么做）。如果您希望在字符编码和字符之间转换，请使用 <function>ord</function> 和 <function>chr</function> 函数。
+    </para>
+
    </sect2>
   </sect1><!-- end string -->
 
@@ -846,8 +908,6 @@ echo "\$foo==$foo; type is " . gettype ($foo) . "<br />\n";
    </para>
    <para>
     解释这些结构超出了本手册的范围，但对于每种结构你至少会发现一个例子。要得到这些结构的更多信息，我们建议你参考有关此广阔主题的外部著作。
-    <!-- like goodrich&tamassia: datastructures and algorithmes.
-    Only, the subtitle is: in Java, and it's quite academic too -->
    </para>
    
    <sect2 id="language.types.array.syntax">
@@ -860,38 +920,63 @@ echo "\$foo==$foo; type is " . gettype ($foo) . "<br />\n";
       <literal><replaceable>key</replaceable> =&gt; <replaceable>value</replaceable></literal> 参数对。
      </para>
      <para>
-      <varname>key</varname> 可以是 <type>integer</type> 或者 <type>string</type>。如果键名是一个
-      <type>integer</type> 的标准表达方法，则被解释为整数（例如 <literal>"8"</literal> 将被解释为
-      <literal>8</literal>，而 <literal>"08"</literal> 将被解释为 <literal>"08"</literal>）。
-     </para>
-     <para>
-      值可以是任何值。
-     </para>
-     <para>
-      如果省略键名，则取当前最大的整数索引，而新的键名将是该值加一。整数可以为负，所以对于负的索引也是这样。例如最大的索引是
-      <literal>-6</literal> 将导致新的键名是 <literal>-5</literal>。如果还不存在整数索引，则键名将为
-      <literal>0</literal>（零）。如果你指定的键名已经有了值，则该值会被覆盖。
-     </para>
-     <para>
-      使用 <literal>true</literal> 作为键名将使 <type>integer</type> <literal>1</literal> 成为键名。使用
-      <literal>false</literal> 作为键名将使 <type>integer</type> <literal>0</literal> 成为键名。使用
-      <literal>NULL</literal> 作为键名将等同于使用空字符串。使用空字符串作为键名将新建（或覆盖）一个用空字符串作为键名的值，这和用空的方括号不一样。
-     </para>
-     <para>
-      不能用数组和对象作为键名。这样做会导致一个警告：<literal>Illegal offset type</literal>。
-     </para>
-     
-     <para>
       <synopsis>
 array( <optional> <replaceable>key</replaceable> =&gt; </optional> <replaceable
 >value</replaceable>
      , ...
      )
-// <replaceable>key</replaceable> is either <type>string</type
-                        > or nonnegative <type>integer</type>
-// <replaceable>value</replaceable> can be anything
+// <replaceable>key</replaceable> 不是<type>字符串</type>就是<type>整数</type>
+// <replaceable>value</replaceable> 可以为任何值
       </synopsis>
      </para>
+     <para>
+      <informalexample>
+       <programlisting role="php">
+<![CDATA[
+array("foo" => "bar", 12 => true);
+]]>
+       </programlisting>
+      </informalexample>
+     </para>
+     <para>
+      <varname>key</varname> 可以是 <type>integer</type> 或者 <type>string</type>。如果键名是一个
+      <type>integer</type> 的标准表达方法，则被解释为整数（例如 <literal>"8"</literal> 将被解释为
+      <literal>8</literal>，而 <literal>"08"</literal> 将被解释为 <literal>"08"</literal>）。PHP 中数组下标的变量类型不会对数组造成影响，数组的类型只有一种，它可以同时包含整型和字符串型的下标。
+     </para>
+     <para>
+      值可以是任何值。
+      <informalexample>
+       <programlisting role="php">
+<![CDATA[
+array("somearray" => array(6 => 5, 13 => 9, "a" => 43));
+]]>
+       </programlisting>
+      </informalexample>
+     </para>
+     <para>
+      如果省略键名，则取当前最大的整数索引，而新的键名将是该值加一。整数可以为负，所以对于负的索引也是这样。例如最大的索引是
+      <literal>-6</literal> 将导致新的键名是 <literal>-5</literal>。如果还不存在整数索引，则键名将为
+      <literal>0</literal>（零）。如果你指定的键名已经有了值，则该值会被覆盖。
+      <informalexample>
+       <programlisting role="php">
+<![CDATA[
+// This array is the same as ...
+array(5 => 43, 32, 56, "b" => 12);
+
+// ...this array
+array(5 => 43, 6 => 32, 7 => 56, "b" => 12);
+]]>
+       </programlisting>
+      </informalexample>
+     </para>
+     <para>
+      使用 &true; 作为键名将使 <type>integer</type> <literal>1</literal> 成为键名。使用
+      &false; 作为键名将使 <type>integer</type> <literal>0</literal> 成为键名。使用
+      <literal>NULL</literal> 作为键名将等同于使用空字符串。使用空字符串作为键名将新建（或覆盖）一个用空字符串作为键名的值，这和用空的方括号不一样。
+     </para>
+     <para>
+      不能用数组和对象作为键名。这样做会导致一个警告：<literal>Illegal offset type</literal>。
+     </para>    
     </sect3>
     
     <sect3 id="language.types.array.syntax.modifying">
@@ -904,15 +989,29 @@ array( <optional> <replaceable>key</replaceable> =&gt; </optional> <replaceable
       <synopsis>
 $arr[<replaceable>key</replaceable>] = <replaceable>value</replaceable>;
 $arr[] = <replaceable>value</replaceable>;
-// <replaceable>key</replaceable> is either <type>string</type> or nonnegative <type>integer</type>
-// <replaceable>value</replaceable> can be anything
+// <replaceable>key</replaceable> 不是 <type>string</type> 就是非负的 <type>integer</type>
+// <replaceable>value</replaceable> 可以为任何值。
       </synopsis>
       如果 <varname>$arr</varname> 还不存在，将会新建一个。这也是一种定义数组的替换方法。要改变一个值，只要给它赋一个新值。如果要删除一个键名／值对，要对它用 <function>unset</function>。
-     </para>
+      <informalexample>
+       <programlisting role="php">
+<![CDATA[
+$arr = array(5 => 1, 12 => 2);
 
+$arr[] = 56;    // This is the same as $arr[13] = 56;
+                // at this point of the script
+
+$arr["x"] = 42; // This adds a new element to
+                // the array with key "x"
+                
+unset($arr[5]); // This removes the element from the array
+
+unset($arr);    // This deletes the whole array
+]]> 
+       </programlisting>
+      </informalexample>
+	 </para>
     </sect3>
-    
-
    </sect2><!-- end syntax -->
    
    <sect2 id="language.types.array.useful-funcs">
@@ -942,7 +1041,6 @@ unset( $a[2] );
     <para>
      <link linkend="control-structures.foreach">foreach</link> 控制结构是专门用于数组的。它提供了一个简单的方法来遍历数组。
     </para>
-    
    </sect2>
    
    <sect2 id="language.types.array.donts">
@@ -976,9 +1074,9 @@ echo $arr[ foo(true) ];
       <informalexample>
        <programlisting role="php">
 <![CDATA[
-$error_descriptions[E_ERROR] = "A fatal error has occured";
+$error_descriptions[E_ERROR]   = "A fatal error has occured";
 $error_descriptions[E_WARNING] = "PHP issued a warning";
-$error_descriptions[E_NOTICE] = "This is just an informal notice";
+$error_descriptions[E_NOTICE]  = "This is just an informal notice";
 ]]>
        </programlisting>
       </informalexample>
@@ -1002,15 +1100,44 @@ $error_descriptions[8] = "This is just an informal notice";
      <sect4>
       <title>那么为什么这样做不好？</title>
       <para>
-       在未来的某一时刻，PHP 开发小组可能会想新增一个常量或者关键字，那你就有麻烦了。例如你已经不能这样用
+       在未来的某一时刻，PHP 开发小组可能会想新增一个常量或者关键字，或者您可能希望在以后在您的程序中引入新的常量，那你就有麻烦了。例如你已经不能这样用
        <literal>empty</literal> 和 <literal>default</literal> 这两个词了，因为他们是<link linkend="reserved">保留字</link>。
       </para>
       <note>
-       <simpara>
+       <para>
         当你把 <link linkend="function.error-reporting">error_reporting</link> 设为
         <literal>E_ALL</literal> 时，你将会看到无论何时使用了未定义的
-        <literal>index</literal> 时，PHP 都会产生通知（在你的脚本中加入一行 <literal>error_reporting(E_ALL);</literal>）。
-       </simpara>
+        <literal>index</literal> 时，PHP 都会产生通知。
+		请看以下脚本：
+        <informalexample>
+         <programlisting role="php">
+<![CDATA[
+<?php
+
+// Turn on the display of all errors
+error_reporting(E_ALL);
+
+// Define the test array
+$abc = array("x" => "y");
+
+// Access element with the *bad* method
+echo $abc[x];
+
+?>
+]]>
+         </programlisting>
+        </informalexample>
+        输出为：
+        <informalexample>
+         <programlisting>
+<![CDATA[
+<br />
+<b>Notice</b>:  Use of undefined constant x - assumed 'x' in <b>/path/to/script.php</b> on
+line <b>10</b><br />
+]]>
+         </programlisting>
+        </informalexample>
+	   </para>
       </note>
       <note>
        <simpara>
@@ -1021,6 +1148,22 @@ $error_descriptions[8] = "This is just an informal notice";
     </sect3>
    </sect2>
 
+   <sect2 id="language.types.array.casting">
+    <title>转换为数组</title>
+    
+    <para>
+	 对于任何的类型：整型、浮点、字符串、布尔和资源，如果您将一个值转换为数组，您将得到一个仅有一个元素的数组（其下标为 0），即纯量值的起始值。
+    </para>
+    
+    <para>
+	 如果您将一个对象转换成一个数组，您所得到的数组的元素为该对象的属性（成员变量），其键名为成员变量名。
+    </para>
+    
+    <para>
+	 如果您将一个 &null; 值转换成数组，您将得到一个空数组。
+    </para>
+   </sect2>
+   
    <sect2 id="language.types.array.examples">
     <title>例子</title>
     <para>
@@ -1031,24 +1174,24 @@ $error_descriptions[8] = "This is just an informal notice";
        <programlisting role="php">
 <![CDATA[
 // this
-$a = array( 'color' => 'red'
-          , 'taste' => 'sweet'
-          , 'shape' => 'round'
-          , 'name'  => 'apple'
-          ,            4        // key will be 0
+$a = array( 'color' => 'red',
+            'taste' => 'sweet',
+            'shape' => 'round',
+            'name'  => 'apple',
+                       4        // key will be 0
           );
 
 // is completely equivalent with
 $a['color'] = 'red';
 $a['taste'] = 'sweet';
 $a['shape'] = 'round';
-$a['name'] = 'apple';
+$a['name']  = 'apple';
 $a[]        = 4;        // key will be 0
 
 $b[] = 'a';
 $b[] = 'b';
 $b[] = 'c';
-// will result in the array array( 0 => 'a' , 1 => 'b' , 2 => 'c' ),
+// will result in the array array(0 => 'a' , 1 => 'b' , 2 => 'c'),
 // or simply array('a', 'b', 'c')
 ]]>
        </programlisting>
@@ -1060,40 +1203,38 @@ $b[] = 'c';
      <programlisting role="php">
 <![CDATA[
 // Array as (property-)map
-$map = array( 'version'    => 4
-            , 'OS'         => 'Linux'
-            , 'lang'       => 'english'
-            , 'short_tags' => true
+$map = array( 'version'    => 4,
+              'OS'         => 'Linux',
+              'lang'       => 'english',
+              'short_tags' => true
             );
             
 // strictly numerical keys
-$array = array( 7
-              , 8
-              , 0
-              , 156
-              , -10
+$array = array( 7,
+                8,
+                0,
+                156,
+                -10
               );
-// this is the same as array( 0 => 7, 1 => 8, ...)
+// this is the same as array(0 => 7, 1 => 8, ...)
 
-$switching = array(         10 // key = 0
-                  , 5    =>  6
-                  , 3    =>  7 
-                  , 'a'  =>  4
-                  ,         11 // key = 6 (maximum of integer-indices was 5)
-                  , '8'  =>  2 // key = 8 (integer!)
-                  , '02' => 77 // key = '02'
-                  , 0    => 12 // the value 10 will be overwritten by 12
+$switching = array(         10, // key = 0
+                    5    =>  6,
+                    3    =>  7, 
+                    'a'  =>  4,
+                            11, // key = 6 (maximum of integer-indices was 5)
+                    '8'  =>  2, // key = 8 (integer!)
+                    '02' => 77, // key = '02'
+                    0    => 12  // the value 10 will be overwritten by 12
                   );
                   
 // empty array
 $empty = array();         
 ]]>
 <!-- TODO example of
-- mixed keys
 - overwriting keys
-- integer keys as string
 - using vars/functions as key/values
-- mixed skipping
+- warning about references
 -->
      </programlisting>
     </example>
@@ -1102,9 +1243,9 @@ $empty = array();
      <title>集合</title>
      <programlisting role="php">
 <![CDATA[
-$colors = array('red','blue','green','yellow');
+$colors = array('red', 'blue', 'green', 'yellow');
 
-foreach ( $colors as $color ) {
+foreach ($colors as $color) {
     echo "Do you like $color?\n";
 }
 
@@ -1174,13 +1315,12 @@ Array
      </example>
     </para>
     <example>
-     <title>填充真正的数组</title>
+     <title>填充数组</title>
      <programlisting role="php">
 <![CDATA[
 // fill an array with all items from a directory
 $handle = opendir('.');
-while ($file = readdir($handle)) 
-{
+while ($file = readdir($handle)) {
     $files[] = $file;
 }
 closedir($handle); 
@@ -1188,7 +1328,7 @@ closedir($handle);
      </programlisting>
     </example>
     <para>
-     数组是有序的。你也可以使用不同的排序函数来改变顺序。更多信息参见<link linkend="ref.array">数组函数库</link>。
+     数组是有序的。你也可以使用不同的排序函数来改变顺序。更多信息参见<link linkend="ref.array">数组函数库</link>。您可以用 <function>count</function> 函数来数出数组中元素的个数。
     </para>
     <example>
      <title>数组排序</title>
@@ -1206,228 +1346,51 @@ print_r($files);
      <title>递归和多维数组</title>
      <programlisting role="php">
 <![CDATA[
-$fruits = array ( "fruits"  => array ( "a" => "orange"
-                                     , "b" => "banana"
-                                     , "c" => "apple"
-                                     )
-                , "numbers" => array ( 1
-                                     , 2
-                                     , 3
-                                     , 4
-                                     , 5
-                                     , 6
-                                     )
-                , "holes"   => array (      "first"
-                                     , 5 => "second"
-                                     ,      "third"
+$fruits = array ( "fruits"  => array ( "a" => "orange",
+                                       "b" => "banana",
+                                       "c" => "apple"
+                                     ),
+                  "numbers" => array ( 1,
+                                       2,
+                                       3,
+                                       4,
+                                       5,
+                                       6,
+                                     ),
+                  "holes"   => array (      "first",
+                                       5 => "second",
+                                            "third"
                                      )
                 );
+
+// Some examples to address values in the array above 
+echo $fruits["holes"][5];    // prints "second"
+echo $fruits["fruits"]["a"]; // prints "orange"
+unset($fruits["holes"][0]);  // remove "first"
+
+// Create a new multi-dimensional array
+$juices["apple"]["green"] = "good"; 
 ]]>
-<!-- quite duplicate...
-$a = array(
-     "apple"  => array(
-          "color"  => "red",
-          "taste"  => "sweet",
-          "shape"  => "round"
-     ),
-     "orange"  => array(
-          "color"  => "orange",
-          "taste"  => "tart",
-          "shape"  => "round"
-     ),
-     "banana"  => array(
-          "color"  => "yellow",
-          "taste"  => "paste-y",
-          "shape"  => "banana-shaped"
-     )
-);
--->
      </programlisting>
     </example>
 
-   </sect2>
-   
-   <!-- TODO
-   <sect2>
-    <title>Misc</title>
-   
-   </sect2>
-   
-   - example multi-dim with $arr[bla][bla] syntax
-   - converting to array
-   - warning about references
-   - note that assigning is copy (usually...)
-   
-   
-   -->  
-
-<!-- there is no such thing as multi/singel dim arrays (at least in PHP4) 
-   <sect2 id="language.types.array.single-dim">
-    <title>Single Dimension Arrays</title>
-
     <para>
-     PHP supports both scalar and associative arrays. In fact, there
-     is no difference between the two.  You can create an array using
-     the 
-     
-     <function>list</function> 
-     
-     Nope
-     
-     
-     
-     
-     or <function>array</function>
-     functions, or you can explicitly set each array element value.
-     <informalexample>
-      <programlisting role="php"> 
-$a[0] = "abc"; 
-$a[1] = "def"; 
-$b["foo"] = 13;
-      </programlisting>
-     </informalexample>
-    </para>
-    <para>
-     You can also create an array by simply adding values to the
-     array. When you assign a value to an array variable using empty
-     brackets, the value will be added onto the end of the array.
-     <informalexample>
-      <programlisting role="php"> 
-$a[] = "hello"; // $a[2] == "hello"
-$a[] = "world"; // $a[3] == "world" 
-      </programlisting>
-     </informalexample>
-    </para>
-    <para>
-     Arrays may be sorted using the <function>asort</function>,
-     <function>arsort</function>, <function>ksort</function>,
-     <function>rsort</function>, <function>sort</function>,
-     <function>uasort</function>, <function>usort</function>, and
-     <function>uksort</function> functions depending on the type of
-     sort you want.
-    </para>
-    <para>
-     You can count the number of items in an array using the
-     <function>count</function> function.
-    </para>
-    <para>
-     You can traverse an array using <function>next</function> and
-     <function>prev</function> functions.  Another common way to
-     traverse an array is to use the <function>each</function>
-     function.
-    </para>
-   </sect2>
-
-   <sect2 id="language.types.array.multi-dim">
-    <title>Multi-Dimensional Arrays</title>
-
-    <para>
-     Multi-dimensional arrays are actually pretty simple.  For each
-     dimension of the array, you add another [key] value to the end:
-     <informalexample>
-      <programlisting role="php"> 
-$a[1]      = $f;               # one dimensional examples
-$a["foo"]  = $f;   
-
-$a[1][0]     = $f;             # two dimensional
-$a["foo"][2] = $f;             # (you can mix numeric and associative indices)
-$a[3]["bar"] = $f;             # (you can mix numeric and associative indices)
-
-$a["foo"][4]["bar"][0] = $f;   # four dimensional!
-      </programlisting>
-     </informalexample>
-    </para>
-    <para>
-     In PHP 3 it is not possible to reference multidimensional arrays
-     directly within strings. For instance, the following will not
-     have the desired result:
-     <informalexample>
-      <programlisting role="php"> 
-$a[3]['bar'] = 'Bob';
-echo "This won't work: $a[3][bar]";
-      </programlisting>
-     </informalexample>
-     In PHP 3, the above will output <computeroutput>This won't work:
-     Array[bar]</computeroutput>. The string concatenation operator,
-     however, can be used to overcome this:
+	 您需要注意数组的赋值总是会涉及到值的拷贝。您需要在复制数组时用指向符号（&）。
      <informalexample>
       <programlisting role="php">
-$a[3]['bar'] = 'Bob';
-echo "This will work: " . $a[3]['bar'];
+<![CDATA[
+$arr1 = array(2, 3);
+$arr2 = $arr1;
+$arr2[] = 4; // $arr2 is changed,
+             // $arr1 is still array(2,3)
+             
+$arr3 = &$arr1;
+$arr3[] = 4; // now $arr1 and $arr3 are the same
+]]>
       </programlisting>
      </informalexample>
     </para>
-    <para>
-     In PHP 4, however, the whole problem may be circumvented by
-     enclosing the array reference (inside the string) in curly
-     braces:
-     <informalexample>
-      <programlisting role="php">
-$a[3]['bar'] = 'Bob';
-echo "This will work: {$a[3][bar]}";
-      </programlisting>
-     </informalexample>
-    </para>
-    <para>
-     You can "fill up" multi-dimensional arrays in many ways, but the
-     trickiest one to understand is how to use the
-     <function>array</function> command for associative arrays.  These
-     two snippets of code fill up the one-dimensional array in the
-     same way:
-     <informalexample>
-      <programlisting role="php"> 
-# Example 1:
-
-$a["color"]	= "red";
-$a["taste"]	= "sweet";
-$a["shape"]	= "round";
-$a["name"]	= "apple";
-$a[3]		= 4;
-
-# Example 2:
-$a = array(
-     "color" => "red",
-     "taste" => "sweet",
-     "shape" => "round",
-     "name"  => "apple",
-     3       => 4
-);
-      </programlisting>
-     </informalexample>
-    </para>
-    <para>
-     The <function>array</function> function can be nested for
-     multi-dimensional arrays:
-     <informalexample>
-      <programlisting role="php"> 
-&lt;?php
-$a = array(
-     "apple"  => array(
-          "color"  => "red",
-          "taste"  => "sweet",
-          "shape"  => "round"
-     ),
-     "orange"  => array(
-          "color"  => "orange",
-          "taste"  => "tart",
-          "shape"  => "round"
-     ),
-     "banana"  => array(
-          "color"  => "yellow",
-          "taste"  => "paste-y",
-          "shape"  => "banana-shaped"
-     )
-);
-
-echo $a["apple"]["taste"];    # will output "sweet"
-?>
-      </programlisting>
-     </informalexample>
-    </para>
-
    </sect2>
-   
-   -->
   </sect1>
 
   <sect1 id="language.types.object">
@@ -1461,7 +1424,19 @@ $bar->do_foo();
     <simpara>
      完整的讨论见<link linkend="language.oop">类与对象</link>一章。
     </simpara>
-
+   </sect2>
+   <sect2 id="language.types.object.casting">
+    <title>转换为对象</title>
+    
+    <para>
+	 如果将一个对象转换成对象，它将不会有任何变化。如果其它任何类型的值被转换成对象，内置类 <literal>stdClass</literal> 的一个实例将被建立。如果该值为 &null;，则新的实例为空。对于任何其它的值，名为 <literal>scalar</literal> 的成员变量将包含该值。
+     <informalexample>
+      <programlisting role="php">
+$obj = (object) 'ciao';
+echo $obj-&gt;scalar;  // outputs 'ciao'
+      </programlisting>
+     </informalexample>
+    </para>
    </sect2>
   </sect1>
 
@@ -1477,6 +1452,14 @@ $bar->do_foo();
       资源类型是 PHP 4 引进的。
      </simpara>
     </note>
+
+   <sect2 id="language.types.resource.casting">
+    <title>转换为资源</title>
+    
+    <para>
+	 由于资源类型变量保存有为打开文件、数据库连接、图形画布区域等的特殊句柄，您无法将其它类型的值转换为资源。
+    </para>
+   </sect2>
 
     <sect2 id="language.types.resource.self-destruct">
      <title>释放资源</title>
@@ -1542,6 +1525,87 @@ $var = NULL;
    </sect2>
   
   </sect1>
+ 
+  <sect1 id="language.pseudo-types">
+   <title>本文档中使用的伪类型</title> 
+
+   <sect2 id="language.types.mixed">
+    <title>mixed</title>
+    <para>
+     <literal>mixed</literal> 说明一个参数可以接受多种不同的（但并不必须是所有的）类型。
+    </para>
+    <para>
+     <function>gettype</function> 表明可以接受所有的 PHP 类型，例如 <function>str_replace</function> 将接受字符串和数组。
+    </para>
+   </sect2>
+  
+   <sect2 id="language.types.number">
+    <title>number</title>
+    <para>
+     <literal>number</literal> 说明一个参数可以是 <type>integer</type> 或者 <type>float</type>。
+    </para>
+   </sect2>
+
+   <sect2 id="language.types.callback">
+    <title>callback</title>
+    <para>
+	 有些诸如 <function>call_user_function</function> 或 <function>usort</function> 的函数接受用户自定义的函数作为一个参数。Callback 函数不仅可以是一个简单的函数，它还可以是一个对象的方法，包括静态类的方法。
+    </para>
+    <para>
+	 一个 PHP 函数用函数名字符串来传递。您可以传递任何内建的或者用户自定义的函数，除了
+     <function>array</function>，
+     <function>echo</function>，
+     <function>empty</function>，
+     <function>eval</function>，
+     <function>exit</function>，
+     <function>isset</function>，
+     <function>list</function>，
+     <function>print</function> 和
+     <function>unset</function>。
+    </para>
+    <para>
+	 一个对象的方法以数组的形式来传递，数组的 0 下标指明对象名，下标 1 指明方法名。
+    </para>
+    <para>
+	 对于没有实例化为对象的静态类，要传递其方法，将数组 0 下标指明的对象名换成该类的名称即可。
+    </para>
+
+    <para>
+     <example>
+      <title>
+	   Callback 函数实例
+      </title>
+      <programlisting role="php">
+<![CDATA[
+<?php 
+
+// simple callback example
+function foobar() {
+    echo "hello world!";
+}
+call_user_function("foobar"); 
+
+// method callback examples
+class foo {
+  function bar() {
+    echo "hello world!";
+  }
+}
+
+$foo = new foo;
+
+call_user_function(array($foo, "bar")); // object method call
+
+call_user_function(array("foo", "bar")); // static class method call
+
+?>
+]]>
+      </programlisting>
+     </example>
+    </para>  
+   
+   </sect2>
+  </sect1>
 
   <sect1 id="language.types.type-juggling">
    <title>类型戏法</title>
@@ -1585,7 +1649,7 @@ examples:
     </informalexample>
    </para>
    <simpara>
-    如果上面两个例子看上去古怪的话，参见<link linkend="language.types.string.conversion">字符串转换</link>。
+    如果上面两个例子看上去古怪的话，参见<link linkend="language.types.string.conversion">字符串转换为数值</link>。
    </simpara>
    <simpara>
     如果你要强制将一个变量当作某种类型来求值，参见<link
@@ -1607,14 +1671,18 @@ $a[0] = "f";  // 是字符串偏移量吗？结果会是什么？
      </informalexample>
     </para>
     <para>
-     由于 PHP 支持通过偏移量进行的字符串索引，这和数组索引的语法一样。以上的例子就产生了一个问题：$a
+     由于一些历史原因，PHP 支持通过偏移量进行的字符串索引，这和数组索引的语法一样。以上的例子就产生了一个问题：$a
      应该变成一个第一个元素是“f”的数组呢，还是“f”成了字符串 $a 的第一个字符？
     </para>
     <para>
-     由于此原因，在 PHP 3.0.12 和 PHP 4.0b3-RC4 中这种自动转换的结果被当成未定义。解决方案仍在讨论之中。
-    </para>
-    <para>
-     （译者注：）PHP 4 中上面的一个例子出错，第二个例子的结果将是字符串 $a = 'f'。
+	 目前版本的 PHP 将以上第二个赋值理解成字符串的偏移量标识，即 $a 变成了 "f"，尽管如此，这种自动转换的地结果应该被认为未定义。PHP 4 引入了新的花括号语法来访问字符串的字符，请使用该语法来替代以上的操作：
+     <informalexample>
+      <programlisting role="php">
+$a    = "abc"; // $a 为一个字符串
+$a{1} = "f";   // $a 目前为 "afc"
+      </programlisting>
+     </informalexample>
+	 请参阅题为“<link linkend="language.types.string.substr">用字符访问字符串</link>”的章节以获取更多信息。
     </para>
    </note>
 
@@ -1626,7 +1694,7 @@ $a[0] = "f";  // 是字符串偏移量吗？结果会是什么？
      <informalexample>
       <programlisting role="php">
 $foo = 10;   // $foo is an integer
-$bar = (float) $foo;   // $bar is a float
+$bar = (boolean) $foo;   // $bar is a boolean
       </programlisting>
      </informalexample>
     </para>
@@ -1653,12 +1721,6 @@ $bar = (float) $foo;   // $bar is a float
       </listitem>
      </itemizedlist>
     </para>
-    <note>
-     <simpara>
-      除了用强制转换将变量转换成字符串之外，还可以将变量用双引号引起来。
-      <!-- TODO: example -->
-     </simpara>
-    </note>
      
     <para>
      注意在括号内允许有空格和制表符，所以下面两个例子功能相同：
@@ -1669,6 +1731,24 @@ $foo = ( int ) $bar;
       </programlisting>
      </informalexample>
     </para>
+    <note>
+     <para>
+	  为了将一个变量还原为字符串，您还可以将变量放置在双引号种。
+     <informalexample>
+      <programlisting role="php">
+$foo = 10;            // $foo is an integer
+$str = "$foo";        // $str is a string
+$fst = (string) $foo; // $fst is also a string
+
+// This prints out that "they are the same"
+if ($fst === $str) {
+    echo "they are the same";
+}
+      </programlisting>
+     </informalexample>
+     </para>
+    </note>
+
     <para>
      当在某些类型之间强制转换时确切地会发生什么可能不是很明显。更多信息见如下小节：
 
@@ -1679,63 +1759,31 @@ $foo = ( int ) $bar;
       <listitem>
        <simpara><link linkend="language.types.integer.casting">转换为整型</link></simpara>
       </listitem>
+      <listitem>
+       <simpara><link linkend="language.types.float.casting">转换为浮点型</link></simpara>
+      </listitem>
+      <listitem>
+       <simpara><link linkend="language.types.string.casting">转换为字符串</link></simpara>
+      </listitem>
+      <listitem>
+       <simpara><link linkend="language.types.array.casting">转换为数组</link></simpara>
+      </listitem>
+      <listitem>
+       <simpara><link linkend="language.types.object.casting">转换为对象</link></simpara>
+      </listitem>
+      <listitem>
+       <simpara><link linkend="language.types.resource.casting">转换为资源</link></simpara>
+      </listitem>
       <!-- don't exist yet
-      <listitem>
-       <simpara><link linkend="language.types.float.casting">Converting to 
-        float</link></simpara>
-      </listitem>
-      <listitem>
-       <simpara><link linkend="language.types.string.casting">Converting to 
-        string</link></simpara>
-      </listitem>
-      <listitem>
-       <simpara><link linkend="language.types.array.casting">Converting to 
-        array</link></simpara>
-      </listitem>
-      <listitem>
-       <simpara><link linkend="language.types.object.casting">Converting to 
-        object</link></simpara>
-      </listitem>
-      <listitem>
-       <simpara><link linkend="language.types.resource.casting">Converting to 
-        resource</link></simpara>
-      </listitem>
       <listitem>
        <simpara><link linkend="language.types.null.casting">Converting to 
         &null;</link></simpara>
       </listitem>
       -->
      </itemizedlist>
-    
     </para>
-    <para>
-     <!-- TODO: move to 'converting to string' -->
-     当强制将数组转换为字符串时，结果将是 <literal>Array</literal> 这个词。当强制将对象转换为字符串时，结果将是 <literal>Object</literal> 这个词。
-    </para>
-    <para>
-     当强制将一个标量或字符串转换为数组时，变量将成为数组的第一个元素：
-     <informalexample>
-      <programlisting role="php">
-$var = 'ciao';
-$arr = (array) $var;
-echo $arr[0];  // outputs 'ciao'  
-      </programlisting>
-     </informalexample>
-    </para>
-    <para>
-     当强制将一个标量或字符串转换为对象时，变量会成为对象的属性，属性名为“scalar”：
-     <informalexample>
-      <programlisting role="php">
-$var = 'ciao';
-$obj = (object) $var;
-echo $obj-&gt;scalar;  // outputs 'ciao'
-      </programlisting>
-     </informalexample>
-    </para>
-
    </sect2>
   </sect1>
-
  </chapter>
  
 <!-- Keep this comment at the end of the file
