@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.22 $ -->
-<!-- $Author: class007 $ -->
-<!-- EN-Revision: 1.20 Maintainer: class007 Status: ready -->
+<!-- $Revision: 1.23 $ -->
+<!-- $Author: dallas $ -->
+<!-- EN-Revision: 1.22 Maintainer: class007 Status: working -->
+<!-- CREDITS: dallas -->
 <appendix id="phpdevel">
  <title>扩展 PHP</title>
 
@@ -43,29 +44,34 @@ if (ARG_COUNT(ht) != 2 || getParameters(ht,2,&arg1,&arg2)==FAILURE) {
      </programlisting>
     </example>
     
-    注意：参数既可以被值(value)传递又可以被引用(reference)传递。两种情况您都需要将 &amp;(pval *) 传递给 getParameters 函数。如果您想检查第 n 个参数是否通过引用传递给您，您可以使用 ParameterPassedByReference(ht,n) 函数。它的返回值为 0 或者 1。
+    注意：参数既可以被值（value）传递又可以被引用（reference）传递。两种情况您都需要将
+    &amp;(pval *) 传递给 getParameters 函数。如果您想检查第 n
+    个参数是否通过引用传递给您，您可以使用 ParameterPassedByReference(ht,n)
+    函数。它的返回值为 0 或者 1。
    </para>
     
    <simpara>
-    当您改变了任何已传递的参数，无论它们是以值或者引用的方式传递，您都可以对它使用 pval_destructor 函数来销毁它。或者如果它是一个您想添加的数组，您可以使用类似于 internal_functions.h 中定义函数的方法来将返回值 return_value 作为数组来操作。
+    当您改变了任何已传递的参数，无论它们是以值或者引用的方式传递，您都可以对它使用
+    pval_destructor 函数来销毁它。或者如果它是一个您想添加的数组，您可以使用类似于
+    internal_functions.h 中定义函数的方法来将返回值 return_value 作为数组来操作。
    </simpara>
 
    <simpara>
-    Also if you change a parameter to IS_STRING make sure you first
-    assign the new estrdup()'ed string and the string length, and only
-    later change the type to IS_STRING. If you change the string of a
-    parameter which already IS_STRING or IS_ARRAY you should run
-    pval_destructor on it first.</simpara></sect2>
+    此外当你将一个参数改为 IS_STRING 时要确保先给 estrdup()
+    出来的字符串赋值以及给出字符串长度，然后才将它的类型改为 IS_STRING。如果要修改一个已经是
+    IS_STRING 或 IS_ARRAY 的参数应该先对其运行 pval_destructor。
+   </simpara>
+  </sect2>
    
   <sect2 id="phpdevel-addfunc-varargs">
-   <title>Variable Function Arguments</title>
+   <title>可变函数参数</title>
    <para>
-    A function can take a variable number of arguments.  If your function can
-    take either 2 or 3 arguments, use the following:</para>
+    函数可以接受不同数目的参数。如果你的函数可以接受 2 或 3 个参数，这样用：
+   </para>
     
    <para>
     <example>
-     <title>Variable function arguments</title>
+     <title>可变函数参数</title>
      <programlisting role="c">
 <![CDATA[
 pval *arg1, *arg2, *arg3;
@@ -77,33 +83,33 @@ if (arg_count < 2 || arg_count > 3 ||
 }
 ]]>
     </programlisting>
-    </example></para></sect2>
+    </example>
+   </para>
+  </sect2>
      
   <sect2 id="phpdevel-addfunc-using-args">
-   <title>Using the Function Arguments</title>
+   <title>使用函数参数</title>
    <para>
-    The type of each argument is stored in the pval type field. This
-    type can be any of the following:
-    
+    每个参数的类型存放在 pval 的类型字段中。可以是以下任何一种：
     <table>
-     <title>PHP Internal Types</title>
+     <title>PHP 内部类型</title>
      <tgroup cols="2">
       <tbody>
        <row>
         <entry>IS_STRING</entry>
-        <entry>String</entry>
+        <entry>字符串</entry>
        </row>
        <row>
         <entry>IS_DOUBLE</entry>
-        <entry>Double-precision floating point</entry>
+        <entry>双精度浮点型</entry>
        </row>
        <row>
         <entry>IS_LONG</entry>
-        <entry>Long integer</entry>
+        <entry>长整型</entry>
        </row>
        <row>
         <entry>IS_ARRAY</entry>
-        <entry>Array</entry>
+        <entry>数组</entry>
        </row>
        <row>
         <entry>IS_EMPTY</entry>
@@ -115,7 +121,7 @@ if (arg_count < 2 || arg_count > 3 ||
        </row>
        <row>
         <entry>IS_INTERNAL_FUNCTION</entry>
-        <entry>?? (if some of these cannot be passed to a function - delete)</entry>
+        <entry>??（如果其中某些不能被传递给一个函数，则删除）</entry>
        </row>
        <row>
         <entry>IS_CLASS</entry>
@@ -130,11 +136,7 @@ if (arg_count < 2 || arg_count > 3 ||
     </table></para>
 
    <para>
-    If you get an argument of one type and would like to use it as
-    another, or if you just want to force the argument to be of a
-    certain type, you can use one of the following conversion
-    functions:
-
+    如果得到了一种类型的参数但是却想按照另一种类型来使用，或者想强制参数为某种类型，可以使用以下的转换函数：
     <programlisting role="c">
 <![CDATA[
 convert_to_long(arg1);
@@ -146,10 +148,11 @@ convert_string_to_number(arg1);  /* Converts string to either LONG or DOUBLE dep
      </programlisting></para>
     
    <simpara>
-    These function all do in-place conversion.  They do not return anything.</simpara>
+    这些函数都是即时转换的，并不返回任何值。
+   </simpara>
 
    <para>
-    The actual argument is stored in a union; the members are:
+    实际上的参数被存放在一个联合中，成员为：
     <itemizedlist>
      <listitem><simpara>IS_STRING: arg1-&gt;value.str.val</simpara></listitem>
      <listitem><simpara>IS_LONG: arg1-&gt;value.lval</simpara></listitem>
@@ -157,46 +160,35 @@ convert_string_to_number(arg1);  /* Converts string to either LONG or DOUBLE dep
     </itemizedlist></para></sect2>
     
   <sect2 id="phpdevel-addfunc-memmgmt">
-   <title>Memory Management in Functions</title>
+   <title>函数中的内存管理</title>
    <simpara>
-    Any memory needed by a function should be allocated with either
-    emalloc() or estrdup().  These are memory handling abstraction
-    functions that look and smell like the normal malloc() and
-    strdup() functions.  Memory should be freed with efree().</simpara>
+    函数所使用的任何内存都应该通过 emalloc() 或者 estrdup()
+    来申请。它们是内存处理抽象函数，看上去就像普通的 malloc() 和
+    strdup() 函数一样。内存应该用 efree() 来释放。
+   </simpara>
 
    <simpara>
-    There are two kinds of memory in this program: memory which is
-    returned to the parser in a variable, and memory which you need for
-    temporary storage in your internal function.  When you assign a
-    string to a variable which is returned to the parser you need to
-    make sure you first allocate the memory with either emalloc() or
-    estrdup().  This memory should NEVER be freed by you, unless you
-    later in the same function overwrite your original assignment
-    (this kind of programming practice is not good though).</simpara>
+    程序中有两种内存：作为变量被返回到解释器中的内存，以及内部函数所需要的临时存储空间。当把一个字符串赋给一个返回解释器的变量时需要确保首先通过
+    emalloc() 或者 estrdup() 分配了内存。该内存决不该由你来释放，除非你在同一个函数中后来又覆盖了原来的赋值（这并不是一种好的编程实践）。
+   </simpara>
 
    <simpara>
-    For any temporary/permanent memory you need in your
-    functions/library you should use the three emalloc(), estrdup(),
-    and efree() functions. They behave EXACTLY like their counterpart
-    functions. Anything you emalloc() or estrdup() you have to efree()
-    at some point or another, unless it's supposed to stick around
-    until the end of the program; otherwise, there will be a memory
-    leak. The meaning of "the functions behave exactly like their
-    counterparts" is: if you efree() something which was not
-    emalloc()'ed nor estrdup()'ed you might get a segmentation
-    fault. So please take care and free all of your wasted memory.</simpara> 
+    任何在你的函数/库中所需要的临时/永久内存都要通过这三个函数来进行：emalloc()，estrdup()
+    和 efree()。它们的行为完全和它们相对应的函数相同。任何通过 emalloc()
+    或 estrdup() 都要用 efree()
+    在某个环节释放，除非它们本来就需要存在到程序结束。否则就会出现内存泄漏。“它们的行为完全和它们相对应的函数相同”的意思是：如果你用 efree() 释放了不是由 emalloc() 或 estrdup() 分配的内存时可能会导致段错误。所以要留意释放所有不需要的内存。
+   </simpara>
 
    <simpara>
-    If you compile with "-DDEBUG", PHP will print out a list of all
-    memory that was allocated using emalloc() and estrdup() but never
-    freed with efree() when it is done running the specified script.</simpara></sect2>
+    如果编译时指定了 "-DDEBUG"，PHP 将在脚本运行结束后显示出所有通过 emalloc() 和 estrdup()
+    分配但是没有用 efree() 释放的内存列表。
+   </simpara>
+  </sect2>
 
   <sect2 id="phpdevel-addfunc-symtab">
-   <title>Setting Variables in the Symbol Table</title>
+   <title>在符号表中设定变量</title>
    <para>
-    A number of macros are available which make it easier to set a
-    variable in the symbol table:
-    
+    有一些宏可以使在符号表中设定变量更容易：
     <itemizedlist>
      <listitem><simpara>SET_VAR_STRING(name,value)</simpara></listitem>
      <listitem><simpara>SET_VAR_DOUBLE(name,value)</simpara></listitem>
@@ -206,29 +198,24 @@ convert_string_to_number(arg1);  /* Converts string to either LONG or DOUBLE dep
 
    <warning>
     <para>
-     Be careful with SET_VAR_STRING. The value part must be malloc'ed
-     manually because the memory management code will try to free this
-     pointer later. Do not pass statically allocated memory into a
-     SET_VAR_STRING.
+     要注意 SET_VAR_STRING。值的部分必须是人工分配出来的，因为内存管理代码会在以后尝试释放该指针。不要将静态分配的内存传递给 SET_VAR_STRING。
     </para>
    </warning>
     
    <simpara>
-    Symbol tables in PHP are implemented as hash tables.  At any
-    given time, &amp;symbol_table is a pointer to the 'main' symbol
-    table, and active_symbol_table points to the currently active
-    symbol table (these may be identical like in startup, or
-    different, if you're inside a function).</simpara>
+    PHP 中的符号表是以散列表来实现的。任何时候 &amp;symbol_table
+    都是一个指向 'main' 符号表的指针，active_symbol_table points
+    指向当前活动的符号表（二者在开始时等同，而在函数内不同）。
+   </simpara>
   
    <para>
-    The following examples use 'active_symbol_table'.  You should
-    replace it with &amp;symbol_table if you specifically want to work
-    with the 'main' symbol table.  Also, the same functions may be
-    applied to arrays, as explained below.</para>
+    以下例子使用了 'active_symbol_table'。如果你指明要工作于
+    'main' 符号表，应该用 &amp;symbol_table 来替代。此外，同样的函数也能像下面说明的作用于数组。
+   </para>
   
    <para>
     <example>
-     <title>Checking whether $foo exists in a symbol table</title>
+     <title>检查 $foo 是否存在于符号表</title>
      <programlisting role="c">
 <![CDATA[
 if (hash_exists(active_symbol_table,"foo",sizeof("foo"))) { exists... }
@@ -238,7 +225,7 @@ else { doesn't exist }
     </example>
 
     <example>
-     <title>Finding a variable's size in a symbol table</title>
+     <title>在符号表中找到一个变量的字长</title>
      <programlisting role="c">
 <![CDATA[
 hash_find(active_symbol_table,"foo",sizeof("foo"),&pvalue);
@@ -247,24 +234,24 @@ check(pvalue.type);
      </programlisting>
     </example>
     
-    Arrays in PHP are implemented using the same hashtables as
-    symbol tables.  This means the two above functions can also be
-    used to check variables inside arrays.</para>
+    PHP 中的数组使用了和符号表同一个散列表来实现。这意味着以上两个函数也可以用来检查数组中的变量。
+   </para>
     
    <simpara>
-    If you want to define a new array in a symbol table, you should do
-    the following.</simpara>
+    如果要在符号表中定义一个新数组，应该这样做。
+   </simpara>
 
    <simpara>
-    First, you may want to check whether it exists and abort
-    appropriately, using hash_exists() or hash_find().</simpara>
+    首先，要用 hash_exists() 或 hash_find() 检查它是否存在并且正确中止。
+   </simpara>
 
    <simpara>
-    Next, initialize the array:</simpara>
+    接着，初始化数组：
+   </simpara>
     
    <para>
     <example>
-     <title>Initializing a new array</title>
+     <title>初始化新数组</title>
      <programlisting role="c">
 <![CDATA[
 pval arr;
@@ -275,15 +262,15 @@ hash_update(active_symbol_table,"foo",sizeof("foo"),&arr,sizeof(pval),NULL);
      </programlisting>
     </example>
     
-    This code declares a new array, named $foo, in the active symbol
-    table. This array is empty.</para>
+    这段代码在活动符号表中定义了一个名为 $foo 的新数组。这是个空数组。
+   </para>
     
    <simpara>
-    Here's how to add new entries to it:</simpara>
+    这里展示了怎样向其中加入新的条目：</simpara>
   
    <para>
     <example>
-     <title>Adding entries to a new array</title>
+     <title>向数组中加入新的条目</title>
      <programlisting role="c">
 <![CDATA[
 pval entry;
@@ -305,20 +292,18 @@ hash_next_index_insert(arr.value.ht,&entry,sizeof(pval),NULL);
      </programlisting>
     </example>
      
-    If you'd like to modify a value that you inserted to a hash, you
-    must first retrieve it from the hash.  To prevent that overhead,
-    you can supply a pval ** to the hash add function, and it'll be
-    updated with the pval * address of the inserted element inside the
-    hash.  If that value is &null; (like in all of the above examples) -
-    that parameter is ignored.</para>
+    如果要修改一个插入到散列表中的值，必须先将其提取出来。要避免额外开销你可以给
+    hash add 函数提供一个 pval ** 参数，它将被表中相应单元的
+    pval * 地址所更新。如果其值为 &null;（如同以上所有的例子），该参数被忽略。
+   </para>
 
    <simpara>
-    hash_next_index_insert() uses more or less the same logic as
-    "$foo[] = bar;" in PHP 2.0.</simpara>
+    hash_next_index_insert() 或多或少使用了如同 PHP 2.0 中
+    "$foo[] = bar;" 的逻辑。</simpara>
 
    <simpara>
-    If you are building an array to return from a function, you can
-    initialize the array just like above by doing:</simpara>
+    如果要建立一个从函数返回的数组，可以就像以上那样初始化数组：
+   </simpara>
 
    <programlisting role="c">
 <![CDATA[
@@ -327,7 +312,7 @@ if (array_init(return_value) == FAILURE) { failed...; }
    </programlisting>
 
    <simpara>
-    ...and then adding values with the helper functions:</simpara>
+    接着用有用的函数加入值：</simpara>
 
    <programlisting role="c">
 <![CDATA[
@@ -338,8 +323,7 @@ add_next_index_string(return_value,estrdup(string_value));
    </programlisting>
   
    <para>
-    Of course, if the adding isn't done right after the array
-    initialization, you'd probably have to look for the array first:
+    当然了，如果如果在数组初始化后添加不正确，你应该先查看一下数组：
       
     <programlisting role="c">
 <![CDATA[
@@ -351,12 +335,14 @@ else { use arr->value.ht... }
     </programlisting></para>
 
    <simpara>
-    Note that hash_find receives a pointer to a pval pointer, and not
-    a pval pointer.</simpara>
+    注意 hash_find 接受一个指向 pval 指针的指针，并不是 pval 指针。
+   </simpara>
   
    <simpara>
-    Just about any hash function returns SUCCESS or FAILURE (except
-    for hash_exists(), which returns a boolean truth value).</simpara></sect2>
+    以上任何 hash 函数返回 SUCCESS 或 FAILURE（除了
+    hash_exists()，它返回一个布尔真值）。
+   </simpara>
+  </sect2>
       
   <sect2 id="phpdevel-addfunc-retsimple">
    <title>Returning simple values</title>
