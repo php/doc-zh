@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.2 $ -->
+<!-- $Revision: 1.3 $ -->
 <!-- $Author: dallas $ -->
-<!-- EN-Revision: 1.6 Maintainer: dallas Status: ready -->
+<!-- EN-Revision: 1.8 Maintainer: dallas Status: ready -->
   <refentry id="function.extract">
    <refnamediv>
     <refname>extract</refname>
@@ -29,7 +29,12 @@
     </note>
     <note>
      <para>
-      EXTR_IF_EXISTS 和 EXTR_PREFIX_IF_EXISTS 是版本 4.2.0 中引进的。
+      <constant>EXTR_IF_EXISTS</constant> 和 <constant>EXTR_PREFIX_IF_EXISTS</constant> 是版本 4.2.0 中引进的。
+     </para>
+    </note>
+    <note>
+     <para>
+      <constant>EXTR_REFS</constant> 是版本 4.3.0 中引进的。
      </para>
     </note>
     <para>
@@ -37,7 +42,7 @@
      <parameter>extract_type</parameter> 参数决定。可以是以下值之一：
      <variablelist>
       <varlistentry>
-       <term>EXTR_OVERWRITE</term>
+       <term><constant>EXTR_OVERWRITE</constant></term>
        <listitem>
         <simpara>
          如果有冲突，覆盖已有的变量。
@@ -45,7 +50,7 @@
        </listitem>
       </varlistentry>
       <varlistentry>
-       <term>EXTR_SKIP</term>
+       <term><constant>EXTR_SKIP</constant></term>
        <listitem>
         <simpara>
          如果有冲突，不覆盖已有的变量。
@@ -53,14 +58,14 @@
        </listitem>
       </varlistentry>
       <varlistentry>
-       <term>EXTR_PREFIX_SAME</term>
+       <term><constant>EXTR_PREFIX_SAME</constant></term>
        <listitem>
         <simpara>如果有冲突，在变量名前加上前缀 <parameter>prefix</parameter>。
         </simpara>
        </listitem>
       </varlistentry>
       <varlistentry>
-       <term>EXTR_PREFIX_ALL</term>
+       <term><constant>EXTR_PREFIX_ALL</constant></term>
        <listitem>
         <simpara>
          给所有变量名加上前缀
@@ -69,7 +74,7 @@
        </listitem>
       </varlistentry>
       <varlistentry>
-       <term>EXTR_PREFIX_INVALID</term>
+       <term><constant>EXTR_PREFIX_INVALID</constant></term>
        <listitem>
         <simpara>
          仅在非法／数字的变量名前加上前缀
@@ -78,7 +83,7 @@
        </listitem>
       </varlistentry>
       <varlistentry>
-       <term>EXTR_IF_EXISTS</term>
+       <term><constant>EXTR_IF_EXISTS</constant></term>
        <listitem>
         <simpara>
          仅在当前符号表中已有同名变量时，覆盖它们的值。其它的都不处理。可以用在已经定义了一组合法的变量，然后要从一个数组例如
@@ -87,29 +92,42 @@
        </listitem>
       </varlistentry>
       <varlistentry>
-       <term>EXTR_PREFIX_IF_EXISTS</term>
+       <term><constant>EXTR_PREFIX_IF_EXISTS</constant></term>
        <listitem>
         <simpara>
-         仅在当前符号表中已有同名变量时，建立附加了前缀的变量名，其它的都不处理。本标记是 PHP 4.2.0 新加的。
+         仅在当前符号表中已有同名变量时，建立附加了前缀的变量名，其它的都不处理。本标记是
+         PHP 4.2.0 新加的。
+        </simpara>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term><constant>EXTR_REFS</constant></term>
+       <listitem>
+        <simpara>
+         将变量作为引用提取。这有力地表明了导入的变量仍然引用了
+         <parameter>var_array</parameter> 参数的值。可以单独使用这个标志或者在
+         <parameter>extract_type</parameter> 中用 OR 与其它任何标志结合使用。本标记是
+         PHP 4.3.0 新加的。
         </simpara>
        </listitem>
       </varlistentry>
      </variablelist>
     </para>
     <para>
-     如果没有指定 <parameter>extract_type</parameter>，则被假定为 EXTR_OVERWRITE。
+     如果没有指定 <parameter>extract_type</parameter>，则被假定为 <constant>EXTR_OVERWRITE</constant>。
     </para>
     <para>
      注意 <parameter>prefix</parameter> 仅在
      <parameter>extract_type</parameter> 的值是
-     EXTR_PREFIX_SAME，EXTR_PREFIX_ALL，EXTR_PREFIX_INVALID 或 EXTR_PREFIX_IF_EXISTS
+     <constant>EXTR_PREFIX_SAME</constant>，<constant>EXTR_PREFIX_ALL</constant>，<constant>EXTR_PREFIX_INVALID</constant>
+     或 <constant>EXTR_PREFIX_IF_EXISTS</constant>
      时需要。如果附加了前缀后的结果不是合法的变量名，将不会导入到符号表中。
     </para>
     <para>
      <function>extract</function> 返回成功导入到符号表中的变量数目。
     </para>
     <para>
-     一种可能的用法是将 <function>wddx_deserialize</function>
+     <function>extract</function> 的一种可能用法是将 <function>wddx_deserialize</function>
      返回的结合数组中的内容导入到符号表变量中去。
     </para>
     <para>
@@ -144,16 +162,16 @@ blue, large, sphere, medium
     </para>
     <para>
      <varname>$size</varname> 没有被覆盖，因为指定了
-     EXTR_PREFIX_SAME，这使得 <varname>$wddx_size</varname>
-     被建立。如果指定了 EXTR_SKIP，则 $wddx_size
-     也不会被建立。EXTR_OVERWRITE 将使 <varname>$size</varname>
-     的值为“medium”，EXTR_PREFIX_ALL 将建立新变量
+     <constant>EXTR_PREFIX_SAME</constant>，这使得 <varname>$wddx_size</varname>
+     被建立。如果指定了 <constant>EXTR_SKIP</constant>，则 $wddx_size
+     也不会被建立。<constant>EXTR_OVERWRITE</constant> 将使 <varname>$size</varname>
+     的值为“medium”，<constant>EXTR_PREFIX_ALL</constant> 将建立新变量
      <varname>$wddx_color</varname>，<varname>$wddx_size</varname> 和
      <varname>$wddx_shape</varname>。
     </para>
     <para>
      必须使用结合数组，数字索引的数组将不会产生结果，除非用了
-     EXTR_PREFIX_ALL 或者 EXTR_PREFIX_INVALID。
+     <constant>EXTR_PREFIX_ALL</constant> 或者 <constant>EXTR_PREFIX_INVALID</constant>。
     </para>
     <para>
      参见 <function>compact</function>。
