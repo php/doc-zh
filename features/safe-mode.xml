@@ -1,20 +1,22 @@
-<?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.10 $ -->
-<!-- $AUTHOR$ -->
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!-- $Revision: 1.3 $ -->
+<!-- $Author$ -->
 <!-- EN-Revision: 1.25 Maintainer: thomaslio Status: ready -->
+<!-- CREDITS: Gregory -->
  <chapter id="features.safe-mode">
   <title>安全模式</title>
+
   <para>
-PHP安全模式试图去解决 shared-server 的安全问题。建立在PHP级别去解决错误。但是从web服务器和OS级别选择中选择一个是很不现实的，尤其是ISP，最好用安全模式
+   PHP 的安全模式是为了试图解决共享服务器（shared-server）安全问题而设立的。在结构上，试图在 PHP 层上解决这个问题是不合理的，但修改 WEB 服务器层和操作系统层显得非常不现实。因此许多人，特别是 ISP，目前使用安全模式。
   </para>
   <para>
    <table>
-    <title>配置指示安全模式:</title>
+    <title>控制安全模式的设置选项有：</title>
     <tgroup cols="2">
      <thead>
       <row>
-       <entry>指示</entry>
-       <entry>默认</entry>
+       <entry>设置选项</entry>
+       <entry>默认值</entry>
       </row>
      </thead>
      <tbody>
@@ -22,7 +24,7 @@ PHP安全模式试图去解决 shared-server 的安全问题。建立在PHP级别去解决错误。但是从w
        <entry>
         <link linkend="ini.safe-mode">safe_mode</link>
        </entry>
-       <entry><literal>off</literal></entry>
+       <entry><literal>Off</literal></entry>
       </row>
       <row>
        <entry>
@@ -71,14 +73,14 @@ PHP安全模式试图去解决 shared-server 的安全问题。建立在PHP级别去解决错误。但是从w
    </table>
   </para>
   <para>
-   当<link linkend="ini.safe-mode">safe_mode</link>打开时，PHP网页的所拥有者拥有对该网页的所有操作权限。比如: 
+   当 <link linkend="ini.safe-mode">safe_mode</link> 设置为 on，PHP 将检查当前脚本的拥有者是否和将被文件函数操作的文件的拥有者相匹配。例如：
    <programlisting role="ls">
 <![CDATA[
 -rw-rw-r--    1 rasmus   rasmus       33 Jul  1 19:20 script.php 
 -rw-r--r--    1 root     root       1116 May 26 18:01 /etc/passwd 
 ]]>
    </programlisting>
-   运行此脚本script.php 
+   运行 script.php
    <programlisting role="php">
 <![CDATA[
 <?php
@@ -86,7 +88,7 @@ PHP安全模式试图去解决 shared-server 的安全问题。建立在PHP级别去解决错误。但是从w
 ?>
 ]]>
    </programlisting>
-   当安全模式打开结果会出错: 
+   如果安全模式被激活，则将会导致以下错误：
    <screen>
 <![CDATA[
 Warning: SAFE MODE Restriction in effect. The script whose uid is 500 is not 
@@ -95,11 +97,10 @@ allowed to access /etc/passwd owned by uid 0 in /docroot/script.php on line 2
    </screen>
   </para>
   <para>
-   无论如何，做为一个环境需要严谨的 <literal>UID</literal>去检查不适当和不严谨<literal>GID</literal>。执行是充分的，这主要有<link linkend="ini.safe-mode-gid">safe_mode_gid</link>开关决定。设置为<literal>on</literal>执行不严谨的<literal>GID</literal> 检查，设置为<literal>off</literal>(默认)执行<literal>UID</literal>检查。
+   同时，或许会存在这样的环境，在该环境下，宽松的 <literal>GID</literal> 检查已经足够，但严格的 <literal>UID</literal> 检查反而是不适合的。您可以用 <link linkend="ini.safe-mode-gid">safe_mode_gid</link> 选项来控制这种检查。如果设置为 <literal>On</literal> 则进行宽松的 <literal>GID</literal> 检查；设置为 <literal>Off</literal>（默认值）则进行 <literal>UID</literal> 检查。
   </para>
   <para>
-   如果代替 <link linkend="ini.safe-mode">safe_mode</link>，你设置了<link linkend="ini.open-basedir">open_basedir</link> 那么在指定的文件目录下所有的文件操作都是有限制的。
-   举例(Apache httpd.conf 例子): 
+   除了 <link linkend="ini.safe-mode">safe_mode</link> 以外，如果您设置了 <link linkend="ini.open-basedir">open_basedir</link> 选项，则所有的文件操作将被限制在您指定的目录下。例如：
    <programlisting role="ini">
 <![CDATA[
 <Directory /docroot>
@@ -107,8 +108,7 @@ allowed to access /etc/passwd owned by uid 0 in /docroot/script.php on line 2
 </Directory>
 ]]>
    </programlisting>
-   如果你使用 script.php
-   <link linkend="ini.open-basedir">open_basedir</link>设置结果为
+   如果您在设置了 <link linkend="ini.open-basedir">open_basedir</link> 选项后运行同样的 script.php，则其结果会是：
    <screen>
 <![CDATA[
 Warning: open_basedir restriction in effect. File is in wrong directory in 
@@ -117,13 +117,14 @@ Warning: open_basedir restriction in effect. File is in wrong directory in
    </screen>
   </para>
   <para>
-   你可以禁止个别的函数，注意这些 disable_functions 的目录不能在 &php.ini 设置以外使用; 除了那几个有意义的文件，你可以不用禁止函数在 per-virtualhost 或者 per-directory 使用，基本的可以在 httpd.conf 中的使用，如果你添加到 &php.ini 文件里
+   您也可以单独地屏蔽某些函数。请注意 disable_functions 选项不能在 &php.ini; 文件外部使用，也就是说您无法在 httpd.conf 文件的按不同虚拟主机或不同目录的方式来屏蔽函数。
+   如果我们将如下内容加入到 &php.ini; 文件：
    <programlisting role="ini">
 <![CDATA[
 disable_functions readfile,system  
 ]]>
    </programlisting>
-   我们会获得这些输出: 
+   则我们会得到如下的输出：
    <screen>
 <![CDATA[
 Warning: readfile() has been disabled for security reasons in 
@@ -133,18 +134,17 @@ Warning: readfile() has been disabled for security reasons in
   </para>
 
   <sect1 id="features.safe-mode.functions">
-   <title>在安全模式，函数功能有限制/禁止</title>
+   <title>被安全模式限制或屏蔽的函数</title>
    <para>
-   这是一些不完全和可能的错误列表的有限制的函数在
-    <link linkend="features.safe-mode">安全模式</link>方式下。
+    以下<link linkend="features.safe-mode">安全模式</link>列表可能不完整或不正确。
     <!-- TODO: add &note.sm.*; to the functions mentioned here.
     That entity should link to this section -->
     <table>
-     <title>安全模式限制的函数</title>
+     <title>安全模式限制函数</title>
      <tgroup cols="2">
       <thead>
        <row>
-        <entry>函数</entry>
+        <entry>函数名</entry>
         <entry>限制</entry>
        </row>
       </thead>
@@ -171,17 +171,17 @@ Warning: readfile() has been disabled for security reasons in
        </row>
        <row>
         <entry><function>ifx_*</function></entry>
-        <entry>sql_safe_mode 限制，(!= 安全模式)</entry>
+        <entry>sql_safe_mode restrictions, (!= safe mode)</entry>
         <!-- TODO: more info on sql-safe-mode -->
        </row>
        <row>
         <entry><function>ingres_*</function></entry>
-        <entry>sql_safe_mode 限制，(!= 安全模式)</entry>
+        <entry>sql_safe_mode restrictions, (!= safe mode)</entry>
         <!-- TODO: more info on sql-safe-mode -->
        </row>
        <row>
         <entry><function>mysql_*</function></entry>
-        <entry>sql_safe_mode 限制，(!= 安全模式)</entry>
+        <entry>sql_safe_mode restrictions, (!= safe mode)</entry>
         <!-- TODO: more info on sql-safe-mode -->
        </row>
        <row>
@@ -195,9 +195,9 @@ Warning: readfile() has been disabled for security reasons in
        </row>
        <row>
         <entry><function>putenv</function></entry>
-        <entry>遵守 safe_mode_protected_env_vars 和
-        safe_mode_allowed_env_vars ini-directives 。请查看相关文档
-         <function>putenv</function></entry>
+        <entry>
+		遵循 ini 设置的 safe_mode_protected_env_vars 和 safe_mode_allowed_env_vars 选项。请参考 <function>putenv</function> 函数的有关文档。
+		</entry>
         <!-- TODO: document those directives in chapters/config.xml -->
        </row>
        <row>
@@ -220,37 +220,31 @@ Warning: readfile() has been disabled for security reasons in
         <entry>&sm.disabled;</entry>
        </row>
        <row>
-        <entry><function>shell_exec</function> (functional equivalent 
-        of backticks)</entry>
+        <entry><function>shell_exec</function>（在功能上和 backticks 函数相同）</entry>
         <entry>&sm.disabled;</entry>
        </row>
        <row>
         <entry><function>exec</function></entry>
-        <entry>你只可以执行可执行的在<link 
-        linkend="ini.safe-mode-exec-dir">safe_mode_exec_dir</link>下。
-        因实际原因不允许
-        <literal>..</literal>路径的执行。</entry>
+        <entry>您只能在 <link linkend="ini.safe-mode-exec-dir">safe_mode_exec_dir</link> 设置的目录下进行执行操作。基于某些原因，目前不能在可执行对象的路径中使用 <literal>..</literal>。
+		</entry>
        </row>
        <row>
         <entry><function>system</function></entry>
-        <entry>你只可以执行可执行的在<link 
-        linkend="ini.safe-mode-exec-dir">safe_mode_exec_dir</link>下.
-        因实际原因不允许
-        <literal>..</literal>路径的执行。</entry>
+        <entry>
+		您只能在 <link linkend="ini.safe-mode-exec-dir">safe_mode_exec_dir</link> 设置的目录下进行执行操作。基于某些原因，目前不能在可执行对象的路径中使用 <literal>..</literal>。
+		</entry>
        </row>
        <row>
         <entry><function>passthru</function></entry>
-        <entry>你只可以执行可执行的在<link 
-        linkend="ini.safe-mode-exec-dir">safe_mode_exec_dir</link>下.
-        因实际原因不允许
-        <literal>..</literal>路径的执行。</entry>
+        <entry>
+        您只能在 <link linkend="ini.safe-mode-exec-dir">safe_mode_exec_dir</link> 设置的目录下进行执行操作。基于某些原因，目前不能在可执行对象的路径中使用 <literal>..</literal>。
+        </entry>
        </row>
        <row>
         <entry><function>popen</function></entry>
-        <entry>你只可以执行可执行的在<link 
-        linkend="ini.safe-mode-exec-dir">safe_mode_exec_dir</link>下.
-        因实际原因不允许
-        <literal>..</literal>路径的执行。</entry>
+        <entry>
+        您只能在 <link linkend="ini.safe-mode-exec-dir">safe_mode_exec_dir</link> 设置的目录下进行执行操作。基于某些原因，目前不能在可执行对象的路径中使用 <literal>..</literal>。
+		</entry>
         <!-- TODO: not sure. popen uses a completely different implementation
         Don't know why, don't know whether it's behaving the same -->
        </row>
@@ -286,8 +280,8 @@ Warning: readfile() has been disabled for security reasons in
        </row>
        <row>
         <entry><function>chmod</function></entry>
-        <entry>&sm.uidcheck; In addition, you cannot  
-        set the SUID, SGID and sticky bits</entry>
+        <entry>&sm.uidcheck; 另外，您不能设置 SUID、SGID 和 sticky bits
+		</entry>
        </row>
        <row>
         <entry><function>touch</function></entry>
@@ -295,25 +289,21 @@ Warning: readfile() has been disabled for security reasons in
        </row>
        <row>
         <entry><function>symlink</function></entry>
-        <entry>&sm.uidcheck; &sm.uidcheck.dir; (注意：仅目标被检查到)</entry>
+        <entry>&sm.uidcheck; &sm.uidcheck.dir; （注意：仅测试 target）</entry>
        </row>
        <row>
         <entry><function>link</function></entry>
-        <entry>&sm.uidcheck; &sm.uidcheck.dir; (注意：仅目标被检查到)</entry>
+        <entry>&sm.uidcheck; &sm.uidcheck.dir; （注意：仅测试 target）</entry>
        </row>
        <row>
         <entry><function>getallheaders</function></entry>
-        <entry>在安全模式下, headers可以'授权' 
-        (注意大小写)
-       将不被返回. 警告: 此用法在aol-server下不能执行
-         <function>getallheaders</function>!</entry>
+        <entry>在安全模式下，以“authorization”（区分大小写）开头的头信息将不会被返回。警告：<function>getallheaders</function> 无法在 aol-server 下实现！
+        </entry>
        </row>
         <row>
         <entry><function>header</function></entry>
-        <entry>在安全模式下, 脚本运行的uid会添加到
-        <literal>realm</literal> 部分的
-        <literal>WWW-Authenticate</literal> header需要你去设置
-       (用在HTTP认证).</entry>
+        <entry>在安全模式下，如果您设置了 <literal>WWW-Authenticate</literal>，当前脚本的 uid 将被添加到该头信息的 <literal>realm</literal> 部分。
+		</entry>
        </row>
        <row>
         <entry>
@@ -321,7 +311,7 @@ Warning: readfile() has been disabled for security reasons in
          <function>show_source</function>
         </entry>
         <entry>
-         &sm.uidcheck; &sm.uidcheck.dir; (note: 只在 PHP 4.2.1后有效果)
+         &sm.uidcheck; &sm.uidcheck.dir; （注意，仅在 4.2.1 版本后有效）
         </entry>
        </row>
        <row>
@@ -329,12 +319,12 @@ Warning: readfile() has been disabled for security reasons in
          <function>parse_ini_file</function>
         </entry>
         <entry>
-         &sm.uidcheck; &sm.uidcheck.dir; (note: 只在 PHP 4.2.1后有效果)
+         &sm.uidcheck; &sm.uidcheck.dir; （注意，仅在 4.2.1 版本后有效）
         </entry>
        </row>
        <row>
-        <entry>其他函数使用 
-         <filename>php4/main/fopen_wrappers.c</filename>
+        <entry>任何使用
+         <filename>php4/main/fopen_wrappers.c</filename> 的函数
         </entry>
         <entry>??</entry>
        </row>
