@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.12 $ -->
-<!-- $Author: dallas $-->
-<!-- EN-Revision: 1.39 Maintainer: verdana  Status: ready -->
+<!-- $Revision: 1.13 $ -->
+<!-- $Author: gregory $-->
+<!-- EN-Revision: 1.40 Maintainer: verdana  Status: ready -->
 <!-- CREDITS: dallas -->
 <!-- CREDITS: Gregory -->
  <chapter id="language.oop">
@@ -827,13 +827,11 @@ class B: 11
    </para>
   </sect1>
 
-  <sect1 id="language.oop.object-comparison">
-   <title>在 PHP 4 中比较对象</title>
-
+  <sect1 id="language.oop.object-comparison-php4">
+   <title>PHP 4 中对象的比较</title>
   <para>
    在 PHP 4 中，对象比较的规则十分简单：如果两个对象的类相同，且它们有相同的属性和值，则这两个对象相等。类似的规则还适用与用全等符（<literal>===</literal>）对两个对象的比较。
   </para>
-  
   <para>
    如果我们执行以下范例中的代码：
    If we were to execute the code in the example below:
@@ -969,6 +967,99 @@ o1 === o2 : FALSE
 o1 !== o2 : TRUE
    </screen>
   </para>
+ </sect1>
+
+  <sect1 id="language.oop.object-comparison-php5">
+   <title>PHP 5 中对象的比较</title>
+   &warn.experimental;
+   <para>
+    在 PHP 5 中，对象的比较比在 PHP 4 中更复杂，也比我们就某一对象倾向性语言期望的要多。
+    （not that PHP 5 is such a language）
+   </para>
+   <para>
+    当使用比较操作符（<literal>==</literal>）时，对象以一种很简单的规则比较：当两个对象有相同的属性和值，属于同一个类且被定义在相同的命名空间中，则两个对象相等。
+   </para>
+   <para>
+    另一方面，当使用全等符（<literal>===</literal>）时，当且仅当两个对象指向相同类（在某一特定的命名空间中）的同一个对象时才相等。
+   </para>
+   <para>
+    以下范例将阐明该规则。
+    <example>
+     <title>PHP 5 中对象比较范例</title>
+     <programlisting role='php'>
+<![CDATA[
+function bool2str($bool) {
+    if ($bool === false) {
+            return 'FALSE';
+    } else {
+            return 'TRUE';
+    }
+}
+
+function compareObjects(&$o1, &$o2) {
+    echo 'o1 == o2 : '.bool2str($o1 == $o2)."\n";
+    echo 'o1 != o2 : '.bool2str($o1 != $o2)."\n";
+    echo 'o1 === o2 : '.bool2str($o1 === $o2)."\n";
+    echo 'o1 !== o2 : '.bool2str($o1 !== $o2)."\n";
+}
+
+class Flag {
+    var $flag;
+
+    function Flag($flag=true) {
+            $this->flag = $flag;
+    }
+}
+
+namespace Other {
+
+    class Flag {
+        var $flag;
+
+        function Flag($flag=true) {
+                $this->flag = $flag;
+        }
+    }
+
+}
+
+$o = new Flag();
+$p = new Flag();
+$q = $o;
+$r = new Other::Flag();
+
+echo "Two instances of the same class\n";
+compareObjects($o, $p);
+
+echo "\nTwo references to the same instance\n";
+compareObjects($o, $q);
+
+echo "\nInstances of similarly named classes in different namespaces\n";
+compareObjects($o, $r);
+]]>
+     </programlisting>
+    </example>
+    该范例将输出：
+    <screen>
+Two instances of the same class
+o1 == o2 : TRUE
+o1 != o2 : FALSE
+o1 === o2 : FALSE
+o1 !== o2 : TRUE
+
+Two references to the same instance
+o1 == o2 : TRUE
+o1 != o2 : FALSE
+o1 === o2 : TRUE
+o1 !== o2 : FALSE
+
+Instances of similarly named classes in different namespaces
+o1 == o2 : FALSE
+o1 != o2 : TRUE
+o1 === o2 : FALSE
+o1 !== o2 : TRUE
+    </screen>
+   </para>
  </sect1>
 </chapter>
  
