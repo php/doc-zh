@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.4 $ -->
-<!-- $Author: dallas $ -->
-<!-- EN-Revision: 1.9 Maintainer: dallas Status: ready -->
+<!-- $Revision: 1.5 $ -->
+<!-- $Author: yincheng $ -->
+<!-- EN-Revision: 1.10 Maintainer: dallas Status: ready -->
   <refentry id="function.pg-fetch-object">
    <refnamediv>
     <refname>pg_fetch_object</refname>
@@ -40,61 +40,46 @@
     </note>
     <para>
      <example>
-      <title>Postgres fetch object</title>
+      <title><function>pg_fetch_object</function></title>
       <programlisting role="php">
 <![CDATA[
 <?php 
-$database = "verlag";
-$db_conn = pg_connect ("host=localhost port=5432 dbname=$database");
-if (!$db_conn): ?>
-    <H1>Failed connecting to postgres database <?php echo $database ?></H1> <?php
+
+$database = "store";
+
+$db_conn = pg_connect("host=localhost port=5432 dbname=$database");
+if (!$db_conn) {
+    echo "Failed connecting to postgres database $database\n";
     exit;
-endif;
+}
 
-$qu = pg_query ($db_conn, "SELECT * FROM verlag ORDER BY autor");
-$row = 0; // postgres needs a row counter other dbs might not 
+$qu = pg_query($db_conn, "SELECT * FROM books ORDER BY author");
 
-while ($data = pg_fetch_object ($qu, $row)) {
-    echo $data->autor." (";
-    echo $data->jahr ."): ";
-    echo $data->titel."<BR>";
+$row = 0; // postgres needs a row counter 
+
+while ($data = pg_fetch_object($qu, $row)) {
+    echo $data->author . " (";
+    echo $data->year . "): ";
+    echo $data->title . "<br />";
     $row++;
 }
-?>
-<PRE>
-<?php
-$fields[] = Array ("autor", "Author");
-$fields[] = Array ("jahr",  "  Year");
-$fields[] = Array ("titel", " Title");
 
-$row= 0; // postgres needs a row counter other dbs might not
-while ($data = pg_fetch_object ($qu, $row)) {
-    echo "----------\n";
-    reset ($fields);
-    while (list (,$item) = each ($fields)):
-        echo $item[1].": ".$data->$item[0]."\n";
-    endwhile;
-    $row++;
-}
-echo "----------\n"; 
-?>
-</PRE> 
-<?php
 pg_free_result ($qu);
 pg_close ($db_conn);
+
 ?>
 ]]>
       </programlisting>
      </example>
-    </para>
-    <para> 
-     参见 <function>pg_query</function>，<function>pg_fetch_array</function>，<function>pg_fetch_row</function> 和 <function>pg_fetch_result</function>。
     </para>
     <note>
      <para>
       从 4.1.0 开始，<parameter>row</parameter> 成为可选参数。每次调用 <function>pg_fetch_object</function>，内部的行计数器都会加一。
      </para>
     </note>
+    <para> 
+     参见 <function>pg_query</function>，<function>pg_fetch_array</function>，<function>pg_fetch_row</function> 和 <function>pg_fetch_result</function>。
+    </para>
    </refsect1>
   </refentry>
 
