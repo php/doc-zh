@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.2 $ -->
+<!-- $Revision: 1.3 $ -->
 <!-- $Author: dallas $ -->
-<!-- EN-Revision:1.9 Maintainer: dallas Status: ready -->
+<!-- EN-Revision:1.10 Maintainer: dallas Status: ready -->
  <chapter id="faq.com">
   <title>PHP 和 COM</title>
   <titleabbrev>PHP 和 COM</titleabbrev>
@@ -194,7 +194,42 @@
     </question>
     <answer>
      <para>
-      还不能。
+      从 PHP 4.3.0 开始，可以自定义事件收报方并且如以下例子所示绑定之。可以用
+      <function>com_print_typeinfo</function> 来让 PHP 产生事件收报方类的框架。
+      <example>  
+       <title>COM 事件收报方例子</title>  
+       <programlisting role="php">  
+<![CDATA[  
+<?php  
+class IEEventSinker {  
+  var $terminated = false;  
+  
+  function ProgressChange($progress, $progressmax) {  
+    echo "Download progress: $progress / $progressmax\n";  
+  }  
+  
+  function DocumentComplete(&$dom, $url) {  
+    echo "Document $url complete\n";  
+  }  
+  
+  function OnQuit() {  
+    echo "Quit!\n";  
+    $this->terminated = true;  
+  }  
+}  
+$ie = new COM("InternetExplorer.Application");  
+$sink =& new IEEventSinker();  
+com_event_sink($ie, $sink, "DWebBrowserEvents2");  
+$ie->Visible = true;  
+$ie->Navigate("http://www.php.net");  
+while(!$sink->terminated) {  
+  com_message_pump(4000);  
+}  
+$ie = null;  
+?>  
+]]>  
+       </programlisting>  
+      </example> 
      </para>
     </answer>
    </qandaentry>
