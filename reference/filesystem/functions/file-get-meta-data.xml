@@ -1,29 +1,95 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.1 $ -->
+<!-- $Revision: 1.2 $ -->
 <!-- $Author: dallas $ -->
 <!-- EN-Revision: 1.1 Maintainer: dallas Status: ready -->
-  <refentry id="function.file-get-wrapper-data">
+  <refentry id="function.file-get-meta-data">
    <refnamediv>
-    <refname>file_get_wrapper_data</refname>
+    <refname>file_get_meta_data</refname>
     <refpurpose>从封装协议文件指针中取得报头／元数据</refpurpose>
    </refnamediv>
    <refsect1>
     <title>说明</title>
      <methodsynopsis>
-      <type>mixed</type><methodname>file_get_wrapper_data</methodname>
+      <type>mixed</type><methodname>file_get_meta_data</methodname>
       <methodparam><type>int</type><parameter>fp</parameter></methodparam>
      </methodsynopsis>
     <simpara>
-     本函数返回通过 <function>fopen</function> 打开的文件的报头或者元数据。可以用来返回
-     HTTP 连接的响应报头，或者其它资源的统计数据。
+     返回现有 <parameter>stream</parameter> 的信息。可以是任何通过
+     <function>fopen</function>，<function>fsockopen</function>
+     和 <function>pfsockopen</function> 建立的流。返回的数组包含以下项目：
     </simpara>
+    <itemizedlist>
+     <listitem>
+      <para>
+       <parameter>timed_out</parameter> (bool) - 如果在上次调用
+       <function>fread</function> 或者 <function>fgets</function>
+       中等待数据时流超时了则为 &true;。
+      </para>
+     </listitem>
+     <listitem>
+      <para>
+       <parameter>blocked</parameter> (bool) - 如果流处于阻塞
+       IO 模式时为 &true;。参见 <function>socket_set_blocking</function>。
+      </para>
+     </listitem>
+     <listitem>
+      <para>
+       <parameter>eof</parameter> (bool) - 如果流到达文件末尾时为
+       &true;。注意对于 socket 流甚至当 <parameter>unread_bytes</parameter>
+       为非零值时也可以为 &true;。要测定是否有更多数据可读，用
+       <function>feof</function> 替代读取本项目的值。
+      </para>
+     </listitem>
+     <listitem>
+      <para>
+       <parameter>unread_bytes</parameter> (int) - 当前读取缓冲区中的字节数。
+      </para>
+     </listitem>
+    </itemizedlist>
     <simpara>
-     返回数据的格式故意不在此时列入文档，并且根据使用了哪种封装协议而不同。
+     以下项目是 PHP 4.3 新加的：
     </simpara>
+    <itemizedlist>
+     <listitem>
+      <para>
+       <parameter>stream_type</parameter> (string) - 一个描述流底层实现的标注。
+      </para>
+     </listitem>
+     <listitem>
+      <para>
+       <parameter>wrapper_type</parameter> (string) -
+       一个描述流的分层协议封装实现的标注。更多关于封装协议的信息见
+       <xref linkend="wrappers"/>。
+      </para>
+     </listitem>
+     <listitem>
+      <para>
+       <parameter>wrapper_data</parameter> (mixed) -
+       当前流附加的封装协议数据。更多封装协议及其数据的信息见
+       <xref linkend="wrappers"/>。
+      </para>
+     </listitem>
+     <listitem>
+      <para>
+       <parameter>filters</parameter> (array) - 
+       包含有被叠加在当前流的任何过滤器名的数组。过滤器目前没有文档。
+      </para>
+     </listitem>
+    </itemizedlist>
     <note>
      <para>
-      本函数是 PHP 4.3.0 引进的。
+      本函数是 PHP 4.3 引进的，在此版本之前，可以用 <function>socket_get_status</function>
+      来取得前四个项目并且<emphasis>仅能用于基于 socket 的流</emphasis>。
      </para>
+     <para>
+      在 PHP 4.3 及以后版本中，<function>socket_get_status</function>
+      是本函数的别名。
+     </para>
+    </note>
+    <note>
+     <simpara>
+      本函数不能作用于通过 <link linkend="ref.sockets">Socket 扩展库</link>创建的流。
+     </simpara>
     </note>
    </refsect1>
   </refentry>
