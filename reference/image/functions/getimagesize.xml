@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="gb2312"?>
+<!-- $Revision: 1.1 $ -->
+<!-- $Author: dallas $ -->
+<!-- EN-Revision: 1.20 Maintainer: dallas Status: ready -->
+ <refentry id="function.getimagesize">
+  <refnamediv>
+   <refname>getimagesize</refname>
+   <refpurpose>取得图像大小</refpurpose>
+  </refnamediv>
+  <refsect1>
+   <title>说明</title>
+   <methodsynopsis>
+    <type>array</type><methodname>getimagesize</methodname>
+    <methodparam><type>string</type><parameter>filename</parameter></methodparam>
+    <methodparam choice="opt"><type>array</type><parameter>imageinfo</parameter></methodparam>
+   </methodsynopsis>
+   <para>
+    <function>getimagesize</function> 函数将测定任何
+    <acronym>GIF</acronym>，<acronym>JPG</acronym>，<acronym>PNG</acronym>，<acronym>SWF</acronym>，<acronym>SWC</acronym>，<acronym>PSD</acronym>，<acronym>TIFF</acronym>，<acronym>BMP</acronym>，<acronym>IFF</acronym>，<acronym>JP2</acronym>，<acronym>JPX</acronym>，<acronym>JB2</acronym>，<acronym>JPC</acronym>，<acronym>XBM</acronym>
+    或 <acronym>WBMP</acronym> 图像文件的大小并返回图像的尺寸以及文件类型和一个可以用于普通
+    <acronym>HTML</acronym> 文件中 <literal>IMG</literal> 标记中的
+    height/width 文本字符串。
+   </para>
+   <note>
+    <para>
+     对 <acronym>JPC</acronym>，<acronym>JP2</acronym>，<acronym>JPX</acronym>，<acronym>JB2</acronym>，<acronym>XBM</acronym>
+     和 <acronym>WBMP</acronym> 的支持自 PHP 4.3.2
+     起可用。对 <acronym>SWC</acronym> 的支持自 PHP 4.3.0 起可用。
+    </para>
+   </note>
+   <para>
+    返回一个具有四个单元的数组。索引 0 包含图像宽度的像素值，索引 1
+    包含图像高度的像素值。索引 2 是图像类型的标记：1 = GIF，2 = JPG，3 =
+    PNG，4 = SWF，5 = PSD，6 = BMP，7 = TIFF(intel byte order)，8 =
+    TIFF(motorola byte order)，9 = JPC，10 = JP2，11 = JPX，12 =
+    JB2，13 = SWC，14 = IFF，15 = WBMP，16 = XBM。这些标记与 PHP 4.3
+    新加的 IMAGETYPE 常量对应。索引 3 是文本字符串，内容为“height="yyy"
+    width="xxx"”，可直接用于 IMG 标记。
+    <example>
+     <title>getimagesize (file)</title>
+     <programlisting role="php">
+<![CDATA[
+<?php
+list($width, $height, $type, $attr) = getimagesize("img/flag.jpg");
+echo "<img src=\"img/flag.jpg\" $attr>";
+?>
+]]>
+     </programlisting>
+    </example>
+   </para>
+   <para>
+    <example>
+     <title>getimagesize (URL)</title>
+     <programlisting role="php">
+<![CDATA[
+<?php
+$size = getimagesize("http://www.example.com/gifs/logo.gif");
+
+// if the file name has space in it, encode it properly
+$size = getimagesize("http://www.example.com/gifs/lo%20go.gif");
+
+?>
+]]>
+     </programlisting>
+    </example>
+   </para>
+   <para>
+    对于 <acronym>JPG</acronym> 图像，还会多返回两个索引：<literal>channels</literal>
+    和 <literal>bits</literal>。<literal>channels</literal>
+    对于 RGB 图像其值为 3，对于 CMYK 图像其值为 4。<literal>bits</literal>
+    是每种颜色的位数。
+   </para>
+   <para>
+    自 PHP 4.3 起，<literal>bits</literal> 和
+    <literal>channels</literal> 对于其它图像类型也存在。但是这些值可能会把人搞糊涂。例如，<acronym>GIF</acronym>
+    总是对每个像素使用 3 个 channel，但是对于动画 <acronym>GIF</acronym>
+    来说每个像素的位数无法通过全局颜色表计算出来。
+   </para>
+   <para>
+    某些格式可能不包含图像或者包含多个图像。此种情况下，<function>getimagesize</function>
+    可能不能用来准确测定图像的大小。此时 <function>getimagesize</function>
+    将返回零作为宽度和高度。
+   </para>
+   <para>
+    自 PHP 4.3 起，<function>getimagesize</function> 还会返回额外的参数
+    <literal>mime</literal>，符合该图像的 MIME 类型。此信息可以用来在
+    HTTP Content-type 头信息中发送正确的信息：
+    <example>
+     <title>getimagesize() 和 MIME 类型</title>
+     <programlisting role="php">
+<![CDATA[
+<?php
+$size = getimagesize ($filename);
+$fp=fopen($filename, "rb");
+if ($size && $fp) {
+  header("Content-type: {$size['mime']}");
+  fpassthru($fp);
+  exit;
+} else {
+  // error
+}
+?>
+]]>
+     </programlisting>
+    </example>
+   </para>
+   <para>
+    如果不能访问 <parameter>filename</parameter>
+    指定的图像或者它不是合法的图片，<function>getimagesize</function>
+    将返回 &false; 并产生一个警告。
+   </para>
+   <para>
+    可选的 <parameter>imageinfo</parameter>
+    参数允许从图像文件中提取一些扩展信息。目前，这将以一个关联数组返回不同的
+    <acronym>JPG</acronym> APP 标识。某些程序用这些 APP
+    标识来在图像中嵌入文本信息。一个非常常见的是 APP13 标识中嵌入的
+    <acronym>IPTC</acronym> <ulink url="&url.iptc;">&url.iptc;</ulink>
+    信息。可以用 <function>iptcparse</function> 函数来将二进制的
+    APP13 标识解析为可读的信息。
+    <example>
+     <title>getimagesize() 返回 IPTC</title>
+     <programlisting role="php">
+<![CDATA[
+<?php
+$size = getimagesize ("testimg.jpg",&$info);
+if (isset ($info["APP13"])) {
+    $iptc = iptcparse ($info["APP13"]);
+    var_dump ($iptc);
+}
+?>
+]]>
+     </programlisting>
+    </example>
+    <note>
+     <simpara>
+      JPEG 2000 支持是 PHP 4.3.2 添加的。注意 JPC 和 JP2
+      可以有不同的色彩深度的成分。此情况下，“bits”的值是碰到的最高的位深度。此外，JP2
+      文件可能包含有多个 JPEG 2000 代码流，此情况下，<function>getimagesize</function>
+      返回此文件顶层中碰到的第一个代码流的值。
+     </simpara>
+    </note>
+    <note>
+     <simpara>
+      TIFF 支持是 PHP 4.2 添加的。
+     </simpara>
+     <simpara>
+      本函数不需要 GD 图像库。
+     </simpara>
+     <simpara>
+      参见 <function>image_type_to_mime_type</function>，<function>exif_imagetype</function>，<function>exif_read_data</function>
+      和 <function>exif_thumbnail</function>。
+     </simpara>
+     <simpara>
+      URL 支持是 PHP 4.0.5 添加的。
+     </simpara>
+    </note>
+   </para>
+  </refsect1>
+ </refentry>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"../../../../manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
+
