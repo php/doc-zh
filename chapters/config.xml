@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- $Revision: 1.11 $ -->
+<!-- $Revision: 1.12 $ -->
+<!-- $Author: gregory $ -->
+<!-- EN-Revision: 1.87 Maintainer: Gregory  Status: working -->
  <chapter id="configuration">
   <title>Configuration</title>
 
@@ -83,8 +85,8 @@ include_path = ".;c:\php\lib"
 
     <para>
      With PHP 4.0, there are several Apache directives that allow you
-     to change the PHP configuration from within the Apache
-     configuration file itself.
+     to change the PHP configuration from within the Apache configuration
+     files.
      <variablelist>
       <varlistentry>
        <term>
@@ -94,7 +96,18 @@ include_path = ".;c:\php\lib"
        </term>
        <listitem>
         <para>
-         This sets the value of the specified variable.</para>
+         Sets the value of the specified directive.
+         Can be used only with PHP_INI_ALL and PHP_INI_PERDIR type directives.
+         To clear a previously set value use <literal>none</literal>
+         as the value.
+         <informalexample>
+          <programlisting role="ini">
+<![CDATA[
+php_value auto_prepend_file none
+]]>
+          </programlisting>
+         </informalexample>
+        </para>
        </listitem>
       </varlistentry>
       <varlistentry>
@@ -105,7 +118,9 @@ include_path = ".;c:\php\lib"
        </term>
        <listitem>
         <para>
-         This is used to set a Boolean configuration option.</para>
+         Used to set a Boolean configuration directive.
+         Can be used only with PHP_INI_ALL and PHP_INI_PERDIR type directives.
+        </para>
        </listitem>
       </varlistentry>
       <varlistentry>
@@ -116,10 +131,10 @@ include_path = ".;c:\php\lib"
        </term>
        <listitem>
         <para>
-         This sets the value of the specified variable. "Admin"
-         configuration settings can only be set from within the
-         main Apache configuration files, and not from
-         <filename>.htaccess</filename> files.
+         Sets the value of the specified directive.
+         This can NOT be used in <filename>.htaccess</filename> files.
+         Any directive type set with <systemitem role="directive">php_admin_value</systemitem>
+         can not be overridden in <filename>.htaccess</filename> files.
         </para>
        </listitem>
       </varlistentry>
@@ -131,7 +146,10 @@ include_path = ".;c:\php\lib"
        </term>
        <listitem>
         <para>
-         This is used to set a Boolean configuration option.
+         Used to set a Boolean configuration directive.
+         This can NOT be used in <filename>.htaccess</filename> files.
+         Any directive type set with <systemitem role="directive">php_admin_flag</systemitem>
+         can not be overridden in <filename>.htaccess</filename> files.
         </para>
        </listitem>
       </varlistentry>
@@ -157,7 +175,7 @@ include_path = ".;c:\php\lib"
      <note>
       <para>
        PHP constants do not exist outside of PHP. For example, in 
-       <filename>httpd.conf</filename> do not use PHP constants 
+       <filename>httpd.conf</filename> you can not use PHP constants 
        such as <constant>E_ALL</constant> or <constant>E_NOTICE</constant> 
        to set the <link linkend="ini.error-reporting">error_reporting</link> 
        directive as they will have no meaning and will evaluate to
@@ -197,17 +215,15 @@ include_path = ".;c:\php\lib"
         <entry>PHP_INI_PERDIR</entry>
         <entry>2</entry>
         <entry>
-         Entry can be set in <filename>.htaccess</filename> and VHost
-         directives in httpd.conf.
+         Entry can be set in &php.ini;, <filename>.htaccess</filename> or
+         <filename>httpd.conf</filename>
         </entry>
        </row>
        <row>
         <entry>PHP_INI_SYSTEM</entry>
         <entry>4</entry>
         <entry>
-         Entry can be set in &php.ini; or
-         <filename>httpd.conf</filename> (but not in VHost blocks in
-         httpd.conf).
+         Entry can be set in &php.ini; or <filename>httpd.conf</filename>
         </entry>
        </row>
        <row>
@@ -222,7 +238,7 @@ include_path = ".;c:\php\lib"
     <para>
      You can view the settings of the configuration values in
      the output of <function>phpinfo</function>. You can also
-     access the values of individual configuration settings using
+     access the values of individual configuration directives using
      <function>ini_get</function> or <function>get_cfg_var</function>.
     </para>
    </sect2>
@@ -458,7 +474,10 @@ include_path = ".;c:\php\lib"
        <para>
         This sets the maximum amount of memory in bytes that a script
         is allowed to allocate.  This helps prevent poorly written
-        scripts for eating up all available memory on a server.
+        scripts for eating up all available memory on a server.  In order to
+        use this directive you must have enabled it at compile time.  So, 
+        your configure line would have included:
+        <literal>--enable-memory-limit</literal>
        </para>
       </listitem>
      </varlistentry>
@@ -490,12 +509,12 @@ include_path = ".;c:\php\lib"
         </row>
         <row>
          <entry>arg_separator.output</entry>
-         <entry>"&"</entry>
+         <entry>"&amp;"</entry>
          <entry>PHP_INI_ALL</entry>
         </row>
         <row>
          <entry>arg_separator.input</entry>
-         <entry>"&"</entry>
+         <entry>"&amp;"</entry>
          <entry>PHP_INI_SYSTEM|PHP_INI_PERDIR</entry>
         </row>
         <row>
@@ -908,24 +927,31 @@ include_path = ".;c:\php\lib"
          files.  The format is like the system's <envar>PATH</envar>
          environment variable: a list of directories separated with a
          colon in UNIX or semicolon in Windows.
+        </para>
+        <para>
          <example>
           <title>UNIX include_path</title>
-          <programlisting role="php3.ini">
+          <programlisting role="php.ini">
 <![CDATA[
-include_path=.:/home/httpd/php-lib
+include_path=".:/php/includes"
 ]]>
-                    </programlisting>
+          </programlisting>
          </example>
+        </para>
+        <para>
          <example>
           <title>Windows include_path</title>
-          <programlisting role="php3.ini">
+          <programlisting role="php.ini">
 <![CDATA[
-include_path=".;c:\www\phplib"
+include_path=".;c:\php\includes"
 ]]>
-                    </programlisting>
+          </programlisting>
          </example>
-         The default value for this directive is <literal>.</literal>
-         (only the current directory).</para>
+        </para>
+        <para>
+         Using a <literal>.</literal> in the include path allows for
+         relative includes as it means the current directory.
+        </para>
        </listitem>
       </varlistentry>
 
