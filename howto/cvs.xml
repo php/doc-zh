@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.4 $ -->
+<!-- $Revision: 1.5 $ -->
 <!-- $AUTHOR$ -->
-<!-- EN-Revision: 1.4 Maintainer: Gregory Status: ready -->
+<!-- EN-Revision: 1.6 Maintainer: Gregory Status: ready -->
 
  <chapter id="chapter-cvs">
   <title>利用 CVS 开展工作</title>
@@ -14,9 +14,10 @@
   </para>
   
   <para>
-   一个 CVS 系统包含有一个存有所有文件的中央服务器。一个 CVS 服务器可以作为许多不同的资源库
-   的服务器，PHP 文档资源库的名称是 <literal>phpdoc</literal>。要访问该服务器，您需要在
-   您的系统上安装一个 CVS 的客户端程序。
+   一个 CVS 系统包含有一个存储了所有文件的中央服务器。一个 CVS 服务器可以作为许多不同模块
+   的服务器，PHP 文档主要模块的名称是 <literal>phpdoc</literal>。进行翻译工作还需要用到
+   一些其它的模块，它们的名称由 phpdoc 加各自的语言代码构成（例如，<literal>phpdoc-zh</literal>）。
+   要访问该服务器，您需要在您的系统上安装一个 CVS 的客户端程序。
   </para>
   
   <para>
@@ -32,7 +33,8 @@
 
   <para>
    本节内容并非希望成为 CVS 使用指南，仅仅只是引导您能够尽快的学会下载 <literal>phpdoc</literal> 
-   目录树以及提交您的更新。如果您需要 CVS 完整的文档，请查阅 <ulink url="&url.cvs;">&url.cvs;</ulink>。
+   目录树及您所翻译的版本的目录树，以及如何提交您的更新。如果您需要 CVS 完整的文档，请查阅
+   <ulink url="&url.cvs;">&url.cvs;</ulink>。
   </para>
 
   <para>
@@ -49,7 +51,8 @@
   
   <para>
    您也可以随时在您的 CVS 客户端中使用 <literal>man cvs</literal> 命令来获取帮助。使用该命令
-   将得到被称为“manpage”的帮助文档。
+   将得到被称为“manpage”的帮助文档。 您也可以使用 <literal>cvs --help</literal> 命令以
+   获取帮助。
   </para>
 
   <sect1 id="cvs-account">
@@ -64,7 +67,7 @@
 
    <para>
     同时也请注意，即使您在我们的服务端有 CVS 的账号，您也可能没有 <literal>phpdoc</literal> 
-    模块的写权限。我们的 Karma 系统控制着不同的账号访问不同资源库的权限，所以如果您有 CVS 
+    模块以及您所翻译的模块的写权限。我们的 Karma 系统控制着不同的账号访问不同模块的权限，所以如果您有 CVS 
     账号，但是没有访问 <literal>phpdoc</literal>的 Karma 权限，请向 Karma <ulink 
     url="mailto:&email.group.php;">&email.group.php;</ulink> 垂询。注意，有 PHP 源
     码目录树 Karma 写权限的人，同样也有 <literal>phpdoc</literal> 的 Karma 权限。
@@ -102,7 +105,7 @@
   <sect1 id="cvs-login">
    <title>CVS 的登录</title>
    <para>
-    现在您已经有 CVS 资源库的写权限了，我们还需要在您的 <filename>.cvsrc</filename> 加上
+    现在您已经有 CVS 模块的写权限了，我们还需要在您的 <filename>.cvsrc</filename> 加上
     一些变量。例如增加 <literal>CVSROOT</literal> 环境变量以便登录 CVS 资源库。
    </para>
 
@@ -156,7 +159,8 @@ setenv CVSROOT :pserver:<parameter>username</parameter>@cvs.php.net:/repository
 
    <note>
     <para>
-     <literal>CVSROOT</literal> 环境变量仅在您下次登录的时候才会生效。
+     <literal>CVSROOT</literal> 环境变量仅在您下次登录的时候才会生效。同时，请不要忘了将
+     <parameter>username</parameter> 替换成您自己的 CVS 账号名。
     </para>
    </note>
    
@@ -188,7 +192,8 @@ $ cvs -d :pserver:<parameter>username</parameter>@cvs.php.net:/repository login
     请将以上命令行中的 <parameter>username</parameter> 替换成您自己的 CVS 用户名。您将
     被要求提供您的密码。一旦您成功的登录到了 CVS 资源库，您的密码将被加密后保存在您的根目录
     的 <filename>.cvspass</filename> 文件中，这样，您以后就不用每次提交命令前都要进行登
-    录操作，除非您删除了该文件，或者执行了 <literal>cvs logout</literal> 命令。
+    录操作，除非您删除了该文件，或者执行了 <literal>cvs logout</literal> 命令。该文件的
+    内容将不会改变，并一直保持您的登录状态。
    </para>
 
   </sect1>
@@ -223,14 +228,34 @@ $ cvs checkout <parameter>phpdoc</parameter>
      该 <filename>phpdoc</filename> 目录在您的系统中是否受到限制。
     </para>
    </note>
-   
+
+   <para>
+    如果您希望参与一个翻译小组的工作，那么用 <command>checkout</command> 命令仅仅下载
+    <filename>phpdoc</filename> 模块是不够的，尽管这是必须进行的一个步骤。
+    <filename>phpdoc</filename> 模块只包含了生成手册时需要的文件，以及英文版本的源文件。
+    在 CVS 资源库中，还有很多翻译版本的模块，它们的名称以翻译的语言代码结尾的，即它们的格式是：
+    <literal>phpdoc-LANGCODE</literal>。LANGCODE 通常是两个字母，但也也有例外的情况。
+    例如，如果您希望加入简体中文版的翻译工作，您还需要用 <command>checkout</command> 命令
+    下载 <filename>phpdoc-it</filename> 模块。您运行下载命令的地方是被严格定义过的，即
+    您必须在以上下载操作中建立的 <filename>phpdoc</filename> 目录下来进行任何其它语言版本
+    的翻译模块的下载操作。因此，请切换到 phpdoc 目录，然后执行
+    <informalexample>
+     <programlisting>
+$ cvs checkout <parameter>phpdoc-zh-dir</parameter>
+     </programlisting>
+    </informalexample>
+    命令。如果您希望下载其它版本的模块，请将“zh”换成其它的语言代码。如果您需要，您可以下载任意
+    多个版本的翻译模块；当然，您也没有必要下载您并不打算参与的翻译模块。如果您仅仅只参与英文版
+    本文档的工作，则无需下载任何语言版本的翻译模块。
+   </para>
+    
   </sect1>
 
   <sect1 id="cvs-update">
    <title>更新目录树</title> 
 
    <para>
-    我们建议您随时更新您的 <parameter>phpdoc</parameter> 目录树以保证您拥有最新的文件。
+    我们建议您随时更新您的 <filename>phpdoc</filename> 目录树以保证您拥有最新的文件。
     目前，该目录下的内容几乎每天都有更新，因此，在您进行编辑工作之前，请一定要先更新您的文件。
    </para>
 
@@ -243,6 +268,13 @@ $ cvs update
      </programlisting>
     </informalexample>
    </para>
+
+   <note>
+    <para>
+     如果您下载了任何版本的翻译模块，那么以上命令将自动更新其模块的内容。因此您没有必要单独更
+     新翻译模块下的文件。
+    </para>
+   </note>
 
    <para>
     如果您仅希望更新一个或某一些您需要更改的文件，您可以在 update 命令后面加加上它们的文件名：
@@ -327,7 +359,7 @@ File: howto.xml         Status: Locally Modified
     请运行以下命令提交文件：
     <informalexample>
      <programlisting>
-$ cvs commit -m 'added new blah() function' <parameter>file1</parameter> <optional><parameter>file2</parameter></optional>
+$ cvs commit -m 'added explanation of the new ..blah.. feature' <parameter>file1</parameter> <optional><parameter>file2</parameter></optional>
      </programlisting>
     </informalexample>
    </para>
@@ -337,6 +369,18 @@ $ cvs commit -m 'added new blah() function' <parameter>file1</parameter> <option
     编辑器来让你输入您的注释。当您希望添加更多的注释，并发觉无法用 
     <parameter>-m</parameter> 参数将这些注释写在一行里时，您便可以使用这种方式。
    </para>
+
+   <note>
+    <para>
+     在提交文件前，请再次检查您的文件将被提交到您所工作的翻译模块下。<filename>phpdoc</filename> 
+     模块仅包含英文文件，因此请不要将其它语言的文件提交到该模块下，除非得到了
+     <link linkend="chapter-maillist">邮件列表</link>上其他人的同意。在翻译模块中，请
+     不要放置只有英文内容的 XML 文件，这不便于翻译工作的维护，因此也请不要将任何纯英文的文件
+     上传到翻译模块的目录树下。如果您不能确保您在提交文件的过程中不会发生错误，那么请到适当的
+     <link linkend="chapter-maillist">邮件列表</link>中垂询。
+    </para>
+   </note>
+
   </sect1>
 
   <sect1 id="cvs-add">

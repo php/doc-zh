@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.3 $ -->
+<!-- $Revision: 1.4 $ -->
 <!-- $AUTHOR$ -->
-<!-- EN-Revision: 1.10 Maintainer: Gregory Status: ready -->
+<!-- EN-Revision: 1.11 Maintainer: Gregory Status: ready -->
 
  <chapter id="chapter-makefile">
   <title>关于 Makefile 文件</title>
@@ -84,12 +84,12 @@ touch .manual.xml
 CONFIG_FILES=manual.xml CONFIG_HEADERS= ./config.status
 creating manual.xml
 nsgmls -i lang-en -s ./phpdocxml.dcl manual.xml
-nsgmls:en/functions/strings.xml:54:13:E: end tag for "para" omitted, but OMITTAG NO was specified
+nsgmls:en/chpaters/intro.xml:54:13:E: end tag for "para" omitted, but OMITTAG NO was specified
 make: *** [test] Error 1
    </screen>
   </para>
   <para>
-   在以上输出的范例中，文档分析器认为在文件 <filename>en/functions/strings.xml</filename>
+   在以上输出的范例中，文档分析器认为在文件 <filename>en/chpaters/intro.xml</filename>
    中的 54 行应该有一个和标记 &lt;para&gt; 对应的结束符。利用该信息，您就能够回到文件中，更
    正错误，然后再提交您所作的更新。
   </para>
@@ -209,6 +209,19 @@ $ ./configure --with-xsl=file:///path/to/docbook/xsl/styles
    </informalexample>
   </para>
   
+  <note>
+   <para>
+    以上 <literal>--with-xsl=file:///path/to/docbook/xsl/styles</literal> 的形式将不能
+    用在 Cygwin 下，因为它将检查已经存在的样式表，但 cygwin 无法识别以这种方式表达的文件路
+    径。因此，在我们还没有找到真正完全正确的解决方法前，请在 cygwin 下用
+    <literal>--with-mxsl=file:///path/to/docbook/xsl/styles</literal> 来替代以上的
+    写法。同时也请注意，被自动配置脚本 configure 加入到 <filename>entities/file-entities.ent</filename> 
+    文件中的路径也会和 XSLT 工具产生问题，因此，在运行 XSLT 处理器之前您需要将它们转换成 
+    <filename>file:///absolute/path/filename.xml</filename> 的形式。当完成这些工作后，
+    您的 XSLT 工具将能够在 cygwin 下正确地生成手册。
+   </para>
+  </note>
+    
   <para>
    Configure 脚本将从其它文件中生成四个文件：
    <filename>html.xsl</filename>，
@@ -220,6 +233,13 @@ $ ./configure --with-xsl=file:///path/to/docbook/xsl/styles
    生成能够被 HTML Help Workshop 处理的源文件，而 <filename>print.xsl</filename> 将
    生成具有 FO 对象的文档，以便可以被某些 FO 处理器进行进一步的处理。
   </para>
+  
+  <note>
+   <para>
+    <filename>htmlhelp.xsl</filename> 目前单独并没有太大的用处，它仅仅用在新的 CHM 生成系
+    统下，而该系统目前还无法在 CVS 下使用。
+   </para>
+  </note>
   
   <para>
    XSLT 处理器的调用因处理器不同而不同。我们现在假设您已经有称为 <filename>saxon</filename> 
@@ -233,9 +253,8 @@ $ saxon -o bigmanual.html manual.xml bightml.xsl
 $ saxon -o manual.fo manual.xml print.xsl
     </programlisting>
    </informalexample>
-   根据以上所描述的，您可以使用对应的命令来输出需要的格式。如果您希望输出 HTML 帮助格式，您
-   需要在处理完成后运行微软超文本帮助编译器。要利用 FO 文档 获取 PDF 格式，您需要运行某个 FO 
-   处理器来调用 <filename>manual.fo</filename> 文件。
+   根据以上所描述的，您可以使用对应的命令来输出需要的格式。要利用 FO 文档 获取 PDF 格式，您
+   需要运行某个 FO 处理器来调用 <filename>manual.fo</filename> 文件。
   </para>
   
   <note>
@@ -249,7 +268,7 @@ $ saxon -o manual.fo manual.xml print.xsl
   <note>
    <para>
     XSL 并非支持 DSSSL 所有的设定，因此利用 XSL 输出的文档在某些方面会不如<emphasis>目前
-    </emphasis>利用 DSSSL 的输出的文档。
+    </emphasis>利用 DSSSL 的输出的文档，不过开发工作已经开始向只使用 XSL 的方向进展。
    </para>
   </note>
  </chapter>
@@ -269,8 +288,8 @@ $ saxon -o manual.fo manual.xml print.xsl
   <para>
    该在线生成系统仅生成一份新的在线手册以及某个语言新的可下载文档，如果这些更新是在一天的时间
    内完成的。即时仅处理一种语言，生成的过程也需要花费好几个小时，因此并非所有语言版本的生成工作都能
-   够在一天内完成。在生成过程中系统会自动保存 <filename>build.log</filename> 文件，该文
-   件包含生成过程的详细信息。关于 <filename>build.log</filename> 文件的详细内容，请查阅“
+   够在一天内完成。在生成过程中系统会自动保存 <filename>build.log.gz</filename> 文件，该文
+   件包含生成过程的详细信息。关于 <filename>build.log.gz</filename> 文件的详细内容，请查阅“
    <link linkend="translation-practical">翻译者相关信息</link>”一节。在生成过程中发生的错误
    也将被记录在该文件中。
   </para>
