@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.5 $ -->
+<!-- $Revision: 1.6 $ -->
 <!-- $Author: dallas $ -->
-<!-- EN-Revision: 1.16 Maintainer: dallas Status: ready -->
+<!-- EN-Revision: 1.17 Maintainer: dallas Status: ready -->
   <sect1 id="install.apache">
    <title>Apache 服务器 1.x 版本</title>
    <para>
@@ -181,7 +181,7 @@ Group "#-1"
     </note>  
     <note>
      <para>
-     确认在使用 --with-apxs=/path/to/apxs 时指向 Apache 安装后的目录中的
+     确认在使用 <option role="configure">--with-apxs=/path/to/apxs</option> 时指向 Apache 安装后的目录中的
      apxs。绝对不能用 Apache 源程序中的 apxs 而要用安装后的 apxs。
      </para>
     </note>   
@@ -192,8 +192,8 @@ Group "#-1"
     <simpara>
      有两种方式使 PHP 工作于 Windows 下的 Apache 1.3.x。一种是
      CGI 方式（php.exe），另一种是使用 Apache 模块 DLL。不管哪种方式都需要停止
-     Apache，编辑 <filename>srm.conf</filename> 或者
-     <filename>httpd.conf</filename> 来配置 Apache 以加入PHP支持。
+     Apache，编辑
+     &httpd.conf; 来配置 Apache 以加入PHP支持。
     </simpara>
     <simpara>
      值得在这里指出现在 Windows 下的 SAPI
@@ -206,7 +206,7 @@ Group "#-1"
   
     <para>
      如果你按照<link linkend="install.windows.manual">手工安装步骤</link>一节中的说明把
-     PHP 解压缩到了 c:\php\ 目录下，那么需要加入以下三行到 Apache 配置文件中以 CGI 方式安装：
+     PHP 解压缩到了 <filename>c:\php\</filename> 目录下，那么需要加入以下三行到 Apache 配置文件中以 CGI 方式安装：
      <itemizedlist>
       <listitem>
        <simpara>
@@ -230,7 +230,7 @@ Group "#-1"
        </simpara>
       </listitem>
      </itemizedlist>
-     注意上面的第二行在原来的 <filename>httpd.conf</filename>
+     注意上面的第二行在原来的 &httpd.conf;
      中就有的，不过被注释了。还有记住用你自己放置 PHP 的路径替换
      <filename>c:/php/</filename>。
      </para>
@@ -244,12 +244,15 @@ Group "#-1"
 
     <para>
      如果你想在 Apache 中用模块方式使用 PHP，确认把 <filename>php4ts.dll</filename>
-     拷贝到 windows/system（Windows 9x/Me）或者
-     winnt/system32（Windows NT/2000/XP）目录下，覆盖原来的文件。然后在
-     Apache 配置文件 <filename>httpd.conf</filename> 中加入以下两行：
+     拷贝到 <filename>windows/system</filename>（Windows 9x/Me）或者
+     <filename>winnt/system32</filename>（Windows NT/2000）或者
+     <filename>windows/system32</filename>（Windows XP）目录下，覆盖原来的文件。然后在
+     Apache 配置文件 &httpd.conf; 中加入以下两行：
      <itemizedlist>
       <listitem>
        <simpara>
+        用自己喜爱的编辑器打开 &httpd.conf，找到
+        <literal>LoadModule</literal> 指令的部分，在其列表的<emphasis>最后部分</emphasis>加上如下一行：
         <literal>
          LoadModule php4_module c:/php/sapi/php4apache.dll
         </literal>
@@ -257,9 +260,27 @@ Group "#-1"
       </listitem>
       <listitem>
        <simpara>
-        <literal>
-          AddType application/x-httpd-php .php .phtml
-        </literal>
+        你可能发现在用 Windows Installer 安装了
+        Apache 之后需要为用
+        <literal>AddModule</literal> 指令定义
+        <filename>mod_php4.c</filename>。尤其是在定义了
+        <literal>ClearModuleList</literal>
+        指令时格外重要，向下滚动几行可以找到该指令。你将会看到
+        <literal>AddModule</literal>
+        项目的列表，并且在列表的<emphasis>最后</emphasis>有这一行：
+        <literal>AddModule mod_php4.c</literal>。
+       </simpara>  
+      </listitem>  
+      <listitem>  
+       <simpara>  
+        搜索类似
+        <literal># AddType allows you to tweak mime.types</literal>
+        的短语，你会找到一些
+        <literal>AddType</literal>
+        的项目，并且在列表的<emphasis>最后</emphasis>有这一行：
+        <literal>AddType application/x-httpd-php .php</literal>。你可以在这里选择任何想用
+        PHP 解析的后缀。.php 只是所建议的一个。甚至可以包括 .html，也可以加上
+        .php3 来向下兼容。
        </simpara>
       </listitem>
      </itemizedlist>
@@ -267,27 +288,15 @@ Group "#-1"
 
     <simpara>
      修改了配置文件之后记住重新启动 Apache，例如如果你的 Apache 是作为
-     Windows 的服务安装的，<literal>NET STOP APACHE</literal> 后面接上
-     <literal>NET START APACHE</literal>。或者用你通常使用的快捷方式。
+     Windows 的服务安装的，<command>NET STOP APACHE</command> 后面接上
+     <command>NET START APACHE</command>。或者用你通常使用的快捷方式。
     </simpara>
-    
-    <warning>
-     <simpara>
-      在用 Apache 的 Windows installer
-      安装之后，你可能发现需要在配置文件（<filename>httpd.conf</filename>）中用
-      <literal>AddModule</literal> 指令定义
-      <filename>mod_php4.c</filename>。在配置文件接近开头的地方有一些
-      <literal>AddModule</literal> 指令，在其中加入 <literal>AddModule mod_php4.c</literal>
-      一行。如果定义了 <literal>ClearModuleList</literal>
-      指令的话这一步尤其重要。如果不这么做可能会导致
-      PHP 不能被注册为 Apache 的模块。
-     </simpara>
-    </warning>
     
     <simpara>
      有两种方式使用源程序语法彩色显示特色，但是取决于你的安装方法。如果你配置了
      Apache 的 SAPI 模块方式使用
-     PHP，那么在配置文件(<filename>httpd.conf</filename>)加入下面一行就可以使用本特色：<literal>AddType application/x-httpd-php-source .phps</literal>
+     PHP，那么在 &httpd.conf; 中（和插入
+     <literal>AddType application/x-httpd-php .php</literal> 是同一个位置）加入下面一行就可以使用本特色：<literal>AddType application/x-httpd-php-source .phps</literal>。
     </simpara>
     <simpara>
      如果你用 CGI 方式使用 PHP，那你需要用 <function>show_source</function>
