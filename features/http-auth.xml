@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.9 $ -->
+<!-- $Revision: 1.10 $ -->
 <!-- $Author: gregory $ -->
-<!-- EN-Revision: 1.34 Maintainer: Gregory Status: ready -->
+<!-- EN-Revision: 1.36 Maintainer: Gregory Status: ready -->
  <chapter id="features.http-auth">
   <title>用 PHP 进行 HTTP 认证</title>
 
@@ -108,12 +108,18 @@
    该行为对于 HTTP 基本认证标准来说并不是必须的，因此您不能依靠这种方法。对 Lynx 浏览器的测试表明 Lynx 在收到 401 的服务端返回信息时不会清空认证文件，因此只要对认证文件的检查要求没有变化，只要用户点击“后退”按钮，再点击“前进”按钮，其原有资源仍然能够被访问。不过，用户可以通过按“_”键来清空他们的认证信息。
   </simpara>
   <simpara>
-   同时请注意，由于微软的 IIS 服务器的一些限制，该功能对 IIS 和 PHP 的 CGI 版本不适用。如果您正在使用 IIS 模块（ISAPI），您可以使用变量 <literal>HTTP_AUTHORIZATION </literal>。例如：<literal>list($user, $pw) =  
-    explode(':', base64_decode(substr($_SERVER['HTTP_AUTHORIZATION'], 6)));  
-   </literal>  
-
+   同时请注意，在 PHP 4.3.3 之前，由于微软 IIS 的限制，HTTP 认证无法工作在 IIS 服务器的 CGI 模式下。为了能够使其在 PHP 4.3.3 以上版本能够工作，您需要编辑 IIS 的设置“目录安全”。点击“编辑”并且只选择“匿名访问”，其它所有的复选框都应该留空。
   </simpara>
-
+  <simpara>
+   另一个限制，在您使用 IIS 的 ISAPI 模式的时候，您无法使用 <literal>PHP_AUTH_*</literal> 变量，而只能使用 <literal>HTTP_AUTHORIZATION</literal>。例如，考虑如下代码：<literal>list($user, $pw) = explode(':',  
+   base64_decode(substr($_SERVER['HTTP_AUTHORIZATION'], 6)));</literal>。
+  </simpara>
+  <note>
+   <title>IIS 注意事项：</title>
+   <simpara>
+    要 HTTP 认证能够在 IIS 下工作， PHP 配置选项 <link linkend="ini.cgi.rfc2616-headers">cgi.rfc2616_headers</link> 必须设置成 <literal>0</literal>（默认值）。
+   </simpara>
+  </note>
   <note>
    <para>
     如果<link linkend="ini.safe-mode">安全模式</link>被激活，脚本的 UID 会被加到 <literal>WWW-Authenticate</literal> 头信息的 <literal>realm</literal> 部分。
