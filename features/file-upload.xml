@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- $Revision: 1.4 $ -->
+<!-- $Revision: 1.5 $ -->
 <!-- $Author: gregory $ -->
-<!-- EN-Revision: 1.54 Maintainer: Gregory Status: ready -->
+<!-- EN-Revision: 1.55 Maintainer: Gregory Status: ready -->
  <chapter id="features.file-upload">
   <title>ÎÄ¼þÉÏ´«´¦Àí</title>
 
@@ -28,7 +28,7 @@
      <programlisting role="html">
 <![CDATA[
 <form enctype="multipart/form-data" action="_URL_" method="post">
-<input type="hidden" name="MAX_FILE_SIZE" value="1000">
+<input type="hidden" name="MAX_FILE_SIZE" value="30000">
 Send this file: <input name="userfile" type="file">
 <input type="submit" value="Send File">
 </form>
@@ -106,19 +106,25 @@ Send this file: <input name="userfile" type="file">
     <example>
      <title>Ê¹ÎÄ¼þÉÏ´«ÉúÐ§</title>
      <para>
-	  ÒÔÏÂÀý³ÌÊÊÓÃÓÚ PHP 4.0.2 ÒÔÉÏ°æ±¾¡£Çë²ÎÔÄº¯Êý <function>is_uploaded_file</function> ºÍ <function>move_uploaded_file</function>¡£
+	  Çë²éÔÄº¯Êý <function>is_uploaded_file</function> ºÍ <function>move_uploaded_file</function> ÒÔ»ñÈ¡½øÒ»²½µÄÐÅÏ¢¡£ÒÔÏÂ·¶Àý´¦ÀíÓÉ±íµ¥Ìá¹©µÄÎÄ¼þÉÏ´«¡£
      </para>
      <programlisting role="php">
 <![CDATA[
-<?php 
-// In PHP earlier then 4.1.0, $HTTP_POST_FILES  should be used instead of $_FILES.
-if (is_uploaded_file($_FILES['userfile']['tmp_name'])) {
-    copy($_FILES['userfile']['tmp_name'], "/place/to/put/uploaded/file");
+<?php
+// ÔÚ 4.1.0 ÒÔÇ°µÄ PHP ÖÐ£¬ÐèÒªÓÃ $HTTP_POST_FILES ´úÌæ $_FILES¡£
+// ÔÚ 4.0.3 ÒÔÇ°µÄ PHP ÖÐ£¬ÐèÒªÓÃ copy() ºÍ is_uploaded_file() À´´úÌæ move_uploaded_file()¡£
+
+$uploaddir = '/var/www/uploads/';
+
+print "<pre>";
+if (move_uploaded_file($_FILES['userfile']['tmp_name'], $uploaddir . $_FILES['userfile']['name'])) {
+    print "File is valid, and was successfully uploaded.  Here's some more debugging info:\n";
+    print_r($_FILES);
 } else {
-    echo "Possible file upload attack. Filename: " . $_FILES['userfile']['name'];
+    print "Possible file upload attack!  Here's some debugging info:\n";
+    print_r($_FILES);
 }
-/* ...or... */
-move_uploaded_file($_FILES['userfile']['tmp_name'], "/place/to/put/uploaded/file");
+
 ?>
 ]]>
      </programlisting>
