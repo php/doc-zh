@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.3 $ -->
+<!-- $Revision: 1.4 $ -->
 <!-- $Author: dallas $ -->
-<!-- EN-Revision: 1.3 Maintainer: dallas Status: ready -->
+<!-- EN-Revision: 1.7 Maintainer: dallas Status: ready -->
   <refentry id="function.file">
    <refnamediv>
     <refname>file</refname> 
@@ -15,8 +15,9 @@
       <methodparam choice="opt"><type>int</type><parameter>use_include_path</parameter></methodparam>
      </methodsynopsis>
     <para> 
-     和 <function>readfile</function> 一样，只除了
-     <function>file</function> 将文件作为一个数组返回。数组中的每个单元都是文件中相应的一行，包括换行符在内。
+     和 <function>readfile</function> 一样，只除了 <function>file</function>
+     将文件作为一个数组返回。数组中的每个单元都是文件中相应的一行，包括换行符在内。如果失败
+     <function>file</function> 返回 &false;。
     </para>
     <note>
      <para>
@@ -26,22 +27,22 @@
     </note>
     &note.line-endings;
     <para>
-     可以将可选的第二个参数设为 "1"，如果也想在 <link
-     linkend="ini.include-path">include_path</link> 中搜寻文件的话。
+     如果也想在 <link linkend="ini.include-path">include_path</link>
+     中搜寻文件的话，可以将可选参数 <parameter>use_include_path</parameter> 设为 "1"。
     </para>
     <para>
      <informalexample>
       <programlisting role="php">
 <![CDATA[
 <?php
-// 将一个 web 页面读入到一个数组中并输出
-$fcontents = file ('http://www.example.com/');
-while (list ($line_num, $line) = each ($fcontents)) {
-    echo "<b>Line $line_num:</b>; ", htmlspecialchars ($line), "<br>\n";
+// 将一个文件读入数组。本例中通过 HTTP 从 URL 中取得 HTML 源文件。
+$lines = file ('http://www.example.com/');
+// 在数组中循环，显示 html 的源文件并加上行号。
+foreach ($lines as $line_num => $line) {
+    echo "Line #<b>{$line_num}</b> : " . htmlspecialchars($line) . "<br>\n";
 }
-
-// 将一个 web 页面读入到一个字符串
-$fcontents = implode ('', file ('http://www.example.com/'));
+// 另一个例子将 web 页面读入字符串。参见 file_get_contents()。
+$html = implode ('', file ('http://www.example.com/'));
 ?>
 ]]>
       </programlisting>
@@ -50,14 +51,16 @@ $fcontents = implode ('', file ('http://www.example.com/'));
     <note>
      <para>
       从 PHP 4.3.0 开始可以用 <function>file_get_contents</function>
-      来将文件读入到一个字符串返回，二进制文件也可以。
+      来将文件读入到一个字符串返回。
+     </para>
+     <para>
+      从 PHP 4.3.0 开始 <function>file</function> 可以安全用于二进制文件。
      </para>
     </note>
-    &note.not-bin-safe;
     &tip.fopen-wrapper;
     <para> 
-     参见 <function>readfile</function>，<function>fopen</function>，<function>fsockopen</function>
-     和 <function>popen</function>。
+     参见 <function>readfile</function>，<function>fopen</function>，<function>fsockopen</function>，<function>popen</function>，<function>file_get_contents</function>
+     和 <function>include</function>。
     </para>
    </refsect1>
   </refentry>
