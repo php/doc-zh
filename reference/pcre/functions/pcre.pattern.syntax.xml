@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.2 $ -->
+<!-- $Revision: 1.3 $ -->
 <!-- $Author: dallas $ -->
 <!-- EN-Revision: 1.5 Maintainer: dallas Status: partial -->
   <refentry id="pcre.pattern.syntax">
@@ -34,9 +34,9 @@
      </listitem>
      <listitem>
       <simpara>
-       PCRE 不允许向前匹配重复的数量符。Perl
+       PCRE 不允许在向前断言中使用重复的数量符。Perl
        允许这样，但可能不是你想象中的含义。例如，(?!a){3}
-       并不匹配下面三个不是“a”的字符，而是匹配下一个不是“a”的字符三次。
+       并不是断言下面三个字符不是“a”，而是断言下一个字符不是“a”三次。
       </simpara>
      </listitem>
      <listitem>
@@ -68,7 +68,7 @@
       </listitem>
       <listitem>
        <simpara>
-        不支持 Perl 的 \G 匹配，因为这和单个的模式匹配无关。
+        不支持 Perl 的 \G 断言，因为这和单个的模式匹配无关。
        </simpara>
       </listitem>
       <listitem>
@@ -136,40 +136,26 @@
 
    <refsect1 id="regexp.reference">
     <title>正则表达式详解</title>
-     <refsect2 id="regexp.introduction">
-      <title>介绍</title>
-      <para>
-     The syntax and semantics of  the  regular  expressions  sup-
-     ported  by PCRE are described below. Regular expressions are
-     also described in the Perl documentation and in a number  of
-     other  books,  some  of which have copious examples. Jeffrey
-     Friedl's  "Mastering  Regular  Expressions",  published   by
-     O'Reilly  (ISBN 1-56592-257-3), covers them in great detail.
-     The description here is intended as reference documentation.
-
-     A regular expression is a pattern that is matched against  a
-     subject string from left to right. Most characters stand for
-     themselves in a pattern, and match the corresponding charac-
-     ters in the subject. As a trivial example, the pattern
-       <literal>The quick brown fox</literal>
-     matches a portion of a subject string that is  identical  to
-     itself.
-    </para>
+    <refsect2 id="regexp.introduction">
+     <title>介绍</title>
+     <para>
+      下面说明 PCRE 所支持的正则表达式的语法和语义。Perl
+      文档和很多其它书中也解说了正则表达式，有的书中有很多例子。Jeffrey
+      Friedl 写的“Mastering  Regular  Expressions”，由 O'Reilly
+      出版社发行（ISBN 1-56592-257-3），包含了大量细节。这里的说明只是个参考文档。
+     </para>
+     <para>
+      正则表达式是从左向右去匹配目标字符串的一组模式。大多数字符在模式中表示它们自身并匹配目标中相应的字符。作为一个小例子，模式
+      <literal>The quick brown fox</literal> 匹配了目标字符串中与其完全相同的一部分。
+     </para>
     </refsect2>
     <refsect2 id="regexp.reference.meta">
      <title>元字符</title>
      <para>
-     The  power  of  regular  expressions comes from the
-     ability to include alternatives and repetitions in the  pat-
-     tern.  These  are encoded in the pattern by the use of <emphasis>meta</emphasis>-
-     <emphasis>characters</emphasis>, which do not stand for  themselves  but  instead
-     are interpreted in some special way.
+      正则表达式的威力在于其能够在模式中包含选择和循环。它们通过使用<emphasis>元字符</emphasis>来编码在模式中，元字符不代表其自身，它们用一些特殊的方式来解析。
      </para>
      <para>
-     There are two different sets of meta-characters: those  that
-     are  recognized anywhere in the pattern except within square
-     brackets, and those that are recognized in square brackets.
-     Outside square brackets, the meta-characters are as follows:
+      有两组不同的元字符：一种是模式中除了方括号内都能被识别的，还有一种是在方括号内被识别的。方括号之外的元字符有这些：
       <variablelist>
        <varlistentry>
         <term><emphasis>\</emphasis></term>
@@ -183,7 +169,7 @@
         <term><emphasis>^</emphasis></term>
         <listitem>
          <simpara>
-          匹配目标的开头（或在多行模式下行的开头，即紧随一换行符之后）
+          断言目标的开头（或在多行模式下行的开头，即紧随一换行符之后）
          </simpara>
         </listitem>
        </varlistentry>
@@ -191,7 +177,7 @@
         <term><emphasis>$</emphasis></term>
         <listitem>
          <simpara>
-          匹配目标的结尾（或在多行模式下行的结尾，即紧随一换行符之前）
+          断言目标的结尾（或在多行模式下行的结尾，即紧随一换行符之前）
          </simpara>
         </listitem>
        </varlistentry>
@@ -319,7 +305,7 @@
         </listitem>
        </varlistentry>
       </variablelist>
-      下面说明了每一个元字符的用法。
+      以下说明了每一个元字符的用法。
      </para>
     </refsect2>
     <refsect2 id="regexp.reference.backslash">
@@ -336,14 +322,7 @@
      选项，模式中的空白字符（字符类中以外的）以及字符类之外的“#”到换行符之间的字符都被忽略。可以用转义的反斜线将空白字符或者“#”字符包括到模式中去。
      </para>
      <para>
-      反斜线的第二种用途提供了一种在模式中以可见方式去编码不可打印字符的方法。
-     A second use of backslash provides a way of encoding non-
-     printing characters in patterns in a visible manner. There
-     is no restriction on the appearance of non-printing  characters,
-     apart from the binary zero that terminates a pattern,
-     but when a pattern is being prepared by text editing, it is
-     usually  easier to use one of the following escape sequences
-     than the binary character it represents:
+      反斜线的第二种用途提供了一种在模式中以可见方式去编码不可打印字符的方法。并没有不可打印字符出现的限制，除了代表模式结束的二进制零以外。但用文本编辑器来准备模式的时候，通常用以下的转义序列来表示那些二进制字符更容易一些：
      </para>
      <para>
       <variablelist>
@@ -359,7 +338,7 @@
         <term><emphasis>\cx</emphasis></term>
         <listitem>
          <simpara>
-           "control-x"，其中 x 是任意字符
+          "control-x"，其中 x 是任意字符
          </simpara>
         </listitem>
        </varlistentry>
@@ -536,7 +515,7 @@
         <term><emphasis>\d</emphasis></term>
         <listitem>
          <simpara>
-          任何十进制数
+          任一十进制数字
          </simpara>
         </listitem>
        </varlistentry>
@@ -544,7 +523,7 @@
         <term><emphasis>\D</emphasis></term>
         <listitem>
          <simpara>
-          任何非十进制数的字符
+          任一非十进制数的字符
          </simpara>
         </listitem>
        </varlistentry>
@@ -552,7 +531,7 @@
         <term><emphasis>\s</emphasis></term>
         <listitem>
          <simpara>
-          任何空白字符
+          任一空白字符
          </simpara>
         </listitem>
        </varlistentry>
@@ -560,7 +539,7 @@
         <term><emphasis>\S</emphasis></term>
         <listitem>
          <simpara>
-          任何非空白字符
+          任一非空白字符
          </simpara>
         </listitem>
        </varlistentry>
@@ -568,7 +547,7 @@
         <term><emphasis>\w</emphasis></term>
         <listitem>
          <simpara>
-          任何“字”的字符
+          任一“字”的字符
          </simpara>
         </listitem>
        </varlistentry>
@@ -576,41 +555,27 @@
         <term><emphasis>\W</emphasis></term>
         <listitem>
          <simpara>
-          任何“非字”的字符
+          任一“非字”的字符
          </simpara>
         </listitem>
        </varlistentry>
       </variablelist>
      </para>
      <para>
-     Each pair of escape sequences partitions the complete set of
-     characters into two disjoint sets. Any given character
-     matches one, and only one, of each pair.
+      任何一个转义序列将完整的字符组合分割成两个分离的部分。任一给定的字符匹配一个且仅一个转义序列。
      </para>
      <para>
-     A "word" character is any letter or digit or the underscore
-     character,  that  is,  any  character which can be part of a
-     Perl "<literal>word</literal>". The definition of letters and digits is
-     controlled by PCRE's character tables, and may vary if locale-specific
-     matching is taking place (see  "Locale  support"
-     above). For example, in the "fr" (French) locale, some char-
-     acter codes greater than 128 are used for accented letters,
-     and these are matched by <literal>\w</literal>.
+      “字”的字符是指任何一个字母或数字或下划线，也就是说，任何可以是
+      Perl "<literal>word</literal>" 的字符。字母和数字的定义由
+      PCRE 字符表控制，可能会根据指定区域的匹配而改变（见上面的“区域支持”）。举例说，在
+      "fr" (French) 区域，某些编码大于 128 的字符用来表示重音字母，这些字符能够被
+      <literal>\w</literal> 所匹配。
      </para>
      <para>
-     These character type sequences can appear both inside and
-     outside  character classes. They each match one character of
-     the appropriate type. If the current matching  point is at
-     the end of the subject string, all of them fail, since there
-     is no character to match.
+      这些字符类型序列可以出现在字符类之中和之外。每一个匹配相应类型中的一个字符。如果当前匹配点在目标字符串的结尾，以上所有匹配都失败，因为没有字符可供匹配。
      </para>
      <para>
-     The fourth use of backslash is  for  certain  simple  asser-
-     tions. An assertion specifies a condition that has to be met
-     at a particular point in  a match, without consuming any
-     characters from the subject string. The use of subpatterns
-     for more complicated assertions is described below. The
-     backslashed assertions are
+      反斜线的第四个用法是某些简单的断言。断言是指在一个匹配中的特定位置必须达到的条件，并不会消耗目标字符串中的任何字符。子模式中更复杂的断言的用法在下面描述。反斜线的断言有：
      </para>
      <para>
       <variablelist>
@@ -642,7 +607,7 @@
         <term><emphasis>\Z</emphasis></term>
         <listitem>
          <simpara>
-          目标的结尾或结尾的换行符（与多行模式无关）
+          目标的结尾或位于结尾的换行符前（与多行模式无关）
          </simpara>
         </listitem>
        </varlistentry>
@@ -657,31 +622,25 @@
       </variablelist>
      </para>
      <para>
-     These assertions may not appear in  character  classes  (but
-     note that "<literal>\b</literal>" has a different meaning, namely the backspace
-     character, inside a character class).
+      这些断言可能不能出现在字符类中（但是注意
+      "<literal>\b</literal>" 有不同的含义，在字符类之中也就是反斜线字符）。
      </para>
      <para>
-     A word boundary is a position in the subject string where
-     the current character and the previous character do not both
-     match <literal>\w</literal> or <literal>\W</literal> (i.e. one matches
-     <literal>\w</literal> and  the  other  matches
-     <literal>\W</literal>), or the start or end of the string if the first
-     or last character matches \w, respectively.
+      字边界是目标字符串中的一个位置，其当前字符和前一个字符不能同时匹配
+      <literal>\w</literal> 或者 <literal>\W</literal>（也就是其中一个匹配
+      <literal>\w</literal> 而另一个匹配
+      <literal>\W</literal>），或者是字符串的开头或结尾，假如第一个或最后一个字符匹配
+      \w 的话。
      </para>
      <para>
-     The <literal>\A</literal>, <literal>\Z</literal>, and
-     <literal>\z</literal> assertions differ  from  the  traditional
-     circumflex  and  dollar  (described below) in that they only
-     ever match at the very start and end of the subject  string,
-     whatever  options  are  set.  They  are  not affected by the
-     <link linkend="pcre.pattern.modifiers">PCRE_NOTBOL</link> or
-     <link linkend="pcre.pattern.modifiers">PCRE_NOTEOL</link> options.
-     The  difference  between <literal>\Z</literal> and
-     <literal>\z</literal>  is that <literal>\Z</literal>
-     matches before a newline that is the
-     last character of the string as well as at the  end  of  the
-     string, whereas <literal>\z</literal> matches only at the end.
+      <literal>\A</literal>，<literal>\Z</literal> 和 <literal>\z</literal>
+      断言与传统的音调符和美元符（下面说明）的不同之处在于它们仅匹配目标字符串的绝对开头和结尾而不管设定了任何选项。它们不受
+      <link linkend="pcre.pattern.modifiers">PCRE_NOTBOL</link> 或
+      <link linkend="pcre.pattern.modifiers">PCRE_NOTEOL</link>
+      选项的影响。<literal>\Z</literal> 和
+      <literal>\z</literal> 的不同之处在于 <literal>\Z</literal>
+      匹配了作为字符串最后一个字符的换行符之前以及字符串的结尾，而
+      <literal>\z</literal> 仅匹配字符串的结尾。
      </para>
     </refsect2>
 
