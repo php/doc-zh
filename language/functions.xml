@@ -1,0 +1,393 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!-- $Revision: 1.1 $ -->
+ <chapter id="functions">
+  <title>º¯Êý</title>
+
+  <sect1 id="functions.user-defined">
+   <title>ÓÃ»§×Ô¶¨Òåº¯Êý</title>
+ 
+   <para>
+    Ò»¸öº¯Êý¿ÉÓÉÒÔÏÂµÄÓï·¨À´¶¨Òå£º
+    <informalexample>
+     <programlisting role="php">
+<![CDATA[
+function foo ($arg_1, $arg_2, ..., $arg_n)
+{
+    echo "Example function.\n";
+    return $retval;
+}
+]]>
+     </programlisting>
+    </informalexample>
+   </para>
+   
+   <!--
+    
+    status of func(const $param) ?
+    zend doesn't care at all whether or not you specify it.
+    I've never seen it before... what's its use? (or was...)
+    
+    -->
+     
+   <simpara>
+    ÈÎºÎÓÐÐ§µÄ PHP ´úÂë¶¼¿ÉÄÜ³öÏÖÔÚº¯ÊýÄÚ²¿£¬ÉõÖÁÆäËûº¯ÊýºÍ
+    <link linkend="keyword.class">class</link> ¶¨Òå¡£
+   </simpara>
+   <simpara>
+    ÔÚ PHP 3 ÖÐ£¬º¯Êýº¯Êý±ØÐëÔÚËüÃÇ±»µ÷ÓÃÖ®Ç°¶¨Òå¡£PHP 4 ÖÐ²»ÔÚÓÐÕâÑùµÄ
+    Ìõ¼þ¡£
+   </simpara>
+   <simpara>
+    PHP ²»Ö§³Öº¯ÊýÖØÔØ£¬¿ÉÄÜÒ²²»Ö§³ÖÈ¡Ïû¶¨Òå»òÕßÖØ¶¨ÒåÒÑÉùÃ÷µÄº¯Êý¡£
+   </simpara>
+   <simpara>
+    PHP 3 does not support variable numbers of arguments to functions,
+    PHP 3 ËäÈ»Ö§³ÖÄ¬ÈÏ²ÎÊý£¨¸ü¶àµÄÐÅÏ¢Çë²ÎÕÕ£ 
+    <link linkend="functions.arguments.default">Ä¬ÈÏ²ÎÊýµÄÖµ</link>£©
+    £¬µ«ÊÇÈ´²»Ö§³Ö¿É±äµÄ²ÎÊý¸öÊý¡£
+    PHP 4 Ö§³Ö: ¼û <link
+    linkend="functions.variable-arg-list">Variable-length argument
+    lists</link> and the function references for
+    <function>func_num_args</function>,
+    <function>func_get_arg</function>, and
+    <function>func_get_args</function> for more information.
+   </simpara>
+
+  </sect1>
+ 
+  <sect1 id="functions.arguments">
+   <title>º¯ÊýµÄ²ÎÊý</title>
+ 
+   <simpara>
+    Information may be passed to functions via the argument list,
+    which is a comma-delimited list of variables and/or constants.
+   </simpara> 
+   <para>
+     PHP supports passing arguments by value (the default), <link
+     linkend="functions.arguments.by-reference">passing by
+     reference</link>, and <link
+     linkend="functions.arguments.default">default argument
+     values</link>. Variable-length argument lists are supported only
+     in PHP 4 and later; see <link
+     linkend="functions.variable-arg-list">Variable-length argument
+     lists</link> and the function references for
+     <function>func_num_args</function>,
+     <function>func_get_arg</function>, and
+     <function>func_get_args</function> for more information. A
+     similar effect can be achieved in PHP 3 by passing an array of
+     arguments to a function:
+ 
+    <informalexample>
+     <programlisting role="php">
+<![CDATA[
+function takes_array($input)
+{
+    echo "$input[0] + $input[1] = ", $input[0]+$input[1];
+}
+]]>
+     </programlisting>
+    </informalexample>
+   </para>
+ 
+   <sect2 id="functions.arguments.by-reference">
+    <title>Í¨¹ýÒýÓÃ´«µÝ²ÎÊý</title>
+ 
+    <simpara>
+     By default, function arguments are passed by value (so that if
+     you change the value of the argument within the function, it does
+     not get changed outside of the function). If you wish to allow a
+     function to modify its arguments, you must pass them by
+     reference.
+    </simpara>
+    <para>
+     If you want an argument to a function to always be passed by
+     reference, you can prepend an ampersand (&amp;) to the argument
+     name in the function definition:
+ 
+     <informalexample>
+      <programlisting role="php">
+<![CDATA[
+function add_some_extra(&$string)
+{
+    $string .= 'and something extra.';
+}
+$str = 'This is a string, ';
+add_some_extra($str);
+echo $str;    // outputs 'This is a string, and something extra.'
+]]>
+      </programlisting>
+     </informalexample>
+    </para>
+ 
+   </sect2>
+ 
+   <sect2 id="functions.arguments.default">
+    <title>Ä¬ÈÏ²ÎÊýµÄÖµ</title>
+ 
+    <para>
+     A function may define C++-style default values for scalar
+     arguments as follows:
+ 
+     <informalexample>
+      <programlisting role="php">
+<![CDATA[
+function makecoffee ($type = "cappuccino")
+{
+    return "Making a cup of $type.\n";
+}
+echo makecoffee ();
+echo makecoffee ("espresso");
+]]>
+      </programlisting>
+     </informalexample>
+    </para>
+ 
+    <para>
+     The output from the above snippet is:
+ 
+     <screen>
+Making a cup of cappuccino.
+Making a cup of espresso.
+     </screen>
+    </para>
+ 
+    <simpara>
+     The default value must be a constant expression, not (for
+     example) a variable or class member.
+    </simpara>
+    <para>
+     Note that when using default arguments, any defaults should be on
+     the right side of any non-default arguments; otherwise, things
+     will not work as expected. Consider the following code snippet:
+ 
+     <informalexample>
+      <programlisting role="php">
+<![CDATA[
+function makeyogurt ($type = "acidophilus", $flavour)
+{
+    return "Making a bowl of $type $flavour.\n";
+}
+ 
+echo makeyogurt ("raspberry");   // won't work as expected
+]]>
+      </programlisting>
+     </informalexample>
+    </para>
+ 
+    <para>
+     The output of the above example is:
+ 
+     <screen>
+Warning: Missing argument 2 in call to makeyogurt() in 
+/usr/local/etc/httpd/htdocs/php3test/functest.html on line 41
+Making a bowl of raspberry .
+     </screen>
+    </para>
+ 
+    <para>
+     Now, compare the above with this:
+ 
+     <informalexample>
+      <programlisting role="php">
+<![CDATA[
+function makeyogurt ($flavour, $type = "acidophilus")
+{
+    return "Making a bowl of $type $flavour.\n";
+}
+ 
+echo makeyogurt ("raspberry");   // works as expected
+]]>
+      </programlisting>
+     </informalexample>
+    </para>
+ 
+    <para>
+     The output of this example is:
+ 
+     <screen>
+Making a bowl of acidophilus raspberry.
+     </screen>
+    </para>
+
+   </sect2>
+
+   <sect2 id="functions.variable-arg-list">
+    <title>Variable-length argument lists</title>
+	
+    <simpara>
+     PHP 4 has support for variable-length argument lists in
+     user-defined functions. This is really quite easy, using the
+     <function>func_num_args</function>,
+     <function>func_get_arg</function>, and
+     <function>func_get_args</function> functions.
+    </simpara>
+
+    <simpara>
+     No special syntax is required, and argument lists may still be
+     explicitly provided with function definitions and will behave as
+     normal.
+    </simpara>
+
+   </sect2>
+
+  </sect1>
+ 
+  <sect1 id="functions.returning-values">
+   <title>·µ»ØÖµ</title>
+ 
+   <para>
+    Values are returned by using the optional return statement. Any
+    type may be returned, including lists and objects. This causes the
+    function to end its execution immediately and pass control back to
+    the line from which it was called. See <function>return</function>
+    for more information.
+    <informalexample>
+     <programlisting role="php">
+<![CDATA[
+function square ($num)
+{
+    return $num * $num;
+}
+echo square (4);   // outputs '16'.
+]]>
+     </programlisting>
+    </informalexample>
+   </para>
+      
+   <para>
+    Äã²»ÄÜ´Óº¯Êý·µ»Ø¶à¸öÖµ£¬µ«·µ»ØÒ»¸öÁÐ±í¿ÉÒÔ»ñµÃ¼òµ¥µÄ½á¹û¡£
+ 
+    <informalexample>
+     <programlisting role="php">
+<![CDATA[
+function small_numbers()
+{
+    return array (0, 1, 2);
+}
+list ($zero, $one, $two) = small_numbers();
+]]>
+     </programlisting>
+    </informalexample>
+   </para>
+   <para>
+    ´Óº¯Êý·µ»ØÒ»¸öÒýÓÃ£¬Äã±ØÐëÔÚº¯ÊýÉêÃ÷ºÍÖ§ÅÉ·µ»ØÖµ¸øÒ»¸ö±äÁ¿Ê±¶¼Ê¹ÓÃÒýÓÃ²Ù×÷·û &amp; £º
+    <informalexample>
+     <programlisting role="php">
+<![CDATA[
+function &returns_reference()
+{
+    return $someref;
+}
+
+$newref =& returns_reference();
+]]>
+     </programlisting>
+    </informalexample>
+   </para>
+   <simpara>
+    ÓÐ¹ØÒýÓÃµÄ¸ü¶àÐÅÏ¢, Çë²é¿´ <link
+    linkend="language.references">ÒýÓÃµÄ½âÊÍ</link>.
+   </simpara>
+  </sect1>
+ 
+  <sect1 id="functions.old-syntax">
+   <title><literal>¾ÉµÄº¯Êý</literal></title>
+ 
+   <simpara>
+    <literal>old_function</literal> Óï¾äÔÊÐíÄãÊ¹ÓÃ PHP/FI2 µÄÓï·¨ÉùÃ÷º¯Êý£¬
+    £¨Äã±ØÐë°Ñ¡®function¡¯Ìæ»»Îª¡®old_function¡¯£©
+
+    <literal>¾ÉµÄº¯Êý</literal> 
+   </simpara>
+   <simpara>
+    ÕâÊÇÒ»¸ö²»±»ÔÞ³ÉµÄÌØÐÔ£¬Ó¦¸ÃÖ»ÓÃÔÚ PHP/FI2->PHP 3 ×ª»»Æ÷ÖÐ¡£
+   </simpara>
+   <warning>
+    <para>
+     Functions declared as <literal>old_function</literal> cannot be
+     called from PHP's internal code. Among other things, this means
+     you can't use them in functions such as
+     <function>usort</function>, <function>array_walk</function>, and
+     <function>register_shutdown_function</function>. You can get
+     around this limitation by writing a wrapper function (in normal
+     PHP 3 form) to call the <literal>old_function</literal>.
+
+
+    </para>
+   </warning>
+
+  </sect1>
+
+  <sect1 id="functions.variable-functions">
+   <title>Variable functions</title>
+
+   <para>
+    PHP supports the concept of variable functions. This means that if
+    a variable name has parentheses appended to it, PHP will look for
+    a function with the same name as whatever the variable evaluates
+    to, and will attempt to execute it. Among other things, this can
+    be used to implement callbacks, function tables, and so forth.
+   </para>
+   <para>
+    Variable functions won't work with language constructs such 
+    as <function>echo</function>, <function>unset</function>,
+    <function>isset</function>, <function>empty</function> and 
+    <function>include</function>.  Although, the construct 
+    <function>print</function> is an exception and will work.  
+    This is one of the major differences between PHP functions and 
+    language constructs. 
+   </para>
+   <para>
+    <example>
+     <title>Variable function example</title>
+     <programlisting role="php">
+<![CDATA[
+<?php
+function foo()
+{
+    echo "In foo()<br>\n";
+}
+
+function bar($arg = '')
+{
+    echo "In bar(); argument was '$arg'.<br>\n";
+}
+
+$func = 'foo';
+$func();
+$func = 'bar';
+$func('test');
+?>
+]]>
+     </programlisting>
+    </example>
+   </para>
+   <para>
+    See also <link linkend="language.variables.variable">
+    variable variables</link> and <function>function_exists</function>.
+   </para>
+
+  </sect1>
+
+ </chapter>
+ 
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"../../manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
