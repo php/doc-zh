@@ -1,6 +1,6 @@
 <!-- $Revision$ -->
 <!-- $Author$ -->
-<!-- EN-Revision: 1.73 Maintainer: Gregory Status: ready -->
+<!-- EN-Revision: 1.94 Maintainer: Gregory Status: ready -->
 
 <!ENTITY warn.experimental '<warning><simpara>本扩展模块是<emphasis>实验性</emphasis>的。该模块的行为，包括其函数的名称以及其它任何关于此模块的文档可能会在没有通知的情况下随 PHP 以后的发布而改变。我们提醒您在使用本扩展模块的同时自担风险。
 </simpara></warning>'>
@@ -15,6 +15,14 @@
 在 4.3.0 版之前不支持该函数的远程文件访问，即使
 <link linkend="ini.allow-url-fopen">allow_url_fopen</link> 选项已被激活。
 </para></warning>'>
+
+<!ENTITY warn.ssl-non-standard '<warning><para>当使用
+SSL 时，Microsoft IIS 将不发送 close_notify 指示就关闭连接从而违反协议。PHP
+在到达数据尾端时将报告 "SSL: Fatal Protocol Error"。要绕过此问题，应将
+<link linkend="ini.error-reporting">error_reporting</link> 级别降低不包括警告。PHP
+4.3.7 及更高版本可以在当使用 https:// 封装协议打开流的时候检测出有此问题的
+IIS 服务器并抑制警告。如果使用 <function>fsockopen</function>
+来创建一个 ssl:// 套接字，则需要自己检测并抑制警告信息。</para></warning>'>
 
 <!ENTITY note.no-remote '<note><simpara>本函数不能作用于<link
 linkend="features.remote-files">远程文件</link>，被检查的文件必须通过服务器的文件系统访问。
@@ -33,6 +41,9 @@ URL 作为文件名来使用。请参阅 <function>fopen</function>
 起本函数也可被<emphasis>某些</emphasis> URL wrapper 使用。参考<xref
 linkend="wrappers"/>来看哪些 wrapper 支持哪些
 <function>stat</function> 家族的功能。</simpara></tip>'>
+
+<!ENTITY note.context-support '<note><simpara>Context 支持是
+<literal>PHP 5.0.0</literal> 添加的。</simpara></note>'>
 
 <!ENTITY return.success '如果成功则返回 &true;，失败则返回 &false;。'>
 
@@ -65,8 +76,33 @@ linkend="ref.yaz">YAZ</link> 扩展使用想同的内部符号，因此它们不能同时使用。</sim
 magic_quotes_gpc</link> 的默认值为 <literal>on</literal>。这相当于自动对所有的 GET、POST、COOKIE
 数据使用 <function>addslashes</function> 函数。您可以使用 <function>stripslashes</function> 函数来去掉它们。
 </para></note>'>
+<!-- Image (GD) Notes -->
 <!ENTITY note.config.t1lib '<note><simpara>本函数仅在
 PHP 编译时指定了 <option role="configure">--enable-t1lib</option> 时可用。</simpara></note>'>
+<!ENTITY note.bundled.gd '<note><simpara>本函数仅在
+PHP 和其捆绑的 GD 库一起编译时可用。</simpara></note>'>
+
+<!-- DomXml Notes -->
+<!ENTITY node.inserted '本节点不会出现在文档中，除非是用例如
+<function>domnode_append_child</function> 来插入的。'> 
+
+<!-- Dom Notes -->
+<!ENTITY dom.node.inserted '本节点不会出现在文档中，除非是用例如
+<link linkend="function.dom-domnode-appendchild">DOMNode->appendChild()</link> 来插入的。'>
+
+<!-- FileSystem entities -->
+<!ENTITY fs.validfp.all '<para>文件指针必须是有效的，并且必须指向一个由
+<function>fopen</function> 或 <function>fsockopen</function>
+成功打开的文件。</para>'>
+
+<!-- PCNTL Notes -->
+<!ENTITY pcntl.parameter.status '<para>参数
+<parameter>status</parameter> 是提供给成功调用的
+<function>pcntl_waitpid</function> 函数的状态参数。</para>'>
+
+<!-- XSLT Notes -->
+<!ENTITY note.xslt.windows '<note><para>注意如果使用
+Windows，需要在路径前加上 <emphasis>file://</emphasis>。</para></note>'> 
 
 <!-- Various notes -->
 <!ENTITY note.randomseed '<note><simpara>在 PHP 4.2.0 中，无需用函数 <function>srand</function> 或
@@ -92,6 +128,13 @@ PHP 编译时指定了 <option role="configure">--enable-t1lib</option> 时可用。</simp
 <!ENTITY note.func-callback '<note><simpara>第二个参数函数名可以替换为一个数组，该数组由一个对象名和该对象名的一个方法名两个元素组成。
 </simpara></note>'>
 
+<!ENTITY warn.escapeshell '<warning><para>如果想允许用户输入的数据被传入此函数，则需要使用
+<function>escapeshellarg</function> 或 <function>escapeshellcmd</function>
+来确保用户不能欺骗系统从而执行任意命令。</para></warning>'> 
+
+<!ENTITY note.exec-bg '<note><para>如果你用此函数启动一个程序并希望保持在后台运行，必须确保该程序的输出被重定向到一个文件或者其它输出流去，否则
+PHP 会在程序执行结束后挂起。</para></note>'>
+
 <!-- Notes for safe-mode limited functions: -->
 <!ENTITY note.sm.disabled '<note><simpara>&sm.disabled;</simpara></note>'>
 
@@ -109,6 +152,15 @@ linkend="functions.variable-functions">变量函数</link>”调用。</simpara>
      Jade doesn't allow in-line entities, so I put them here... Though they
      should have been inline in safe-mode.xml -->
 <!ENTITY sm.uidcheck '将检查您将要操作的文件/目录与正在执行的脚本是否有相同的 UID。'>
+<!ENTITY warn.sm.exec '<warning><simpara>在打开了<link
+linkend="features.safe-mode">安全模式</link>时，任何初始命令字符串之后的词都被看成一个单一的参数。因此，<literal>echo
+y | echo x</literal> 就成了 <literal>echo "y | echo x"</literal>。</simpara></warning>'>
+
+<!ENTITY note.exec-path '<note><simpara>在打开了<link
+linkend="features.safe-mode">安全模式</link>时，只能执行在
+<link linkend="ini.safe-mode-exec-dir">safe_mode_exec_dir</link>
+之内的程序。为实用起见当前不能在指向程序的路径中包含
+<literal>..</literal> 成分。</simpara></note>'>
 
 <!ENTITY sm.uidcheck.dir '将检查您将要操作的目录和正在执行的脚本是否有相同的 UID。'>
 
@@ -142,24 +194,9 @@ linkend="functions.variable-functions">变量函数</link>”调用。</simpara>
 <!ENTITY extension.classes '<simpara>
 由于这些类是由该扩展模块定义的，因此它们仅在该扩展模块被编译到 PHP 内核中，或者在运行时被动态加载后才有效。
 </simpara>'>
-<!-- These are using in reference/$extname/reference.xml and other
-supplemental files to mark section titles -->
-<!ENTITY reftitle.intro     '<title>介绍</title>'>
-<!ENTITY reftitle.required  '<title>需求</title>'>
-<!ENTITY reftitle.install   '<title>安装</title>'>
-<!ENTITY reftitle.runtime   '<title>运行时配置</title>'>
-<!ENTITY reftitle.resources '<title>资源类型</title>'>
-<!ENTITY reftitle.constants '<title>预定义常量</title>'>
-<!ENTITY reftitle.classes   '<title>预定义类</title>'>
-<!ENTITY reftitle.methods   '<title>方法</title>'>
-<!ENTITY reftitle.properties   '<title>属性</title>'>
-<!ENTITY reftitle.returnvalues '<title>返回值</title>'>
-<!ENTITY reftitle.examples  '<title>范例</title>'>
-<!ENTITY reftitle.seealso   '<title>相关参考</title>'>
-<!ENTITY note.pecl-php5 '<note><simpara>
-该扩展已经从 PHP 5 中移出，然后移入到
-  	<ulink url="&url.pecl;">PECL</ulink> 仓库中。
-  	</simpara></note>'>
+<!ENTITY note.extension.php5 '<note><simpara>本扩展功能需要 PHP 5。</simpara></note>'>
+<!ENTITY note.pecl-php5 '<note><simpara>该扩展已经从 PHP 5 中移出，然后移入到
+<ulink url="&url.pecl;">PECL</ulink> 仓库中。</simpara></note>'>
 <!-- Common pieces for reference part END -->
 
 <!ENTITY windows.builtin '<simpara> <literal>PHP</literal> 的 Windows 版本已经内置该扩展模块的支持。您无需加载任何附加的扩展库即可使用这些函数。</simpara>'>
@@ -167,6 +204,10 @@ supplemental files to mark section titles -->
 <!-- These are here as helpers for manual consistency and brievety-->
 <!ENTITY php '<literal>PHP</literal>'>
 <!ENTITY safemode '<link linkend="ini.safe-mode">安全模式</link>'>
+<!-- Notes for SAPI/Apache -->
+<!ENTITY note.apache.nsapi-module '<note><para>自
+PHP 4.3.3 起也可以在 Netscape/iPlanet/SunONE 服务器的
+<link linkend="ref.nsapi">NSAPI server module</link> 中使用本函数。</para></note>'>
 <!-- SimpleXML Notes -->
 <!ENTITY simplexml.iteration '<note><simpara>SimpleXML 有一条给大部分方法增加交互式属性的规则。该规则不能够使用
 <function>var_dump</function> 或其它检查对象的方法来查看。
@@ -177,7 +218,7 @@ supplemental files to mark section titles -->
 
 <!-- Sybase Notes -->
 <!ENTITY sybase.ct.only '<note><simpara>该函数仅适用于 Sybase 的 CT 库接口，而不适用于 DB 库。</simpara></note>'>
-
+<!ENTITY sybase.db.only '<note><simpara>本函数仅适用于 Sybase 的 DB 库接口，而不适用于 CT 库。</simpara></note>'>
 <!-- Some MySQL Notes -->
 <!ENTITY mysql.field-case '<note><simpara>该函数返回的字段名是<emphasis>大小写敏感的</emphasis>！</simpara></note>'>
 <!-- CPDF Unit length -->
@@ -195,10 +236,27 @@ IPv6 地址（例如 fe80::1）时必须将 IP 地址放在方括号内。例如
 <!-- Notes for tidy -->
 <!ENTITY note.tidy.ze2 '<note><simpara>本函数能用于
 Zend Engine 2，这意味着  PHP &gt;= 5.0.0。</simpara></note>'>
- 	 
-<!ENTITY note.tidy.1only '<note><simpara>该函数只在 
+
+<!ENTITY note.tidy.1only '<note><simpara>该函数只在
 Tidy 1.0 中存在。在 Tidy 2.0 中，该函数被移除。</simpara></note>'>
-  	 
-<!ENTITY note.tidy.2only '<note><simpara>可选的参数
-<literal>config_options</literal> 和 <literal>encoding</literal>
-在 Tidy 2.0 中增加。</simpara></note>'>
+
+<!ENTITY note.tidy.2only '<note><simpara>可选参数
+<literal>config</literal> 和 <literal>encoding</literal>
+是在 Tidy 2.0 中添加的。</simpara></note>'>
+
+<!ENTITY tidy.conf-enc '<para><parameter>config</parameter>
+参数可以以数组或者字符串方式传递。如果以字符串传递，则代表配置文件名，否则就解释为选项本身。每个选项的解释见
+<ulink url="&url.tidy.conf;">&url.tidy.conf;</ulink>。</para><para><parameter>encoding</parameter>
+参数设置了输入／输出文档的编码方式。<parameter>encoding</parameter>
+的可能值有：ascii，latin1，raw，utf8，iso2022，mac，win1252，utf16le，utf16be，utf16，big5
+和 shiftjis。</para>'>
+
+<!-- Snippets for the installation section -->
+<!ENTITY warn.apache2.compat '<warning><para>不论是
+Unix 还是 Windows 下，都不要将 Apache 2.0.x 和
+<literal>PHP</literal> 的组合用于实际运作的环境中去。</para></warning>'>
+
+<!ENTITY note.apache.slashes '<note><simpara>记住在
+Windows 下给 Apache 的配置文件中加入路径值的时候，所有的反斜线例如
+<filename>c:\directory\file.ext</filename> 必须转换成正斜线，如
+<filename>c:/directory/file.ext</filename>。</simpara></note>'>
