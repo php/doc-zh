@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.4 $ -->
+<!-- $Revision: 1.5 $ -->
 <!-- $Author: dallas $ -->
-<!-- EN-Revision: 1.6 Maintainer: lm92 Status: ready -->
+<!-- EN-Revision: 1.14 Maintainer: lm92 Status: ready -->
+<!-- CREDITS: dallas -->
   <refentry id="function.fread">
    <refnamediv>
     <refname>fread</refname>
@@ -19,9 +20,9 @@
      <parameter>handle</parameter> 读取最多
      <parameter>length</parameter> 个字节。
      该函数在读取完
-     <parameter>length</parameter> 个字节数或到达
-     EOF 的时候就会停止读取文件，视乎先碰到哪种情况。
-    </simpara> 
+     <parameter>length</parameter> 个字节数，或到达
+     EOF 的时候，或（对于网络流）当一个包可用时就会停止读取文件，视乎先碰到哪种情况。
+    </simpara>
     <para>
      <informalexample>
       <programlisting role="php">
@@ -35,12 +36,12 @@ fclose ($handle);
       </programlisting>
      </informalexample>
     </para>
-    <note>
+    <warning>
      <para>
-      在区分二进制文件和文本文件的系统上（如 Windows）
-      打开文件时，<function>fopen</function> 函数的 mode 参数要加上 'b'。
+      在区分二进制文件和文本文件的系统上（如
+      Windows）打开文件时，<function>fopen</function> 函数的 mode 参数要加上 'b'。
      </para>
-    </note>
+    </warning>
     <para>
      <informalexample>
       <programlisting role="php">
@@ -53,10 +54,50 @@ fclose ($handle);
       </programlisting>
      </informalexample>
     </para>
+    <warning>
+     <para>
+      当从网络流或者管道读取时，例如在读取从<link
+      linkend="features.remote-files">远程文件</link>或
+      <function>popen</function> 以及 <function>proc_open</function>
+      的返回时，读取会在一个包可用之后停止。这意味着你应该如下例所示将数据收集起来合并成大块。
+     </para>
+    </warning>
+    <para>
+     <informalexample>
+      <programlisting role="php">
+<![CDATA[
+<?php
+$handle = fopen ("http://www.example.com/", "rb");
+$contents = "";
+do {
+    $data = fread($handle, 8192);
+    if (strlen($data) == 0) {
+        break;
+    }
+    $contents .= $data;
+} while(true);
+fclose ($handle);
+?>
+]]>
+      </programlisting>
+     </informalexample>
+    </para>
+    <note>
+     <para>
+      上例比传统的使用 while(!<function>feof</function>)
+      的方法性能要好，因为在每个循环中节约了函数调用的花费。
+     </para>
+    </note>
+    <note>
+     <para>
+      如果你只是想将一个文件的内容读入到一个字符串中，用
+      <function>file_get_contents</function>，它的性能比上面的代码好得多。
+     </para>
+    </note>
     <simpara>
      参见
-     <function>fwrite</function>，<function>fopen</function>，<function>fsockopen</function>，<function>popen</function>，<function>fgets</function>，<function>fgetss</function>，<function>fscanf</function>，<function>file</function> 和
-     <function>fpassthru</function>。
+     <function>fwrite</function>，<function>fopen</function>，<function>fsockopen</function>，<function>popen</function>，<function>fgets</function>，<function>fgetss</function>，<function>fscanf</function>，<function>file</function>
+     和 <function>fpassthru</function>。
     </simpara>
    </refsect1>
   </refentry>

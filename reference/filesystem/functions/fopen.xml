@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.5 $ -->
+<!-- $Revision: 1.6 $ -->
 <!-- $Author: dallas $ -->
-<!-- EN-Revision: 1.11 Maintainer: dallas Status: ready -->
+<!-- EN-Revision: 1.18 Maintainer: dallas Status: ready -->
 <!-- CREDITS: lm92 -->
   <refentry id="function.fopen">
    <refnamediv>
@@ -49,9 +49,9 @@
      <simpara>
       所支持的协议列表见<xref linkend="wrappers"/>。某些协议（也被称为
       <literal>wrappers</literal>）支持
-      <literal>context</literal> 和 <literal>php.ini</literal>
+      <literal>context</literal> 和 &php.ini;
       选项。参见相应的页面哪些选项可以被设定。（也就是
-      <literal>php.ini</literal> 的值
+      &php.ini; 的值
       <literal>user_agent</literal> 用在 <literal>http</literal> 协议中。）有关
       <literal>contexts</literal> 和
       <parameter>zcontext</parameter> 参数的说明，参见 <xref linkend="ref.stream"/>。
@@ -109,16 +109,80 @@
           读写方式打开，将文件指针指向文件末尾。如果文件不存在则尝试创建之。
          </entry>
         </row>
+        <row>
+         <entry><literal>'x'</literal></entry>
+         <entry>
+          创建并以写入方式打开，将文件指针指向文件头。如果文件已存在，则
+          <function>fopen</function> 调用失败并返回 &false;，并生成一条
+          <constant>E_WARNING</constant> 级别的错误信息。如果文件不存在则尝试创建之。这和给
+          底层的 <literal>open(2)</literal> 系统调用指定
+          <literal>O_EXCL|O_CREAT</literal> 标记是等价的。此选项被
+          PHP 4.3.2 以及以后的版本所支持，仅能用于本地文件。
+         </entry>
+        </row>
+        <row>
+         <entry><literal>'x+'</literal></entry>
+         <entry>
+          创建并以读写方式打开，将文件指针指向文件头。如果文件已存在，则
+          <function>fopen</function> 调用失败并返回 &false;，并生成一条
+          <constant>E_WARNING</constant> 级别的错误信息。如果文件不存在则尝试创建之。这和给
+          底层的 <literal>open(2)</literal> 系统调用指定
+          <literal>O_EXCL|O_CREAT</literal> 标记是等价的。此选项被
+          PHP 4.3.2 以及以后的版本所支持，仅能用于本地文件。
+         </entry>
+        </row>
        </tbody>
       </tgroup>
      </table>
     </para>
     <note>
      <para>
-      <parameter>mode</parameter> 可以包括字母
-      'b'，仅在区分二进制和文本文件的系统下有用（例如
-      Windows。在 UNIX 下没有用）。如果不需要将被忽略。鼓励用户包括
-      'b' 标记以使脚本具有更好的移植性。
+      不同的操作系统家族具有不同的行结束习惯。当你写入一个文本文件并想插入一个新行时，你需要使用符合你操作系统的行结束符号。基于
+      Unix 的系统使用 <literal>\n</literal>
+      作为行结束字符，基于 Windows 的系统使用 <literal>\r\n</literal>
+      作为行结束字符，基于 Macintosh 的系统使用 <literal>\r</literal>
+      作为行结束字符。
+     </para>
+     <para>
+      如果写入文件时使用了错误的行结束符号，则其它应用程序打开这些文件时可能会表现得很怪异。
+     </para>
+     <para>
+      Windows 下提供了一个文本转换标记（<literal>'t'</literal>）可以透明地将
+      <literal>\n</literal> 转换为 <literal>\r\n</literal>。与此对应你还可以使用
+      <literal>'b'</literal> 来强制使用二进制模式，这样就不会转换你的数据。要使用这些标记，要么用
+      <literal>'b'</literal> 或者用 <literal>'t'</literal> 作为
+      <parameter>mode</parameter> 参数的最后一个字符。
+     </para>
+     <para>
+      默认的转换模式依赖于 SAPI 和你使用的 PHP
+      版本，因此为了便于移植鼓励你总是指定恰当的标记。当操作以
+      <literal>\n</literal> 作为行结束定界符的纯文本文件时，如果你还期望这些文件可以用于其它应用程序例如
+      Notepad，则应该在脚本中使用 <literal>'t'</literal>
+      模式。在所有其它情况下使用 <literal>'b'</literal>。
+     </para>
+     <para>
+      在操作二进制文件时如果没有指定 <literal>'b'</literal>
+      标记，可能会碰到一些奇怪的问题，包括坏掉的图片文件以及关于
+      <literal>\r\n</literal> 字符的奇怪问题。
+     </para>
+     <para>
+      <emphasis>
+       为移植性考虑，强烈建议在用 <function>fopen</function>
+       打开文件时总是使用 <literal>'b'</literal> 标记。
+      </emphasis>
+     </para>
+     <para>
+      <emphasis>
+       再一次，为移植性考虑，强烈建议你重写那些依赖于
+       <literal>'t'</literal> 模式的代码使其使用正确的行结束符并改成
+       <literal>'b'</literal> 模式。
+      </emphasis>
+     </para>
+     <para>
+      <emphasis>
+       自 PHP 4.3.2 起，对所有区别二进制和文本模式的平台默认模式都被设为二进制模式。如果你在升级后脚本碰到问题，尝试暂时使用
+       <literal>'t'</literal> 标记，直到所有的脚本都照以上所说的改为更具移植性以后。
+      </emphasis>
      </para>
     </note>
     <para>
@@ -153,7 +217,7 @@ $handle = fopen ("ftp://user:password@example.com/somefile.txt", "w");
     <para>
      在 Windows 平台上，要小心转义文件路径中的每个反斜线，或者用斜线。
      <informalexample>
-      <programlisting role="php"> 
+      <programlisting role="php">
 <![CDATA[
 <?php
 $handle = fopen ("c:\\data\\info.txt", "r");
@@ -163,7 +227,7 @@ $handle = fopen ("c:\\data\\info.txt", "r");
      </informalexample>
     </para>
     <simpara>
-     参见<xref linkend="wrappers"/>，<function>fclose</function>，<function>fgets</function>，<function>fsockopen</function>，<function>file</function>，<function>file_exists</function>，<function>is_readable</function>，<function>socket_set_timeout</function>
+     参见<xref linkend="wrappers"/>，<function>fclose</function>，<function>fgets</function>，<function>fread</function>，<function>fwrite</function>，<function>fsockopen</function>，<function>file</function>，<function>file_exists</function>，<function>is_readable</function>，<function>stream_set_timeout</function>
      和 <function>popen</function>。
     </simpara>
    </refsect1>
