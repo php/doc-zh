@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.9 $ -->
-<!-- $Author: class007 $ -->
-<!-- EN-Revision: 1.12 Maintainer: Gregory  Status: ready -->
+<!-- $Revision: 1.10 $ -->
+<!-- $Author: gregory $ -->
+<!-- EN-Revision: 1.13 Maintainer: Gregory  Status: ready -->
   <sect1 id="install.apache2">
    <title>Apache 服务器 2.x 版本</title>
    <para>
@@ -82,25 +82,44 @@
     /usr/local/apache2/bin/apachectl stop.
 
 9.  cd ../php4-NN
-10. ./configure --with-apxs2=/usr/local/apache2/bin/apxs
+
+10. 现在我们需要配置 PHP。在这里您可以用各种各样的参数来自定义PHP，例如启动哪些扩展功能包的支持等。用 ./configure --help 命令可以列出当前可用的所有参数。在我们的例子中，我们将给出一个在有 MySQL 支持的 Apache 2 上进行配置的范例。您本地的 apxs 的路径可能会不同，事实上，在您的系统中，它可能被命名为 apxs2。
+
+    ./configure --with-apxs2=/usr/local/apache2/bin/apxs
+
 11. make
 12. make install
-13. cp php.ini-dist /usr/local/lib/php.ini
 
-    编辑 php.ini 文件以修改 PHP 的选项。如果您想要把此文件放到另外的位置，您需要
+    如果您决定在安装后改变配置选项，您只需重复最后的三步，然后需要重新启动 Apache 使新模块生效。无需重新编译。
+
+    请注意，除非明确有提示，否则 'make install' 命令将安装 PEAR、各种 PHP 工具诸如 phpize，安装 PHP CLI 等等。
+
+13. 配置 php.ini
+
+    cp php.ini-dist /usr/local/lib/php.ini
+
+    您可以编辑 php.ini 文件以修改 PHP 的选项。如果您想要把此文件放到另外的位置，您需要
     在步骤 10 添加 --with-config-file-path=/path 选项。
 
-14. 编辑 httpd.conf 文件，确保其包含如下两行：
-  
-   LoadModule php4_module modules/libphp4.so
-   AddType application/x-httpd-php .php
+    如果您选择 php.ini -recommended，请务必阅读其中的变更的列表，它们将影响 PHP 的执行。
 
-  您可以在这里选择各种扩展名。.php 是我们推荐的最简单的扩展名。
- 
-  LoadModule 命令的右边参数必须指向您系统中 PHP 模块的路径。如果您完全按照前面的
-  步骤配置，那么此路径就应该为 modules/libphp4.so。
+14. 编辑 httpd.conf 文件以调用 PHP 模块。LoadMolude 表达式右边的路径必须指向您系统中的 PHP。以上的 make install 命令可能已经帮您完成了这些，但务必要检查。
 
-15. 启动您的 Apache 服务器：
+    对于 PHP 4：
+       LoadModule php4_module modules/libphp4.so
+
+    对于 PHP 5：
+       LoadModule php5_module modules/libphp5.so
+
+15. 告知 Apache 将特定的扩展名解析成 PHP，例如，我们让 Apache 将扩展名 .php 解析成 PHP。您可以将任何扩展名指定为 PHP，只需添加它们，每一个用空格分隔。例如，我们要添加 .phtml：
+
+    AddType application/x-httpd-php .php .phtml
+
+    通常，我们还将 .phps 扩展名设置成显示高亮的 PHP 源文件，可以这样来完成：
+
+    AddType application/x-httpd-php-source .phps
+
+16. 启动您的 Apache 服务器：
    /usr/local/apache2/bin/apachectl start
 ]]>
 
@@ -146,20 +165,25 @@ Action application/x-httpd-php "/php/php.exe"
      </example>
     </para>
     <para>
-     如果您想把 <literal>PHP</literal> 作为 Apache 2.0 的模块，请务必移动 <filename>php4ts.dll</filename> 到 <filename>winnt/system32</filename>（Windows NT/2000）或 <filename>windows/system32</filename> （Windows XP），覆盖原有文件（如果有的话）。然后您需要插入如下两行到 &httpd.conf; 中，以使您的 PHP 作为 Apache 的 <emphasis>PHP-Module</emphasis> 安装：
+     如果您想把 <literal>PHP</literal> 作为 Apache 2.0 的模块，请务必移动 <filename>php4ts.dll</filename> 到 <filename>winnt/system32</filename>（Windows NT/2000）或 <filename>windows/system32</filename> （Windows XP），覆盖原有文件（如果有的话），对于 PHP 5，这个文件是 <filename>php5ts.dll</filename>。然后您需要插入如下两行到 &httpd.conf; 中，以使您的 PHP 作为 Apache 的 <emphasis>PHP-Module</emphasis> 安装：
      <example>
       <title>PHP 以模块方式安装到 Apache 2.0</title>
        <programlisting role="apache">
 <![CDATA[
+; For PHP 4 do something like this:
 LoadModule php4_module "c:/php/sapi/php4apache2.dll"
 AddType application/x-httpd-php .php
+
+; For PHP 5 do something like this: 
+LoadModule php5_module "c:/php/sapi/php5apache2.dll" 
+AddType application/x-httpd-php .php 
 ]]>
        </programlisting>
      </example>
     </para>
     <note>
      <simpara>
-      记得替换 <filename>c:/php/</filename> 为您计算机上 <literal>PHP</literal> 的实际路径。请注意在您的 LoadMolude 设置选项中使用 <filename>php4apache2.dll</filename> <emphasis>而非</emphasis> <filename>php4apache.dll</filename>，后者是为 Apache 1.3.x 设计的。
+      记得替换 <filename>c:/php/</filename> 为您计算机上 <literal>PHP</literal> 的实际路径。请注意在您的 LoadMolude 设置选项中使用 <filename>php4apache2.dll</filename> 或者 <filename>php5apache2.dll</filename>，<emphasis>而非</emphasis> <filename>php4apache.dll</filename>，后者是为 Apache 1.3.x 设计的。
      </simpara>
     </note>
     <warning>
