@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="gb2312"?>
+<!-- $Revision: 1.1 $ -->
+<!-- $Author: nio $ -->
+<!-- EN-Revision: 1.5 Maintainer: nio Status: ready -->
+<!-- splitted from ./en/functions/var.xml, last change in rev 1.28 -->
+  <refentry id="function.serialize">
+   <refnamediv>
+    <refname>serialize</refname>
+    <refpurpose>
+     产生一个可存储的值的表示
+    </refpurpose>
+   </refnamediv>
+   <refsect1>
+    <title>描述</title>
+     <methodsynopsis>
+      <type>string</type><methodname>serialize</methodname>
+      <methodparam><type>mixed</type><parameter>value</parameter></methodparam>
+     </methodsynopsis>
+    <simpara>
+     <function>serialize</function> 返回字符串，此字符串包含了表示 
+     <parameter>value</parameter> 的字节流，可以存储于任何地方。
+    </simpara>
+    <simpara>
+     这有利于存储或传递 PHP 的值，同时不丢失其类型和结构。
+    </simpara>
+   <simpara>
+    想要将已序列化的字符串变回 PHP 的值，可使用
+    <function>unserialize</function>。<function>serialize</function>
+    可处理除了 <type>resource</type> 
+    之外的任何类型。甚至可以 <function>serialize</function> 那些包含了指向其自身引用的数组。你正 
+    <function>serialize</function>  的数组／对象中的引用也将被存储。
+   </simpara>
+   <simpara>
+   当序列化对象时，PHP 将试图在序列动作之前调用该对象的成员函数
+   <function>__sleep</function>。这样就允许对象在被序列化之前做任何清除操作。类似的，当使用 
+   <function>unserialize</function> 恢复对象时， 将调用
+   <function>__wakeup</function> 成员函数。
+   </simpara>
+   <!-- TODO
+        in 4.0.4pl1 this didn't work properly, however, there
+        been some fixes. I don't know whether this all
+        works correctly now, and if so, whether it is since 405
+        or 406
+   <note>
+    <simpara>
+     This didn't work correctly until 4.0.?
+    </simpara>
+   </note>
+   </simpara>
+   -->
+   <note>
+    <para>
+     在 PHP 3 中，对象属性将被序列化，但是方法则会丢失。PHP 4 
+     打破了此限制，可以同时存储属性和方法。请参见<link 
+     linkend="language.oop">类与对象</link>中的<link 
+     linkend="language.oop.serialization">序列化对象</link>部分获取更多信息。
+    </para>
+   </note>
+    <para>
+     <example>
+      <title><function>serialize</function> 示例</title>
+      <programlisting role="php">
+<![CDATA[
+// $session_data 是包含了当前用户 session 信息的多维数组。
+// 我们使用 serialize() 在请求结束之前将其存储到数据库中。
+
+$conn = odbc_connect ("webdb", "php", "chicken");
+$stmt = odbc_prepare ($conn,
+      "UPDATE sessions SET data = ? WHERE id = ?");
+$sqldata = array (serialize($session_data), $PHP_AUTH_USER);
+if (!odbc_execute ($stmt, &$sqldata)) {
+    $stmt = odbc_prepare($conn,
+     "INSERT INTO sessions (id, data) VALUES(?, ?)");
+    if (!odbc_execute($stmt, &$sqldata)) {
+    /* 出错 */
+    }
+}
+]]>
+      </programlisting>
+     </example>
+    </para>
+   <para>
+    参见：<function>unserialize</function>。
+   </para>
+   </refsect1>
+  </refentry>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"../../../../manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
