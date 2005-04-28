@@ -1,7 +1,7 @@
-<?xml version="1.0" encoding="iso-8859-1"?>
-<!-- $Revision: 1.11 $ -->
-<!-- $Author: gregory $ -->
-<!-- EN-Revision: 1.12 Maintainer: Gregory Status: ready -->
+<?xml version="1.0" encoding="gb2312"?>
+<!-- $Revision: 1.12 $ -->
+<!-- $Author: class007 $ -->
+<!-- EN-Revision: 1.17 Maintainer: Gregory Status: ready -->
  <reference id="ref.xml">
   <title>XML Óï·¨½âÎöº¯Êý¿â</title>
   <titleabbrev>XML</titleabbrev>
@@ -25,7 +25,7 @@
    <section id="xml.requirements">
     &reftitle.required;
     <para>
-	 ¸ÃÀ©Õ¹Ä£¿éÐèÒªÊ¹ÓÃ <productname>expat</productname>£¬Äú¿ÉÒÔ·ÃÎÊ <ulink url="&url.expat;">&url.expat;</ulink> À´»ñÈ¡¡£expat ×Ô´øµÄ Makefile ÎÄ¼þ²»»áÉú³ÉÄ¬ÈÏµÄÀ©Õ¹¿â£¬Äú¿ÉÒÔÊ¹ÓÃÒÔÏÂµÄÉú³É¹æÔòÀ´ÊµÏÖ£º
+	 ¸ÃÀ©Õ¹Ä£¿éÄ¬ÈÏÊ¹ÓÃ <productname>expat compat layer</productname>¡£ËüÒ²¿ÉÒÔÊ¹ÓÃ <productname>expat</productname>£¬Äú¿ÉÒÔ·ÃÎÊ <ulink url="&url.expat;">&url.expat;</ulink> À´»ñÈ¡¡£expat ×Ô´øµÄ Makefile ÎÄ¼þ²»»áÉú³ÉÄ¬ÈÏµÄÀ©Õ¹¿â£¬Äú¿ÉÒÔÊ¹ÓÃÒÔÏÂµÄÉú³É¹æÔòÀ´ÊµÏÖ£º
      <programlisting role="makefile">
 <![CDATA[
 libexpat.a: $(OBJS)
@@ -208,16 +208,18 @@ libexpat.a: $(OBJS)
 $file = "data.xml";
 $depth = array();
 
-function startElement($parser, $name, $attrs) {
+function startElement($parser, $name, $attrs) 
+{
     global $depth;
     for ($i = 0; $i < $depth[$parser]; $i++) {
-        print "  ";
+        echo "  ";
     }
-    print "$name\n";
+    echo "$name\n";
     $depth[$parser]++;
 }
 
-function endElement($parser, $name) {
+function endElement($parser, $name) 
+{
     global $depth;
     $depth[$parser]--;
 }
@@ -262,22 +264,25 @@ $map_array = array(
     "LITERAL"  => "TT"
 );
 
-function startElement($parser, $name, $attrs) {
+function startElement($parser, $name, $attrs) 
+{
     global $map_array;
-    if ($htmltag == $map_array[$name]) {
-        print "<$htmltag>";
+    if (isset($map_array[$name])) {
+        echo "<$map_array[$name]>";
     }
 }
 
-function endElement($parser, $name) {
+function endElement($parser, $name) 
+{
     global $map_array;
-    if ($htmltag == $map_array[$name]) {
-        print "</$htmltag>";
+    if (isset($map_array[$name])) {
+        echo "</$map_array[$name]>";
     }
 }
 
-function characterData($parser, $data) {
-    print $data;
+function characterData($parser, $data) 
+{
+    echo $data;
 }
 
 $xml_parser = xml_parser_create();
@@ -321,7 +326,8 @@ xml_parser_free($xml_parser);
 <?php
 $file = "xmltest.xml";
 
-function trustedFile($file) {
+function trustedFile($file) 
+{
     // only trust local files owned by ourselves
     if (!eregi("^([a-z]+)://", $file) 
         && fileowner($file) == getmyuid()) {
@@ -330,26 +336,30 @@ function trustedFile($file) {
     return false;
 }
 
-function startElement($parser, $name, $attribs) {
-    print "&lt;<font color=\"#0000cc\">$name</font>";
+function startElement($parser, $name, $attribs) 
+{
+    echo "&lt;<font color=\"#0000cc\">$name</font>";
     if (sizeof($attribs)) {
         while (list($k, $v) = each($attribs)) {
-            print " <font color=\"#009900\">$k</font>=\"<font 
+            echo " <font color=\"#009900\">$k</font>=\"<font 
                    color=\"#990000\">$v</font>\"";
         }
     }
-    print "&gt;";
+    echo "&gt;";
 }
 
-function endElement($parser, $name) {
-    print "&lt;/<font color=\"#0000cc\">$name</font>&gt;";
+function endElement($parser, $name) 
+{
+    echo "&lt;/<font color=\"#0000cc\">$name</font>&gt;";
 }
 
-function characterData($parser, $data) {
-    print "<b>$data</b>";
+function characterData($parser, $data) 
+{
+    echo "<b>$data</b>";
 }
 
-function PIHandler($parser, $target, $data) {
+function PIHandler($parser, $target, $data) 
+{
     switch (strtolower($target)) {
         case "php":
             global $parser_file;
@@ -366,7 +376,8 @@ function PIHandler($parser, $target, $data) {
     }
 }
 
-function defaultHandler($parser, $data) {
+function defaultHandler($parser, $data) 
+{
     if (substr($data, 0, 1) == "&" && substr($data, -1, 1) == ";") {
         printf('<font color="#aa00aa">%s</font>', 
                 htmlspecialchars($data));
@@ -399,7 +410,8 @@ function externalEntityRefHandler($parser, $openEntityNames, $base, $systemId,
     return false;
 }
 
-function new_xml_parser($file) {
+function new_xml_parser($file) 
+{
     global $parser_file;
 
     $xml_parser = xml_parser_create();
@@ -424,7 +436,7 @@ if (!(list($xml_parser, $fp) = new_xml_parser($file))) {
     die("could not open XML input");
 }
 
-print "<pre>";
+echo "<pre>";
 while ($data = fread($fp, 4096)) {
     if (!xml_parse($xml_parser, $data, feof($fp))) {
         die(sprintf("XML error: %s at line %d\n",
@@ -432,8 +444,8 @@ while ($data = fread($fp, 4096)) {
                     xml_get_current_line_number($xml_parser)));
     }
 }
-print "</pre>";
-print "parse complete\n";
+echo "</pre>";
+echo "parse complete\n";
 xml_parser_free($xml_parser);
 
 ?>
@@ -469,7 +481,7 @@ xml_parser_free($xml_parser);
   <title>About this Document</title>
   <para>
    <!-- this is a comment -->
-   <?php print 'Hi!  This is PHP version '.phpversion(); ?>
+   <?php echo 'Hi!  This is PHP version ' . phpversion(); ?>
   </para>
  </section>
 </chapter>
@@ -490,7 +502,7 @@ xml_parser_free($xml_parser);
 <foo>
    <element attrib="value"/>
    &testEnt;
-   <?php print "This is some more PHP code being executed."; ?>
+   <?php echo "This is some more PHP code being executed."; ?>
 </foo>
 ]]>
        </programlisting>
