@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.8 $ -->
+<!-- $Revision: 1.9 $ -->
 <!-- $Author: dallas $ -->
-<!-- EN-Revision:1.21 Maintainer: dallas Status: ready -->
+<!-- EN-Revision:1.27 Maintainer: dallas Status: ready -->
  <chapter id="faq.databases">
   <title>数据库问题</title>
   <titleabbrev>数据库问题</titleabbrev>
@@ -51,12 +51,14 @@
       Microsoft Access（用 ODBC）和 PHP（用内置驱动）来访问，或者用一个 Access 和 PHP
       都识别的中间文件格式，例如 flat 文件或者 dBase 数据库。关于这一点 OpenLink Software
       的 Tim Hayes 写道：
-      <programlisting>
-当你可以通过 ODBC 直接从 PHP 访问数据库时－ 例如用 OpenLink 的驱动程序，
-使用其它数据库做中间媒介不是一个好主意。如果你确实需要一个中间文件格式，
-OpenLink 已经发布了 Virtuoso（一个虚拟数据库引擎） for NT，Linux 和其它
-Unix 平台。请访问我们的<ulink url="&url.openlink;">网站</ulink>来免费下载。
-      </programlisting>
+      <blockquote>
+       <para>
+        当你可以通过 ODBC 直接从 PHP 访问数据库时－ 例如用 OpenLink
+        的驱动程序，使用其它数据库做中间媒介不是一个好主意。如果你确实需要一个中间文件格式，OpenLink
+        已经发布了 Virtuoso（一个虚拟数据库引擎） for NT，Linux 和其它
+        Unix 平台。请访问我们的<ulink url="&url.openlink;">网站</ulink>来免费下载。
+       </para>
+      </blockquote>
      </para>
      <para>
       还有一个已被证实有效的选择是在 Windows 下用 MySQL 和它的 MyODBC
@@ -143,7 +145,8 @@ Unix 平台。请访问我们的<ulink url="&url.openlink;">网站</ulink>来免费下载。
     </question>
     <answer>
      <para>
-      看上去最有可能的是，PHP 4 在编译时使用了“--with-mysql”选项但没有指定
+      看上去最有可能的是，PHP 4 在编译时使用了
+      <option role="configure">--with-mysql</option> 选项但没有指定
       MySQL 的路径。这意味着 PHP 使用了它自己内置的
       MySQL 客户端库。如果你的系统运行了使用其它版本的
       MySQL 客户端库的应用程序，例如作为 Apache 模块的
@@ -198,12 +201,14 @@ Unix 平台。请访问我们的<ulink url="&url.openlink;">网站</ulink>来免费下载。
      <para>
       事实上这并不会影响到太多人。UNIX
       用户，起码是那些知道自己在做什么的人，往往会在编译
-      PHP 时通过 --with-mysql=/usr 将其绑定到自己系统中的
+      PHP 时通过 <option role="configure">--with-mysql=/usr</option>
+      将其绑定到自己系统中的
       libmyqlclient 库上。Windows 用户可以在 &php.ini;
-      中激活 <filename>php_mysql.dll</filename> 扩展库。此外，要将
-      <filename>libmySQL.dll</filename> 拷贝到适当的
-      <literal>%SYSTEMROOT%</literal> 目录中，和 <filename>dll</filename>
-      目录中其它绑定的 DLL 一样。
+      中激活 <filename>php_mysql.dll</filename> 扩展库。此外，确认
+      <filename>libmysql.dll</filename> 在系统路径中。具体怎样做的详情，请阅读
+      FAQ 中的<link linkend="faq.installation.addtopath">设定 Windows
+      系统路径</link>。因为 <filename>libmysql.dll</filename>（以及很多其它
+      PHP 有关文件）存放于 PHP 目录中，可能需要将 PHP 目录加入到系统路径中。
      </para>
     </answer>
    </qandaentry>
@@ -238,16 +243,26 @@ Unix 平台。请访问我们的<ulink url="&url.openlink;">网站</ulink>来免费下载。
      <para>
       你试图用一个值为 0 的结果资源号。0 表示你的查询由于某原因失败了，你需要在提交查询之后和在使用返回结果资源号之前检查错误。正确的方法是用类似如下的代码：
       <programlisting role="php">
+<![CDATA[
+<?php
+
 $result = mysql_query("SELECT * FROM tables_priv");
 if (!$result) {
     echo mysql_error();
     exit;
 }
+?>
+]]>
       </programlisting>
       或者
       <programlisting role="php">
+<![CDATA[
+<?php
+
 $result = mysql_query("SELECT * FROM tables_priv")
-    or die("Bad query: ".mysql_error());
+    or die("Bad query: " . mysql_error());
+?>
+]]>
       </programlisting>
      </para>
     </answer>

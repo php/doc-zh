@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.3 $ -->
+<!-- $Revision: 1.4 $ -->
 <!-- $Author: dallas $ -->
-<!-- EN-Revision:1.10 Maintainer: dallas Status: ready -->
+<!-- EN-Revision:1.12 Maintainer: dallas Status: ready -->
  <chapter id="faq.com">
   <title>PHP 和 COM</title>
   <titleabbrev>PHP 和 COM</titleabbrev>
@@ -24,7 +24,7 @@
      </para>
     </answer>
    </qandaentry>
-   
+
    <qandaentry id="faq.com.q2">
     <question>
      <para>
@@ -37,7 +37,7 @@
      </para>
     </answer>
    </qandaentry>
-  
+
    <qandaentry id="faq.com.q3">
     <question>
      <para>
@@ -53,7 +53,7 @@
      </para>
     </answer>
    </qandaentry>
-  
+
    <qandaentry id="faq.com.q4">
     <question>
      <para>
@@ -66,7 +66,7 @@
      </para>
     </answer>
    </qandaentry>
-  
+
    <qandaentry id="faq.com.q5">
     <question>
      <para>
@@ -75,12 +75,16 @@
     </question>
     <answer>
      <para>
-      当前除了 PHP 自己提供的办法之外（@，track_errors，..）不可能捕获 COM
-      的错误，但我们正在考虑实现它的方法。
+      在 PHP 5 中，COM 扩展会发出 <literal>com_exception</literal>
+      异常信息，可以捕获并检查 <literal>code</literal>
+      成员来决定下一步的行为。
+     </para>
+     <para>
+      在 PHP 4 中除了用 PHP 自己提供的办法之外（@，track_errors，..）不可能捕获 COM 的错误。
      </para>
     </answer>
    </qandaentry>
-  
+
    <qandaentry id="faq.com.q6">
     <question>
      <para>
@@ -93,7 +97,7 @@
      </para>
     </answer>
    </qandaentry>
-  
+
    <qandaentry id="faq.com.q7">
     <question>
      <para>
@@ -123,7 +127,7 @@
      </para>
     </answer>
    </qandaentry>
-    
+
    <qandaentry id="faq.com.q8">
     <question>
      <para>
@@ -135,11 +139,11 @@
       完全和运行本地对象一样。只须将远端服务器的 IP 作为第二个变量传递给 COM 的构造函数即可。
      </para>
      <para>
-      确认在 &php.ini; 中设定了 <literal>com.allow_dcom=true</literal>。
+      确认在 &php.ini; 中设定了 <xref linkend="ini.com.allow-dcom"/><literal>=&true;</literal>。
      </para>
     </answer>
    </qandaentry>
-   
+
    <qandaentry id="faq.com.q9">
     <question>
      <para>
@@ -148,11 +152,11 @@
     </question>
     <answer>
      <para>
-      编辑 &php.ini; 并设定 <literal>com.allow_dcom=true</literal>。
+      编辑 &php.ini; 并设定 <xref linkend="ini.com.allow-dcom"/><literal>=&true;</literal>。
      </para>
     </answer>
    </qandaentry>
-   
+
    <qandaentry id="faq.com.q10">
     <question>
      <para>
@@ -166,7 +170,7 @@
      </para>
     </answer>
    </qandaentry>
-   
+
    <qandaentry id="faq.com.q11">
     <question>
      <para>
@@ -178,14 +182,18 @@
       在绰号的帮助下这有可能。如果你想得到同一个 word 实例的多个引用你可以这样建立此实例：
      </para>
      <programlisting role="php">
-      $word = new COM("C:\docs\word.doc");
+<![CDATA[
+<?php
+$word = new COM("C:\docs\word.doc");
+?>
+]]>
      </programlisting>
      <para>
       如果没有运行中的实例这将建立一个新的实例，否则将会返回正在运行中的实例的句柄，如果可用的话。
      </para>
     </answer>
    </qandaentry>
-   
+
    <qandaentry id="faq.com.q12">
     <question>
      <para>
@@ -194,46 +202,13 @@
     </question>
     <answer>
      <para>
-      从 PHP 4.3.0 开始，可以自定义事件收报方并且如以下例子所示绑定之。可以用
-      <function>com_print_typeinfo</function> 来让 PHP 产生事件收报方类的框架。
-      <example>  
-       <title>COM 事件收报方例子</title>  
-       <programlisting role="php">  
-<![CDATA[  
-<?php  
-class IEEventSinker {  
-  var $terminated = false;  
-  
-  function ProgressChange($progress, $progressmax) {  
-    echo "Download progress: $progress / $progressmax\n";  
-  }  
-  
-  function DocumentComplete(&$dom, $url) {  
-    echo "Document $url complete\n";  
-  }  
-  
-  function OnQuit() {  
-    echo "Quit!\n";  
-    $this->terminated = true;  
-  }  
-}  
-$ie = new COM("InternetExplorer.Application");  
-$sink =& new IEEventSinker();  
-com_event_sink($ie, $sink, "DWebBrowserEvents2");  
-$ie->Visible = true;  
-$ie->Navigate("http://www.php.net");  
-while(!$sink->terminated) {  
-  com_message_pump(4000);  
-}  
-$ie = null;  
-?>  
-]]>  
-       </programlisting>  
-      </example> 
+      可以自定义事件收报方并且用 <function>com_event_sink</function>
+      函数绑定之。可以用 <function>com_print_typeinfo</function>
+      来让 PHP 产生事件收报方类的框架。
      </para>
     </answer>
    </qandaentry>
-   
+
    <qandaentry id="faq.com.q13">
     <question>
      <para>
@@ -246,7 +221,7 @@ $ie = null;
      </para>
     </answer>
    </qandaentry>
-   
+
    <qandaentry id="faq.com.q14">
     <question>
      <para>
@@ -259,7 +234,7 @@ $ie = null;
      </para>
     </answer>
    </qandaentry>
-   
+
    <qandaentry id="faq.com.q15">
     <question>
      <para>
@@ -272,7 +247,7 @@ $ie = null;
      </para>
     </answer>
    </qandaentry>
- 
+
   </qandaset>
  </chapter>
 

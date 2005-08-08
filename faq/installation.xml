@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.9 $ -->
+<!-- $Revision: 1.10 $ -->
 <!-- $Author: dallas $ -->
-<!-- EN-Revision:1.24 Maintainer: dallas Status: ready -->
+<!-- EN-Revision:1.45 Maintainer: dallas Status: ready -->
  <chapter id="faq.installation">
-  <title>安装</title>
+  <title>安装常见问题</title>
   <titleabbrev>安装</titleabbrev>
 
   <para>
@@ -18,6 +18,31 @@
   </para>
 
   <qandaset>
+   <qandaentry id="faq.installation.apache2">
+    <question>
+     <para>
+      为什么不应该在实际运作环境中的 Apache2 中使用线程化的 MPM？
+     </para>
+    </question>
+    <answer>
+     <para>
+      PHP 是粘合剂。它将几十种第三方的库粘合到一起来创建很酷的 Web
+      应用，并通过很直观且易于学习的语言界面使其看上去好像一个整体。PHP
+      的灵活与强大依赖于底层平台的稳定与耐用。起码需要将一个可运作的操作系统，一个可运作的
+      Web 服务器以及可运作的第三方库粘合起来。其中任何一方不运作了，PHP
+      都需要有方法来识别出问题并且快速解决。如果没有完全独立的执行线程，完全独立的内存单元，和稳定的空间对付每个请求，那底层架构就太复杂以至于不稳定因素更容易进入到
+      PHP 系统中。
+     </para>
+     <para>
+      如果必须要用线程化的 MPM，看看 FastCGI 配置，使 PHP 运行于自己独立的内存空间中。
+     </para>
+     <para>
+      最后需要指出，不使用线程化 MPM 的警告在 Windows 系统中没那么强烈，因为
+      Windows 中的大多数库都理应在多线程下安全运行。
+     </para>
+    </answer>
+   </qandaentry>
+
    <qandaentry id="faq.installation.phpini">
     <question>
      <para>
@@ -28,15 +53,15 @@
      <para>
       UNIX 中默认在 <filename>/usr/local/lib</filename> 目录中，也就是
       <filename>&lt;install-path&gt;/lib</filename>。很多人会在编译时通过
-      <link linkend="install.configure.with-config-file-path">--with-config-file-path</link>
+      <link linkend="configure.with-config-file-path">--with-config-file-path</link>
       标记来改变路径。例如你可以将路径设为：
-      <programlisting>
+      <programlisting role="shell">
 --with-config-file-path=/etc
       </programlisting>
       然后从发行包中将 <filename>php.ini-dist</filename> 拷贝为
       <filename>/etc/php.ini</filename> 并编辑它来作出你想要的修改。
      </para>
-     <programlisting>
+     <programlisting role="shell">
 --with-config-file-scan-dir=PATH
      </programlisting>
      <para>
@@ -131,7 +156,8 @@
       假定你的 Apache 和 PHP 都是从 RPM 包中安装的，你需要在
       &httpd.conf;
       文件中取消以下部分或所有行的注释，或者把它们添加到该文件中：
-      <programlisting>
+      <programlisting role="apache-conf">
+<![CDATA[
 # Extra Modules
 AddModule mod_php.c
 AddModule mod_php3.c
@@ -139,14 +165,17 @@ AddModule mod_perl.c
 
 # Extra Modules
 LoadModule php_module         modules/mod_php.so
-LoadModule php3_module        modules/libphp3.so     /* for PHP 3 */
-LoadModule php4_module        modules/libphp4.so     /* for PHP 4 */
+LoadModule php3_module        modules/libphp3.so     # for PHP 3
+LoadModule php4_module        modules/libphp4.so     # for PHP 4
 LoadModule perl_module        modules/libperl.so
+]]>
       </programlisting>
       并且把：
-      <programlisting>
-AddType application/x-httpd-php3 .php3    /* for PHP 3 */
-AddType application/x-httpd-php .php      /* for PHP 4 */
+      <programlisting role="apache-conf">
+<![CDATA[
+AddType application/x-httpd-php3 .php3    # for PHP 3
+AddType application/x-httpd-php .php      # for PHP 4
+]]>
       </programlisting>
       添加到全局属性中，或者添加到你希望加入 PHP 支持的虚拟域中。
      </para>
@@ -181,7 +210,7 @@ AddType application/x-httpd-php .php      /* for PHP 4 */
        <listitem>
         <para>
          先去掉 mod_php3：
-         <programlisting>
+         <programlisting role="shell">
 rpm -e mod_php3
          </programlisting>
         </para>
@@ -189,7 +218,7 @@ rpm -e mod_php3
        <listitem>
         <para>
          然后取得源文件的 rpm 包并安装它，而不是编译它。
-         <programlisting>
+         <programlisting role="shell">
 rpm -Uvh mod_php3-3.0.5-2.src.rpm
          </programlisting>
         </para>
@@ -203,11 +232,9 @@ rpm -Uvh mod_php3-3.0.5-2.src.rpm
         </para>
         <para>
          对应于 MySQL 你应该加入
-         <programlisting>
---with-mysql=/usr \
-         </programlisting>
-          %build 一节看上去将类似这样：
-         <programlisting>
+         <option role="configure">--with-mysql=/usr</option>。则 %build
+         一节看上去将类似这样：
+         <programlisting role="shell">
 ./configure --prefix=/usr \
 --with-apxs=/usr/sbin/apxs \
 --with-config-file-path=/usr/lib \
@@ -222,7 +249,7 @@ rpm -Uvh mod_php3-3.0.5-2.src.rpm
        <listitem>
         <para>
          一旦完成了这个修改，就这样建立二进制程序的 rpm 包：
-         <programlisting>
+         <programlisting role="shell">
 rpm -bb /usr/src/redhat/SPECS/mod_php3.spec
          </programlisting>
         </para>
@@ -284,9 +311,9 @@ rpm -ivh /usr/src/redhat/RPMS/i386/mod_php3-3.0.5-2.i386.rpm
      <para>
       当服务器尝试运行 PHP 时出了错。要想看到有意义的错误信息，在命令行中转到
       PHP 可执行程序（Windows 中是 <filename>php.exe</filename>）所在目录下并运行
-      <literal>php -i</literal>。如果 PHP
+      <command>php -i</command>。如果 PHP
       运行有任何问题，那么会显示相应的错误信息，这将给你下一步要做什么的线索。如果你得到满屏幕
-      html 代码（<function>phpinfo</function> 函数的输出）的话说明
+      HTML 代码（<function>phpinfo</function> 函数的输出）的话说明
       PHP 本身工作正常，你的问题可能和你的服务器配置有关，要仔细检查。
      </para>
     </answer>
@@ -297,7 +324,7 @@ rpm -ivh /usr/src/redhat/RPMS/i386/mod_php3-3.0.5-2.i386.rpm
      <para>
       某些操作系统：我已经在不出错的情况下安装了 PHP，但当我试着启动 Apache
       时得到了一个未定义符号错误：
-      <programlisting>
+      <programlisting role="shell">
 [mybox:user /src/php4] root# apachectl configtest
  apachectl: /usr/local/apache/bin/httpd Undefined symbols:
   _compress
@@ -308,7 +335,8 @@ rpm -ivh /usr/src/redhat/RPMS/i386/mod_php3-3.0.5-2.i386.rpm
     <answer>
      <para>
       这实际上和 PHP 没有关系，而和 MySQL 的客户端库有关。有的需要
-      --with-zlib，有的不需要。这个问题也包括在 MySQL 的 FAQ 中。
+      <option role="configure">--with-zlib</option>，有的不需要。这个问题也包括在
+      MySQL 的 FAQ 中。
      </para>
     </answer>
    </qandaentry>
@@ -317,12 +345,12 @@ rpm -ivh /usr/src/redhat/RPMS/i386/mod_php3-3.0.5-2.i386.rpm
     <question>
      <para>
       Windows：我已经安装了 PHP，但当我试着通过浏览器访问 PHP 脚本时，得到如下错误：
-      <programlisting>
+      <screen>
 cgi error:
  The specified CGI application misbehaved by not
  returning a complete set of HTTP headers.
  The headers it did return are:
-      </programlisting>
+      </screen>
      </para>
     </question>
     <answer>
@@ -330,9 +358,9 @@ cgi error:
       这个错误信息意味着 PHP
       根本就不能产生任何输出。要想看到有意义的错误信息，在命令行中转到
        PHP 可执行程序（Windows 中是 <filename>php.exe</filename>）所在目录下并运行
-       <literal>php -i</literal>。如果 PHP
+       <command>php -i</command>。如果 PHP
        运行有任何问题，那么会显示相应的错误信息，这将给你下一步要做什么的线索。如果你得到满屏幕
-       html 代码（<function>phpinfo</function> 函数的输出）的话说明 PHP 本身工作正常。
+       HTML 代码（<function>phpinfo</function> 函数的输出）的话说明 PHP 本身工作正常。
      </para>
      <para>
       一旦 PHP 在命令行中工作正常，试着通过浏览器再次访问脚本。如果还失败的话那可能是如下原因之一：
@@ -417,6 +445,192 @@ cgi error:
      <para>
       如果 &php.ini; 被使用了并且你是以模块方式运行 PHP
       的，确保在修改了 &php.ini; 之后重新启动你的 web server。
+     </para>
+    </answer>
+   </qandaentry>
+
+   <qandaentry id="faq.installation.addtopath">
+    <question>
+     <para>
+      怎样将 PHP 目录加入到 Windows 路径 <varname>PATH</varname> 中去？
+     </para>
+    </question>
+    <answer>
+     <para>
+      在 Windows NT，2000，XP 和 2003 下：
+      <itemizedlist>
+       <listitem><para>
+        进入控制面板并打开“系统”图标（开始 -&gt; 设置 -&gt;
+        控制面板 -&gt; 系统，Windows XP/2003 中是：开始 -&gt; 控制面板
+        -&gt; 系统）
+       </para></listitem>
+       <listitem><para>
+        选择“高级”标签页
+       </para></listitem>
+       <listitem><para>
+        点击“环境变量”按钮
+       </para></listitem>
+       <listitem><para>
+        在“系统变量”栏中
+       </para></listitem>
+       <listitem><para>
+        找到 Path 这一项（可能需要向下滚动才能找到）
+       </para></listitem>
+       <listitem><para>
+        鼠标双击 Path 这一项
+       </para></listitem>
+       <listitem><para>
+        在最后加入你的 PHP 目录，包括前面的“;”（例如：<literal>;C:\php</literal>）
+       </para></listitem>
+       <listitem><para>
+        点击“确定”并重新启动电脑
+       </para></listitem>
+      </itemizedlist>
+     </para>
+     <para>
+      在 Windows 98/Me 中需要编辑 <filename>autoexec.bat</filename> 文件：
+      <itemizedlist>
+       <listitem><para>
+        打开记事本（开始 -&gt; 运行，然后输入 notepad 并点确定）
+       </para></listitem>
+       <listitem><para>
+        打开 <filename>C:\autoexec.bat</filename> 文件
+       </para></listitem>
+       <listitem><para>
+        找到这么一行：PATH=C:\WINDOWS;C:\WINDOWS\COMMAND;..... 并在最后加上
+        <literal>;C:\php</literal>
+       </para></listitem>
+       <listitem><para>
+        保存文件并重新启动电脑
+       </para></listitem>
+      </itemizedlist>
+     </para>
+     <note>
+      <simpara>
+       记住在上述修改之后重新启动，以确保对
+       <varname>PATH</varname> 的改变生效。
+      </simpara>
+     </note>
+     <para>
+      PHP 手册过去提倡把文件拷贝到 Windows
+      系统目录中去，这是因为该目录（<filename>C:\Windows</filename>，<filename>C:\WINNT</filename>，等等）默认就在系统路径中。但是把文件拷贝到
+      Windows 系统目录中这一方式早已不被提倡，还可能造成问题。
+     </para>
+    </answer>
+   </qandaentry>
+
+   <qandaentry id="faq.installation.phprc">
+    <question>
+     <para>
+      怎样使 &php.ini; 文件在 Windows 下被 PHP 所用？
+     </para>
+    </question>
+    <answer>
+     <para>
+      有几种方法。如果使用 Apache，阅读专门的安装指示（<link
+       linkend="install.windows.apache1">Apache 1</link>，<link
+       linkend="install.windows.apache2">Apache 2</link>），否则就必须设定
+       <varname>PHPRC</varname> 环境变量：
+     </para>
+     <para>
+      在 Windows NT，2000，XP 和 2003 种：
+      <itemizedlist>
+       <listitem><para>
+        进入控制面板并打开“系统”图标（开始 -&gt; 设置 -&gt;
+        控制面板 -&gt; 系统，Windows XP/2003 中是：开始 -&gt; 控制面板
+        -&gt; 系统）
+       </para></listitem>
+       <listitem><para>
+        选择“高级”标签页
+       </para></listitem>
+       <listitem><para>
+        点击“环境变量”按钮
+       </para></listitem>
+       <listitem><para>
+        在“系统变量”栏中
+       </para></listitem>
+       <listitem><para>
+         点击“新建”按钮并在“变量名”中输入“PHPRC”，在“变量值”中输入
+         &php.ini; 文件所在的目录（例如：<literal>C:\php</literal>）
+       </para></listitem>
+       <listitem><para>
+        点击“确定”并重新启动电脑
+       </para></listitem>
+      </itemizedlist>
+     </para>
+     <para>
+      在 Windows 98/Me 中需要编辑 <filename>autoexec.bat</filename> 文件：
+      <itemizedlist>
+       <listitem><para>
+        打开记事本（开始 -&gt; 运行，然后输入 notepad 并点确定）
+       </para></listitem>
+       <listitem><para>
+        打开 <filename>C:\autoexec.bat</filename> 文件
+       </para></listitem>
+      <listitem><para>
+        在文件结尾处加入一行：<literal>set
+        PHPRC=C:\php</literal>（将 <literal>C:\php</literal>
+        替换为你的 &php.ini; 实际存在的目录）。注意路径中不能包含空格。例如将
+        PHP 安装到了
+        <filename>C:\Program Files\PHP</filename> 中，你需要输入
+        <filename>C:\PROGRA~1\PHP</filename> 替代之
+       </para></listitem>
+       <listitem><para>
+        保存文件并重新启动电脑
+       </para></listitem>
+      </itemizedlist>
+     </para>
+    </answer>
+   </qandaentry>
+
+   <qandaentry id="faq.installation.apache.multiviews">
+    <question>
+     <para>
+      有可能使 PHP 运作于 Apache 的 content negotiation（MultiViews 选项）吗？
+     </para>
+    </question>
+    <answer>
+     <para>
+      如果到 PHP 文件的连接包含扩展名，一切都运行完美。本解答只针对到
+      PHP 文件的连接不包含扩展名时，而希望通过 content negotiation
+      来从不包含扩展名的 URL 来选择 PHP 文件的情况。在此种情况下，将
+      <literal>AddType application/x-httpd-php .php</literal>
+      替换为：
+      <programlisting role="apache-conf">
+<![CDATA[
+# PHP 4
+AddHandler php-script php
+AddType text/html php
+
+# PHP 5
+AddHandler php5-script php
+AddType text/html php
+]]>
+     </programlisting>
+     此方案对于 Apache 1 不适用，因为 PHP 模块不捕获
+     <literal>php-script</literal>。
+     </para>
+    </answer>
+   </qandaentry>
+
+   <qandaentry id="faq.installation.requestmethods">
+    <question>
+     <para>
+      PHP 是否仅限于处理 GET 和 POST 请求方法？
+     </para>
+    </question>
+    <answer>
+     <para>
+      不是，PHP 有可能处理任何请求方法，例如 CONNECT。适当的回应状态可以用
+      <function>header</function> 发送。如果仅需要处理 GET 和 POST
+      方法，可以通过如下的 Apache 配置实现：
+      <programlisting role="apache-conf">
+<![CDATA[
+<LimitExcept GET POST>
+Deny from all
+</LimitExcept>
+]]>
+     </programlisting>
      </para>
     </answer>
    </qandaentry>
