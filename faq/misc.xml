@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.6 $ -->
-<!-- $Author: yincheng $ -->
-<!-- EN-Revision:1.13 Maintainer: dallas Status: ready -->
+<!-- $Revision: 1.7 $ -->
+<!-- $Author: dallas $ -->
+<!-- EN-Revision:1.24 Maintainer: dallas Status: ready -->
  <chapter id="faq.misc">
   <title>杂类问题</title>
   <titleabbrev>杂类问题</titleabbrev>
@@ -29,7 +29,8 @@
       url="&url.quickzip;">Quick Zip</ulink>。如果你有像 <ulink
       url="&url.winrar;">WinRAR</ulink> 或者 <ulink
       url="&url.powerarchiver;">Power Archiver</ulink> 之类的工具，可以很容易用它解压缩 bz2 文件。如果你用
-      Windows Commander，可以从 <ulink url="&url.wincmd;">Windows Commander</ulink> 网站免费得到一个 bz2 插件。
+      Total Commander（前身为 Windows Commander），可以从
+      <ulink url="&url.wincmd;">Total Commander</ulink> 网站免费得到一个 bz2 插件。
      </para>
      <para>
       Redhat 的 bzip2 命令行工具：
@@ -60,6 +61,96 @@
       在你下载了包含很多 html 文件的 php_manual_lang.tar.bz2 的情况下，过程是一样的。唯一区别是得到了一个
       php_manual_lang.tar 文件。tar 格式可以被大多数 Windows 下流行的压缩工具所处理，例如 <ulink
       url="&url.winzip;">WinZip</ulink>。
+     </para>
+    </answer>
+   </qandaentry>
+   <qandaentry id="faq.misc.arguments.references">
+    <question>
+     <para>
+      在函数定义中，例如
+      <function>asort</function>，参数旁边的 &amp; 是什么意思？
+     </para>
+    </question>
+    <answer>
+     <para>
+      这表示该参数是<link
+      linkend="language.references.pass">引用传递</link>，该函数会修改其值。只可以用此方法传递变量，其实都不需要在函数调用中用
+      &amp; 传递（此方式都已<link
+      linkend="ini.allow-call-time-pass-reference">过时了</link>）。
+     </para>
+    </answer>
+   </qandaentry>
+
+   <qandaentry id="faq.misc.registerglobals">
+    <question>
+     <para>
+      怎么处理 <literal>register_globals</literal>？
+     </para>
+    </question>
+    <answer>
+     <para>
+      有关 <literal>register_globals</literal>
+      实现方面的安全性，请阅读<link
+      linkend="security.globals">使用 register_globals</link>
+      中的安全一章。
+     </para>
+     <para>
+      推荐使用<link
+      linkend="language.variables.superglobals">超全局变量</link>而不要依赖
+      <literal>register_globals</literal>。
+     </para>
+     <para>
+      如果需要在一台关闭了 <literal>register_globals</literal>
+      的共享主机上运行一些旧式程序而该程序需要此选项打开时，或者在一些打开了此选项的主机上但想消除安全隐患，那么就需要用
+      PHP 来模拟出相反的设定。最好先问清楚是否能否在哪里更改
+      PHP 配置的选项，如果不行，那可以用如下的兼容手段。
+     </para>
+     <para>
+      <example>
+       <title>模拟注册全局变量</title>
+        <para>
+        本例模拟 register_globals On。
+       </para>
+       <programlisting role="php">
+<![CDATA[
+<?php
+// Emulate register_globals on
+if (!ini_get('register_globals')) {
+    $superglobals = array($_SERVER, $_ENV,
+        $_FILES, $_COOKIE, $_POST, $_GET);
+    if (isset($_SESSION)) {
+        array_unshift($superglobals, $_SESSION);
+    }
+    foreach ($superglobals as $superglobal) {
+        extract($superglobal, EXTR_SKIP);
+    }
+}
+?>
+]]>
+       </programlisting>
+       <para>
+        本例模拟 register_globals Off。
+       </para>
+       <programlisting role="php">
+<![CDATA[
+<?php
+// Emulate register_globals off
+if (ini_get('register_globals')) {
+    $superglobals = array($_SERVER, $_ENV,
+        $_FILES, $_COOKIE, $_POST, $_GET);
+    if (isset($_SESSION)) {
+        array_unshift($superglobals, $_SESSION);
+    }
+    foreach ($superglobals as $superglobal) {
+        foreach ($superglobal as $global => $value) {
+            unset($GLOBALS[$global]);
+        }
+    }
+}
+?>
+]]>
+       </programlisting>
+      </example>
      </para>
     </answer>
    </qandaentry>
