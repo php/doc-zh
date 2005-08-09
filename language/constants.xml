@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.7 $ -->
+<!-- $Revision: 1.8 $ -->
 <!-- $Author: dallas $ -->
-<!-- EN-Revision: 1.34 Maintainer: dallas Status: ready -->
+<!-- EN-Revision: 1.41 Maintainer: dallas Status: ready -->
  <chapter id="language.constants">
   <title>常量</title>
 
@@ -11,7 +11,31 @@
   </simpara>
   <para>
    常量名和其它任何 PHP 标签遵循同样的命名规则。合法的常量名以字母或下划线开始，后面跟着任何字母，数字或下划线。用正则表达式是这样表达的：<literal>[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*</literal>
-   <!-- TODO: Example of valid & invalid constant names -->
+  </para>
+  <para>
+   <example>
+    <title>合法与非法的常量名</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+
+// 合法的常量名
+define("FOO",     "something");
+define("FOO2",    "something else");
+define("FOO_BAR", "something more")
+
+// 非法的常量名
+define("2FOO",    "something");
+
+// This is valid, but should be avoided:
+// PHP may one day provide a magical constant
+// that will break your script
+define("__FOO__", "something");
+
+?>
+]]>
+    </programlisting>
+   </example>
   </para>
 
   <note>
@@ -94,18 +118,21 @@ echo Constant; // outputs "Constant" and issues a notice.
 ]]>
      </programlisting>
     </example>
-
    </para>
+   <simpara>
+    参见 <link linkend="language.oop5.constants">类常量</link>。
+   </simpara>
   </sect1>
 
   <sect1 id="language.constants.predefined">
-   <title>预定义常量</title>
+   <title>魔术常量</title>
 
    <simpara>
-    PHP 向它运行的任何脚本提供了大量的预定义常量。不过很多常量都是由不同的扩展库定义的，只有在加载了这些扩展库时才会出现，或者动态加载后，或者在编译时已经包括进去了。
+    PHP 向它运行的任何脚本提供了大量的<link
+    linkend="reserved.constants">预定义常量</link>。不过很多常量都是由不同的扩展库定义的，只有在加载了这些扩展库时才会出现，或者动态加载后，或者在编译时已经包括进去了。
    </simpara>
    <para>
-    有四个魔术常量根据它们使用的位置而改变。例如
+    有五个魔术常量根据它们使用的位置而改变。例如
     <constant>__LINE__</constant> 的值就依赖于它在脚本中所处的行来决定。这些特殊的常量不区分大小写，如下：
    </para>
    <para>
@@ -128,34 +155,41 @@ echo Constant; // outputs "Constant" and issues a notice.
        <row>
         <entry><constant>__FILE__</constant></entry>
         <entry>
-         文件的完整路径和文件名。
+         文件的完整路径和文件名。如果用在包含文件中，则返回包含文件名。自
+         PHP 4.0.2 起，<constant>__FILE__</constant>
+         总是包含一个绝对路径，而在此之前的版本有时会包含一个相对路径。
         </entry>
        </row>
        <row>
         <entry><constant>__FUNCTION__</constant></entry>
         <entry>
-         函数名称（这是 PHP 4.3.0 新加的）。
+         函数名称（PHP 4.3.0 新加）。自 PHP 5
+         起本常量返回该函数被定义时的名字（区分大小写）。在
+         PHP 4 中该值总是小写字母的。
         </entry>
        </row>
        <row>
         <entry><constant>__CLASS__</constant></entry>
         <entry>
-         类的名称（这是 PHP 4.3.0 新加的）。
+         类的名称（PHP 4.3.0 新加）。自 PHP 5
+         起本常量返回该类被定义时的名字（区分大小写）。在
+         PHP 4 中该值总是小写字母的。
         </entry>
        </row>
        <row>
         <entry><constant>__METHOD__</constant></entry>
         <entry>
-         类的方法名（这是 PHP 5.0.0 新加的）。
+         类的方法名（PHP 5.0.0 新加）。返回该方法被定义时的名字（区分大小写）。
         </entry>
        </row>
       </tbody>
      </tgroup>
     </table>
    </para>
-   <simpara>
-    预定义常量的列表见<link linkend="reserved.constants">预定义常量</link>一节。
-   </simpara>
+   <para>
+    参见
+    <function>get_class</function>，<function>get_object_vars</function>，<function>file_exists</function>&listendand;<function>function_exists</function>。
+   </para>
 
   </sect1>
  </chapter>

@@ -1,133 +1,33 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.5 $ -->
+<!-- $Revision: 1.6 $ -->
 <!-- $Author: dallas $ -->
-<!-- EN-Revision: 1.34 Maintainer: verdana  Status:ready -->
+<!-- EN-Revision: 1.45 Maintainer: verdana  Status:ready -->
+<!-- CREDITS: dallas -->
  <chapter id="language.basic-syntax">
   <title>基本语法</title>
-
-   <!--
-
-    NOTE:                             Last modified: 2001-05-16 13:00 GMT
-
-    the language part is currently under heavy revision. Please do not
-    not make any heavy (i.e. structural) modifications to this part
-    for a moment.
-
-    You'd also better not start any translation yet.
-
-    Comments are always welcome at phpdoc@lists.php.net
-
-    Progress:
-
-     intro : DOESN'T EXIST - yet?
-             new chapter, with some introductionary remarks?
-             Will be discussed on the ML soon.
-     basic-syntax:
-             FINISHED
-             except maybe moving the 'advanced escaping'
-             to a better place?
-             TODO:
-              - nada
-     types : Being revised. Added all new types
-             Boolean and Integer are more or less finished.
-             The rest isn't.
-             TODO:
-              - why is $foo[bar] bad syntax?
-              - what's the difference between unset($bla) and
-                $bla = NULL; (it is different!)
-              - $obj->{expr} syntax
-              - (unset) cast?????
-              - $bla = unset <== should've been nuked, don't mention it
-              - $str{offset} syntax, rather than $str[offset]
-              - read notes and apply when any of them are useful
-              - remove notes which have been included here.
-              - ...
-     the rest: Not yet started with.
-             TODO:
-              - ?
-     oop   : has been revised by Kristian, DONE.
-   -->
 
   <sect1 id="language.basic-syntax.phpmode">
    <title>从 HTML 中分离</title>
 
    <para>
-    PHP 的脚本由文件中一对特殊的标记所引起的内容，当解释器分析一个文件时，所有特殊标记外的普通文件，解释器不对其做任何处理，而特殊标记内文件将作为
-    PHP 代码被解释器分析执行。该运行机制将允许您在 HTML 中嵌入 PHP
-    代码：PHP 标记外的内容将被完全独立开，不做任何处理，而内部的将作为 PHP 代码解析。
-   </para>
-
-   <para>
-    用来标记 PHP 代码块的标记共有四套，其中只有两套总是有效（&lt;?php. . .?&gt;
-    和 &lt;script language="php"&gt;. . .&lt;/script&gt;）；另外两套可以在
-    &php.ini; 配置文件中开启或者关闭。虽然短格式的标记和 ASP
-    风格的标记可能比较省力，但是某些情况下您可能必须要使用长格式的标记。比如，您打算在
-    XML 或者 XHTML 中嵌入 PHP 代码，您将需要使用 &lt;?php. . .?&gt;
-    形式的标记以适应 XML 的标准。
-   </para>
-
-   <para>
-    PHP 支持的标记为：
-   </para>
-
-    <para>
-     <example>
-      <title>从 HTML 中分离的方式</title>
-      <programlisting role="php">
+    当 PHP 解析一个文件时，会寻找开始和结束标记，标记告诉
+    PHP 开始和停止解释其中的代码。此种方式的解析可以使
+    PHP 嵌入到各种不同的文档中，凡是在一对开始和结束标记之外的内容都会被
+    PHP 解析器忽略。大多数情况下 PHP 都是嵌入在 HTML 文档中的，如下例所示。
+    <informalexample>
+     <programlisting role="php">
 <![CDATA[
-1.  <?php echo("if you want to serve XHTML or XML documents, do like this\n"); ?>
-
-2.  <? echo ("this is the simplest, an SGML processing instruction\n"); ?>
-    <?= expression ?> This is a shortcut for "<? echo expression ?>"
-
-3.  <script language="php">
-        echo ("some editors (like FrontPage) don't
-              like processing instructions");
-    </script>
-
-4.  <% echo ("You may optionally use ASP-style tags"); %>
-    <%= $variable; # This is a shortcut for "<% echo . . ." %>
+<p>This is going to be ignored.</p>
+<?php echo 'While this is going to be parsed.'; ?>
+<p>This will also be ignored.</p>
 ]]>
-      </programlisting>
-     </example>
-    </para>
-
-   <para>
-    优先选用的方式为第一种方式 &lt;?php. . .?&gt;，因为它允许您在 XML 结构，如
-    XHTML 的代码中使用 PHP。
+     </programlisting>
+    </informalexample>
    </para>
-
    <para>
-    第二种方式并非总是可用的。只有当您在 &php.ini; 配置文件中激活
-    <link linkend="ini.short-open-tag">short_open_tag</link> 选项，才是可用的。您也可以通过使用
-    <function>short_tags</function> 函数（仅用于 PHP 3），或者使用
-    --enable-short-tags 选项 <command>configure</command> PHP
-    来激活短格式标记。在 php.ini-dist
-    配置文件中，默认是开启短格式标记的，但是建议您不要使用该标记。
-   </para>
-
-   <para>
-    在 PHP 配置文件中开启选项 <link linkend="ini.asp-tags">asp_tags</link> 将激活第四种方式。
-    <note>
-     <para>ASP 风格的标记添加于 PHP 3.0.4</para>
-    </note>
-   </para>
-
-   <note>
-    <para>
-     当开发大型应用程序或者用于分发的函数库，或者在不受您控制的 PHP
-     服务器上面开发程序时，请不要使用短格式的标记，因为目标服务器可能并不支持短格式的标记。为了便于移植，请保证用于再分发的代码中不使用短格式的标记。
-    </para>
-   </note>
-
-   <para>
-    PHP 代码块结束标记奖自动包含最近的一个结尾的新行（如果存在的话）。而且，结束标记自动隐含一个分号; 您不需要为
-    PHP 代码块的最后行追加一个分号。
-   </para>
-
-    <para>
-     PHP 允许您使用如下的结构：
-    <example><title>更高级的脱离</title>
+    还可以用更高级的结构：
+    <example>
+     <title>高级分离术</title>
      <programlisting role="php">
 <![CDATA[
 <?php
@@ -144,21 +44,86 @@ if ($expression) {
 ]]>
      </programlisting>
     </example>
-     PHP 将直接输出结束标记和下一个开始标记中的任何非 PHP
-     代码。当需要输出大量的文本时，退出 PHP 解析模式将比使用
-     <function>echo</function> 或者 <function>print</function>
-     或者此类的函数打印所有文本要更加的有效。
+    上例可正常工作，因为当 PHP 碰到结束标记 ?&gt;
+    时，就简单地将其后的内容原样输出直到碰到下一个开始标记为止。当然，上面的例子很做作，但是对输出大块的文本而言，脱离
+    PHP 解析模式通常比将所有内容用 <function>echo</function>
+    或者 <function>print</function> 输出更有效率。
+   </para>
+   <para>
+    可以在 PHP 中使用四对不同的开始和结束标记。其中两种，&lt;?php ?&gt;
+    和 &lt;script language="php"&gt; &lt;/script&gt; 总是可用的。另两种是短标记和
+    <productname>ASP</productname> 风格标记，可以在 &php.ini;
+    配置文件中打开或关闭。尽管有些人觉得短标记和
+    <productname>ASP</productname> 风格标记很方便，但移植性较差，通常不推荐。
+    <note>
+     <para>
+      此外注意如果将 PHP 嵌入到 XML 或 XHTML
+      中则需要使用 &lt;?php ?&gt; 以保持符合标准。
+     </para>
+    </note>
+   </para>
+   <para>
+    <example>
+     <title>PHP 开始和结束标记</title>
+     <programlisting role="php">
+<![CDATA[
+1.  <?php echo 'if you want to serve XHTML or XML documents, do like this'; ?>
+
+2.  <script language="php">
+        echo 'some editors (like FrontPage) don\'t
+              like processing instructions';
+    </script>
+
+3.  <? echo 'this is the simplest, an SGML processing instruction'; ?>
+    <?= expression ?> This is a shortcut for "<? echo expression ?>"
+
+4.  <% echo 'You may optionally use ASP-style tags'; %>
+    <%= $variable; # This is a shortcut for "<% echo . . ." %>
+]]>
+     </programlisting>
+    </example>
+   </para>
+   <para>
+    上例中的 1 和 2 总是可用的，其中 1 是最常用，并建议使用的。
+   </para>
+   <para>
+    短标记（上例 3）仅在通过 &php.ini; 配置文件中的指令
+    <link linkend="ini.short-open-tag">short_open_tag</link>
+    打开后才可用，或者在 PHP 编译时加入了
+    <option>--enable-short-tags</option> 选项。
+    <note>
+     <para>
+      如果用 PHP 3 还可以通过 <function>short_tags</function>
+      函数激活使用短标记。<emphasis>此方法只适用于 PHP 3！</emphasis>
+     </para>
+    </note>
+   </para>
+   <para>
+    <productname>ASP</productname> 风格标记（上例 4）仅在通过 &php.ini;
+    配置文件中的指令
+    <link linkend="ini.asp-tags">asp_tags</link> 打开后才可用。
+    <note>
+     <para>
+      对 <productname>ASP</productname> 风格标记的支持是 3.0.4 版添加的。
+     </para>
+    </note>
+   </para>
+   <para>
+    <note>
+     <para>
+      在以下情况应避免使用短标记：开发需要发行的程序或者库，或者在用户不能控制的服务器上开发。因为目标服务器可能不支持短标记。为了代码的移植及发行，确保不要使用短标记。
+     </para>
+    </note>
    </para>
   </sect1>
 
   <sect1 id="language.basic-syntax.instruction-separation">
    <title>指令分隔符</title>
 
-   <simpara>
-    指令分隔方式与 C 或者 Perl 类似 -- 每个语句由分号格开。</simpara>
    <para>
-    结束标记（?&gt;）同样隐含语句的结束，因此下面的代码是等价的：
-
+    同 C 或 Perl 一样，PHP 需要在每个语句后用分号结束指令。一段 PHP
+    代码中的结束标记隐含表示了一个分号；在一个 PHP
+    代码段中的最后一行可以不用分号结束。如果后面还有新行，则代码段的结束标记包含了行结束。
     <informalexample>
      <programlisting role="php">
 <![CDATA[
@@ -170,6 +135,13 @@ if ($expression) {
 ]]>
      </programlisting>
     </informalexample>
+    <note>
+     <para>
+      文件末尾的 PHP 代码段结束标记可以不要，有些情况下当使用输出缓冲和
+      <function>include</function> 或者 <function>require</function>
+      时不要更好些。
+     </para>
+    </note>
    </para>
   </sect1>
 
@@ -177,7 +149,7 @@ if ($expression) {
    <title>注释</title>
 
    <para>
-    PHP 支持 'C'，'C++' 和 Unix Shell 风格的注释。例如:
+    PHP 支持“C”，“C++”和 Unix Shell 风格（Perl 风格）的注释。例如:
 
     <informalexample>
      <programlisting role="php">
@@ -195,7 +167,13 @@ if ($expression) {
    </para>
 
    <simpara>
-    “单行”注释仅仅注释到行末或者当前的 PHP 代码块，视乎哪个首先出现。
+    “单行”注释仅仅注释到行末或者当前的 PHP 代码块，视乎哪个首先出现。这意味着在
+    <literal>// ?&gt;</literal> 之后的 HTML 代码将被显示出来：?&gt;
+    跳出了 PHP 模式并返回了 HTML 模式，<literal>//</literal>
+    并不能影响到这一点。如果启用了
+    <link linkend="ini.asp-tags">asp_tags</link> 配置选项，其行为和
+    <literal>// %&gt;</literal> 相同。不过，<literal>&lt;/script&gt;</literal>
+    标记在单行注释中不会跳出 PHP 模式。
    </simpara>
    <para>
     <informalexample>
@@ -209,7 +187,8 @@ if ($expression) {
    </para>
 
    <simpara>
-    小心不要嵌套 'C' 风格的注释，当注释大量代码时，可能犯该错误。
+    “C”风格的注释在碰到第一个 <literal>*/</literal>
+    时结束。小心不要嵌套“C”风格的注释，当注释大量代码时，可能犯该错误。
    </simpara>
    <para>
     <informalexample>
@@ -225,11 +204,6 @@ if ($expression) {
     </informalexample>
    </para>
 
-   <simpara>
-    “单行”注释仅仅注释到行末或者当前的 PHP 代码块，视乎哪个首先出现。这意味着 // ?>
-    后面的 HTML 代码将被打印出来：?> 跳出了 PHP 模式并且返回 HTML 模式，而且 //
-    注释符并不会影响到模式的转换。
-   </simpara>
   </sect1>
  </chapter>
 
