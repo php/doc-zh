@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.24 $ -->
+<!-- $Revision: 1.25 $ -->
 <!-- $Author: dallas $ -->
-<!-- EN-Revision:1.50 Maintainer: class007 Status: ready -->
+<!-- EN-Revision:1.53 Maintainer: class007 Status: ready -->
 <!-- CREDITS: dallas -->
 <appendix id="wrappers">
  <title>支持的协议／封装协议列表</title>
@@ -92,6 +92,57 @@
     </tgroup>
    </table>
   </para>
+ </section>
+
+ <section id="wrappers.socket">
+  <title>Socket</title>
+  <para>
+   本节包含支持可工作于套接字的封装协议的上下文选项，如
+   <literal>tcp</literal>，<literal>http</literal> 或 <literal>ftp</literal>。
+  </para>
+  <para>
+   自 PHP 5.1.0 起只支持一个选项，<literal>bindto</literal>，可用来指定
+   IP 地址（可以是 IPv4 或 IPv6）和／或 PHP 将用来访问网络的端口号。语法是
+   <literal>ip:port</literal>（如果想让系统自动选择可以将 IP 或端口号设为
+   <literal>0</literal>）。
+  </para>
+  <note>
+   <para>
+    因 FTP 在正常运行时创建两个套接字连接，此时不能在
+    <literal>bindto</literal> 选项中指定端口号。因此对于
+    FTP wrapper 只支持一种语法 <literal>ip:0</literal>。
+   </para>
+  </note>
+  <example>
+   <title>怎样使用 bindto 选项的一些例子</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+// connect to the internet using the '192.168.0.100' IP
+$opts = array('socket' =>
+            array('bindto' => '192.168.0.100:0'));
+
+
+// connect to the internet using the '192.168.0.100' IP and port '7000'
+$opts = array('socket' =>
+            array('bindto' => '192.168.0.100:7000'));
+
+
+// connect to the internet using port '7000'
+$opts = array('socket' =>
+            array('bindto' => '0:7000'));
+
+
+// create the context...
+$context = stream_context_create($opts);
+
+// ...and use it to fetch the data
+echo file_get_contents('http://www.example.com', false, $context);
+
+?>
+]]>
+   </programlisting>
+  </example>
  </section>
 
  <section id="wrappers.http">
@@ -489,8 +540,11 @@ foreach($meta_data['wrapper_data'] as $response) {
    <function>print</function> 与 <function>echo</function> 的方式相同。
   </simpara>
   <simpara>
-   <filename>php://input</filename> 允许您读取 POST 的原始数据。
-   和 <varname>$HTTP_RAW_POST_DATA</varname> 比起来，它给内存带来的压力较小，并且不需要任何特殊的 &php.ini; 设置。
+   <filename>php://input</filename> 允许您读取 POST
+   的原始数据。和 <varname>$HTTP_RAW_POST_DATA</varname>
+   比起来，它给内存带来的压力较小，并且不需要任何特殊的 &php.ini;
+   设置。<filename>php://input</filename> 不能用于
+   <literal>enctype="multipart/form-data"</literal>。
   </simpara>
   <simpara>
    <filename>php://stdin</filename> 和
