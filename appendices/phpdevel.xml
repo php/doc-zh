@@ -1,16 +1,18 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.25 $ -->
-<!-- $Author: gregory $ -->
-<!-- EN-Revision: 1.24 Maintainer: class007 Status: working -->
+<!-- $Revision: 1.26 $ -->
+<!-- $Author: dallas $ -->
+<!-- EN-Revision: 1.26 Maintainer: class007 Status: partial -->
 <!-- CREDITS: dallas -->
 <appendix id="phpdevel">
  <title>扩展 PHP 3</title>
 
- <simpara>  
-  该章节中的内容可能已经比较过时了，它讲解了如何扩展 PHP3。如果您对 PHP 4 感兴趣，请阅读“<link linkend="zend">Zend API</link>”的有关章节。同时，您还可以阅读 PHP 源文档中的一些文档，例如
-  <filename>README.SELF-CONTAINED-EXTENSIONS</filename> 和 
+ <simpara>
+  该章节中的内容可能已经比较过时了，它讲解了如何扩展 PHP3。如果您对 PHP 4
+  感兴趣，请阅读“<link linkend="zend">Zend API</link>”的有关章节。同时，您还可以阅读
+  PHP 源文档中的一些文档，例如
+  <filename>README.SELF-CONTAINED-EXTENSIONS</filename> 和
   <filename>README.EXT_SKEL</filename>。
- </simpara>  
+ </simpara>
 
  <sect1 id="phpdevel-addfunc">
   <title>为 PHP 新增函数</title>
@@ -18,10 +20,10 @@
    <title>函数原型</title>
    <para>
     所有的函数有着如下形式：
-    <programlisting role="c">       
+    <programlisting role="c">
 <![CDATA[
 void php3_foo(INTERNAL_FUNCTION_PARAMETERS) {
-     
+
 }
 ]]>
     </programlisting>
@@ -47,13 +49,13 @@ if (ARG_COUNT(ht) != 2 || getParameters(ht,2,&arg1,&arg2)==FAILURE) {
 ]]>
      </programlisting>
     </example>
-    
+
     注意：参数既可以被值（value）传递又可以被引用（reference）传递。两种情况您都需要将
     &amp;(pval *) 传递给 getParameters 函数。如果您想检查第 n
     个参数是否通过引用传递给您，您可以使用 ParameterPassedByReference(ht,n)
     函数。它的返回值为 0 或者 1。
    </para>
-    
+
    <simpara>
     当您改变了任何已传递的参数，无论它们是以值或者引用的方式传递，您都可以对它使用
     pval_destructor 函数来销毁它。或者如果它是一个您想添加的数组，您可以使用类似于
@@ -66,13 +68,13 @@ if (ARG_COUNT(ht) != 2 || getParameters(ht,2,&arg1,&arg2)==FAILURE) {
     IS_STRING 或 IS_ARRAY 的参数应该先对其运行 pval_destructor。
    </simpara>
   </sect2>
-   
+
   <sect2 id="phpdevel-addfunc-varargs">
    <title>可变函数参数</title>
    <para>
     函数可以接受不同数目的参数。如果你的函数可以接受 2 或 3 个参数，这样用：
    </para>
-    
+
    <para>
     <example>
      <title>可变函数参数</title>
@@ -90,7 +92,7 @@ if (arg_count < 2 || arg_count > 3 ||
     </example>
    </para>
   </sect2>
-     
+
   <sect2 id="phpdevel-addfunc-using-args">
    <title>使用函数参数</title>
    <para>
@@ -145,12 +147,12 @@ if (arg_count < 2 || arg_count > 3 ||
 <![CDATA[
 convert_to_long(arg1);
 convert_to_double(arg1);
-convert_to_string(arg1); 
+convert_to_string(arg1);
 convert_to_boolean_long(arg1); /* If the string is "" or "0" it becomes 0, 1 otherwise */
 convert_string_to_number(arg1);  /* Converts string to either LONG or DOUBLE depending on string */
 ]]>
      </programlisting></para>
-    
+
    <simpara>
     这些函数都是即时转换的，并不返回任何值。
    </simpara>
@@ -162,7 +164,7 @@ convert_string_to_number(arg1);  /* Converts string to either LONG or DOUBLE dep
      <listitem><simpara>IS_LONG: arg1-&gt;value.lval</simpara></listitem>
      <listitem><simpara>IS_DOUBLE: arg1-&gt;value.dval</simpara></listitem>
     </itemizedlist></para></sect2>
-    
+
   <sect2 id="phpdevel-addfunc-memmgmt">
    <title>函数中的内存管理</title>
    <simpara>
@@ -205,21 +207,21 @@ convert_string_to_number(arg1);  /* Converts string to either LONG or DOUBLE dep
      要注意 SET_VAR_STRING。值的部分必须是人工分配出来的，因为内存管理代码会在以后尝试释放该指针。不要将静态分配的内存传递给 SET_VAR_STRING。
     </para>
    </warning>
-    
+
    <simpara>
     PHP 中的符号表是以散列表来实现的。任何时候 &amp;symbol_table
     都是一个指向 'main' 符号表的指针，active_symbol_table points
     指向当前活动的符号表（二者在开始时等同，而在函数内不同）。
    </simpara>
-  
+
    <para>
     以下例子使用了 'active_symbol_table'。如果你指明要工作于
     'main' 符号表，应该用 &amp;symbol_table 来替代。此外，同样的函数也能像下面说明的作用于数组。
    </para>
-  
+
    <para>
     <example>
-     <title>检查 $foo 是否存在于符号表</title>
+     <title>检查 <varname>$foo</varname> 是否存在于符号表</title>
      <programlisting role="c">
 <![CDATA[
 if (hash_exists(active_symbol_table,"foo",sizeof("foo"))) { exists... }
@@ -237,10 +239,9 @@ check(pvalue.type);
 ]]>
      </programlisting>
     </example>
-    
     PHP 中的数组使用了和符号表同一个散列表来实现。这意味着以上两个函数也可以用来检查数组中的变量。
    </para>
-    
+
    <simpara>
     如果要在符号表中定义一个新数组，应该这样做。
    </simpara>
@@ -252,50 +253,49 @@ check(pvalue.type);
    <simpara>
     接着，初始化数组：
    </simpara>
-    
+
    <para>
     <example>
      <title>初始化新数组</title>
      <programlisting role="c">
 <![CDATA[
 pval arr;
-  
+
 if (array_init(&arr) == FAILURE) { failed... };
 hash_update(active_symbol_table,"foo",sizeof("foo"),&arr,sizeof(pval),NULL);
 ]]>
      </programlisting>
     </example>
-    
-    这段代码在活动符号表中定义了一个名为 $foo 的新数组。这是个空数组。
+    这段代码在活动符号表中定义了一个名为 <varname>$foo</varname> 的新数组。这是个空数组。
    </para>
-    
+
    <simpara>
     这里展示了怎样向其中加入新的条目：</simpara>
-  
+
    <para>
     <example>
      <title>向数组中加入新的条目</title>
      <programlisting role="c">
 <![CDATA[
 pval entry;
-  
+
 entry.type = IS_LONG;
 entry.value.lval = 5;
-  
+
 /* defines $foo["bar"] = 5 */
-hash_update(arr.value.ht,"bar",sizeof("bar"),&entry,sizeof(pval),NULL); 
+hash_update(arr.value.ht,"bar",sizeof("bar"),&entry,sizeof(pval),NULL);
 
 /* defines $foo[7] = 5 */
-hash_index_update(arr.value.ht,7,&entry,sizeof(pval),NULL); 
+hash_index_update(arr.value.ht,7,&entry,sizeof(pval),NULL);
 
 /* defines the next free place in $foo[],
  * $foo[8], to be 5 (works like php2)
  */
-hash_next_index_insert(arr.value.ht,&entry,sizeof(pval),NULL); 
+hash_next_index_insert(arr.value.ht,&entry,sizeof(pval),NULL);
 ]]>
      </programlisting>
     </example>
-     
+
     如果要修改一个插入到散列表中的值，必须先将其提取出来。要避免额外开销你可以给
     hash add 函数提供一个 pval ** 参数，它将被表中相应单元的
     pval * 地址所更新。如果其值为 &null;（如同以上所有的例子），该参数被忽略。
@@ -303,7 +303,8 @@ hash_next_index_insert(arr.value.ht,&entry,sizeof(pval),NULL);
 
    <simpara>
     hash_next_index_insert() 或多或少使用了如同 PHP 2.0 中
-    "$foo[] = bar;" 的逻辑。</simpara>
+    <literal>"$foo[] = bar;"</literal> 的逻辑。
+   </simpara>
 
    <simpara>
     如果要建立一个从函数返回的数组，可以就像以上那样初始化数组：
@@ -325,14 +326,14 @@ add_next_index_double(return_value,double_value);
 add_next_index_string(return_value,estrdup(string_value));
 ]]>
    </programlisting>
-  
+
    <para>
     当然了，如果如果在数组初始化后添加不正确，你应该先查看一下数组：
-      
+
     <programlisting role="c">
 <![CDATA[
 pval *arr;
-  
+
 if (hash_find(active_symbol_table,"foo",sizeof("foo"),(void **)&arr)==FAILURE) { can't find... }
 else { use arr->value.ht... }
 ]]>
@@ -341,18 +342,18 @@ else { use arr->value.ht... }
    <simpara>
     注意 hash_find 接受一个指向 pval 指针的指针，并不是 pval 指针。
    </simpara>
-  
+
    <simpara>
     以上任何 hash 函数返回 SUCCESS 或 FAILURE（除了
     hash_exists()，它返回一个布尔真值）。
    </simpara>
   </sect2>
-      
+
   <sect2 id="phpdevel-addfunc-retsimple">
    <title>Returning simple values</title>
    <simpara>
     A number of macros are available to make returning values from a
-    function easier.</simpara> 
+    function easier.</simpara>
 
    <para>
     The RETURN_* macros all set the return value and return from the
@@ -366,7 +367,7 @@ else { use arr->value.ht... }
      <listitem><simpara>RETURN_STRINGL(s,l,dup)   Return string (s) specifying length (l).</simpara></listitem>
      <listitem><simpara>RETURN_DOUBLE(d)</simpara></listitem>
     </itemizedlist></para>
-    
+
    <para>
     The RETVAL_* macros set the return value, but do not return.
     <itemizedlist>
@@ -386,7 +387,7 @@ else { use arr->value.ht... }
    <simpara>
     If your function returns boolean success/error responses, always
     use RETURN_TRUE and RETURN_FALSE respectively.</simpara></sect2>
-    
+
   <sect2 id="phpdevel-addfunc-retcomplex">
    <title>Returning complex values</title>
    <simpara>
@@ -411,15 +412,17 @@ else { use arr->value.ht... }
 add_method( return_value, function_name, function_ptr );
 ]]>
        </programlisting>
-			 </para></listitem>
-    </orderedlist></para>
+      </para>
+     </listitem>
+    </orderedlist>
+   </para>
 
    <para>
     The functions used to populate an object are:
     <itemizedlist>
      <listitem><simpara>add_property_long( return_value,
        property_name, l ) - Add a property named 'property_name', of
-       type long, equal to 'l'</simpara></listitem> 
+       type long, equal to 'l'</simpara></listitem>
      <listitem><simpara>add_property_double( return_value,
        property_name, d ) - Same, only adds a double</simpara></listitem>
      <listitem><simpara>add_property_string( return_value,
@@ -430,7 +433,7 @@ add_method( return_value, function_name, function_ptr );
 
    <para>
     Returning an array:
-    
+
     <orderedlist numeration="arabic">
      <listitem><simpara>Call array_init(return_value).</simpara></listitem>
      <listitem><simpara>Fill it up with values. The functions available
@@ -473,7 +476,7 @@ add_method( return_value, function_name, function_ptr );
      <listitem><simpara>php3_list_insert(ptr, type) - returns the 'id'
        of the newly inserted resource</simpara></listitem>
      <listitem><simpara>php3_list_delete(id) - delete the resource
-       with the specified id</simpara></listitem> 
+       with the specified id</simpara></listitem>
      <listitem><simpara>php3_list_find(id,*type)
        - returns the pointer of the resource with the specified id,
        updates 'type' to the resource's type</simpara></listitem>
@@ -481,11 +484,12 @@ add_method( return_value, function_name, function_ptr );
 
     Typically, these functions are used for SQL drivers but they can
     be used for anything else; for instance, maintaining file
-    descriptors.</para>
+    descriptors.
+   </para>
 
    <simpara>
     Typical list code would look like this:</simpara>
-    
+
    <para>
     <example>
      <title>Adding a new resource</title>
@@ -512,8 +516,8 @@ int type;
 convert_to_long(resource_id);
 resource = php3_list_find(resource_id->value.lval, &type);
 if (type != LE_RESOURCE_TYPE) {
-	php3_error(E_WARNING,"resource index %d has the wrong type",resource_id->value.lval);
-	RETURN_FALSE;
+    php3_error(E_WARNING,"resource index %d has the wrong type",resource_id->value.lval);
+    RETURN_FALSE;
 }
 /* ...use resource... */
 ]]>
@@ -533,7 +537,7 @@ php3_list_delete(resource_id->value.lval);
 ]]>
      </programlisting>
     </example>
-   
+
     The resource types should be registered in php3_list.h, in enum
     list_entry_type.  In addition, one should add shutdown code for
     any new resource type defined, in list.c's list_entry_destructor()
@@ -578,7 +582,7 @@ php3_list_delete(resource_id->value.lval);
     If you read mysql.c, you'll notice that except for the more
     complex connect function, nothing in the rest of the module has to
     be changed.</simpara>
-   
+
    <simpara>
     The very same interface exists for the regular resource list and
     the persistent resource list, only 'list' is replaced with
@@ -588,7 +592,7 @@ php3_list_delete(resource_id->value.lval);
      <listitem><simpara>php3_plist_insert(ptr, type) - returns the 'id'
        of the newly inserted resource</simpara></listitem>
      <listitem><simpara>php3_plist_delete(id) - delete the resource
-       with the specified id</simpara></listitem> 
+       with the specified id</simpara></listitem>
      <listitem><simpara>php3_plist_find(id,*type)
        - returns the pointer of the resource with the specified id,
        updates 'type' to the resource's type</simpara></listitem>
@@ -652,8 +656,8 @@ php3_list_delete(resource_id->value.lval);
     The steps required to add a new directive:
 
     <orderedlist>
-     <listitem><simpara>Add directive to php3_ini_structure struct in mod_php3.h.</simpara></listitem> 
-    
+     <listitem><simpara>Add directive to php3_ini_structure struct in mod_php3.h.</simpara></listitem>
+
      <listitem><simpara>In main.c, edit the php3_module_startup
        function and add the appropriate cfg_get_string() or
        cfg_get_long() call.</simpara></listitem>
@@ -772,7 +776,7 @@ php3_list_delete(resource_id->value.lval);
   </simpara>
 
   <sect2 id="internal.e-notice">
-   <title>E_NOTICE</title>
+   <title><constant>E_NOTICE</constant></title>
    <simpara>
     Notices are not printed by default, and indicate that the script
     encountered something that could indicate an error, but could also
@@ -783,17 +787,17 @@ php3_list_delete(resource_id->value.lval);
   </sect2>
 
   <sect2 id="internal.e-warning">
-   <title>E_WARNING</title>
+   <title><constant>E_WARNING</constant></title>
    <simpara>
     Warnings are printed by default, but do not interrupt script
     execution.  These indicate a problem that should have been trapped
-    by the script before the call was made. For example, calling 
-	<function>ereg</function> with an invalid regular expression.
+    by the script before the call was made. For example, calling
+    <function>ereg</function> with an invalid regular expression.
    </simpara>
   </sect2>
 
   <sect2 id="internal.e-error">
-   <title>E_ERROR</title>
+   <title><constant>E_ERROR</constant></title>
    <simpara>
     Errors are also printed by default, and execution of the script is
     halted after the function returns. These indicate errors that can
@@ -802,7 +806,7 @@ php3_list_delete(resource_id->value.lval);
   </sect2>
 
   <sect2 id="internal.e-parse">
-   <title>E_PARSE</title>
+   <title><constant>E_PARSE</constant></title>
    <simpara>
     Parse errors should only be generated by the parser. The code is
     listed here only for the sake of completeness.
@@ -810,68 +814,68 @@ php3_list_delete(resource_id->value.lval);
   </sect2>
 
   <sect2 id="internal.e-core-error">
-   <title>E_CORE_ERROR</title>
+   <title><constant>E_CORE_ERROR</constant></title>
    <simpara>
-    This is like an E_ERROR, except it is generated by the core
+    This is like an <constant>E_ERROR</constant>, except it is generated by the core
     of PHP. Functions should not generate this type of error.
    </simpara>
   </sect2>
 
   <sect2 id="internal.e-core-warning">
-   <title>E_CORE_WARNING</title>
+   <title><constant>E_CORE_WARNING</constant></title>
    <simpara>
-    This is like an E_WARNING, except it is generated by the core
+    This is like an <constant>E_WARNING</constant>, except it is generated by the core
     of PHP. Functions should not generate this type of error.
    </simpara>
   </sect2>
 
   <sect2 id="internal.e-compile-error">
-   <title>E_COMPILE_ERROR</title>
+   <title><constant>E_COMPILE_ERROR</constant></title>
    <simpara>
-     This is like an E_ERROR, except it is generated by the Zend Scripting
-     Engine. Functions should not generate this type of error.
+    This is like an <constant>E_ERROR</constant>, except it is generated by the Zend Scripting
+    Engine. Functions should not generate this type of error.
    </simpara>
   </sect2>
 
   <sect2 id="internal.e-compile-warning">
-   <title>E_COMPILE_WARNING</title>
+   <title><constant>E_COMPILE_WARNING</constant></title>
    <simpara>
-     This is like an E_WARNING, except it is generated by the Zend Scripting
+     This is like an <constant>E_WARNING</constant>, except it is generated by the Zend Scripting
      Engine. Functions should not generate this type of error.
    </simpara>
   </sect2>
 
   <sect2 id="internal.e-user-error">
-   <title>E_USER_ERROR</title>
+   <title><constant>E_USER_ERROR</constant></title>
    <simpara>
-     This is like an E_ERROR, except it is generated in PHP code by using
-     the PHP function <function>trigger_error</function>. Functions should 
+     This is like an <constant>E_ERROR</constant>, except it is generated in PHP code by using
+     the PHP function <function>trigger_error</function>. Functions should
      not generate this type of error.
    </simpara>
   </sect2>
 
   <sect2 id="internal.e-user-warning">
-   <title>E_USER_WARNING</title>
+   <title><constant>E_USER_WARNING</constant></title>
    <simpara>
-     This is like an E_WARNING, except it is generated  by using the PHP 
-     function <function>trigger_error</function>. Functions should not 
+     This is like an <constant>E_WARNING</constant>, except it is generated  by using the PHP
+     function <function>trigger_error</function>. Functions should not
      generate this type of error.
    </simpara>
   </sect2>
 
   <sect2 id="internal.e-user-notice">
-   <title>E_USER_NOTICE</title>
+   <title><constant>E_USER_NOTICE</constant></title>
    <simpara>
-     This is like an E_NOTICE, except it is generated by using the PHP
-     function <function>trigger_error</function>. Functions should not 
+     This is like an <constant>E_NOTICE</constant>, except it is generated by using the PHP
+     function <function>trigger_error</function>. Functions should not
      generate this type of error.
    </simpara>
   </sect2>
-  
+
   <sect2 id="internal.e-all">
-   <title>E_ALL</title>
+   <title><constant>E_ALL</constant></title>
    <simpara>
-    All of the above.  Using this error_reporting level will show 
+    All of the above.  Using this error_reporting level will show
     all error types.
    </simpara>
   </sect2>
