@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.9 $ -->
-<!-- $Author: gregory $ -->
-<!-- EN-Revision: 1.16 Maintainer: Gregory Status: ready -->
+<!-- $Revision: 1.10 $ -->
+<!-- $Author: dallas $ -->
+<!-- EN-Revision: 1.21 Maintainer: Gregory Status: ready -->
  <reference id="ref.mysql">
   <title>MySQL 函数库</title>
   <titleabbrev>MySQL</titleabbrev>
@@ -26,56 +26,67 @@
     </para>
    </section>
 
-   &reference.mysql.configure;     
+   &reference.mysql.configure;
 
-   &reference.mysql.ini; 
-    
-     <section id="mysql.resources"> 
-     &reftitle.resources; 
-      <para>
-	   在 MySQL 模块中使用了两种资源类型。第一种是数据库的连接句柄，第二种是 SQL 查询返回的结果集。
-      </para> 
-     </section> 
+   &reference.mysql.ini;
 
+   <section id="mysql.resources">
+    &reftitle.resources;
+    <para>
+     在 MySQL 模块中使用了两种资源类型。第一种是数据库的连接句柄，第二种是 SQL 查询返回的结果集。
+    </para>
+   </section>
 
    &reference.mysql.constants;
 
-    
+   <section id="mysql.notes">
+   &reftitle.notes;
+    <note>
+     <para>
+      大多数 MySQL 函数都接受
+      <parameter>link_identifier</parameter>
+      作为最后一个可选参数。如果未提供此参数，则使用最后一个打开的连接。如果不存在连接，则会用
+      &php.ini; 中定义的默认参数去尝试建立连接。如果连接不成功，函数返回 &false;。
+     </para>
+    </note>
+   </section>
+
    <section id="mysql.examples">
    &reftitle.examples;
     <para>
-     这个简单的例子演示如何连接数据库，执行查询语句，打印返回结果集和断开数据库等一系列基本的 MySQL 操作。
+     这个简单的例子演示如何连接数据库，执行查询语句，打印返回结果集和断开数据库等一系列基本的
+     MySQL 操作。
      <example>
       <title>MySQL 扩展范例</title>
       <programlisting role="php">
 <![CDATA[
 <?php
-    /* 连接选择数据库 */
-    $link = mysql_connect("mysql_host", "mysql_user", "mysql_password")
-        or die("Could not connect : " . mysql_error()); 
-    print "Connected successfully";
-    mysql_select_db("my_database") or die("Could not select database");
+// Connecting, selecting database
+$link = mysql_connect('mysql_host', 'mysql_user', 'mysql_password')
+    or die('Could not connect: ' . mysql_error());
+echo 'Connected successfully';
+mysql_select_db('my_database') or die('Could not select database');
 
-    /* 执行 SQL 查询 */
-    $query = "SELECT * FROM my_table";
-    $result = mysql_query($query) or die("Query failed : " . mysql_error()); 
+// Performing SQL query
+$query = 'SELECT * FROM my_table';
+$result = mysql_query($query) or die('Query failed: ' . mysql_error());
 
-    /* 在 HTML 中打印结果 */
-    print "<table>\n";
-    while ($line = mysql_fetch_array($result, MYSQL_ASSOC)) {
-        print "\t<tr>\n";
-        foreach ($line as $col_value) {
-            print "\t\t<td>$col_value</td>\n";
-        }
-        print "\t</tr>\n";
+// Printing results in HTML
+echo "<table>\n";
+while ($line = mysql_fetch_array($result, MYSQL_ASSOC)) {
+    echo "\t<tr>\n";
+    foreach ($line as $col_value) {
+        echo "\t\t<td>$col_value</td>\n";
     }
-    print "</table>\n";
+    echo "\t</tr>\n";
+}
+echo "</table>\n";
 
-    /* 释放资源 */
-    mysql_free_result($result);
+// Free resultset
+mysql_free_result($result);
 
-    /* 断开连接 */
-    mysql_close($link);
+// Closing connection
+mysql_close($link);
 ?>
 ]]>
       </programlisting>
