@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.3 $ -->
-<!-- $Author: dallas $ -->
-<!-- EN-Revision: 1.3 Maintainer: dallas Status: ready -->
+<!-- $Revision: 1.4 $ -->
+<!-- $Author: lm92 $ -->
+<!-- EN-Revision: 1.6 Maintainer: dallas Status: ready -->
   <refentry id="function.is-uploaded-file">
    <refnamediv>
     <refname>is_uploaded_file</refname>
@@ -22,6 +22,29 @@
      这种检查显得格外重要，如果上传的文件有可能会造成对用户或本系统的其他用户显示其内容的话。
     </para>
     <para>
+     为了能使 <function>is_uploaded_file</function> 函数正常工作，必段指定类似于
+     $_FILES['userfile']['tmp_name'] 的变量，而在从客户端上传的文件名
+     $_FILES['userfile']['name'] 不能正常运作。
+    </para>
+    <example>
+     <title><function>is_uploaded_file</function> 例子</title>
+     <programlisting role="php">
+<![CDATA[
+<?php
+ 
+if (is_uploaded_file($_FILES['userfile']['tmp_name'])) {
+   echo "File ". $_FILES['userfile']['name'] ." uploaded successfully.\n";
+   echo "Displaying contents\n";
+   readfile($_FILES['userfile']['tmp_name']);
+} else {
+   echo "Possible file upload attack: ";
+   echo "filename '". $_FILES['userfile']['tmp_name'] . "'.";
+}
+ 
+?>]]>
+     </programlisting>
+    </example>
+    <para>
      <function>is_uploaded_file</function> 仅可用于
      PHP 3 的 3.0.16 版之后，以及 PHP 4 的 4.0.2
      版之后。如果你执意要用老版本，可以用下面的函数来保护自己：
@@ -31,11 +54,15 @@
        PHP 4 的 4.0.2 版之后。它依赖的 PHP 内部函数在该版本之后改变了。
       </para>
      </note>
+    </para>
+     <example>
+      <title><function>is_uploaded_file</function> 可运行于 PHP 4 &lt; 4.0.3 的例子</title>
      <programlisting role="php">
 <![CDATA[
 <?php
 /* Userland test for uploaded file. */
-function is_uploaded_file($filename) {
+function is_uploaded_file($filename)
+{
     if (!$tmp_file = get_cfg_var('upload_tmp_dir')) {
         $tmp_file = dirname(tempnam('', ''));
     }
@@ -54,7 +81,7 @@ if (is_uploaded_file($HTTP_POST_FILES['userfile'])) {
 ?>
 ]]>
      </programlisting>
-    </para>
+    </example>
     <para>
      参见 <function>move_uploaded_file</function>，以及<link
      linkend="features.file-upload">文件上传处理</link>一章中的简单使用例子。
