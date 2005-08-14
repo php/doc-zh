@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.4 $ -->
-<!-- $Author: dallas $ -->
-<!-- EN-Revision: 1.12 Maintainer: dallas Status: ready -->
+<!-- $Revision: 1.5 $ -->
+<!-- $Author: lm92 $ -->
+<!-- EN-Revision: 1.19 Maintainer: dallas Status: ready -->
   <refentry id="function.glob">
    <refnamediv>
     <refname>glob</refname>
@@ -15,8 +15,9 @@
      <methodparam choice="opt"><type>int</type><parameter>flags</parameter></methodparam>
     </methodsynopsis>
     <para>
-     <function>glob</function> 函数依照 shell 使用的规则寻找所有与
-     <parameter>pattern</parameter> 匹配的文件路径。不进行缩写扩展或参数替代。
+     <function>glob</function> 函数依照 libc glob() 函数使用的规则寻找所有与
+     <parameter>pattern</parameter> 匹配的文件路径，类似于一般 shells
+     所用的规则一样。不进行缩写扩展或参数替代。
     </para>
     <para>
      返回一个包含有匹配文件/目录的数组。如果出错返回 &false;。
@@ -53,15 +54,26 @@
        <simpara>
         <constant>GLOB_ONLYDIR</constant> - 仅返回与模式匹配的目录项
        </simpara>
+       <note>
+        <simpara>
+         在 PHP 4.3.3 版本之前 <constant>GLOB_ONLYDIR</constant>
+         在 Windows 或者其它不使用 GNU C 库的系统上是
+         <emphasis role="strong">不可用</emphasis> 的。
+        </simpara>
+       </note>
+      </listitem>
+      <listitem>
+       <simpara>
+        <constant>GLOB_ERR</constant> - 停止并读取错误信息（比如说不可读的目录），默认的情况下忽略所有错误
+       </simpara>
+       <note>
+        <simpara>
+         <constant>GLOB_ERR</constant> 是在 PHP 5.1 中添加的
+        </simpara>
+       </note>
       </listitem>
      </itemizedlist>
     </para>
-    <note>
-     <simpara>
-      在 PHP 4.3.3 之前，<constant>GLOB_ONLYDIR</constant>
-      <emphasis role="strong">不可</emphasis>用于 Windows 下以及其它不使用 GNU C 库的系统。
-     </simpara>
-    </note>
     <para>
      <example>
       <title>
@@ -73,22 +85,22 @@
 foreach (glob("*.txt") as $filename) {
     echo "$filename size " . filesize($filename) . "\n";
 }
-
-/* 输出类似：
-
+?>
+]]>
+     </programlisting>
+      <para>
+       输出结果类似
+      </para>
+      <screen>
+  	<![CDATA[
 funclist.txt size 44686
 funcsummary.txt size 267625
 quickref.txt size 137820
-
-*/
-?>
 ]]>
-      </programlisting>
+      </screen>
      </example>
     </para>
-
     &note.no-remote;
-
     <para>
      参见
      <function>opendir</function>，<function>readdir</function>，<function>closedir</function>
