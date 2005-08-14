@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.3 $ -->
-<!-- $Author: dallas $ -->
-<!-- EN-Revision: 1.5 Maintainer: dallas Status: ready -->
+<!-- $Revision: 1.4 $ -->
+<!-- $Author: lm92 $ -->
+<!-- EN-Revision: 1.9 Maintainer: dallas Status: ready -->
   <refentry id="function.umask">
    <refnamediv>
     <refname>umask</refname>
@@ -14,12 +14,39 @@
       <methodparam choice="opt"><type>int</type><parameter>mask</parameter></methodparam>
      </methodsynopsis>
     <para>
-     <function>umask</function> 设定 PHP 的 umask 为掩码 &amp; 0777 并返回原来的
+     <function>umask</function> 设定 PHP 的  <parameter>mask</parameter>
+     为掩码 &amp; 0777 并返回原来的
      umask。当 PHP 被作为服务器模块使用时，在每个请求结束后 umask
      会被恢复。
     </para>
     <para>
      无参数调用 <function>umask</function> 会返回当前的 umask。
+    </para>
+    <note>
+     <para>
+      在多线程的服务器上尽量避免使用这个函数。创建文件后要改变其权限最好还是使用
+      <function>chmod</function>。使用 <function>umask</function>
+      会导致并发程序和服务器发生不可预知的情况，因为它们是使用相同的 umask 的。
+     </para>
+    </note>
+    <para>
+     <example>
+      <title><function>umask</function> 范例</title>
+      <programlisting role="php">
+<![CDATA[
+<?php
+$old = umask(0);
+chmod("/path/some_dir/some_file.txt", 0755);
+umask($old);
+ 
+// Checking
+if ($old != umask()) {
+    die('An error occured while changing back the umask');
+}
+?>
+]]>
+      </programlisting>
+     </example>
     </para>
    </refsect1>
   </refentry>
