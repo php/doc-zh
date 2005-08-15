@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.11 $ -->
-<!-- $Author: gregory $ -->
-<!-- EN-Revision: 1.65 Maintainer: Gregory Status: ready -->
+<!-- $Revision: 1.12 $ -->
+<!-- $Author: dallas $ -->
+<!-- EN-Revision: 1.85 Maintainer: Gregory Status: ready -->
+<!-- CREDITS: dallas -->
  <chapter id="features.file-upload">
   <title>文件上传处理</title>
 
@@ -9,57 +10,85 @@
    <title>POST 方法上传</title>
 
    <simpara>
-    PHP 能够接受任何来自符合 RFC-1867 标准的浏览器（包括 Netscape Navigator 3 及更高版本，Microsoft Internet Explorer 3 加微软补丁，或者更高版本）上传的文件。PHP 的这种特性使得我们既可以上传文本文件，也可以上传二进制文件。利用 PHP 的认证和文件操作函数，您就可以控制谁有上传的权限，以及在文件上传后进行哪些处理。
+    本特性可以使用户上传文本和二进制文件。用 PHP
+    的认证和文件操作函数，可以完全控制允许哪些人上传以及文件上传后怎样处理。
+   </simpara>
+   <simpara>
+    PHP 能够接受任何来自符合 RFC-1867 标准的浏览器（包括
+    <productname>Netscape Navigator 3</productname> 及更高版本，打了补丁的
+    <productname>Microsoft Internet Explorer 3</productname> 或者更高版本）上传的文件。
    </simpara>
    <note>
     <title>相关的设置</title>
     <para>
-	 请参阅 &php.ini; 的 <link linkend="ini.file-uploads">file_uploads</link>、
-     <link linkend="ini.upload-max-filesize">upload_max_filesize</link>、<link linkend="ini.upload-tmp-dir">upload_tmp_dir</link> 以及 <link linkend="ini.post-max-size">post_max_size</link> 设置选项。
+     请参阅 &php.ini; 的 <link
+     linkend="ini.file-uploads">file_uploads</link>，<link
+     linkend="ini.upload-max-filesize">upload_max_filesize</link>，<link
+     linkend="ini.upload-tmp-dir">upload_tmp_dir</link><link
+     linkend="ini.post-max-size">post_max_size</link>
+     以及 <link linkend="ini.max-input-time">max_input_time</link> 设置选项。
     </para>
    </note>
    <para>
-    请注意 PHP 也支持 PUT 方法的文件上传，Netscape Composer 和 W3C 的 Amaya 客户端使用这种方法。请参阅 <link linkend="features.file-upload.put-method">PUT 方法支持</link>以获取更多信息。
-   </para>
-   <para>
-    您可以如下建立一个特殊的表单来支持文件上传：
+    请注意 PHP 也支持 PUT 方法的文件上传，<productname>Netscape Composer</productname>
+    和 W3C 的 <productname>Amaya</productname> 客户端使用这种方法。请参阅
+    <link linkend="features.file-upload.put-method">PUT 方法支持</link>以获取更多信息。
    </para>
    <para>
     <example>
      <title>文件上传表单</title>
+     <para>
+      可以如下建立一个特殊的表单来支持文件上传：
+     </para>
      <programlisting role="html">
+     <!-- The HTML comments in this example code are stripped.
+     This needs to be fixed in livedocs. -->
 <![CDATA[
-<form enctype="multipart/form-data" action="_URL_" method="POST">
-<input type="hidden" name="MAX_FILE_SIZE" value="30000">
-Send this file: <input name="userfile" type="file">
-<input type="submit" value="Send File">
+<!-- The data encoding type, enctype, MUST be specified as below -->
+<form enctype="multipart/form-data" action="__URL__" method="POST">
+    <!-- MAX_FILE_SIZE must precede the file input field -->
+    <input type="hidden" name="MAX_FILE_SIZE" value="30000" />
+    <!-- Name of input element determines name in $_FILES array -->
+    Send this file: <input name="userfile" type="file" />
+    <input type="submit" value="Send File" />
 </form>
 ]]>
      </programlisting>
+     <para>
+      以上范例中的 <literal>__URL__</literal> 应该被换掉，指向一个真实的 PHP 文件。
+     </para>
+     <para>
+      <literal>MAX_FILE_SIZE</literal>
+      隐藏字段（单位为字节）必须先于文件输入字段，其值为接收文件的最大尺寸。这是对浏览器的一个建议，PHP
+      也会检查此项。在浏览器端可以简单绕过此设置，因此不要指望用此特性来阻挡大文件。实际上，PHP
+      设置中的上传文件最大值是不会失效的。但是最好还是在表单中加上此项目，因为它可以避免用户在花时间等待上传大文件之后才发现文件过大上传失败的麻烦。
+     </para>
     </example>
    </para>
+
+   <note>
+    <para>
+     要确保文件上传表单的属性是
+     <literal>enctype="multipart/form-data"</literal>，否则文件上传不了。
+    </para>
+   </note>
+
    <para>
-    以上范例中的“_URL_”应该替换成指向一个 PHP 文件的真实 URL。MAX_FILE_SIZE 隐藏域（单位为字节）必须先于文件输入域，其值为接收文件的最大尺寸。同时，要保证您的文件上传表单中要有 <literal>enctype="multipart/form-data"</literal>，否则文件上传将不能工作。
-    <warning>
-     <para>
-	  MAX_FILE_SIZE 的值只是对浏览器的一个建议，实际上它可以被简单的绕过。因此不要把对浏览器的限制寄希望于该值。实际上，PHP
-      设置中的上传文件最大值，是不会失效的。但是最好还是在表单中加上
-      MAX_FILE_SIZE，因为它可以避免用户在花时间等待上传大文件之后才发现该文件太大了的麻烦。
-     </para>
-    </warning>
+    全局变量 <link linkend="reserved.variables.files">$_FILES</link>
+    自 PHP 4.1.0 起存在（在更早的版本中用
+    <varname>$HTTP_POST_FILES</varname> 替代）。此数组包含有所有上传的文件信息。
    </para>
 
    <para>
-    为上传文件定义的变量会根据 PHP 的版本及设置的不同而不同。<link linkend="language.variables.superglobals">自动全局变量</link> <link linkend="reserved.variables.files">$_FILES</link> 从 PHP 4.1.0 版本开始被支持。在这之前，从 4.0.0 版本开始，PHP 支持 <varname>$HTTP_POST_FILES</varname> 数组。这些数组将包含所有关于您上传的文件的信息，其中，我们推荐您使用 <varname>$_FILES</varname>。如果 PHP 的设置选项 <link linkend="ini.register-globals">register_globals</link> 为 <emphasis>on</emphasis>，则相关的变量名将也会存在。从 PHP 4.2.0 版本开始，<link linkend="ini.register-globals">register_globals</link> 的默认值被设为 <emphasis>off</emphasis>。
-   </para>
-   <para>
-    以上范例中 <link linkend="reserved.variables.files">$_FILES</link> 数组的内容如下所示。我们假设文件上传字段的名称如上例所示，为 <emphasis>userfile</emphasis>。名称可随意命名。
+    以上范例中 <link linkend="reserved.variables.files">$_FILES</link>
+    数组的内容如下所示。我们假设文件上传字段的名称如上例所示，为
+    <emphasis>userfile</emphasis>。名称可随意命名。
     <variablelist>
      <varlistentry>
       <term><varname>$_FILES['userfile']['name']</varname></term>
       <listitem>
        <para>
-	    客户端机器文件的原名称。
+        客户端机器文件的原名称。
        </para>
       </listitem>
      </varlistentry>
@@ -67,7 +96,7 @@ Send this file: <input name="userfile" type="file">
       <term><varname>$_FILES['userfile']['type']</varname></term>
       <listitem>
        <para>
-	    文件的 MIME 类型，需要浏览器提供该信息的支持，例如“<literal>image/gif</literal>”。
+        文件的 MIME 类型，需要浏览器提供该信息的支持，例如“<literal>image/gif</literal>”。
         </para>
       </listitem>
      </varlistentry>
@@ -75,7 +104,7 @@ Send this file: <input name="userfile" type="file">
       <term><varname>$_FILES['userfile']['size']</varname></term>
       <listitem>
        <para>
-	    已上传文件的大小，单位为字节。
+        已上传文件的大小，单位为字节。
        </para>
       </listitem>
      </varlistentry>
@@ -83,7 +112,7 @@ Send this file: <input name="userfile" type="file">
       <term><varname>$_FILES['userfile']['tmp_name']</varname></term>
       <listitem>
        <para>
-	    文件被上传后在服务端储存的临时文件名。
+        文件被上传后在服务端储存的临时文件名。
        </para>
       </listitem>
      </varlistentry>
@@ -91,22 +120,22 @@ Send this file: <input name="userfile" type="file">
       <term><varname>$_FILES['userfile']['error']</varname></term>
       <listitem>
        <para>
-	    和该文件上传相关的<link linkend="features.file-upload.errors">错误代码</link>。<emphasis>['error']</emphasis> 是在 PHP 4.2.0 版本中增加的。
+        和该文件上传相关的<link
+        linkend="features.file-upload.errors">错误代码</link>。此项目是在
+        PHP 4.2.0 版本中增加的。
        </para>
       </listitem>
      </varlistentry>
     </variablelist>
    </para>
-   <note>
-    <para>
-	 在 PHP 4.1.0 版本以前该数组的名称为 <varname>$HTTP_POST_FILES</varname>，它并不像 <varname>$_FILES</varname> 一样是<link linkend="language.variables.superglobals">自动全局变量</link>。PHP 3 不支持 <varname>$HTTP_POST_FILES</varname> 数组。
-    </para>
-   </note>
+
    <para>
-    当 &php.ini; 中的 <link linkend="ini.register-globals">register_globals</link> 被设置为 <emphasis>on</emphasis> 时，您可以使用更多的变量。例如，<varname>$userfile_name</varname> 等价于 <varname>$_FILES['userfile']['name']</varname>，<varname>$userfile_type</varname> 等价于 <varname>$_FILES['userfile']['type']</varname> 等。请记住从 PHP 4.2.0 开始，<link linkend="ini.register-globals">register_globals</link> 的默认值为 <literal>off</literal>，因此我们建议您不要依赖于改设置项而使用刚刚提到的那些附加变量。
-   </para>
-   <para>
-    文件被上传后，默认地会被储存到服务端的默认临时目录中，除非您将 &php.ini; 中的 <link linkend="ini.upload-tmp-dir">upload_tmp_dir</link> 设置为了其它的路径。服务端的默认临时目录可以通过更改 PHP 运行环境的环境变量 <envar>TMPDIR</envar> 来重新设置，但是在 PHP 脚本内部通过运行 <function>putenv</function> 函数来设置是不起作用的。该环境变量也可以用来确认其它的操作也是在上传的文件上进行的。
+    文件被上传后，默认地会被储存到服务端的默认临时目录中，除非
+    &php.ini; 中的 <link linkend="ini.upload-tmp-dir">upload_tmp_dir</link>
+    设置为其它的路径。服务端的默认临时目录可以通过更改 PHP
+    运行环境的环境变量 <envar>TMPDIR</envar> 来重新设置，但是在
+    PHP 脚本内部通过运行 <function>putenv</function>
+    函数来设置是不起作用的。该环境变量也可以用来确认其它的操作也是在上传的文件上进行的。
     <example>
      <title>使文件上传生效</title>
      <para>
@@ -115,20 +144,24 @@ Send this file: <input name="userfile" type="file">
      <programlisting role="php">
 <![CDATA[
 <?php
-// 在 4.1.0 以前的 PHP 中，需要用 $HTTP_POST_FILES 代替 $_FILES。
-// 在 4.0.3 以前的 PHP 中，需要用 copy() 和 is_uploaded_file() 来代替 move_uploaded_file()。
+// In PHP versions earlier than 4.1.0, $HTTP_POST_FILES should be used instead
+// of $_FILES.
 
 $uploaddir = '/var/www/uploads/';
-$uploadfile = $uploaddir. $_FILES['userfile']['name'];
-print "<pre>";
-if (move_uploaded_file($_FILES['userfile']['tmp_name'], $uploaddir . $_FILES['userfile']['name'])) {
-    print "File is valid, and was successfully uploaded.  Here's some more debugging info:\n";
-    print_r($_FILES);
+$uploadfile = $uploaddir . basename($_FILES['userfile']['name']);
+
+echo '<pre>';
+if (move_uploaded_file($_FILES['userfile']['tmp_name'], $uploadfile)) {
+    echo "File is valid, and was successfully uploaded.\n";
 } else {
-    print "Possible file upload attack!  Here's some debugging info:\n";
-    print_r($_FILES);
+    echo "Possible file upload attack!\n";
 }
+
+echo 'Here is some more debugging info:';
+print_r($_FILES);
+
 print "</pre>";
+
 ?>
 ]]>
      </programlisting>
@@ -139,58 +172,110 @@ print "</pre>";
    </simpara>
    <simpara>
     如果表单中没有选择上传的文件，则 PHP 变量
-    $_FILES['userfile']['size'] 的值将为 0，$_FILES['userfile']['tmp_name']
-    将为 none。
+    <varname>$_FILES['userfile']['size']</varname> 的值将为
+    0，<varname>$_FILES['userfile']['tmp_name']</varname> 将为空。
    </simpara>
    <simpara>
     如果该文件没有被移动到其它地方也没有被改名，则该文件将在表单请求结束时被删除。
    </simpara>
+   <example>
+    <title>上传一组文件</title>
+    <para>
+     PHP 的 <link linkend="faq.html.arrays">HTML 数组特性</link>甚至支持文件类型。
+    </para>
+    <programlisting role="html">
+<![CDATA[
+<form action="" method="post" enctype="multipart/form-data">
+<p>Pictures:
+<input type="file" name="pictures[]" />
+<input type="file" name="pictures[]" />
+<input type="file" name="pictures[]" />
+<input type="submit" value="Send" />
+</p>
+</form>
+]]>
+    </programlisting>
+    <programlisting role="php">
+<![CDATA[
+<?php
+foreach ($_FILES["pictures"]["error"] as $key => $error) {
+    if ($error == UPLOAD_ERR_OK) {
+        $tmp_name = $_FILES["pictures"]["tmp_name"][$key];
+        $name = $_FILES["pictures"]["name"][$key];
+        move_uploaded_file($tmp_name, "data/$name");
+    }
+}
+?>
+]]>
+    </programlisting>
+   </example>
   </sect1>
 
   <sect1 id="features.file-upload.errors">
    <title>关于错误信息的解释</title>
    <simpara>
-    从 PHP 4.2.0 开始，PHP 将随文件信息数组一起返回一个对应的错误代码。该代码可以在文件上传时生成的文件数组中的 <emphasis>['error']</emphasis> 字段中被找到，也就是 <varname>$_FILES['userfile']['error']</varname>。
+    从 PHP 4.2.0 开始，PHP
+    将随文件信息数组一起返回一个对应的错误代码。该代码可以在文件上传时生成的文件数组中的
+    <literal>error</literal> 字段中被找到，也就是
+    <varname>$_FILES['userfile']['error']</varname>。
    </simpara>
    <para>
     <variablelist>
      <varlistentry>
-      <term><varname>UPLOAD_ERR_OK</varname></term>
+      <term><constant>UPLOAD_ERR_OK</constant></term>
       <listitem>
        <para>
-        值：0; 没有错误发生，文件上传成功。
+        其值为 0，没有错误发生，文件上传成功。
        </para>
       </listitem>
      </varlistentry>
      <varlistentry>
-      <term><varname>UPLOAD_ERR_INI_SIZE</varname></term>
+      <term><constant>UPLOAD_ERR_INI_SIZE</constant></term>
       <listitem>
        <para>
-        值：1; 上传的文件超过了 &php.ini; 中 <link linkend="ini.upload-max-filesize">upload_max_filesize</link> 选项限制的值。
+        其值为 1，上传的文件超过了 &php.ini; 中
+        <link linkend="ini.upload-max-filesize">upload_max_filesize</link> 选项限制的值。
        </para>
       </listitem>
      </varlistentry>
      <varlistentry>
-      <term><varname>UPLOAD_ERR_FORM_SIZE</varname></term>
+      <term><constant>UPLOAD_ERR_FORM_SIZE</constant></term>
       <listitem>
        <para>
-        值：2; 上传文件的大小超过了 HTML 表单中 <emphasis>MAX_FILE_SIZE</emphasis> 选项指定的值。
+        其值为 2，上传文件的大小超过了 HTML 表单中
+        <emphasis>MAX_FILE_SIZE</emphasis> 选项指定的值。
        </para>
       </listitem>
      </varlistentry>
      <varlistentry>
-      <term><varname>UPLOAD_ERR_PARTIAL</varname></term>
+      <term><constant>UPLOAD_ERR_PARTIAL</constant></term>
       <listitem>
        <para>
-        值：3; 文件只有部分被上传。
+        其值为 3，文件只有部分被上传。
        </para>
       </listitem>
      </varlistentry>
      <varlistentry>
-      <term><varname>UPLOAD_ERR_NO_FILE</varname></term>
+      <term><constant>UPLOAD_ERR_NO_FILE</constant></term>
       <listitem>
        <para>
-        值：4; 没有文件被上传。
+        其值为 4，没有文件被上传。
+       </para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><constant>UPLOAD_ERR_NO_TMP_DIR</constant></term>
+      <listitem>
+       <para>
+        其值为 6，找不到临时文件夹。PHP 4.3.10 和 PHP 5.0.3 引进。
+       </para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><constant>UPLOAD_ERR_CANT_WRITE</constant></term>
+      <listitem>
+       <para>
+        其值为 7，文件写入失败。PHP 5.1.0 引进。
        </para>
       </listitem>
      </varlistentry>
@@ -198,7 +283,7 @@ print "</pre>";
    </para>
    <note>
     <para>
-	 这些在 PHP 4.3.0 之后变成了 PHP 常量。
+     这些在 PHP 4.3.0 之后变成了 PHP 常量。
     </para>
    </note>
   </sect1>
@@ -206,44 +291,70 @@ print "</pre>";
   <sect1 id="features.file-upload.common-pitfalls">
    <title>一些注意事项</title>
    <simpara>
-    对 <literal>MAX_FILE_SIZE</literal> 设置的值，不能大于 ini 设置中 <link linkend="ini.upload-max-filesize">upload_max_filesize</link> 选项设置的值。其默认值为 2M 字节。
+    对 <literal>MAX_FILE_SIZE</literal> 设置的值，不能大于 ini
+    设置中 <link linkend="ini.upload-max-filesize">upload_max_filesize</link>
+    选项设置的值。其默认值为 2M 字节。
    </simpara>
    <simpara>
-    如果内存限制设置被激活，您可能需要将 <link linkend="ini.memory-limit">memory_limit</link> 设置的更大些，请确认 <link linkend="ini.memory-limit">memory_limit</link> 的设置足够的大。
+    如果内存限制设置被激活，可能需要将
+    <link linkend="ini.memory-limit">memory_limit</link> 设置的更大些，请确认
+    <link linkend="ini.memory-limit">memory_limit</link> 的设置足够的大。
    </simpara>
    <simpara>
-    如果 <link linkend="ini.max-execution-time">max_execution_time</link> 设置的值太小，脚本运行的时间可能会超过该设置。因此，也请保证 <literal>max_execution_time</literal> 足够的大。
+    如果 <link linkend="ini.max-execution-time">max_execution_time</link>
+    设置的值太小，脚本运行的时间可能会超过该设置。因此，也请保证
+    <literal>max_execution_time</literal> 足够的大。
    </simpara>
    <note>
     <simpara>
-     <link linkend="ini.max-execution-time">max_execution_time</link> 仅仅只影响脚本本身运行地时间。任何其它花费在脚本运行之外的时间，诸如用函数 <function>system</function> 对系统的调用、<function>sleep</function> 函数的使用、数据库查询、文件上传等，在计算脚本运行的最大时间时都不包括在内。
+     <link linkend="ini.max-execution-time">max_execution_time</link>
+     仅仅只影响脚本本身运行地时间。任何其它花费在脚本运行之外的时间，诸如用函数
+     <function>system</function> 对系统的调用、<function>sleep</function>
+     函数的使用、数据库查询、文件上传等，在计算脚本运行的最大时间时都不包括在内。
     </simpara>
    </note>
+   <warning>
+    <simpara>
+     <link linkend="ini.max-input-time">max_input_time</link>
+     以秒为单位设定了脚本接收输入的最大时间，包括文件上传。对于较大或多个文件，或者用户的网速较慢时，可能会超过默认的
+     <literal>60 秒</literal>。
+    </simpara>
+   </warning>
    <simpara>
-    如果 <link linkend="ini.post-max-size">post_max_size</link> 设置的值太小，则较大的文件会无法被上传。因此，请保证 <literal>post_max_size</literal> 的值足够的大。
+    如果 <link linkend="ini.post-max-size">post_max_size</link>
+    设置的值太小，则较大的文件会无法被上传。因此，请保证
+    <literal>post_max_size</literal> 的值足够的大。
    </simpara>
    <simpara>
     不使您操作的文件有效化，可能意味着用户能够访问其它目录下的敏感信息。
    </simpara>
    <simpara>
-    请注意 CERN httpd 似乎会丢弃它从客户端获得的 content-type mime 头信息中第一个空格后所有的内容，基于这一点，CERN httpd 不支持文件上传特性。
+    请注意 <productname>CERN httpd</productname> 似乎会丢弃它从客户端获得的
+    content-type mime
+    头信息中第一个空格后所有的内容，基于这一点，<productname>CERN httpd</productname>
+    不支持文件上传特性。
    </simpara>
    <simpara>
     鉴于文件路径的表示方法有很多种，我们无法确保用使用各种外语的文件名（尤其是包含空格的）能够被正确的处理。
+   </simpara>
+   <simpara>
+    开发人员不应将普通的输入字段和文件上传的字段混用同一个表单变量（例如都用
+    <literal>foo[]</literal>）。
    </simpara>
   </sect1>
 
   <sect1 id="features.file-upload.multiple">
    <title>上传多个文件</title>
    <simpara>
-    您可以对 <literal>input</literal> 域使用不同的 <literal>name</literal> 来上传多个文件。
+    可以对 <literal>input</literal> 域使用不同的 <literal>name</literal> 来上传多个文件。
    </simpara>
    <simpara>
-    PHP 支持同时上传多个文件并将它们的信息自动以数组的形式组织。要完成这项功能，您需要在 HTML 表单中对文件上传域使用类似于多下拉菜单和复选框的数组名称来提交。
+    PHP 支持同时上传多个文件并将它们的信息自动以数组的形式组织。要完成这项功能，需要在
+    HTML 表单中对文件上传域使用类似于多下拉菜单和复选框的数组名称来提交。
    </simpara>
    <note>
     <para>
-	 对多文件上传的支持是在 3.0.10 版本添加的。
+     对多文件上传的支持是在 PHP 3.0.10 版本添加的。
     </para>
    </note>
    <para>
@@ -251,32 +362,45 @@ print "</pre>";
      <title>上传多个文件</title>
      <programlisting role="html">
 <![CDATA[
-<form action="file-upload.php" method="POST" enctype="multipart/form-data">
-  Send these files:<br>
-  <input name="userfile[]" type="file"><br>
-  <input name="userfile[]" type="file"><br>
-  <input type="submit" value="Send files">
+<form action="file-upload.php" method="post" enctype="multipart/form-data">
+  Send these files:<br />
+  <input name="userfile[]" type="file" /><br />
+  <input name="userfile[]" type="file" /><br />
+  <input type="submit" value="Send files" />
 </form>
 ]]>
      </programlisting>
     </example>
    </para>
    <simpara>
-    当以上表单被提交后，数组 <varname>$_FILES['userfile']</varname>、<varname>$_FILES['userfile']['name']</varname> 和 <varname>$_FILES['userfile']['size']</varname> 将被初始化（在 PHP 4.1.0 以前版本是 <varname>$HTTP_POST_FILES</varname>。）如果 <literal>register_globals</literal> 的设置为 on，则和文件上传相关的全局变量也将被初始化。所有这些提交的信息都将被储存到以数字为索引的数组中。
+    当以上表单被提交后，数组
+    <varname>$_FILES['userfile']</varname>，<varname>$_FILES['userfile']['name']</varname>
+    和 <varname>$_FILES['userfile']['size']</varname> 将被初始化（在
+    PHP 4.1.0 以前版本是 <varname>$HTTP_POST_FILES</varname>）。如果
+    <link linkend="ini.register-globals">register_globals</link>
+    的设置为 on，则和文件上传相关的全局变量也将被初始化。所有这些提交的信息都将被储存到以数字为索引的数组中。
    </simpara>
    <simpara>
-    例如，假设名为 <filename>/home/test/review.html</filename> 和 <filename>/home/test/xwp.out</filename> 的文件被提交，则 <varname>$_FILES['userfile']['name'][0]</varname> 将包含文件 <filename>review.html</filename> 的名称，而 <varname>$_FILES['userfile']['name'][1]</varname> 则将包含文件 <filename>xwp.out</filename> 的名称。类似的，<varname>$_FILES['userfile']['size'][0]</varname> 将包含文件 <filename>review.html</filename> 的大小，依此类推。
+    例如，假设名为 <filename>/home/test/review.html</filename> 和
+    <filename>/home/test/xwp.out</filename> 的文件被提交，则
+    <varname>$_FILES['userfile']['name'][0]</varname> 将包含文件
+    <filename>review.html</filename> 的名称，而
+    <varname>$_FILES['userfile']['name'][1]</varname> 则将包含文件
+    <filename>xwp.out</filename>
+    的名称。类似的，<varname>$_FILES['userfile']['size'][0]</varname>
+    将包含文件 <filename>review.html</filename> 的大小，依此类推。
    </simpara>
    <simpara>
-    <varname>$_FILES['userfile']['name'][0]</varname>、<varname>$_FILES['userfile']['tmp_name'][0]</varname>、<varname>$_FILES['userfile']['size'][0]</varname> 以及
-    <varname>$_FILES['userfile']['type'][0]</varname> 都将被同时设置并有效。
+    <varname>$_FILES['userfile']['name'][0]</varname>，<varname>$_FILES['userfile']['tmp_name'][0]</varname>，<varname>$_FILES['userfile']['size'][0]</varname>
+    以及 <varname>$_FILES['userfile']['type'][0]</varname> 都将被同时设置并有效。
    </simpara>
   </sect1>
 
   <sect1 id="features.file-upload.put-method">
    <title>对 PUT 方法的支持</title>
     <simpara>
-	  PHP 3 和 PHP 4 对 PUT 方法的支持有所不同。在 PHP 4 中，我们必须使用标准的输入流来读取一个 HTTP PUT 的内容。
+     PHP 3 和 PHP 4 对 PUT 方法的支持有所不同。在 PHP 4
+     中，必须使用标准的输入流来读取一个 HTTP PUT 的内容。
     </simpara>
     <para>
      <example>
@@ -285,15 +409,15 @@ print "</pre>";
 <![CDATA[
 <?php
 /* PUT data comes in on the stdin stream */
-$putdata = fopen("php://stdin","r");
+$putdata = fopen("php://stdin", "r");
 
 /* Open a file for writing */
-$fp = fopen("myputfile.ext","w");
+$fp = fopen("myputfile.ext", "w");
 
-/* Read the data 1kb at a time
- and write to the file */
-while ($data = fread($putdata,1024))
-fwrite($fp,$data);
+/* Read the data 1 KB at a time
+   and write to the file */
+while ($data = fread($putdata, 1024))
+  fwrite($fp, $data);
 
 /* Close the streams */
 fclose($fp);
@@ -310,36 +434,57 @@ fclose($putdata);
     </note>
 
    <para>
-    PHP 提供对诸如  Netscape Composer 和 W3C Amaya 等客户端使用的 HTTP PUT 方法的支持。PUT 请求比文件上传要简单的多，它们一般的形式为：
+    PHP 提供对诸如 <productname>Netscape Composer</productname>
+    和 W3C <productname>Amaya</productname> 等客户端使用的
+    HTTP PUT 方法的支持。PUT 请求比文件上传要简单的多，它们一般的形式为：
     <informalexample>
-     <programlisting>
+     <programlisting role="HTTP">
+<![CDATA[
 PUT /path/filename.html HTTP/1.1
+]]>
      </programlisting>
     </informalexample>
    </para>
    <para>
-    这通常意味着远程客户端会将其中的 /path/filename.html 存储到您的 WEB 目录树。让 Apache 或者 PHP 自动允许所有人覆盖您 WEB 目录数下的任何文件显然是很不明智的。因此，要处理类似的请求，您必须先告诉您的 WEB 服务器您需要用特定的 PHP 脚本来处理该请求。在 Apache 下，您可以用 <emphasis>Script</emphasis> 选项来设置。它可以被放置到 Apache 配置文件中几乎所有的位置。通常我们把它放置在 &lt;Directory&gt; 区域或者 &lt;Virtualhost&gt; 区域。您可以用如下一行来完成该设置：
+    这通常意味着远程客户端会将其中的 <filename>/path/filename.html</filename>
+    存储到 WEB 目录树。让 Apache 或者 PHP 自动允许所有人覆盖
+    WEB 目录数下的任何文件显然是很不明智的。因此，要处理类似的请求，必须先告诉
+    WEB 服务器需要用特定的 PHP 脚本来处理该请求。在 Apache 下，可以用
+    <emphasis>Script</emphasis> 选项来设置。它可以被放置到
+    Apache 配置文件中几乎所有的位置。通常我们把它放置在
+    &lt;Directory&gt; 区域或者 &lt;Virtualhost&gt; 区域。可以用如下一行来完成该设置：
     <informalexample>
      <programlisting>
+<![CDATA[
 Script PUT /put.php
+]]>
      </programlisting>
     </informalexample>
    </para>
    <simpara>
-    这将告诉 Apache 将所有对 URIs 的 PUT 请求全部发送到 put.php 脚本，这些 URIs 必须和 PUT 命令中的内容相匹配。当然，这是建立在您的 PHP 支持 .php 扩展名，并且 PHP 已经在运行的假设之上。
+    这将告诉 Apache 将所有对 URI 的 PUT 请求全部发送到 put.php 脚本，这些
+    URI 必须和 PUT 命令中的内容相匹配。当然，这是建立在 PHP 支持
+    .php 扩展名，并且 PHP 已经在运行的假设之上。
    </simpara>
    <simpara>
-    在您的 put.php 文件中，您可以作如下操作：
+    在 put.php 文件中，可以作如下操作：
    </simpara>
    <para>
     <informalexample><programlisting role="php">
 <![CDATA[
-<?php copy($PHP_UPLOADED_FILE_NAME,$DOCUMENT_ROOT.$REQUEST_URI); ?>
+<?php copy($PHP_UPLOADED_FILE_NAME, $DOCUMENT_ROOT . $REQUEST_URI); ?>
 ]]>
     </programlisting></informalexample>
    </para>
    <simpara>
-    这将会把文件拷贝到远程客户端请求的位置。您可能希望在文件拷贝之前进行一些检查或者对用户认证之类的操作。这里唯一的问题是，当 PHP 接受到 PUT 方法的请求时，它将会把上传的文件储存到和其它用 <link linkend="features.file-upload.post-method">POST 方法</link>处理过的文件相同的临时目录。在请求结束时，临时文件将被删除。因此，您用来处理 PUT 的 PHP 脚本必须将该文件拷贝到其它的地方。该临时文件的文件名被储存在变量 $PHP_PUT_FILENAME 中，您也可以通过 $REQUEST_URI 变量获得建议的目标文件名（在非 Apache WEB 服务器上可能会有较大的变化）。该目标文件名是由远程客户端指定的。您也可以不听从改客户端的信息，而把所有上传的文件存储到一个特殊的上传目录下。
+    这将会把文件拷贝到远程客户端请求的位置。可能希望在文件拷贝之前进行一些检查或者对用户认证之类的操作。这里唯一的问题是，当
+    PHP 接受到 PUT 方法的请求时，它将会把上传的文件储存到和其它用
+    <link linkend="features.file-upload.post-method">POST
+    方法</link>处理过的文件相同的临时目录。在请求结束时，临时文件将被删除。因此，用来处理
+    PUT 的 PHP 脚本必须将该文件拷贝到其它的地方。该临时文件的文件名被储存在变量
+    <varname>$PHP_PUT_FILENAME</varname> 中，也可以通过
+    <varname>$REQUEST_URI</varname> 变量获得建议的目标文件名（在非
+    Apache WEB 服务器上可能会有较大的变化）。该目标文件名是由远程客户端指定的。也可以不听从改客户端的信息，而把所有上传的文件存储到一个特殊的上传目录下。
    </simpara>
   </sect1>
 
