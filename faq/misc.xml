@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.7 $ -->
+<!-- $Revision: 1.8 $ -->
 <!-- $Author: dallas $ -->
-<!-- EN-Revision:1.24 Maintainer: dallas Status: ready -->
+<!-- EN-Revision:1.25 Maintainer: dallas Status: ready -->
  <chapter id="faq.misc">
   <title>杂类问题</title>
   <titleabbrev>杂类问题</titleabbrev>
 
    <para>
-    有些问题没法归到其它类中，你可以在这里发现它们。
+    有些问题没法归到其它类中，可以在这里找到。
    </para>
 
   <qandaset>
@@ -19,7 +19,8 @@
     </question>
     <answer>
      <para>
-      如果你没有能处理 bz2 文件的压缩工具，从 Redhat <ulink url="&url.bzip2;">下载</ulink>一个命令行工具（进一步信息见下面）。
+      如果你没有能处理 bz2 文件的压缩工具，从 Redhat
+      <ulink url="&url.bzip2;">下载</ulink>一个命令行工具（进一步信息见下面）。
      </para>
      <para>
       如果你不喜欢用命令行工具，你可以试试免费工具例如 <ulink
@@ -28,7 +29,8 @@
       url="&url.7zip;">7-Zip</ulink> 或者 <ulink
       url="&url.quickzip;">Quick Zip</ulink>。如果你有像 <ulink
       url="&url.winrar;">WinRAR</ulink> 或者 <ulink
-      url="&url.powerarchiver;">Power Archiver</ulink> 之类的工具，可以很容易用它解压缩 bz2 文件。如果你用
+      url="&url.powerarchiver;">Power Archiver</ulink>
+      之类的工具，可以很容易用它解压缩 bz2 文件。如果你用
       Total Commander（前身为 Windows Commander），可以从
       <ulink url="&url.wincmd;">Total Commander</ulink> 网站免费得到一个 bz2 插件。
      </para>
@@ -129,24 +131,43 @@ if (!ini_get('register_globals')) {
 ]]>
        </programlisting>
        <para>
-        本例模拟 register_globals Off。
+        本例模拟 register_globals Off。要记住此代码应在脚本最开头的地方调用。
        </para>
        <programlisting role="php">
 <![CDATA[
 <?php
 // Emulate register_globals off
-if (ini_get('register_globals')) {
-    $superglobals = array($_SERVER, $_ENV,
-        $_FILES, $_COOKIE, $_POST, $_GET);
-    if (isset($_SESSION)) {
-        array_unshift($superglobals, $_SESSION);
+function unregister_GLOBALS()
+{
+    if (!ini_get('register_globals')) {
+        return;
     }
-    foreach ($superglobals as $superglobal) {
-        foreach ($superglobal as $global => $value) {
-            unset($GLOBALS[$global]);
+
+    // Might want to change this perhaps to a nicer error
+    if (isset($_REQUEST['GLOBALS'])) {
+        die('GLOBALS overwrite attempt detected');
+    }
+
+    // Variables that shouldn't be unset
+    $noUnset = array('GLOBALS',  '_GET',
+                     '_POST',    '_COOKIE',
+                     '_REQUEST', '_SERVER',
+                     '_ENV',     '_FILES');
+
+    $input = array_merge($_GET,    $_POST,
+                         $_COOKIE, $_SERVER,
+                         $_ENV,    $_FILES,
+                         isset($_SESSION) && is_array($_SESSION) ? $_SESSION : array());
+
+    foreach ($input as $k => $v) {
+        if (!in_array($k, $noUnset) && isset($GLOBALS[$k])) {
+            unset($GLOBALS[$k]);
         }
     }
 }
+
+unregister_GLOBALS();
+
 ?>
 ]]>
        </programlisting>
