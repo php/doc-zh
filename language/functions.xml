@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.19 $ -->
+<!-- $Revision: 1.20 $ -->
 <!-- $Author: dallas $ -->
-<!-- EN-Revision: 1.40 Maintainer: verdana Status: ready -->
-<!-- CREDITS: Gregory -->
+<!-- EN-Revision: 1.59 Maintainer: verdana Status: ready -->
+<!-- CREDITS: Gregory, dallas -->
  <chapter id="functions">
   <title>函数</title>
 
@@ -14,11 +14,11 @@
    </para>
    <para>
     <example>
-     <title>展示函数用途的伪码</title>
+     <title>展示函数用途的伪代码</title>
      <programlisting role="php">
 <![CDATA[
 <?php
-function foo ($arg_1, $arg_2, ..., $arg_n)
+function foo($arg_1, $arg_2, ..., $arg_n)
 {
     echo "Example function.\n";
     return $retval;
@@ -29,21 +29,13 @@ function foo ($arg_1, $arg_2, ..., $arg_n)
     </example>
    </para>
 
-   <!--
-
-    status of func(const $param) ?
-    zend doesn't care at all whether or not you specify it.
-    I've never seen it before... what's its use? (or was...)
-
-    -->
-
    <simpara>
-    任何有效的 PHP 代码都有可能出现在函数内部，甚至包括其它函数和
-    <link linkend="keyword.class">类</link> 定义。
+    任何有效的 PHP 代码都有可能出现在函数内部，甚至包括其它函数和<link
+    linkend="keyword.class">类</link> 定义。
    </simpara>
    <simpara>
-    在 PHP 3 中，函数必须在被调用之前定义。而 PHP 4 则不再有这样的
-    条件。<emphasis>除非</emphasis>函数如以下两个范例中有条件的定义。
+    在 PHP 3 中，函数必须在被调用之前定义。而 PHP 4
+    则不再有这样的条件。<emphasis>除非</emphasis>函数如以下两个范例中有条件的定义。
    </simpara>
    <para>
     如果一个函数以以下两个范例的方式有条件的定义，其定义必须在调用<emphasis>之前</emphasis>完成。
@@ -64,7 +56,7 @@ $makefoo = true;
 bar();
 
 if ($makefoo) {
-  function foo ()
+  function foo()
   {
     echo "I don't exist until program execution reaches me.\n";
   }
@@ -115,8 +107,11 @@ bar();
      </programlisting>
     </example>
    </para>
+   <para>
+    PHP 中的所有函数和类都具有全局域，可以在内部定义外部调用，反之亦然。
+   </para>
    <simpara>
-    PHP 不支持函数重载，可能也不支持取消定义或者重定义已声明的函数。
+    PHP 不支持函数重载，也不可能取消定义或者重定义已声明的函数。
    </simpara>
    <note>
     <simpara>
@@ -124,35 +119,52 @@ bar();
     </simpara>
    </note>
    <simpara>
-    PHP 3 虽然支持默认参数（更多的信息请参照
-    <link linkend="functions.arguments.default">默认参数的值</link>）
-    ，但是却不支持可变的参数个数。
-    PHP 4 支持: 见 <link
-    linkend="functions.variable-arg-list">可变长度的参数列表</link> 和涉及到的相关函数
+    PHP 3 虽然支持默认参数（更多信息请参照<link
+    linkend="functions.arguments.default">默认参数的值</link>），但是却不支持可变的参数个数。PHP 4
+    支持：见<link
+    linkend="functions.variable-arg-list">可变长度的参数列表</link>和涉及到的相关函数
     <function>func_num_args</function>，
-    <function>func_get_arg</function>， 和
+    <function>func_get_arg</function>，以及
     <function>func_get_args</function> 以获取更多的信息。
    </simpara>
 
+   <para>
+    在 PHP 中可以调用递归函数。但是要避免递归函数／方法调用超过
+    100-200 层，因为可能会破坏堆栈从而使当前脚本终止。
+    <example>
+     <title>递归函数</title>
+     <programlisting role="php">
+<![CDATA[
+<?php
+function recursion($a)
+{
+    if ($a < 20) {
+        echo "$a\n";
+        recursion($a + 1);
+    }
+}
+?>
+]]>
+     </programlisting>
+    </example>
+   </para>
   </sect1>
 
   <sect1 id="functions.arguments">
    <title>函数的参数</title>
 
    <simpara>
-    通过参数列表可以传递信息到函数，该列表是以逗号作为分隔符的变量和常量列表。
+    通过参数列表可以传递信息到函数，即以逗号作为分隔符的表达式列表。
    </simpara>
    <para>
-     PHP 支持按值传递参数（默认）,
-     <link linkend="functions.arguments.by-reference">通过引用传递</link>, 和
-     <link linkend="functions.arguments.default">默认参数值</link>.
-     可变长度参数列表仅在 PHP 4 和后续版本中支持；更多信息请参照 <link
-     linkend="functions.variable-arg-list">可变长度参数列表</link>
-     和涉及到的相关函数 <function>func_num_args</function>，
-     <function>func_get_arg</function>, 和
-     <function>func_get_args</function>。
-     PHP 3 中通过传递一个数组参数可以达到类似的效果：
-    </para>
+    PHP 支持按值传递参数（默认），<link
+    linkend="functions.arguments.by-reference">通过引用传递</link>以及<link
+    linkend="functions.arguments.default">默认参数</link>。可变长度参数列表仅在
+    PHP 4 和后续版本中支持；更多信息请参照<link
+    linkend="functions.variable-arg-list">可变长度参数列表</link>和涉及到的相关函数
+    <function>func_num_args</function>，<function>func_get_arg</function> 以及
+    <function>func_get_args</function>。PHP 3 中通过传递一个数组参数可以达到类似的效果：
+   </para>
    <para>
     <example>
      <title>向函数传递数组</title>
@@ -173,13 +185,10 @@ function takes_array($input)
     <title>通过引用传递参数</title>
 
     <simpara>
-     缺省情况下，函数参数通过值传递（因而即使在函数内部改变参数的值，它
-     并不会改变函数外部的值）。如果你希望允许函数修改它的参数值，你必须
-     通过引用传递参数。
+     缺省情况下，函数参数通过值传递（因而即使在函数内部改变参数的值，它并不会改变函数外部的值）。如果希望允许函数修改它的参数值，必须通过引用传递参数。
     </simpara>
     <para>
-     如果想要函数的一个参数总是通过引用传递，你可以在函数定义中该参数的
-     前面预先加上符号（&）：
+     如果想要函数的一个参数总是通过引用传递，你可以在函数定义中该参数的前面预先加上符号（&）：
     </para>
     <para>
      <example>
@@ -214,12 +223,12 @@ echo $str;    // outputs 'This is a string, and something extra.'
       <programlisting role="php">
 <![CDATA[
 <?php
-function makecoffee ($type = "cappuccino")
+function makecoffee($type = "cappuccino")
 {
     return "Making a cup of $type.\n";
 }
-echo makecoffee ();
-echo makecoffee ("espresso");
+echo makecoffee();
+echo makecoffee("espresso");
 ?>
 ]]>
       </programlisting>
@@ -236,12 +245,33 @@ Making a cup of espresso.
      </screen>
     </para>
 
+    <para>
+     PHP 还允许使用数组和特殊类型 NULL 作为默认参数，例如：
+    </para>
+    <para>
+     <example>
+      <title>使用非标量类型作为默认参数</title>
+      <programlisting role="php">
+<![CDATA[
+<?php
+function makecoffee($types = array("cappuccino"), $coffeeMaker = NULL)
+{
+    $device = is_null($coffeeMaker) ? "hands" : $coffeeMaker;
+    return "Making a cup of ".join(", ", $types)." with $device.\n";
+}
+echo makecoffee();
+echo makecoffee(array("cappuccino", "lavazza"), "teapot");
+?>
+]]>
+      </programlisting>
+     </example>
+    </para>
+
     <simpara>
-     默认值必须是常量表达式，不是（比如）变量，类成员，或者函数调用。
+     默认值必须是常量表达式，不是（例如）变量，类成员，或者函数调用。
     </simpara>
     <para>
-     请注意当使用默认参数时，任何默认参数必须放在任何非默认参数的右侧；否则，
-     可能函数将不会按照预期的情况工作。考虑下面的代码片断：
+     请注意当使用默认参数时，任何默认参数必须放在任何非默认参数的右侧；否则，可能函数将不会按照预期的情况工作。考虑下面的代码片断：
     </para>
     <para>
      <example>
@@ -249,12 +279,12 @@ Making a cup of espresso.
       <programlisting role="php">
 <![CDATA[
 <?php
-function makeyogurt ($type = "acidophilus", $flavour)
+function makeyogurt($type = "acidophilus", $flavour)
 {
     return "Making a bowl of $type $flavour.\n";
 }
 
-echo makeyogurt ("raspberry");   // won't work as expected
+echo makeyogurt("raspberry");   // won't work as expected
 ?>
 ]]>
       </programlisting>
@@ -279,12 +309,12 @@ Making a bowl of raspberry .
       <programlisting role="php">
 <![CDATA[
 <?php
-function makeyogurt ($flavour, $type = "acidophilus")
+function makeyogurt($flavour, $type = "acidophilus")
 {
     return "Making a bowl of $type $flavour.\n";
 }
 
-echo makeyogurt ("raspberry");   // works as expected
+echo makeyogurt("raspberry");   // works as expected
 ?>
 ]]>
       </programlisting>
@@ -299,15 +329,21 @@ Making a bowl of acidophilus raspberry.
      </screen>
     </para>
 
+    <note>
+     <simpara>
+      自 PHP 5 起，默认值可以通过引用传递。
+     </simpara>
+    </note>
+
    </sect2>
 
    <sect2 id="functions.variable-arg-list">
     <title>可变长度参数列表</title>
 
     <simpara>
-     PHP 4 已经在用户自定义函数中支持可变长度参数列表。这个真的很简单，
-     使用 <function>func_num_args</function>，<function>func_get_arg</function>，和
-     <function>func_get_args</function> 函数.
+     PHP 4 及更高版本已经在用户自定义函数中支持可变长度参数列表。这个真的很简单，用
+     <function>func_num_args</function>，<function>func_get_arg</function>，和
+     <function>func_get_args</function> 函数。
     </simpara>
 
     <simpara>
@@ -322,9 +358,8 @@ Making a bowl of acidophilus raspberry.
    <title>返回值</title>
 
    <para>
-    值通过使用可选的返回语句返回。任何类型都可以返回，其中包括列表和对象。
-    这导致函数立即结束它的运行，并且将控制权传递回它被调用的行。更多信息
-    请参照 <function>return</function>。
+    值通过使用可选的返回语句返回。任何类型都可以返回，其中包括列表和对象。这导致函数立即结束它的运行，并且将控制权传递回它被调用的行。更多信息见
+    <function>return</function>。
    </para>
    <para>
     <example>
@@ -332,11 +367,11 @@ Making a bowl of acidophilus raspberry.
      <programlisting role="php">
 <![CDATA[
 <?php
-function square ($num)
+function square($num)
 {
     return $num * $num;
 }
-echo square (4);   // outputs '16'.
+echo square(4);   // outputs '16'.
 ?>
 ]]>
      </programlisting>
@@ -392,12 +427,13 @@ $newref =& returns_reference();
    <title>变量函数</title>
 
    <para>
-    PHP 支持变量函数的概念。这意味着如果一个变量名后有圆括号，PHP 将寻找
-    与变量的值相同的函数，并且将尝试执行它。除了别的事情以外，这个可以被
-    用于实现回调函数，函数表等等。
+    PHP 支持变量函数的概念。这意味着如果一个变量名后有圆括号，PHP
+    将寻找与变量的值相同的函数，并且将尝试执行它。除了别的事情以外，这个可以被用于实现回调函数，函数表等等。
     </para>
    <para>
-    变量函数不能用于语言结构，例如 <function>echo</function>、<function>print</function>、<function>unset</function>、<function>isset</function>、<function>empty</function>、<function>include</function>、<function>require</function> 以及类似的语句。您需要使用您自己的外壳函数来将这些结构用作变量函数。
+    变量函数不能用于语言结构，例如
+    <function>echo</function>，<function>print</function>，<function>unset</function>，<function>isset</function>，<function>empty</function>，<function>include</function>，<function>require</function>
+    以及类似的语句。需要使用自己的外壳函数来将这些结构用作变量函数。
    </para>
    <para>
     <example>
@@ -405,14 +441,12 @@ $newref =& returns_reference();
      <programlisting role="php">
 <![CDATA[
 <?php
-function foo()
-{
-    echo "In foo()<br>\n";
+function foo() {
+    echo "In foo()<br />\n";
 }
 
-function bar($arg = '')
-{
-    echo "In bar(); argument was '$arg'.<br>\n";
+function bar($arg = '') {
+    echo "In bar(); argument was '$arg'.<br />\n";
 }
 
 // This is a wrapper function around echo
@@ -435,7 +469,7 @@ $func('test');  // This calls echoit()
     </example>
    </para>
    <para>
-    您还可以利用变量函数的特性来调用一个对象的方法。
+    还可以利用变量函数的特性来调用一个对象的方法。
     <example>
      <title>变量方法范例</title>
      <programlisting role="php">
@@ -443,7 +477,7 @@ $func('test');  // This calls echoit()
 <?php
 class Foo
 {
-    function Var()
+    function Variable()
     {
         $name = 'Bar';
         $this->$name(); // This calls the Bar() method
@@ -456,8 +490,8 @@ class Foo
 }
 
 $foo = new Foo();
-$funcname = "Var";
-$foo->$funcname();   // This calls $foo->Var()
+$funcname = "Variable";
+$foo->$funcname();   // This calls $foo->Variable()
 
 ?>
 ]]>
@@ -465,22 +499,43 @@ $foo->$funcname();   // This calls $foo->Var()
     </example>
    </para>
    <para>
-    请参阅 <function>call_user_func</function>、<link linkend="language.variables.variable">变量变量</link> 和 <function>function_exists</function>。
+    请参阅 <function>call_user_func</function>，<link
+    linkend="language.variables.variable">变量变量</link> 和
+    <function>function_exists</function>。
    </para>
 
   </sect1>
 
 <sect1 id="functions.internal">
-     <title>内部（内建）函数</title>
+     <title>内部（内置）函数</title>
 
      <para>
-      PHP 有很多标准的函数和结构。还有一些函数需要和特定地 PHP 扩展模块一起编译，否则在使用它们的时候就会得到一个致命的“未定义函数”错误。例如，要使用诸如 <function>imagecreatetruecolor</function> 的“<link linkend="ref.image">图像</link>函数”，您需要在编译 PHP 的时候加上 GD 的支持。或者，要使用 <function>mysql_connect</function> 函数，您就需要在编译 PHP 的时候加上 <link linkend="ref.mysql">MySQL</link> 支持。另外还有一些核心函数，例如“<link linkend="ref.strings">字符串函数</link>”和“<link linkend="ref.variables">变量函数</link>”，它们存在于每一个版本的 PHP 中。调用 <function>phpinfo</function> 或者 <function>get_loaded_extensions</function> 可以得知 PHP 加载了那些扩展库。同时还应该注意，很多扩展库默认就是有效的。PHP 手册按照不同的扩展库组织了它们的文档。请参阅“<link linkend="configuration">配置</link>”、“<link linkend="installation">安装</link>”以及独立的扩展库章节以获取有关如何设置 PHP 的信息。
+      PHP 有很多标准的函数和结构。还有一些函数需要和特定地 PHP
+      扩展模块一起编译，否则在使用它们的时候就会得到一个致命的“未定义函数”错误。例如，要使用<link
+      linkend="ref.image">图像</link>函数比如
+      <function>imagecreatetruecolor</function>，需要在编译 PHP 的时候加上
+      <productname>GD</productname> 的支持。或者，要使用
+      <function>mysql_connect</function> 函数，就需要在编译 PHP 的时候加上
+      <link linkend="ref.mysql">MySQL</link> 支持。有很多核心函数已包含在每个版本的
+      PHP 中如<link linkend="ref.strings">字符串</link>和<link
+      linkend="ref.var">变量</link>函数。调用
+      <function>phpinfo</function> 或者 <function>get_loaded_extensions</function>
+      可以得知 PHP 加载了那些扩展库。同时还应该注意，很多扩展库默认就是有效的。PHP
+      手册按照不同的扩展库组织了它们的文档。请参阅<link
+      linkend="configuration">配置</link>，<link
+      linkend="install">安装</link>以及各自的扩展库章节以获取有关如何设置 PHP 的信息。
      </para>
      <para>
-      手册中“<link linkend="about.prototypes">如何阅读函数原型</link>”讲解了如何阅读和理解一个函数的原型。确认一个函数将返回什么，或者函数是否直接作用于传递的参数是很重要得。例如，<function>str_replace</function> 函数将返回修改过的字符串，而 <function>usort</function> 却直接作用于传递的参数变量本身。手册中，每一个函数的页面中都有关于函数参数、行为改变、成功与否的返回值以及使用条件等信息。了解这些重要的（常常是细微的）差别是编写正确的 PHP 代码的关键。
+      手册中<link
+      linkend="about.prototypes">如何阅读函数原型</link>讲解了如何阅读和理解一个函数的原型。确认一个函数将返回什么，或者函数是否直接作用于传递的参数是很重要的。例如，<function>str_replace</function>
+      函数将返回修改过的字符串，而 <function>usort</function>
+      却直接作用于传递的参数变量本身。手册中，每一个函数的页面中都有关于函数参数、行为改变、成功与否的返回值以及使用条件等信息。了解这些重要的（常常是细微的）差别是编写正确的
+      PHP 代码的关键。
      </para>
      <para>
-      请参阅函数 <function>function_exists</function>、<link linkend="funcref">函数的引用</link>、<function>get_extension_funcs</function> 和 <function>dl</function>。
+      参见 <function>function_exists</function>，<link
+      linkend="funcref">函数参考</link>，<function>get_extension_funcs</function>
+      和 <function>dl</function>。
      </para>
     </sect1>
 
