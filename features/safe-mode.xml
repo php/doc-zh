@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="gb2312"?>
 <!-- $Revision: 1.16 $ -->
 <!-- $Author: gregory $ -->
-<!-- EN-Revision: 1.43 Maintainer: thomaslio Status: ready -->
+<!-- EN-Revision: 1.63 Maintainer: thomaslio Status: ready -->
 <!-- CREDITS: Gregory, dallas -->
 <chapter id="features.safe-mode">
  <title>安全模式</title>
@@ -17,12 +17,13 @@
   <para>
    <table>
     <title>保安措施和安全模式配置指令</title>
-    <tgroup cols="3">
+    <tgroup cols="4">
      <thead>
       <row>
        <entry>名称</entry>
        <entry>默认值</entry>
-       <entry>作用范围</entry>
+       <entry>可修改范围</entry>
+       <entry>更新记录</entry>
       </row>
      </thead>
      <tbody>
@@ -30,46 +31,55 @@
        <entry>safe_mode</entry>
        <entry>"0"</entry>
        <entry>PHP_INI_SYSTEM</entry>
+       <entry></entry>
       </row>
       <row>
        <entry>safe_mode_gid</entry>
        <entry>"0"</entry>
        <entry>PHP_INI_SYSTEM</entry>
+       <entry>自 PHP 4.1.0 起可用</entry>
       </row>
       <row>
        <entry>safe_mode_include_dir</entry>
        <entry>NULL</entry>
        <entry>PHP_INI_SYSTEM</entry>
+       <entry>自 PHP 4.1.0 起可用</entry>
       </row>
       <row>
        <entry>safe_mode_exec_dir</entry>
        <entry>""</entry>
        <entry>PHP_INI_SYSTEM</entry>
+       <entry></entry>
       </row>
       <row>
        <entry>safe_mode_allowed_env_vars</entry>
-       <entry>PHP_</entry>
+       <entry>"PHP_"</entry>
        <entry>PHP_INI_SYSTEM</entry>
+       <entry></entry>
       </row>
       <row>
        <entry>safe_mode_protected_env_vars</entry>
-       <entry>LD_LIBRARY_PATH</entry>
+       <entry>"LD_LIBRARY_PATH"</entry>
        <entry>PHP_INI_SYSTEM</entry>
+       <entry></entry>
       </row>
       <row>
        <entry>open_basedir</entry>
        <entry>NULL</entry>
        <entry>PHP_INI_SYSTEM</entry>
+       <entry></entry>
       </row>
       <row>
        <entry>disable_functions</entry>
        <entry>""</entry>
-       <entry>PHP_INI_SYSTEM</entry>
+       <entry>仅 &php.ini;</entry>
+       <entry>自 PHP 4.0.1 起可用</entry>
       </row>
       <row>
        <entry>disable_classes</entry>
        <entry>""</entry>
-       <entry>PHP_INI_SYSTEM</entry>
+       <entry>仅 &php.ini;</entry>
+       <entry>自 PHP 4.3.2 起可用</entry>
       </row>
      </tbody>
     </tgroup>
@@ -89,7 +99,7 @@
      <listitem>
       <para>
        是否启用 PHP 的安全模式。更多信息请阅读<link
-       linkend="security.index">安全</link>一章。
+       linkend="security">安全</link>一章。
       </para>
      </listitem>
     </varlistentry>
@@ -121,10 +131,17 @@
       <simpara>
        从 PHP 4.2.0 开始，本指令可以接受和 <link
        linkend="ini.include-path">include_path</link>
-       指令类似的风格用分号隔开的路径，而不只是一个目录。
+       指令类似的风格用冒号（Windows 中是分号）隔开的路径，而不只是一个目录。
       </simpara>
       <simpara>
-       指定的限制实际上是一个前缀，而非一个目录名。这也就是说“safe_mode_include_dir = /dir/incl”将允许访问“/dir/include”和“/dir/incls”，如果它们存在。如果您希望将访问控制在一个指定的目录，那么请在结尾加上一个斜线，例如：“safe_mode_include_dir = /dir/incl/”。
+       指定的限制实际上是一个前缀，而非一个目录名。这也就是说“safe_mode_include_dir
+       = /dir/incl”将允许访问“/dir/include”和“/dir/incls”，如果它们存在。如果希望将访问控制在一个指定的目录，那么请在结尾加上一个斜线，例如：“safe_mode_include_dir
+       = /dir/incl/”。
+      </simpara>
+      <simpara>
+       如果本指令的值为空，在 PHP 4.2.3 中以及 PHP 4.3.3 起具有不同
+       <literal>UID</literal>/<literal>GID</literal>
+       的文件将不能被包含。在较早版本中，所有文件都能被包含。
       </simpara>
      </listitem>
     </varlistentry>
@@ -136,7 +153,8 @@
      <listitem>
       <para>
        如果 PHP 使用了安全模式，<function>system</function> 和其它<link
-       linkend="ref.exec">执行系统程序的函数</link>将拒绝启动不在此目录中的程序。
+       linkend="ref.exec">程序执行函数</link>将拒绝启动不在此目录中的程序。必须使用
+       <literal>/</literal> 作为目录分隔符，包括 Windows 中。
       </para>
      </listitem>
     </varlistentry>
@@ -186,7 +204,13 @@
       </para>
       <para>
        特殊值 <systemitem class="constant">.</systemitem>
-       指定了存放该脚本的目录将被当做基准目录。
+       指明脚本的工作目录将被作为基准目录。但这有些危险，因为脚本的工作目录可以轻易被
+       <function>chdir</function> 而改变。
+      </para>
+      <para>
+       在 <filename>httpd.conf</filename> 文件中中，open_basedir
+       可以像其它任何配置选项一样用“php_admin_value open_basedir none”的<link
+       linkend="configuration.changes.apache">方法</link>关闭（例如某些虚拟主机中）。
       </para>
       <para>
        在 Windows 中，用分号分隔目录。在任何其它系统中用冒号分隔目录。作为
@@ -214,7 +238,7 @@
      </term>
      <listitem>
       <simpara>
-       本指令允许你基于<link linkend="security.index">安全</link>原因禁止某些函数。接受逗号分隔的函数名列表作为参数。
+       本指令允许你基于<link linkend="security">安全</link>原因禁止某些函数。接受逗号分隔的函数名列表作为参数。
        disable_functions 不受<link linkend="ini.safe-mode">安全模式</link>的影响。
       </simpara>
       <simpara>
@@ -230,7 +254,7 @@
      <listitem>
       <simpara>
        本指令可以使你出于<link
-       linkend="security.index">安全</link>的理由禁用某些类。用逗号分隔类名。disable_classes
+       linkend="security">安全</link>的理由禁用某些类。用逗号分隔类名。disable_classes
        不受<link linkend="ini.safe-mode">安全模式</link>的影响。
       </simpara>
       <simpara>
@@ -253,7 +277,8 @@
   </para>
 
   <para>
-   当 <link linkend="ini.safe-mode">safe_mode</link> 设置为 on，PHP 将检查当前脚本的拥有者是否和将被文件函数操作的文件的拥有者相匹配。例如：
+   当 <link linkend="ini.safe-mode">safe_mode</link> 设置为 on，PHP
+   将通过文件函数或其目录检查当前脚本的拥有者是否和将被操作的文件的拥有者相匹配。例如：
    <programlisting role="ls">
 <![CDATA[
 -rw-rw-r--    1 rasmus   rasmus       33 Jul  1 19:20 script.php
@@ -277,10 +302,17 @@ allowed to access /etc/passwd owned by uid 0 in /docroot/script.php on line 2
    </screen>
   </para>
   <para>
-   同时，或许会存在这样的环境，在该环境下，宽松的 <literal>GID</literal> 检查已经足够，但严格的 <literal>UID</literal> 检查反而是不适合的。您可以用 <link linkend="ini.safe-mode-gid">safe_mode_gid</link> 选项来控制这种检查。如果设置为 <literal>On</literal> 则进行宽松的 <literal>GID</literal> 检查；设置为 <literal>Off</literal>（默认值）则进行 <literal>UID</literal> 检查。
+   同时，或许会存在这样的环境，在该环境下，宽松的 <literal>GID</literal>
+   检查已经足够，但严格的 <literal>UID</literal>
+   检查反而是不适合的。可以用 <link linkend="ini.safe-mode-gid">safe_mode_gid</link>
+   选项来控制这种检查。如果设置为 <literal>On</literal>
+   则进行宽松的 <literal>GID</literal> 检查；设置为
+   <literal>Off</literal>（默认值）则进行 <literal>UID</literal> 检查。
   </para>
   <para>
-   除了 <link linkend="ini.safe-mode">safe_mode</link> 以外，如果您设置了 <link linkend="ini.open-basedir">open_basedir</link> 选项，则所有的文件操作将被限制在您指定的目录下。例如：
+   除了 <link linkend="ini.safe-mode">safe_mode</link> 以外，如果设置了
+   <link linkend="ini.open-basedir">open_basedir</link>
+   选项，则所有的文件操作将被限制在指定的目录下。例如：
    <programlisting role="ini">
 <![CDATA[
 <Directory /docroot>
@@ -288,7 +320,8 @@ allowed to access /etc/passwd owned by uid 0 in /docroot/script.php on line 2
 </Directory>
 ]]>
    </programlisting>
-   如果您在设置了 <link linkend="ini.open-basedir">open_basedir</link> 选项后运行同样的 script.php，则其结果会是：
+   如果在设置了 <link linkend="ini.open-basedir">open_basedir</link>
+   选项后运行同样的 script.php，则其结果会是：
    <screen>
 <![CDATA[
 Warning: open_basedir restriction in effect. File is in wrong directory in
@@ -297,11 +330,10 @@ Warning: open_basedir restriction in effect. File is in wrong directory in
    </screen>
   </para>
   <para>
-   您也可以单独地屏蔽某些函数。请注意
+   也可以单独地屏蔽某些函数。请注意
    <link linkend="ini.disable-functions">disable_functions</link>
-   选项不能在 &php.ini; 文件外部使用，也就是说您无法在 &httpd.conf;
-   文件的按不同虚拟主机或不同目录的方式来屏蔽函数。
-   如果我们将如下内容加入到 &php.ini; 文件：
+   选项不能在 &php.ini; 文件外部使用，也就是说无法在 &httpd.conf;
+   文件的按不同虚拟主机或不同目录的方式来屏蔽函数。如果我们将如下内容加入到 &php.ini; 文件：
    <programlisting role="ini">
 <![CDATA[
 disable_functions readfile,system
@@ -315,6 +347,11 @@ Warning: readfile() has been disabled for security reasons in
 ]]>
    </screen>
   </para>
+  <warning>
+   <para>
+    当然，这些 PHP 限制不适用于可执行文件。
+   </para>
+  </warning>
  </sect1>
 
  <sect1 id="features.safe-mode.functions">
@@ -380,7 +417,8 @@ Warning: readfile() has been disabled for security reasons in
       <row>
        <entry><function>putenv</function></entry>
        <entry>
-        遵循 ini 设置的 safe_mode_protected_env_vars 和 safe_mode_allowed_env_vars 选项。请参考 <function>putenv</function> 函数的有关文档。
+        遵循 ini 设置的 safe_mode_protected_env_vars 和 safe_mode_allowed_env_vars
+        选项。请参考 <function>putenv</function> 函数的有关文档。
        </entry>
        <!-- TODO: document those directives in chapters/config.xml -->
       </row>
@@ -407,28 +445,41 @@ Warning: readfile() has been disabled for security reasons in
       </row>
       <row>
        <entry><function>exec</function></entry>
-       <entry>您只能在 <link linkend="ini.safe-mode-exec-dir">safe_mode_exec_dir</link> 设置的目录下进行执行操作。基于某些原因，目前不能在可执行对象的路径中使用 <literal>..</literal>。
-	</entry>
+       <entry>
+        只能在 <link linkend="ini.safe-mode-exec-dir">safe_mode_exec_dir</link>
+        设置的目录下进行执行操作。基于某些原因，目前不能在可执行对象的路径中使用
+        <literal>..</literal>。<function>escapeshellcmd</function> 将被作用于此函数的参数上。
+       </entry>
       </row>
       <row>
        <entry><function>system</function></entry>
        <entry>
-        您只能在 <link linkend="ini.safe-mode-exec-dir">safe_mode_exec_dir</link> 设置的目录下进行执行操作。基于某些原因，目前不能在可执行对象的路径中使用 <literal>..</literal>。
+        只能在 <link linkend="ini.safe-mode-exec-dir">safe_mode_exec_dir</link>
+        设置的目录下进行执行操作。基于某些原因，目前不能在可执行对象的路径中使用
+        <literal>..</literal>。<function>escapeshellcmd</function> 将被作用于此函数的参数上。
        </entry>
       </row>
       <row>
        <entry><function>passthru</function></entry>
        <entry>
-       您只能在 <link linkend="ini.safe-mode-exec-dir">safe_mode_exec_dir</link> 设置的目录下进行执行操作。基于某些原因，目前不能在可执行对象的路径中使用 <literal>..</literal>。
+        只能在 <link linkend="ini.safe-mode-exec-dir">safe_mode_exec_dir</link>
+        设置的目录下进行执行操作。基于某些原因，目前不能在可执行对象的路径中使用
+        <literal>..</literal>。<function>escapeshellcmd</function> 将被作用于此函数的参数上。
        </entry>
       </row>
       <row>
        <entry><function>popen</function></entry>
        <entry>
-        您只能在 <link linkend="ini.safe-mode-exec-dir">safe_mode_exec_dir</link> 设置的目录下进行执行操作。基于某些原因，目前不能在可执行对象的路径中使用 <literal>..</literal>。
+        只能在 <link linkend="ini.safe-mode-exec-dir">safe_mode_exec_dir</link>
+        设置的目录下进行执行操作。基于某些原因，目前不能在可执行对象的路径中使用
+        <literal>..</literal>。<function>escapeshellcmd</function> 将被作用于此函数的参数上。
        </entry>
        <!-- TODO: not sure. popen uses a completely different implementation
        Don't know why, don't know whether it's behaving the same -->
+      </row>
+      <row>
+       <entry><function>fopen</function></entry>
+       <entry>&sm.uidcheck.dir;</entry>
       </row>
       <row>
        <entry><function>mkdir</function></entry>
@@ -436,7 +487,7 @@ Warning: readfile() has been disabled for security reasons in
       </row>
       <row>
        <entry><function>rmdir</function></entry>
-       <entry>&sm.uidcheck;</entry>
+       <entry>&sm.uidcheck.dir;</entry>
       </row>
       <row>
        <entry><function>rename</function></entry>
@@ -462,7 +513,7 @@ Warning: readfile() has been disabled for security reasons in
       </row>
       <row>
        <entry><function>chmod</function></entry>
-       <entry>&sm.uidcheck; 另外，您不能设置 SUID、SGID 和 sticky bits</entry>
+       <entry>&sm.uidcheck; 另外，不能设置 SUID、SGID 和 sticky bits</entry>
       </row>
       <row>
        <entry><function>touch</function></entry>
@@ -477,13 +528,15 @@ Warning: readfile() has been disabled for security reasons in
        <entry>&sm.uidcheck; &sm.uidcheck.dir; （注意：仅测试 target）</entry>
       </row>
       <row>
-       <entry><function>getallheaders</function></entry>
-       <entry>在安全模式下，以“authorization”（区分大小写）开头的头信息将不会被返回。警告：<function>getallheaders</function> 无法在 aol-server 下实现！
+       <entry><function>apache_request_headers</function></entry>
+       <entry>在安全模式下，以“authorization”（区分大小写）开头的头信息将不会被返回。
       </entry>
       </row>
       <row>
        <entry><function>header</function></entry>
-       <entry>在安全模式下，如果您设置了 <literal>WWW-Authenticate</literal>，当前脚本的 uid 将被添加到该头信息的 <literal>realm</literal> 部分。</entry>
+       <entry>在安全模式下，如果设置了
+       <literal>WWW-Authenticate</literal>，当前脚本的 uid
+       将被添加到该头信息的 <literal>realm</literal> 部分。</entry>
       </row>
       <row>
        <entry><link linkend="features.http-auth">PHP_AUTH 变量</link></entry>
@@ -529,7 +582,7 @@ Warning: readfile() has been disabled for security reasons in
         <function>mail</function>
        </entry>
        <entry>
-        在安全模式下，第五个参数被屏蔽。（注意，仅在 PHP 4.2.3 及以上版本有效）
+        在安全模式下，第五个参数被屏蔽。（注意，仅自 PHP 4.2.3 起受影响）
        </entry>
       </row>
       <row>
