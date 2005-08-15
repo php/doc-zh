@@ -1,71 +1,126 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.11 $ -->
-<!-- $Author: class007 $ -->
-<!-- EN-Revision: 1.38 Maintainer: class007 Status: ready -->
-<!-- CREDITS: thomaslio -->
+<!-- $Revision: 1.12 $ -->
+<!-- $Author: dallas $ -->
+<!-- EN-Revision: 1.40 Maintainer: class007 Status: ready -->
+<!-- CREDITS: thomaslio, dallas -->
 <chapter id="features.commandline">
  <title>PHP 的命令行模式</title>
- <!-- NEW DOCUMENTATION STARTS -->
  <para>
-  从版本 4.3.0 开始，PHP 提供了一种新类型的 <literal>SAPI</literal>（Server Application Programming Interface，服务端应用编程端口）支持，名为 <literal>CLI</literal>，意为 <emphasis>Command Line Interface</emphasis>，即命令行接口。顾名思义，该 <literal>SAPI</literal> 模块主要用作 PHP 的开发外壳应用。<literal>CLI SAPI</literal> 和其它 <literal>SAPI</literal> 模块相比有很多的不同之处，我们将在本章中详细阐述。值得一提的是，<literal>CLI</literal> 和 <literal>CGI</literal> 是不同的 SAPI，尽管它们之间有很多共同的行为。
+  从版本 4.3.0 开始，PHP 提供了一种新类型的 <literal>SAPI</literal>（Server
+  Application Programming Interface，服务端应用编程端口）支持，名为
+  <literal>CLI</literal>，意为 <emphasis>Command Line
+  Interface</emphasis>，即命令行接口。顾名思义，该
+  <literal>SAPI</literal> 模块主要用作 PHP 的开发外壳应用。<literal>CLI SAPI</literal>
+  和其它 <literal>SAPI</literal>
+  模块相比有很多的不同之处，我们将在本章中详细阐述。值得一提的是，<literal>CLI</literal>
+  和 <literal>CGI</literal> 是不同的 SAPI，尽管它们之间有很多共同的行为。
  </para>
+
  <para>
-  <literal>CLI SAPI</literal> 最先是随 PHP 4.2.0 版本发布的，但仍旧只是一个实验性的版本，并需要在运行 <command>./configure</command> 时加上 <option role="configure">--enable-cli</option> 参数。从 PHP 4.3.0 版本开始，<literal>CLI SAPI</literal> 成为了正式模块，<option role="configure">--enable-cli</option> 参数会被默认得设置为 on，您也可以用参数 <option role="configure">--disable-cli</option> 来屏蔽。
+  <literal>CLI SAPI</literal> 最先是随 PHP 4.2.0
+  版本发布的，但仍旧只是一个实验性的版本，并需要在运行
+  <command>./configure</command> 时加上
+  <option role="configure">--enable-cli</option> 参数。从 PHP 4.3.0
+  版本开始，<literal>CLI SAPI</literal> 成为了正式模块，<option
+  role="configure">--enable-cli</option> 参数会被默认得设置为
+  on，也可以用参数 <option role="configure">--disable-cli</option> 来屏蔽。
  </para>
+
  <para>
-  从 PHP 4.3.0开始，CLI/CGI 二进制执行文件的文件名、位置和是否存在会根据 PHP 在您系统上的安装而不同。在默认情况下，当运行 <command>make</command> 时，CGI 和 CLI 都会被编译并且分别放置在您 PHP 源文件目录的 <filename>sapi/cgi/php</filename> 和 <filename>sapi/cli/php</filename> 下。您可以注意到两个文件都被命名为了 php。在 <command>make install</command> 的过程中会发生什么取决于您的配置行。如果在配置的时候选择了一个 SAPI 模块，如 apxs，或者使用了 <option role="configure">--disable-cgi</option> 参数，则在 <command>make install</command> 的过程中，CLI 将被拷贝到 <filename>{PREFIX}/bin/php</filename>，除非 CGI 已经被放置在了那个位置。因此，例如，如果在您的配置行中有 <option role="configure">--with--apxs</option>，则在 <literal>make install</literal> 的过程中，CLI 将被拷贝到 <literal>{PREFIX}/bin/php</literal>。如果您希望撤销 CGI 执行文件的安装，请在 <command>make install</command> 之后运行 <command>make install-cli</command>。或者，您也可以在您的配置行中加上 <option role="configure">--disable-cgi</option> 参数。
+  从 PHP 4.3.0开始，CLI/CGI 二进制执行文件的文件名、位置和是否存在会根据
+  PHP 在系统上的安装而不同。在默认情况下，当运行
+  <command>make</command> 时，CGI 和 CLI 都会被编译并且分别放置在
+  PHP 源文件目录的 <filename>sapi/cgi/php</filename> 和
+  <filename>sapi/cli/php</filename> 下。可以注意到两个文件都被命名为了
+  php。在 <command>make install</command>
+  的过程中会发生什么取决于配置行。如果在配置的时候选择了一个
+  SAPI 模块，如 apxs，或者使用了
+  <option role="configure">--disable-cgi</option> 参数，则在
+  <command>make install</command> 的过程中，CLI 将被拷贝到
+  <filename>{PREFIX}/bin/php</filename>，除非 CGI
+  已经被放置在了那个位置。因此，例如，如果在配置行中有
+  <option role="configure">--with--apxs</option>，则在
+  <literal>make install</literal> 的过程中，CLI 将被拷贝到
+  <literal>{PREFIX}/bin/php</literal>。如果希望撤销 CGI
+  执行文件的安装，请在 <command>make install</command>
+  之后运行 <command>make install-cli</command>。或者，也可以在您的配置行中加上
+  <option role="configure">--disable-cgi</option> 参数。
  </para>
+
+ <note>
+  <para>
+   由于 <option role="configure">--enable-cli</option> 和
+   <option role="configure">--enable-cgi</option>
+   同时默认有效，因此，不必再配置行中加上
+   <option role="configure">--enable-cli</option> 来使得 CLI 在
+   <command>make install</command> 过程中被拷贝到
+   <filename>{PREFIX}/bin/php</filename>。
+  </para>
+ </note>
+
  <para>
-  <note>
-   <para>
-    由于 <option role="configure">--enable-cli</option> 和 <option role="configure">--enable-cgi</option> 同时默认有效，因此，您不必再配置行中加上 <option role="configure">--enable-cli</option> 来使得 CLI 在 <command>make install</command> 过程中被拷贝到 <filename>{PREFIX}/bin/php</filename>。
-   </para>
-  </note>
+  在 PHP 4.2.0 到 PHP 4.2.3 之间的 Windows 发行包中，CLI 的文件名为
+  <filename>php-cli.exe</filename>，相同文件夹下的
+  <filename>php.exe</filename> 为 CGI。从 PHP 4.3.0 版本开始，Windows
+  的发行包中 CLI 的执行文件为
+  <filename>php.exe</filename>，被放置在一个单独的名为
+  <filename class="directory">cli</filename> 的文件夹下，即
+  <filename>cli/php.exe</filename>。在 PHP 5 中，CLI
+  存在于主文件夹中，名为 <filename>php.exe</filename>，而
+  CGI 版本名为  <filename>php-cgi.exe</filename>。
  </para>
+
  <para>
-  在 PHP 4.2.0 到 PHP 4.2.3 之间的 Windows 发行包中，CLI 的文件名为 <filename>php-cli.exe</filename>，相同文件夹下的  <filename>php.exe</filename> 为 CGI。从 PHP 4.3.0 版本开始，Windows 的发行包中 CLI 的执行文件为 <filename>php.exe</filename>，被放置在一个单独的名为 <filename class="directory">cli</filename> 的文件夹下，即 <filename>cli/php.exe</filename>。在 PHP 5 中，CLI 存在于主文件夹中，名为 <filename>php.exe</filename>，而 CGI 版本名为  <filename>php-cgi.exe</filename>。
- </para>
- <para>
-  从 PHP 5 起，一个名为 <filename>php-win.exe</filename> 的新文件随包发布。它相当于 CLI 版本，但是 php-win 不输入任何内容，便不提供控制台 (不弹出“命令提示符”对话框)。这种方式类似于 php-gtk。您需要使用
+  从 PHP 5 起，一个名为 <filename>php-win.exe</filename>
+  的新文件随包发布。它相当于 CLI 版本，但是 php-win
+  不输出任何内容，便不提供控制台（不会弹出“DOS 窗口”）。这种方式类似于
+  php-gtk。需要使用
   <option role="configure">--enable-cli-win32</option> 选项来配置它。
  </para>
- <para>
-  <note>
-   <title>这是哪个 SAPI？</title>
-   <para>
-    在命令外壳下，运行 <command>php -v</command> 便能得知该 <filename>php</filename> 是 CGI 还是 CLI。请参考函数 <function>php_sapi_name</function> 以及常量 <constant>PHP_SAPI</constant>。
-   </para>
-  </note>
-  <note>
-   <para>
-    在 PHP 4.3.2 中加入了 Unix 的 <literal>man</literal> 页面。可以在你的命令外壳下键入
-    <command>man php</command> 来查看。
-   </para>
-  </note>
- </para>
+
+ <note>
+  <title>如何得知自己使用的是哪个 SAPI？</title>
+  <para>
+   在命令行下，运行 <command>php -v</command> 便能得知该
+   <filename>php</filename> 是 CGI 还是 CLI。请参考函数
+   <function>php_sapi_name</function> 以及常量 <constant>PHP_SAPI</constant>。
+  </para>
+ </note>
+
+ <note>
+  <para>
+   在 PHP 4.3.2 中加入了 Unix 的 <literal>man</literal> 页面。可以在命令行中键入
+   <command>man php</command> 来查看。
+  </para>
+ </note>
+
  <para>
   以下为 <literal>CLI SAPI</literal> 和其它 <literal>SAPI</literal> 模块相比的显著区别：
   <itemizedlist>
    <listitem>
     <para>
-	 与 <literal>CGI SAPI</literal> 不同，其输出没有任何头信息。
+     与 <literal>CGI SAPI</literal> 不同，其输出没有任何头信息。
     </para>
     <para>
-	 尽管 <literal>CGI SAPI</literal> 提供了取消 HTTP 头信息的方法，但在 <literal>CLI SAPI</literal> 中并不存在类似的方法以开启 HTTP 头信息的输出。
+     尽管 <literal>CGI SAPI</literal> 提供了取消 HTTP 头信息的方法，但在
+     <literal>CLI SAPI</literal> 中并不存在类似的方法以开启 HTTP 头信息的输出。
     </para>
     <para>
-	  CLI 默认以安静模式开始，但为了保证兼容性，<option>-q</option> 和 <option>--no-header</option> 参数为了向后兼容仍然保留，使得您可以使用旧的 CGI 脚本。
+     CLI 默认以安静模式开始，但为了保证兼容性，<option>-q</option> 和
+     <option>--no-header</option> 参数为了向后兼容仍然保留，使得您可以使用旧的 CGI 脚本。
     </para>
     <para>
-	  在运行时，不会把工作目录改为脚本的当前目录。（您可以使用 <option>-C</option> 和 <option>--no-chdir</option> 参数来兼容 CGI 模式）。
+     在运行时，不会把工作目录改为脚本的当前目录（可以使用
+     <option>-C</option> 和 <option>--no-chdir</option> 参数来兼容 CGI 模式）。
     </para>
     <para>
-	  出错时输出纯文本的错误信息（非 HTML 格式）。
+     出错时输出纯文本的错误信息（非 HTML 格式）。
     </para>
    </listitem>
    <listitem>
     <para>
-	 <literal>CLI SAPI</literal> 强制覆盖了 &php.ini; 中的某些设置，因为这些设置在外壳环境下是没有意义的。
+     <literal>CLI SAPI</literal> 强制覆盖了 &php.ini;
+     中的某些设置，因为这些设置在外壳环境下是没有意义的。
     </para>
     <para>
      <table>
@@ -83,21 +138,25 @@
          <entry><link linkend="ini.html-errors">html_errors</link></entry>
          <entry>&false;</entry>
          <entry>
-		  无意义的 HTML 标记符会使得出错信息很凌乱，所以在外壳下阅读报错信息是十分困难的。因此将该选项的默认值改为 &false;。
+          无意义的 HTML
+          标记符会使得出错信息很凌乱，所以在外壳下阅读报错信息是十分困难的。因此将该选项的默认值改为 &false;。
          </entry>
         </row>
         <row>
          <entry><link linkend="ini.implicit-flush">implicit_flush</link></entry>
          <entry>&true;</entry>
          <entry>
-		  在命令行模式下，所有来自 <function>print</function> 和 <function>echo</function> 的输出将被立即写到输出端，而不作任何地缓冲操作。如果您希望延缓或控制标准输出，您仍然可以使用 <link linkend="ref.outcontrol">output buffering</link> 设置项。
+          在命令行模式下，所有来自 <function>print</function> 和
+          <function>echo</function> 的输出将被立即写到输出端，而不作任何地缓冲操作。如果您希望延缓或控制标准输出，您仍然可以使用
+          <link linkend="ref.outcontrol">output buffering</link> 设置项。
          </entry>
         </row>
         <row>
          <entry><link linkend="ini.max-execution-time">max_execution_time</link></entry>
-         <entry>0 （无限值）</entry>
+         <entry>0（无限值）</entry>
          <entry>
-		  鉴于在外壳环境下使用 PHP 的无穷的可能性，最大运行时间被设置为了无限值。为 WEB 开发的应用程序可能只需运行几秒钟时间，而外壳应用程序的运行时间可能会长的多。
+          鉴于在外壳环境下使用 PHP 的无穷的可能性，最大运行时间被设置为了无限值。为
+          WEB 开发的应用程序可能只需运行几秒钟时间，而外壳应用程序的运行时间可能会长的多。
          </entry>
         </row>
         <row>
@@ -105,11 +164,22 @@
          <entry>&true;</entry>
          <entry>
          <para>
-		  由于该设置为 &true;，您将总是可以在 <literal>CLI SAPI</literal> 中访问到 <emphasis>argc</emphasis>（传送给应用程序参数的个数）和 <emphasis>argv</emphasis>（包含有实际参数的数组）。
+         由于该设置为 &true;，您将总是可以在 <literal>CLI SAPI</literal>
+         中访问到 <emphasis>argc</emphasis>（传送给应用程序参数的个数）和
+         <emphasis>argv</emphasis>（包含有实际参数的数组）。
          </para>
          <para>
-		  对于 PHP 4.3.0，在使用 <literal>CLI SAPI</literal> 时，PHP 变量 <literal>$argc</literal>
-          和 <literal>$argv</literal> 已被注册并且设定了对应的值。而在这之前的版本，这两个变量在 <literal>CGI</literal> 或者 <literal>模块</literal> 版本中的建立依赖于将 PHP 的设置选项 <link linkend="ini.register-globals">register_globals</link> 设为 <emphasis>on</emphasis>。除了版本和 <literal>register_globals</literal> 设定以外，您可以随时通过调用 <link linkend="reserved.variables.server">$_SERVER</link> 或者 <varname>$HTTP_SERVER_VARS</varname>来访问它们。例如：<varname>$_SERVER['argv']</varname>
+          对于 PHP 4.3.0，在使用 <literal>CLI SAPI</literal> 时，PHP 变量
+          <literal>$argc</literal> 和 <literal>$argv</literal>
+          已被注册并且设定了对应的值。而在这之前的版本，这两个变量在
+          <literal>CGI</literal> 或者 <literal>模块</literal>
+          版本中的建立依赖于将 PHP 的设置选项
+          <link linkend="ini.register-globals">register_globals</link>
+          设为 <emphasis>on</emphasis>。除了版本和
+          <literal>register_globals</literal> 设定以外，您可以随时通过调用
+          <link linkend="reserved.variables.server">$_SERVER</link>
+          或者 <varname>$HTTP_SERVER_VARS</varname>
+          来访问它们。例如：<varname>$_SERVER['argv']</varname>
          </para>
          </entry>
         </row>
@@ -119,13 +189,14 @@
     </para>
     <note>
      <para>
-	  这些设置无法在设置文件 &php.ini; 或任何指定的其它文件中被初始化为其它值。这些默认值被限制在所有其它的设置文件被解析后改变。不过，它们的值可以在程序运行的过程中被改变（尽管对于该运行过程来说，这些设置项是没有意义的）。
+      这些设置无法在设置文件 &php.ini;
+      或任何指定的其它文件中被初始化为其它值。这些默认值被限制在所有其它的设置文件被解析后改变。不过，它们的值可以在程序运行的过程中被改变（尽管对于该运行过程来说，这些设置项是没有意义的）。
      </para>
     </note>
    </listitem>
    <listitem>
     <para>
-	 为了减轻外壳环境下的工作，我们定义了如下常量：
+     为了减轻外壳环境下的工作，我们定义了如下常量：
      <table>
       <title>CLI 专用常量</title>
       <tgroup cols="2">
@@ -139,7 +210,7 @@
         <row>
          <entry><constant>STDIN</constant></entry>
          <entry>
-		 一个已打开的指向 <literal>stdin</literal> 的流。您可以用如下方法来调用：
+          一个已打开的指向 <literal>stdin</literal> 的流。您可以用如下方法来调用：
          <programlisting role="php">
 <![CDATA[
 <?php
@@ -163,7 +234,7 @@ fscanf(STDIN, "%d\n", $number); // 从 STDIN 读取数字
         <row>
          <entry><constant>STDOUT</constant></entry>
          <entry>
-		 一个已打开的指向 <literal>stdout</literal> 的流。您可以用如下方式来调用：
+          一个已打开的指向 <literal>stdout</literal> 的流。您可以用如下方式来调用：
          <programlisting role="php">
 <![CDATA[
 <?php
@@ -178,7 +249,7 @@ $stdout = fopen('php://stdout', 'w');
         <row>
          <entry><constant>STDERR</constant></entry>
          <entry>
-		 一个已打开的指向 <literal>stderr</literal> 的流。您可以用如下方式来调用：
+          一个已打开的指向 <literal>stderr</literal> 的流。您可以用如下方式来调用：
          <programlisting role="php">
 <![CDATA[
 <?php
@@ -195,21 +266,23 @@ $stderr = fopen('php://stderr', 'w');
      </table>
     </para>
     <para>
-	 有了以上常量，您就无需自己建立指向诸如 <literal>stderr</literal> 的流，只需简单的使用这些常量来代替流指向：
+     有了以上常量，就无需自己建立指向诸如 <literal>stderr</literal>
+     的流，只需简单的使用这些常量来代替流指向：
      <programlisting role="shell">
 <![CDATA[
 php -r 'fwrite(STDERR, "stderr\n");'
 ]]>
      </programlisting>
-	 您无需自己来关闭这些流，PHP 会自动完成这些操作。
+      无需自己来关闭这些流，PHP 会自动完成这些操作。
     </para>
    </listitem>
    <listitem>
     <para>
-	 <literal>CLI SAPI</literal> <emphasis role="strong">不</emphasis>会将当前目录改为已运行的脚本所在的目录。
+     <literal>CLI SAPI</literal>
+     <emphasis role="strong">不会</emphasis>将当前目录改为已运行的脚本所在的目录。
     </para>
     <para>
-	 以下范例显示了本模块与 <literal>CGI SAPI</literal> 模块之间的不同：
+     以下范例显示了本模块与 <literal>CGI SAPI</literal> 模块之间的不同：
      <programlisting role="php">
 <![CDATA[
 <?php
@@ -220,7 +293,7 @@ echo getcwd(), "\n";
      </programlisting>
     </para>
     <para>
-	 在使用 <literal>CGI</literal> 版本时，其输出为
+     在使用 <literal>CGI</literal> 版本时，其输出为
      <screen>
 <![CDATA[
 $ pwd
@@ -232,10 +305,10 @@ $ php-cgi -f another_directory/test.php
      </screen>
     </para>
     <para>
-	 我们明显可以看到 PHP 将当前目录改成了刚刚运行过的脚本所在的目录。
+     我们明显可以看到 PHP 将当前目录改成了刚刚运行过的脚本所在的目录。
     </para>
     <para>
-	 使用 <literal>CLI SAPI</literal> 模式，我们得到：
+     使用 <literal>CLI SAPI</literal> 模式，我们得到：
      <screen>
 <![CDATA[
 $ pwd
@@ -245,39 +318,52 @@ $ php -q another_directory/test.php
 /tmp
 ]]>
      </screen>
-	 这使得我们在利用 PHP 编写外壳工具时获得了很大的便利。
+     这使得我们在利用 PHP 编写外壳工具时获得了很大的便利。
     </para>
     <note>
      <para>
-	  您可以在命令行运行时给该 <literal>CGI SAPI</literal> 加上 <option>-C</option> 参数，使其支持 <literal>CLI SAPI</literal> 的功能。
+      您可以在命令行运行时给该 <literal>CGI SAPI</literal> 加上
+      <option>-C</option> 参数，使其支持 <literal>CLI SAPI</literal> 的功能。
      </para>
     </note>
    </listitem>
   </itemizedlist>
  </para>
  <para>
-  以下是 PHP 二进制文件（即 <filename>php.exe</filename> 程序）提供的命令行模式的选项参数，您随时可以运行带 <option>-h</option> 参数的 PHP 命令来查询这些参数。
+  以下是 PHP 二进制文件（即 <filename>php.exe</filename>
+  程序）提供的命令行模式的选项参数，您随时可以运行带
+  <option>-h</option> 参数的 PHP 命令来查询这些参数。
   <screen>
 <![CDATA[
-Usage: php [options] [-f] <file> [args...]
-       php [options] -r <code> [args...]
-       php [options] [-- args...]
-  -s               Display colour syntax highlighted source.
-  -w               Display source with stripped comments and whitespace.
-  -f <file>        Parse <file>.
-  -v               Version number
-  -c <path>|<file> Look for php.ini file in this directory
+Usage: php [options] [-f] <file> [--] [args...]
+       php [options] -r <code> [--] [args...]
+       php [options] [-B <begin_code>] -R <code> [-E <end_code>] [--] [args...]
+       php [options] [-B <begin_code>] -F <file> [-E <end_code>] [--] [args...]
+       php [options] -- [args...]
+       php [options] -a
+
   -a               Run interactively
+  -c <path>|<file> Look for php.ini file in this directory
+  -n               No php.ini file will be used
   -d foo[=bar]     Define INI entry foo with value 'bar'
   -e               Generate extended information for debugger/profiler
-  -z <file>        Load Zend extension <file>.
+  -f <file>        Parse <file>.
+  -h               This help
+  -i               PHP information
   -l               Syntax check only (lint)
   -m               Show compiled in modules
-  -i               PHP information
   -r <code>        Run PHP <code> without using script tags <?..?>
-  -h               This help
+  -B <begin_code>  Run PHP <begin_code> before processing input lines
+  -R <code>        Run PHP <code> for every input line
+  -F <file>        Parse and execute <file> for every input line
+  -E <end_code>    Run PHP <end_code> after processing all input lines
+  -H               Hide any passed arguments from external tools.
+  -s               Display colour syntax highlighted source.
+  -v               Version number
+  -w               Display source with stripped comments and whitespace.
+  -z <file>        Load Zend extension <file>.
 
-  args...          Arguments passed to script. Use -- args when first argument 
+  args...          Arguments passed to script. Use -- args when first argument
                    starts with - or script is read from stdin
 ]]>
   </screen>
@@ -287,7 +373,7 @@ Usage: php [options] [-f] <file> [args...]
   <orderedlist>
    <listitem>
     <para>
-	 让 PHP 运行指定文件。 
+     让 PHP 运行指定文件。
     </para>
     <para>
      <screen>
@@ -299,12 +385,15 @@ php -f my_script.php
      </screen>
     </para>
     <para>
-	 以上两种方法（使用或不使用 <option>-f</option> 参数）都能够运行给定的 <filename>my_script.php</filename> 文件。您可以选择任何文件来运行，您指定的 PHP 脚本并非必须要以 <literal>.php</literal> 为扩展名，它们可以有任意的文件名和扩展名。
+     以上两种方法（使用或不使用 <option>-f</option> 参数）都能够运行给定的
+     <filename>my_script.php</filename> 文件。您可以选择任何文件来运行，您指定的
+     PHP 脚本并非必须要以 <literal>.php</literal>
+     为扩展名，它们可以有任意的文件名和扩展名。
     </para>
    </listitem>
    <listitem>
     <para>
-	 在命令行直接运行 PHP 代码。
+     在命令行直接运行 PHP 代码。
     </para>
     <para>
      <screen>
@@ -314,20 +403,22 @@ php -r 'print_r(get_defined_constants());'
      </screen>
     </para>
     <para>
-	 在使用这种方法时，请您注意外壳变量的替代及引号的使用。
+     在使用这种方法时，请您注意外壳变量的替代及引号的使用。
     </para>
     <note>
      <para>
-	  请仔细阅读以上范例，在运行代码时没有开始和结束的标记符！加上 <option>-r</option> 参数后，这些标记符是不需要的，加上它们会导致语法错误。
+      请仔细阅读以上范例，在运行代码时没有开始和结束的标记符！加上
+      <option>-r</option> 参数后，这些标记符是不需要的，加上它们会导致语法错误。
      </para>
     </note>
    </listitem>
    <listitem>
     <para>
-	 通过标准输入（<literal>stdin</literal>）提供需要运行的 PHP 代码。
+     通过标准输入（<literal>stdin</literal>）提供需要运行的 PHP 代码。
     </para>
     <para>
-	 以上用法给我们提供了非常强大的功能，使得我们可以如下范例所示，动态地生成 PHP 代码并通过命令行运行这些代码：
+     以上用法给我们提供了非常强大的功能，使得我们可以如下范例所示，动态地生成
+     PHP 代码并通过命令行运行这些代码：
      <screen>
 <![CDATA[
 $ some_application | some_filter | php | sort -u >final_output.txt
@@ -341,10 +432,22 @@ $ some_application | some_filter | php | sort -u >final_output.txt
   以上三种运行代码的方法不能同时使用。
  </para>
  <para>
-  和所有的外壳应用程序一样，PHP 的二进制文件（<filename>php.exe</filename> 文件）及其运行的 PHP 脚本能够接受一系列的参数。PHP 没有限制传送给脚本程序的参数的个数（外壳程序对命令行的字符数有限制，但您通常都不会超过该限制）。传递给您脚本的参数可在全局变量 <varname>$argv</varname> 中获取。该数组中下标为零的成员为脚本的名称（当 PHP 代码来自标准输入获直接用 <option>-r</option> 参数以命令行方式运行时，该名称为“<literal>-</literal>”）。另外，全局变量 <varname>$argc</varname> 存有 <varname>$argv</varname> 数组中成员变量的个数（而非传送给脚本程序的参数的个数）。
+  和所有的外壳应用程序一样，PHP 的二进制文件（<filename>php.exe</filename>
+  文件）及其运行的 PHP 脚本能够接受一系列的参数。PHP
+  没有限制传送给脚本程序的参数的个数（外壳程序对命令行的字符数有限制，但您通常都不会超过该限制）。传递给您脚本的参数可在全局变量
+  <varname>$argv</varname> 中获取。该数组中下标为零的成员为脚本的名称（当
+  PHP 代码来自标准输入获直接用 <option>-r</option>
+  参数以命令行方式运行时，该名称为“<literal>-</literal>”）。另外，全局变量
+  <varname>$argc</varname> 存有 <varname>$argv</varname>
+  数组中成员变量的个数（而非传送给脚本程序的参数的个数）。
  </para>
  <para>
-  只要您传送给您脚本的参数不是以 <literal>-</literal> 符号开头，您就无需过多的注意什么。向您的脚本传送以 <literal>-</literal> 开头的参数会导致错误，因为 PHP 会认为应该由它自身来处理这些参数。您可以用参数列表分隔符 <literal>--</literal> 来解决这个问题。在 PHP 解析完参数后，该符号后所有的参数将会被原样传送给您的脚本程序。
+  只要您传送给您脚本的参数不是以 <literal>-</literal>
+  符号开头，您就无需过多的注意什么。向您的脚本传送以
+  <literal>-</literal> 开头的参数会导致错误，因为 PHP
+  会认为应该由它自身来处理这些参数。您可以用参数列表分隔符
+  <literal>--</literal> 来解决这个问题。在 PHP
+  解析完参数后，该符号后所有的参数将会被原样传送给您的脚本程序。
  </para>
  <para>
   <screen>
@@ -407,72 +510,20 @@ array(4) {
      <row>
       <entry>选项名称</entry>
       <entry>长名称</entry>
-      <entry>描 述</entry>
+      <entry>说明</entry>
      </row>
     </thead>
     <tbody>
      <row>
-      <entry>-s</entry>
-      <entry>--syntax-highlight</entry>
+      <entry>-a</entry>
+      <entry>--interactive</entry>
       <entry>
        <para>
-	    显示有语法高亮色彩的源文件。
-       </para>
-       <para>
-	    该参数使用内建机制来解析文件并为其生成一个 <literal>HTML</literal> 高亮版本并将结果写到标准输出。请注意该过程所做的只是生成了一个 <literal>&lt;code&gt; [...] &lt;/code&gt;</literal> 的 <literal>HTML</literal> 标记符块，并不包含任何的 <literal>HTML</literal> 头。
-       </para>
-       <note>
-        <para>
-		 该选项不能和 <option>-r</option> 参数同时使用。
-        </para>
-       </note>
-      </entry>
-     </row>
-     <row>
-      <entry>-s</entry>
-      <entry>--syntax-highlighting</entry>
-      <entry>
-       <para>
-        <option>--syntax-highlight</option> 的别名。
-       </para>
-      </entry>
-     </row>
-     <row>
-      <entry>-w</entry>
-      <entry>--strip</entry>
-      <entry>
-       <para>
-	    显示除去了注释和空格的源代码。
-       </para>
-       <note>
-        <para>
-		 该选项不能和 <option>-r</option> 参数同时使用。
-        </para>
-       </note>
-      </entry>
-     </row>
-     <row>
-      <entry>-f</entry>
-      <entry>--file</entry>
-      <entry>
-       <para>
-	    解析并运行给定的文件名到 <option>-f</option> 选项。该参数为可选参数且可以不加，仅指明需要运行的文件名即可。
-       </para>
-      </entry>
-     </row>
-     <row>
-      <entry>-v</entry>
-      <entry>--version</entry>
-      <entry>
-       <para>
-	    将 PHP、PHP SAPI 及 Zend 的版本信息写入的标准输出。例如：
-        <screen>
-<![CDATA[
-$ php -v
-PHP 4.3.0-dev (cli), Copyright (c) 1997-2002 The PHP Group
-Zend Engine v1.3.0, Copyright (c) 1998-2002 Zend Technologies
-]]>
-        </screen>
+        交互式运行 PHP。如果编译 PHP 时加入了 <link
+        linkend="ref.readline">Readline</link> 扩展（Windows
+        下不可用），那将会得到一个很好的外壳，包括一个自动完成的功能（例如可以在键入变量名的时候，按下
+        TAB 键，PHP 会自动完成该变量名）以及命令历史记录，可以用上下键来访问。历史记录存在
+        <filename>~/.php_history</filename> 文件中。
        </para>
       </entry>
      </row>
@@ -481,7 +532,9 @@ Zend Engine v1.3.0, Copyright (c) 1998-2002 Zend Technologies
       <entry>--php-ini</entry>
       <entry>
        <para>
-	    用该参数，您可以指定一个放置 &php.ini; 文件的目录，或者直接指定一个自定义的 <literal>INI</literal> 文件，其文件名可以不是 &php.ini;。例如：
+        用该参数，可以指定一个放置 &php.ini;
+        文件的目录，或者直接指定一个自定义的 <literal>INI</literal>
+        文件（其文件名可以不是 &php.ini;），例如：
         <screen>
 <![CDATA[
 $ php -c /custom/directory/ my_script.php
@@ -489,7 +542,8 @@ $ php -c /custom/directory/ my_script.php
 $ php -c /custom/directory/custom-file.ini my_script.php
 ]]>
         </screen>
-        如果您不指定此选项，PHP 将在<link linkend="configuration.file">默认位置</link>搜索文件。
+        如果您不指定此选项，PHP 将在<link
+        linkend="configuration.file">默认位置</link>搜索文件。
        </para>
       </entry>
      </row>
@@ -507,7 +561,8 @@ $ php -c /custom/directory/custom-file.ini my_script.php
       <entry>--define</entry>
       <entry>
        <para>
-	    用该参数可以自行设置 &php.ini; 文件中设置变量的值，其语法为：
+        用该参数可以自行设置任何可以在 &php.ini;
+        文件中设置的配置选项的值，其语法为：
         <screen>
 <![CDATA[
 -d configuration_directive[=value]
@@ -515,42 +570,29 @@ $ php -c /custom/directory/custom-file.ini my_script.php
         </screen>
        </para>
        <para>
-        范例：
+        例子（因版面原因而折行显示）：
         <screen>
 <![CDATA[
-# Ommiting the value part will set the given configuration directive to "1"
-$ php -d max_execution_time 
-       -r '$foo = ini_get("max_execution_time"); var_dump($foo);'
+# 取值部分被省略，将会把配置选项设为 "1"
+$ php -d max_execution_time
+        -r '$foo = ini_get("max_execution_time"); var_dump($foo);'
 string(1) "1"
 
-# Passing an empty value part will set the configuration directive to ""
-php -d max_execution_time= 
-       -r '$foo = ini_get("max_execution_time"); var_dump($foo);'
+# 取值部分为空白，将会把配置选项设为 ""
+php -d max_execution_time=
+        -r '$foo = ini_get("max_execution_time"); var_dump($foo);'
 string(0) ""
 
-# The configuration directive will be set to anything passed after the '=' character
-$  php -d max_execution_time=20 
-      -r '$foo = ini_get("max_execution_time"); var_dump($foo);'
+# 配置选项将被设置成为任何 '=' 字符之后的值
+$  php -d max_execution_time=20
+        -r '$foo = ini_get("max_execution_time"); var_dump($foo);'
 string(2) "20"
-$  php 
-       -d max_execution_time=doesntmakesense 
-       -r '$foo = ini_get("max_execution_time"); var_dump($foo);'
+$  php
+        -d max_execution_time=doesntmakesense
+        -r '$foo = ini_get("max_execution_time"); var_dump($foo);'
 string(15) "doesntmakesense"
 ]]>
         </screen>
-       </para>
-      </entry>
-     </row>
-     <row>
-      <entry>-a</entry>
-      <entry>--interactive</entry>
-      <entry>
-       <para>
-        交互式运行 PHP。
-        <!-- 
-        mfischer, 20020510: Couldn't come up with a decent useful description
-        of the current implementation of the interactive mode.
-        -->
        </para>
       </entry>
      </row>
@@ -559,21 +601,37 @@ string(15) "doesntmakesense"
       <entry>--profile-info</entry>
       <entry>
        <para>
-	    为调试器等生成扩展信息。
-        <!-- 
-        mfischer, 20020510: Anyone who can provide more information what it
-        really does (even if it's only for developers) ?
-        -->
+        激活扩展信息模式，被用于调试／测试。
        </para>
       </entry>
      </row>
      <row>
-      <entry>-z</entry>
-      <entry>--zend-extension</entry>
+      <entry>-f</entry>
+      <entry>--file</entry>
       <entry>
        <para>
-	    加载 Zend 扩展库。如果仅给定一个文件名，PHP 将试图从您系统扩展库的默认路径（在 Linux 系统下，该路径通常由 <filename>/etc/ld.so.conf</filename> 指定）加载该扩展库。如果您用一个绝对路径指定文件名，则系统的扩展库默认路径将不会被使用。如果用相对路径指定的文件名，PHP 则仅试图加载相对于当前目录的扩展库。
+        解析并运行 <option>-f</option>
+        选项给定的文件名。该参数为可选参数，可以省略，仅指明需要运行的文件名即可。
        </para>
+      </entry>
+     </row>
+     <row>
+      <entry>-h and -?</entry>
+      <entry>--help and --usage</entry>
+      <entry>
+       使用该参数，您可以得到完整的命令行参数的列表及这些参数作用的简单描述。
+      </entry>
+     </row>
+     <row>
+      <entry>-i</entry>
+      <entry>--info</entry>
+      <entry>
+       该命令行参数会调用 <function>phpinfo</function>
+       函数并显示出结果。如果 PHP 没有正常工作，建议执行
+       <command>php -i</command>
+       命令来查看在信息表格之前或者对应的地方是否有任何错误信息输出。请注意当使用
+       CGI 摸索时，输出的内容为 <literal>HTML</literal>
+       格式，因此输出的信息篇幅较大。
       </entry>
      </row>
      <row>
@@ -581,26 +639,33 @@ string(15) "doesntmakesense"
       <entry>--syntax-check</entry>
       <entry>
        <para>
-	    该参数提供了对指定 PHP 代码进行语法检查的方便的方法。如果成功，则向标准输出写入 <literal>No syntax errors detected in &lt;filename&gt;</literal> 字符串，并且外壳返回值为 <literal>0</literal>。如果失败，则 <literal>Errors parsing
-        &lt;filename&gt;</literal> 以及内部解析器错误信息会一起被写入到标准输出，同时外壳返回值将别设置为 <literal>255</literal>。
+        该参数提供了对指定 PHP
+        代码进行语法检查的方便的方法。如果成功，则向标准输出写入
+        <literal>No syntax errors detected in &lt;filename&gt;</literal>
+        字符串，并且外壳返回值为
+        <literal>0</literal>。如果失败，则输出
+        <literal>Errors parsing
+        &lt;filename&gt;</literal>
+        以及内部解析器错误信息到标准输出，同时外壳返回值将别设置为
+        <literal>255</literal>。
        </para>
        <para>
-	    该参数将无法检查致命错误（如未定义函数），如果您希望检测之名错误，请使用 <option>-f</option> 参数。
+        该参数将无法检查致命错误（如未定义函数），如果也希望检测致命错误，请使用
+        <option>-f</option> 参数。
        </para>
        <note>
         <para>
-		 该参数不能和 <option>-r</option> 一同使用。
+         该参数不能和 <option>-r</option> 一同使用。
         </para>
        </note>
       </entry>
      </row>
-
      <row>
       <entry>-m</entry>
       <entry>--modules</entry>
       <entry>
        <para>
-	    使用该参数，PHP 将打印出内置以及已加载的 PHP 及 Zend 模块：
+        使用该参数，PHP 将打印出内置以及已加载的 PHP 及 Zend 模块：
         <screen>
 <![CDATA[
 $ php -m
@@ -623,42 +688,40 @@ ctype
       </entry>
      </row>
      <row>
-      <entry>-i</entry>
-      <entry>--info</entry>
-      <entry>
-	   该命令行参数会调用 <function>phpinfo</function> 函数，并打印出结果。如果 PHP 没有正常工作，我们建议您执行 <command>php -i</command> 命令来查看在信息表格之前或者对应的地方是否有任何错误信息输出。请注意当使用 CGI 摸索时，输出的内容为 <literal>HTML</literal> 格式，因此输出的信息篇幅较大。
-      </entry>
-     </row>
-     <row>
       <entry>-r</entry>
       <entry>--run</entry>
       <entry>
        <para>
-	    使用该参数可以在命令行运行 PHP 代码。您<emphasis role="strong">无需</emphasis>加上 PHP 的起始和结束标识符（<literal>&lt;?php</literal> 和 <literal>?&gt;</literal>），否则将会导致语法解析错误。
+        使用该参数可以在命令行内运行单行 PHP
+        代码。<emphasis role="strong">无需</emphasis>加上 PHP
+        的起始和结束标识符（<literal>&lt;?php</literal> 和
+        <literal>?&gt;</literal>），否则将会导致语法解析错误。
        </para>
        <note>
         <para>
-		 使用这种形式的 PHP 时，应个别注意避免和外壳环境进行的命令行参数替换相冲突。
+         使用这种形式的 PHP 时，应注意避免和外壳环境进行的命令行参数替换相冲突。
         </para>
         <para>
-		 显示语法解析错误的范例
+         显示语法解析错误的范例
          <screen>
 <![CDATA[
 $ php -r "$foo = get_defined_constants();"
 Command line code(1) : Parse error - parse error, unexpected '='
 ]]>
          </screen>
-        </para>
-        <para>
-		 这里的问题在于即时使用了双引号 <literal>"</literal>，sh/bash 仍然实行了参数替换。由于 <varname>$foo</varname> 没有被定义，被替换后它所在的位置变成了空字符，因此在运行时，实际被 PHP 读取的代码为：
+         这里的问题在于即使使用了双引号
+         <literal>"</literal>，sh/bash 仍然实行了参数替换。由于
+         <varname>$foo</varname>
+         没有被定义，被替换后它所在的位置变成了空字符，因此在运行时，实际被
+         PHP 读取的代码为：
          <screen>
 <![CDATA[
 $ php -r " = get_defined_constants();"
 ]]>
          </screen>
-        </para>
-        <para>
-		 正确的方法是使用单引号 <literal>'</literal>。在用单引号引用的字符串中，变量不会被 sh/bash 还原成其原值。
+         正确的方法是使用单引号
+         <literal>'</literal>。在用单引号引用的字符串中，变量不会被
+         sh/bash 还原成其原值。
          <screen>
 <![CDATA[
 $ php -r '$foo = get_defined_constants(); var_dump($foo);'
@@ -675,81 +738,148 @@ array(370) {
   [...]
 ]]>
          </screen>
-        </para>
-        <para>
-		 如果您使用的外壳不是 sh/bash，您可能会碰到其它的问题。请报告您碰到的 Bug 到 <ulink url="&url.php.bugs;">&url.php.bugs;</ulink>，或者发邮件到 &email.php.doc;。
-        </para>
-        <para>
-		 当您试图将外壳的环境变量引入到马或者用反斜线来转义字符时也可能碰到各种各样的问题，请您在使用时注意！
-		 <!-- :-) -->
+         如果使用的外壳不是 sh/bash，可能会碰到更多问题。请将碰到的 Bug
+         向 <ulink url="&url.php.bugs;">&url.php.bugs;</ulink>
+         报告。注意，当试图将 shell 变量用到代码中或者使用反斜线时仍然很容易碰到问题。
         </para>
        </note>
-       <note> 
-        <para> 
-          <option>-r</option> 在 <emphasis>CLI</emphasis> SAPI 中有效，在 <emphasis>CGI</emphasis> SAPI 中无效。
+       <note>
+        <para>
+         <option>-r</option> 在 <emphasis>CLI</emphasis> SAPI
+         中有效，在 <emphasis>CGI</emphasis> SAPI 中无效。
         </para>
        </note>
-	  </entry>
-     </row>
-     <row>
-      <entry>-h</entry>
-      <entry>--help</entry>
-      <entry>
-	   使用该参数，您可以得到完整的命令行参数的列表及这些参数作用的简单描述。
       </entry>
      </row>
      <row>
-      <entry>-?</entry>
-      <entry>--usage</entry>
+      <entry>-B</entry>
+      <entry>--process-begin</entry>
       <entry>
-       <option>--help</option> 的别名。
+       <para>
+        在处理 stdin 之前先执行 PHP 代码。PHP 5 新加。
+       </para>
       </entry>
      </row>
-     <!--
-     new, not in PHP 4.3.4, but are in php_cli.c 1.102 or cgi_main.c 1.243
-     -b <address:port>|<port> bindpath Bind Path for external FASTCGI Server mode, only CGI, no Windows
-     -B <begin_code>     process-begin Run PHP <begin_code> before processing input lines
-     -R <code>           process-code  Run PHP <code> for every input line
-     -F <file>           process-file  Parse and execute <file> for every input line
-     -E <end_code>       process-end   Run PHP <end_code> after processing all input lines
-     -H                  hide-args     Hide any passed arguments from external tools.
-     -g                  global        Define global variables on command line
-     -->
+     <row>
+      <entry>-R</entry>
+      <entry>--process-code</entry>
+      <entry>
+       <para>
+        对每个输入行都执行 PHP 代码。PHP 5 新加。
+       </para>
+       <para>
+        此模式下有两个特殊变量：<varname>$argn</varname>
+        和 <varname>$argi</varname>。<varname>$argn</varname>
+        包含 PHP 当前处理的行内容，而
+        <varname>$argi</varname> 则包含该行号。
+       </para>
+      </entry>
+     </row>
+     <row>
+      <entry>-F</entry>
+      <entry>--process-file</entry>
+      <entry>
+       <para>
+        对每个输入行都执行 PHP 文件。PHP 5 新加。
+       </para>
+      </entry>
+     </row>
+     <row>
+      <entry>-E</entry>
+      <entry>--process-end</entry>
+      <entry>
+       <para>
+        在处理完输入后执行的 PHP 代码。PHP 5 新加。
+       </para>
+       <para>
+        使用 <option>-B</option>，<option>-R</option> 和
+        <option>-E</option> 选项来计算一个项目总行数的例子。
+        <screen>
+<![CDATA[
+$ find my_proj | php -B '$l=0;' -R '$l += count(@file($argn));' -E 'echo "Total Lines: $l\n";'
+Total Lines: 37328
+]]>
+        </screen>
+       </para>
+      </entry>
+     </row>
+     <row>
+      <entry>-s</entry>
+      <entry>--syntax-highlight and --syntax-highlight</entry>
+      <entry>
+       <para>
+        显示有语法高亮色彩的源代码。
+       </para>
+       <para>
+        该参数使用内建机制来解析文件并为其生成一个 <literal>HTML</literal>
+        高亮版本并将结果写到标准输出。请注意该过程所做的只是生成了一个
+        <literal>&lt;code&gt; [...] &lt;/code&gt;</literal> 的
+        <literal>HTML</literal> 标记的块，并不包含任何的 <literal>HTML</literal> 头。
+       </para>
+       <note>
+        <para>
+         该选项不能和 <option>-r</option> 参数同时使用。
+        </para>
+       </note>
+      </entry>
+     </row>
+     <row>
+      <entry>-v</entry>
+      <entry>--version</entry>
+      <entry>
+       <para>
+        将 PHP，PHP SAPI 和 Zend 的版本信息写入标准输出。例如：
+        <screen>
+<![CDATA[
+$ php -v
+PHP 4.3.0 (cli), Copyright (c) 1997-2002 The PHP Group
+Zend Engine v1.3.0, Copyright (c) 1998-2002 Zend Technologies
+]]>
+        </screen>
+       </para>
+      </entry>
+     </row>
+     <row>
+      <entry>-w</entry>
+      <entry>--strip</entry>
+      <entry>
+       <para>
+        显示除去了注释和多余空白的源代码。
+       </para>
+       <note>
+        <para>
+         该选项不能和 <option>-r</option> 参数同时使用。
+        </para>
+       </note>
+      </entry>
+     </row>
+     <row>
+      <entry>-z</entry>
+      <entry>--zend-extension</entry>
+      <entry>
+       <para>
+        加载 Zend 扩展库。如果仅给定一个文件名，PHP
+        将试图从当前系统扩展库的默认路径（在 Linux
+        系统下，该路径通常由 <filename>/etc/ld.so.conf</filename>
+        指定）加载该扩展库。如果用一个绝对路径指定文件名，则不会使用系统的扩展库默认路径。如果用相对路径指定的文件名，则
+        PHP 仅试图在当前目录的相对目录加载扩展库。
+       </para>
+      </entry>
+     </row>
     </tbody>
    </tgroup>
   </table>
  </para>
- <!-- NEW DOCUMENTATION ENDS -->
 
- <!-- OLD DOCUMENTED STARTS
-  mfischer, 20020510: I've commented out the start paragraphs of the old
-  documentation as it is meant to be replaced by the new one.
  <para>
-  The command line options of the PHP executable are useful
-  if you would like to debug or test your PHP setup, but they
-  can also be handy, if you would like to use PHP for a
-  different purpose than web scripting.
- </para>
- <para>
-  Note, that you can always direct the output of the PHP
-  executable to an external file with the &gt; character,
-  so <literal>php -q test.php &gt; test.html</literal> will
-  print out the output of <filename>test.php</filename>
-  without HTTP headers to the <filename>test.html</filename>
-  file in the same directory.
- </para>
- <para>
-  You can only use these command line options if you have
-  the PHP executable. If you built the server module
-  version, and you have no CGI version available on your
-  machine, than you have no chance to use these options.
-  For Windows users both the PHP executable and the server
-  modules are in the binary package, the executable is
-  named <filename>php.exe</filename>.
- </para>
- -->
- <para>
-  PHP 的命令行模式能使得 PHP 脚本能完全独立于 WEB 服务器单独运行。如果您使用 Unix 系统，您需要在您的 PHP 脚本的最前面加上一行特殊的代码，使得它能够被执行，这样系统就能知道用什么样的程序要运行该脚本。在 Windows 平台下您可以将 <filename>php.exe</filename> 和 <literal>.php</literal> 文件的双击属性相关联，您也可以编写一个批处理文件来用 PHP 执行脚本。为 Unix 系统增加的第一行代码不会影响该脚本在 Windows 下的运行，因此您也可以用该方法编写跨平台的脚本程序。以下是一个简单的PHP 命令行程序的范例。
+  PHP 的命令行模式能使得 PHP 脚本能完全独立于 WEB 服务器单独运行。如果使用
+  Unix 系统，需要在 PHP
+  脚本的最前面加上一行特殊的代码，使得它能够被执行，这样系统就能知道用哪个程序去运行该脚本。在
+  Windows 平台下可以将 <filename>php.exe</filename> 和 <literal>.php</literal>
+  文件的双击属性相关联，也可以编写一个批处理文件来用 PHP
+  执行脚本。为 Unix 系统增加的第一行代码不会影响该脚本在
+  Windows 下的运行，因此也可以用该方法编写跨平台的脚本程序。以下是一个简单的
+  PHP 命令行程序的范例。
  </para>
  <para>
   <example>
@@ -781,30 +911,43 @@ This is a command line PHP script with one option.
   </example>
  </para>
  <para>
-  在以上脚本中，我们用第一行特殊的代码来指明该文件应该由 PHP 来执行。我们在这里使用 CLI 的版本，因此不会有 HTTP 头信息输出。在您用 PHP 编写命令行应用程序时，您可以使用两个参数：<varname>$argc</varname> 和 <varname>$argv</varname>。前面一个的值是比参数个数大 1 的整数（运行的脚本本身的名称也被当作一个参数）。第二个时包含有参数的数组，其第一个元素为脚本的名称，下标为数字 0（<varname>$argv[0]</varname>）。
+  在以上脚本中，用第一行特殊的代码来指明该文件应该由 PHP
+  来执行。在这里使用 CLI 的版本，因此不会有 HTTP 头信息输出。在用
+  PHP 编写命令行应用程序时，可以使用两个参数：<varname>$argc</varname>
+  和 <varname>$argv</varname>。前面一个的值是比参数个数大 1
+  的整数（运行的脚本本身的名称也被当作一个参数）。第二个是包含有参数的数组，其第一个元素为脚本的名称，下标为数字
+  0（<varname>$argv[0]</varname>）。
  </para>
  <para>
-  在以上程序中我们检查了参数的个数是大于 1 个还是小于 1 个。即时参数是 <option>--help</option>、<option>-help</option>、<option>-h</option> 或 <option>-?</option>，我们仍然打印出帮助信息，并同时动态输出脚本的名称。如果还收到了其它参数，我们也把它们显示出来。
+  以上程序中检查了参数的个数是大于 1 个还是小于 1
+  个。此外如果参数是 <option>--help</option>，<option>-help</option>，<option>-h</option>
+  或 <option>-?</option>
+  时，打印出帮助信息，并同时动态输出脚本的名称。如果还收到了其它参数，将其显示出来。
  </para>
  <para>
-  如果您希望在 Unix 下运行以上脚本，您需要使得它成为可执行脚本，然后简单的运行 <command>script.php echothis</command> 或 <command>script.php -h</command>。在 Windows 下，您可以为此编写一个批处理文件：
+  如果希望在 Unix 下运行以上脚本，需要使其属性为可执行文件，然后简单的运行
+  <command>script.php echothis</command> 或 <command>script.php -h</command>。在
+  Windows 下，可以为此编写一个批处理文件：
  </para>
  <para>
   <example>
    <title>运行 PHP 命令行脚本的批处理文件（script.bat）</title>
    <programlisting role="shell">
 <![CDATA[
-@c:\php\cli\php.exe script.php %1 %2 %3 %4
+@C:\php\php.exe script.php %1 %2 %3 %
 ]]>
    </programlisting>
   </example>
  </para>
  <para>
-  假设您将上述程序命名为 <filename>script.php</filename>，且您的 CLI <filename>php.exe</filename> 文件放置在 <filename>c:\php\cli\php.exe</filename>，该批处理文件会帮助您将附加的参数传给脚本程序： <command>script.bat echothis</command> 或
-  <command>script.bat -h</command>。
+  假设将上述程序命名为 <filename>script.php</filename>，且
+  CLI 版的 <filename>php.exe</filename> 文件放置在
+  <filename>c:\php\cli\php.exe</filename>，该批处理文件会帮助将附加的参数传给脚本程序：<command>script.bat
+  echothis</command> 或 <command>script.bat -h</command>。
  </para>
  <para>
-  请参阅 <link linkend="ref.readline">Readline</link> 扩展模块的有关文档，以获取更多的函数的信息。这些函数可以帮助您完善您的 PHP 命令行应用程序。
+  请参阅 <link linkend="ref.readline">Readline</link>
+  扩展模块的有关文档，以获取更多的函数的信息。这些函数可以帮助完善 PHP 命令行应用程序。
  </para>
 </chapter>
 
