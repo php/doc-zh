@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.4 $ -->
-<!-- $Author: dallas $ -->
-<!-- EN-Revision: 1.8 Maintainer: dallas Status: ready -->
+<!-- $Revision: 1.5 $ -->
+<!-- $Author: lm92 $ -->
+<!-- EN-Revision: 1.20 Maintainer: dallas Status: ready -->
   <refentry id="function.fgetcsv">
    <refnamediv>
     <refname>fgetcsv</refname>
@@ -12,31 +12,55 @@
      <methodsynopsis>
       <type>array</type><methodname>fgetcsv</methodname>
       <methodparam><type>int</type><parameter>handle</parameter></methodparam>
-      <methodparam><type>int</type><parameter>length</parameter></methodparam>
+      <methodparam choice="opt"><type>int</type><parameter>length</parameter></methodparam>
       <methodparam choice="opt"><type>string</type><parameter>delimiter</parameter></methodparam>
       <methodparam choice="opt"><type>string</type><parameter>enclosure</parameter></methodparam>
      </methodsynopsis>
+
+    <para>
+     <variablelist>
+      <varlistentry>
+       <term><parameter>handle</parameter></term>
+       <listitem>
+        <simpara>
+         一个由 <function>fopen</function>、<function>popen</function> 或
+         <function>fsockopen</function> 产生的有效文件指针。
+        </simpara>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term><parameter>length</parameter> （可选）</term>
+       <listitem>
+        <simpara>
+         必须大于 CVS 文件内最长的一行。在 PHP 5
+         中该参数是可选的。如果忽略（在 PHP 5.0.4 以后的版本中设为
+         0）该参数的话，那么长度就没有限制，不过可能会影响执行效率。
+        </simpara>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term><parameter>delimiter</parameter> （可选）</term>
+       <listitem>
+        <simpara>
+         设置字段分界符（只允许一个字符），默认值为逗号。
+        </simpara>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term><parameter>enclosure</parameter> （可选）</term>
+       <listitem>
+        <simpara>
+         设置字段环绕符（只允许一个字符），默认值为双引号。该参数是在 PHP 4.3.0 中添加的。
+        </simpara>
+       </listitem>
+      </varlistentry>
+     </variablelist>
+    </para>
+
     <simpara>
      和 <function>fgets</function> 类似，只除了
      <function>fgetcsv</function> 解析读入的行并找出 <acronym>CSV</acronym>
-     格式的字段然后返回一个包含这些字段的数组。可选的第三个参数
-     <parameter>delimiter</parameter> 的默认值是逗号。可选参数
-     <parameter>enclosure</parameter> 的默认值是双引号。<parameter>delimiter</parameter>
-     和 <parameter>enclosure</parameter>
-     都被限制为一个字符。如果多于一个字符，则只使用第一个字符。
-    </simpara>
-    <note>
-     <simpara>
-      <parameter>enclosure</parameter> 参数是 PHP 4.3.0 新加的。
-     </simpara>
-    </note>
-    <simpara>
-     <parameter>handle</parameter> 必须是通过
-     <function>fopen</function>，<function>popen</function> 或者
-     <function>fsockopen</function> 成功打开的有效文件指针。
-    </simpara>
-    <simpara>
-     <parameter>length</parameter> 必须大于 CVS 文件中长度最大的行（以便于处理行结束字符）。
+     格式的字段然后返回一个包含这些字段的数组。
     </simpara>
     <simpara>
      <function>fgetcsv</function> 出错时返回 &false;，包括碰到文件结束时。
@@ -53,20 +77,34 @@
 <![CDATA[
 <?php
 $row = 1;
-$handle = fopen ("test.csv","r");
-while ($data = fgetcsv ($handle, 1000, ",")) {
-    $num = count ($data);
-    print "<p> $num fields in line $row: <br>\n";
+$handle = fopen("test.csv","r");
+while ($data = fgetcsv($handle, 1000, ",")) {
+    $num = count($data);
+    echo "<p> $num fields in line $row: <br>\n";
     $row++;
     for ($c=0; $c < $num; $c++) {
-        print $data[$c] . "<br>\n";
+        echo $data[$c] . "<br>\n";
     }
 }
-fclose ($handle);
+fclose($handle);
 ?>
 ]]>
       </programlisting>
      </example>
+    </para>
+    <para>
+     从 PHP 4.3.5 起，<function>fgetcsv</function> 的操作是二进制安全的。
+    </para>
+    <note>
+     <simpara>
+      该函数对区域设置是敏感的。比如说 <varname>LANG</varname> 设为
+      <literal>en_US.UTF-8</literal> 的话，单字节编码的文件就会出现读取错误。
+     </simpara>
+    </note>
+    &note.line-endings;
+    <para>
+     参见 <function>explode</function>，<function>file</function>，<function>pack</function>
+     和 <function>fputcsv</function>
     </para>
    </refsect1>
   </refentry>
