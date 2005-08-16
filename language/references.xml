@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.4 $ -->
+<!-- $Revision: 1.5 $ -->
 <!-- $Author: dallas $ -->
-<!-- EN-Revision: 1.25 Maintainer: dallas Status: ready -->
+<!-- EN-Revision: 1.44 Maintainer: dallas Status: ready -->
  <chapter id="language.references">
   <title>引用的解释</title>
 
   <sect1 id="language.references.whatare">
    <title>引用是什么</title>
    <simpara>
-    在 PHP 中引用意味着用不同的名字访问同一个变量内容。这并不像 C 的指针，它们是符号表别名。注意在
+    在 PHP 中引用意味着用不同的名字访问同一个变量内容。这并不像 C
+    的指针，替代的是，引用是符号表别名。注意在
     PHP 中，变量名和变量内容是不一样的，因此同样的内容可以有不同的名字。最接近的比喻是
     Unix 的文件名和文件本身 － 变量名是目录条目，而变量内容则是文件本身。引用可以被看作是
     Unix 文件系统中的紧密连接。
@@ -23,7 +24,7 @@
      <programlisting role="php">
 <![CDATA[
 <?php
-$a =& $b
+$a =& $b;
 ?>
 ]]>
      </programlisting>
@@ -37,6 +38,11 @@ $a =& $b
      </para>
     </note>
    </para>
+   <note>
+    <para>
+     如果具有引用的数组被拷贝，其值不会解除引用。对于数组传值给函数也是如此。
+    </para>
+   </note>
    <para>
    同样的语法可以用在函数中，它返回引用，以及用在 <literal>new</literal>
    运算符中（PHP 4.0.4 以及以后版本）：
@@ -45,7 +51,7 @@ $a =& $b
 <![CDATA[
 <?php
 $bar =& new fooclass();
-$foo =& find_var ($bar);
+$foo =& find_var($bar);
 ?>
 ]]>
     </programlisting>
@@ -64,19 +70,102 @@ $foo =& find_var ($bar);
       Zend 引擎的一个限制并且会导致一个解析错误。
      </para>
    </note>
+   <warning>
+    <para>
+     如果在一个函数内部给一个声明为 <literal>global</literal>
+     的变量赋于一个引用，该引用只在函数内部可见。可以通过使用
+     <varname>$GLOBALS</varname> 数组避免这一点。
+     <example>
+      <title>在函数内引用全局变量</title>
+      <programlisting role="php">
+<![CDATA[
+<?php
+$var1 = "Example variable";
+$var2 = "";
+
+function global_references($use_globals)
+{
+    global $var1, $var2;
+    if (!$use_globals) {
+        $var2 =& $var1; // visible only inside the function
+    } else {
+        $GLOBALS["var2"] =& $var1; // visible also in global context
+    }
+}
+
+global_references(false);
+echo "var2 is set to '$var2'\n"; // var2 is set to ''
+global_references(true);
+echo "var2 is set to '$var2'\n"; // var2 is set to 'Example variable'
+?>
+]]>
+      </programlisting>
+     </example>
+     把 <literal>global $var;</literal> 当成是 <literal>$var
+     =&amp; $GLOBALS['var'];</literal> 的简写。从而将其它引用赋给
+     <literal>$var</literal> 只改变了本地变量的引用。
+    </para>
+   </warning>
+   <note>
+    <para>
+     如果在 <link
+     linkend="control-structures.foreach">foreach</link>
+     语句中给一个具有引用的变量赋值，被引用的对象也被改变。
+     <example>
+      <title>引用与 foreach 语句</title>
+      <programlisting role="php">
+<![CDATA[
+<?php
+$ref = 0;
+$row =& $ref;
+foreach (array(1, 2, 3) as $row) {
+    // do something
+}
+echo $ref; // 3 - last element of the iterated array
+?>
+]]>
+      </programlisting>
+     </example>
+    </para>
+   </note>
+   <warning>
+    <para>
+     复杂数组最好拷贝而不是引用。下面的例子不会如期望中那样工作。
+     <example>
+      <title>复杂数组的引用</title>
+      <programlisting role="php">
+<![CDATA[
+<?php
+$top = array(
+    'A' => array(),
+    'B' => array(
+        'B_b' => array(),
+    ),
+);
+
+$top['A']['parent'] = &$top;
+$top['B']['parent'] = &$top;
+$top['B']['B_b']['data'] = 'test';
+print_r($top['A']['parent']['B']['B_b']); // array()
+?>
+]]>
+      </programlisting>
+     </example>
+    </para>
+   </warning>
    <para>
     引用做的第二件事是用引用传递变量。这是通过在函数内建立一个本地变量并且该变量在呼叫范围内引用了同一个内容来实现的。例如：
     <informalexample>
      <programlisting role="php">
 <![CDATA[
 <?php
-function foo (&$var)
+function foo(&$var)
 {
     $var++;
 }
 
 $a=5;
-foo ($a);
+foo($a);
 ?>
 ]]>
      </programlisting>
@@ -98,7 +187,7 @@ foo ($a);
      <programlisting role="php">
 <![CDATA[
 <?php
-function foo (&$var)
+function foo(&$var)
 {
     $var =& $GLOBALS["baz"];
 }
@@ -114,31 +203,35 @@ foo($bar);
     <varname>$GLOBALS["baz"]</varname> 上面。不可能通过引用机制将 <varname>$bar</varname>
     在函数调用范围内绑定到别的变量上面，因为在函数 <varname>foo</varname> 中并没有变量
     <varname>$bar</varname>（它被表示为 <varname>$var</varname>，但是 <varname>$var</varname>
-    只有变量内容而没有调用符号表中的名字到值的绑定）。
+    只有变量内容而没有调用符号表中的名字到值的绑定）。可以使用<link
+    linkend="language.references.return">引用返回</link>来引用被函数选择的变量。
    </simpara>
   </sect1>
 
-  <sect1 id="language.references.pass">
-   <title>引用传递</title>
-   <para>
+ <sect1 id="language.references.pass">
+  <title>引用传递</title>
+  <para>
    你可以将一个变量通过引用传递给函数，这样该函数就可以修改其参数的值。语法如下：
-    <informalexample>
-     <programlisting role="php">
+   <informalexample>
+    <programlisting role="php">
 <![CDATA[
 <?php
-function foo (&$var)
+function foo(&$var)
 {
     $var++;
 }
 
 $a=5;
-foo ($a);
+foo($a);
 // $a is 6 here
 ?>
 ]]>
-     </programlisting>
-    </informalexample>
-  注意在函数调用时没有引用符号 － 只有函数定义中有。光是函数定义就足够使参数通过引用来正确传递了。
+    </programlisting>
+   </informalexample>
+   注意在函数调用时没有引用符号 －
+   只有函数定义中有。光是函数定义就足够使参数通过引用来正确传递了。在最近版本的
+   PHP 中如果把 &amp; 用在 <literal>foo(&amp;$a);</literal>
+   中会得到一条警告说“Call-time pass-by-reference”已经过时了。
   </para>
   <para>
   以下内容可以通过引用传递：
@@ -186,33 +279,32 @@ function bar() // Note the missing &
     $a = 5;
     return $a;
 }
-foo(bar());
-
+foo(bar()); // 自 PHP 5.1.0 起导致致命错误
 foo($a = 5) // 表达式，不是变量
-foo(5) // 常量，不是变量
+foo(5) // 导致致命错误
 ?>
 ]]>
      </programlisting>
     </informalexample>
    这些条件是 PHP 4.0.4 以及以后版本有的。
   </para>
-  </sect1>
+ </sect1>
 
   <sect1 id="language.references.return">
    <title>引用返回</title>
    <para>
-    引用返回用在当你想用函数找到引用应该被绑定在哪一个变量上面时。当返回引用时，使用此语法：
+    引用返回用在当你想用函数找到引用应该被绑定在哪一个变量上面时。<emphasis>不要</emphasis>用返回引用来增加性能，引擎足够聪明来自己进行优化。仅在有合理的技术原因时才返回引用！要返回引用，使用此语法：
     <informalexample>
      <programlisting role="php">
 <![CDATA[
 <?php
-function &find_var ($param)
+function &find_var($param)
 {
     /* ...code... */
     return $found_var;
 }
 
-$foo =& find_var ($bar);
+$foo =& find_var($bar);
 $foo->x = 2;
 ?>
 ]]>
@@ -227,6 +319,14 @@ $foo->x = 2;
      是作为引用的绑定，而不是通常的赋值。
     </simpara>
    </note>
+   <note>
+    <simpara>
+     如果试图这样从函数返回引用：<literal>return
+     ($found_var);</literal>，这将<emphasis>不会</emphasis>起作用，因为你在试图返回一个<emphasis>表达式</emphasis>的结果而不是一个引用的变量。只能从函数返回引用变量——没别的方法。如果代码试图返回一个动态表达式或
+     <literal>new</literal> 运算符的结果，自 PHP 4.4.0 和 PHP 5.1.0 起会发出一条
+     <constant>E_NOTICE</constant> 错误。
+    </simpara>
+   </note>
   </sect1>
 
   <sect1 id="language.references.unset">
@@ -239,7 +339,7 @@ $foo->x = 2;
 <?php
 $a = 1;
 $b =& $a;
-unset ($a);
+unset($a);
 ?>
 ]]>
      </programlisting>
