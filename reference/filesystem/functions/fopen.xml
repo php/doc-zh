@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.6 $ -->
-<!-- $Author: dallas $ -->
-<!-- EN-Revision: 1.18 Maintainer: dallas Status: ready -->
+<!-- $Revision: 1.7 $ -->
+<!-- $Author: lm92 $ -->
+<!-- EN-Revision: 1.27 Maintainer: dallas Status: ready -->
 <!-- CREDITS: lm92 -->
   <refentry id="function.fopen">
    <refnamediv>
@@ -14,7 +14,7 @@
       <type>resource</type><methodname>fopen</methodname>
       <methodparam><type>string</type><parameter>filename</parameter></methodparam>
       <methodparam><type>string</type><parameter>mode</parameter></methodparam>
-      <methodparam choice="opt"><type>int</type><parameter>use_include_path</parameter></methodparam>
+      <methodparam choice="opt"><type>bool</type><parameter>use_include_path</parameter></methodparam>
       <methodparam choice="opt"><type>resource</type><parameter>zcontext</parameter></methodparam>
      </methodsynopsis>
     <simpara>
@@ -53,8 +53,14 @@
       选项。参见相应的页面哪些选项可以被设定。（也就是
       &php.ini; 的值
       <literal>user_agent</literal> 用在 <literal>http</literal> 协议中。）有关
-      <literal>contexts</literal> 和
-      <parameter>zcontext</parameter> 参数的说明，参见 <xref linkend="ref.stream"/>。
+     </simpara>
+    </note>
+     &note.context-support;
+    <note>
+     <simpara>
+      自 PHP 4.3.2
+      起，对所有区别二进制和文本模式的平台默认模式都被设为二进制模式。如果你在升级后脚本碰到问题，尝试暂时使用
+      <literal>'t'</literal> 标记，直到所有的脚本都照以下所说的改为更具移植性以后。
      </simpara>
     </note>
     <para>
@@ -165,24 +171,18 @@
       标记，可能会碰到一些奇怪的问题，包括坏掉的图片文件以及关于
       <literal>\r\n</literal> 字符的奇怪问题。
      </para>
+    </note>
+    <note>
      <para>
-      <emphasis>
        为移植性考虑，强烈建议在用 <function>fopen</function>
        打开文件时总是使用 <literal>'b'</literal> 标记。
-      </emphasis>
      </para>
+    </note>
+    <note>
      <para>
-      <emphasis>
        再一次，为移植性考虑，强烈建议你重写那些依赖于
        <literal>'t'</literal> 模式的代码使其使用正确的行结束符并改成
        <literal>'b'</literal> 模式。
-      </emphasis>
-     </para>
-     <para>
-      <emphasis>
-       自 PHP 4.3.2 起，对所有区别二进制和文本模式的平台默认模式都被设为二进制模式。如果你在升级后脚本碰到问题，尝试暂时使用
-       <literal>'t'</literal> 标记，直到所有的脚本都照以上所说的改为更具移植性以后。
-      </emphasis>
      </para>
     </note>
     <para>
@@ -201,10 +201,10 @@
       <programlisting role="php">
 <![CDATA[
 <?php
-$handle = fopen ("/home/rasmus/file.txt", "r");
-$handle = fopen ("/home/rasmus/file.gif", "wb");
-$handle = fopen ("http://www.example.com/", "r");
-$handle = fopen ("ftp://user:password@example.com/somefile.txt", "w");
+$handle = fopen("/home/rasmus/file.txt", "r");
+$handle = fopen("/home/rasmus/file.gif", "wb");
+$handle = fopen("http://www.example.com/", "r");
+$handle = fopen("ftp://user:password@example.com/somefile.txt", "w");
 ?>
 ]]>
       </programlisting>
@@ -220,12 +220,14 @@ $handle = fopen ("ftp://user:password@example.com/somefile.txt", "w");
       <programlisting role="php">
 <![CDATA[
 <?php
-$handle = fopen ("c:\\data\\info.txt", "r");
+$handle = fopen("c:\\data\\info.txt", "r");
 ?>
 ]]>
       </programlisting>
      </informalexample>
     </para>
+    &warn.ssl-non-standard;
+    &note.sm.uidcheck.dir;
     <simpara>
      参见<xref linkend="wrappers"/>，<function>fclose</function>，<function>fgets</function>，<function>fread</function>，<function>fwrite</function>，<function>fsockopen</function>，<function>file</function>，<function>file_exists</function>，<function>is_readable</function>，<function>stream_set_timeout</function>
      和 <function>popen</function>。
