@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.2 $ -->
-<!-- $Author: dallas $ -->
-<!-- EN-Revision: 1.12 Maintainer: Avenger Status: ready -->
-<!-- splitted from ./en/functions/http.xml, last change in rev 1.2 -->
+<!-- $Revision: 1.3 $ -->
+<!-- $Author: lm92 $ -->
+<!-- EN-Revision: 1.37 Maintainer: Avenger Status: ready -->
   <refentry id="function.setcookie">
    <refnamediv>
     <refname>setcookie</refname>
@@ -11,60 +10,173 @@
    <refsect1>
     <title>描述</title>
      <methodsynopsis>
-      <type>boolean</type><methodname>setcookie</methodname>
+      <type>bool</type><methodname>setcookie</methodname>
       <methodparam><type>string</type><parameter>name</parameter></methodparam>
       <methodparam choice="opt"><type>string</type><parameter>value</parameter></methodparam>
       <methodparam choice="opt"><type>int</type><parameter>expire</parameter></methodparam>
       <methodparam choice="opt"><type>string</type><parameter>path</parameter></methodparam>
       <methodparam choice="opt"><type>string</type><parameter>domain</parameter></methodparam>
-      <methodparam choice="opt"><type>int</type><parameter>secure</parameter></methodparam>
+      <methodparam choice="opt"><type>bool</type><parameter>secure</parameter></methodparam>
      </methodsynopsis>
     <para>
      <function>setcookie</function> 函数用来建立一个新的 cookie 的信息。和其它头部信息一样，cookies
      必须要输出在文件的<emphasis>最前面</emphasis>，也就意味着在其之前，你不能输出任何字符
      (这是规定)。包括
-     <literal>&lt;html></literal> 和 <literal>&lt;head></literal>
+     <literal>&lt;html&gt;</literal> 和 <literal>&lt;head&gt;</literal>
      标签以及一些空格。如果这些标签在使用 <function>setcookie</function> 函数前输出，函数运行则会失败并返回 &false;。
      只要 <function>setcookie</function> 函数成功运行，不管该信息是否被用户接受，都会返回 &true;。
     </para>
+    <note>
+     <para>
+      在 PHP 4
+      中，输出缓冲机制可以实现在调用这个函数前就输出内容，这些内容会被暂时缓冲在服务器端直到最后才输出。要实现这个功能，可以使用
+      <function>ob_start</function> 和 <function>ob_end_flush</function>
+      或都设置 &php.ini; 内的 <literal>output_buffering</literal>
+      选项，也可以修改服务器端的配置。
+     </para>
+    </note>
     <para>
-     除了 <parameter>name</parameter> 以外，其它所有参数都是可选的。如果只有 name
-     参数，这将会删除客户端名称为 name
-     的 cookie。当然，为了跳过某些参数的设定，你可以为一些参数赋空字符
+     除了 <parameter>name</parameter> 
+     外，其它所有参数都是可选的。当然，为了跳过某些参数的设定，你可以为一些参数赋空字符
      (<emphasis>&quot;&quot;</emphasis>)。但参数
      <parameter>expire</parameter> 及
-     <parameter>secure</parameter> 的类型应该为整数 (integers) 并且不能被赋为空字符。你可以用 0
-     来代替(<emphasis>0</emphasis>)。参数
-     <parameter>expire</parameter> 是一个 Unix 的时间戳，可以用
-     <function>time</function> 或 <function>mktime</function>
-     函数来获得。<parameter>secure</parameter> 参数表明该 cookie
-     只在安全 HTTP 连接下才被发送。
+     <parameter>secure</parameter> 的类型应该为整数 (integers) 并且不能被赋为空字符。你可以用零
+     (<emphasis>0</emphasis>) 来代替 。下面的表格对 <function>setcookie</function>
+     的每一个参数都进行了解释。可以对照
+     <ulink url="&spec.cookies;">Netscape cookie specification</ulink> 以便了解
+     <function>setcookie</function> 的每一个参数的细节以及通过阅读
+     <ulink url="&url.rfc;2965">RFC 2965</ulink> 了解 HTTP cookies 的工作方式。
+    </para>
+    <para>
+     <table>
+      <title><function>setcookie</function> 参数详解</title>
+      <tgroup cols="3">
+       <thead>
+        <row>
+         <entry>参数</entry>
+         <entry>说明</entry>
+         <entry>举例</entry>
+        </row>
+       </thead>
+       <tbody>
+        <row>
+         <entry><parameter>name</parameter></entry>
+         <entry>
+          Cookie 的名字
+         </entry>
+         <entry>
+          使用 <varname>$_COOKIE['cookiename']</varname> 调用名为 cookiename 的 cookie
+         </entry>
+        </row>
+        <row>
+         <entry><parameter>value</parameter></entry>
+         <entry>
+          Cookie 的值。由于这个值是保存在客户端的，所以请不要把它设为敏感数据。
+         </entry>
+         <entry>
+          如果 cookie 的 <parameter>name</parameter> 为 'cookiename'，就可以通过
+          <varname>$_COOKIE['cookiename']</varname> 调用其值。
+         </entry>
+        </row>
+        <row>
+         <entry><parameter>expire</parameter></entry>
+         <entry>
+          Cookie 的有效期。这必须是一个 Unix 时间戳也就是从 Unix
+          开始到现在的秒数。换而言之，设置这个值时必须使用
+          <function>time</function> 再加上单位为秒的 cookie 的有效期。也可用
+          <function>mktime</function>来实现。
+         </entry>
+         <entry>
+          <literal>time()+60*60*24*30</literal> 将会把 cookies
+          的有效期设为30天。如果这个参数没有设置的话 cookie
+          将会在会话结束（一般是浏览器关闭）时失效。
+         </entry>
+        </row>
+        <row>
+         <entry><parameter>path</parameter></entry>
+         <entry>
+          Cookie 在服务器端的有效路径。
+         </entry>
+         <entry>
+          如果该参数设为 <literal>'/'</literal> 的话，cookies 就可以在整个
+          <parameter>domain</parameter> 内被调用，如果设为 <literal>'/foo/'</literal>，cookies
+          就只能在 <parameter>domain</parameter> 服务器的 <literal>/foo/</literal> 目录及其子目录内被调用，例如 <literal>/foo/bar/</literal>。该参数的默认值为当前目录。
+         </entry>
+        </row>
+        <row>
+         <entry><parameter>domain</parameter></entry>
+         <entry>
+          对于该 cookie 有效的域名。
+         </entry>
+         <entry>
+          要使 cookie 能在如 example.com 域名下的所有子域都有效的话，该参数应该设为
+          <literal>'.example.com'</literal>。虽然 <literal>.</literal>
+          并不必须的，但加上它参兼容更多的浏览器。如果该参数设为
+          <literal>www.example.com</literal> 的话，就只能在名为 www
+          的主机上使用了。更多详细信息参见
+          <ulink url="&spec.cookies;">spec</ulink>。
+         </entry>
+        </row>
+        <row>
+         <entry><parameter>secure</parameter></entry>
+         <entry>
+          设置 cookie 是否在安全的 HTTPS 连接中才有被发送。当设成 &true;
+          时，cookie 只会在安全的连接中被发送。默认值为 &false;。
+         </entry>
+         <entry>
+          <literal>0</literal> or <literal>1</literal>
+         </entry>
+        </row>
+       </tbody>
+      </tgroup>
+     </table>
     </para>
     <para>
      当 cookies 被设置后，便可以在其它页面通过 <link linkend="reserved.variables.cookies">$_COOKIE</link>
      或 <varname>$HTTP_COOKIE_VARS</varname> 数组取得其值。需要注意的是，<link linkend="language.variables.superglobals">autoglobals</link>
      的 <varname>$_COOKIE</varname> 形式适用于 PHP
      <ulink url="&url.php.release4.1.0;">4.1.0</ulink> 或更高版本。而
-     <varname>$HTTP_COOKIE_VARS</varname> 则从 PHP 3 起就可以使用.
+     <varname>$HTTP_COOKIE_VARS</varname> 则从 PHP 3 起就可以使用。Cookies
+     的值也会被保存到 <link linkend="reserved.variables.request">$_REQUEST</link> 数组中。
     </para>
+    <note>
+     <para>
+      如果 PHP 的选项 <link linkend="ini.register-globals">register_globals</link>
+      被设为 <literal>on</literal> 的话，cookie
+      的值仍然会被斌到变量内。在下面的例子中，<varname>$TestCookie</varname>
+      会被注册，但是我们仍然推荐使用 <varname>$_COOKIE</varname> 数组。
+     </para>
+    </note>
     <para>
      需要注意的几点:
      <itemizedlist>
       <listitem>
        <simpara>
-       Cookies 不会在你设置它的本页生效、要测试一个 cookie 是否被成功的设定，你可以在其到期之前通过另外一个页面来访问其值。过期时间是通过参数
-       <parameter>expire</parameter> 来设置的。
+       Cookies 不会在你设置它的本页生效、要测试一个 cookie
+       是否被成功的设定，你可以在其到期之前通过另外一个页面来访问其值。过期时间是通过参数
+       <parameter>expire</parameter> 来设置的。可以简单地使用
+       <literal>print_r($_COOKIE);</literal> 来调试现有的 cookies。
        </simpara>
       </listitem>
       <listitem>
        <simpara>
-        Cookies 将会被与其同名的后设定的 cookie 所覆盖。
+        Cookies 将会被与其同名的后设定的 cookie 所覆盖。如果 value 参数是一个空字符串，或者等于
+        &false;，但是其它的参数都于前一次使用 setcookie 时相同，那么名称为 name
+        所指定的 cookie 将会在客户端被删除。
        </simpara>
       </listitem>
       <listitem>
        <simpara>
-        在实际运用中，你可以把 Cookies 的名称设置成一个数组，但是数组 cookie 中的每个元素的值将会被单独保存在用户的系统中。你可以试着用<function>explode</function>
-        或 <function>serialize</function> 函数来把多个 cookie 值写入到一个 cookie 文件中。
+        由于把 cookie 的值设为 &false; 会使客户端尝试删除这个 cookie，所以要在 cookie
+        上保存 &true; 或 &false; 时不应该直接使用 boolean 值，而应该用 <emphasis>0</emphasis>
+        来表示 &false;，用 <emphasis>1</emphasis> 来表示 &true;
+       </simpara>
+      </listitem>
+      <listitem>
+       <simpara>
+        在实际运用中，你可以把 Cookies 的名称设置成一个数组，但是数组 cookie 中的每个元素的值将会被单独保存在用户的系统中。考虑使用<function>explode</function>
+        函数来把多个 cookie 的名字和值写入到一个 cookie 文件中。并不推荐使用
+        <function>serialize</function> 函数，因为它可以会导致一个安全漏洞。
        </simpara>
       </listitem>
      </itemizedlist>
@@ -81,62 +193,118 @@
       <title><function>setcookie</function> sent examples</title>
       <programlisting role="php">
 <![CDATA[
-setcookie ("TestCookie", $value);
-setcookie ("TestCookie", $value,time()+3600);  /* expire in 1 hour */
-setcookie ("TestCookie", $value,time()+3600, "/~rasmus/", ".utoronto.ca", 1);
+$value = 'something from somewhere';
+setcookie("TestCookie", $value);
+setcookie("TestCookie", $value,time()+3600);  /* expire in 1 hour */
+setcookie("TestCookie", $value,time()+3600, "/~rasmus/", ".utoronto.ca", 1);
 ]]>
       </programlisting>
      </example>
     </para>
     <para>
-    一个过期的 cookie 将会被自动删除。例子说明了如何删除一个 cookies:
-     <example>
-      <title><function>setcookie</function> delete examples</title>
-      <programlisting role="php">
-<![CDATA[
-// set the expiration date to one hour ago
-setcookie ("TestCookie", "", time() - 3600);
-setcookie ("TestCookie", "", time() - 3600, "/~rasmus/", ".utoronto.ca", 1);
-]]>
-      </programlisting>
-     </example>
+    要注意的是 cookie
+    的值在发送的时候会被自动的编码并保存，而当你读取它的时候，它又会被自动的解码并自动把被赋值给与自己同名的一个变量。如果不想
+    PHP 做这个工作，而你又在使用 PHP 5 的话，可以使用 <function>setrawcookie</function>
+    来访问原始的 cookie 值。下面这个简单的例子可以得到刚才所设定的 cookie 的值：
     </para>
     <para>
-    要注意的是 cookie 的值在发送的时候会被自动的编码并保存，而当你读取它的时候，它又会被自动的解码并自动把自己赋值给与自己同名的一个变量。你可以通过下面简单的例子来看到:
      <informalexample>
       <programlisting role="php">
 <![CDATA[
-echo $TestCookie;
+<?php
+// 输出单独的 cookie
 echo $_COOKIE["TestCookie"];
+echo $HTTP_COOKIE_VARS["TestCookie"];
+ 
+// 另一个调试的方法就是输出所有的 cookie
+print_r($_COOKIE);
+?>
 ]]>
       </programlisting>
      </informalexample>
+    </para>
+    <para>
+     当删除一个 cookie
+     时，先要确定它的有效期，才能有效的运行删除机制。下面的例子说明了如何删除刚才设置的那个
+     cookies:
+     <example>
+      <title><function>setcookie</function> 删除的例子</title>
+      <programlisting role="php">
+<![CDATA[
+// set the expiration date to one hour ago
+setcookie("TestCookie", "", time() - 3600);
+setcookie("TestCookie", "", time() - 3600, "/~rasmus/", ".utoronto.ca", 1);
+]]>
+      </programlisting>
+     </example>
     </para>
     <para>
     你也可以设置一个数组来存放 cookie，把许多名称不同的 cookie 放到一个数组中存放。这样你在接收 cookie
     的时候只需要要获取一个数组:
-     <informalexample>
+    </para>
+    <para>
+     <example>
+      <title><function>setcookie</function> 中使用数组的例子</title>
       <programlisting role="php">
 <![CDATA[
+<?php
 setcookie ("cookie[three]", "cookiethree");
 setcookie ("cookie[two]", "cookietwo");
 setcookie ("cookie[one]", "cookieone");
-if (isset ($cookie)) {
-    while (list ($name, $value) = each ($cookie)) {
-        echo "$name == $value<br>\n";
+
+// 刷新以后，输出它们
+if (isset($_COOKIE['cookie'])) {
+    foreach ($_COOKIE['cookie'] as $name => $value) {
+        echo "$name : $value <br />\n";
     }
 }
+?>
 ]]>
       </programlisting>
-     </informalexample>
+      <para>
+       以上代码将输出
+      </para>
+      <screen>
+<![CDATA[
+three : cookiethree
+two : cookietwo
+one : cookieone
+]]>
+      </screen>
+     </example>
     </para>
+    <note>
+     <para>
+      下面的一些 RFC 也具参考价值：
+      <ulink url="&url.rfc;2109">RFC 2109</ulink> 和
+      <ulink url="&url.rfc;2965">RFC 2695</ulink>
+     </para>
+     <para>
+      事实上 <parameter>expire</parameter> 参数的值只能为 Unix 时间戳，它并不接受如
+      <literal>Wdy, DD-Mon-YYYY HH:MM:SS GMT</literal>
+      之类的时间格式。之所以可以把这种格式的时间发送过去是因为 PHP
+      已经在内部进行了转换。
+     </para>
+     <para>
+      <parameter>expire</parameter> 参数的时间以客户端为准而非服务器。
+     </para>
+    </note>
+    <note>
+     <simpara>
+      向 Microsoft Internet Explorer 4 with Service Pack 1 设置 path
+      参数会导致它不能正确处理 cookies。
+      set.
+     </simpara>
+     <simpara>
+      Netscape Communicator 4.05 及 Microsoft Internet Explorer 3.x 在
+      cookie 的路径和时间没有设置的情况下会出现 cookies 处理错误。
+      are not set.
+     </simpara>
+    </note>
     <para>
-    关于 cookies 更多的介绍，可以参考网景公司的 cookies 说明书
-    <ulink url="&spec.cookies;">&spec.cookies;</ulink>.
+     参见 <function>header</function>，<function>setrawcookie</function> 和
+     本手册中的 <link linkend="features.cookies">Cookies 章节</link>
     </para>
-    <simpara>
-     Netscape Communicator 4.05 及 Microsoft Internet Explorer 3.x 在 cookie 的路径和时间没有设置的情况下会出现一些问题。
-    </simpara>
    </refsect1>
   </refentry>
 
