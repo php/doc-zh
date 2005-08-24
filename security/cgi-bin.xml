@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.4 $ -->
-<!-- $Author: lm92 $ -->
+<!-- $Revision: 1.5 $ -->
+<!-- $Author: dallas $ -->
 <!-- EN-Revision: 1.4 Maintainer: lm92 Status: ready -->
+<!-- CREDITS: dallas -->
 <chapter id="security.cgi-bin">
-   <title>安装成 CGI 模式</title>
+   <title>以 CGI 模式安装时</title>
 
    <sect1 id="security.cgi-bin.attacks">
     <title>可能受到的攻击</title>
@@ -11,10 +12,10 @@
      如果不想把 PHP 嵌入到服务器端软件（如 Apache）作为一个模块安装的话，可以选择以
      <acronym>CGI</acronym> 的模式安装。或者把 PHP 用于不同的 CGI
      封装以便为代码创建安全的 chroot 和 setuid 环境。这种安装方式通常会把
-     PHP 的可执行文件安装到 Web 服务器的 cgi-bin
+     PHP 的可执行文件安装到 web 服务器的 cgi-bin
      目录。CERT 建议书 <ulink url="&url.cert;">CA-96.11</ulink>
      建议不要把任何的解释器放到 cgi-bin 目录。尽管 PHP
-     作为一个独立的解释器，但是它的设计使它可以防止这类型的攻击：
+     可以作为一个独立的解释器，但是它的设计使它可以防止下面类型的攻击：
     </simpara>
     <itemizedlist>
      <listitem>
@@ -50,41 +51,45 @@
        Web 目录下的任意文件了。
       </simpara>
       <simpara>
-       在 PHP 里，编译时的可选项
+       在 PHP 里，编译时配置选项
        <link linkend="configure.enable-force-cgi-redirect">--enable-force-cgi-redirect</link>
-       以及运行时的可选项 <link linkend="ini.doc-root">doc_root</link>和<link linkend="ini.user-dir">user_dir</link>都可以为服务器上的文件和目录添加限制，用于防止这类攻击。下面将对各个选项的设置进行详细讲解。
+       以及运行时配置指令 <link linkend="ini.doc-root">doc_root</link> 和
+       <link linkend="ini.user-dir">user_dir</link>
+       都可以为服务器上的文件和目录添加限制，用于防止这类攻击。下面将对各个选项的设置进行详细讲解。
       </simpara>
      </listitem>
     </itemizedlist>
    </sect1>
 
    <sect1 id="security.cgi-bin.default">
-    <title>方法一：Web 目录内的文件完全公开</title>
+    <title>情形一：只运行公开的文件</title>
 
     <simpara>
-     如果 Web 服务器不使用任何的密码或者IP地址对内容进行访问限制，就不需要设置这些选项。又如
-     Web 服务器不支持重定向，或者由于 Web 服务器不能和 PHP
-     通信而使访问请求变得更为安全，就可以在安装时添加
+     如果 web 服务器中所有内容都受到密码或 IP
+     地址的访问限制，就不需要设置这些选项。如果
+     web 服务器不支持重定向，或者 web 服务器不能和 PHP
+     通信而使访问请求变得更为安全，可以在 configure 脚本中指定
      <link linkend="configure.enable-force-cgi-redirect">--enable-force-cgi-redirect</link>
-     选项。除此之外，还要确认 PHP 程序不需要依靠其它方式调用，比如说直接通过
+     选项。除此之外，还要确认 PHP 程序不依赖其它方式调用，比如通过直接的
      <filename role="php">http://my.host/cgi-bin/php/dir/script.php</filename>
-     或通过重定向访问
+     访问或通过重定向访问
      <filename role="php">http://my.host/dir/script.php</filename>。
     </simpara>
     <simpara>
-     在Apache中，重定向可以使用AddHandler和Action语句来设置，请看下一节。
+     在Apache中，重定向可以使用 AddHandler 和 Action 语句来设置，请看下一节。
     </simpara>
    </sect1>
 
    <sect1 id="security.cgi-bin.force-redirect">
-    <title>方法二：使用 --enable-force-cgi-redirect选项</title>
+    <title>情形二：使用 --enable-force-cgi-redirect 选项</title>
     <simpara>
-     这个编译选项可以防止任何人通过如
+     此编译选项可以防止任何人通过如
      <filename role="php">http://my.host/cgi-bin/php/secretdir/script.php</filename>
-     这样的 URL 直接调用 PHP。打开之后，PHP 只会遵守 Web 服务器的重定向规则进行解释。
+     这样的 URL 直接调用 PHP。PHP 在此模式下只会解析已经通过了
+     web 服务器的重定向规则的 URL。
     </simpara>
     <simpara>
-     通常Apache中的重定向设置可以通过以下语句完成：
+     通常 Apache 中的重定向设置可以通过以下指令完成：
     </simpara>
     <programlisting role="apache-conf">
 <![CDATA[
@@ -93,64 +98,66 @@ AddHandler php-script .php
 ]]>
     </programlisting>
     <simpara>
-     这个选项只在 Apache 下进行过测试，并且要依赖于 Apache
+     此选项只在 Apache 下进行过测试，并且要依赖于 Apache
      在重定向操作中所设置的非标准 CGI 环境变量
-     <envar>REDIRECT_STATUS</envar>。如果 Web
-     服务器不支持任何的方式对请求进行定向或重定向，就不能使用这个选项，而应该用另一种方法，请看下一节。
+     <envar>REDIRECT_STATUS</envar>。如果 web
+     服务器不支持任何方式能够判断请求是直接的还是重定向的，就不能使用这个选项，而应该用其它方法。请看下一节。
     </simpara>
    </sect1>
 
    <sect1 id="security.cgi-bin.doc-root">
-    <title>方法三：设置 doc_root 或 user_dir</title>
+    <title>情形三：设置 doc_root 或 user_dir</title>
     <simpara>
-     在 Web 服务器上放置可执行脚本和动态页面有时会产生一些安全问题。如果因为配置上的错误而导致脚本不能正常执行，那就会使源代码暴露，从而导致您的知识产权受侵害或者机密数据泄露。所以，很多系统管理员都会为
-     PHP 代码设置一个只允许解释器访问的目录，这样的话，PHP
-     解释器只对会解释代码而不会在配置错误时把源代码泄露。
+     在 web 服务器的主文档目录中包含动态内容如脚本和可执行程序有时被认为是一种不安全的实践。如果因为配置上的错误而未能执行脚本而作为普通
+     HTML 文档显示，那就可能导致知识产权或密码资料的泄露。所以很多系统管理员都会专门设置一个只能通过
+     PHP CGI 来访问的目录，这样该目录中的内容只会被解析而不会原样显示出来。
     </simpara>
     <simpara>
-     对于上一节提到的不支持重定向的情况，设置一个在 Web 目录外的
-     doc_root 用于存放脚本也是一种解决方法。
+     对于前面所说无法判断是否重定向的情况，很有必要在主文档目录之外建立一个专用于脚本的
+     doc_root 目录。
     </simpara>
     <simpara>
      可以通过<link linkend="configuration.file">配置文件
-     </link>内的<link linkend="ini.doc-root">doc_root</link>
+     </link>内的 <link linkend="ini.doc-root">doc_root</link>
      或设置环境变量
-     <envar>PHP_DOCUMENT_ROOT</envar> 来定义 PHP 脚本目录。如果设置了该项，那么
+     <envar>PHP_DOCUMENT_ROOT</envar> 来定义 PHP 脚本主目录。如果设置了该项，那么
      PHP 就只会解释 <parameter>doc_root</parameter>
-     指定目录下的文件，并确保目录外的脚本不会被 PHP
+     目录下的文件，并确保目录外的脚本不会被 PHP
      解释器执行（下面所说的 <parameter>user_dir</parameter> 除外）。
     </simpara>
     <simpara>
      另一个可用的选项就是
      <link linkend="ini.user-dir">user_dir</link>。当 user_dir
      没有设置的时候，<parameter>doc_root</parameter>
-     就是唯一能控制在哪里打开文件选项。访问如
+     就是唯一能控制在哪里打开文件的选项。访问如
      <filename role="url">http://my.host/~user/doc.php</filename>
      这个 URL 时，并不会打开用户主目录下文件，而只会执行
-     doc_root 指定目录下的
-     <filename role="uri">~user/doc.php</filename>（这个子目录以[<literal>~</literal>]作开头）。
+     doc_root 目录下的
+     <filename role="uri">~user/doc.php</filename>（这个子目录以
+     [<literal>~</literal>] 作开头）。
     </simpara>
     <simpara>
-     如果 user_dir 被设置了，比如设成
-     <filename role="dir">public_php</filename> 的话，那么像
+     如果设置了 user_dir，例如
+     <filename role="dir">public_php</filename>，那么像
      <filename role="url">http://my.host/~user/doc.php</filename>
      这样的请求将会执行用户主目录下的
-     <filename role="dir">public_php/doc.php</filename>，假设用户主目录的绝对路径是
+     <filename role="dir">public_php</filename> 子目录下的
+     <filename>doc.php</filename> 文件。假设用户主目录的绝对路径是
      <filename role="dir">/home/user</filename>，那么被执行文件将会是
      <filename>/home/user/public_php/doc.php</filename>。
     </simpara>
     <simpara>
-     <parameter>user_dir</parameter> 的设置不受
-     <parameter>doc_root</parameter>的影响，所以可以把
-     PHP 脚本的主目录和用户的目录分开管理。
+     <parameter>user_dir</parameter> 的设置与
+     <parameter>doc_root</parameter> 无关，所以可以分别控制
+     PHP 脚本的主目录和用户目录。
     </simpara>
    </sect1>
 
    <sect1 id="security.cgi-bin.shell">
-    <title>方法四：PHP 解释器放在 Web 目录以外</title>
+    <title>情形四：PHP 解释器放在 web 目录以外</title>
     <para>
-     一个非常安全的做法就是把 PHP 解释器放在 Web 目录外的地方，比如说
-     <filename role="dir">/usr/local/bin</filename>。这样做有一个很不方便的地方就是必须在每一个包含
+     一个非常安全的做法就是把 PHP 解释器放在 web 目录外的地方，比如说
+     <filename role="dir">/usr/local/bin</filename>。这样做唯一不便的地方就是必须在每一个包含
      PHP 代码的文件的第一行加入如下语句：
      <informalexample>
       <programlisting>
@@ -159,8 +166,8 @@ AddHandler php-script .php
 ]]>
       </programlisting>
      </informalexample>
-     使这些文件变成可执行文件。也就是说，要像处理用
-     Perl 或 sh 写的 CGI 脚本一样，使用以 <literal>#!</literal>
+     还要将这些文件的属性改成可执行。也就是说，要像处理用
+     Perl 或 sh 或其它任何脚本语言写的 CGI 脚本一样，使用以 <literal>#!</literal>
      开头的 shell-escape 机制来启动它们。
     </para>
     <para>

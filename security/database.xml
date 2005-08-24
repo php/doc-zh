@@ -1,41 +1,42 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.2 $ -->
-<!-- $Author: yincheng $ -->
+<!-- $Revision: 1.3 $ -->
+<!-- $Author: dallas $ -->
 <!-- EN-Revision: 1.11 Maintainer: lm92 Status: ready -->
+<!-- CREDITS: dallas -->
   <chapter id="security.database">
    <title>数据库安全</title>
 
    <simpara>
-    今时今日，数据库系统已经成为各个动态网站上 Web
-    应用程序的重要组成部分。由于有很多敏感的数据保存在数据库中，所以对数据库实施保护就显得尤为重要了。
+    今时今日，数据库系统已经成为各个动态网站上 web
+    应用程序的重要组成部分。由于非常敏感和机密的数据有可能保存在数据库中，所以对数据库实施保护就显得尤为重要了。
    </simpara>
    <simpara>
-    要从数据库中提取或者存入数据，就必须经过连接数据库、发送查询、获取结果、关闭连接等步骤。目前，能完成这一系列动作的最常用的查询语言是
-    Structured Query Language (SQL)。可以看看攻击者是如何
-    <link linkend="security.database.sql-injection">篡改 SQL 查询语句的</link>.
+    要从数据库中提取或者存入数据，就必须经过连接数据库、发送一条合法查询、获取结果、关闭连接等步骤。目前，能完成这一系列动作的最常用的查询语言是结构化查询语言
+    Structured Query Language (SQL)。可以看看攻击者是如何<link
+    linkend="security.database.sql-injection">篡改 SQL 查询语句的</link>。
    </simpara>
    <simpara>
-    PHP 本身并不能保护数据库的安全。下面的章节只是讲述如何安全地使用 PHP
-    脚本对数据库进行访问和简单的操作。
+    PHP 本身并不能保护数据库的安全。下面的章节只是讲述怎样用 PHP
+    脚本对数据库进行基本的访问和操作。
    </simpara>
    <simpara>
-    记住一条简单的原则：全面地防御。保护数据库的措施越多，攻击者就越难获得和使用数据库内的信息。正确地设计和应用数据库可以减少被攻击的担忧。
+    记住一条简单的原则：深入防御。保护数据库的措施越多，攻击者就越难获得和使用数据库内的信息。正确地设计和应用数据库可以减少被攻击的担忧。
    </simpara>
 
    <sect1 id="security.database.design">
-    <title>数据库设计</title>
+    <title>设计数据库</title>
      <simpara>
-      第一步一般都是创建数据库，除非你要使用第三方的数据库服务。当一个数据库被创建的时候，创建者会被指定为这个数据库的所有者。通常，只有所有者和超级用户才有权限任意操作这个数据库，如果想让其它用户都能使用，就必须赋予他们权限。
+      第一步一般都是创建数据库，除非是使用第三方的数据库服务。当创建一个数据库的时候，会指定一个所有者来执行和新建语句。通常，只有所有者（或超级用户）才有权对数据库中的对象进行任意操作。如果想让其他用户使用，就必须赋予他们权限。
      </simpara>
      <simpara>
-      应用程序（译者注：指服务于客户的应用程序）不应该使用数据库拥有者或超级用户帐号来连接数据库，因为这些帐号可以执行任意的操作，比如说修改数据库结构（删除表格等）或者清空整个数据库的内容。
+      应用程序永远不要使用数据库所有者或超级用户帐号来连接数据库，因为这些帐号可以执行任意的操作，比如说修改数据库结构（例如删除一个表）或者清空整个数据库的内容。
      </simpara>
      <simpara>
-      比较安全的做法就是为程序的不同功能创建不同的数据库帐号，并严格限制这些帐号的权限，使它们只能做份内的事情，从而避免由于同一个帐号权限过宽而被用于不正当用途。这样的话，就算攻击者利用程序的漏洞来操作数据库，也只能做出和程序一样的事情来。
+      应该为程序的每个方面创建不同的数据库帐号，并赋予对数据库对象的极有限的权限。仅分配给能完成其功能所需的权限，避免同一个用户可以完成另一个用户的事情。这样即使攻击者利用程序漏洞取得了数据库的访问权限，也最多只能做到和该程序一样的影响范围。
      </simpara>
      <simpara>
-      把所有的功能（译者注：指数据库应用方面）都用Web
-      程序（比如说动态脚本）来实现并不是一个明智的做法。更好的办法就是使用视图（view）、触发器（trigger）或者规则（rule）等数据库模型。当系统升级的时候，需要为数据库开辟新的接口，这时就必须重做所有的数据库客户端。除此之外，触发器还可以透明和自动地处理字段，并在调试程序和跟踪事实时提供有用的信息。
+      鼓励用户不要把所有的事务逻辑都用 web
+      应用程序（即用户的脚本）来实现。最好用视图（view）、触发器（trigger）或者规则（rule）在数据库层面完成。当系统升级的时候，需要为数据库开辟新的接口，这时就必须重做所有的数据库客户端。除此之外，触发器还可以透明和自动地处理字段，并在调试程序和跟踪事实时提供有用的信息。
      </simpara>
    </sect1>
 
@@ -56,21 +57,20 @@
     <title>加密存储模型</title>
     <simpara>
      SSL/SSH 能保护客户端和服务器端交换的数据，但 SSL/SSH
-     并不能保护数据库中已有的数据。SSL 只是一个 on-the-wire protocol。
+     并不能保护数据库中已有的数据。SSL 只是一个加密网络数据流的协议。
     </simpara>
     <simpara>
-     如果数据库系统不能自行保护数据的话，一但攻击者能直接访问数据库（通过 Web
-     服务器），敏感的数据就可能暴露或者被滥用。对数据库内的数据加密是减少这类风险的有效途径，但是只有很少的数据库提供这些加密功能。
+     如果攻击者取得了直接访问数据库的许可（绕过 web
+     服务器），敏感数据就可能暴露或者被滥用，除非数据库自己保护了这些信息。对数据库内的数据加密是减少这类风险的有效途径，但是只有很少的数据库提供这些加密功能。
     </simpara>
     <simpara>
      对于这个问题，有一个简单的解决办法，就是创建自己的加密机制，然后把它用在 PHP
-     程序内。在插入数据库之前先把数据加密，以后提取出来时再解密。PHP
-     有几个扩展库可以完成这个工作，比如说
+     程序内。PHP 有几个扩展库可以完成这个工作，比如说
      <link linkend="ref.mcrypt">Mcrypt</link> 和
-     <link linkend="ref.mhash">Mhash</link>等，它们包含多种加密运算法则。
+     <link linkend="ref.mhash">Mhash</link>等，它们包含多种加密运算法则。脚本在插入数据库之前先把数据加密，以后提取出来时再解密。有关加密如何工作的例子请参考相关手册。
     </simpara>
     <simpara>
-     如果某些数据是隐藏的，并且不需要以明文的形式（比如说不用显示出来）存在的话，散列加密是值得考虑的。使用散列加密最常见的例子就是把密码经过
+     对某些真正隐蔽的数据，如果不需要以明文的形式存在（即不用显示），可以考虑用散列算法。使用散列算法最常见的例子就是把密码经过
      MD5 加密后的散列存进数据库来代替原来的明文密码。参见
      <function>crypt</function> 和 <function>md5</function>。
     </simpara>
@@ -106,28 +106,26 @@ if (pg_num_rows($result) > 0) {
     <title>SQL 注入</title>
     <simpara>
      很多 Web 开发者没有注意到 SQL 查询是可以被篡改的，因而把 SQL
-     查询看作是可信任的。殊不知道，SQL
-     查询可以绕开访问控制，从而绕过身份验证和权限检查。更有甚者，可以利用SQL
-     查询去访问系统组的命令。
+     查询当作可信任的命令。殊不知道，SQL
+     查询可以绕开访问控制，从而绕过身份验证和权限检查。更有甚者，有可能通过 SQL
+     查询去运行主机操作系统级的命令。
     </simpara>
     <simpara>
-     SQL 注入（SQL Injection）直接就是攻击者常用的一种创建或修改现有SQL
-     语句的技术，从而达到获得或篡改重要数据，甚至执行系统命令的目的。之所以能构成这种攻击，是因为
-     Web 程序从客户端获得数据（译者注：通常是获得变量的值）并把用它们用来构造 SQL
-     查询。下面将会给出一些真实的例子。
+     直接 SQL 命令注入就是攻击者常用的一种创建或修改已有 SQL
+     语句的技术，从而达到取得隐藏数据，或覆盖关键的值，甚至执行数据库主机操作系统命令的目的。这是通过应用程序取得用户输入并与静态参数组合成
+     SQL 查询来实现的。下面将会给出一些真实的例子。
     </simpara>
     <para>
-     由于在没有对输入的数据进行检查，并且使用了像超级用户这种有权创建新用户的数据库帐号来连接，所以就很容易被攻击者获得权限。
+     由于在缺乏对输入的数据进行验证，并且使用了超级用户或其它有权创建新用户的数据库帐号来连接，攻击者可以在数据库中新建一个超级用户。
      <example>
       <title>
        一段实现数据分页显示的代码……也可以被用作创建一个超级用户（PostgreSQL系统）。
-       (PostgreSQL)
       </title>
       <programlisting role="php">
 <![CDATA[
 <?php
 
-$offset = $argv[0]; // beware, no input validation!
+$offset = $argv[0]; // 注意，没有输入验证！
 $query  = "SELECT id, name FROM products ORDER BY name LIMIT 20 OFFSET $offset;";
 $result = pg_query($conn, $query);
 
@@ -161,9 +159,9 @@ insert into pg_shadow(usename,usesysid,usesuper,usecatupd,passwd)
     </note>
     <para>
      对显示搜索结果的页面下手是一个能得到密码的可行办法。攻击者所要做的只不过是找出哪些提交上去的变量是用于
-     SQL 语句并且没有结过处理的。而这类的变量通常都被用于 <literal>SELECT</literal>
+     SQL 语句并且处理不当的。而这类的变量通常都被用于 <literal>SELECT</literal>
      查询中的条件语句，如 <literal>WHERE, ORDER BY, LIMIT</literal> 和
-     <literal>OFFSET</literal>。如果服务器支持 <literal>UNION</literal>
+     <literal>OFFSET</literal>。如果数据库支持 <literal>UNION</literal>
      构造的话，攻击者还可能会把一个完整的 SQL
      查询附加到原来的语句上以便从任意数据表中得到密码。因此，对密码字段加密是很重要的。
      <example>
@@ -197,15 +195,15 @@ union select '1', concat(uname||'-'||passwd) as name, '1971-01-01', '0' from use
      假如上述语句（使用 <literal>'</literal> 和
      <literal>--</literal>）被加入到 <varname>$query</varname>
      中的任意一个变量的话，那么就麻烦了。
-     If this query (playing with the <literal>'</literal> and
     </para>
     <para>
      SQL 中的 UPDATE
      也会受到攻击。这种查询也可能像上面的例子那样被插入或附加上另一个完整的请求。但是攻击者更愿意对
-     <literal>SET</literal> 语句下手，这样他们就可以更改数据表中的一些数据。要实现这种攻击，可以通过表单上的变量名对字段进行猜测，或者进行暴力破解，那是因为对于用户名和密码的字段来说，并没有太大的命名空间。
+     <literal>SET</literal>
+     子句下手，这样他们就可以更改数据表中的一些数据。这种情况下必须要知道数据库的结构才能修改查询成功进行。可以通过表单上的变量名对字段进行猜测，或者进行暴力破解。对于存放用户名和密码的字段，命名的方法并不多。
      <example>
      <title>
-      用于重设密码……也可以通过它获得更多权限（任何数据库系统）
+      从重设密码……到获得更多权限（任何数据库系统）
      </title>
       <programlisting role="php">
 <![CDATA[
@@ -215,10 +213,10 @@ $query = "UPDATE usertable SET pwd='$pwd' WHERE uid='$uid';";
 ]]>
       </programlisting>
      </example>
-     但量恶意的用户会把 <literal>' or uid like'%admin%'; --</literal>
+     但是恶意的用户会把 <literal>' or uid like'%admin%'; --</literal>
      作为变量的值提交给 <varname>$uid</varname> 来改变 admin 的密码，或者把
-     <varname>$pwd</varname> 的值提交为 <literal>"hehehe', admin='yes', trusted=100 "</literal>
-     去获得更多的权限。这样做的话，查询语句实际上就变成了：
+     <varname>$pwd</varname> 的值提交为 <literal>"hehehe', admin='yes',
+     trusted=100 "</literal>（后面有个空格）去获得更多的权限。这样做的话，查询语句实际上就变成了：
      <informalexample>
       <programlisting role="php">
 <![CDATA[
@@ -239,7 +237,7 @@ $query = "UPDATE usertable SET pwd='hehehe', admin='yes', trusted=100 WHERE
     <para>
      下面这个可怕的例子将会演示如何在某些数据库上执行系统命令。
      <example>
-     <title>攻击数据库服务器上的操作系统（MSSQL Server）</title>
+     <title>攻击数据库所在主机的操作系统（MSSQL Server）</title>
       <programlisting role="php">
 <![CDATA[
 <?php
@@ -272,7 +270,7 @@ $result = mssql_query($query);
      MSSQL 服务器会执行这条 SQL
      语句，包括它后面那个用于向系统添加用户的命令。如果这个程序是以
      <literal>sa</literal> 运行而 MSSQLSERVER
-     又有足够的权限的话，攻击者就可以获得一个系统帐号了。
+     服务又有足够的权限的话，攻击者就可以获得一个系统帐号来访问主机了。
     </para>
     <note>
      <para>
@@ -283,7 +281,7 @@ $result = mssql_query($query);
     <sect2 id="security.database.avoiding">
      <title>预防措施</title>
      <simpara>
-      也许有人会自我安慰，说攻击者要知道数据库结构的信息才能实施上面的攻击。没错，确实如此。但没人能保证攻击者一定得不到这些信息，一但他们得到了，数据库有泄露的危险。如果你正在所用的数据库操作代码是开源的，比如说属于某一内空管理系统或者论坛程序，攻击都就很容得到到相关的代码。如果这些代码设计不良的话，风险就更大了。
+      也许有人会自我安慰，说攻击者要知道数据库结构的信息才能实施上面的攻击。没错，确实如此。但没人能保证攻击者一定得不到这些信息，一但他们得到了，数据库有泄露的危险。如果你在用开放源代码的软件包来访问数据库，比如论坛程序，攻击者就很容得到到相关的代码。如果这些代码设计不良的话，风险就更大了。
      </simpara>
      <simpara>
       这些攻击总是建立在发掘安全意识不强的代码上的。所以，永远不要信任外界输入的数据，特别是来自于客户端的，包括选择框、表单隐藏域和
@@ -293,20 +291,22 @@ $result = mssql_query($query);
      <itemizedlist>
       <listitem>
        <simpara>
-        远永不要使用超级用户和某一个库的所有者帐号去连接数据库。要自己添加权限被严格限制的帐号。
+        永远不要使用超级用户或所有者帐号去连接数据库。要用权限被严格限制的帐号。
        </simpara>
       </listitem>
       <listitem>
        <simpara>
-        检查输入的数据是否正确。PHP 有很多可以用于检查输入的函数，从简单的
-        <link linkend="ref.var">变量函数库</link> 和 <link linkend="ref.ctype">字符类型函数据</link>
-        （ 比如 <function>is_numeric</function>，<function>ctype_digit</function>） 到高级的
-        <link linkend="ref.pcre">正则表达式函数库（Perl兼容）</link> 都可以完成这个工作。
+        检查输入的数据是否具有所期望的数据格式。PHP
+        有很多可以用于检查输入的函数，从简单的<link
+        linkend="ref.var">变量函数</link>和<link
+        linkend="ref.ctype">字符类型函数</link>（比如
+        <function>is_numeric</function>，<function>ctype_digit</function>）到复杂的
+        <link linkend="ref.pcre">Perl 兼容正则表达式函数</link>都可以完成这个工作。
        </simpara>
       </listitem>
       <listitem>
        <para>
-        如果所输入的数据是纯数字，可以考虑使用 <function>is_numeric</function>
+        如果程序等待输入一个数字，可以考虑使用 <function>is_numeric</function>
         来检查，或者直接使用 <function>settype</function> 来转换它的类型，也可以用
         <function>sprintf</function> 把它格式化为数字。
         <example>
@@ -318,7 +318,7 @@ $result = mssql_query($query);
 settype($offset, 'integer');
 $query = "SELECT id, name FROM products ORDER BY name LIMIT 20 OFFSET $offset;";
 
-// please note %d in the format string, using %s would be meaningless
+// 请注意格式字符串中的 %d，如果用 %s 就毫无意义了
 $query = sprintf("SELECT id, name FROM products ORDER BY name LIMIT 20 OFFSET %d;",
                  $offset);
 
@@ -331,29 +331,27 @@ $query = sprintf("SELECT id, name FROM products ORDER BY name LIMIT 20 OFFSET %d
       <listitem>
        <simpara>
         使用数据库特定的敏感字符转义函数（比如 <function>mysql_escape_string</function> 和
-        <function>sql_escape_string</function>）把用户提交上来并要传递到数据库的数据进行转义。
-        如果数据库没有专门的敏感字符转义功能的话
+        <function>sql_escape_string</function>）把用户提交上来的非数字数据进行转义。如果数据库没有专门的敏感字符转义功能的话
         <function>addslashes</function> 和 <function>str_replace</function>
-        可以代替完成这个工作。正如
-        <link linkend="security.database.storage">第一个例子</link>
-        所说，单纯地转义敏感字符是不够的，查询还是可以被攻击。
+        可以代替完成这个工作。看看<link
+        linkend="security.database.storage">第一个例子</link>，此例显示仅在查询的静态部分加上引号是不够的，查询很容易被攻破。
        </simpara>
       </listitem>
       <listitem>
        <simpara>
-        不要输出任何数据库的内部资料，特别是数据库的结构参见
-        <link linkend="security.errors">错误报告</link> 和
-        <link linkend="ref.errorfunc">错误处理函数库</link>。
+        要不择手段避免显示出任何有关数据库的信心，尤其是数据库结构。参见<link
+        linkend="security.errors">错误报告</link>和<link
+        linkend="ref.errorfunc">错误处理函数</link>。
        </simpara>
       </listitem>
       <listitem>
        <simpara>
-        也可以选择使用数据库的存储过程和预定义指针等特性来抽象数库访问，使用户不能直接访问数据表和视图。但这个办法可能会有副作用。
+        也可以选择使用数据库的存储过程和预定义指针等特性来抽象数库访问，使用户不能直接访问数据表和视图。但这个办法又有别的影响。
        </simpara>
       </listitem>
      </itemizedlist>
      <simpara>
-      除此之外，在允许的情况下，使用代码或数据库系统保存查询日志也是一个好办法。显然，日志并不能防止任何攻击，但利用它可以跟踪到哪个程序曾经被尝试攻击过。毕竟，更多的信息总比没有要好。
+      除此之外，在允许的情况下，使用代码或数据库系统保存查询日志也是一个好办法。显然，日志并不能防止任何攻击，但利用它可以跟踪到哪个程序曾经被尝试攻击过。日志本身没用，要查阅其中包含的信息才行。毕竟，更多的信息总比没有要好。
      </simpara>
     </sect2>
    </sect1>

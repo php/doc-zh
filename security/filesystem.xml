@@ -1,20 +1,22 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.2 $ -->
-<!-- $Author: lm92 $ -->
+<!-- $Revision: 1.3 $ -->
+<!-- $Author: dallas $ -->
 <!-- EN-Revision: 1.3 Maintainer: lm92 Status: ready -->
+<!-- CREDITS: dallas -->
   <chapter id="security.filesystem">
    <title>文件系统安全</title>
    <simpara>
     PHP 遵从大多数服务器系统中关于文件和目录权限的安全机制。这就使管理员可以控制哪些文件在文件系统内是可读的。必须特别注意的是全局的可读文件，并确保每一个有权限的用户对这些文件的读取动作都是安全的。
    </simpara>
    <simpara>
-    PHP 被设计为允许使用不同的用户级别来访问文件系统，所以完全有可能通过编写一段
-    PHP 代码来读取如 /etc/passwd
-    的系统文件、更改以太网连接以及发送大量的任务给打印机等等。换而言之，必须确保
-    PHP 代码写入和读取的文件是安全的。
+    PHP 被设计为以用户级别来访问文件系统，所以完全有可能通过编写一段
+    PHP 代码来读取系统文件如
+    /etc/passwd，更改网络连接以及发送大量打印任务等等。因此必须确保
+    PHP 代码读取和写入的是合适的文件。
    </simpara>
    <simpara>
-    使用下面的代码，用户可以指定文件名并在自己的主目录中删除它。假设这样做是为了能通过 Web 界面来管理文件系统，因此 Apache 用户有权删除自己目录下的文件。
+    请看下面的代码，用户想要删除自己主目录中的一个文件。假设此情形是通过
+    web 界面来管理文件系统，因此 Apache 用户有权删除用户目录下的文件。
    </simpara>
    <para>
     <example>
@@ -32,13 +34,13 @@ echo "$file_to_delete has been deleted!";
 ]]>
      </programlisting>
     </example>
-   既然 username 变量可以通过用户表单来提交，他们就可以在用户名和文件名前加一些东西，然后删除其它目录的文件。这种情况下，就需要考虑对提交的变量内容进行验证了。如果在提交的文件名前面加上“../etc/”和“passwd”的话，上面的代码就等同于：
+    既然 username 变量可以通过用户表单来提交，那就可以提交别人的用户名和文件名，并删除该文件。这种情况下，就要考虑其它方式的认证。想想看如果提交的变量是“../etc/”和“passwd”会发生什么。上面的代码就等同于：
     <example>
-     <title>……一个针对文件系统的攻击</title>
+     <title>……文件系统攻击</title>
      <programlisting role="php">
 <![CDATA[
 <?php
-// 如果 PHP 有 root 权限的话，用户就可以删除硬盘中的任意文件
+// 删除硬盘中任何 PHP 有访问权限的文件。如果 PHP 有 root 权限：
 $username = "../etc/";
 $homedir = "/home/../etc/";
 $file_to_delete = "passwd";
@@ -48,27 +50,27 @@ echo "/home/../etc/passwd has been deleted!";
 ]]>
      </programlisting>
     </example>
-    有两个办法可以防止这类的问题
+    有两个重要措施来防止此类问题。
     <itemizedlist>
      <listitem>
       <simpara>
-       限制 PHP 用户的权限
+       只给 PHP 的 web 用户很有限的权限。
       </simpara>
      </listitem>
      <listitem>
       <simpara>
-       检查所有提交上来的变量值
+       检查所有提交上来的变量。
       </simpara>
      </listitem>
     </itemizedlist>
-    根据上面的两个思想，可以对代码进行改进：
+    下面是改进的脚本：
     <example>
      <title>更安全的文件名检查</title>
      <programlisting role="php">
 <![CDATA[
 <?php
-// 只允许 PHP 用户在权限范围之内删除文件
-$username = $_SERVER['REMOTE_USER']; // 使用验证机制
+// 删除硬盘中 PHP 有权访问的文件
+$username = $_SERVER['REMOTE_USER']; // 使用认证机制
 
 $homedir = "/home/$username";
 
@@ -85,13 +87,13 @@ echo "$file_to_delete has been deleted!";
 ]]>
      </programlisting>
     </example>
-    然而，这样做仍然是有缺陷的。如果身份验证系统允许用户自行登陆，那么用户可以提交“../etc/”之类的变量，系统又一次沦陷了。所以，需要加强检查：
+    然而，这样做仍然是有缺陷的。如果认证系统允许用户建立自己的登录用户名，而用户选择用“../etc/”作为用户名，系统又一次沦陷了。所以，需要加强检查：
     <example>
      <title>更安全的文件名检查</title>
      <programlisting role="php">
 <![CDATA[
 <?php
-$username = $_SERVER['REMOTE_USER']; // 使用验证机制
+$username = $_SERVER['REMOTE_USER']; // 使用认证机制
 $homedir = "/home/$username";
 
 if (!ereg('^[^./][^/]*$', $userfile))
@@ -106,9 +108,9 @@ if (!ereg('^[^./][^/]*$', $username))
     </example>
    </para>
    <para>
-    在一个系统上，存在着各钟各样需要注意的文件，包括联系到系统的设备（/dev/
-    或者 COM1）、配置文件（/ect/ 和 .ini文件）、常用的存储区域（/home/ 或者 My
-    Documents）等等。了解这些信息以后，就可以制定相关的策略来开放或禁止某些东西了。
+    根据操作系统的不同，存在着各种各样需要注意的文件，包括联系到系统的设备（/dev/
+    或者 COM1）、配置文件（/ect/ 文件和 .ini文件）、常用的存储区域（/home/ 或者 My
+    Documents）等等。由于此原因，建立一个策略禁止所有权限而只开放明确允许的通常更容易些。
    </para>
   </chapter>
 
