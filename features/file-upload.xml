@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.13 $ -->
+<!-- $Revision: 1.14 $ -->
 <!-- $Author: dallas $ -->
 <!-- EN-Revision: 1.86 Maintainer: Gregory Status: ready -->
 <!-- CREDITS: dallas -->
@@ -31,8 +31,8 @@
    </note>
    <para>
     请注意 PHP 也支持 PUT 方法的文件上传，<productname>Netscape Composer</productname>
-    和 W3C 的 <productname>Amaya</productname> 客户端使用这种方法。请参阅
-    <link linkend="features.file-upload.put-method">PUT 方法支持</link>以获取更多信息。
+    和 W3C 的 <productname>Amaya</productname> 客户端使用这种方法。请参阅<link
+    linkend="features.file-upload.put-method">对 PUT 方法的支持</link>以获取更多信息。
    </para>
    <para>
     <example>
@@ -59,7 +59,7 @@
      </para>
      <para>
       <literal>MAX_FILE_SIZE</literal>
-      隐藏字段（单位为字节）必须先于文件输入字段，其值为接收文件的最大尺寸。这是对浏览器的一个建议，PHP
+      隐藏字段（单位为字节）必须放在文件输入字段之前，其值为接收文件的最大尺寸。这是对浏览器的一个建议，PHP
       也会检查此项。在浏览器端可以简单绕过此设置，因此不要指望用此特性来阻挡大文件。实际上，PHP
       设置中的上传文件最大值是不会失效的。但是最好还是在表单中加上此项目，因为它可以避免用户在花时间等待上传大文件之后才发现文件过大上传失败的麻烦。
      </para>
@@ -170,12 +170,14 @@ print "</pre>";
    </para>
    <simpara>
     接受上传文件的 PHP
-    脚本为决定接下来要对该文件进行哪些操作，应该实现任何逻辑上必要的检查。例如可以用
+    脚本为了决定接下来要对该文件进行哪些操作，应该实现任何逻辑上必要的检查。例如可以用
     <varname>$_FILES['userfile']['size']</varname>
     变量来排除过大或过小的文件，也可以通过
     <varname>$_FILES['userfile']['type']</varname>
     变量来排除文件类型和某种标准不相符合的文件，但只把这个当作一系列检查中的第一步，因为此值完全由客户端控制而在
-    PHP 端并不检查。自 PHP 4.2.0 起，还可以通过 <varname>$_FILES['userfile']['error']</varname> 变量来根据不同的<link linkend="features.file-upload.errors">错误代码</link>来做相关的判断。不管做何种的判断，您必须将该文件从临时目录中删除，要么将其移动到其它的地方。
+    PHP 端并不检查。自 PHP 4.2.0 起，还可以通过
+    <varname>$_FILES['userfile']['error']</varname> 变量来根据不同的<link
+    linkend="features.file-upload.errors">错误代码</link>来计划下一步如何处理。不管怎样，要么将该文件从临时目录中删除，要么将其移动到其它的地方。
    </simpara>
    <simpara>
     如果表单中没有选择上传的文件，则 PHP 变量
@@ -219,7 +221,7 @@ foreach ($_FILES["pictures"]["error"] as $key => $error) {
   </sect1>
 
   <sect1 id="features.file-upload.errors">
-   <title>关于错误信息的解释</title>
+   <title>错误信息说明</title>
    <simpara>
     从 PHP 4.2.0 开始，PHP
     将随文件信息数组一起返回一个对应的错误代码。该代码可以在文件上传时生成的文件数组中的
@@ -290,13 +292,13 @@ foreach ($_FILES["pictures"]["error"] as $key => $error) {
    </para>
    <note>
     <para>
-     这些在 PHP 4.3.0 之后变成了 PHP 常量。
+     以上值在 PHP 4.3.0 之后变成了 PHP 常量。
     </para>
    </note>
   </sect1>
 
   <sect1 id="features.file-upload.common-pitfalls">
-   <title>一些注意事项</title>
+   <title>常见缺陷</title>
    <simpara>
     对 <literal>MAX_FILE_SIZE</literal> 设置的值，不能大于 ini
     设置中 <link linkend="ini.upload-max-filesize">upload_max_filesize</link>
@@ -315,7 +317,7 @@ foreach ($_FILES["pictures"]["error"] as $key => $error) {
    <note>
     <simpara>
      <link linkend="ini.max-execution-time">max_execution_time</link>
-     仅仅只影响脚本本身运行地时间。任何其它花费在脚本运行之外的时间，诸如用函数
+     仅仅只影响脚本本身运行的时间。任何其它花费在脚本运行之外的时间，诸如用函数
      <function>system</function> 对系统的调用、<function>sleep</function>
      函数的使用、数据库查询、文件上传等，在计算脚本运行的最大时间时都不包括在内。
     </simpara>
@@ -333,7 +335,7 @@ foreach ($_FILES["pictures"]["error"] as $key => $error) {
     <literal>post_max_size</literal> 的值足够的大。
    </simpara>
    <simpara>
-    不使您操作的文件有效化，可能意味着用户能够访问其它目录下的敏感信息。
+    不对正在操作的文件进行验证可能意味着用户能够访问其它目录下的敏感信息。
    </simpara>
    <simpara>
     请注意 <productname>CERN httpd</productname> 似乎会丢弃它从客户端获得的
@@ -357,7 +359,7 @@ foreach ($_FILES["pictures"]["error"] as $key => $error) {
    </simpara>
    <simpara>
     PHP 支持同时上传多个文件并将它们的信息自动以数组的形式组织。要完成这项功能，需要在
-    HTML 表单中对文件上传域使用类似于多下拉菜单和复选框的数组名称来提交。
+    HTML 表单中对文件上传域使用和多选框与复选框相同的数组式提交语法。
    </simpara>
    <note>
     <para>
@@ -390,16 +392,15 @@ foreach ($_FILES["pictures"]["error"] as $key => $error) {
    <simpara>
     例如，假设名为 <filename>/home/test/review.html</filename> 和
     <filename>/home/test/xwp.out</filename> 的文件被提交，则
-    <varname>$_FILES['userfile']['name'][0]</varname> 将包含文件
-    <filename>review.html</filename> 的名称，而
-    <varname>$_FILES['userfile']['name'][1]</varname> 则将包含文件
-    <filename>xwp.out</filename>
-    的名称。类似的，<varname>$_FILES['userfile']['size'][0]</varname>
+    <varname>$_FILES['userfile']['name'][0]</varname> 的值将是
+    <filename>review.html</filename>，而
+    <varname>$_FILES['userfile']['name'][1]</varname> 的值将是
+    <filename>xwp.out</filename>。类似的，<varname>$_FILES['userfile']['size'][0]</varname>
     将包含文件 <filename>review.html</filename> 的大小，依此类推。
    </simpara>
    <simpara>
-    <varname>$_FILES['userfile']['name'][0]</varname>，<varname>$_FILES['userfile']['tmp_name'][0]</varname>，<varname>$_FILES['userfile']['size'][0]</varname>
-    以及 <varname>$_FILES['userfile']['type'][0]</varname> 都将被同时设置并有效。
+    此外也同时设置了 <varname>$_FILES['userfile']['name'][0]</varname>，<varname>$_FILES['userfile']['tmp_name'][0]</varname>，<varname>$_FILES['userfile']['size'][0]</varname>
+    以及 <varname>$_FILES['userfile']['type'][0]</varname>。
    </simpara>
   </sect1>
 
@@ -454,9 +455,9 @@ PUT /path/filename.html HTTP/1.1
    </para>
    <para>
     这通常意味着远程客户端会将其中的 <filename>/path/filename.html</filename>
-    存储到 WEB 目录树。让 Apache 或者 PHP 自动允许所有人覆盖
-    WEB 目录数下的任何文件显然是很不明智的。因此，要处理类似的请求，必须先告诉
-    WEB 服务器需要用特定的 PHP 脚本来处理该请求。在 Apache 下，可以用
+    存储到 web 目录树。让 Apache 或者 PHP 自动允许所有人覆盖
+    web 目录树下的任何文件显然是很不明智的。因此，要处理类似的请求，必须先告诉
+    web 服务器需要用特定的 PHP 脚本来处理该请求。在 Apache 下，可以用
     <emphasis>Script</emphasis> 选项来设置。它可以被放置到
     Apache 配置文件中几乎所有的位置。通常我们把它放置在
     &lt;Directory&gt; 区域或者 &lt;Virtualhost&gt; 区域。可以用如下一行来完成该设置：
@@ -491,7 +492,7 @@ Script PUT /put.php
     PUT 的 PHP 脚本必须将该文件拷贝到其它的地方。该临时文件的文件名被储存在变量
     <varname>$PHP_PUT_FILENAME</varname> 中，也可以通过
     <varname>$REQUEST_URI</varname> 变量获得建议的目标文件名（在非
-    Apache WEB 服务器上可能会有较大的变化）。该目标文件名是由远程客户端指定的。也可以不听从改客户端的信息，而把所有上传的文件存储到一个特殊的上传目录下。
+    Apache web 服务器上可能会有较大的变化）。该目标文件名是由远程客户端指定的。也可以不听从改客户端的信息，而把所有上传的文件存储到一个特殊的上传目录下。
    </simpara>
   </sect1>
 

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.11 $ -->
+<!-- $Revision: 1.12 $ -->
 <!-- $Author: dallas $ -->
 <!-- EN-Revision: 1.42 Maintainer: Gregory Status: ready -->
 <!-- CREDITS: dallas -->
@@ -13,10 +13,10 @@
    <function>header</function>
    函数来向客户端浏览器发送“Authentication
    Required”信息，使其弹出一个用户名／密码输入窗口。当用户输入用户名和密码后，包含有
-   URL 的 PHP 脚本将会再次和<link linkend="reserved.variables">预定义变量</link>
+   URL 的 PHP 脚本将会加上<link linkend="reserved.variables">预定义变量</link>
    <varname>PHP_AUTH_USER</varname>，<varname>PHP_AUTH_PW</varname> 和
    <varname>AUTH_TYPE</varname>
-   一起被调用，这三个变量分别被设定为用户名，密码和认证类型。预定义变量保存在
+   被再次调用，这三个变量分别被设定为用户名，密码和认证类型。预定义变量保存在
    <link linkend="reserved.variables.server">$_SERVER</link> 或者
    <varname>$HTTP_SERVER_VARS</varname> 数组中。支持“Basic”和“Digest”（自
    PHP 5.1.0 起）认证方法。请参阅 <function>header</function> 函数以获取更多信息。
@@ -26,9 +26,9 @@
    <title>PHP 版本问题</title>
    <para>
     <link linkend="language.variables.superglobals">Autoglobals</link> 全局变量，包括
-     <link linkend="reserved.variables.server">$_SERVER</link>等，自
-     PHP <ulink url="&url.php.release4.1.0;">4.1.0</ulink>
-     起有效，<varname>$HTTP_SERVER_VARS</varname> 从 PHP 3 开始有效。
+    <link linkend="reserved.variables.server">$_SERVER</link>等，自
+    PHP <ulink url="&url.php.release4.1.0;">4.1.0</ulink>
+    起有效，<varname>$HTTP_SERVER_VARS</varname> 从 PHP 3 开始有效。
    </para>
   </note>
 
@@ -114,29 +114,30 @@ echo 'Your are logged in as: ' . $digest['username'];
   </note>
 
   <para>
-   在以上例程中，我们仅仅只打印出了 <varname>PHP_AUTH_USER</varname> 和
+   在以上例子中，仅仅只打印出了 <varname>PHP_AUTH_USER</varname> 和
    <varname>PHP_AUTH_PW</varname>
-   的值，但在实际运用中，您可能需要对用户名和密码的合法性进行检查。或许进行数据库的查询，或许从 dbm 文件中检索。
+   的值，但在实际运用中，可能需要对用户名和密码的合法性进行检查。或许进行数据库的查询，或许从 dbm 文件中检索。
   </para>
 
   <para>
-   请注意由 Internet Explorer
-   浏览器本身的问题带来的错误。它对头信息的顺序显得似乎有点吹毛求疵。目前在
-   <literal>HTTP/1.0 401</literal> 头之前发送
-   <emphasis>WWW-Authenticate</emphasis> 头信息能解决该问题。
+   注意有些 Internet Explorer
+   浏览器本身有问题。它对头信息的顺序显得似乎有点吹毛求疵。目前看来在发送
+   <literal>HTTP/1.0 401</literal> 之前先发送
+   <emphasis>WWW-Authenticate</emphasis> 头信息似乎可以解决此问题。
   </para>
 
   <simpara>
-   在 PHP 4.3.0
-   中，为了防止有人通过编写脚本来从用传统外部机制认证的页面上获取密码，当外部认证对特定页面有效，并且&safemode;被开启时，PHP_AUTH
+   自 PHP 4.3.0
+   起，为了防止有人通过编写脚本来从用传统外部机制认证的页面上获取密码，当外部认证对特定页面有效，并且&safemode;被开启时，PHP_AUTH
    变量将不会被设置。但无论如何，<varname>REMOTE_USER</varname>
-   可以被用来辨认外部认证的用户，即使用 <varname>$_SERVER['REMOTE_USER']</varname> 变量。
+   可以被用来辨认外部认证的用户，因此可以用
+   <varname>$_SERVER['REMOTE_USER']</varname> 变量。
   </simpara>
 
   <note>
-   <title>设置问题</title>
+   <title>配置说明</title>
    <para>
-    PHP 用 <literal>AuthType</literal> 选项来判断外部认证机制是否有效。
+    PHP 用是否有 <literal>AuthType</literal> 指令来判断外部认证机制是否有效。
    </para>
   </note>
 
@@ -179,26 +180,26 @@ echo 'Your are logged in as: ' . $digest['username'];
    </example>
   </para>
   <simpara>
-   该行为对于 HTTP 基本认证标准来说并不是必须的，因此您不能依靠这种方法。对
+   该行为对于 HTTP 的 Basic 认证标准来说并不是必须的，因此不能依靠这种方法。对
    Lynx 浏览器的测试表明 Lynx 在收到 401
    的服务端返回信息时不会清空认证文件，因此只要对认证文件的检查要求没有变化，只要用户点击“后退”按钮，再点击“前进”按钮，其原有资源仍然能够被访问。不过，用户可以通过按“_”键来清空他们的认证信息。
   </simpara>
   <simpara>
    同时请注意，在 PHP 4.3.3 之前，由于微软 IIS 的限制，HTTP
    认证无法工作在 IIS 服务器的 CGI 模式下。为了能够使其在 PHP 4.3.3
-   以上版本能够工作，您需要编辑 IIS
+   以上版本能够工作，需要编辑 IIS
    的设置“目录安全”。点击“编辑”并且只选择“匿名访问”，其它所有的复选框都应该留空。
   </simpara>
   <simpara>
-   另一个限制，在 IIS 的 ISAPI 模式下使用 PHP 4 的时候，无法使用
+   另一个限制是在 IIS 的 ISAPI 模式下使用 PHP 4 的时候，无法使用
    <literal>PHP_AUTH_*</literal> 变量，而只能使用
    <literal>HTTP_AUTHORIZATION</literal>。例如，考虑如下代码：<literal>list($user, $pw)
    = explode(':', base64_decode(substr($_SERVER['HTTP_AUTHORIZATION'], 6)));</literal>。
   </simpara>
   <note>
-   <title>IIS 注意事项：</title>
+   <title>IIS 注意事项</title>
    <simpara>
-    要 HTTP 认证能够在 IIS 下工作， PHP 配置选项
+    要 HTTP 认证能够在 IIS 下工作，PHP 配置选项
     <link linkend="ini.cgi.rfc2616-headers">cgi.rfc2616_headers</link>
     必须设置成 <literal>0</literal>（默认值）。
    </simpara>
