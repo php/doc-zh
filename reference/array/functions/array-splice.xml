@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.5 $ -->
+<!-- $Revision: 1.6 $ -->
 <!-- $Author: dallas $ -->
-<!-- EN-Revision: 1.8 Maintainer: dallas Status: ready -->
+<!-- EN-Revision: 1.15 Maintainer: dallas Status: ready -->
   <refentry id="function.array-splice">
    <refnamediv>
     <refname>array_splice</refname>
@@ -13,7 +13,7 @@
     <title>说明</title>
      <methodsynopsis>
       <type>array</type><methodname>array_splice</methodname>
-      <methodparam><type>array</type><parameter>input</parameter></methodparam>
+      <methodparam><type>array</type><parameter role="reference">input</parameter></methodparam>
       <methodparam><type>int</type><parameter>offset</parameter></methodparam>
       <methodparam choice="opt"><type>int</type><parameter>length</parameter></methodparam>
       <methodparam choice="opt"><type>array</type><parameter>
@@ -45,11 +45,11 @@
      <parameter>offset</parameter> 和 <parameter>length</parameter>
      的组合结果是不会移除任何值，则 <parameter>replacement</parameter>
      数组中的单元将被插入到 <parameter>offset</parameter>
-     指定的位置。小窍门：如果用来替换的值只是一个单元，那么不需要给它加上
+     指定的位置。注意替换数组中的键名不保留。如果用来替换的值只是一个单元，那么不需要给它加上
      <literal>array()</literal>，除非该单元本身就是一个数组。
     </para>
     <para>
-     以下的表达式具有同样效果：
+     以下表达式以同样方式修改了 <varname>$input</varname>：
      <table>
       <title><function>array_splice</function> 等价表达式</title>
       <tgroup cols="2">
@@ -75,7 +75,7 @@
           array_shift($input)
          </entry>
          <entry>
-          array_splice($input, -1)
+          array_splice($input, 0, 1)
          </entry>
         </row>
         <row>
@@ -88,7 +88,7 @@
         </row>
         <row>
          <entry>
-          $a[$x] = $y
+          $input[$x] = $y // 对于键名和偏移量等值的数组
          </entry>
          <entry>
           array_splice($input, $x, 1, $y)
@@ -107,25 +107,26 @@
       <programlisting role="php">
 <![CDATA[
 <?php
-$input = array ("red", "green", "blue", "yellow");
-array_splice ($input, 2);
-// $input is now array ("red", "green")
+$input = array("red", "green", "blue", "yellow");
+array_splice($input, 2);
+// $input is now array("red", "green")
 
-$input = array ("red", "green", "blue", "yellow");
-array_splice ($input, 1, -1);
-// $input is now array ("red", "yellow")
+$input = array("red", "green", "blue", "yellow");
+array_splice($input, 1, -1);
+// $input is now array("red", "yellow")
 
-$input = array ("red", "green", "blue", "yellow");
-array_splice ($input, 1, count($input), "orange");
-// $input is now array ("red", "orange")
+$input = array("red", "green", "blue", "yellow");
+array_splice($input, 1, count($input), "orange");
+// $input is now array("red", "orange")
 
-$input = array ("red", "green", "blue", "yellow");
-array_splice ($input, -1, 1, array("black", "maroon"));
-// $input is now array ("red", "green",
+$input = array("red", "green", "blue", "yellow");
+array_splice($input, -1, 1, array("black", "maroon"));
+// $input is now array("red", "green",
 //          "blue", "black", "maroon")
-$input = array ("red", "green", "blue", "yellow");
-array_splice ($input, 3, 0, "purple");
-// $input is now array ("red", "green",
+
+$input = array("red", "green", "blue", "yellow");
+array_splice($input, 3, 0, "purple");
+// $input is now array("red", "green",
 //          "blue", "purple", "yellow");
 ?>
 ]]>

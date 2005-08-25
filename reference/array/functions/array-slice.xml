@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.3 $ -->
+<!-- $Revision: 1.4 $ -->
 <!-- $Author: dallas $ -->
-<!-- EN-Revision: 1.6 Maintainer: dallas Status: ready -->
+<!-- EN-Revision: 1.11 Maintainer: dallas Status: ready -->
   <refentry id="function.array-slice">
    <refnamediv>
     <refname>array_slice</refname>
@@ -14,6 +14,7 @@
       <methodparam><type>array</type><parameter>array</parameter></methodparam>
       <methodparam><type>int</type><parameter>offset</parameter></methodparam>
       <methodparam choice="opt"><type>int</type><parameter>length</parameter></methodparam>
+      <methodparam choice="opt"><type>bool</type><parameter>preserve_keys</parameter></methodparam>
      </methodsynopsis>
     <para>
      <function>array_slice</function> 返回根据 <parameter>offset</parameter> 和
@@ -21,7 +22,7 @@
      数组中的一段序列。
     </para>
     <para>
-     如果 <parameter>offset</parameter> 为正，则序列将从 <parameter>array</parameter>
+     如果 <parameter>offset</parameter> 非负，则序列将从 <parameter>array</parameter>
      中的此偏移量开始。如果 <parameter>offset</parameter> 为负，则序列将从
      <parameter>array</parameter> 中距离末端这么远的地方开始。
     </para>
@@ -31,7 +32,9 @@
      <parameter>offset</parameter> 开始一直到 <parameter>array</parameter> 的末端。
     </para>
     <para>
-     注意 <function>array_slice</function> 将忽略键名，并且是根据单元在数组中的实际位置来计算偏移量和长度的。
+     注意 <function>array_slice</function> 默认将重置数组的键。自
+     PHP 5.0.2 起，可以通过将
+     <parameter>preserve_keys</parameter> 设为 &true; 来改变此行为。
     </para>
     <para>
      <example>
@@ -39,14 +42,33 @@
       <programlisting role="php">
 <![CDATA[
 <?php
-$input = array ("a", "b", "c", "d", "e");
-$output = array_slice ($input, 2);      // returns "c", "d", and "e"
-$output = array_slice ($input, 2, -1);  // returns "c", "d"
-$output = array_slice ($input, -2, 1);  // returns "d"
-$output = array_slice ($input, 0, 3);   // returns "a", "b", and "c"
+$input = array("a", "b", "c", "d", "e");
+
+$output = array_slice($input, 2);      // returns "c", "d", and "e"
+$output = array_slice($input, -2, 1);  // returns "d"
+$output = array_slice($input, 0, 3);   // returns "a", "b", and "c"
+
+// note the differences in the array keys
+print_r(array_slice($input, 2, -1));
+print_r(array_slice($input, 2, -1, true));
 ?>
 ]]>
       </programlisting>
+      &example.outputs;
+      <screen>
+<![CDATA[
+Array
+(
+    [0] => c
+    [1] => d
+)
+Array
+(
+    [2] => c
+    [3] => d
+)
+]]>
+      </screen>
      </example>
     </para>
     <para>
