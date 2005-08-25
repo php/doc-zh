@@ -1,25 +1,28 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.4 $ -->
+<!-- $Revision: 1.5 $ -->
 <!-- $Author: dallas $ -->
-<!-- EN-Revision: 1.10 Maintainer: dallas Status: ready -->
+<!-- EN-Revision: 1.18 Maintainer: dallas Status: ready -->
   <refentry id="function.array-merge">
    <refnamediv>
     <refname>array_merge</refname>
-    <refpurpose>合并两个或多个数组</refpurpose>
+    <refpurpose>合并一个或多个数组</refpurpose>
    </refnamediv>
    <refsect1>
     <title>说明</title>
      <methodsynopsis>
       <type>array</type><methodname>array_merge</methodname>
       <methodparam><type>array</type><parameter>array1</parameter></methodparam>
-      <methodparam><type>array</type><parameter>array2</parameter></methodparam>
+      <methodparam choice="opt"><type>array</type><parameter>array2</parameter></methodparam>
       <methodparam choice="opt"><type>array</type><parameter>...</parameter></methodparam>
      </methodsynopsis>
     <para>
-     <function>array_merge</function> 将两个或多个数组的单元合并起来，一个数组中的值附加在前一个数组的后面。返回作为结果的数组。
+     <function>array_merge</function> 将一个或多个数组的单元合并起来，一个数组中的值附加在前一个数组的后面。返回作为结果的数组。
     </para>
     <para>
      如果输入的数组中有相同的字符串键名，则该键名后面的值将覆盖前一个值。然而，如果数组包含数字键名，后面的值将<emphasis role="strong">不会</emphasis>覆盖原来的值，而是附加到后面。
+    </para>
+    <para>
+     如果只给了一个数组并且该数组是数字索引的，则键名会以连续方式重新索引。
     </para>
     <para>
      <example>
@@ -27,16 +30,14 @@
       <programlisting role="php">
 <![CDATA[
 <?php
-$array1 = array ("color" => "red", 2, 4);
-$array2 = array ("a", "b", "color" => "green", "shape" => "trapezoid", 4);
-$result = array_merge ($array1, $array2);
+$array1 = array("color" => "red", 2, 4);
+$array2 = array("a", "b", "color" => "green", "shape" => "trapezoid", 4);
+$result = array_merge($array1, $array2);
 print_r($result);
 ?>
 ]]>
       </programlisting>
-      <para>
-       <varname>$result</varname> 成为：
-      </para>
+      &example.outputs;
       <screen role="php">
 <![CDATA[
 Array
@@ -101,13 +102,41 @@ Array
       </screen>
      </example>
     </para>
-    <note>
+    <warning>
      <para>
-      共有的键名将根据先来先服务的原则被覆盖掉。
+      <function>array_merge</function> 的行为在 PHP 5 中被修改了。和 PHP 4
+      不同，<function>array_merge</function> 现在只接受
+      <type>array</type> 类型的参数。不过可以用强制转换来合并其它类型。请看下面的例子。
      </para>
-    </note>
+     <para>
+      <example>
+       <title><function>array_merge</function> PHP 5 例子</title>
+       <programlisting role="php">
+<![CDATA[
+<?php
+$beginning = 'foo';
+$end = array(1 => 'bar');
+$result = array_merge((array)$beginning, (array)$end);
+print_r($result);
+?>
+]]>
+       </programlisting>
+       &example.outputs;
+       <screen role="php">
+<![CDATA[
+Array
+(
+    [0] => foo
+    [1] => bar
+)
+]]>
+       </screen>
+      </example>
+     </para>
+    </warning>
     <para>
-     参见 <function>array_merge_recursive</function> 和 <function>array_combine</function>。
+     参见 <function>array_merge_recursive</function>，<function>array_combine</function>
+     和<link linkend="language.operators.array">数组运算符</link>。
     </para>
    </refsect1>
   </refentry>

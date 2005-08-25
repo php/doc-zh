@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.7 $ -->
+<!-- $Revision: 1.8 $ -->
 <!-- $Author: dallas $ -->
-<!-- EN-Revision: 1.6 Maintainer: dallas Status: ready -->
+<!-- EN-Revision: 1.17 Maintainer: dallas Status: ready -->
   <refentry id="function.array-multisort">
    <refnamediv>
     <refname>array_multisort</refname>
@@ -9,18 +9,26 @@
    </refnamediv>
    <refsect1>
     <title>说明</title>
-     <methodsynopsis>
-      <type>bool</type><methodname>array_multisort</methodname>
-      <methodparam><type>array</type><parameter>ar1</parameter></methodparam>
-      <methodparam choice="opt"><type>mixed</type><parameter>arg</parameter></methodparam>
-      <methodparam choice="opt"><type>mixed</type><parameter>...</parameter></methodparam>
-      <methodparam choice="opt"><type>array</type><parameter>...</parameter></methodparam>
-     </methodsynopsis>
+    <methodsynopsis>
+     <type>bool</type><methodname>array_multisort</methodname>
+     <methodparam><type>array</type><parameter>ar1</parameter></methodparam>
+     <methodparam choice="opt"><type>mixed</type><parameter>arg</parameter></methodparam>
+     <methodparam choice="opt"><type>mixed</type><parameter>...</parameter></methodparam>
+     <methodparam choice="opt"><type>array</type><parameter>...</parameter></methodparam>
+     <!-- Parameters don't need to be passed by reference -->
+    </methodsynopsis>
     <para>
-     <function>array_multisort</function> 可以用来一次对多个数组进行排序或者根据某一维对多维数组进行排序。排序时保留原有的键名关联。
+     &return.success;
     </para>
     <para>
-     输入数组被当成一个表的列并以行来排序 － 这类似于 SQL 的 ORDER BY
+     <function>array_multisort</function>
+     可以用来一次对多个数组进行排序，或者根据某一维或多维对多维数组进行排序。
+    </para>
+    <para>
+     关联（<type>string</type>）键名保持不变，但数字键名会被重新索引。
+    </para>
+    <para>
+     输入数组被当成一个表的列并以行来排序——这类似于 SQL 的 ORDER BY
      子句的功能。第一个数组是要排序的主要数组。数组中的行（值）比较为相同的话就按照下一个输入数组中相应值的大小来排序，依此类推。
     </para>
     <para>
@@ -30,10 +38,10 @@
      排序顺序标志：
      <itemizedlist>
       <listitem>
-       <simpara>SORT_ASC - 按照上升顺序排序</simpara>
+       <simpara><constant>SORT_ASC</constant> - 按照上升顺序排序</simpara>
       </listitem>
       <listitem>
-       <simpara>SORT_DESC - 按照下降顺序排序</simpara>
+       <simpara><constant>SORT_DESC</constant> - 按照下降顺序排序</simpara>
       </listitem>
      </itemizedlist>
     </para>
@@ -41,42 +49,60 @@
      排序类型标志：
      <itemizedlist>
       <listitem>
-       <simpara>SORT_REGULAR - 将项目按照通常方法比较</simpara>
+       <simpara><constant>SORT_REGULAR</constant> - 将项目按照通常方法比较</simpara>
       </listitem>
       <listitem>
-       <simpara>SORT_NUMERIC - 将项目按照数值比较</simpara>
+       <simpara><constant>SORT_NUMERIC</constant> - 将项目按照数值比较</simpara>
       </listitem>
       <listitem>
-       <simpara>SORT_STRING - 将项目按照字符串比较</simpara>
+       <simpara><constant>SORT_STRING</constant> - 将项目按照字符串比较</simpara>
       </listitem>
      </itemizedlist>
     </para>
     <para>
      每个数组之后不能指定两个同类的排序标志。每个数组后指定的排序标志仅对该数组有效 - 在此之前为默认值
-     SORT_ASC 和 SORT_REGULAR。
+     <constant>SORT_ASC</constant> 和 <constant>SORT_REGULAR</constant>。
     </para>
-    <para>
-     &return.success;
-    </para>
+
     <para>
      <example>
       <title>对多个数组排序</title>
       <programlisting role="php">
 <![CDATA[
 <?php
-$ar1 = array ("10", 100, 100, "a");
-$ar2 = array (1, 3, "2", 1);
-array_multisort ($ar1, $ar2);
+$ar1 = array("10", 100, 100, "a");
+$ar2 = array(1, 3, "2", 1);
+array_multisort($ar1, $ar2);
+
+var_dump($ar1);
+var_dump($ar2);
 ?>
 ]]>
       </programlisting>
+      <para>
+       本例中经过排序后，第一个数组将包含
+       "10"，"a"，100，100。第二个数组将包含
+       1，1，"2"，3。第二个数组中的项目顺序完全和第一个数组中相应的项目（100 和 100）顺序一致。
+      </para>
+      <screen>
+<![CDATA[
+array(4) {
+  [0]=> string(2) "10"
+  [1]=> string(1) "a"
+  [2]=> int(100)
+  [3]=> int(100)
+}
+array(4) {
+  [0]=> int(1)
+  [1]=> int(1)
+  [2]=> string(1) "2"
+  [3]=> int(3)
+}
+]]>
+      </screen>
      </example>
     </para>
-    <para>
-     本例中经过排序后，第一个数组将包含
-     10，"a"，100，100。第二个数组将包含
-     1，1，"2"，3。第二个数组中的项目顺序完全和第一个数组中相应的项目（100 和 100）顺序一致。
-    </para>
+
     <para>
      <example>
       <title>对多维数组排序</title>
@@ -96,8 +122,172 @@ array_multisort ($ar[0], SORT_ASC, SORT_STRING,
      10，100，100，"a"（作为字符串上升排序），第二个数组将包含
      1，3，"2"，1（作为数值下降排序）。
     </para>
+
     <para>
-     【译者注】本函数相当有用，为有助于理解，请看下面这个例子：
+     <example>
+      <title>Sorting multi-dimensional array</title>
+      <programlisting role="php">
+<![CDATA[
+<?php
+$ar = array(
+       array("10", 11, 100, 100, "a"),
+       array(   1,  2, "2",   3,   1)
+      );
+array_multisort($ar[0], SORT_ASC, SORT_STRING,
+                $ar[1], SORT_NUMERIC, SORT_DESC);
+var_dump($ar);
+?>
+]]>
+      </programlisting>
+      <para>
+       In this example, after sorting, the first array will transform to
+       "10", 100, 100, 11, "a" (it was sorted as strings in ascending
+       order). The second will contain 1, 3, "2", 2, 1 (sorted as numbers,
+       in descending order).
+      </para>
+      <screen>
+<![CDATA[
+array(2) {
+  [0]=> array(5) {
+    [0]=> string(2) "10"
+    [1]=> int(100)
+    [2]=> int(100)
+    [3]=> int(11)
+    [4]=> string(1) "a"
+  }
+  [1]=> array(5) {
+    [0]=> int(1)
+    [1]=> int(3)
+    [2]=> string(1) "2"
+    [3]=> int(2)
+    [4]=> int(1)
+  }
+}
+]]>
+      </screen>
+     </example>
+    </para>
+
+    <para>
+     <example>
+      <title>对数据库结果进行排序</title>
+      <para>
+       本例中 <varname>data</varname>
+       数组中的每个单元表示一个表中的一行。这是典型的数据库记录的数据集合。
+      </para>
+      <para>
+       例子中的数据如下：
+      </para>
+      <screen>
+<![CDATA[
+volume | edition
+-------+--------
+    67 |       2
+    86 |       1
+    85 |       6
+    98 |       2
+    86 |       6
+    67 |       7
+]]>
+      </screen>
+      <para>
+       数据全都存放在名为 <varname>data</varname>
+       的数组中。这通常是通过循环从数据库取得的结果，例如
+       <function>mysql_fetch_assoc</function>。
+      </para>
+      <programlisting role="php">
+<![CDATA[
+<?php
+$data[] = array('volume' => 67, 'edition' => 2);
+$data[] = array('volume' => 86, 'edition' => 1);
+$data[] = array('volume' => 85, 'edition' => 6);
+$data[] = array('volume' => 98, 'edition' => 2);
+$data[] = array('volume' => 86, 'edition' => 6);
+$data[] = array('volume' => 67, 'edition' => 7);
+?>
+]]>
+      </programlisting>
+      <para>
+       本例中将把 <varname>volume</varname> 降序排列，把
+       <varname>edition</varname> 升序排列。
+      </para>
+      <para>
+       现在有了包含有行的数组，但是 <function>array_multisort</function>
+       需要一个包含列的数组，因此用以下代码来取得列，然后排序。
+      </para>
+      <programlisting role="php">
+<![CDATA[
+<?php
+// 取得列的列表
+foreach ($data as $key => $row) {
+    $volume[$key]  = $row['volume'];
+    $edition[$key] = $row['edition'];
+}
+
+// 将数据根据 volume 降序排列，根据 edition 升序排列
+// 把 $data 作为最后一个参数，以通用键排序
+array_multisort($volume, SORT_DESC, $edition, SORT_ASC, $data);
+?>
+]]>
+      </programlisting>
+      <para>
+       数据集合现在排好序了，结果如下：
+      </para>
+      <screen>
+<![CDATA[
+volume | edition
+-------+--------
+    98 |       2
+    86 |       1
+    86 |       6
+    85 |       6
+    67 |       2
+    67 |       7
+]]>
+      </screen>
+     </example>
+    </para>
+
+    <para>
+     <example>
+      <title>不区分大小写字母排序</title>
+      <para>
+       <constant>SORT_STRING</constant> 和
+       <constant>SORT_REGULAR</constant>
+       都是区分大小写字母的，大写字母会排在小写字母之前。
+      </para>
+      <para>
+       要进行不区分大小写的排序，就要按照原数组的小写字母拷贝来排序。
+      </para>
+      <programlisting role="php">
+<![CDATA[
+<?php
+$array = array('Alpha', 'atomic', 'Beta', 'bank');
+$array_lowercase = array_map('strtolower', $array);
+
+array_multisort($array_lowercase, SORT_ASC, SORT_STRING, $array);
+
+print_r($array);
+?>
+]]>
+      </programlisting>
+      &example.outputs;
+      <screen>
+<![CDATA[
+Array
+(
+    [0] => Alpha
+    [1] => atomic
+    [2] => bank
+    [3] => Beta
+)
+]]>
+      </screen>
+     </example>
+    </para>
+
+    <para>
+     【译者注】本函数相当有用，为有助于理解，请再看下面这个例子：
     </para>
     <para>
      <example>
@@ -117,7 +307,7 @@ var_dump($grade);
       <para>
        上例输出结果如下：
       </para>
-      <screen role="php">
+      <screen>
 <![CDATA[
 array(2) {
   ["score"]=>
