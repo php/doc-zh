@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.6 $ -->
+<!-- $Revision: 1.7 $ -->
 <!-- $Author: dallas $ -->
-<!-- EN-Revision: 1.8 Maintainer: nio Status: ready -->
+<!-- EN-Revision: 1.13 Maintainer: nio Status: ready -->
  <reference id="ref.classobj">
-  <title>类／对象函数库</title>
+  <title>Classes/Objects 类／对象函数</title>
   <titleabbrev>Classes/Objects</titleabbrev>
 
   <partintro>
     <section id="classobj.intro">
      &reftitle.intro;
      <para>
-      这些函数允许你获取类和对象实例的信息。你可以取得对象所属的类的名字，以及它的成员属性和方法。通过使用这些函数，你不仅可以弄清楚一个对象类的全体成员，而且可以知道它的起源（例如，该对象类是哪个类的扩展）。
+      本类函数允许获取类和对象实例的信息。可以取得对象所属的类的名字，以及它的成员属性和方法。通过使用这些函数，不仅可以弄清楚一个对象类的全体成员，而且可以知道它的起源（例如，该对象类是哪个类的扩展）。
      </para>
     </section>
 
@@ -52,45 +52,51 @@
 <![CDATA[
 <?php
 
-// 基础类及其属性和方法
+// base class with member properties and methods
 class Vegetable {
 
     var $edible;
     var $color;
 
-    function Vegetable( $edible, $color="green" ) {
+    function Vegetable($edible, $color="green")
+    {
         $this->edible = $edible;
         $this->color = $color;
     }
 
-    function is_edible() {
+    function is_edible()
+    {
         return $this->edible;
     }
 
-    function what_color() {
+    function what_color()
+    {
         return $this->color;
     }
 
-} // 类 Vegetable 的结束
+} // end of class Vegetable
 
-// 从基础类扩展
+// extends the base class
 class Spinach extends Vegetable {
 
     var $cooked = false;
 
-    function Spinach() {
-        $this->Vegetable( true, "green" );
+    function Spinach()
+    {
+        $this->Vegetable(true, "green");
     }
 
-    function cook_it() {
+    function cook_it()
+    {
         $this->cooked = true;
     }
 
-    function is_cooked() {
+    function is_cooked()
+    {
         return $this->cooked;
     }
 
-} // 类 Spinach 的结束
+} // end of class Spinach
 
 ?>
 ]]>
@@ -98,7 +104,7 @@ class Spinach extends Vegetable {
       </example>
      </para>
      <para>
-     接着，我们从这些对象中创建了两个对象实例，打印出它们的相关信息，包括它们的起源。我们还定义了一些实用函数，它们主要是为了让变量的输出好看些。
+      接着，我们从这些对象中创建了两个对象实例，打印出它们的相关信息，包括它们的起源。我们还定义了一些实用函数，它们主要是为了让变量的输出好看些。
      </para>
      <para>
       <example>
@@ -110,45 +116,48 @@ class Spinach extends Vegetable {
 
 include "classes.inc";
 
-// 实用函数
+// utility functions
 
-function print_vars($obj) {
-    $arr = get_object_vars($obj);
-    while (list($prop, $val) = each($arr))
+function print_vars($obj)
+{
+    foreach (get_object_vars($obj) as $prop => $val) {
         echo "\t$prop = $val\n";
+    }
 }
 
-function print_methods($obj) {
+function print_methods($obj)
+{
     $arr = get_class_methods(get_class($obj));
-    foreach ($arr as $method)
+    foreach ($arr as $method) {
         echo "\tfunction $method()\n";
+    }
 }
 
-function class_parentage($obj, $class) {
-    global $$obj;
-    if (is_subclass_of($$obj, $class)) {
-        echo "Object $obj belongs to class ".get_class($$obj);
+function class_parentage($obj, $class)
+{
+    if (is_subclass_of($GLOBALS[$obj], $class)) {
+        echo "Object $obj belongs to class " . get_class($$obj);
         echo " a subclass of $class\n";
     } else {
         echo "Object $obj does not belong to a subclass of $class\n";
     }
 }
 
-// 创建两个对象实例
+// instantiate 2 objects
 
-$veggie = new Vegetable(true,"blue");
+$veggie = new Vegetable(true, "blue");
 $leafy = new Spinach();
 
-// 打印出对象的相关信息
-echo "veggie: CLASS ".get_class($veggie)."\n";
-echo "leafy: CLASS ".get_class($leafy);
-echo ", PARENT ".get_parent_class($leafy)."\n";
+// print out information about objects
+echo "veggie: CLASS " . get_class($veggie) . "\n";
+echo "leafy: CLASS " . get_class($leafy);
+echo ", PARENT " . get_parent_class($leafy) . "\n";
 
-// 显示 veggie 的属性
+// show veggie properties
 echo "\nveggie: Properties\n";
 print_vars($veggie);
 
-// 显示 leafy 的方法
+// and leafy methods
 echo "\nleafy: Methods\n";
 print_methods($leafy);
 
