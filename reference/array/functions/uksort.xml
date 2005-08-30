@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.4 $ -->
+<!-- $Revision: 1.5 $ -->
 <!-- $Author: dallas $ -->
-<!-- EN-Revision: 1.7 Maintainer: dallas Status: ready -->
+<!-- EN-Revision: 1.16 Maintainer: dallas Status: ready -->
   <refentry id="function.uksort">
    <refnamediv>
     <refname>uksort</refname>
@@ -12,12 +12,20 @@
    <refsect1>
     <title>说明</title>
      <methodsynopsis>
-      <type>void</type><methodname>uksort</methodname>
-      <methodparam><type>array</type><parameter>array</parameter></methodparam>
+      <type>bool</type><methodname>uksort</methodname>
+      <methodparam><type>array</type><parameter role="reference">array</parameter></methodparam>
       <methodparam><type>callback</type><parameter>cmp_function</parameter></methodparam>
      </methodsynopsis>
     <para>
      本函数将使用用户提供的比较函数对数组中的键名进行排序。如果要排序的数组需要用一种不寻常的标准进行排序，那么应该使用此函数。
+    </para>
+    <para>
+     <parameter>cmp_function</parameter> 函数应接受两个参数，该参数将被
+     <parameter>array</parameter>
+     中的一对键名填充。比较函数在第一个参数小于，等于，或大于第二个参数时必须分别返回一个小于零，等于零，或大于零的整数。
+    </para>
+    <para>
+     &return.success;
     </para>
     <para>
      <example>
@@ -25,24 +33,25 @@
       <programlisting role="php">
 <![CDATA[
 <?php
-function cmp ($a, $b) {
-    if ($a == $b) return 0;
+function cmp($a, $b)
+{
+    if ($a == $b) {
+        return 0;
+    }
     return ($a > $b) ? -1 : 1;
 }
 
-$a = array (4 => "four", 3 => "three", 20 => "twenty", 10 => "ten");
+$a = array(4 => "four", 3 => "three", 20 => "twenty", 10 => "ten");
 
-uksort ($a, "cmp");
+uksort($a, "cmp");
 
-while (list ($key, $value) = each ($a)) {
+foreach ($a as $key => $value) {
     echo "$key: $value\n";
 }
 ?>
 ]]>
       </programlisting>
-      <para>
-       本例将显示：
-      </para>
+      &example.outputs;
       <screen>
 <![CDATA[
 20: twenty

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.4 $ -->
+<!-- $Revision: 1.5 $ -->
 <!-- $Author: dallas $ -->
-<!-- EN-Revision: 1.10 Maintainer: dallas Status: ready -->
+<!-- EN-Revision: 1.19 Maintainer: dallas Status: ready -->
   <refentry id="function.extract">
    <refnamediv>
     <refname>extract</refname>
@@ -29,7 +29,8 @@
     </note>
     <note>
      <para>
-      <constant>EXTR_IF_EXISTS</constant> 和 <constant>EXTR_PREFIX_IF_EXISTS</constant> 是版本 4.2.0 中引进的。
+      <constant>EXTR_IF_EXISTS</constant> 和
+      <constant>EXTR_PREFIX_IF_EXISTS</constant> 是版本 4.2.0 中引进的。
      </para>
     </note>
     <note>
@@ -126,6 +127,19 @@
     <para>
      <function>extract</function> 返回成功导入到符号表中的变量数目。
     </para>
+    <warning>
+     <para>
+      不要对不能信任的数据使用
+      <function>extract</function>，例如用户的输入（$_GET，...）。如果这样做，举例说，要临时运行依赖于
+      <link linkend="security.globals">register_globals</link>
+      的老代码，要确保使用不会覆盖的
+      <parameter>extract_type</parameter> 值，例如
+      <constant>EXTR_SKIP</constant>，并且要留意应该按照
+      <link linkend="ini">&php.ini;</link>
+      中由 <link linkend="ini.variables-order">variables_order</link>
+      定义的顺序来提取。
+     </para>
+    </warning>
     <para>
      <function>extract</function> 的一种可能用法是将 <function>wddx_deserialize</function>
      返回的结合数组中的内容导入到符号表变量中去。
@@ -140,19 +154,17 @@
 /* 假定 $var_array 是 wddx_deserialize 返回的数组*/
 
 $size = "large";
-$var_array = array ("color" => "blue",
-                    "size"  => "medium",
-                    "shape" => "sphere");
-extract ($var_array, EXTR_PREFIX_SAME, "wddx");
+$var_array = array("color" => "blue",
+                   "size"  => "medium",
+                   "shape" => "sphere");
+extract($var_array, EXTR_PREFIX_SAME, "wddx");
 
-print "$color, $size, $shape, $wddx_size\n";
+echo "$color, $size, $shape, $wddx_size\n";
 
 ?>
 ]]>
       </programlisting>
-      <para>
-       以上例子将产生：
-      </para>
+      &example.outputs;
       <screen>
 <![CDATA[
 blue, large, sphere, medium
