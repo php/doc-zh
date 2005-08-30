@@ -1,76 +1,162 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.4 $ -->
+<!-- $Revision: 1.5 $ -->
 <!-- $Author: dallas $ -->
-<!-- EN-Revision: 1.3 Maintainer: dallas Status: ready -->
-  <refentry id="function.strtotime">
-   <refnamediv>
-    <refname>strtotime</refname>
-    <refpurpose>
-     将任何英文文本的日期时间描述解析为 UNIX 时间戳
-    </refpurpose>
-   </refnamediv>
-   <refsect1>
-    <title>说明</title>
-     <methodsynopsis>
-      <type>int</type><methodname>strtotime</methodname>
-      <methodparam><type>string</type><parameter>time</parameter></methodparam>
-      <methodparam choice="opt"><type>int</type><parameter>now</parameter></methodparam>
-     </methodsynopsis>
-    <simpara>
-     本函数预期接受一个包含英文日期格式的字符串并尝试将其解析为
-     UNIX 时间戳。如果 time 的格式是绝对时间则 now
-     参数不起作用。如果 time 的格式是相对时间则其所相对的时间由
-     now 提供，或者如果未提供 now 参数时用当前时间。失败时返回 <literal>-1</literal>。
-    </simpara>
-    <simpara>
-     因为 <function>strtotime</function> 的行为是依照 GNU
-     日期语法的，因此请看看 GNU 手册中的
-     <ulink url="&url.gnu.man.date-input;">Date Input
-     Formats</ulink>。这里记述了 <parameter>time</parameter> 参数的合法语法。
-    </simpara>
-    <para>
-     <example>
-      <title><function>strtotime</function> 例子</title>
-      <programlisting role="php">
+<!-- EN-Revision: 1.16 Maintainer: dallas Status: ready -->
+<refentry id="function.strtotime">
+ <refnamediv>
+  <refname>strtotime</refname>
+  <refpurpose>将任何英文文本的日期时间描述解析为 Unix 时间戳</refpurpose>
+ </refnamediv>
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <type>int</type><methodname>strtotime</methodname>
+   <methodparam><type>string</type><parameter>time</parameter></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>now</parameter></methodparam>
+  </methodsynopsis>
+  <simpara>
+   本函数预期接受一个包含美国英语日期格式的字符串并尝试将其解析为
+   Unix 时间戳（自 January 1 1970 00:00:00 GMT 起的秒数），其值相对于
+   <parameter>now</parameter> 参数给出的时间，如果没有提供此参数则用系统当前时间。
+  <para>
+   本函数将使用 <envar>TZ</envar> 环境变量（如果有的话）来计算时间戳。自
+   PHP 5.1.0 起有更容易的方法来定义时区用于所有的日期／时间函数。此过程在
+   <function>date_default_timezone_get</function> 函数页面中有说明。
+  </para>
+  <note>
+   <para>
+    如果给定的年份是两位数字的格式，则其值 0-69 表示 2000-2069，70-100
+    表示 1970-2000。
+   </para>
+  </note>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>time</parameter></term>
+     <listitem>
+      <para>
+       被解析的字符串，格式根据 GNU <ulink
+       url="&url.gnu.man.date-input;">Date Input Formats</ulink> 语法
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>now</parameter></term>
+     <listitem>
+      <para>
+       用来计算返回值的时间戳
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   成功则返回时间戳，否则返回 &false;。在 PHP 5.1.0
+   之前本函数在失败时返回 <literal>-1</literal>。
+  </para>
+ </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <para>
+   <informaltable>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>&Version;</entry>
+       <entry>&Description;</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>5.1.0</entry>
+       <entry>
+        失败时返回 &false;，不再是 <literal>-1</literal>。
+       </entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </informaltable>
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title><function>strtotime</function> 例子</title>
+    <programlisting role="php">
 <![CDATA[
 <?php
-echo strtotime ("now"), "\n";
-echo strtotime ("10 September 2000"), "\n";
-echo strtotime ("+1 day"), "\n";
-echo strtotime ("+1 week"), "\n";
-echo strtotime ("+1 week 2 days 4 hours 2 seconds"), "\n";
-echo strtotime ("next Thursday"), "\n";
-echo strtotime ("last Monday"), "\n";
+echo strtotime("now"), "\n";
+echo strtotime("10 September 2000"), "\n";
+echo strtotime("+1 day"), "\n";
+echo strtotime("+1 week"), "\n";
+echo strtotime("+1 week 2 days 4 hours 2 seconds"), "\n";
+echo strtotime("next Thursday"), "\n";
+echo strtotime("last Monday"), "\n";
 ?>
 ]]>
-      </programlisting>
-     </example>
-    </para>
-    <para>
-     <example>
-      <title>检查失败</title>
-      <programlisting role="php">
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   <example>
+    <title>失败检查</title>
+    <programlisting role="php">
 <![CDATA[
 <?php
 $str = 'Not Good';
-if (($timestamp = strtotime($str)) === -1) {
+
+// previous to PHP 5.1.0 you would compare with -1, instead of false
+if (($timestamp = strtotime($str)) === false) {
     echo "The string ($str) is bogus";
 } else {
-    echo "$str == ". date('l dS of F Y h:i:s A',$timestamp);
+    echo "$str == " . date('l dS of F Y h:i:s A', $timestamp);
 }
 ?>
 ]]>
-      </programlisting>
-     </example>
-    </para>
-    <note>
-     <para>
-      有效的时间戳典型范围是从格林威治时间 1901 年 12 月 13 日 星期五 20:45:54 到
-      2038年 1 月 19 日 星期二 03:14:07。（该日期根据 32 位有符号整数的最小值和最大值而来。）
-     </para>
-    </note>
-   </refsect1>
-  </refentry>
+    </programlisting>
+   </example>
+  </para>
+ </refsect1>
+
+ <refsect1 role="notes">
+  &reftitle.notes;
+  <warning>
+   <para>
+    在 PHP 5 中到 5.0.2 之前，<literal>"now"</literal>
+    和其它相对时间从今天午夜起错误计算了。这和正确从当前时间起计算的其它版本不同。
+   </para>
+  </warning>
+  <note>
+   <para>
+    有效的时间戳通常从 Fri, 13 Dec 1901 20:45:54 GMT 到
+    Tue, 19 Jan 2038 03:14:07 GMT（对应于 32
+    位有符号整数的最小值和最大值）。不是所有的平台都支持负的时间戳，那么日记范围就被限制为不能早于
+    Unix 纪元。这意味着在 1970 年 1 月 1 日之前的日期将不能用在 Windows，一些
+    Linux 版本，以及几个其它的操作系统中。不过 PHP 5.1.0 及更新的版本克服了此限制。
+   </para>
+  </note>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>strptime</function></member>
+   </simplelist>
+  </para>
+ </refsect1>
+</refentry>
 
 <!-- Keep this comment at the end of the file
 Local variables:
