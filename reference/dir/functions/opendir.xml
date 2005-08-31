@@ -1,63 +1,146 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.5 $ -->
+<!-- $Revision: 1.6 $ -->
 <!-- $Author: dallas $ -->
-<!-- EN-Revision: 1.6 Maintainer: dallas Status: ready -->
-  <refentry id="function.opendir">
-   <refnamediv>
-    <refname>opendir</refname>
-    <refpurpose>打开目录句柄</refpurpose>
-   </refnamediv>
-   <refsect1>
-    <title>说明</title>
-     <methodsynopsis>
-      <type>resource</type><methodname>opendir</methodname>
-      <methodparam><type>string</type><parameter>path</parameter></methodparam>
-     </methodsynopsis>
-    <para>
-     返回一个目录句柄，可以在之后用在
-     <function>closedir</function>，<function>readdir</function> 和
-     <function>rewinddir</function> 调用中。
-    </para>
-    <para>
-     如果 <parameter>path</parameter>
-     不是一个合法的目录或者因为权限限制或文件系统错误而不能打开目录，<function>opendir</function>
-     返回 &false; 并产生一个 <link linkend="errorfunc.constants">E_WARNING</link>
-     级别的 PHP 错误信息。可以在 <function>opendir</function>
-     前面加上“<link linkend="language.operators.errorcontrol">@</link>”符号来抑制错误信息的输出。
-    </para>
-    <para>
-     <example>
-      <title><function>opendir</function> 例子</title>
-      <programlisting role="php">
+<!-- EN-Revision: 1.15 Maintainer: dallas Status: ready -->
+<refentry id="function.opendir">
+ <refnamediv>
+  <refname>opendir</refname>
+  <refpurpose>打开目录句柄</refpurpose>
+ </refnamediv>
+
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <type>resource</type><methodname>opendir</methodname>
+   <methodparam><type>string</type><parameter>path</parameter></methodparam>
+   <methodparam choice="opt"><type>resource</type><parameter>context</parameter></methodparam>
+  </methodsynopsis>
+  <para>
+   打开一个目录句柄，可用于之后的
+   <function>closedir</function>，<function>readdir</function> 和
+   <function>rewinddir</function> 调用中。
+  </para>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>path</parameter></term>
+     <listitem>
+      <para>
+       要打开的目录路径
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>context</parameter></term>
+     <listitem>
+      <para>
+       <parameter>context</parameter> 参数的说明见手册中的
+       <link linkend="ref.stream">Streams API</link> 一章。
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   如果成功则返回目录句柄的 <type>resource</type>，失败则返回 &false;。
+  </para>
+  <para>
+   如果 <parameter>path</parameter>
+   不是一个合法的目录或者因为权限限制或文件系统错误而不能打开目录，<function>opendir</function>
+   返回 &false; 并产生一个 <link linkend="errorfunc.constants">E_WARNING</link>
+   级别的 PHP 错误信息。可以在 <function>opendir</function>
+   前面加上“<link linkend="language.operators.errorcontrol">@</link>”符号来抑制错误信息的输出。
+  </para>
+ </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <para>
+   <informaltable>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>&Version;</entry>
+       <entry>&Description;</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>5.0.0</entry>
+       <entry>
+        <parameter>path</parameter> 支持 <literal>ftp://</literal>
+        URL wrapper
+       </entry>
+      </row>
+      <row>
+       <entry>4.3.0</entry>
+       <entry>
+        <parameter>path</parameter> 可以是任何支持目录列表的
+        URL，不过在 PHP 4 中只有 <literal>file://</literal>
+        URL wrapper 支持此功能
+       </entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </informaltable>
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title><function>opendir</function> 例子</title>
+    <programlisting role="php">
 <![CDATA[
 <?php
-$dir = "/tmp/";
+$dir = "/etc/php5/";
+
 // Open a known directory, and proceed to read its contents
 if (is_dir($dir)) {
     if ($dh = opendir($dir)) {
         while (($file = readdir($dh)) !== false) {
-            print "filename: $file : filetype: " . filetype($dir . $file) . "\n";
+            echo "filename: $file : filetype: " . filetype($dir . $file) . "\n";
         }
         closedir($dh);
     }
 }
 ?>
 ]]>
-      </programlisting>
-     </example>
-    </para>
-    <para>
-     自 <literal>PHP 4.3.0</literal> 起 <parameter>path</parameter>
-     也可以是任何支持目录列表的 URL，但是在 <literal>PHP 4.3</literal>
-     中只支持 <literal>file://</literal> url 协议。自 <literal>PHP 5.0.0</literal>
-     起，也包括了 <literal>ftp://</literal> url 协议的支持。
-    </para>
-    <para>
-     参见 <function>is_dir</function>，<function>readdir</function>
-     和 <link linkend="class.dir">Dir</link>。
-    </para>
-   </refsect1>
-  </refentry>
+    </programlisting>
+    &example.outputs.similar;
+    <screen>
+<![CDATA[
+filename: . : filetype: dir
+filename: .. : filetype: dir
+filename: apache : filetype: dir
+filename: cgi : filetype: dir
+filename: cli : filetype: dir
+]]>
+    </screen>
+   </example>
+  </para>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>is_dir</function></member>
+    <member><function>readdir</function></member>
+    <member><link linkend="class.dir">Dir</link></member>
+   </simplelist>
+  </para>
+ </refsect1>
+</refentry>
 
 <!-- Keep this comment at the end of the file
 Local variables:
