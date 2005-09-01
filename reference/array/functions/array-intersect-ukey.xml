@@ -1,34 +1,48 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.2 $ -->
+<!-- $Revision: 1.1 $ -->
 <!-- $Author: dallas $ -->
-<!-- EN-Revision: 1.2 Maintainer: dallas Status: ready -->
-<refentry id="function.array-intersect-key">
+<!-- EN-Revision: 1.3 Maintainer: dallas Status: ready -->
+<refentry id="function.array-intersect-ukey">
  <refnamediv>
-  <refname>array_intersect_key</refname>
-  <refpurpose>使用键名比较计算数组的交集</refpurpose>
+  <refname>array_intersect_ukey</refname>
+  <refpurpose>用回调函数比较键名来计算数组的交集</refpurpose>
  </refnamediv>
  <refsect1>
   <title>说明</title>
   <methodsynopsis>
-   <type>array</type><methodname>array_intersect_key</methodname>
+   <type>array</type><methodname>array_intersect_ukey</methodname>
    <methodparam><type>array</type><parameter>array1</parameter></methodparam>
    <methodparam><type>array</type><parameter>array2</parameter></methodparam>
-   <methodparam choice="opt"><type>array</type><parameter> ...</parameter></methodparam>
+   <methodparam choice="opt"><type>array</type><parameter>...</parameter></methodparam>
+   <methodparam><type>callback</type><parameter>key_compare_func</parameter></methodparam>
   </methodsynopsis>
   <para>
-   <function>array_intersect_key</function> 返回一个数组，该数组包含了所有出现在
+   <function>array_intersect_ukey</function> 返回一个数组，该数组包含了所有出现在
    <parameter>array1</parameter> 中并同时出现在所有其它参数数组中的键名的值。
   </para>
   <para>
+   此比较是通过用户提供的回调函数来进行的。如果认为第一个参数小于，等于，或大于第二个参数时必须分别返回一个小于零，等于零，或大于零的整数。
+  </para>
+  <para>
    <example>
-    <title><function>array_intersect_key</function> 例子</title>
+    <title><function>array_intersect_ukey</function> 例子</title>
     <programlisting role="php">
 <![CDATA[
 <?php
+function key_compare_func($key1, $key2)
+{
+    if ($key1 == $key2)
+        return 0;
+    else if ($key1 > $key2)
+        return 1;
+    else
+        return -1;
+}
+
 $array1 = array('blue'  => 1, 'red'  => 2, 'green'  => 3, 'purple' => 4);
 $array2 = array('green' => 5, 'blue' => 6, 'yellow' => 7, 'cyan'   => 8);
 
-var_dump(array_intersect_key($array1, $array2));
+var_dump(array_intersect_ukey($array1, $array2, 'key_compare_func'));
 ?>
 ]]>
     </programlisting>
@@ -53,15 +67,9 @@ array(2) {
    <parameter>array1</parameter> 中的。
   </para>
   <para>
-   在 <literal>key =&gt; value</literal> 对中的两个键名仅在
-   <literal>(string) $key1 === (string) $key2 </literal>
-   时被认为相等。换句话说，执行的是严格类型检查，因此字符串的表达必须完全一样。
-  </para>
-  <para>
-   参见
-   <function>array_diff</function>，<function>array_udiff</function>，<function>array_diff_assoc</function>，<function>array_diff_uassoc</function>，<function>array_udiff_assoc</function>，<function>array_udiff_uassoc</function>，<function>array_diff_key</function>，<function>array_diff_ukey</function>，<function>array_intersect</function>，<function>array_intersect_assoc</function>，<function>array_intersect_uassoc</function>
+   参见 <function>array_diff</function>，<function>array_udiff</function>，<function>array_diff_assoc</function>，<function>array_diff_uassoc</function>，<function>array_udiff_assoc</function>，<function>array_udiff_uassoc</function>，<function>array_diff_key</function>，<function>array_diff_ukey</function>，<function>array_intersect</function>，<function>array_intersect_assoc</function>，<function>array_intersect_uassoc</function>
    和
-   <function>array_intersect_ukey</function>。
+   <function>array_intersect_key</function>。
   </para>
  </refsect1>
 </refentry>
