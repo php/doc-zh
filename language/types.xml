@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.18 $ -->
+<!-- $Revision: 1.19 $ -->
 <!-- $Author: dallas $ -->
-<!-- EN-Revision: 1.153 Maintainer: dallas Status: ready -->
+<!-- EN-Revision: 1.154 Maintainer: dallas Status: ready -->
 <!-- CREDITS: Gregory -->
  <chapter id="language.types">
   <title>类型</title>
@@ -1632,27 +1632,23 @@ Do you like yellow?
     </example>
 
     <para>
-     注意目前不可能在这样一个循环中直接改变数组的值。可以改变的例子如下：
-      <!--
-       Should be made possible, if you write:
-       foreach ( $colors as &$color )
-
-       See bug#3074
-      -->
+     直接改变数组的值在 PHP 5 中可以通过引用传递来做到。之前的版本需要需要采取别的方法：
      <example id="language.types.array.examples.changeloop">
       <title>集合</title>
       <programlisting role="php">
 <![CDATA[
 <?php
+// PHP 5
+foreach ($colors as &$color) {
+    $color = strtoupper($color);
+}
+unset($color); /* 确保下面对 $color 的覆盖不会影响到前一个数组单元 */
+// 之前版本的方法
 foreach ($colors as $key => $color) {
-    // won't work:
-    //$color = strtoupper($color);
-
-    //works:
     $colors[$key] = strtoupper($color);
 }
-print_r($colors);
 
+print_r($colors);
 ?>
 ]]>
       </programlisting>
