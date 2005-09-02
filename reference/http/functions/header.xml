@@ -1,93 +1,80 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.5 $ -->
+<!-- $Revision: 1.6 $ -->
 <!-- $Author: dallas $ -->
-<!-- EN-Revision: 1.25 Maintainer: Avenger Status: ready -->
-  <refentry id="function.header">
-   <refnamediv>
-    <refname>header</refname>
-    <refpurpose>向浏览器发送一个 HTTP 头信息</refpurpose>
-   </refnamediv>
-   <refsect1>
-    <title>描述</title>
-    <methodsynopsis>
-     <type>void</type><methodname>header</methodname>
-     <methodparam><type>string</type><parameter>string</parameter></methodparam>
-     <methodparam choice="opt"><type>bool</type><parameter>replace</parameter></methodparam>
-     <methodparam choice="opt"><type>int</type><parameter>http_response_code</parameter></methodparam>
-    </methodsynopsis>
-    <para>
-     <function>header</function> 函数用来发送一个 <acronym>HTTP</acronym>
-     头信息到客户端的浏览器。有关 <acronym>HTTP</acronym> 头信息的更多内容参见官方文档
-     <ulink url="&url.rfc;2616">HTTP/1.1 规范</ulink>。
-    </para>
-    <para>
-     可选参数 <parameter>replace</parameter>
-     用来表示当出现两个相似的头部信息时，是替换前一个相同的头部信息还是增加一个相同的头部信息。默认为替换，如果你将其设为
-     &false; 则可以多次发送相同的头部信息。例如:
-    </para>
-    <para>
-     <informalexample>
-      <programlisting role="php">
+<!-- EN-Revision: 1.26 Maintainer: Avenger Status: ready -->
+<!-- CREDITS: dallas -->
+<refentry id="function.header">
+ <refnamediv>
+  <refname>header</refname>
+  <refpurpose>发送一个原始 HTTP 标头</refpurpose>
+ </refnamediv>
+ <refsect1>
+  <title>说明</title>
+  <methodsynopsis>
+   <type>void</type><methodname>header</methodname>
+   <methodparam><type>string</type><parameter>string</parameter></methodparam>
+   <methodparam choice="opt"><type>bool</type><parameter>replace</parameter></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>http_response_code</parameter></methodparam>
+  </methodsynopsis>
+  <para>
+   <function>header</function> 函数用来发送一个原始 <acronym>HTTP</acronym>
+   标头。有关 <acronym>HTTP</acronym> 标头的更多内容见
+   <ulink url="&url.rfc;2616">HTTP/1.1 规范</ulink>。
+  </para>
+  <para>
+   可选参数 <parameter>replace</parameter>
+   指明是替换掉前一条类似的标头还是增加一条相同类型的标头。默认为替换，但如果将其设为
+   &false; 则可以强制发送多个同类标头。例如:
+  </para>
+  <para>
+   <informalexample>
+    <programlisting role="php">
 <![CDATA[
 <?php
 header('WWW-Authenticate: Negotiate');
 header('WWW-Authenticate: NTLM', false);
 ?>
 ]]>
-      </programlisting>
-     </informalexample>
-    </para>
-    <para>
-     第二个可选参数 <parameter>http_response_code</parameter> 表示 HTTP
-     的头信息的代码（此参数是 PHP 4.3.0 新加的）。
-    </para>
-    <para>
-     有两种特殊情形的头信息输出。第一种是以字符串“<literal>HTTP/</literal>”（大小写不重要）开头的，可以用来确定要发送的
-     HTTP 状态码。例如，如果使用的 WEB 服务器是 Apache
-     的话，要制作一个找不到文件的错误处理页面（使用
-     <literal>ErrorDocument</literal> 指令），可能会需要用它来产生一些适当的状态码。
-    </para>
-    <para>
-     <informalexample>
-      <programlisting role="php">
+    </programlisting>
+   </informalexample>
+  </para>
+  <para>
+   第二个可选参数 <parameter>http_response_code</parameter> 强制将 HTTP
+   响应代码设为指定值（此参数是 PHP 4.3.0 新加的）。
+  </para>
+  <para>
+   有两种特殊的 header 调用。第一种是标头以字符串“<literal>HTTP/</literal>”（大小写不重要）开头的，可以用来确定要发送的
+   HTTP 状态码。例如，如果配置了 Apache 用 PHP
+   来处理找不到文件的错误处理请求（使用
+   <literal>ErrorDocument</literal> 指令），需要确保脚本产生了正确的状态码。
+  </para>
+  <para>
+   <informalexample>
+    <programlisting role="php">
 <![CDATA[
 <?php
 header("HTTP/1.0 404 Not Found")
 ?>
 ]]>
-      </programlisting>
-     </informalexample>
-    </para>
-    <note>
-     <para>
-      HTTP 头信息通常是首先被发送到客户端的，它并不管 <function>header</function>
-      函数是否是在第一行。任何时候都可以通过调用
-      <function>header</function> 函数用新的状态行覆盖原先的，除非
-      HTTP 头信息已经发送出去。
-     </para>
-    </note>
-    <note>
-     <para>
-      在 PHP 3 中，此函数只在 PHP 以 Apache 的模块化运行的时候有效。可以用
-      <literal>Status</literal> 来达到相同的效果。
-      <informalexample>
-       <programlisting role="php">
-<![CDATA[
-<?php
-header("Status: 404 Not Found");
-?>
-]]>
-       </programlisting>
-      </informalexample>
-     </para>
-    </note>
-    <para>
-     第二种特殊情况是以“Location:”开头的信息。它不只是把这个头信息发送回浏览器，它还将一个
-     <literal>REDIRECT</literal>（302）状态码返回给浏览器，除非已经发出了 <literal>3xx</literal> 的状态码。
-    </para>
-    <para>
-     <informalexample>
-      <programlisting role="php">
+    </programlisting>
+   </informalexample>
+  </para>
+  <note>
+   <para>
+    HTTP 状态码标头行总是第一个被发送到客户端，而并不管实际的
+    <function>header</function> 调用是否是第一个。除非
+    HTTP 标头已经发送出去，任何时候都可以通过用新的状态行调用
+    <function>header</function> 函数来覆盖原先的。
+   </para>
+  </note>
+  <para>
+   第二种特殊情况是以“Location:”标头。它不只是把这个标头发送回浏览器，它还将一个
+   <literal>REDIRECT</literal>（302）状态码返回给浏览器，除非之前已经发出了某个
+   <literal>3xx</literal> 状态码。
+  </para>
+  <para>
+   <informalexample>
+    <programlisting role="php">
 <![CDATA[
 <?php
 header("Location: http://www.example.com/"); /* 重定向浏览器 */
@@ -96,41 +83,49 @@ header("Location: http://www.example.com/"); /* 重定向浏览器 */
 exit;
 ?>
 ]]>
-      </programlisting>
-     </informalexample>
-    </para>
-    <note>
-     <para>
-      HTTP/1.1 标准需要一个绝对地址的 <acronym>URI</acronym> 做为
-      <ulink url="&spec.http1.1;-sec14.html#sec14.30">Location:</ulink>
-      的参数, 但有一些客户端支持虚拟的路径。通常可以使用
-      <literal>$_SERVER['HTTP_HOST']</literal>、<literal>$_SERVER['PHP_SELF']</literal>
-      及 <function>dirname</function> 函数来自己获取所需要的绝对路径:
-      <informalexample>
-       <programlisting>
+    </programlisting>
+   </informalexample>
+  </para>
+  <note>
+   <para>
+    HTTP/1.1 标准需要一个绝对地址的 <acronym>URI</acronym> 做为
+    <ulink url="&spec.http1.1;-sec14.html#sec14.30">Location:</ulink>
+    的参数, 但有一些客户端支持相对 URI。通常可以使用
+    <literal>$_SERVER['HTTP_HOST']</literal>、<literal>$_SERVER['PHP_SELF']</literal>
+    及 <function>dirname</function> 函数来自己从相对 URI 产生出绝对 URI：
+    <informalexample>
+     <programlisting>
 <![CDATA[
 <?php
 header("Location: http://".$_SERVER['HTTP_HOST']
-                      .dirname($_SERVER['PHP_SELF'])
+                       . rtrim(dirname($_SERVER['PHP_SELF']), '/\\')
                       ."/".$relative_url);
 ?>
 ]]>
-       </programlisting>
-      </informalexample>
-     </para>
-    </note>
-    <para>
-     PHP 脚本通常是动态改变的。可有些客户端或一些代理服务器会把一些浏览过的内容给缓冲起来，这样更新的脚本就不能被客户端及时的发现，可以通过发送一些类似下面例子中的头信息来禁止缓存网页。
-    </para>
-    <para>
-     <informalexample>
-      <programlisting role="php">
+     </programlisting>
+    </informalexample>
+   </para>
+  </note>
+  <note>
+   <para>
+    即使启用了
+    <link linkend="ini.session.use-trans-sid">session.use_trans_sid</link>，Session
+    ID 也不会随着 Location 头信息被传递。必须手工用 <constant>SID</constant>
+    常量来传递。
+   </para>
+  </note>
+  <para>
+   PHP 脚本通常会产生一些动态内容，这些内容必须不被浏览器或代理服务器缓存。很多代理服务器和浏览器都可以被下面的方法禁止缓存：
+  </para>
+  <para>
+   <informalexample>
+    <programlisting role="php">
 <![CDATA[
 <?php
-// Date in the past
+// 指定一个过去的日期
 header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
 
-// always modified
+// 每次都表示修改过
 header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
 
 // HTTP/1.1
@@ -142,28 +137,30 @@ header("Cache-Control: post-check=0, pre-check=0", false);
 header("Pragma: no-cache");
 ?>
 ]]>
-      </programlisting>
-     </informalexample>
-    </para>
-    <note>
-     <para>
-      可能会发现即使没有把上边的代码全部输出网页也没有被缓冲。这是因为一些用户在他们的浏览器的一些选项设置中设置了禁止缓存文件的选项。
-     </para>
-     <para>
-      另外，当 session 在代码中被使用时，利用 <function>session_cache_limiter</function> 函数和
-      <literal>session.cache_limiter</literal> 选项可以自动的产生相关的缓冲区。
-     </para>
-    </note>
-    <para>
-     要牢记 <function>header</function>
-     要使用在任何网页输出前。包括一些非 HTML 标签和空行都不允许在其之前输出。在使用
-     <function>include</function>、<function>require</function>
-     函数或一些其它的文件存取类函数时，这是一个很常犯的错误。同样在一个单独的
-     PHP/HTML 文件中这个错误也很普遍。
-    </para>
-    <para>
-     <informalexample>
-      <programlisting role="php">
+    </programlisting>
+   </informalexample>
+  </para>
+  <note>
+   <para>
+    可能会发现即使不输出上面所有的代码，网页也没有被缓冲。用户有很多选项可以设置来改变浏览器的默认缓存行为。通过发送上述标头，应该可以覆盖任何可以导致脚本页面被缓存的设置。
+   </para>
+   <para>
+    另外，当使用了 session 时，利用 <function>session_cache_limiter</function> 函数和
+    <literal>session.cache_limiter</literal> 选项可以用来自动产生正确的缓存相关标头。
+   </para>
+  </note>
+  <para>
+   要记住 <function>header</function>
+   必须在任何实际输出之前调用，不论是来自普通的 HTML 标记，空行或者
+   PHP。有一个常见错误就是在通过
+   <function>include</function>，<function>require</function>
+   或一些其它的文件存取类函数读取代码时，有一些空格或者空行在调用
+   <function>header</function> 之前被发送了出去。同样在一个单独的
+   PHP/HTML 文件中这个错误也很普遍。
+  </para>
+  <para>
+   <informalexample>
+    <programlisting role="php">
 <![CDATA[
 <html>
 <?php
@@ -172,25 +169,25 @@ header("Pragma: no-cache");
 header('Location: http://www.example.com/');
 ?>
 ]]>
-      </programlisting>
-     </informalexample>
-    </para>
-    <note>
-     <para>
-      在 PHP 4里，可以通过一些输出缓冲函数来解决这个问题。这样做，可以把所有的输出都缓冲到服务，直到下命令发送它们。可以在代码中使用
-      <function>ob_start</function> 及 <function>ob_end_flush</function>
-      来实现这样的功能，或者通过修改 &php.ini; 中的 <literal>output_buffering</literal>
-      选项来实现，也可以通过修改服务器配置文件来实现。
-     </para>
-    </note>
-    <para>
-     如果想提示用户下载并保存一个文件，例如一个 PDF
-     文件，可以通过发送 <ulink url="&url.rfc;2183">Content-Disposition</ulink>
-     信息来使客户端机器弹出下载对话框来下载需要处理的文件。
-    </para>
-    <para>
-     <informalexample>
-      <programlisting role="php">
+    </programlisting>
+   </informalexample>
+  </para>
+  <note>
+   <para>
+    自 PHP 4 起，可以通过一些输出缓冲函数来解决这个问题。代价是把所有向浏览器的输出都缓存在服务器，直到下命令发送它们。可以在代码中使用
+    <function>ob_start</function> 及 <function>ob_end_flush</function>
+    来实现这样的功能，或者通过修改 &php.ini; 中的 <literal>output_buffering</literal>
+    配置选项来实现，也可以通过修改服务器配置文件来实现。
+   </para>
+  </note>
+  <para>
+   如果想提示用户保存所发送的数据，例如一个生成的 PDF
+   文件，可以通过发送 <ulink url="&url.rfc;2183">Content-Disposition</ulink>
+   标头提供推荐的文件名来强制浏览器弹出一个保存文件对话框。
+  </para>
+  <para>
+   <informalexample>
+    <programlisting role="php">
 <![CDATA[
 <?php
 // 这样将会直接输出一个 PDF 文件
@@ -203,29 +200,30 @@ header('Content-Disposition: attachment; filename="downloaded.pdf"');
 readfile('original.pdf');
 ?>
 ]]>
-      </programlisting>
-     </informalexample>
-    </para>
-    <note>
-     <para>
-      Microsoft Internet Explorer 4.01 中的一个漏洞使得该机制无法正常工作。在
-      Microsoft Internet Explorer 5
-      中这个漏洞依然存在，升级 Service Pack 2 及其以后版本中这个漏洞将不复存在。
-     </para>
-    </note>
-    <note>
-     <simpara>
-      在<link linkend="ini.safe-mode">安全模式</link>下，当前使用者的
-      UID 会附加到头信息 <literal>WWW-Authenticate</literal>
-      的 <literal>realm</literal> 部分一起发送（用于 HTTP 认证）。
-     </simpara>
-    </note>
-    <para>
-     参见 <function>headers_sent</function>，<function>setcookie</function>
-     及 <link linkend="features.http-auth">HTTP 人证</link>章节。
-    </para>
-   </refsect1>
-  </refentry>
+    </programlisting>
+   </informalexample>
+  </para>
+  <note>
+   <para>
+    Microsoft Internet Explorer 4.01
+    中的一个漏洞使得该机制无法正常工作，无解决方案。在
+    Microsoft Internet Explorer 5.5
+    中也有个漏洞影响到这一点，升级到 Service Pack 2 或更高版本可以解决。
+   </para>
+  </note>
+  <note>
+   <simpara>
+    在<link linkend="ini.safe-mode">安全模式</link>下，如果设定了
+    <literal>WWW-Authenticate</literal> 标头（用于 HTTP
+    认证）则脚本的 UID 会添加到其中的 <literal>realm</literal> 部分中去。
+   </simpara>
+  </note>
+  <para>
+   参见 <function>headers_sent</function>，<function>setcookie</function>
+   和 <link linkend="features.http-auth">HTTP 认证</link>一章。
+  </para>
+ </refsect1>
+</refentry>
 
 <!-- Keep this comment at the end of the file
 Local variables:
