@@ -1,249 +1,252 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.14 $ -->
+<!-- $Revision: 1.15 $ -->
 <!-- $Author: dallas $ -->
-<!-- EN-Revision: 1.18 Maintainer: Gregory Status: ready -->
- <reference id="ref.xml">
-  <title>XML 语法解析函数</title>
-  <titleabbrev>XML</titleabbrev>
+<!-- EN-Revision: 1.19 Maintainer: Gregory Status: ready -->
+<!-- Purpose: xml -->
+<!-- Membership: bundled, external -->
 
-  <partintro>
+<reference id="ref.xml">
+ <title>XML 语法解析函数</title>
+ <titleabbrev>XML</titleabbrev>
 
-   <section id="xml.intro">
-    &reftitle.intro;
-    <para>
-	 XML（eXtensible Markup Language，可扩展标记语言）是一种在 web
-	 上进行文档交换的数据格式。该语言是由 W3C（World
-	 Wide Web Concortium，世界万维网组织）定义的一种标准。可以访问
-	 <ulink url="&url.xml;">&url.xml;</ulink> 以获取关于 XML 及其相关技术的更多信息。
-    </para>
-    <para>
-	 本扩展模块可为 James Clark 的 <productname>expat</productname>
-	 提供支持。该工具包帮助解析 XML 文档（而非 XML
-	 文档的有效化）。它支持三种源代码的<link
-	 linkend="xml.encoding">编码方式</link>，这三种编码方式也被 PHP
-	 本身所支持，它们分别是：<literal>US-ASCII</literal>、<literal>ISO-8859-1</literal>
-	 和 <literal>UTF-8</literal>。本系统尚不支持 <literal>UTF-16</literal>。
-    </para>
-    <para>
-	 本扩展模块使用户能够<link linkend="function.xml-parser-create">建立
-	 XML 语法解析器</link>，并对不同的 XML 事件定义对应的处理器。每个
-	 XML 语法解析器都有若干个可根据需要调整的<link
-	 linkend="function.xml-parser-set-option">参数</link>。
-    </para>
-   </section>
+ <partintro>
 
-   <section id="xml.requirements">
-    &reftitle.required;
-    <para>
-	 本扩展模块默认使用 <productname>expat compat layer</productname>。它也可以使用
-	 <productname>expat</productname>，可以访问
-	 <ulink url="&url.expat;">&url.expat;</ulink> 来获取。expat
-	 自带的 Makefile 文件不会生成默认的扩展库，可以使用以下的生成规则来实现：
-     <programlisting role="makefile">
+  <section id="xml.intro">
+   &reftitle.intro;
+   <para>
+    XML（eXtensible Markup Language，可扩展标记语言）是一种在 web
+    上进行文档交换的数据格式。该语言是由 W3C（World
+    Wide Web Concortium，世界万维网组织）定义的一种标准。可以访问
+    <ulink url="&url.xml;">&url.xml;</ulink> 以获取关于 XML 及其相关技术的更多信息。
+   </para>
+   <para>
+    本扩展模块可为 James Clark 的 <productname>expat</productname>
+    提供支持。该工具包帮助解析 XML 文档（而非 XML
+    文档的有效化）。它支持三种源代码的<link
+    linkend="xml.encoding">编码方式</link>，这三种编码方式也被 PHP
+    本身所支持，它们分别是：<literal>US-ASCII</literal>、<literal>ISO-8859-1</literal>
+    和 <literal>UTF-8</literal>。本系统尚不支持 <literal>UTF-16</literal>。
+   </para>
+   <para>
+    本扩展模块使用户能够<link linkend="function.xml-parser-create">建立
+    XML 语法解析器</link>，并对不同的 XML 事件定义对应的处理器。每个
+    XML 语法解析器都有若干个可根据需要调整的<link
+    linkend="function.xml-parser-set-option">参数</link>。
+   </para>
+  </section>
+
+  <section id="xml.requirements">
+   &reftitle.required;
+   <para>
+    本扩展模块默认使用 <productname>expat compat layer</productname>。它也可以使用
+    <productname>expat</productname>，可以访问
+    <ulink url="&url.expat;">&url.expat;</ulink> 来获取。expat
+    自带的 Makefile 文件不会生成默认的扩展库，可以使用以下的生成规则来实现：
+    <programlisting role="makefile">
 <![CDATA[
 libexpat.a: $(OBJS)
     ar -rc $@ $(OBJS)
     ranlib $@
 ]]>
-     </programlisting>
-    </para>
+    </programlisting>
+   </para>
+   <para>
+    请访问 <ulink url="&url.expat.rpm;">&url.expat.rpm;</ulink> 以获取
+    expat 源文件的 RPM 包。
+   </para>
+  </section>
+
+  &reference.xml.configure;
+
+  <section id="xml.configuration">
+   &reftitle.runtime;
+   &no.config;
+  </section>
+
+  <section id="xml.resources">
+   &reftitle.resources;
+   <section id="xml.resources.xml">
+    <title><literal>xml</literal></title>
     <para>
-     请访问 <ulink url="&url.expat.rpm;">&url.expat.rpm;</ulink> 以获取
-     expat 源文件的 RPM 包。
+     由 <function>xml_parser_create</function> 和
+     <function>xml_parser_create_ns</function>
+     返回的 <literal>xml</literal> 资源引用了一个 XML
+     解析器实例，将被用在本扩展库提供的函数中。
     </para>
    </section>
+  </section>
 
-   &reference.xml.configure;
+  &reference.xml.constants;
 
-   <section id="xml.configuration">
-    &reftitle.runtime;
-    &no.config;
-   </section>
+  <section id="xml.eventhandlers">
+   <title>事件处理器</title>
+   <para>
+    XML 事件处理器定义如下：
+    <table>
+     <title>已支持的 XML 事件处理器</title>
+     <tgroup cols="2">
+      <thead>
+       <row>
+        <entry>用来设置处理器的 PHP 函数</entry>
+        <entry>事件描述</entry>
+       </row>
+      </thead>
+      <tbody>
+       <row>
+        <entry><function>xml_set_element_handler</function></entry>
+        <entry>
+         元素事件（Element events）将在 XML
+         解析器遇到标记符的起始符或者终止符时发生。另外，对于起始符和终止符也有独立的处理器。
+        </entry>
+       </row>
+       <row>
+        <entry>
+         <function>xml_set_character_data_handler</function>
+        </entry>
+        <entry>
+         粗略的说，字符数据（Character data）是指 XML
+         文档中所有标记符以外的内容，包括标记符之间的空格。需要注意的是
+         XML 语法解析器不会加上或者去掉任何空格。空格的取舍将由应用程序（也就是你自己）来决定。
+        </entry>
+       </row>
+       <row>
+        <entry>
+         <function>xml_set_processing_instruction_handler</function>
+        </entry>
+        <entry>
+         PHP 程序员对“处理指令”（Processing
+         Instructions，PI）应该已经很熟悉了。&lt;?php ?&gt;
+         就是一个处理指令，其中 <replaceable>php</replaceable>
+         被称为“PI target”。除了以“XML”开头的 PI target
+         已被保留以外，对这些 PI 的处理将由应用程序来完成。
+        </entry>
+       </row>
+       <row>
+        <entry><function>xml_set_default_handler</function></entry>
+        <entry>
+         所有无法被其它处理器处理的事件将由默认处理器来处理。这些事件包括诸如
+         XML 和文档类型声明等内容。
+        </entry>
+       </row>
+       <row>
+        <entry>
+         <function>xml_set_unparsed_entity_decl_handler</function>
+        </entry>
+        <entry>
+         该处理器将在遇到无法解析的实体名称（NDATA）声明时被调用。
+        </entry>
+       </row>
+       <row>
+        <entry>
+         <function>xml_set_notation_decl_handler</function>
+        </entry>
+        <entry>
+         该处理器将在声明一个注释时被调用。
+        </entry>
+       </row>
+       <row>
+        <entry>
+         <function>xml_set_external_entity_ref_handler</function>
+        </entry>
+        <entry>
+         当 XML 解析器遇到指向外部解析的一般实体名时，该处理器将被调用。该指向的目标可以是一个文件，也可以是
+         URL。请参阅“<link linkend="example.xml-external-entity">外部实体名范例</link>”。
+        </entry>
+       </row>
+      </tbody>
+     </tgroup>
+    </table>
+   </para>
+  </section>
 
-   <section id="xml.resources">
-    &reftitle.resources;
-    <section id="xml.resources.xml">
-     <title><literal>xml</literal></title>
-     <para>
-      由 <function>xml_parser_create</function> 和
-      <function>xml_parser_create_ns</function>
-      返回的 <literal>xml</literal> 资源引用了一个 XML
-      解析器实例，将被用在本扩展库提供的函数中。
-     </para>
-    </section>
-   </section>
+  <section id="xml.case-folding">
+   <title>大小写折叠（Case Folding）</title>
+   <para>
+    元素处理函数可能会导致元素名称“大小写折叠”（<glossterm>case-folded</glossterm>）。“大小写折叠”被 XML 标准定义为“一个应用于一系列字符的过程，在该过程中，这些字符中的所有的非大写字符将被替换成它们对应大写等价字符”。换句话说，对于 XML，“大小写折叠”就是指将字符串转换成大写字符。
+   </para>
+   <para>
+    所有被传递给处理器函数的元素名称将默认的发生“大小写折叠”。该过程可以分别被
+    <function>xml_parser_get_option</function> 和
+    <function>xml_parser_set_option</function> 函数查询和控制。
+   </para>
+  </section>
 
-   &reference.xml.constants;
+  <section id="xml.error-codes">
+   <title>错误代码</title>
+   <para>
+    以下常量被定义为 XML 的错误代码，将由 <function>xml_parse</function> 返回：
+    <simplelist>
+     <member>XML_ERROR_NONE</member>
+     <member>XML_ERROR_NO_MEMORY</member>
+     <member>XML_ERROR_SYNTAX</member>
+     <member>XML_ERROR_NO_ELEMENTS</member>
+     <member>XML_ERROR_INVALID_TOKEN</member>
+     <member>XML_ERROR_UNCLOSED_TOKEN</member>
+     <member>XML_ERROR_PARTIAL_CHAR</member>
+     <member>XML_ERROR_TAG_MISMATCH</member>
+     <member>XML_ERROR_DUPLICATE_ATTRIBUTE</member>
+     <member>XML_ERROR_JUNK_AFTER_DOC_ELEMENT</member>
+     <member>XML_ERROR_PARAM_ENTITY_REF</member>
+     <member>XML_ERROR_UNDEFINED_ENTITY</member>
+     <member>XML_ERROR_RECURSIVE_ENTITY_REF</member>
+     <member>XML_ERROR_ASYNC_ENTITY</member>
+     <member>XML_ERROR_BAD_CHAR_REF</member>
+     <member>XML_ERROR_BINARY_ENTITY_REF</member>
+     <member>XML_ERROR_ATTRIBUTE_EXTERNAL_ENTITY_REF</member>
+     <member>XML_ERROR_MISPLACED_XML_PI</member>
+     <member>XML_ERROR_UNKNOWN_ENCODING</member>
+     <member>XML_ERROR_INCORRECT_ENCODING</member>
+     <member>XML_ERROR_UNCLOSED_CDATA_SECTION</member>
+     <member>XML_ERROR_EXTERNAL_ENTITY_HANDLING</member>
+    </simplelist>
+   </para>
+  </section>
 
-    <section id="xml.eventhandlers">
-     <title>事件处理器</title>
-     <para>
-	  XML 事件处理器定义如下：
-      <table>
-       <title>已支持的 XML 事件处理器</title>
-       <tgroup cols="2">
-        <thead>
-         <row>
-          <entry>用来设置处理器的 PHP 函数</entry>
-          <entry>事件描述</entry>
-         </row>
-        </thead>
-        <tbody>
-         <row>
-          <entry><function>xml_set_element_handler</function></entry>
-          <entry>
-		   元素事件（Element events）将在 XML
-		   解析器遇到标记符的起始符或者终止符时发生。另外，对于起始符和终止符也有独立的处理器。
-          </entry>
-         </row>
-         <row>
-          <entry>
-           <function>xml_set_character_data_handler</function>
-          </entry>
-          <entry>
-		   粗略的说，字符数据（Character data）是指 XML
-		   文档中所有标记符以外的内容，包括标记符之间的空格。需要注意的是
-		   XML 语法解析器不会加上或者去掉任何空格。空格的取舍将由应用程序（也就是你自己）来决定。
-          </entry>
-         </row>
-         <row>
-          <entry>
-           <function>xml_set_processing_instruction_handler</function>
-          </entry>
-          <entry>
-		   PHP 程序员对“处理指令”（Processing
-		   Instructions，PIs）应该已经很熟悉了。&lt;?php ?&gt;
-		   就是一个处理指令，其中 <replaceable>php</replaceable>
-		   被称为“PI target”。除了以“XML”开头的 PI target
-		   已被保留以外，对这些 PIs 的处理将由应用程序来完成。
-          </entry>
-         </row>
-         <row>
-          <entry><function>xml_set_default_handler</function></entry>
-          <entry>
-		   所有无法被其它处理器处理的事件将由默认处理器来处理。这些事件包括诸如
-		   XML 和文档类型声明等内容。
-          </entry>
-         </row>
-         <row>
-          <entry>
-           <function>xml_set_unparsed_entity_decl_handler</function>
-          </entry>
-          <entry>
-		   该处理器将在遇到无法解析的实体名称（NDATA）声明时被调用。
-          </entry>
-         </row>
-         <row>
-          <entry>
-           <function>xml_set_notation_decl_handler</function>
-          </entry>
-          <entry>
-		   该处理器将在声明一个注释时被调用。
-          </entry>
-         </row>
-         <row>
-          <entry>
-           <function>xml_set_external_entity_ref_handler</function>
-          </entry>
-          <entry>
-		   当 XML 解析器遇到指向外部解析的一般实体名时，该处理器将被调用。该指向的目标可以是一个文件，也可以是
-		   URL。请参阅“<link linkend="example.xml-external-entity">外部实体名范例</link>”。
-          </entry>
-         </row>
-        </tbody>
-       </tgroup>
-      </table>
-     </para>
-    </section>
+  <section id="xml.encoding">
+   <title>字符编码</title>
+   <para>
+    PHP 的 XML 扩展库支持不同字符编码（<glossterm>character encoding</glossterm>）的
+    <ulink url="&url.unicode;">Unicode</ulink>
+    字符集。字符编码有两种形式，它们分别是“源编码”（<glossterm>source
+    encoding</glossterm>）和“目标编码”（<glossterm>target
+    encoding</glossterm>）。PHP 对文档内部表示的编码方式是
+    <literal>UTF-8</literal>。
+   </para>
+   <para>
+    源编码将在 XML 文档被<link
+    linkend="function.xml-parse">解析</link>后完成。源编码可在<link
+    linkend="function.xml-parser-create">建立一个 XML
+    解析器</link>时指明（该编码方式在 XML
+    解析器的生命周期中不能被再次改变）。支持的编码方式包括
+    <literal>ISO-8859-1</literal>，<literal>US-ASCII</literal>
+    和 <literal>UTF-8</literal>。前两种为单字节编码，即每个字符被一个单一的字节表示。<literal>UTF-8</literal>
+    支持 1 至 4 个字节的多 bit（最多 12）字符编码。PHP 默认使用
+    <literal>ISO-8859-1</literal> 作为源编码方式。
+   </para>
+   <para>
+    目标编码将在 PHP 向 XML 处理器函数传送数据时被完成。当 XML
+    解析器被建立后，目标编码将被设置成与源编码相同的编码方式，但该方式可在任何时候被更改。目标编码将影响字符数据、标记符名称以及处理指令目标（PI target）。
+   </para>
+   <para>
+    如果 XML 解析器遇到其源编码方式表示能力之外的字符，它将返回一个错误。
+   </para>
+   <para>
+    当 PHP 在被解析的 XML 文档中遇到当前目标编码无法表示的字符时，这些字符将被“降级”。简单的说，这些字符将被问号替换。
+   </para>
+  </section>
 
-    <section id="xml.case-folding">
-     <title>大小写折叠（Case Folding）</title>
-     <para>
-	  元素处理函数可能会导致元素名称“大小写折叠”（<glossterm>case-folded</glossterm>）。“大小写折叠”被 XML 标准定义为“一个应用于一系列字符的过程，在该过程中，这些字符中的所有的非大写字符将被替换成它们对应大写等价字符”。换句话说，对于 XML，“大小写折叠”就是指将字符串转换成大写字符。
-     </para>
-     <para>
-	  所有被传递给处理器函数的元素名称将默认的发生“大小写折叠”。该过程可以分别被
-	  <function>xml_parser_get_option</function> 和
-	  <function>xml_parser_set_option</function> 函数查询和控制。
-     </para>
-    </section>
-
-    <section id="xml.error-codes">
-     <title>错误代码</title>
-     <para>
-	  以下常量被定义为 XML 的错误代码，将由 <function>xml_parse</function> 返回：
-      <simplelist>
-       <member>XML_ERROR_NONE</member>
-       <member>XML_ERROR_NO_MEMORY</member>
-       <member>XML_ERROR_SYNTAX</member>
-       <member>XML_ERROR_NO_ELEMENTS</member>
-       <member>XML_ERROR_INVALID_TOKEN</member>
-       <member>XML_ERROR_UNCLOSED_TOKEN</member>
-       <member>XML_ERROR_PARTIAL_CHAR</member>
-       <member>XML_ERROR_TAG_MISMATCH</member>
-       <member>XML_ERROR_DUPLICATE_ATTRIBUTE</member>
-       <member>XML_ERROR_JUNK_AFTER_DOC_ELEMENT</member>
-       <member>XML_ERROR_PARAM_ENTITY_REF</member>
-       <member>XML_ERROR_UNDEFINED_ENTITY</member>
-       <member>XML_ERROR_RECURSIVE_ENTITY_REF</member>
-       <member>XML_ERROR_ASYNC_ENTITY</member>
-       <member>XML_ERROR_BAD_CHAR_REF</member>
-       <member>XML_ERROR_BINARY_ENTITY_REF</member>
-       <member>XML_ERROR_ATTRIBUTE_EXTERNAL_ENTITY_REF</member>
-       <member>XML_ERROR_MISPLACED_XML_PI</member>
-       <member>XML_ERROR_UNKNOWN_ENCODING</member>
-       <member>XML_ERROR_INCORRECT_ENCODING</member>
-       <member>XML_ERROR_UNCLOSED_CDATA_SECTION</member>
-       <member>XML_ERROR_EXTERNAL_ENTITY_HANDLING</member>
-      </simplelist>
-     </para>
-    </section>
-
-    <section id="xml.encoding">
-     <title>字符编码</title>
-     <para>
-	  PHP 的 XML 扩展库支持不同字符编码（<glossterm>character encoding</glossterm>）的
-	  <ulink url="&url.unicode;">Unicode</ulink>
-	  字符集。字符编码有两种形式，它们分别是“源编码”（<glossterm>source
-	  encoding</glossterm>）和“目标编码”（<glossterm>target
-	  encoding</glossterm>）。PHP 对文档内部表示的编码方式是
-	  <literal>UTF-8</literal>。
-     </para>
-     <para>
-	  源编码将在 XML 文档被<link
-	  linkend="function.xml-parse">解析</link>后完成。源编码可在<link
-	  linkend="function.xml-parser-create">建立一个 XML
-	  解析器</link>时指明（该编码方式在 XML
-	  解析器的生命周期中不能被再次改变）。支持的编码方式包括
-	  <literal>ISO-8859-1</literal>，<literal>US-ASCII</literal>
-	  和 <literal>UTF-8</literal>。前两种为单字节编码，即每个字符被一个单一的字节表示。<literal>UTF-8</literal>
-	  支持 1 至 4 个字节的多 bit（最多 12）字符编码。PHP 默认使用
-	  <literal>ISO-8859-1</literal> 作为源编码方式。
-     </para>
-     <para>
-	  目标编码将在 PHP 向 XML 处理器函数传送数据时被完成。当 XML
-	  解析器被建立后，目标编码将被设置成与源编码相同的编码方式，但该方式可在任何时候被更改。目标编码将影响字符数据、标记符名称以及处理指令目标（PI target）。
-     </para>
-     <para>
-	  如果 XML 解析器遇到其源编码方式表示能力之外的字符，它将返回一个错误。
-     </para>
-     <para>
-	  当 PHP 在被解析的 XML 文档中遇到当前目标编码无法表示的字符时，这些字符将被“降级”。简单的说，这些字符将被问号替换。
-     </para>
-    </section>
-
-   <section id="xml.examples">
-    &reftitle.examples;
+  <section id="xml.examples">
+   &reftitle.examples;
+   <para>
+    以下是 PHP 脚本解析 XML 文档的一些范例。
+   </para>
+   <section id="example.xml-structure">
+    <title>XML 元素结构范例</title>
     <para>
-	 以下是 PHP 脚本解析 XML 文档的一些范例。
-    </para>
-    <section id="example.xml-structure">
-     <title>XML 元素结构范例</title>
-     <para>
-	  第一个范例用缩进格式显示一个文档中起始元素的结构。
-      <example>
-       <title>显示 XML 元素结构</title>
-       <programlisting role="php">
+     第一个范例用缩进格式显示一个文档中起始元素的结构。
+     <example>
+      <title>显示 XML 元素结构</title>
+      <programlisting role="php">
 <![CDATA[
 <?php
 $file = "data.xml";
@@ -281,23 +284,23 @@ while ($data = fread($fp, 4096)) {
 xml_parser_free($xml_parser);
 ?>
 ]]>
-       </programlisting>
-      </example>
-     </para>
-    </section>
+      </programlisting>
+     </example>
+    </para>
+   </section>
 
-    <section id="example.xml-map-tags">
-     <title>XML 标记符映射范例</title>
-     <para>
-      <example>
-       <title>将 XML 映射为 HTML</title>
-       <para>
-	   以下范例将 XML 文档中的标记符直接映射成 HTML
-	   标记符。在“映射数组”中不存在的元素将被忽略。当然，该范例将只对一个特定的
-	   XML 文档有效。
-       </para>
-       <para>
-    <programlisting role="php">
+   <section id="example.xml-map-tags">
+    <title>XML 标记符映射范例</title>
+    <para>
+     <example>
+      <title>将 XML 映射为 HTML</title>
+      <para>
+       以下范例将 XML 文档中的标记符直接映射成 HTML
+       标记符。在“映射数组”中不存在的元素将被忽略。当然，该范例将只对一个特定的
+       XML 文档有效。
+      </para>
+      <para>
+       <programlisting role="php">
 <![CDATA[
 <?php
 $file = "data.xml";
@@ -347,25 +350,25 @@ while ($data = fread($fp, 4096)) {
 xml_parser_free($xml_parser);
 ?>
 ]]>
-        </programlisting>
-       </para>
-      </example>
-     </para>
-    </section>
+       </programlisting>
+      </para>
+     </example>
+    </para>
+   </section>
 
-    <section id="example.xml-external-entity">
-     <title>XML 外部实体范例</title>
-     <para>
-	  该范例能够高亮显示 XML 源代码。它将说明如何外部实体指向处理器来包含和解析其它文档，如何处理 PIs，以及一种确定包含有 PIs 的代码的可信度。
-     </para>
-     <para>
-	  能被该范例使用的的 XML 文档（<filename>xmltest.xml</filename> 和
-	  <filename>xmltest2.xml</filename>）被列在该范例之后。
-     </para>
-     <para>
-      <example>
-       <title>外部实体范例</title>
-       <programlisting role="php">
+   <section id="example.xml-external-entity">
+    <title>XML 外部实体范例</title>
+    <para>
+     该范例能够高亮显示 XML 源代码。它将说明如何外部实体指向处理器来包含和解析其它文档，如何处理 PIs，以及一种确定包含有 PIs 的代码的可信度。
+    </para>
+    <para>
+     能被该范例使用的的 XML 文档（<filename>xmltest.xml</filename> 和
+     <filename>xmltest2.xml</filename>）被列在该范例之后。
+    </para>
+    <para>
+     <example>
+      <title>外部实体范例</title>
+      <programlisting role="php">
 <![CDATA[
 <?php
 $file = "xmltest.xml";
@@ -494,13 +497,13 @@ xml_parser_free($xml_parser);
 
 ?>
 ]]>
-       </programlisting>
-      </example>
-     </para>
-     <para>
-      <example>
-       <title>xmltest.xml</title>
-       <programlisting role="xml">
+      </programlisting>
+     </example>
+    </para>
+    <para>
+     <example>
+      <title>xmltest.xml</title>
+      <programlisting role="xml">
 <![CDATA[
 <?xml version='1.0'?>
 <!DOCTYPE chapter SYSTEM "/just/a/test.dtd" [
@@ -530,14 +533,14 @@ xml_parser_free($xml_parser);
  </section>
 </chapter>
 ]]>
-       </programlisting>
-      </example>
-     </para>
-     <para>
-      以下文档将被 <filename>xmltest.xml</filename> 文件调用：
-      <example>
-       <title>xmltest2.xml</title>
-       <programlisting role="xml">
+      </programlisting>
+     </example>
+    </para>
+    <para>
+     以下文档将被 <filename>xmltest.xml</filename> 文件调用：
+     <example>
+      <title>xmltest2.xml</title>
+      <programlisting role="xml">
 <![CDATA[
 <?xml version="1.0"?>
 <!DOCTYPE foo [
@@ -549,16 +552,17 @@ xml_parser_free($xml_parser);
    <?php echo "This is some more PHP code being executed."; ?>
 </foo>
 ]]>
-       </programlisting>
-      </example>
-     </para>
-    </section>
+      </programlisting>
+     </example>
+    </para>
    </section>
-  </partintro>
+  </section>
+ </partintro>
 
-&reference.xml.functions;
+ &reference.xml.functions;
 
- </reference>
+</reference>
+
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml

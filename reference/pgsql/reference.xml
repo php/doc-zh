@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.10 $ -->
+<!-- $Revision: 1.11 $ -->
 <!-- $Author: dallas $ -->
-<!-- EN-Revision: 1.25 Maintainer: dallas Status: ready -->
-<!-- CREDITS: Gregory -->
+<!-- EN-Revision: 1.27 Maintainer: dallas Status: ready -->
+<!-- Purpose: database.vendors -->
+<!-- Membership: bundled, external -->
+
 <reference id="ref.pgsql">
  <title>PostgreSQL 数据库函数</title>
  <titleabbrev>PostgreSQL</titleabbrev>
@@ -30,258 +32,92 @@
   </section>
 
   &reference.pgsql.configure;
-
   &reference.pgsql.ini;
 
-  <section id="pgsql.using">
-   <title>使用方法及提示</title>
-   <warning>
-    <para>
-     由于 notice message handling 代码中的 bug，不推荐在
-     PHP 4.0.6 中使用 PostgreSQL 模块。使用 4.1.0 或更新版本。
-    </para>
-   </warning>
-   <warning>
-    <para>
-     为符合当前编码标准，PostgreSQL 函数名称将在 4.2.0
-     版本中改变。大多数新名称将多出一个下划线，例如
-     pg_lo_open()。一部分函数则改变了名称以保持一致性。例如
-     pg_exec() 改为 pg_query()。老的函数名依然可以在 4.2.0
-     和以后的少数几个版本中使用，但以后可能会删除。
-    </para>
-    <table>
-     <title>已改变的函数名</title>
-     <tgroup cols="2">
-      <thead>
-       <row>
-        <entry>旧名称</entry>
-        <entry>新名称</entry>
-       </row>
-      </thead>
-     <tbody>
-      <row>
-       <entry><function>pg_cmdtuples</function></entry>
-       <entry><function>pg_affected_rows</function></entry>
-      </row>
-      <row>
-       <entry><function>pg_errormessage</function></entry>
-       <entry><function>pg_last_error</function></entry>
-      </row>
-      <row>
-       <entry><function>pg_exec</function></entry>
-       <entry><function>pg_query</function></entry>
-      </row>
-      <row>
-       <entry><function>pg_fieldname</function></entry>
-       <entry><function>pg_field_name</function></entry>
-      </row>
-      <row>
-       <entry><function>pg_fieldsize</function></entry>
-       <entry><function>pg_field_size</function></entry>
-      </row>
-      <row>
-       <entry><function>pg_fieldnum</function></entry>
-       <entry><function>pg_field_num</function></entry>
-      </row>
-      <row>
-       <entry><function>pg_fieldprtlen</function></entry>
-       <entry><function>pg_field_prtlen</function></entry>
-      </row>
-      <row>
-       <entry><function>pg_fieldisnull</function></entry>
-       <entry><function>pg_field_is_null</function></entry>
-      </row>
-      <row>
-       <entry><function>pg_freeresult</function></entry>
-       <entry><function>pg_free_result</function></entry>
-      </row>
-      <row>
-       <entry><function>pg_getlastoid</function></entry>
-       <entry><function>pg_last_oid</function></entry>
-      </row>
-      <row>
-       <entry><function>pg_loreadall</function></entry>
-       <entry><function>pg_lo_read_all</function></entry>
-      </row>
-      <row>
-       <entry><function>pg_locreate</function></entry>
-       <entry><function>pg_lo_create</function></entry>
-      </row>
-      <row>
-       <entry><function>pg_lounlink</function></entry>
-       <entry><function>pg_lo_unlink</function></entry>
-      </row>
-      <row>
-       <entry><function>pg_loopen</function></entry>
-       <entry><function>pg_lo_open</function></entry>
-      </row>
-      <row>
-       <entry><function>pg_loclose</function></entry>
-       <entry><function>pg_lo_close</function></entry>
-      </row>
-      <row>
-       <entry><function>pg_loread</function></entry>
-       <entry><function>pg_lo_read</function></entry>
-      </row>
-      <row>
-       <entry><function>pg_lowrite</function></entry>
-       <entry><function>pg_lo_write</function></entry>
-      </row>
-      <row>
-       <entry><function>pg_loimport</function></entry>
-       <entry><function>pg_lo_import</function></entry>
-      </row>
-      <row>
-       <entry><function>pg_loexport</function></entry>
-       <entry><function>pg_lo_export</function></entry>
-      </row>
-      <row>
-       <entry><function>pg_numrows</function></entry>
-       <entry><function>pg_num_rows</function></entry>
-      </row>
-      <row>
-       <entry><function>pg_numfields</function></entry>
-       <entry><function>pg_num_fields</function></entry>
-      </row>
-      <row>
-       <entry><function>pg_result</function></entry>
-       <entry><function>pg_fetch_result</function></entry>
-      </row>
-     </tbody>
-    </tgroup>
-   </table>
+  <section id="pgsql.resources">
+  &reftitle.resources;
    <para>
-    为以后支持异步连接，将不再提倡用旧语法使用函数 <function>pg_connect</function>/<function>pg_pconnect</function>。请用连接字符串作为参数来使用函数 <function>pg_connect</function> 和 <function>pg_pconnect</function>。
+    PostgreSQL 模块使用了两种资源类型。第一种是数据库连接的标识符，第二种是保存查询结果的资源。
    </para>
-  </warning>
-  <para>
-   不是所有的版本都支持所有的函数，这和 libpq 的版本和编译方法有关。如果编译源代码时少了一个函数，那么 libpq 就不支持需要该函数的功能。
-  </para>
-  <para>
-   不要使用比 PostgreSQL 服务器连接所接受更旧版本的 libpq 也很重要。如果你用的 libpq 版本比 PostgreSQL 服务器预期的低就可能出现问题。
-  </para>
-  <para>
-   PostgreSQL 在 6.3 (03/02/1998) 版之后默认使用 unix domain sockets，默认状态下不会打开 TCP 端口。下面这张表说明了各种新建连接的可能性。TCP/IP socket 放在 <filename>/tmp/.s.PGSQL.5432</filename>。该选项可用 <command>postmaster</command> 中的 '-i' 参数打开，它表示“监视 TCP/IP 端口以及 Unix domain socket”。
-   <table>
-    <title>Postmaster 和 PHP</title>
-    <tgroup cols="3">
-     <thead>
-      <row>
-       <entry>Postmaster</entry>
-       <entry>PHP</entry>
-       <entry>状态</entry>
-      </row>
-     </thead>
-     <tbody>
-      <row>
-       <entry>postmaster &amp;</entry>
-       <entry>pg_connect("dbname=MyDbName");</entry>
-       <entry>OK</entry>
-      </row>
-      <row>
-       <entry>postmaster -i &amp;</entry>
-       <entry>pg_connect("dbname=MyDbName");</entry>
-       <entry>OK</entry>
-      </row>
-      <row>
-       <entry>postmaster &amp;</entry>
-       <entry>pg_connect("host=localhost dbname=MyDbName");</entry>
-       <entry>
-        Unable to connect to PostgreSQL server: connectDB() failed:
-        Is the postmaster running and accepting TCP/IP (with -i)
-        connection at 'localhost' on port '5432'? in
-        /path/to/file.php on line 20.
-       </entry>
-      </row>
-      <row>
-       <entry>postmaster -i &amp;</entry>
-       <entry>pg_connect("host=localhost dbname=MyDbName");</entry>
-       <entry>OK</entry>
-      </row>
-     </tbody>
-    </tgroup>
-   </table>
-  </para>
-  <para>
-   到 PostgreSQL 服务器的连接可以通过以下命令串中的参数对建立：<command>$conn =
-    pg_connect("host=myHost port=myPort tty=myTTY options=myOptions
-    dbname=myDB user=myUser password=myPassword");
-   </command>
-  </para>
-  <para>
-   以前的语法：
-   <command>
-    $conn = pg_connect ("host", "port", "options", "tty", "dbname")
-   </command>
-   已经不再提倡使用。
-  </para>
-
-  <para>
-   环境变量会影响 PostgreSQL 服务器／客户机的行为。例如如果连接串中省略了主机名，PostgreSQL 模块将会查找环境变量 PGHOST。
-   不同版本所支持的环境变量不同，详情参考 PostgreSQL Programmers's Manual (libpq - Environment Variables)。
-  </para>
-  <para>
-   确认已经给适当的用户设置了环境变量。用 <literal>$_ENV</literal> 或 <function>getenv</function> 来检查当前进程可以使用哪些环境变量。
-  </para>
-  <example>
-   <title>设定默认参数</title>
-   <programlisting>
-<![CDATA[
-PGHOST=pgsql.example.com
-PGPORT=7890
-PGDATABASE=web-system
-PGUSER=web-user
-PGPASSWORD=secret
-PGDATESTYLE=ISO
-PGTZ=JST
-PGCLIENTENCODING=EUC-JP
-
-export PGHOST PGPORT PGDATABASE PGUSER PGPASSWORD PGDATESTYLE PGTZ PGCLIENTENCODING
-]]>
-    </programlisting>
-   </example>
-   <note>
-    <para>
-     PostgreSQL 自动将所有标识符（例如表／列名）转成小写字母值。要使其能识别大写字母值，必须将标识符放在引号内。
-    </para>
-   </note>
   </section>
 
   &reference.pgsql.constants;
 
+  <section id="pgsql.notes">
+  &reftitle.notes;
+   <note>
+    <para>
+     不是所有的版本都支持所有的函数，这和
+     libpq（PostgreSQL C 客户端库）的版本和编译方法有关。如果 PHP
+     的 PostgreSQL 扩展不见了，那是因为 libpq 的版本不支持它。
+    </para>
+   </note>
+   <note>
+    <para>
+     大多数 PostgreSQL 函数接受 <parameter>connection</parameter>
+     作为第一个可选参数。如果没有提供，则使用上一个打开的连接。如果没有打开的连接，函数返回 &false;。
+    </para>
+   </note>
+   <note>
+    <para>
+     PostgreSQL 在创建对象和查询时自动将所有标识符（例如表／列名）转成小写字母值。要强制其使用混合或大写字母的标识符，必须将标识符用双引号（"）转义。
+    </para>
+   </note>
+   <note>
+    <para>
+     PostgreSQL 没有特殊的命令来取得数据库的结构信息（例如当前数据库中的所有表）。不过在
+     PostgreSQL 7.4 及以上版本有一个标准结构名叫
+     <literal>information_schema</literal>，它包含有系统视图以及所有必要的信息，可以很容易地查询出来。其细节见
+     <ulink url="&url.pgsql.manual;">PostgreSQL 文档</ulink>。
+    </para>
+   </note>
+  </section>
+
   <section id="pgsql.examples">
    &reftitle.examples;
-   <para>
-    从 PostgreSQL 7.1.0 开始，在一个 text 类型字段中最多可以储存 1GB 的数据。在老版本中则限制为一个块的大小（默认 8KB，最大 32KB，编译时指定）。
-   </para>
-   <para>
-    要使用 large object (lo) 接口，需要把 large object 函数放在一个事务段中。事务段以 SQL 语句 <command>BEGIN</command> 开始，如果该事务合法，以 <command>COMMIT</command> 或者 <command>END</command>结束，如果该事务失败，则以 <command>ROLLBACK</command> 或者 <command>ABORT</command>结束。
-    <example>
-     <title>使用 Large Object</title>
-     <programlisting role="php">
+    <para>
+     此简单例子演示了 PostgreSQL 数据库的连接，执行查询，显示结果以及断开连接。
+     <example>
+      <title>PostgreSQL 例子</title>
+      <programlisting role="php">
 <![CDATA[
 <?php
-   $database = pg_connect("dbname=jacarta");
-   pg_query($database, "begin");
-   $oid = pg_lo_create($database);
-   echo "$oid\n";
-   $handle = pg_lo_open($database, $oid, "w");
-   echo "$handle\n";
-   pg_lo_write($handle, "large object data");
-   pg_lo_close($handle);
-   pg_query($database, "commit");
+// 连接，选择数据库
+$db = pg_connect("host=localhost dbname=publishing user=www password=foo");
+    or die('Could not connect: ' . pg_last_error());
+
+// 执行 SQL 查询
+$query = 'SELECT * FROM authors';
+$result = pg_query($query) or die('Query failed: ' . pg_last_error());
+
+// 用 HTML 显示结果
+echo "<table>\n";
+while ($line = pg_fetch_array($result, null, PGSQL_ASSOC)) {
+    echo "\t<tr>\n";
+    foreach ($line as $col_value) {
+        echo "\t\t<td>$col_value</td>\n";
+    }
+    echo "\t</tr>\n";
+}
+echo "</table>\n";
+
+// 释放结果集
+pg_free_result($result);
+
+// 关闭连接
+pg_close($link);
 ?>
 ]]>
-     </programlisting>
-    </example>
-    在关闭 large object 之前不应关闭到 PostgreSQL 服务器的连接。
-   </para>
-  </section>
+      </programlisting>
+     </example>
+    </para>
+   </section>
  </partintro>
 
  &reference.pgsql.functions;
 
 </reference>
+
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
