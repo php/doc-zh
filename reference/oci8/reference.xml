@@ -1,26 +1,25 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.10 $ -->
+<!-- $Revision: 1.11 $ -->
 <!-- $Author: dallas $ -->
-<!-- EN-Revision: 1.14 Maintainer: yincheng Status: ready -->
+<!-- EN-Revision: 1.17 Maintainer: yincheng Status: ready -->
+<!-- CREDITS: dallas -->
 <!-- Purpose: database.vendors -->
 <!-- Membership: bundled, external -->
 
+<!-- Dallas 注：本人对 Oracle 不熟，一些用语还请熟悉 Oracle 的朋友对照原文修改一下。 -->
+
 <reference id="ref.oci8">
- <title>OCI8 Oracle 函数</title>
+ <title>Oracle 函数</title>
  <titleabbrev>OCI8</titleabbrev>
 
  <partintro>
   <section id="oci8.intro">
    &reftitle.intro;
    <para>
-    本类函数允许访问  Oracle9,Oracle8 和 Oracle7
-    数据库。本类函数使用 Oracle Call Interface（OCI）。
-   </para>
-   <para>
-    本扩展比<link linkend="ref.oracle">旧版 Oracle</link> 扩展更灵活。支持向
-    Oracle 位置标志符绑定局部和全局 PHP 变量，全面支持 LOB、FILE
-    和 ROWID，允许用户使用自定义变量。应该尽可能的使用本扩展来代替<link
-    linkend="ref.oracle">旧版 Oracle</link>。
+    本类函数使用 Oracle Call
+    Interface（OCI）使用户可以访问 Oracle 10，Oracle9，Oracle8 和 Oracle7
+    数据库。支持将 PHP 变量与 Oracle 占位符（placeholder）绑定，具有完整的
+    LOB，FILE 和 ROWID 支持，以及允许使用用户提供的定义变量。
    </para>
   </section>
 
@@ -28,12 +27,20 @@
    &reftitle.required;
    <para>
     使用本扩展需要 Oracle 客户端库。Windows
-    用户需要至少 Oracle  8.1 来使用
+    用户需要至少 Oracle  8.1 版才能使用
     <filename>php_oci8.dll</filename>。
    </para>
    <para>
+    安装所有所需文件最方便的方法是使用
+    Oracle Instant Client，可以从此处得到：<ulink
+    url="&url.oracle.instant.client;">&url.oracle.instant.client;</ulink>。Instant
+    Client 不需要 ORACLE_SID 或 ORACLE_HOME 环境变量被设定。不过可能还是要设定
+    LD_LIBRARY_PATH 和 NLS_LANG。
+   </para>
+   <para>
     在使用本扩展之前，请确认已经为 Oracle 用户和 web daemon
-    用户正确设置了 Oracle 环境变量。下面列出了需要设置的环境变量：
+    用户正确设置了 Oracle 环境变量。这些变量应该在启动 web server
+    <emphasis>之前</emphasis>设定。下面列出了需要设置的环境变量：
     <itemizedlist>
      <listitem>
       <simpara>
@@ -60,21 +67,20 @@
        NLS_LANG
       </simpara>
      </listitem>
-     <listitem>
-      <simpara>
-       ORA_NLS33
-      </simpara>
-     </listitem>
     </itemizedlist>
+    对于较少用到的 Oracle 环境变量例如
+    TNS_ADMIN，TWO_TASK，ORA_TZFILE 和各种 Oracle
+    全球性设定例如 ORA_NLS33，ORA_NLS10 和 NLS_*
+    等变量请参考 Oracle 稳当。
    </para>
    <para>
     在为 web 服务器用户设置环境变量之后，还需要将 web
     服务器用户（nobody，www）加到 oracle 组中。
    </para>
    <note>
-    <title>如果 web 服务器不能够启动或者在启动的时候崩溃</title>
+    <title>I如果 web 服务器不能够启动或者在启动的时候崩溃</title>
     <para>
-     检查 Apache 是否使用了 pthread 库：
+     检查 Apache 是否连接了 pthread 库：
     </para>
     <para>
      <informalexample>
@@ -114,49 +120,134 @@
    </note>
   </section>
 
-  &reference.oci8.configure;
-
-  <section id="oci8.configuration">
-   &reftitle.runtime;
-   &no.config;
-  </section>
-
-  <section id="oci8.resources">
-   &reftitle.resources;
-   <para>
-   </para>
-  </section>
+  &reference.oci8.ini;
 
   &reference.oci8.constants;
 
   <section id="oci8.examples">
    &reftitle.examples;
    <para>
-   <example>
-    <title>OCI 提示</title>
+    <example>
+     <title>基本查询</title>
      <programlisting role="php">
 <![CDATA[
 <?php
-// by sergo at bacup dot ru
 
-// Use option: OCI_DEFAULT for execute command to delay execution
-OCIExecute($stmt, OCI_DEFAULT);
+$conn = oci_connect('hr', 'hr', 'orcl');
+if (!$conn) {
+  $e = oci_error();
+  print htmlentities($e['message']);
+  exit;
+}
 
-// for retrieve data use (after fetch):
+$query = 'SELECT * FROM DEPARTMENTS';
 
-$result = OCIResult($stmt, $n);
-if (is_object($result)) $result = $result->load();
+$stid = oci_parse($conn, $query);
+if (!$stid) {
+  $e = oci_error($conn);
+  print htmlentities($e['message']);
+  exit;
+}
 
-// For INSERT or UPDATE statement use:
+$r = oci_execute($stid, OCI_DEFAULT);
+if(!$r) {
+  $e = oci_error($stid);
+  echo htmlentities($e['message']);
+  exit;
+}
 
-$sql = "insert into table (field1, field2) values (field1 = 'value',
- field2 = empty_clob()) returning field2 into :field2";
-OCIParse($conn, $sql);
-$clob = OCINewDescriptor($conn, OCI_D_LOB);
-OCIBindByName($stmt, ":field2", &$clob, -1, OCI_B_CLOB);
-OCIExecute($stmt, OCI_DEFAULT);
-$clob->save("some text");
-OCICommit($conn);
+print '<table border="1">';
+while($row = oci_fetch_array($stid, OCI_RETURN_NULLS)) {
+  print '<tr>';
+     foreach($row as $item) {
+       print '<td>'.($item?htmlentities($item):'&nbsp;').'</td>';
+     }
+     print '</tr>';
+}
+print '</table>';
+
+oci_close($conn);
+?>
+]]>
+     </programlisting>
+    </example>
+   </para>
+   <para>
+    <example>
+     <title>用绑定变量插入</title>
+     <programlisting role="php">
+<![CDATA[
+<?php
+
+// Before running, create the table:
+//   CREATE TABLE MYTABLE (mid NUMBER, myd VARCHAR2(20));
+
+$conn = oci_connect('scott', 'tiger', 'orcl');
+
+$query = 'INSERT INTO MYTABLE VALUES(:myid, :mydata)';
+
+$stid = oci_parse($conn, $query);
+
+$id = 60;
+$data = 'Some data';
+
+oci_bind_by_name($stid, ':myid', $id);
+oci_bind_by_name($stid, ':mydata', $data);
+
+$r = oci_execute($stid);
+
+if($r)
+  print "One row inserted";
+
+oci_close($conn);
+
+?>
+]]>
+     </programlisting>
+    </example>
+   </para>
+
+   <para>
+    <example>
+     <title>将数据插入到 CLOB 列中</title>
+     <programlisting role="php">
+<![CDATA[
+<?php
+
+// Before running, create the table:
+//     CREATE TABLE MYTABLE (mykey NUMBER, myclob CLOB);
+
+$conn = oci_connect('scott', 'tiger', 'orcl');
+
+$mykey = 12343;  // arbitrary key for this example;
+
+$sql = "INSERT INTO mytable (mykey, myclob)
+        VALUES (:mykey, EMPTY_CLOB())
+        RETURNING myclob INTO :myclob";
+
+$stid = oci_parse($conn, $sql);
+$clob = oci_new_descriptor($conn, OCI_D_LOB);
+oci_bind_by_name($stid, ":mykey", $mykey, 5);
+oci_bind_by_name($stid, ":myclob", $clob, -1, OCI_B_CLOB);
+oci_execute($stid, OCI_DEFAULT);
+$clob->save("A very long string");
+
+oci_commit($conn);
+
+// Fetching CLOB data
+
+$query = 'SELECT myclob FROM mytable WHERE mykey = :mykey';
+
+$stid = oci_parse ($conn, $query);
+oci_bind_by_name($stid, ":mykey", $mykey, 5);
+oci_execute($stid, OCI_DEFAULT);
+
+print '<table border="1">';
+while ($row = oci_fetch_array($stid, OCI_ASSOC)) {
+  $result = $row['MYCLOB']->load();
+  print '<tr><td>'.$result.'</td></tr>';
+}
+print '</table>';
 
 ?>
 ]]>
@@ -164,14 +255,14 @@ OCICommit($conn);
     </example>
    </para>
    <para>
-    可以使用与命令行相同的方法来访问存储过程。
+    可以很容易地访问存储过程，就和从命令行访问一样。
     <example>
      <title>使用存储过程</title>
      <programlisting role="php">
 <![CDATA[
 <?php
 // by webmaster at remoterealty dot com
-$sth = OCIParse( $dbh, "begin sp_newaddress( :address_id, '$firstname',
+$sth = oci_parse($dbh, "begin sp_newaddress( :address_id, '$firstname',
  '$lastname', '$company', '$address1', '$address2', '$city', '$state',
  '$postalcode', '$country', :error_code );end;");
 
@@ -179,15 +270,162 @@ $sth = OCIParse( $dbh, "begin sp_newaddress( :address_id, '$firstname',
 // in/out variable and :error_code being an out variable.
 // Then you do the binding:
 
-   OCIBindByName($sth, ":address_id", $addr_id, 10);
-   OCIBindByName($sth, ":error_code", $errorcode, 10);
-   OCIExecute($sth);
+   oci_bind_by_name($sth, ":address_id", $addr_id, 10);
+   oci_bind_by_name($sth, ":error_code", $errorcode, 10);
+   oci_execute($sth);
 
 ?>
 ]]>
      </programlisting>
     </example>
    </para>
+  </section>
+
+  <section id="oci8.connection">
+   <title>连接处理</title>
+   <para>
+    OCI8 扩展提供了 3 个不同函数来连接
+    Oracle。取决于用户来使用对自己的应用程序最合适的函数。本节的信息有助于用户作出合适的选择。
+   </para>
+   <para>
+    连接到 Oracle
+    服务器从所需的时间上来讲是个相当花费的操作。<function>oci_pconnect</function>
+    函数使用了一个连接的持久缓冲区，可以被不同的脚本请求重复使用。这意味着通常在每个
+    PHP 进程（或 Apache 子进程）中只需要连接一次。
+   </para>
+   <para>
+    如果应用程序连接 Oracle 时对每个 web
+    用户都使用了不同的认证信息，则由 <function>oci_pconnect</function>
+    使用的持久缓冲区就用处不大了，因为随着并发用户的增加，到某个程度后会由于要保持太多的空闲连接而对
+    Oracle 服务器的整体性能起到逆反的影响。如果应用程序是这样的架构，建议要么用
+    <link linkend="ini.oci8.max_persistent">oci8.max_persistent</link> 和
+    <link linkend="ini.oci8.persistent_timeout">oci8.persistent_timeout</link>
+    配置选项（此二者可以使用户控制持久连接缓冲区的大小和生命周期）来协调应用程序，要么用
+    <function>oci_connect</function> 来连接。
+   </para>
+   <para>
+    <function>oci_connect</function> 和 <function>oci_pconnect</function>
+    都使用了一个连接缓冲区。如果在某个脚本中用同样的参数多次调用
+    <function>oci_connect</function>，则第二个和之后的调用会返回已有的连接句柄。<function>oci_connect</function>
+    使用的连接缓冲区会在脚本执行完毕后或者明确地关闭了连接句柄时被清空。<function>oci_pconnect</function>
+    有相似的行为，不过其缓冲区独立地维持着并在不同请求之间都存活着。
+   </para>
+   <para>
+    要记住此缓冲特性，因为它使两个句柄没有在事务级隔离开来（事实上是同一个连接句柄，因此没有任何方式的隔离）。如果应用程序需要两个独立的，事务级隔离的连接，应该使用
+    <function>oci_new_connect</function>。
+   </para>
+   <para>
+    <function>oci_new_connect</function> 总是创建一个到
+    Oracle 服务器的新连接，不管其它连接是否已经存在。高流量的 web
+    应用应该避免使用
+    <function>oci_new_connect</function>，尤其是在程序最忙的部分。
+   </para>
+  </section>
+
+  <section id="oci8.datatypes">
+   <title>驱动程序支持的数据类型</title>
+   <table>
+    <title>用 <function>oci_bind_by_name</function> 函数绑定参数时支持以下类型</title>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>类型</entry>
+       <entry>映射</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>SQLT_NTY</entry>
+       <entry>映射到一个来自 PHP collection 对象的本地 collection
+       类型，例如由 <function>oci_new_collection</function> 创建的。</entry>
+      </row>
+      <row>
+       <entry>SQLT_BFILEE</entry>
+        <entry>映射到一个本地的 descriptor，例如由
+        <function>oci_new_descriptor</function> 创建的。</entry>
+      </row>
+      <row>
+       <entry>SQLT_CFILEE</entry>
+       <entry>映射到一个本地的 descriptor，例如由
+        <function>oci_new_descriptor</function> 创建的。</entry>
+      </row>
+       <row>
+       <entry>SQLT_CLOB</entry>
+       <entry>映射到一个本地的 descriptor，例如由
+        <function>oci_new_descriptor</function> 创建的。</entry>
+      </row>
+      <row>
+       <entry>SQLT_BLOB</entry>
+       <entry>映射到一个本地的 descriptor，例如由
+        <function>oci_new_descriptor</function> 创建的。</entry>
+      </row>
+      <row>
+       <entry>SQLT_RDD</entry>
+       <entry>映射到一个本地的 descriptor，例如由
+        <function>oci_new_descriptor</function> 创建的。</entry>
+      </row>
+      <row>
+       <entry>SQLT_NUM</entry>
+       <entry>将 PHP 参数转换为 C 语言的 long 类型，并绑定为其值。</entry>
+      </row>
+      <row>
+       <entry>SQLT_RSET</entry>
+       <entry>映射到一个本地的 statement 句柄，例如由
+        <function>oci_parse</function> 创建或从其它 OCI 查询取得的。</entry>
+      </row>
+      <row>
+       <entry>SQLT_CHR 以及任何其它类型</entry>
+       <entry>将 PHP 参数转换为字符串类型并绑定为字符串。</entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </table>
+
+   <table>
+    <title>在从结果集中取得列时支持以下类型</title>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>类型</entry>
+       <entry>映射</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>SQLT_RSET</entry>
+       <entry>创建一个 oci statement 资源来代表指针。</entry>
+      </row>
+      <row>
+       <entry>SQLT_RDD</entry>
+       <entry>创建一个 ROWID 对象。</entry>
+      </row>
+      <row>
+       <entry>SQLT_BLOB</entry>
+       <entry>创建一个 LOB 对象。</entry>
+      </row>
+      <row>
+       <entry>SQLT_CLOB</entry>
+       <entry>创建一个 LOB 对象。</entry>
+      </row>
+      <row>
+       <entry>SQLT_BFILE</entry>
+       <entry>创建一个 LOB 对象。</entry>
+      </row>
+      <row>
+       <entry>SQLT_LNG</entry>
+       <entry>限制为 SQLT_CHR，返回为字符串。</entry>
+      </row>
+      <row>
+       <entry>SQLT_LBI</entry>
+       <entry>限制为 SQLT_BIN，返回为字符串。</entry>
+      </row>
+      <row>
+       <entry>任何其它类型</entry>
+       <entry>限制为 SQLT_CHR，返回为字符串。</entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </table>
   </section>
 
  </partintro>
