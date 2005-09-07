@@ -1,103 +1,20 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.9 $ -->
-<!-- $Author: lm92 $ -->
-<!-- EN-Revision: 1.11 Maintainer: yincheng Status: ready -->
-<!-- CREDITS: xuke, Gregory -->
-<!-- splitted from ./en/functions/oci8.xml, last change in rev 1.2 -->
-  <refentry id="function.ocibindbyname">
-   <refnamediv>
-    <refname>ocibindbyname</refname>
-    <refpurpose>
-绑定一个 PHP 变量到一个 Oracle 位置标志符
-    </refpurpose>
-   </refnamediv>
-   <refsect1>
-    <title>描述</title>
-     <methodsynopsis>
-      <type>bool</type><methodname>ocibindbyname</methodname>
-      <methodparam><type>resource</type><parameter>stmt</parameter></methodparam>
-      <methodparam><type>string</type><parameter>ph_name</parameter></methodparam>
-      <methodparam><type>mixed</type><parameter>&amp;variable</parameter></methodparam>
-      <methodparam choice="opt"><type>int</type><parameter>maxlength</parameter></methodparam>
-      <methodparam choice="opt"><type>int</type><parameter>type</parameter></methodparam>
-     </methodsynopsis>
-    <para>
-     <function>ocibindbyname</function> 参数
-     <parameter>variable</parameter> 把一个 PHP 变量绑定到 Oracle 的位置标志符
-     <parameter>ph_name</parameter>。该变量是否会被用作输入输出是在运行时决定的，并且函数给该变量分配必要的存储空间。 
-        参数 length 确定该绑定的最大长度，如果将 length 设为 －1，函数 <function>ocibindbyname</function> 会用该变量的当前长度确定绑定的最大长度。
-    </para>
-    <para>
-    如果你要绑定一个抽象数据类型（LOB/ROWID/BFILE），你需要先用 <function>ocinewdescriptor</function> 函数进行定位。参数 length 在这种情况下不可用，应该被设为－1。  参数 type 告诉 Oracle 我们希望使用什么样的描述符； 可能的值为： OCI_B_FILE (Binary-File), OCI_B_CFILE
-     (Character-File), OCI_B_CLOB (Character-LOB), OCI_B_BLOB
-     (Binary-LOB) 和 OCI_B_ROWID (ROWID)。
-    </para>
-    <para>
-    <example>
-     <title><function>ocibindbyname</function></title> 
-     <programlisting role="php">
-<![CDATA[
-<?php
-/* OCIBindByPos example thies at thieso dot net (980221)
-  inserts 3 records into emp, and uses the ROWID for updating the 
-  records just after the insert.
-*/
+<!-- $Revision: 1.10 $ -->
+<!-- $Author: dallas $ -->
+<!-- EN-Revision: 1.18 Maintainer: dallas Status: ready -->
+<refentry id="function.ocibindbyname">
+ <refnamediv>
+  <refname>ocibindbyname</refname>
+  <refpurpose><function>oci_bind_by_name</function> 的&Alias;</refpurpose>
+ </refnamediv>
 
-$conn = OCILogon("scott", "tiger");
-
-$stmt = OCIParse($conn, "insert into emp (empno, ename) " .
-					   "values (:empno,:ename) " .
-					   "returning ROWID into :rid");
-
-$data = array(1111 => "Larry", 2222 => "Bill", 3333 => "Jim");
-
-$rowid = OCINewDescriptor($conn, OCI_D_ROWID);
-
-OCIBindByName($stmt, ":empno", $empno, 32);
-OCIBindByName($stmt, ":ename", $ename, 32);
-OCIBindByName($stmt, ":rid", $rowid, -1, OCI_B_ROWID);
-
-$update = OCIParse($conn, "update emp set sal = :sal where ROWID = :rid");
-OCIBindByName($update, ":rid", $rowid, -1, OCI_B_ROWID);
-OCIBindByName($update, ":sal", $sal, 32);
-
-$sal = 10000;
-
-while (list($empno, $ename) = each($data)) {
-	OCIExecute($stmt);
-	OCIExecute($update);
-} 
-
-$rowid->free();
-
-OCIFreeStatement($update);
-OCIFreeStatement($stmt);
-
-$stmt = OCIParse($conn, "select * from emp where empno in (1111,2222,3333)");
-OCIExecute($stmt);
-while (OCIFetchInto($stmt, &$arr, OCI_ASSOC)) {
-	var_dump($arr);
-}
-OCIFreeStatement($stmt);
-
-/* delete our "junk" from the emp table.... */
-$stmt = OCIParse($conn, "delete from emp where empno in (1111,2222,3333)");
-OCIExecute($stmt);
-OCIFreeStatement($stmt);
-
-OCILogoff($conn);
-?>
-]]>
-     </programlisting>
-    </example>
-   </para>
-    <warning>
-     <para>
-       同时使用魔术引用和 <function>ocibindbyname</function> 函数是一个坏主意；这是因为：1、被引用的变量不需要任何引用；2、由 <function>ocibindbyname</function> 函数不能分辨自动添加的引用和专门加上的引用，这样所有魔术应用都会被写到数据库中。
-     </para> 
-    </warning>
-   </refsect1>
-  </refentry>
+ <refsect1 role="description">
+  &reftitle.description;
+  <simpara>
+   &info.function.alias;<function>oci_bind_by_name</function>。
+  </simpara>
+ </refsect1>
+</refentry>
 
 <!-- Keep this comment at the end of the file
 Local variables:
