@@ -1,139 +1,20 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.3 $ -->
-<!-- $Author: lm92 $ -->
-<!-- EN-Revision: 1.8 Maintainer: yincheng Status: ready -->
-<!-- splitted from ./en/functions/oci8.xml, last change in rev 1.15 -->
-  <refentry id="function.ocinlogon">
-   <refnamediv>
-    <refname>ocinlogon</refname>
-    <refpurpose>确定一个到 Oracle 的新连接</refpurpose>
-   </refnamediv>
-   <refsect1>
-    <title>描述</title>
-     <methodsynopsis>
-      <type>resource</type><methodname>ocinlogon</methodname>
-      <methodparam><type>string</type><parameter>username</parameter></methodparam>
-      <methodparam><type>string</type><parameter>password</parameter></methodparam>
-      <methodparam choice="opt"><type>string</type><parameter>db</parameter></methodparam>
-     </methodsynopsis>
-    <para>
-     <function>ocinlogon</function> 创建一个到Oracle 8 数据库的新连接。
-可选的第3个参数含有你想要连接的数据库的名字，该名字为本地 Oracle 
-实列的名字或者在 tnsnames.ora 的条目中的名字。
-如果第3个参数没有定义， PHP 使用环境变量  ORACLE_SID (Oracle 实列)
-或  TWO_TASK (tnsnames.ora) 来确定连接哪一个数据库。
-    </para>
-    <para>
-     <function>ocinlogon</function> 强迫打开一个新的连接。
-如果你需要隔离一系列事务时，该函数将被用到。
-在默认的情况下，如果使用 <function>ocilogon</function>，连接将
-在页水平被共享；如果使用 <function>ociplogon</function>，连接将
-被在 web 服务器进程水平被共享。如果你有使用 <function>ocinlogon</function>
-打开的连接，所有的提交和回滚仅仅应用到特定的连接。
-    </para>
-    <para>
-下面的例子演示连接是怎样被隔离的。
-     <example>
-      <title><function>ocinlogon</function></title>
-      <programlisting role="php">
-<![CDATA[
-<?php
-echo "<html><pre>";
-$db = "";
+<!-- $Revision: 1.4 $ -->
+<!-- $Author: dallas $ -->
+<!-- EN-Revision: 1.15 Maintainer: dallas Status: ready -->
+<refentry id="function.ocinlogon">
+ <refnamediv>
+  <refname>ocinlogon</refname>
+  <refpurpose><function>oci_new_connect</function> 的&Alias;</refpurpose>
+ </refnamediv>
 
-$c1 = ocilogon("scott", "tiger", $db);
-$c2 = ocinlogon("scott", "tiger", $db);
-
-function create_table($conn) 
-{
-  $stmt = ociparse($conn, "create table scott.hallo (test
-varchar2(64))");
-  ociexecute($stmt);
-  echo $conn . " created table\n\n";
-}
-
-function drop_table($conn) 
-{
-  $stmt = ociparse($conn, "drop table scott.hallo");
-  ociexecute($stmt);
-  echo $conn . " dropped table\n\n";
-}
-
-function insert_data($conn) 
-{
-  $stmt = ociparse($conn, "insert into scott.hallo 
-            values('$conn' || ' ' || to_char(sysdate,'DD-MON-YY HH24:MI:SS'))");
-  ociexecute($stmt, OCI_DEFAULT);
-  echo $conn . " inserted hallo\n\n";
-}
-
-function delete_data($conn) 
-{
-  $stmt = ociparse($conn, "delete from scott.hallo");
-  ociexecute($stmt, OCI_DEFAULT);
-  echo $conn . " deleted hallo\n\n";
-}
-
-function commit($conn) 
-{
-  ocicommit($conn);
-  echo $conn . " committed\n\n";
-}
-
-function rollback($conn) 
-{
-  ocirollback($conn);
-  echo $conn . " rollback\n\n";
-}
-
-function select_data($conn) 
-{
-  $stmt = ociparse($conn, "select * from scott.hallo");
-  ociexecute($stmt, OCI_DEFAULT);
-  echo $conn . "----selecting\n\n";
-  while (ocifetch($stmt)) {
-    echo $conn . " <" . ociresult($stmt, "TEST") . ">\n\n";
-  }
-  echo $conn . "----done\n\n";
-}
-
-create_table($c1);
-insert_data($c1);
-
-select_data($c1);   
-select_data($c2);   
-
-rollback($c1);      
-
-select_data($c1);   
-select_data($c2);   
-
-insert_data($c2);   
-commit($c2);        
-
-select_data($c1);   
-
-delete_data($c1);   
-select_data($c1);   
-select_data($c2);   
-commit($c1);        
-
-select_data($c1);
-select_data($c2);
-
-drop_table($c1);
-echo "</pre></html>";
-?>
-]]>
-      </programlisting>
-     </example>
-    </para>
-    <simpara>
-  参见 <function>ocilogon</function> 和
-     <function>ociplogon</function>。
-    </simpara>
-   </refsect1>
-  </refentry>
+ <refsect1 role="description">
+  &reftitle.description;
+  <simpara>
+   &info.function.alias;<function>oci_new_connect</function>。
+  </simpara>
+ </refsect1>
+</refentry>
 
 <!-- Keep this comment at the end of the file
 Local variables:
