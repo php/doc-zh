@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.1 $ -->
+<!-- $Revision: 1.2 $ -->
 <!-- $Author: dallas $ -->
-<!-- EN-Revision: 1.8 Maintainer: dallas Status: ready -->
+<!-- EN-Revision: 1.9 Maintainer: dallas Status: ready -->
 
 <chapter id="install.pecl">
  <title>PECL 扩展库安装</title>
@@ -9,9 +9,9 @@
  <sect1 id="install.pecl.intro">
   <title>PECL 安装介绍</title>
   <simpara>
-   PHP 扩展库可以通过不同方式安装。<ulink url="&url.pecl;">PECL</ulink>
-   是位于 <ulink url="&url.php.pear;">PEAR</ulink> 结构之下的
-   PHP 扩展库仓库，下面示范了怎样安装这些扩展。
+   <ulink url="&url.pecl;">PECL</ulink>
+   是通过 <ulink url="&url.php.pear;">PEAR</ulink> 打包系统来的
+   PHP 扩展库仓库，本章内容示范了怎样取得并安装 PECL 扩展。
   </simpara>
   <simpara>
    以下指南中假定 <literal>/your/phpsrcdir/</literal> 是 PHP
@@ -20,15 +20,14 @@
    <ulink url="&url.php.pear.cli;">pear 命令</ulink>。
   </simpara>
   <simpara>
-   共享扩展库可以通过将其包括在 &php.ini; 中用
-   <link linkend="ini.extension">extension</link> PHP 指令安装。参见
-   <link linkend="ini.extension-dir">extensions_dir</link>
-   指令以及 <function>dl</function>。以下说明的安装方法不会自动配置
-   PHP 包括这些扩展库，必须手工完成这一步。
+   要使用共享扩展库，必须经过编译，安装，然后加载。以下说明的方法提供了怎样编译和安装扩展库德各种指导，但并不会自动加载它们。可以通过将其包括在
+   &php.ini; 中用
+   <link linkend="ini.extension">extension</link> PHP 指令加载，或者
+   用 <function>dl</function> 函数。
   </simpara>
   <simpara>
-   当编译 PHP 模块时，具有所需工具（autoconf，automake，libtool
-   等）的合适版本很重要。所需工具和所需版本的详情见<ulink
+   当编译 PHP 模块时，拥有各种工具（autoconf，automake，libtool
+   等）的已知好使的版本很重要。所需工具和所需版本的详情见<ulink
    url="&url.php.anoncvs;">匿名 CVS 说明</ulink>。
   </simpara>
  </sect1>
@@ -44,8 +43,8 @@
      <ulink url="&url.pecl;">&url.pecl;</ulink>
     </simpara>
     <simpara>
-     这里列出的有更新记录，版本说明，需求，修订等信息。虽然不是每个
-     PECL 扩展库都有单独的 web 页面，但大部分都有。
+     PECL 网站包括有 PHP
+     开发组提供的不同扩展库的信息。这里的信息包括：更新记录，版本说明，需求，以及其它信息。
     </simpara>
    </listitem>
    <listitem>
@@ -53,7 +52,9 @@
      <literal>pear download extname</literal>
     </simpara>
     <simpara>
-     <ulink url="&url.php.pear.cli;">pear 命令</ulink>也可以用来下载源文件。也可以指明具体的修正版。
+     PECL 网站中列出的 PECL 扩展库的发行版本可以用
+     <ulink url="&url.php.pear.cli;">pear
+     命令</ulink>来下载和安装。也可以指明具体的修正版。
     </simpara>
    </listitem>
    <listitem>
@@ -61,7 +62,7 @@
      <acronym>CVS</acronym>
     </simpara>
     <simpara>
-     所有的 PECL 文件都在 <acronym>CVS</acronym> 中。其 web 页面见
+     大多数 PECL 扩展库也在 <acronym>CVS</acronym> 中。其 web 页面见
      <ulink url="&url.php.cvs;pecl/">&url.php.cvs;pecl/</ulink>。要直接从
      <acronym>CVS</acronym> 中下载，用以下命令，其中用户
      <emphasis>cvsread</emphasis> 的密码是 <emphasis>phpfi</emphasis>：
@@ -118,60 +119,69 @@ $ pear install extname
    </screen>
   </para>
   <simpara>
-   这将下载 <emphasis>extname</emphasis> 的源代码并将其编译入系统。这将产生一个
-   <filename>extname.so</filename> 文件，应将其包括入 &php.ini; 中。
+   这将下载 <emphasis>extname</emphasis> 的源代码，编译之，并将
+   <filename>extname.so</filename> 安装到 <link
+   linkend="ini.extension-dir">extension_dir</link>
+   中。然后 <filename>extname.so</filename> 就可以通过 &php.ini; 加载了。
   </simpara>
   <simpara>
-   在系统 <emphasis>preferred_state</emphasis> 设定高于可用的
-   <emphasis>extname</emphasis> 版本的情况下，例如设定为 stable
-   而扩展库还在 beta 时，要么通过 <literal>pear config-set</literal>
-   修改 <emphasis>preferred_state</emphasis>，或者指定一个 PECL 扩展库的特定版本。例如：
+   默认情况下，<literal>pear</literal> 命令不会安装标记为
+   <literal>alpha</literal> 或
+   <literal>beta</literal> 状态的包。如果没有 <literal>stable</literal>
+   包可用，也可以用以下命令安装一个 <literal>beta</literal> 包：
   </simpara>
   <para>
    <screen>
-$ pear install extname-0.1.1
+$ pear install extname-beta
    </screen>
   </para>
-  <simpara>
-   不管怎样，pear 都会将此 <filename>extname.so</filename> 文件拷贝到
-   <link linkend="ini.extension-dir">extensions directory</link>。据此调整 &php.ini;。
-  </simpara>
+  <para>
+   也可以用此命令安装一个指定的版本：
+  </para>
+  <para>
+   <screen>
+$ pear install extname-0.1
+   </screen>
+  </para>
  </sect1>
 
  <sect1 id="install.pecl.phpize">
   <title>用 phpize 编译共享 PECL 扩展库</title>
   <simpara>
-   如果不能用 pear，例如从 <acronym>CVS</acronym> 编译共享
-   PECL 扩展库，或者尚未发布的 PECL 包，那么也可以用 <literal>phpize</literal>
-   命令来手工创建共享扩展库。假定源程序文件名字为
-   <filename>extname.tgz</filename> 并下载到了当前目录下，考虑下面的命令：
+   有时候不能用 <literal>pear</literal>
+   安装命令。这可能是因为在防火墙后面，或者是因为想要安装的扩展库还没有
+   PEAR 兼容的包，例如 CVS 中尚未发布的扩展库。如果要编译这种扩展库，可以用更底层的编译工具来手工进行编译。
+  </simpara>
+  <simpara>
+   <literal>phpize</literal> 命令是用来准备 PHP
+   扩展库的编译环境的。下面例子中，扩展库的源程序位于
+   <filename>extname</filename> 目录中：
   </simpara>
   <para>
    <screen>
 <![CDATA[
-$ pear download extname
-$ gzip -d < extname.tgz | tar -xvf -
 $ cd extname
 $ phpize
-$ ./configure && make
+$ ./configure
+$ make
+# make install
 ]]>
    </screen>
   </para>
   <simpara>
-   如果成功，这将创建 <filename>extname.so</filename> 并放置于
-   <filename>extname/</filename> 源程序目录下的
-   <filename>modules/</filename> 与／或 <filename>.libs/</filename>
-   目录中。将此共享扩展库（<filename>extname.so</filename>）移动到
-   PHP 的 <link linkend="ini.extension-dir">extensions directory</link>
-   下并据此调整 &php.ini;。
+   成功的安装将创建 <filename>extname.so</filename> 并放置于
+   PHP 的<link linkend="ini.extension-dir">扩展库目录</link>中。需要调整
+   &php.ini;，加入 <literal>extension=extname.so</literal>
+   这一行之后才能使用此扩展库。
   </simpara>
  </sect1>
 
  <sect1 id="install.pecl.static">
   <title>将 PECL 扩展库静态编译入 PHP</title>
   <simpara>
-   要将扩展库静态编译到 PHP 中，将扩展库源程序放入 PHP
-   源程序中的 <filename>ext/</filename> 目录中去。例如：
+   有时可能需要将扩展库静态编译到 PHP 中。这需要将扩展库源程序放入
+   <filename>php-src/ext/</filename> 目录中去并告诉 PHP
+   编译系统来生成其配置脚本。
   </simpara>
   <para>
    <screen>
@@ -180,7 +190,6 @@ $ cd /your/phpsrcdir/ext
 $ pear download extname
 $ gzip -d < extname.tgz | tar -xvf -
 $ mv extname-x.x.x extname
-$ rm package.xml
 ]]>
    </screen>
   </para>
@@ -193,7 +202,7 @@ $ rm package.xml
    </screen>
   </para>
   <simpara>
-   然后正常编译 PHP：
+   此时强制 PHP 重新生成配置脚本，然后正常编译 PHP：
   </simpara>
   <para>
    <screen>
