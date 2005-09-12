@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="gb2312"?>
+<!-- $Revision: 1.1 $ -->
+<!-- $Author: dallas $ -->
+<!-- EN-Revision: 1.14 Maintainer: dallas Status: ready -->
+<sect1 id="language.oop5.basic">
+ <title>基本概念</title>
+
+ <sect2 id="language.oop5.basic.class">
+  <title>class</title>
+  <para>
+   每个类的定义都以关键字 class 开头，后面跟着类名，可以是任何非
+   PHP <link linkend="reserved">保留字</link>的名字。后面跟着一对花括号，里面包含有类成员和方法的定义。伪变量
+   <varname>$this</varname> 可以在当一个方法在对象内部调用时使用。<varname>$this</varname>
+   是一个到调用对象（通常是方法所属于的对象，但也可以是另一个对象，如果该方法是从第二个对象内<link
+   linkend="language.oop5.static">静态</link>调用的话）的引用。看下面例子：
+   <informalexample>
+    <programlisting role="php">
+<![CDATA[
+<?php
+class A
+{
+    function foo()
+    {
+        if (isset($this)) {
+            echo '$this is defined (';
+            echo get_class($this);
+            echo ")\n";
+        } else {
+            echo "\$this is not defined.\n";
+        }
+    }
+}
+
+class B
+{
+    function bar()
+    {
+        A::foo();
+    }
+}
+
+$a = new A();
+$a->foo();
+A::foo();
+$b = new B();
+$b->bar();
+B::bar();
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+$this is defined (a)
+$this is not defined.
+$this is defined (b)
+$this is not defined.
+]]>
+    </screen>
+   </informalexample>
+  </para>
+  <example>
+   <title>简单的类定义</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+class SimpleClass
+{
+    // 成员声明
+    public $var = 'a default value';
+
+    // 方法声明
+    public function displayVar() {
+        echo $this->var;
+    }
+}
+?>
+]]>
+   </programlisting>
+  </example>
+ </sect2>
+
+ <sect2 id="language.oop5.basic.new">
+  <title>new</title>
+  <para>
+   要创建一个对象的实例，必须创建一个新对象并将其赋给一个变量。当创建新对象时该对象总是被赋值，除非该对象定义了<link
+   linkend="language.oop5.decon">构造函数</link>并且在出错时抛出了一个<link
+   linkend="language.exceptions">异常</link>。
+  </para>
+  <example>
+   <title>创建一个实例e</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+$instance = new SimpleClass()
+?>
+]]>
+   </programlisting>
+  </example>
+  <para>
+   当把一个对象已经创建的实例赋给一个新变量时，新变量会访问同一个实例，就和用该对象赋值一样。此行为和给函数传递入实例时一样。可以用<link
+   linkend="language.oop5.cloning">克隆</link>给一个已创建的对象建立一个新实例。
+  </para>
+  <example>
+   <title>对象赋值</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+$assigned   =  $instance;
+$reference  =& $instance;
+
+$instance->var = '$assigned will have this value';
+
+$instance = null; // $instance and $reference become null
+
+var_dump($instance);
+var_dump($reference);
+var_dump($assigned);
+?>
+]]>
+   </programlisting>
+   &example.outputs;
+   <screen>
+<![CDATA[
+NULL
+NULL
+object(SimpleClass)#1 (1) {
+   ["var"]=>
+     string(30) "$assigned will have this value"
+}
+]]>
+   </screen>
+  </example>
+ </sect2>
+
+ <sect2 id="language.oop5.basic.extends">
+  <title>extends</title>
+  <para>
+   一个类可以在声明中用 extends
+   关键字继承另一个类的方法和成员。不能扩展多个类，只能继承一个基类。
+  </para>
+  <para>
+   被继承的方法和成员可以通过用同样的名字重新声明被覆盖，除非父类定义方法时使用了
+   <link linkend="language.oop5.final">final</link> 关键字。可以通过
+   <link linkend="language.oop5.paamayim-nekudotayim">parent::</link>
+   来访问被覆盖的方法或成员。
+  </para>
+  <example>
+   <title>简单的类继承</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+class ExtendClass extends SimpleClass
+{
+    // Redefine the parent method
+    function displayVar()
+    {
+        echo "Extending class\n";
+        parent::displayVar();
+    }
+}
+
+$extended = new ExtendClass();
+$extended->displayVar();
+?>
+]]>
+   </programlisting>
+   &example.outputs;
+   <screen>
+<![CDATA[
+Extending class
+a default value
+]]>
+   </screen>
+  </example>
+ </sect2>
+
+</sect1>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"../../manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
