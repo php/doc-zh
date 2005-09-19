@@ -1,100 +1,193 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.2 $ -->
+<!-- $Revision: 1.3 $ -->
 <!-- $Author: dallas $ -->
-<!-- EN-Revision: 1.7 Maintainer: dallas Status: ready -->
-  <refentry id="function.mysql-connect">
-   <refnamediv>
-    <refname>mysql_connect</refname>
-    <refpurpose>打开一个到 MySQL 服务器的连接</refpurpose>
-   </refnamediv>
-   <refsect1>
-    <title>说明</title>
-    <methodsynopsis>
-     <type>resource</type><methodname>mysql_connect</methodname>
-     <methodparam choice="opt"><type>string</type><parameter>server</parameter></methodparam>
-     <methodparam choice="opt"><type>string</type><parameter>username</parameter></methodparam>
-     <methodparam choice="opt"><type>string</type><parameter>password</parameter></methodparam>
-     <methodparam choice="opt"><type>bool</type><parameter>new_link</parameter></methodparam>
-     <methodparam choice="opt"><type>int</type><parameter>client_flags</parameter></methodparam>
-    </methodsynopsis>
-    <para>
-     如果成功则返回一个 MySQL 连接标识，失败则返回 &false;。
-    </para>
-    <para>
-     <function>mysql_connect</function> 建立一个到 MySQL
-     服务器的连接。当没有提供可选参数时使用以下默认值：<parameter>server</parameter>
-     = 'localhost:3306'，<parameter>username</parameter>
-     = 服务器进程所有者的用户名，<parameter>password</parameter>
-     = 空密码。
-    </para>
-    <para>
-     <parameter>server</parameter> 参数可以包括端口号。例如
-     &quot;hostname:port&quot; 或者是到本地套接字的路径，例如本机上的
-     &quot;:/path/to/socket&quot;。
-     <note>
+<!-- EN-Revision: 1.16 Maintainer: dallas Status: ready -->
+<refentry id="function.mysql-connect">
+ <refnamediv>
+  <refname>mysql_connect</refname>
+  <refpurpose>打开一个到 MySQL 服务器的连接</refpurpose>
+ </refnamediv>
+
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <type>resource</type><methodname>mysql_connect</methodname>
+   <methodparam choice="opt"><type>string</type><parameter>server</parameter></methodparam>
+   <methodparam choice="opt"><type>string</type><parameter>username</parameter></methodparam>
+   <methodparam choice="opt"><type>string</type><parameter>password</parameter></methodparam>
+   <methodparam choice="opt"><type>bool</type><parameter>new_link</parameter></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>client_flags</parameter></methodparam>
+  </methodsynopsis>
+  <para>
+   打开或重复使用一个到 MySQL 服务器的连接。
+  </para>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>server</parameter></term>
+     <listitem>
       <para>
-       无论指定 &quot;localhost&quot; 或者
-       &quot;localhost:port&quot; 作为
-       <parameter>server</parameter>，MySQL 客户端库将覆盖之并尝试连接到本地套接字（Windows
-       中的名字管道）。如果希望使用 TCP/IP 连接，用 &quot;127.0.0.1&quot; 替代
-       &quot;localhost&quot;。如果 MySQL
-       客户端库试图连接到错误的本地套接字，则应该在 PHP 配置中将
-       mysql.default_host 设为正确的路径并使 server 字段为空。
+       MySQL 服务器。可以包括端口号，例如
+       "hostname:port"，或者到本地套接字的路径，例如对于 localhost 的 ":/path/to/socket"。
       </para>
       <para>
-       &quot;:port&quot; 的支持是 PHP 3.0B4 起加入的。
+       如果 PHP 指令 <link linkend="ini.mysql.default-host">
+       mysql.default_host</link> 未定义（默认情况），则默认值是 'localhost:3306'。
       </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>username</parameter></term>
+     <listitem>
       <para>
-       &quot;:/path/to/socket&quot; 的支持是 PHP 3.0.10 起加入的。
+       用户名。默认值是服务器进程所有者的用户名。
       </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>password</parameter></term>
+     <listitem>
       <para>
-       可以在函数名前加上 <link linkend="language.operators.errorcontrol">@</link>
-       来抑制失败时产生的错误信息。
+       密码。默认值是空密码。
       </para>
-     </note>
-    </para>
-    <para>
-     如果用同样的参数第二次调用
-     <function>mysql_connect</function>，将不会建立新连接，而将返回已经打开的连接标识。参数
-     <parameter>new_link</parameter> 改变此行为并使
-     <function>mysql_connect</function> 总是打开新的连接，甚至当
-     <function>mysql_connect</function> 曾在前面被用同样的参数调用过。参数
-     <parameter>client_flags</parameter> 可以是以下常量的组合：MYSQL_CLIENT_COMPRESS，MYSQL_CLIENT_IGNORE_SPACE
-     或者 MYSQL_CLIENT_INTERACTIVE。
-    </para>
-    <note>
-     <para>
-      <parameter>new_link</parameter> 参数自 PHP 4.2.0 起可用。
-     </para>
-     <para>
-      <parameter>client_flags</parameter> 参数自 PHP 4.3.0 起可用。
-     </para>
-    </note>
-    <para>
-     一旦脚本结束，到服务器的连接就会被关闭。除非之前已经调用了
-     <function>mysql_close</function> 来关闭它。
-    </para>
-    <para>
-     <example>
-      <title>MySQL 连接例子</title>
-      <programlisting role="php">
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>new_link</parameter></term>
+     <listitem>
+      <para>
+       如果用同样的参数第二次调用
+       <function>mysql_connect</function>，将不会建立新连接，而将返回已经打开的连接标识。参数
+       <parameter>new_link</parameter> 改变此行为并使
+       <function>mysql_connect</function> 总是打开新的连接，甚至当
+       <function>mysql_connect</function> 曾在前面被用同样的参数调用过。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>client_flags</parameter></term>
+     <listitem>
+      <para>
+       <parameter>client_flags</parameter>
+       参数可以是以下常量的组合：<constant>MYSQL_CLIENT_COMPRESS</constant>，<constant>MYSQL_CLIENT_IGNORE_SPACE</constant>
+       或 <constant>MYSQL_CLIENT_INTERACTIVE</constant>。
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   如果成功则返回一个 MySQL 连接标识，失败则返回 &false;。
+  </para>
+ </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <para>
+   <informaltable>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>&Version;</entry>
+       <entry>&Description;</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>4.3.0</entry>
+       <entry>
+        添加 <parameter>client_flags</parameter> 参数。
+       </entry>
+      </row>
+      <row>
+       <entry>4.2.0</entry>
+       <entry>
+        添加 <parameter>new_link</parameter> 参数。
+       </entry>
+      </row>
+      <row>
+       <entry>3.0.10</entry>
+       <entry>
+        对 <parameter>server</parameter> 添加 ":/path/to/socket" 支持。
+       </entry>
+      </row>
+      <row>
+       <entry>3.0.0</entry>
+       <entry>
+        对 <parameter>server</parameter> 添加 ":port" 支持。
+       </entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </informaltable>
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title><function>mysql_connect</function> 例子</title>
+    <programlisting role="php">
 <![CDATA[
 <?php
-    $link = mysql_connect("localhost", "mysql_user", "mysql_password")
-        or die("Could not connect: " . mysql_error());
-    print ("Connected successfully");
-    mysql_close($link);
+$link = mysql_connect('localhost', 'mysql_user', 'mysql_password');
+if (!$link) {
+    die('Could not connect: ' . mysql_error());
+}
+echo 'Connected successfully';
+mysql_close($link);
 ?>
 ]]>
-      </programlisting>
-     </example>
-    </para>
-    <para>
-     参见 <function>mysql_pconnect</function> 和
-     <function>mysql_close</function>。
-    </para>
-   </refsect1>
-  </refentry>
+    </programlisting>
+   </example>
+  </para>
+ </refsect1>
+
+ <refsect1 role="notes">
+  &reftitle.notes;
+  <note>
+   <para>
+    只要将 server 指定为 &quot;localhost&quot; 或
+    &quot;localhost:port&quot;，MySQL 客户端库会越过此值并尝试连接到本地套接字（Windows
+    中的名字管道）。如果想用 TCP/IP，应该用 &quot;127.0.0.1&quot;
+    代替 &quot;localhost&quot;。如果 MySQL 客户端库试图连接到一个错误的本地套接字，则应该在
+    PHP 配置中设定 mysql.default_host 的正确路径并把 server 留空。
+   </para>
+  </note>
+  <note>
+   <para>
+    脚本一结束，到服务器的连接就被关闭，除非之前已经明确调用
+    <function>mysql_close</function> 关闭了。
+   </para>
+  </note>
+  <note>
+   <para>
+    可以在函数名前加上一个
+    <link linkend="language.operators.errorcontrol">@</link>
+    来抑制出错时的错误信息。
+   </para>
+  </note>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>mysql_pconnect</function></member>
+    <member><function>mysql_close</function></member>
+   </simplelist>
+  </para>
+ </refsect1>
+</refentry>
 
 <!-- Keep this comment at the end of the file
 Local variables:
