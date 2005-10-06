@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.3 $ -->
+<!-- $Revision: 1.4 $ -->
 <!-- $Author: dallas $ -->
-<!-- EN-Revision: 1.16 Maintainer: dallas Status: ready -->
+<!-- EN-Revision: 1.18 Maintainer: dallas Status: ready -->
 <refentry id="function.mysql-connect">
  <refnamediv>
   <refname>mysql_connect</refname>
@@ -74,7 +74,7 @@
       <para>
        <parameter>client_flags</parameter>
        参数可以是以下常量的组合：<constant>MYSQL_CLIENT_COMPRESS</constant>，<constant>MYSQL_CLIENT_IGNORE_SPACE</constant>
-       或 <constant>MYSQL_CLIENT_INTERACTIVE</constant>。
+       或 <constant>MYSQL_CLIENT_INTERACTIVE</constant>。进一步信息见<xref linkend="mysql.client-flags" />。
       </para>
      </listitem>
     </varlistentry>
@@ -150,6 +150,61 @@ mysql_close($link);
     </programlisting>
    </example>
   </para>
+  <para>
+   <example>
+    <title><function>mysql_connect</function> 例子：使用 <literal>hostname:port</literal> 语法</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+// we connect to example.com and port 3307
+$link = mysql_connect('example.com:3307', 'mysql_user', 'mysql_password');
+if (!$link) {
+    die('Could not connect: ' . mysql_error());
+}
+echo 'Connected successfully';
+mysql_close($link);
+
+// we connect to localhost at port 3307
+$link = mysql_connect('127.0.0.1:3307', 'mysql_user', 'mysql_password');
+if (!$link) {
+    die('Could not connect: ' . mysql_error());
+}
+echo 'Connected successfully';
+mysql_close($link);
+?>
+]]>
+    </programlisting>
+   </example>
+  </para
+  <para>
+   <example>
+    <title><function>mysql_connect</function> 例子：使用 ":/path/to/socket" 语法</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+// we connect to localhost and socket e.g. /tmp/mysql.sock
+
+//variant 1: ommit localhost
+$link = mysql_connect('/tmp/mysql', 'mysql_user', 'mysql_password');
+if (!$link) {
+    die('Could not connect: ' . mysql_error());
+}
+echo 'Connected successfully';
+mysql_close($link);
+
+
+// variant 2: with localhost
+$link = mysql_connect('localhost:/tmp/mysql.sock', 'mysql_user', 'mysql_password');
+if (!$link) {
+    die('Could not connect: ' . mysql_error());
+}
+echo 'Connected successfully';
+mysql_close($link);
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
  </refsect1>
 
  <refsect1 role="notes">
@@ -160,7 +215,8 @@ mysql_close($link);
     &quot;localhost:port&quot;，MySQL 客户端库会越过此值并尝试连接到本地套接字（Windows
     中的名字管道）。如果想用 TCP/IP，应该用 &quot;127.0.0.1&quot;
     代替 &quot;localhost&quot;。如果 MySQL 客户端库试图连接到一个错误的本地套接字，则应该在
-    PHP 配置中设定 mysql.default_host 的正确路径并把 server 留空。
+    PHP 配置中设定 <xref linkend="ini.mysql.default-host" />
+    的正确路径并把 server 留空。
    </para>
   </note>
   <note>
