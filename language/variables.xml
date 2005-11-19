@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.19 $ -->
+<!-- $Revision: 1.20 $ -->
 <!-- $Author: dallas $ -->
-<!-- EN-Revision: 1.87 Maintainer: verdana Status:  -->
+<!-- EN-Revision: 1.90 Maintainer: verdana Status: ready -->
 <!-- CREDITS: dallas, Gregory -->
  <chapter id="language.variables">
   <title>变量</title>
@@ -48,9 +48,7 @@ $i站点is = 'mansikka';  // 合法变量名；可以用中文
     PHP 3 中，变量总是传值赋值。那也就是说，当将一个表达式的值赋予一个变量时，整个原始表达式的值被赋值到目标变量。这意味着，例如，当一个变量的值赋予另外一个变量时，改变其中一个变量的值，将不会影响到另外一个变量。有关这种类型的赋值操作，请参阅<link linkend="language.expressions">表达式</link>一章。
    </para>
    <para>
-    PHP 4 提供了另外一种方式给变量赋值：<link linkend="language.references">引用赋值</link>。这意味着新的变量简单的引用（换言之，“成为其别名” 或者 “指向”）了原始变量。改动新的变量将影响到原始变量，反之亦然。这同样意味着其中没有执行复制操作；因而，这种赋值操作更加快速。不过只有在密集的循环中或者对很大的<link
-    linkend="language.types.array">数组</link>或<link
-    linkend="language.types.object">对象</link>赋值时才有可能注意到速度的提升。
+    PHP 4 提供了另外一种方式给变量赋值：<link linkend="language.references">引用赋值</link>。这意味着新的变量简单的引用（换言之，“成为其别名” 或者 “指向”）了原始变量。改动新的变量将影响到原始变量，反之亦然。
    </para>
    <para>
     使用引用赋值，简单地将一个 &amp;
@@ -90,6 +88,32 @@ $bar = &test();    // Invalid.
 ]]>
      </programlisting>
     </informalexample>
+   </para>
+   <para>
+    虽然在 PHP 中并不需要初始化变量，但这是个好习惯。未初始化的变量具有其类型的默认值 -
+    &false;，零，空字符串或者空数组。
+   </para>
+   <para>
+    <example>
+     <title>未初始化变量的默认值</title>
+     <programlisting role="php">
+<![CDATA[
+<?php
+echo ($unset_bool ? "true" : "false"); // false
+$unset_int += 25; // 0 + 25 => 25
+echo $unset_string . "abc"; // "" . "abc" => "abc"
+$unset_array[3] = "def"; // array() + array(3 => "def") => array(3 => "def")
+?>
+]]>
+     </programlisting>
+    </example>
+   </para>
+   <para>
+    依赖未初始化变量的默认值在某些情况下会有问题，例如把一个文件包含到另一个之中时碰上相同的变量名。另外把
+    <link linkend="ini.register-globals">register_globals</link> 打开是一个主要的<link 
+    linkend="security.globals">安全隐患</link>。<link linkend="e-notice">E_NOTICE</link>
+    级别的错误会在碰上未初始化的变量时发出，但是在向一个未初始化的数组附加单元时不会。<function>isset</function>
+    语言结构可以用来检测一个变量是否已被初始化。
    </para>
   </sect1>
 
