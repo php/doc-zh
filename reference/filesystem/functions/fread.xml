@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.9 $ -->
+<!-- $Revision: 1.10 $ -->
 <!-- $Author: dallas $ -->
-<!-- EN-Revision: 1.16 Maintainer: dallas Status: ready -->
+<!-- EN-Revision: 1.18 Maintainer: dallas Status: ready -->
 <!-- CREDITS: lm92 -->
 <refentry id="function.fread">
  <refnamediv>
@@ -18,9 +18,12 @@
   <simpara>
    <function>fread</function> 从文件指针
    <parameter>handle</parameter> 读取最多
-   <parameter>length</parameter> 个字节。该函数在读取完
+   <parameter>length</parameter> 个字节。该函数在读取完最多
    <parameter>length</parameter> 个字节数，或到达
    EOF 的时候，或（对于网络流）当一个包可用时就会停止读取文件，视乎先碰到哪种情况。
+  </simpara>
+  <simpara>
+   返回所读取的字符串，如果出错返回 &false;。
   </simpara>
   <para>
    <informalexample>
@@ -59,12 +62,26 @@ fclose($handle);
   </para>
   <warning>
    <para>
-    当从网络流或者管道读取时，例如在读取从<link
+    当从任何不是普通本地文件读取时，例如在读取从<link
     linkend="features.remote-files">远程文件</link>或
     <function>popen</function> 以及 <function>proc_open</function>
-    的返回时，读取会在一个包可用之后停止。这意味着应该如下例所示将数据收集起来合并成大块。
+    返回的流时，读取会在一个包可用之后停止。这意味着应该如下例所示将数据收集起来合并成大块。
    </para>
   </warning>
+  <para>
+   <informalexample>
+    <programlisting role="php">
+<![CDATA[
+<?php
+// 对 PHP 5 及更高版本
+$handle = fopen("http://www.example.com/", "rb");
+$contents = stream_get_contents($handle);
+fclose($handle);
+?>
+]]>
+    </programlisting>
+   </informalexample>
+  </para>
   <para>
    <informalexample>
     <programlisting role="php">
