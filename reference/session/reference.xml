@@ -1,0 +1,335 @@
+<?xml version="1.0" encoding="gb2312"?>
+<!-- $Revision: 1.1 $ -->
+<!-- $Author: dallas $ -->
+<!-- EN-Revision: 1.57 Maintainer: dallas Status: ready -->
+<!-- Purpose: basic.session -->
+<!-- Membership: core -->
+
+<reference id="ref.session">
+ <title>Session 会话处理函数</title>
+ <titleabbrev>Sessions</titleabbrev>
+    
+ <partintro>
+  
+  <section id="session.intro">
+   &reftitle.intro;
+   <para>
+    PHP 中的会话支持由一种将特定数据保留用于之后的请求的方法组成。这样可以使用户建立更灵活的应用并提高网站的吸引力。
+   </para>
+   <para>
+    访问网站的来客会被分配一个唯一的标识符，即所谓的会话 ID。它要么存放在客户端的
+    cookie，要么经由 URL 传递。
+   </para>
+   <para>
+    会话支持允许用户注册任意数目的变量并保留给各个请求使用。当来客访问网站时，PHP
+    会自动（如果<link linkend="ini.session.auto-start">session.auto_start</link>
+    被设为 1）或在用户请求时（由 <function>session_start</function>
+    明确调用或 <function>session_register</function> 暗中调用）检查请求中是否发送了特定的会话
+    ID。如果是，则之前保存的环境就被重建。
+   </para>
+   <caution>
+    <para>
+     如果确实启用了
+     <link linkend="ini.session.auto-start">session.auto_start</link>，则不能将对象放入会话中，因为类定义必须在启动会话之前加载以在会话中重建对象。
+    </para>
+   </caution>
+   <para>
+    请求结束后所有注册的变量都会被序列化。已注册但未定义的变量被标记为未定义。在之后的访问中这些变量也未被会话模块定义，除非用户以后定义它们。
+   </para>
+   <warning>
+    <para>
+     有些类型的数据不能被序列化因此也就不能保存在会话中。包括
+     <type>resource</type> 变量或者有循环引用的对象（即某对象将一个指向自己的引用传递给另一个对象）。
+    </para>
+   </warning>
+   <note>
+    <para>
+     会话处理是 PHP 4.0 添加的。
+    </para>
+   </note>
+   <note>
+    <para>
+     注意在使用会话时除非用 <function>session_register</function>
+     函数注册了一个变量或者将一个新的键添加到了 <varname>$_SESSION</varname>
+     超全局数组中去，否则会话的记录不会被创建。不管会话是否用
+     <function>session_start</function> 函数启动都是如此。
+    </para>
+   </note>
+  </section>
+   
+  <section id="session.security">
+   <title>会话和安全</title>
+   <para>
+    外部连接：<ulink url="&url.session-fixation;">Session fixation</ulink>。
+   </para>
+   <para>
+    会话模块不能保证存放在会话中的信息只能被创建该会话的用户看到。根据其存放的数据，还需要采取更多措施来主动保护会话的完整性。
+   </para>
+   <para>
+    评估会话中携带的数据并实施附加保护措施——这通常要付出代价，降低用户的方便程度。例如，如果要保护用户免于受简单的社交策略侵害（注：指在
+    URL 中显示的会话 ID 会被别人在电脑屏幕上看到，或被别的网站通过 HTTP Referer
+    得到等），则应该启用 <literal>session.use_only_cookies</literal>。此情形下，客户端必须无条件启用
+    cookie，否则会话就不工作。
+   </para>
+   <para>
+    有几种途径会将现有的会话 ID 泄露给第三方。泄露出的会话 ID 使第三方能够访问所有与指定
+    ID 相关联的资源。第一，URL 携带会话 ID。如果连接到外部站点，包含有会话 ID
+    的 URL 可能会被存在外部站点的 Referer 日志中。第二，较主动的攻击者可能会侦听网段的数据包。如果未加密，会话
+    ID 会以明文方式在网络中流过。对此的解决方式是在服务器上实施 SSL 并强制用户使用。
+   </para>
+  </section>
+
+  <section id="session.requirements">
+   &reftitle.required;
+   &no.requirement;
+   <note>
+    <para>
+     作为可选项，可以使用共享内存分配（mm），由
+     Ralf S. Engelschall 开发用于会话存储。必须下载
+     <ulink url="&url.mm;">mm</ulink> 并安装。此选项在 Windows 平台下不可用。注意 mm
+     的会话存储模块不能保证到同一个会话的并发访问被正确地锁定。可能用基于共享内存的文件系统（例如
+     Solaris/Linux 中的 tmpfs，或 BSD 中的 /dev/md）来将会话存放到文件中更为恰当，因为这样会正确锁定。会话数据存放在内存中则
+     Web 服务器重启动会删除之。
+    </para>
+   </note>
+  </section>
+
+  &reference.session.configure;
+
+  &reference.session.ini;
+
+  <section id="session.resources">
+   &reftitle.resources;
+   &no.resource;
+  </section>
+
+  &reference.session.constants;
+
+  <section id="session.examples">
+   &reftitle.examples;
+   <note>
+    <para>
+     自 PHP 4.1.0 起，<varname>$_SESSION</varname> 如同
+     <varname>$_POST</varname>，<varname>$_GET</varname>，<varname>$_REQUEST</varname>
+     等一样成为全局数组。与 <varname>$HTTP_SESSION_VARS</varname>
+     不同，<varname>$_SESSION</varname> 总是具有全局范围。因此不要对
+     <varname>$_SESSION</varname> 使用
+     <link linkend="language.variables.scope"><command>global</command></link>
+     关键字。注意本文档已被改为在所有地方都使用
+     <varname>$_SESSION</varname>。如果倾向后者，可以将
+     <varname>$HTTP_SESSION_VARS</varname> 都替换成
+     <varname>$_SESSION</varname>。此外注意必须在使用 <varname>$_SESSION</varname>
+     之前先用 <function>session_start</function> 启动会话。
+    </para>
+    <para>
+     在 <varname>$_SESSION</varname> 关联数组中的键名具有和 PHP
+     中普通变量名相同的规则，即不能以数字开头，必须以字母或下划线开头。更多细节见本手册中<link
+     linkend='language.variables'>变量</link>一章。
+    </para>
+   </note>
+
+   <para>
+    如果 <link linkend="ini.register-globals">register_globals</link>
+    被禁用，则只有全局关联数组 <varname>$_SESSION</varname>
+    中的成员可以被注册为会话变量。被恢复的会话变量也只存在于
+    <varname>$_SESSION</varname> 数组中。
+   </para>
+   <para>
+    为提高安全性和代码的可读性，建议使用
+    <varname>$_SESSION</varname>（或在 PHP 4.0.6 或更低版本中用
+    <varname>$HTTP_SESSION_VARS</varname>）。使用了
+    <varname>$_SESSION</varname>，就没有必要使用
+    <function>session_register</function>，<function>session_unregister</function>，<function>session_is_registered</function>
+    函数。访问会话变量就和其它变量一样。
+    <example>
+     <title>用 <varname>$_SESSION</varname> 注册变量</title>
+     <programlisting role="php">
+<![CDATA[
+<?php
+session_start();
+// Use $HTTP_SESSION_VARS with PHP 4.0.6 or less
+if (!isset($_SESSION['count'])) {
+    $_SESSION['count'] = 0;
+} else {
+    $_SESSION['count']++;
+}
+?>
+]]>
+     </programlisting>
+    </example>
+    <example>
+     <title>用 <varname>$_SESSION</varname> 取消注册变量并且禁用了 <link
+      linkend="ini.register-globals">register_globals</link></title>
+     <programlisting role="php">
+<![CDATA[
+<?php
+session_start();
+// Use $HTTP_SESSION_VARS with PHP 4.0.6 or less
+unset($_SESSION['count']);
+?>
+]]>
+     </programlisting>
+    </example>
+   </para>
+   <para>
+    <caution>
+     <para>
+      不要用 <literal>unset($_SESSION)</literal> 取消了整个
+      <varname>$_SESSION</varname> 数组，这样将不能再通过
+      <varname>$_SESSION</varname> 超全局数组注册变量了。
+     </para>
+    </caution>
+   </para>
+   <warning>
+    <para>
+     不能在会话变量中用引用，因为没有可行的方法将引用恢复到另一个变量去。
+    </para>
+   </warning>
+   <para>
+    如果启用了 <link
+    linkend="ini.register-globals">register_globals</link>，则每个全局变量都能被注册为会话变量。在会话重新启动时，这些变量会被恢复到相应的全局变量中去。因为
+    PHP 必须知道哪些全局变量被注册为会话变量，用户需要用
+    <function>session_register</function> 函数来注册变量。可以简单地通过在
+    <varname>$_SESSION</varname> 中设定变量来免去这样做。
+    <caution>
+     <para>
+      在 PHP 4.3 之前，如果使用了 <varname>$_SESSION</varname>
+      并且仅用了 <link linkend="ini.register-globals">register_globals</link>，则不要使用
+      <function>session_register</function>，<function>session_is_registered</function>
+      或 <function>session_unregister</function>。出于安全及性能原因，建议禁用
+      <link linkend="ini.register-globals">register_globals</link>。
+     </para>
+    </caution>
+   </para>
+   <para>
+    如果启用了 <link
+    linkend="ini.register-globals">register_globals</link>，则全局变量和
+    <varname>$_SESSION</varname> 中的条目自动指向之前注册的同一个会话实例。不过如果变量是用
+    <varname>$_SESSION</varname> 注册的，则全局变量自下一个请求起才可用。
+   </para>
+   <para>
+    在 PHP 4.2.3 和之前版本中有个缺陷。如果用
+    <function>session_register</function> 注册了一个新的会话变量，则在全局变量范围中的条目和
+    <varname>$_SESSION</varname> 中的条目在下一个
+    <function>session_start</function> 之前没有引用到同一个值。即如果修改一个新注册的全局变量，不会在
+    <varname>$_SESSION</varname> 条目中反应出来。这在 PHP 4.3 中已被修正。
+   </para>
+  </section>
+
+  <section id="session.idpassing">
+   <title>传递会话 ID</title>
+   <para>
+    有两种方法传递一个会话 ID：
+    <itemizedlist>
+     <listitem>
+      <simpara>
+       cookie
+      </simpara>
+     </listitem>
+     <listitem>
+      <simpara>
+       URL 参数
+      </simpara>
+     </listitem>
+    </itemizedlist>
+   </para>
+   <para>
+    会话模块支持这两种方法。cookie 更优化，但由于不总是可用，也提供替代的方法。第二种方法直接将会话
+    ID 嵌入到 URL 中间去。
+   </para>
+   <para>
+    PHP 可以透明地转换连接。除非是使用
+    PHP 4.2 或更新版本，需要手工在编译 PHP 时激活。在 Unix 下，用
+    <link linkend="ini.session.use-trans-sid">--enable-trans-sid</link>
+    配置选项。如果此配置选项和运行时选项
+    <literal>session.use_trans_sid</literal> 都被激活，相对
+    URI 将被自动修改为包含会话 ID。
+    <note>
+     <para>
+      &php.ini; 指令 <link linkend="ini.arg-separator.output">arg_separator.output</link>
+      允许定制参数分隔符。为安全符合 XHTML，这里用 &amp;amp;。
+     </para>
+    </note> 
+   </para>
+   <para>
+    此外，可以用常量 <literal>SID</literal>，在会话启动时被定义。如果客户端没有发送适当的会话
+    cookie 的话，则 <literal>SID</literal>
+    的格式为 <literal>session_name=session_id</literal>，否则就为一个空字符串。因此可以无条件将其嵌入到
+    URL 中去。
+   </para>
+   <para>
+    下面例子演示了怎样注册一个变量，以及怎样用 SID 正确连接到另一个页面。
+    <example>
+     <title>对单一用户进行页面点击计数</title>
+     <programlisting role="php">
+<![CDATA[
+<?php
+if (!session_is_registered('count')) {
+    session_register('count');
+    $count = 1;
+} else {
+    $count++;
+}
+?>
+
+<p>
+Hello visitor, you have seen this page <?php echo $count; ?> times.
+</p>
+
+<p>
+To continue, <a href="nextpage.php?<?php echo strip_tags(SID); ?>">click
+here</a>.
+</p>
+]]>
+     </programlisting>
+    </example>
+   </para>
+   <para>
+    用 <function>strip_tags</function> 来输出 SID 以避免 XSS 相关的攻击。
+   </para>
+   <para>
+    如果编译 PHP 时指定了
+    <link linkend="ini.session.use-trans-sid">--enable-trans-sid</link>，就不需要像上例那样输出 SID 了。
+   </para>
+   <note>
+    <para>
+     非相对的 URL 被假定为指向外部站点，因此没有附加 SID，因为这可能是个安全隐患将
+     SID 泄露给不同的服务器。
+    </para>
+   </note>
+  </section>
+   
+  <section id="session.customhandler">
+   <title>定制会话处理器</title>
+   <para>
+    要实现数据库存储或其它储存方法，需要用
+    <function>session_set_save_handler</function> 来创建一组用户级别的存储函数。
+   </para>
+  </section>
+ </partintro>
+
+ &reference.session.functions;
+
+</reference>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"../../../manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
+
