@@ -1,37 +1,36 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.1 $ -->
-<!-- $Author: nio $ -->
-<!-- EN-Revision: 1.4 Maintainer: nio Status: ready -->
-<!-- splitted from ./en/functions/strings.xml, last change in rev 1.2 -->
-  <refentry id="function.get-meta-tags">
-   <refnamediv>
-    <refname>get_meta_tags</refname>
-    <refpurpose>
-     从一个文件中提取所有的 meta 标签 content 属性，返回一个数组
-    </refpurpose>
-   </refnamediv>
-   <refsect1>
-    <title>描述</title>
-     <methodsynopsis>
-      <type>array</type><methodname>get_meta_tags</methodname>
-      <methodparam><type>string</type><parameter>filename</parameter></methodparam>
-      <methodparam choice="opt"><type>int</type><parameter>use_include_path</parameter></methodparam>
-     </methodsynopsis>
-    <para>
-     打开 <parameter>filename</parameter> 逐行解析文件中的 
-     &lt;meta> 标签。此参数可以是本地文件也可以是一个
-     <acronym>URL</acronym>。解析工作将在
-     <literal>&lt;/head&gt;</literal> 处停止。
-    </para>
-    <para>
-     将 <parameter>use_include_path</parameter> 设置为 1 将促使 
-     PHP 尝试按照 <link linkend="ini.include-path">include_path</link>
-     标准包含路径中的每个指向去打开文件。这只用于本地文件，不适用于 URL。
-    </para>
-    <para>
-     <example>
-      <title><function>get_meta_tags</function> 解析些什么</title>
-      <programlisting role="html">
+<!-- $Revision: 1.2 $ -->
+<!-- $Author: dallas $ -->
+<!-- EN-Revision: 1.7 Maintainer: nio Status: ready -->
+<refentry id="function.get-meta-tags">
+ <refnamediv>
+  <refname>get_meta_tags</refname>
+  <refpurpose>
+   从一个文件中提取所有的 meta 标签 content 属性，返回一个数组
+  </refpurpose>
+ </refnamediv>
+ <refsect1>
+  <title>描述</title>
+  <methodsynopsis>
+   <type>array</type><methodname>get_meta_tags</methodname>
+   <methodparam><type>string</type><parameter>filename</parameter></methodparam>
+   <methodparam choice="opt"><type>bool</type><parameter>use_include_path</parameter></methodparam>
+  </methodsynopsis>
+  <para>
+   打开 <parameter>filename</parameter> 逐行解析文件中的 
+   &lt;meta&gt; 标签。此参数可以是本地文件也可以是一个
+   <acronym>URL</acronym>。解析工作将在
+   <literal>&lt;/head&gt;</literal> 处停止。
+  </para>
+  <para>
+   将 <parameter>use_include_path</parameter> 设置为 &true; 将使 
+   PHP 尝试按照 <link linkend="ini.include-path">include_path</link>
+   标准包含路径中的每个指向去打开文件。这只用于本地文件，不适用于 URL。
+  </para>
+  <para>
+   <example>
+    <title><function>get_meta_tags</function> 解析些什么</title>
+    <programlisting role="html">
 <![CDATA[
 <meta name="author" content="name">
 <meta name="keywords" content="php documentation">
@@ -39,47 +38,47 @@
 <meta name="geo.position" content="49.33;-86.59">
 </head> <!-- 解析工作在此处停止 -->
 ]]>
-      </programlisting>
-     </example>
-     （注意回车换行 － PHP 使用一个本地函数来解析输入，所以 Mac 上的文件将不能在 Unix 上正常工作）。
-    </para>
-    <para> 
-     返回的关联数组以属性 name 的值作为键，属性 content 
-     的值作为值，所以你可以很容易地使用标准数组函数遍历此关联数组或访问某个值。属性
-     name 中的特殊字符将使用‘_’替换，而其它字符则转换成小写。如果有两个
-     meta 标签拥有相同的 name，则只返回最后出现的那一个。
-    </para>
-    <para>
-     <example>
-      <title><function>get_meta_tags</function> 的返回值</title>
-      <programlisting role="php">
+    </programlisting>
+   </example>
+   （注意回车换行 － PHP 使用一个本地函数来解析输入，所以 Mac 上的文件将不能在 Unix 上正常工作）。
+  </para>
+  <para> 
+   返回的关联数组以属性 name 的值作为键，属性 content 
+   的值作为值，所以你可以很容易地使用标准数组函数遍历此关联数组或访问某个值。属性
+   name 中的特殊字符将使用‘_’替换，而其它字符则转换成小写。如果有两个
+   meta 标签拥有相同的 name，则只返回最后出现的那一个。
+  </para>
+  <para>
+   <example>
+    <title><function>get_meta_tags</function> 的返回值</title>
+    <programlisting role="php">
 <![CDATA[
 <?php
 // 假设上边的标签是在 www.example.com 中
 $tags = get_meta_tags('http://www.example.com/');
 
 // 注意所有的键（key）均为小写，而键中的‘.’则转换成了‘_’。
-print $tags['author'];       // name
-print $tags['keywords'];     // php documentation
-print $tags['description'];  // a php manual
-print $tags['geo_position']; // 49.33;-86.59
+echo $tags['author'];       // name
+echo $tags['keywords'];     // php documentation
+echo $tags['description'];  // a php manual
+echo $tags['geo_position']; // 49.33;-86.59
 ?>
 ]]>
-      </programlisting>
-     </example>
-    </para>
-    <note>
-     <para>
-      从 PHP 4.0.5 开始，<function>get_meta_tags</function>
-      支持没有使用引号括起来的 HTML 属性。
-     </para>
-    </note>
-    <para>
-     参见 <function>htmlentities</function> 和
-     <function>urlencode</function>。
-    </para>
-   </refsect1>
-  </refentry>
+    </programlisting>
+   </example>
+  </para>
+  <note>
+   <para>
+    从 PHP 4.0.5 开始，<function>get_meta_tags</function>
+    支持没有使用引号括起来的 HTML 属性。
+   </para>
+  </note>
+  <para>
+   参见 <function>htmlentities</function> 和
+   <function>urlencode</function>。
+  </para>
+ </refsect1>
+</refentry>
 
 <!-- Keep this comment at the end of the file
 Local variables:
