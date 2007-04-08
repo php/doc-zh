@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.28 $ -->
-<!-- $Author: lm92 $ -->
-<!-- EN-Revision: 1.42 Maintainer: class007 Status: ready -->
+<!-- $Revision: 1.29 $ -->
+<!-- $Author: yincheng $ -->
+<!-- EN-Revision: 1.48 Maintainer: class007 Status: ready -->
 <!-- CREDITS: gregory -->
 <chapter id="tutorial">
  <title>简明教程</title>
@@ -187,7 +187,7 @@
    <para>
     <link linkend="reserved.variables.server">$_SERVER</link>
     是一个特殊的 PHP 保留变量，它包含了 web
-    服务器提供的所有信息，被称为自动全局变量（或“超全局变量”）。请查阅本手册“<link
+    服务器提供的所有信息，被称为超全局变量。请查阅本手册“<link
     linkend="language.variables.superglobals">超全局变量</link>”中的有关内容以获取更多信息。这些特殊的变量是在
     PHP <ulink url="&url.php.release4.1.0;">4.1.0</ulink> 版本引入的。在这之前使用
     <varname>$HTTP_*_VARS</varname> 数组，如
@@ -203,7 +203,9 @@
    <title>打印一个变量（数组元素）</title>
     <programlisting role="php">
 <![CDATA[
-<?php echo $_SERVER['HTTP_USER_AGENT']; ?>
+<?php 
+echo $_SERVER['HTTP_USER_AGENT']; 
+?>
 ]]>
    </programlisting>
    <para>
@@ -255,8 +257,7 @@ if (strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') !== FALSE) {
    <link linkend="control-structures.if">if</link> 语句。如果用户对
    C 语言的基本语法比较熟悉，则应该对此很熟悉，否则，可能需要拿起任何一本
    PHP 介绍性的书籍并阅读前面的两三个章节，或者也可以阅读本手册的“<link
-   linkend="langref">语言参考</link>”一章。可以在 <ulink
-   url="&url.php.books;">&url.php.books;</ulink> 找到有关 PHP 的书籍的列表。
+   linkend="langref">语言参考</link>”一章。
   </para>
   <para>
    需要介绍的第二个原理，是对 <function>strpos</function>
@@ -351,8 +352,8 @@ if (strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') !== FALSE) {
     <title>打印来自表单的数据</title>
     <programlisting role="php">
 <![CDATA[
-你好，<?php echo $_POST['name']; ?>。
-你 <?php echo $_POST['age']; ?> 岁了。
+你好，<?php echo htmlspecialchars($_POST['name']); ?>。
+你 <?php echo (int)$_POST['age']; ?> 岁了。
 ]]>
     </programlisting>
     <para>
@@ -366,15 +367,28 @@ if (strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') !== FALSE) {
    </example>
   </para>
   <para>
-   该脚本进行的工作应该已经很明显了，这儿并没有其它更复杂的内容。PHP
+       Apart from the <function>htmlspecialchars</function> and 
+       <literal>(int)</literal> parts, it should be obvious what this does.  
+       <function>htmlspecialchars</function> makes sure any characters that
+   are
+       special in html are properly encoded so people can't inject HTML tags
+       or Javascript into your page.  For the age field, since we know it is
+   a 
+       number, we can just <link
+   linkend="language.types.typecasting">convert</link> 
+       it to an <type>integer</type> which will automatically get rid of any 
+       stray characters.  You can also have PHP do this for you automatically
+   by 
+       using the <link linkend="ref.filter">filter</link> extension.
+   PHP
    将自动设置 <varname>$_POST['name']</varname> 和
-   <varname>$_POST['age']</varname> 变量。在这之前我们使用了自动全局变量
-   <varname>$_SERVER</varname>，现在我们引入了自动全局变量
+   <varname>$_POST['age']</varname> 变量。在这之前我们使用了超全局变量
+   <varname>$_SERVER</varname>，现在我们引入了超全局变量
    <link linkend="reserved.variables.post">$_POST</link>，它包含了所有的
    POST 数据。请注意我们的表单提交数据的<emphasis>方法</emphasis>（method）。如果使用了
-   <emphasis>GET</emphasis> 方法，那么表单中的信息将被储存到自动全局变量
+   <emphasis>GET</emphasis> 方法，那么表单中的信息将被储存到超全局变量
    <link linkend="reserved.variables.get">$_GET</link>
-   中。如果并不关心请求数据的来源，也可以用自动全局变量
+   中。如果并不关心请求数据的来源，也可以用超全局变量
    <link linkend="reserved.variables.request">$_REQUEST</link>，它包含了所有
    GET、POST、COOKIE 和 FILE 的数据。请参阅
    <function>import_request_variables</function> 函数。
@@ -403,7 +417,7 @@ if (strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') !== FALSE) {
       数组（在函数或者方法中原本是全局变量）。PHP
       <ulink url="&url.php.release4.1.0;">4.1.0</ulink>
       版本引入了如下<link
-      linkend="language.variables.superglobals">自动全局数组变量</link>：<varname>$_GET</varname>、<varname>$_POST</varname>、<varname>$_COOKIE</varname>、<varname>$_SERVER</varname>、<varname>$_FILE</varname>、<varname>$_ENV</varname>、<varname>$_REQUEST</varname>
+      linkend="language.variables.superglobals">超全局数组变量</link>：<varname>$_GET</varname>、<varname>$_POST</varname>、<varname>$_COOKIE</varname>、<varname>$_SERVER</varname>、<varname>$_FILE</varname>、<varname>$_ENV</varname>、<varname>$_REQUEST</varname>
       以及 <varname>$_SESSION</varname>。老的 <varname>$HTTP_*_VARS</varname>
       数组，诸如 $HTTP_POST_VARS 等，从 PHP 3 就已经开始使用，它们仍然存在。&avail.register-long-arrays;
      </simpara>
@@ -415,7 +429,7 @@ if (strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') !== FALSE) {
       版开始，&php.ini; 中的设置选项
       <link linkend="ini.register-globals">register_globals</link>
       默认值变成了
-      <emphasis>off</emphasis>。建议用以上提到的自动全局数组变量来访问这些值。但可能老的脚本、书籍以及教程都可能建立在该设置为
+      <emphasis>off</emphasis>。建议用以上提到的超全局数组变量来访问这些值。但可能老的脚本、书籍以及教程都可能建立在该设置为
       on 的基础上。如果该选项被设置为
       on，则可以在
       URL <literal>http://www.example.com/foo.php?id=42</literal>
