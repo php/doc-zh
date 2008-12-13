@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="gb2312"?>
+<!-- $Revision: 1.3 $ -->
+<!-- $Author: haohappy $ -->
+<!-- EN-Revision: 1.13 Maintainer: haohappy Status: ready -->
+ <sect1 xml:id="language.oop5.iterations" xmlns="http://docbook.org/ns/docbook">
+  <title>对象迭代</title>
+  <para>
+
+   PHP 5 provides a way for objects to be defined so it is possible to iterate
+   through a list of items, with, for example a <link
+   linkend="control-structures.foreach">foreach</link> statement. By default,
+   all <link linkend="language.oop5.visibility">visible</link> properties will be used
+   for the iteration.
+
+   PHP5提供了一种迭代（iteration）对象的功能，就像使用数组那样，可以通过<link linkend="control-structures.foreach">foreach</link>
+   来遍历对象中的属性。默认情况下，在外部迭代只能得到外部可见的属性的值。
+  </para>
+
+  <example>
+   <title>简单的对象迭代</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+class MyClass
+{
+    public $var1 = 'value 1';
+    public $var2 = 'value 2';
+    public $var3 = 'value 3';
+
+    protected $protected = 'protected var';
+    private   $private   = 'private var';
+
+    function iterateVisible() {
+       echo "MyClass::iterateVisible:\n";
+       foreach($this as $key => $value) {
+           print "$key => $value\n";
+       }
+    }
+}
+
+$class = new MyClass();
+
+foreach($class as $key => $value) {
+    print "$key => $value\n";
+}
+echo "\n";
+
+
+$class->iterateVisible();
+
+?>
+]]>
+   </programlisting>
+   &example.outputs; 
+   <screen role="php">
+<![CDATA[
+var1 => value 1
+var2 => value 2
+var3 => value 3
+
+MyClass::iterateVisible:
+var1 => value 1
+var2 => value 2
+var3 => value 3
+protected => protected var
+private => private var
+]]>
+   </screen>
+
+  </example>
+
+ <para>
+  如上所示, the <link
+  linkend="control-structures.foreach">foreach</link> 遍历了所有
+  <link linkend="language.oop5.visibility">可见的</link> 属性. 你也可以通过实现PHP 5自带的
+  <varname>Iterator</varname>接口来实现迭代. 使用Iterator接口可以让对象自行决定如何迭代自已。
+ </para>
+
+  <example>
+   <title>实现Iterator接口的迭代</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+class MyIterator implements Iterator
+{
+    private $var = array();
+
+    public function __construct($array)
+    {
+        if (is_array($array)) {
+            $this->var = $array;
+        }
+    }
+
+    public function rewind() {
+        echo "rewinding\n";
+        reset($this->var);
+    }
+
+    public function current() {
+        $var = current($this->var);
+        echo "current: $var\n";
+        return $var;
+    }
+
+    public function key() {
+        $var = key($this->var);
+        echo "key: $var\n";
+        return $var;
+    }
+
+    public function next() {
+        $var = next($this->var);
+        echo "next: $var\n";
+        return $var;
+    }
+
+    public function valid() {
+        $var = $this->current() !== false;
+        echo "valid: {$var}\n";
+        return $var;
+    }
+}
+
+$values = array(1,2,3);
+$it = new MyIterator($values);
+
+foreach ($it as $a => $b) {
+    print "$a: $b\n";
+}
+?>
+]]>
+   </programlisting>
+   &example.outputs;
+   <screen role="php">
+<![CDATA[
+rewinding
+current: 1
+valid: 1
+current: 1
+key: 0
+0: 1
+next: 2
+current: 2
+valid: 1
+current: 2
+key: 1
+1: 2
+next: 3
+current: 3
+valid: 1
+current: 3
+key: 2
+2: 3
+next:
+current:
+valid:
+]]>
+   </screen>
+
+  </example>
+
+  <para>
+   你也可以让类实现<varname>IteratorAggregate</varname>接口，这样你的类就不用强制性地实现
+   <varname>Iterator</varname>接口中的所有方法。
+  </para>
+
+  <example>
+   <title>通过IteratorAggregate来实现对象迭代</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+class MyCollection implements IteratorAggregate
+{
+    private $items = array();
+    private $count = 0;
+
+    // Required definition of interface IteratorAggregate
+    public function getIterator() {
+        return new MyIterator($this->items);
+    }
+
+    public function add($value) {
+        $this->items[$this->count++] = $value;
+    }
+}
+
+$coll = new MyCollection();
+$coll->add('value 1');
+$coll->add('value 2');
+$coll->add('value 3');
+
+foreach ($coll as $key => $val) {
+    echo "key/value: [$key -> $val]\n\n";
+}
+?>
+]]>
+   </programlisting>
+   &example.outputs;  
+   <screen role="php">
+<![CDATA[
+rewinding
+current: value 1
+valid: 1
+current: value 1
+key: 0
+key/value: [0 -> value 1]
+
+next: value 2
+current: value 2
+valid: 1
+current: value 2
+key: 1
+key/value: [1 -> value 2]
+
+next: value 3
+current: value 3
+valid: 1
+current: value 3
+key: 2
+key/value: [2 -> value 3]
+
+next:
+current:
+valid:
+]]>
+   </screen>
+
+  </example>
+
+  <note>
+   <para>
+    请查看<link linkend="ref.spl">SPL Extension</link>了解更多Iterator相关信息。
+	</para>
+  </note> 
+
+ </sect1>
+ 
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"../../manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
