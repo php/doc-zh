@@ -1,0 +1,1453 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision: 1.1 $ -->
+<!-- $Author: eniac2008 $ -->
+<!-- EN-Revision: 1.9 Maintainer: Altair Status: ready -->
+<chapter xml:id="language.namespaces" xmlns="http://docbook.org/ns/docbook"
+ version="1.1">
+ <title>命名空间</title>
+
+ <sect1 xml:id="language.namespaces.rationale">
+  <title>命名空间概述</title>
+  <simpara>
+   什么是命名空间？从广义上来说，命名空间是一种封装事物的方法。在很多地方都可以见到这种抽象概念。例如，在操作系统中目录用来将相关文件分组，对于目录中的文件来说，它就扮演了命名空间的角色。具体举个例子，文件
+   <literal>foo.txt</literal> 可以同时在目录<literal>/home/greg</literal> 和
+   <literal>/home/other</literal> 中存在，但在同一个目录中不能存在两个
+   <literal>foo.txt</literal> 文件。另外，在目录 <literal>/home/greg</literal> 外访问
+   <literal>foo.txt</literal> 文件时，我们必须将目录名以及目录分隔符放在文件名之前得到
+   <literal>/home/greg/foo.txt</literal>。这个原理应用到程序设计领域就是命名空间的概念。
+  </simpara>
+  <simpara>
+   在PHP中，命名空间用来解决在编写类库或应用程序时创建可重用的代码如类或函数时碰到的两类问题：
+   In the PHP world, namespaces are designed to solve two problems that authors
+   of libraries and applications encounter when creating re-usable code elements
+   such as classes or functions:
+  </simpara>
+  <para>
+   <orderedlist>
+    <listitem>
+     <simpara>
+      用户编写的代码与PHP内部的类/函数/常量或第三方类/函数/常量之间的名字冲突。
+     </simpara>
+    </listitem>
+    <listitem>
+     <simpara>
+      为很长的标识符名称(通常是为了缓解第一类问题而定义的)创建一个别名（或简短）的名称，提高源代码的可读性。
+     </simpara>
+    </listitem>
+   </orderedlist>
+  </para>
+  <simpara>
+   PHP 命名空间提供了一种将相关的类、函数和常量组合到一起的途径。下面是一个说明 PHP
+   命名空间语法的示例：
+  </simpara>
+  <example>
+   <title>命名空间语法示例</title>
+   <programlisting role="php">
+   <![CDATA[
+<?php
+namespace my\name; // 参考 "定义命名空间" 小节
+
+class MyClass {}
+function myfunction() {}
+const MYCONST = 1;
+
+$a = new MyClass;
+$c = new \my\name\MyClass; // 参考 "全局空间" 小节
+
+$a = strlen('hi'); // 参考 "使用命名空间：后备全局函数/常量" 小节
+
+$d = namespace\MYCONST; // 参考 "namespace操作符和__NAMESPACE__常量” 小节
+
+$d = __NAMESPACE__ . '\MYCONST';
+echo constant($d); // 参考 "命名空间和动态语言特征" 小节
+?>
+    ]]>
+   </programlisting>
+  </example>
+  <simpara>
+   PHP 在 5.3.0 以后的版本开始支持命名空间。
+  </simpara>
+ </sect1>
+
+ <sect1 xml:id="language.namespaces.definition">
+  <title>定义命名空间</title>
+  <para>
+   虽然任意合法的PHP代码都可以包含在命名空间中，但只有三种类型的代码受命名空间的影响，它们是：类，函数和常量。
+  </para>
+  <para>
+   命名空间通过关键字<literal>namespace</literal>
+   来声明。如果一个文件中包含命名空间，它必须在其它所有代码之前声明命名空间。
+   <example>
+    <title>声明单个命名空间</title>
+    <programlisting role="php">
+     <![CDATA[
+<?php
+namespace MyProject;
+
+const CONNECT_OK = 1;
+class Connection { /* ... */ }
+function connect() { /* ... */  }
+
+?>
+]]>
+    </programlisting>
+   </example>
+   在声明命名空间之前唯一合法的代码是用于定义源文件编码方式的 <literal>declare</literal>
+   语句。另外，所有非 PHP
+   代码包括空白符都不能出现在命名空间的声明之前：
+   <example>
+    <title>声明单个命名空间</title>
+    <programlisting role="php">
+     <![CDATA[
+<html>
+<?php
+namespace MyProject; // 致命错误 -　命名空间必须是程序脚本的第一条语句
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   另外，与PHP其它的语言特征不同，同一个命名空间可以定义在多个文件中，即允许将同一个命名空间的内容分割存放在不同的文件中。
+  </para>
+ </sect1>
+ <sect1 xml:id="language.namespaces.nested">
+  <title>定义子命名空间</title>
+  <para>
+   与目录和文件的关系很象，PHP
+   命名空间也允许指定层次化的命名空间的名称。因此，命名空间的名字可以使用分层次的方式定义：
+   <example>
+    <title>声明分层次的单个命名空间</title>
+    <programlisting role="php">
+     <![CDATA[
+<?php
+namespace MyProject\Sub\Level;
+
+const CONNECT_OK = 1;
+class Connection { /* ... */ }
+function connect() { /* ... */  }
+
+?>
+]]>
+    </programlisting>
+   </example>
+   上面的例子创建了常量<literal>MyProject\Sub\Level\CONNECT_OK</literal>，类
+   <literal>MyProject\Sub\Level\Connection</literal>和函数
+   <literal>MyProject\Sub\Level\Connection</literal>。
+  </para>
+ </sect1>
+ <sect1 xml:id="language.namespaces.definitionmultiple">
+  <title>在同一个文件中定义多个命名空间</title>
+  <para>
+   也可以在同一个文件中定义多个命名空间。在同一个文件中定义多个命名空间有两种语法形式。
+  </para>
+  <para>
+   <example>
+    <title>定义多个命名空间，简单组合语法</title>
+    <programlisting role="php">
+     <![CDATA[
+<?php
+namespace MyProject;
+
+const CONNECT_OK = 1;
+class Connection { /* ... */ }
+function connect() { /* ... */  }
+
+namespace AnotherProject;
+
+const CONNECT_OK = 1;
+class Connection { /* ... */ }
+function connect() { /* ... */  }
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+  不建议使用这种语法在单个文件中定义多个命名空间。建议使用下面的大括号形式的语法。
+  </para>
+  <para>
+   <example>
+    <title>定义多个命名空间，大括号语法</title>
+    <programlisting role="php">
+     <![CDATA[
+<?php
+namespace MyProject {
+
+const CONNECT_OK = 1;
+class Connection { /* ... */ }
+function connect() { /* ... */  }
+}
+
+namespace AnotherProject {
+
+const CONNECT_OK = 1;
+class Connection { /* ... */ }
+function connect() { /* ... */  }
+}
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   在实际的编程实践中，非常不提倡在同一个文件中定义多个命名空间。这种方式的主要用于将多个 PHP
+   脚本合并在同一个文件中。
+  </para>
+  <para>
+   将全局的非命名空间中的代码与命名空间中的代码组合在一起，只能使用大括号形式的语法。全局代码必须用一个不带名称的 namespace 
+   语句加上大括号括起来，例如：
+   <example>
+    <title>定义多个命名空间和不包含在命名空间中的代码</title>
+    <programlisting role="php">
+     <![CDATA[
+<?php
+namespace MyProject {
+
+const CONNECT_OK = 1;
+class Connection { /* ... */ }
+function connect() { /* ... */  }
+}
+
+namespace { // global code
+session_start();
+$a = MyProject\connect();
+echo MyProject\Connection::start();
+}
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   除了开始的declare语句外，命名空间的括号外不得有任何PHP代码。
+   <example>
+    <title>定义多个命名空间和不包含在命名空间中的代码</title>
+    <programlisting role="php">
+     <![CDATA[
+<?php
+declare(encoding='UTF-8');
+namespace MyProject {
+
+const CONNECT_OK = 1;
+class Connection { /* ... */ }
+function connect() { /* ... */  }
+}
+
+namespace { // 全局代码
+session_start();
+$a = MyProject\connect();
+echo MyProject\Connection::start();
+}
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+ </sect1>
+ <sect1 xml:id="language.namespaces.basics">
+  <title>使用命名空间：基础</title>
+  <para>
+   在讨论如何使用命名空间之前，必须了解 PHP
+   是如何知道要使用哪一个命名空间中的元素的。可以将 PHP 
+   命名空间与文件系统作一个简单的类比。在文件系统中访问一个文件有三种方式：
+   <orderedlist>
+    <listitem>
+     <simpara>
+     相对文件名形式如<literal>foo.txt</literal>。它会被解析为
+     <literal>currentdirectory/foo.txt</literal>，其中 currentdirectory
+     表示当前目录。因此如果当前目录是
+     <literal>/home/foo</literal>，则该文件名被解析为<literal>/home/foo/foo.txt</literal>。
+     </simpara>
+    </listitem>
+    <listitem>
+     <simpara>
+      相对路径名形式如<literal>subdirectory/foo.txt</literal>。它会被解析为
+      <literal>currentdirectory/subdirectory/foo.txt</literal>。
+     </simpara>
+    </listitem>
+    <listitem>
+     <simpara>
+     绝对路径名形式如<literal>/main/foo.txt</literal>。它会被解析为<literal>/main/foo.txt</literal>。
+     </simpara>
+    </listitem>
+   </orderedlist>
+   PHP 命名空间中的元素使用同样的原理。例如，类名可以通过三种方式引用：
+   <orderedlist>
+    <listitem>
+     <simpara>
+     非限定名称，或不包含前缀的类名称，例如
+     <literal>$a=new foo();</literal> 或
+     <literal>foo::staticmethod();</literal>。如果当前命名空间是
+     <literal>currentnamespace</literal>，foo 将被解析为
+     <literal>currentnamespace\foo</literal>。如果使用 foo
+     的代码是全局的，不包含在任何命名空间中的代码，则 foo 
+     会被解析为<literal>foo</literal>。
+     </simpara>
+     <simpara>
+     警告：如果命名空间中的函数或常量未定义，则该非限定的函数名称或常量名称会被解析为全局函数名称或常量名称。详情参见
+     <link linkend="language.namespaces.fallback">使用命名空间：后备全局函数名称/常量名称</link>。
+     </simpara>
+    </listitem>
+    <listitem>
+     <simpara>
+     限定名称,或包含前缀的名称，例如
+     <literal>$a = new subnamespace\foo();</literal> 或
+     <literal>subnamespace\foo::staticmethod();</literal>。如果当前的命名空间是
+     <literal>currentnamespace</literal>，则 foo 会被解析为
+     <literal>currentnamespace\subnamespace\foo</literal>。如果使用
+     foo 的代码是全局的，不包含在任何命名空间中的代码，foo
+     会被解析为<literal>subnamespace\foo</literal>。
+     </simpara>
+    </listitem>
+    <listitem>
+     <simpara>
+     完全限定名称，或包含了全局前缀操作符的名称，例如，
+     <literal>$a = new \currentnamespace\foo();</literal> 或
+     <literal>\currentnamespace\foo::staticmethod();</literal>。在这种情况下，foo 
+     总是被解析为代码中的文字名(literal name)<literal>currentnamespace\foo</literal>。
+     </simpara>
+    </listitem>
+   </orderedlist>
+  </para>
+  <para>
+   下面是一个使用这三种方式的实例：
+   <informalexample>
+    <simpara>file1.php</simpara>
+    <programlisting role="php">
+     <![CDATA[
+<?php
+namespace Foo\Bar\subnamespace;
+
+const FOO = 1;
+function foo() {}
+class foo
+{
+    static function staticmethod() {}
+}
+?>
+     ]]>
+    </programlisting>
+    <simpara>file2.php</simpara>
+    <programlisting role="php">
+     <![CDATA[
+<?php
+namespace Foo\Bar;
+include 'file1.php';
+
+const FOO = 2;
+function foo() {}
+class foo
+{
+    static function staticmethod() {}
+}
+
+/* 非限定名称 */
+foo(); // 解析为 Foo\Bar\foo resolves to function Foo\Bar\foo
+foo::staticmethod(); // 解析为类 Foo\Bar\foo的静态方法staticmethod。resolves to class Foo\Bar\foo, method staticmethod
+echo FOO; // resolves to constant Foo\Bar\FOO
+
+/* 限定名称 */
+subnamespace\foo(); // 解析为函数 Foo\Bar\subnamespace\foo
+subnamespace\foo::staticmethod(); // 解析为类 Foo\Bar\subnamespace\foo,
+                                  // 以及类的方法 staticmethod
+echo subnamespace\FOO; // 解析为常量 Foo\Bar\subnamespace\FOO
+                                  
+/* 完全限定名称 */
+\Foo\Bar\foo(); // 解析为函数 Foo\Bar\foo
+\Foo\Bar\foo::staticmethod(); // 解析为类 Foo\Bar\foo, 以及类的方法 staticmethod
+echo \Foo\Bar\FOO; // 解析为常量 Foo\Bar\FOO
+?>
+     ]]>
+    </programlisting>
+   </informalexample>
+  </para>
+  <para>
+   注意访问任意全局类、函数或常量，都可以使用完全限定名称，例如
+   <function>\strlen</function> 或 <classname>\Exception</classname> 或
+   <literal>\INI_ALL</literal>。
+
+   <example>
+    <title>在命名空间内部访问全局类、函数和常量</title>
+    <programlisting role="php">
+     <![CDATA[
+<?php
+namespace Foo;
+
+function strlen() {}
+const INI_ALL = 3;
+class Exception {}
+
+$a = \strlen('hi'); // 调用全局函数strlen
+$b = \INI_ALL; // 访问全局常量 INI_ALL
+$c = new \Exception('error'); // 实例化全局类 Exception
+?>
+     ]]>
+    </programlisting>
+   </example>
+  </para>
+ </sect1>
+ <sect1 xml:id="language.namespaces.dynamic">
+  <title>命名空间和动态语言特征</title>
+  <para>
+   PHP 命名空间的实现受到其语言自身的动态特征的影响。因此，如果要将下面的代码转换到命名空间中：
+   <example>
+    <title>动态访问元素</title>
+    <simpara>example1.php:</simpara>
+    <programlisting role="php">
+     <![CDATA[
+<?php
+class classname
+{
+    function __construct()
+    {
+        echo __METHOD__,"\n";
+    }
+}
+function funcname()
+{
+    echo __FUNCTION__,"\n";
+}
+const constname = "global";
+
+$a = 'classname';
+$obj = new $a; // prints classname::__construct
+$b = 'funcname';
+$b(); // prints funcname
+echo constant('constname'), "\n"; // prints global
+?>
+    ]]>
+    </programlisting>
+   </example>
+   必须使用完全限定名称（包括命名空间前缀的类名称）。注意因为在动态的类名称、函数名称或常量名称中，限定名称和完全限定名称没有区别，因此其前导的反斜杠是不必要的。
+   <example>
+    <title>动态访问命名空间的元素</title>
+    <programlisting role="php">
+     <![CDATA[
+<?php
+namespace namespacename;
+class classname
+{
+    function __construct()
+    {
+        echo __METHOD__,"\n";
+    }
+}
+function funcname()
+{
+    echo __FUNCTION__,"\n";
+}
+const constname = "namespaced";
+
+include 'example1.php';
+
+$a = 'classname';
+$obj = new $a; // prints classname::__construct
+$b = 'funcname';
+$b(); // prints funcname
+echo constant('constname'), "\n"; // prints global
+
+/* note that if using double quotes, "\\namespacename\\classname" must be used */
+$a = '\namespacename\classname';
+$obj = new $a; // prints namespacename\classname::__construct
+$a = 'namespacename\classname';
+$obj = new $a; // also prints namespacename\classname::__construct
+$b = 'namespacename\funcname';
+$b(); // prints namespacename\funcname
+$b = '\namespacename\funcname';
+$b(); // also prints namespacename\funcname
+echo constant('\namespacename\constname'), "\n"; // prints namespaced
+echo constant('namespacename\constname'), "\n"; // also prints namespaced
+?>
+    ]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   请一定别忘了阅读 <link linkend="language.namespaces.faq.quote">对字符串中的命名空间名称转义的注解</link>.
+  </para>
+ </sect1>
+ <sect1 xml:id="language.namespaces.nsconstants">
+  <title>namespace关键字和__NAMESPACE__常量</title>
+  <para>
+   PHP支持两种抽象的访问当前命名空间内部元素的方法，<constant>__NAMESPACE__</constant>
+   魔术常量和<literal>namespace</literal>关键字。
+  </para>
+  <para>
+   常量<constant>__	NAMESPACE__</constant>的值是包含当前命名空间名称的字符串。在全局的，不包括在任何命名空间中的代码，它包含一个空的字符串。
+   <example>
+    <title>__NAMESPACE__ 示例, 在命名空间中的代码</title>
+    <programlisting role="php">
+     <![CDATA[
+<?php
+namespace MyProject;
+
+echo '"', __NAMESPACE__, '"'; // 输出 "MyProject"
+?>
+]]>
+    </programlisting>
+   </example>
+   <example>
+    <title>__NAMESPACE__ 示例，全局代码</title>
+    <programlisting role="php">
+     <![CDATA[
+<?php
+
+echo '"', __NAMESPACE__, '"'; // 输出 ""
+?>
+]]>
+    </programlisting>
+   </example>
+   常量 <constant>__NAMESPACE__</constant> 在动态创建名称时很有用，例如：
+   <example>
+    <title>使用__NAMESPACE__动态创建名称</title>
+    <programlisting role="php">
+     <![CDATA[
+<?php
+namespace MyProject;
+
+function get($classname)
+{
+    $a = __NAMESPACE__ . '\\' . $classname;
+    return new $a;
+}
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   关键字 <literal>namespace</literal> 可用来显式访问当前命名空间或子命名空间中的元素。它等价于类中的
+   <literal>self</literal> 操作符。
+   <example>
+    <title>namespace操作符，命名空间中的代码</title>
+    <programlisting role="php">
+     <![CDATA[
+<?php
+namespace MyProject;
+
+use blah\blah as mine; // see "Using namespaces: importing/aliasing"
+
+blah\mine(); // calls function blah\blah\mine()
+namespace\blah\mine(); // calls function MyProject\blah\mine()
+
+namespace\func(); // calls function MyProject\func()
+namespace\sub\func(); // calls function MyProject\sub\func()
+namespace\cname::method(); // calls static method "method" of class MyProject\cname
+$a = new namespace\sub\cname(); // instantiates object of class MyProject\sub\cname
+$b = namespace\CONSTANT; // assigns value of constant MyProject\CONSTANT to $b
+?>
+]]>
+    </programlisting>
+   </example>
+   <example>
+    <title>namespace操作符, 全局代码</title>
+    <programlisting role="php">
+     <![CDATA[
+<?php
+
+namespace\func(); // calls function func()
+namespace\sub\func(); // calls function sub\func()
+namespace\cname::method(); // calls static method "method" of class cname
+$a = new namespace\sub\cname(); // instantiates object of class sub\cname
+$b = namespace\CONSTANT; // assigns value of constant CONSTANT to $b
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+ </sect1>
+ <sect1 xml:id="language.namespaces.importing">
+  <title>使用命名空间：别名/导入</title>
+  <para>
+   允许通过别名引用或导入外部的完全限定名称，是命名空间的一个重要特征。这有点类似于在类
+   unix 文件系统中可以创建对其它的文件或目录的符号连接。
+  </para>
+  <para>
+   PHP 命名空间支持
+   有两种使用别名或导入方式：为类名称使用别名，或为命名空间名称使用别名。注意PHP不支持导入函数或常量。
+  </para>
+  <para>
+   在PHP中，别名是通过操作符 <literal>use</literal> 来实现的.  下面是一个使用所有可能的三种导入方式的例子：
+   <example>
+    <title>使用use操作符导入/使用别名</title>
+    <programlisting role="php">
+     <![CDATA[
+<?php
+namespace foo;
+use My\Full\Classname as Another;
+
+// 下面的例子与 use My\Full\NSname as NSname 相同
+use My\Full\NSname;
+
+// 导入一个全局类
+use \ArrayObject;
+
+$obj = new namespace\Another; // 实例化 foo\Another 对象
+$obj = new Another; // 实例化 My\Full\Classname　对象
+NSname\subns\func(); // 调用函数 My\Full\NSname\subns\func
+$a = new ArrayObject(array(1)); // 实例化 ArrayObject 对象
+// 如果不使用 "use \ArrayObject" ，则实例化一个 foo\ArrayObject 对象
+?>
+]]>
+    </programlisting>
+   </example>
+   注意对命名空间中的名称（包含命名空间分隔符的完全限定名称如 
+   <literal>Foo\Bar</literal>以及相对的不包含命名空间分隔符的全局名称如 
+   <literal>FooBar</literal>）来说，前导的反斜杠是不必要的也不允许有反斜杠，因为导入的名称必须是完全限定的，不会根据当前的命名空间作相对解析。
+   Note that for namespaced names (fully qualified namespace names containing
+   namespace separator, such as <literal>Foo\Bar</literal> as opposed to global names that
+   do not, such as <literal>FooBar</literal>), the leading backslash is unnecessary and not
+   allowed, as import names
+   must be fully qualified, and are not processed relative to the current namespace.
+  </para>
+  <para>
+   为了简化操作，PHP还支持在一行中使用多个use语句
+   <example>
+    <title>通过use操作符导入/使用别名，一行中包含多个use语句</title>
+    <programlisting role="php">
+     <![CDATA[
+<?php
+use My\Full\Classname as Another, My\Full\NSname;
+
+$obj = new Another; // 实例化 My\Full\Classname 对象
+NSname\subns\func(); // 调用函数 My\Full\NSname\subns\func
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   导入操作是在编译执行的，但动态的类名称、函数名称或常量名称则不是。
+   Importing is performed at compile-time, and so does not affect dynamic class, function
+   or constant names.
+   <example>
+    <title>导入和动态名称</title>
+    <programlisting role="php">
+     <![CDATA[
+<?php
+use My\Full\Classname as Another, My\Full\NSname;
+
+$obj = new Another; // 实例化一个 My\Full\Classname 对象
+$a = 'Another';
+$obj = new $a;      // 实际化一个 Another 对象
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   另外，导入操作只影响非限定名称和限定名称。完全限定名称由于是确定的，故不受导入的影响。
+   <example>
+    <title>导入和完全限定名称</title>
+    <programlisting role="php">
+     <![CDATA[
+<?php
+use My\Full\Classname as Another, My\Full\NSname;
+
+$obj = new Another; // instantiates object of class My\Full\Classname
+$obj = new \Another; // instantiates object of class Another
+$obj = new Another\thing; // instantiates object of class My\Full\Classname\thing
+$obj = new \Another\thing; // instantiates object of class Another\thing
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+ </sect1>
+ <sect1 xml:id="language.namespaces.global">
+  <title>全局空间</title>
+  <para>
+   如果没有定义任何命名空间，所有的类与函数的定义都是在全局空间，与 
+   PHP 引入命名空间概念前一样。在名称前加上前缀 <literal>\</literal>
+   表示该名称是全局空间中的名称，即使该名称位于其它的命名空间中时也是如此。
+   <example>
+    <title>使用全局空间说明</title>
+    <programlisting role="php">
+     <![CDATA[
+<?php
+namespace A\B\C;
+
+/* 这个函数是 A\B\C\fopen */
+function fopen() { 
+     /* ... */
+     $f = \fopen(...); // 调用全局的fopen函数
+     return $f;
+} 
+?>
+    ]]>
+    </programlisting>
+   </example>
+  </para>
+ </sect1>
+ <sect1 xml:id="language.namespaces.fallback">
+  <title>使用命名空间：后备全局函数/常量</title>
+  <para>
+   在一个命名空间中，当 PHP 
+   遇到一个非限定的类、函数或常量名称时，它使用不同的优先策略来解析该名称。类名称总是解析到当前命名空间中的名称。因此在访问系统内部或不包含在命名空间中的类名称时，必须使用完全限定名称，例如：
+   <example>
+    <title>在命名空间中访问全局类</title>
+    <programlisting role="php">
+     <![CDATA[
+<?php
+namespace A\B\C;
+class Exception extends \Exception {}
+
+$a = new Exception('hi'); // $a 是类 A\B\C\Exception 的一个对象
+$b = new \Exception('hi'); // $b 是类 Exception 的一个对象
+
+$c = new ArrayObject; // 致命错误, 找不到 A\B\C\ArrayObject 类
+?>
+    ]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   对于函数和常量来说，如果当前命名空间中不存在该函数或常量，PHP 
+   会退而使用全局空间中的函数或常量。
+   For functions and constants, PHP will fall back to global functions or constants
+   if a namespaced function or constant does not exist.
+   <example>
+    <title>命名空间中后备的全局函数/常量</title>
+    <programlisting role="php">
+     <![CDATA[
+<?php
+namespace A\B\C;
+
+const E_ERROR = 45;
+function strlen($str)
+{
+    return \strlen($str) - 1;
+}
+
+echo E_ERROR, "\n"; // 输出 "45"
+echo INI_ALL, "\n"; // 输出 "7" - 使用全局常量 INI_ALL
+
+echo strlen('hi'), "\n"; // 输出 "1"
+if (is_array('hi')) { // 输出 "is not array"
+    echo "is array\n";
+} else {
+    echo "is not array\n";
+}
+?>
+    ]]>
+    </programlisting>
+   </example>
+  </para>
+ </sect1>
+
+ <sect1 xml:id="language.namespaces.rules">
+  <title>名称解析规则</title>
+  <para>
+   在说明名称解析规则之前，我们先看一些重要的定义：
+   <variablelist>
+    <title>命名空间名称定义</title>
+    <varlistentry>
+     <term>非限定名称Unqualified name</term>
+     <listitem>
+      <para>
+       名称中不包含命名空间分隔符的标识符，例如 <literal>Foo</literal>
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>限定名称Qualified name</term>
+     <listitem>
+      <para>
+       名称中含有命名空间分隔符的标识符，例如 <literal>Foo\Bar</literal>
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>完全限定名称Fully qualified name</term>
+     <listitem>
+      <para>
+       名称中包含命名空间分隔符，并以命名空间分隔符开始的标识符，例如 <literal>\Foo\Bar</literal>。
+       <literal>namespace\Foo</literal> 也是一个完全限定名称。
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+  <para>
+   名称解析遵循下列规则：
+   <orderedlist>
+    <listitem>
+     <simpara>
+      对完全限定名称的函数，类和常量的调用在编译时解析。例如 
+	  <literal>new \A\B</literal> 解析为类 <literal>A\B</literal>。
+     </simpara>
+    </listitem>
+    <listitem>
+     <simpara>
+	 所有的非限定名称和限定名称（非完全限定名称）根据当前的导入规则在编译时进行转换。例如，如果命名空间
+	 <literal>A\B\C</literal> 被导入为 <literal>C</literal>，那么对 <literal>C\D\e()</literal> 
+	 的调用就会被转换为 <literal>A\B\C\D\e()</literal>。
+     </simpara>
+    </listitem>
+    <listitem>
+     <simpara>
+	 在命名空间内部，所有的没有根据导入规则转换的限定名称均会在其前面加上当前的命名空间名称。例如，在命名空间 
+	 <literal>A\B</literal> 内部调用 <literal>C\D\e()</literal>，则 <literal>C\D\e()</literal> 
+	 会被转换为 <literal>A\B\C\D\e()</literal> 。
+     </simpara>
+    </listitem>
+    <listitem>
+     <simpara>
+	 非限定类名根据当前的导入规则在编译时转换（用全名代替短的导入名称）。例如，如果命名空间
+	 <literal>A\B\C</literal> 导入为C，则 <literal>new C()</literal>
+	 被转换为 <literal>new A\B\C() </literal>。
+     </simpara>
+    </listitem>
+    <listitem>
+     <simpara>
+      在命名空间内部（例如A\B），对非限定名称的函数调用是在运行时解析的。例如对函数
+	  <literal>foo()</literal> 的调用是这样解析的：
+     </simpara>
+      <orderedlist>
+       <listitem>
+        <simpara>
+         在当前命名空间中查找名为 <literal>A\B\foo()</literal> 的函数
+        </simpara>
+       </listitem>
+       <listitem>
+        <simpara>
+		尝试查找并调用 <emphasis>全局(global)</emphasis> 空间中的函数 <literal>foo()</literal>。
+        </simpara>
+       </listitem>
+      </orderedlist>
+    </listitem>
+    <listitem>
+     <simpara>
+      在命名空间（例如<literal>A\B</literal>）内部对非限定名称或限定名称类（非完全限定名称）的调用是在运行时解析的。下面是调用
+	  <literal>new C()</literal> 及 <literal>new D\E()</literal> 的解析过程：
+      <literal> new C()</literal>的解析:
+     </simpara>
+     <orderedlist>
+      <listitem>
+       <simpara>
+        在当前命名空间中查找<literal>A\B\C</literal>类。
+       </simpara>
+      </listitem>
+      <listitem>
+       <simpara>
+        尝试自动装载类<literal>A\B\C</literal>。
+       </simpara>
+      </listitem>
+     </orderedlist>
+     <simpara>
+      <literal> new D\E()</literal>的解析:
+     </simpara>
+     <orderedlist>
+      <listitem>
+       <simpara>
+        在类名称前面加上当前命名空间名称变成：<literal>A\B\D\E</literal>，然后查找该类。
+       </simpara>
+      </listitem>
+      <listitem>
+       <simpara>
+        尝试自动装载类 <literal>A\B\D\E</literal>。
+       </simpara>
+      </listitem>
+     </orderedlist>
+     <simpara>
+      为了引用全局命名空间中的全局类，必须使用完全限定名称 <literal>new \C()</literal>。
+     </simpara>
+    </listitem>
+   </orderedlist>
+  </para>
+  <example>
+   <title>名称解析示例</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+namespace A;
+use B\D, C\E as F;
+
+// 函数调用
+
+foo();      // 首先尝试调用定义在命名空间"A"中的函数foo()
+            // 再尝试调用全局函数 "foo"
+
+\foo();     // 调用全局空间函数 "foo" 
+
+my\foo();   // 调用定义在命名空间"A\my"中函数 "foo" 
+
+F();        // 首先尝试调用定义在命名空间"A"中的函数 "F" 
+            // 再尝试调用全局函数 "F"
+
+// 类引用
+
+new B();    // 创建命名空间 "A" 中定义的类 "B" 的一个对象
+            // 如果未找到，则尝试自动装载类 "A\B"
+
+new D();    // 使用导入规则，创建命名空间 "B" 中定义的类 "D" 的一个对象
+            // 如果未找到，则尝试自动装载类 "B\D"
+
+new F();    // 使用导入规则，创建命名空间 "C" 中定义的类 "E" 的一个对象
+            // 如果未找到，则尝试自动装载类 "C\E"
+
+new \B();   // 创建定义在全局空间中的类 "B" 的一个对象
+            // 如果未发现，则尝试自动装载类 "B"
+
+new \D();   // 创建定义在全局空间中的类 "D" 的一个对象
+            // 如果未发现，则尝试自动装载类 "D"
+
+new \F();   // 创建定义在全局空间中的类 "F" 的一个对象
+            // 如果未发现，则尝试自动装载类 "F"
+
+// 调用另一个命名空间中的静态方法或命名空间函数
+
+B\foo();    // 调用命名空间 "A\B" 中函数 "foo"
+
+B::foo();   // 调用命名空间 "A" 中定义的类 "B" 的 "foo" 方法
+            // 如果未找到类 "A\B" ，则尝试自动装载类 "A\B"
+
+D::foo();   // 使用导入规则，调用命名空间 "B" 中定义的类 "D" 的 "foo" 方法
+            // 如果类 "B\D" 未找到，则尝试自动装载类 "B\D"
+
+\B\foo();   // 调用命名空间 "B" 中的函数 "foo" 
+
+\B::foo();  // 调用全局空间中的类 "B" 的 "foo" 方法
+            // 如果类 "B" 未找到，则尝试自动装载类 "B"
+
+// 当前命名空间中的静态方法或函数
+
+A\B::foo();   // 调用命名空间 "A\A" 中定义的类 "B" 的 "foo" 方法
+              // 如果类 "A\A\B" 未找到，则尝试自动装载类 "A\A\B"
+
+\A\B::foo();  // 调用命名空间 "A\B" 中定义的类 "B" 的 "foo" 方法
+              // 如果类 "A\B" 未找到，则尝试自动装载类 "A\B"
+?>
+]]>
+   </programlisting>
+  </example>
+ </sect1>
+ <sect1 xml:id="language.namespaces.faq">
+  <title>FAQ: things you need to know about namespaces</title>
+  <para>
+   This FAQ is split into two sections: common questions, and some specifics of
+   implementation that are helpful to understand fully.
+  </para>
+  <para>
+   First, the common questions.
+   <orderedlist>
+    <listitem>
+     <simpara>
+      <link linkend="language.namespaces.faq.shouldicare">If I don't use namespaces, should
+      I care about any of this?</link>
+     </simpara>
+    </listitem>
+    <listitem>
+     <simpara>
+      <link linkend="language.namespaces.faq.globalclass">How do I use internal or global
+      classes in a namespace?</link>
+     </simpara>
+    </listitem>
+    <listitem>
+     <simpara>
+      <link linkend="language.namespaces.faq.innamespace">How do I use namespaces classes
+      functions, or constants in their own namespace?</link>
+     </simpara>
+    </listitem>
+    <listitem>
+     <simpara>
+      <link linkend="language.namespaces.faq.full">
+       How does a name like <literal>\my\name</literal> or <literal>\name</literal>
+       resolve?
+      </link>
+     </simpara>
+    </listitem>
+    <listitem>
+     <simpara>
+      <link linkend="language.namespaces.faq.qualified">How does a name like
+      <literal>my\name</literal> resolve?</link>
+     </simpara>
+    </listitem>
+    <listitem>
+     <simpara>
+      <link linkend="language.namespaces.faq.shortname1">How does an unqualified class name
+      like <literal>name</literal> resolve?</link>
+     </simpara>
+    </listitem>
+    <listitem>
+     <simpara>
+      <link linkend="language.namespaces.faq.shortname2">How does an unqualified function
+      name or unqualified constant name
+      like <literal>name</literal> resolve?</link>
+     </simpara>
+    </listitem>
+   </orderedlist>
+  </para>
+  <para>
+   There are a few implementation details of the namespace implementations
+   that are helpful to understand.
+   <orderedlist>
+    <listitem>
+     <simpara>
+      <link linkend="language.namespaces.faq.conflict">Import names cannot conflict with
+      classes defined in the same file.</link>
+     </simpara>
+    </listitem>
+    <listitem>
+     <simpara>
+      <link linkend="language.namespaces.faq.nested">Nested namespaces are not allowed.
+      </link>
+     </simpara>
+    </listitem>
+    <listitem>
+     <simpara>
+      <link linkend="language.namespaces.faq.nofuncconstantuse">Neither functions nor
+      constants can be imported via the <literal>use</literal>
+      statement.</link>
+     </simpara>
+    </listitem>
+    <listitem>
+     <simpara>
+      <link linkend="language.namespaces.faq.quote">Dynamic namespace names (quoted
+      identifiers) should escape backslash.</link>
+     </simpara>
+    </listitem>
+    <listitem>
+     <simpara>
+      <link linkend="language.namespaces.faq.constants">Undefined Constants referenced
+      using any backslash die with fatal error</link>
+     </simpara>
+    </listitem>
+    <listitem>
+     <simpara>
+      <link linkend="language.namespaces.faq.builtinconst">Cannot override special
+      constants NULL, TRUE, FALSE, ZEND_THREAD_SAFE or ZEND_DEBUG_BUILD</link>
+     </simpara>
+    </listitem>
+   </orderedlist>
+  </para>
+  <sect2 xml:id="language.namespaces.faq.shouldicare">
+   <title>If I don't use namespaces, should I care about any of this?</title>
+   <para>
+    No.  Namespaces do not affect any existing code in any way, or any
+    as-yet-to-be-written code that does not contain namespaces.  You can
+    write this code if you wish:
+   </para>
+   <para>
+    <example>
+     <title>Accessing global classes outside a namespace</title>
+     <programlisting role="php">
+<![CDATA[
+<?php
+$a = new \stdClass;
+]]>
+     </programlisting>
+    </example>
+   </para>
+   <para>
+    This is functionally equivalent to:
+   </para>
+   <para>
+    <example>
+     <title>Accessing global classes outside a namespace</title>
+     <programlisting role="php">
+<![CDATA[
+<?php
+$a = new stdClass;
+]]>
+     </programlisting>
+    </example>
+   </para>
+  </sect2>
+  <sect2 xml:id="language.namespaces.faq.globalclass">
+   <title>How do I use internal or global classes in a namespace?</title>
+   <para>
+    <example>
+     <title>Accessing internal classes in namespaces</title>
+     <programlisting role="php">
+<![CDATA[
+<?php
+namespace foo;
+$a = new \stdClass;
+
+function test(\ArrayObject $typehintexample = null) {}
+
+$a = \DirectoryIterator::CURRENT_AS_FILEINFO;
+
+// extending an internal or global class
+class MyException extends \Exception {}
+?>
+]]>
+     </programlisting>
+    </example>
+   </para>
+  </sect2>
+  <sect2 xml:id="language.namespaces.faq.innamespace">
+   <title>
+    How do I use namespaces classes, functions, or constants in their own
+    namespace?
+   </title>
+   <para>
+    <example>
+     <title>Accessing internal classes, functions or constants in namespaces</title>
+     <programlisting role="php">
+<![CDATA[
+<?php
+namespace foo;
+
+class MyClass {}
+
+// using a class from the current namespace as a type hint
+function test(MyClass $typehintexample = null) {}
+// another way to use a class from the current namespace as a type hint
+function test(\foo\MyClass $typehintexample = null) {}
+
+// extending a class from the current namespace
+class Extended extends MyClass {}
+
+// accessing a global function
+$a = \globalfunc();
+
+// accessing a global constant
+$b = \INI_ALL;
+?>
+]]>
+     </programlisting>
+    </example>
+   </para>
+  </sect2>
+  <sect2 xml:id="language.namespaces.faq.full">
+   <title>
+     How does a name like <literal>\my\name</literal> or <literal>\name</literal>
+     resolve?
+   </title>
+   <para>
+    Names that begin with a <literal>\</literal> always resolve to what they
+    look like, so <literal>\my\name</literal> is in fact <literal>my\name</literal>,
+    and <literal>\Exception</literal> is <literal>Exception</literal>.
+    <example>
+     <title>Fully Qualified names</title>
+     <programlisting role="php">
+<![CDATA[
+<?php
+namespace foo;
+$a = new \my\name(); // instantiates "my\name" class
+echo \strlen('hi'); // calls function "strlen"
+$a = \INI_ALL; // $a is set to the value of constant "INI_ALL"
+?>
+]]>
+     </programlisting>
+    </example>
+   </para>
+  </sect2>
+  <sect2 xml:id="language.namespaces.faq.qualified">
+   <title>How does a name like <literal>my\name</literal> resolve?</title>
+   <para>
+    Names that contain a backslash but do not begin with a backslash like
+    <literal>my\name</literal> can be resolved in 2 different ways.
+   </para>
+   <para>
+    If there is
+    an import statement that aliases another name to <literal>my</literal>, then
+    the import alias is applied to the <literal>my</literal> in <literal>my\name</literal>.
+   </para>
+   <para>
+    Otherwise, the current namespace name is prepended to <literal>my\name</literal>.
+   </para>
+   <para>
+    <example>
+     <title>Qualified names</title>
+     <programlisting role="php">
+<![CDATA[
+<?php
+namespace foo;
+use blah\blah as foo;
+
+$a = new my\name(); // instantiates "foo\my\name" class
+foo\bar::name(); // calls static method "name" in class "blah\blah\bar"
+my\bar(); // calls function "foo\my\bar"
+$a = my\BAR; // sets $a to the value of constant "foo\my\BAR"
+?>
+]]>
+     </programlisting>
+    </example>
+   </para>
+  </sect2>
+  <sect2 xml:id="language.namespaces.faq.shortname1">
+   <title>How does an unqualified class name like <literal>name</literal> resolve?</title>
+   <para>
+    Class names that do not contain a backslash like
+    <literal>name</literal> can be resolved in 2 different ways.
+   </para>
+   <para>
+    If there is
+    an import statement that aliases another name to <literal>name</literal>, then
+    the import alias is applied.
+   </para>
+   <para>
+    Otherwise, the current namespace name is prepended to <literal>name</literal>.
+   </para>
+   <para>
+    <example>
+     <title>Unqualified class names</title>
+     <programlisting role="php">
+<![CDATA[
+<?php
+namespace foo;
+use blah\blah as foo;
+
+$a = new name(); // instantiates "foo\name" class
+foo::name(); // calls static method "name" in class "blah\blah"
+?>
+]]>
+     </programlisting>
+    </example>
+   </para>
+  </sect2>
+  <sect2 xml:id="language.namespaces.faq.shortname2">
+   <title>
+    How does an unqualified function name or unqualified constant name
+    like <literal>name</literal> resolve?
+   </title>
+   <para>
+    Function or constant names that do not contain a backslash like
+    <literal>name</literal> can be resolved in 2 different ways.
+   </para>
+   <para>
+    First, the current namespace name is prepended to <literal>name</literal>.
+   </para>
+   <para>
+    Finally, if the constant or function <literal>name</literal> does not exist
+    in the current namespace, a global constant or function <literal>name</literal>
+    is used if it exists.
+   </para>
+   <para>
+    <example>
+     <title>Unqualified function or constant names</title>
+     <programlisting role="php">
+<![CDATA[
+<?php
+namespace foo;
+use blah\blah as foo;
+
+const FOO = 1;
+
+function my() {}
+function foo() {}
+function sort(&$a)
+{
+    sort($a);
+    $a = array_flip($a);
+    return $a;
+}
+
+my(); // calls "foo\my"
+$a = strlen('hi'); // calls global function "strlen" because "foo\strlen" does not exist
+$arr = array(1,3,2);
+$b = sort($arr); // calls function "foo\sort"
+$c = foo(); // calls function "foo\foo" - import is not applied
+
+$a = FOO; // sets $a to value of constant "foo\FOO" - import is not applied
+$b = INI_ALL; // sets $b to value of global constant "INI_ALL"
+?>
+]]>
+     </programlisting>
+    </example>
+   </para>
+  </sect2>
+  <sect2 xml:id="language.namespaces.faq.conflict">
+   <title>Import names cannot conflict with classes defined in the same file.</title>
+   <para>
+    The following script combinations are legal:
+    <informalexample>
+     <simpara>file1.php</simpara>
+     <programlisting role="php">
+     <![CDATA[
+<?php
+namespace my\stuff;
+class MyClass {}
+?>
+     ]]>
+     </programlisting>
+     <simpara>another.php</simpara>
+     <programlisting role="php">
+     <![CDATA[
+<?php
+namespace another;
+class thing {}
+?>
+     ]]>
+     </programlisting>
+     <simpara>file2.php</simpara>
+     <programlisting role="php">
+     <![CDATA[
+<?php
+namespace my\stuff;
+include 'file1.php';
+include 'another.php';
+
+use another\thing as MyClass;
+$a = new MyClass; // instantiates class "thing" from namespace another
+?>
+     ]]>
+     </programlisting>
+    </informalexample>
+   </para>
+   <para>
+    There is no name conflict, even though the class <literal>MyClass</literal> exists
+    within the <literal>my\stuff</literal> namespace, because the MyClass definition is
+    in a separate file.  However, the next example causes a fatal error on name conflict
+    because MyClass is defined in the same file as the use statement.
+    <informalexample>
+     <programlisting role="php">
+     <![CDATA[
+<?php
+namespace my\stuff;
+use another\thing as MyClass;
+class MyClass {} // fatal error: MyClass conflicts with import statement
+$a = new MyClass;
+?>
+     ]]>
+     </programlisting>
+    </informalexample>
+   </para>
+  </sect2>
+  <sect2 xml:id="language.namespaces.faq.nested">
+   <title>Nested namespaces are not allowed.</title>
+   <para>
+    PHP does not allow nesting namespaces
+    <informalexample>
+     <programlisting role="php">
+     <![CDATA[
+<?php
+namespace my\stuff {
+    namespace nested {
+        class foo {}
+    }
+}
+?>
+     ]]>
+     </programlisting>
+    </informalexample>
+    However, it is easy to simulate nested namespaces like so:
+    <informalexample>
+     <programlisting role="php">
+     <![CDATA[
+<?php
+namespace my\stuff\nested {
+    class foo {}
+}
+?>
+     ]]>
+     </programlisting>
+    </informalexample>
+   </para>
+  </sect2>
+  <sect2 xml:id="language.namespaces.faq.nofuncconstantuse">
+   <title>Neither functions nor constants can be imported via the <literal>use</literal>
+      statement.</title>
+   <para>
+    The only elements that are affected by <literal>use</literal> statements are namespaces
+    and class names.  In order to shorten a long constant or function, import its containing
+    namespace
+    <informalexample>
+     <programlisting role="php">
+     <![CDATA[
+<?php
+namespace mine;
+use ultra\long\ns\name;
+
+$a = name\CONSTANT;
+name\func();
+?>
+     ]]>
+     </programlisting>
+    </informalexample>
+   </para>
+  </sect2>
+  <sect2 xml:id="language.namespaces.faq.quote">
+   <title>Dynamic namespace names (quoted identifiers) should escape backslash</title>
+   <para>
+    It is very important to realize that because the backslash is used as an escape character
+    within strings, it should always be doubled when used inside a string.  Otherwise
+    there is a risk of unintended consequences:
+    <example>
+     <title>Dangers of using namespaced names inside a double-quoted string</title>
+     <programlisting role="php">
+      <![CDATA[
+<?php
+$a = new "dangerous\name"; // \n is a newline inside double quoted strings!
+$obj = new $a;
+
+$a = new 'not\at\all\dangerous'; // no problems here.
+$obj = new $a;
+?>
+      ]]>
+     </programlisting>
+    </example>
+    Inside a single-quoted string, the backslash escape sequence is much safer to use, but it
+    is still recommended practice to escape backslashes in all strings as a best practice.
+   </para>
+  </sect2>
+  <sect2 xml:id="language.namespaces.faq.constants">
+   <title>Undefined Constants referenced using any backslash die with fatal error</title>
+   <para>
+    Any undefined constant that is unqualified like <literal>FOO</literal> will
+    produce a notice explaining that PHP assumed <literal>FOO</literal> was the value
+    of the constant.  Any constant, qualified or fully qualified, that contains a
+    backslash will produce a fatal error if not found.
+    <example>
+     <title>Undefined constants</title>
+     <programlisting role="php">
+      <![CDATA[
+<?php
+namespace bar;
+$a = FOO; // produces notice - undefined constants "FOO" assumed "FOO";
+$a = \FOO; // fatal error, undefined namespace constant FOO
+$a = Bar\FOO; // fatal error, undefined namespace constant bar\Bar\FOO
+$a = \Bar\FOO; // fatal error, undefined namespace constant Bar\FOO
+?>
+      ]]>
+     </programlisting>
+    </example>
+   </para>
+  </sect2>
+  <sect2 xml:id="language.namespaces.faq.builtinconst">
+   <title>Cannot override special constants NULL, TRUE, FALSE, ZEND_THREAD_SAFE or ZEND_DEBUG_BUILD</title>
+   <para>
+    Any attempt to define a namespaced constant that is a special, built-in constant
+    results in a fatal error
+    <example>
+     <title>Undefined constants</title>
+     <programlisting role="php">
+      <![CDATA[
+<?php
+namespace bar;
+const NULL = 0; // fatal error;
+const true = 'stupid'; // also fatal error;
+// etc.
+?>
+      ]]>
+     </programlisting>
+    </example>
+   </para>
+  </sect2>
+ </sect1>
+</chapter>
+
+<!-- Keep this comment at the end of the file
+ Local variables:
+ mode: sgml
+ sgml-omittag:t
+ sgml-shorttag:t
+ sgml-minimize-attributes:nil
+ sgml-always-quote-attributes:t
+ sgml-indent-step:1
+ sgml-indent-data:t
+ indent-tabs-mode:nil
+ sgml-parent-document:nil
+ sgml-default-dtd-file:"../../manual.ced"
+ sgml-exposed-tags:nil
+ sgml-local-catalogs:nil
+ sgml-local-ecat-files:nil
+ End:
+ vim600: syn=xml fen fdm=syntax fdl=2 si
+ vim: et tw=78 syn=sgml
+ vi: ts=1 sw=1
+-->
