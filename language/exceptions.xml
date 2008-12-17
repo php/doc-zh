@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.6 $ -->
-<!-- $Author: bjori $ -->
-<!-- EN-Revision: 1.3 Maintainer: lm92 Status: ready -->
+<!-- $Revision: 1.7 $ -->
+<!-- $Author: eniac2008 $ -->
+<!-- EN-Revision: 1.8 Maintainer: Altair Status: ready -->
+<!-- CREDITS: lm92 -->
  <chapter xml:id="language.exceptions" xmlns="http://docbook.org/ns/docbook">
   <title>异常处理</title>
 
@@ -24,27 +25,89 @@
    将会产生一个严重的错误，并且输出
    <literal>Uncaught Exception ...</literal> （未捕获异常）的提示信息。
   </para>
+  <note>
+   <para>
+    PHP 内部函数主要使用<link 
+    linkend="ini.error-reporting">错误报告</link>, 只有现代<link 
+    linkend="language.oop5">面向对象</link>的扩展才使用异常。但错误可以很容易的通过<link 
+    linkend="class.errorexception">ErrorException</link>转换为异常。
+   </para>
+  </note>
+  <tip>
+   <para>
+    <link linkend="intro.spl">PHP标准库 (SPL)</link> 提供了许多内建的异常类。
+   </para>
+  </tip>  
    <example>
     <title>抛出一个异常</title>
     <programlisting role="php">
 <![CDATA[
+<![CDATA[
 <?php
+function inverse($x) {
+    if (!$x) {
+        throw new Exception('Division by zero.');
+    }
+    else return 1/$x;
+}
+
 try {
-    $error = 'Always throw this error';
-    throw new Exception($error);
-
-    // 从这里开始，tra 代码块内的代码将不会被执行
-    echo 'Never executed';
-
+    echo inverse(5) . "\n";
+    echo inverse(0) . "\n";
 } catch (Exception $e) {
     echo 'Caught exception: ',  $e->getMessage(), "\n";
 }
 
-// 继续执行
+// Continue execution
 echo 'Hello World';
 ?>
 ]]>
     </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+0.2
+Caught exception: Division by zero.
+Hello World
+]]>
+    </screen>
+   </example>
+
+   <example>
+    <title>嵌套的异常</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+
+class MyException extends Exception { }
+
+class Test {
+    public function testing() {
+        try {
+            try {
+                throw new MyException('foo!');
+            } catch (MyException $e) {
+                /* rethrow it */
+                throw $e;
+            }
+        } catch (Exception $e) {
+            var_dump($e->getMessage());
+        }
+    }
+}
+
+$foo = new Test;
+$foo->testing();
+
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+string(4) "foo!"
+]]>
+    </screen>
    </example>
 
   <sect1 xml:id="language.exceptions.extending">
