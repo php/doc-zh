@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.23 $ -->
+<!-- $Revision: 1.24 $ -->
 <!-- $Author: eniac2008 $ -->
-<!-- EN-Revision: 1.90 Maintainer: verdana Status: ready -->
-<!-- CREDITS: dallas, Gregory -->
+<!-- EN-Revision: 1.107 Maintainer: Altair Status: ready -->
+<!-- CREDITS: dallas, Gregory, verdana -->
  <chapter xml:id="language.variables" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
   <title>变量</title>
 
@@ -23,6 +23,14 @@
      在此所说的字母是 a-z，A-Z，以及 ASCII 字符从 127 到 255（0x7f-0xff）。
     </simpara>
    </note>
+   <note>
+    <simpara>
+     <literal>$this</literal> 是一个特殊的变量，它不能被赋值。
+    </simpara>
+   </note>
+   
+   &tip.userlandnaming;
+   
    <para>
     有关变量的函数信息见<link linkend="ref.var">变量函数</link>。
    </para>
@@ -45,10 +53,10 @@ $i站点is = 'mansikka';  // 合法变量名；可以用中文
    </para>
 
    <para>
-    PHP 3 中，变量总是传值赋值。那也就是说，当将一个表达式的值赋予一个变量时，整个原始表达式的值被赋值到目标变量。这意味着，例如，当一个变量的值赋予另外一个变量时，改变其中一个变量的值，将不会影响到另外一个变量。有关这种类型的赋值操作，请参阅<link linkend="language.expressions">表达式</link>一章。
+    变量默认总是传值赋值。那也就是说，当将一个表达式的值赋予一个变量时，整个原始表达式的值被赋值到目标变量。这意味着，例如，当一个变量的值赋予另外一个变量时，改变其中一个变量的值，将不会影响到另外一个变量。有关这种类型的赋值操作，请参阅<link linkend="language.expressions">表达式</link>一章。
    </para>
    <para>
-    PHP 4 提供了另外一种方式给变量赋值：<link linkend="language.references">引用赋值</link>。这意味着新的变量简单的引用（换言之，“成为其别名” 或者 “指向”）了原始变量。改动新的变量将影响到原始变量，反之亦然。
+    PHP 也提供了另外一种方式给变量赋值：<link linkend="language.references">引用赋值</link>。这意味着新的变量简单的引用（换言之，“成为其别名” 或者 “指向”）了原始变量。改动新的变量将影响到原始变量，反之亦然。
    </para>
    <para>
     使用引用赋值，简单地将一个 &amp;
@@ -57,11 +65,11 @@ $i站点is = 'mansikka';  // 合法变量名；可以用中文
      <programlisting role="php">
 <![CDATA[
 <?php
-$foo = 'Bob';              // Assign the value 'Bob' to $foo
-$bar = &$foo;              // Reference $foo via $bar.
-$bar = "My name is $bar";  // Alter $bar...
+$foo = 'Bob';              // 将 'Bob' 赋给 $foo
+$bar = &$foo;              // 通过 $bar 引用 $foo
+$bar = "My name is $bar";  // 修改 $bar 变量
 echo $bar;
-echo $foo;                 // $foo is altered too.
+echo $foo;                 // $foo 的值也被修改
 ?>
 ]]>
      </programlisting>
@@ -75,23 +83,23 @@ echo $foo;                 // $foo is altered too.
 <![CDATA[
 <?php
 $foo = 25;
-$bar = &$foo;      // This is a valid assignment.
-$bar = &(24 * 7);  // Invalid; references an unnamed expression.
+$bar = &$foo;      // 合法的赋值
+$bar = &(24 * 7);  // 非法; 引用没有名字的表达式
 
 function test()
 {
    return 25;
 }
 
-$bar = &test();    // Invalid.
+$bar = &test();    // 非法
 ?>
 ]]>
      </programlisting>
     </informalexample>
    </para>
    <para>
-    虽然在 PHP 中并不需要初始化变量，但这是个好习惯。未初始化的变量具有其类型的默认值 -
-    &false;，零，空字符串或者空数组。
+    虽然在 PHP 中并不需要初始化变量，但对变量进行初始化是个好习惯。未初始化的变量具有其类型的默认值 - 布尔类型的变量默认值是
+    &false;，整形和符点型变量默认值是零，字符串型变量默认值是空字符串或者数组变量的默认值是空数组。
    </para>
    <para>
     <example>
@@ -99,10 +107,32 @@ $bar = &test();    // Invalid.
      <programlisting role="php">
 <![CDATA[
 <?php
-echo ($unset_bool ? "true" : "false"); // false
+// Unset AND unreferenced (no use context) variable; outputs NULL
+var_dump($unset_var);
+
+// Boolean usage; outputs 'false' (See ternary operators for more on this syntax)
+echo($unset_bool ? "true\n" : "false\n");
+
+// String usage; outputs 'string(3) "abc"'
+$unset_str .= 'abc';
+var_dump($unset_str);
+
+// Integer usage; outputs 'int(25)'
 $unset_int += 25; // 0 + 25 => 25
-echo $unset_string . "abc"; // "" . "abc" => "abc"
-$unset_array[3] = "def"; // array() + array(3 => "def") => array(3 => "def")
+var_dump($unset_int);
+
+// Float/double usage; outputs 'float(1.25)'
+$unset_float += 1.25;
+var_dump($unset_float);
+
+// Array usage; outputs array(1) {  [3]=>  string(3) "def" }
+$unset_arr[3] = "def"; // array() + array(3 => "def") => array(3 => "def")
+var_dump($unset_arr);
+
+// Object usage; creates new stdClass object (see http://www.php.net/manual/en/reserved.classes.php)
+// Outputs: object(stdClass)#1 (1) {  ["foo"]=>  string(3) "bar" }
+$unset_obj->foo = 'bar';
+var_dump($unset_obj);
 ?>
 ]]>
      </programlisting>
@@ -111,8 +141,8 @@ $unset_array[3] = "def"; // array() + array(3 => "def") => array(3 => "def")
    <para>
     依赖未初始化变量的默认值在某些情况下会有问题，例如把一个文件包含到另一个之中时碰上相同的变量名。另外把
     <link linkend="ini.register-globals">register_globals</link> 打开是一个主要的<link 
-    linkend="security.globals">安全隐患</link>。<link linkend="errorfunc.constants.errorlevels.e-notice">E_NOTICE</link>
-    级别的错误会在碰上未初始化的变量时发出，但是在向一个未初始化的数组附加单元时不会。<function>isset</function>
+    linkend="security.globals">安全隐患</link>。使用未初始化的变量会发出<link 
+    linkend="errorfunc.constants.errorlevels.e-notice">E_NOTICE</link>错误，但是在向一个未初始化的数组附加单元时不会。<function>isset</function>
     语言结构可以用来检测一个变量是否已被初始化。
    </para>
   </sect1>
@@ -146,11 +176,11 @@ $unset_array[3] = "def"; // array() + array(3 => "def") => array(3 => "def")
      的配置项条目，安全一章中的<link
      linkend="security.globals">使用 Register Globals</link>，以及 PHP
      <link xlink:href="&url.php.release4.1.0;">4.1.0</link> 和
-     <link xlink:href="&url.php.release4.2.0;">4.2.0</link> 的发行通告。
+     <link xlink:href="&url.php.release4.2.0;">4.2.0</link> 的发布公告。
     </simpara>
     <simpara>
      如果有可用的 PHP 预定义变量那最好用，如<link
-     linkend="language.variables.superglobals">超全局变量</link>。
+     linkend="language.variables.superglobals">超全局数组</link>。
     </simpara>
    </warning>
 
@@ -227,8 +257,8 @@ Test();
     这个脚本不会有任何输出，因为 echo 语句引用了一个局部版本的变量
     <varname>$a</varname>，而且在这个范围内，它并没有被赋值。你可能注意到
     PHP 的全局变量和 C 语言有一点点不同，在 C
-    语言中，全局变量在函数中自动生效，除非被局部变量覆盖。这可能引起一些问题，有些人可能漫不经心的改变一个全局变量。PHP
-    中全局变量在函数中使用时必须申明为全局。
+    语言中，全局变量在函数中自动生效，除非被局部变量覆盖。这可能引起一些问题，有些人可能不小心就改变了一个全局变量。PHP
+    中全局变量在函数中使用时必须申明为global。
    </simpara>
 
    <sect2 xml:id="language.variables.scope.global">
@@ -293,8 +323,8 @@ echo $b;
     </para>
 
     <simpara>
-     在 <varname>$GLOBALS</varname>
-     数组中，每一个变量为一个元素，键名对应变量名，值对应变量的内容。<varname>$GLOBALS</varname>
+      <varname>$GLOBALS</varname>
+     是一个关联数组，每一个变量为一个元素，键名对应变量名，值对应变量的内容。<varname>$GLOBALS</varname>
      之所以在全局范围内存在，是因为 $GLOBALS 是一个<link
      linkend="language.variables.superglobals">超全局变量</link>。以下范例显示了超全局变量的用处：
     </simpara>
@@ -363,7 +393,7 @@ function Test()
       <programlisting role="php">
 <![CDATA[
 <?php
-function Test()
+function test()
 {
     static $a = 0;
     echo $a;
@@ -376,7 +406,7 @@ function Test()
     </para>
 
     <simpara>
-     现在，每次调用 Test() 函数都会输出
+     现在，变量<varname>$a</varname>在第一调用test()时被初始化，每次调用 test() 函数都会输出
      <varname>$a</varname> 的值并加一。
     </simpara>
 
@@ -392,14 +422,14 @@ function Test()
       <programlisting role="php">
 <![CDATA[
 <?php
-function Test()
+function test()
 {
     static $count = 0;
 
     $count++;
     echo $count;
     if ($count < 10) {
-        Test();
+        test();
     }
     $count--;
 }
@@ -674,14 +704,18 @@ echo "$a $hello";
 // 自 PHP 4.1.0 起可用
    echo $_POST['username'];
    echo $_REQUEST['username'];
+   
    import_request_variables('p', 'p_');
    echo $p_username;
-// 自 PHP 3 起可用。自 PHP 5.0.0 起，这些较长的预定义变量
+// PHP 6以后将无效。自 PHP 5.0.0 起，这些较长的预定义变量
 // 可用 register_long_arrays 指令关闭。
+
    echo $HTTP_POST_VARS['username'];
+
 // 如果 PHP 指令 register_globals = on 时可用。不过自
 // PHP 4.2.0 起默认值为 register_globals = off。
 // 不提倡使用/依赖此种方法。
+
    echo $username;
 ?>
 ]]>
@@ -700,7 +734,7 @@ echo "$a $hello";
 
     <note>
      <para>
-      <link linkend="language.variables.superglobals">超全局变量</link>和
+      <link linkend="language.variables.superglobals">超全局数组</link>和
       <varname>$_POST</varname> 以及 <varname>$_GET</varname> 一样，自
       PHP 4.1.0 起可用。
      </para>
@@ -710,7 +744,7 @@ echo "$a $hello";
      如上所示，在 PHP 4.2.0 之前 <link
      linkend="ini.register-globals">register_globals</link>
      的默认值是
-     <emphasis>on</emphasis>。在 PHP 3 中其值总是 on。PHP
+     <emphasis>on</emphasis>。PHP
      社区鼓励大家不要依赖此指令，建议在编码时假定其为
      <emphasis>off</emphasis>。
     </para>
@@ -766,12 +800,7 @@ if (isset($_POST['action']) && $_POST['action'] == 'submitted') {
      </example>
     </para>
 
-    <para>
-     在 PHP 3 中，变量使用中的数组仅限于一维数组。在
-     PHP 4 中，没有此种限制。
-    </para>
-
-    <sect3 xml:id="language.variables.external.form.submit">
+     <sect3 xml:id="language.variables.external.form.submit">
      <title>IMAGE SUBMIT 变量名</title>
 
      <simpara>
