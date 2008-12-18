@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.23 $ -->
-<!-- $Author: bjori $-->
-<!-- EN-Revision: 1.64 Maintainer: verdana  Status: ready -->
-<!-- CREDITS: dallas, Gregory -->
+<!-- $Revision: 1.24 $ -->
+<!-- $Author: eniac2008 $-->
+<!-- EN-Revision: 1.71 Maintainer: Altair  Status: ready -->
+<!-- CREDITS: dallas, Gregory, verdana -->
 <chapter xml:id="language.oop" xmlns="http://docbook.org/ns/docbook">
  <title>类与对象（PHP 4）</title>
 
  <sect1 xml:id="keyword.class">
   <title><literal>类</literal></title>
   <para>
-   类是变量与作用于这些变量的函数的集合。使用下面的语法定义一个类：
+   类是变量与作用于这些变量的函数的集合。变量通过<literal>var</literal>来定义，函数通过
+   <literal>function</literal> 来定义，而类则通过下面的语法定义：
    <informalexample>
     <programlisting role="php">
 <![CDATA[
@@ -212,7 +213,7 @@ $cart->$myvar = array("10" => 1);
   <para>
    在定义类的时候，无法得知将使什么名字的对象来访问：在编写 Cart
    类时，并不知道之后对象的名称将会命名为 <varname>$cart</varname>
-   或者 <varname>$another_cart</varname>。因而你不能在类中使用
+   或者 <varname>$another_cart</varname>，还是什么其它的名字。因而你不能在类中使用
    <varname>$cart-&gt;items</varname>。然而为了类定义的内部访问自身的函数和变量，可以使用伪变量
    <varname>$this</varname>
    来达到这个目的。<varname>$this</varname> 变量可以理解为“我自己的”或者“当前对象”。因而
@@ -565,18 +566,6 @@ $b->example();
  <sect1 xml:id="language.oop.serialization">
   <title>序列化对象 － 会话中的对象</title>
 
-  <note>
-   <simpara>
-    在 PHP 3 中，在序列化和解序列化的过程中对象会失去类的关联。结果的变量是对象类型，但是没有类和方法，因此就没什么用了（就好像一个用滑稽的语法定义的数组一样）。
-   </simpara>
-  </note>
-
-  <caution>
-   <simpara>
-    以下信息仅在 PHP &gt;= 4 中有效。
-   </simpara>
-  </caution>
-
   <para>
    <function>serialize</function>
    返回一个字符串，包含着可以储存于 PHP 的任何值的字节流表示。<function>unserialize</function>
@@ -639,7 +628,7 @@ $b->example();
 
   <para>
    强烈建议在所有的页面中都包括这些注册的对象的类的定义，即使并不是在所有的页面中都用到了这些类。如果没有这样做，一个对象被解序列化了但却没有其类的定义，它将失去与之关联的类并成为
-   <literal>stdClass</literal>
+   <classname>__PHP_Incomplete_Class_Name</classname>
    的一个对象而完全没有任何可用的函数，这样就很没有用处。
   </para>
 
@@ -658,12 +647,12 @@ $b->example();
   <para>
    <function>serialize</function> 检查类中是否有魔术名称
    <literal>__sleep</literal>
-   的函数。如果这样，该函数将在任何序列化之前运行。它可以清除对象并应该返回一个包含有该对象中应被序列化的所有变量名的数组。
+   的函数。如果这样，该函数将在任何序列化之前运行。它可以清除对象并应该返回一个包含有该对象中应被序列化的所有变量名的数组。如果该函数没有返回什么数据，则不会有什么数据被序列化，并且会发出一个 E_NOTICE 错误。
   </para>
 
   <para>
    使用 <literal>__sleep</literal>
-   的目的是关闭对象可能具有的任何数据库连接，提交等待中的数据或进行类似的清除任务。此外，如果有非常大的对象而并不需要完全储存下来时此函数也很有用。
+   的目的是提交等待中的数据或进行类似的清除任务。此外，如果有非常大的对象而并不需要完全储存下来时此函数也很有用。
   </para>
 
   <para>
