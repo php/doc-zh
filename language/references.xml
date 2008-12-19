@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.11 $ -->
-<!-- $Author: bjori $ -->
-<!-- EN-Revision: 1.46 Maintainer: dallas Status: ready -->
+<!-- $Revision: 1.12 $ -->
+<!-- $Author: eniac2008 $ -->
+<!-- EN-Revision: 1.50 Maintainer: Altair Status: ready -->
+<!-- CREDITS: dallas -->
 <chapter xml:id="language.references" xmlns="http://docbook.org/ns/docbook">
  <title>引用的解释</title>
 
@@ -43,6 +44,31 @@ $a =& $b;
     如果具有引用的数组被拷贝，其值不会解除引用。对于数组传值给函数也是如此。
    </para>
   </note>
+   <note>
+    <para>
+    如果对一个未定义的变量进行引用赋值、引用参数传递或引用返回，则会自动创建该变量。
+     <example>
+      <title>对未定义的变量使用引用</title>
+      <programlisting role="php">
+<![CDATA[
+<?php
+function foo(&$var) { }
+
+foo($a); // $a is "created" and assigned to null
+
+$b = array();
+foo($b['b']);
+var_dump(array_key_exists('b', $b)); // bool(true)
+
+$c = new StdClass;
+foo($c->d);
+var_dump(property_exists($c, 'd')); // bool(true)
+?>
+]]>
+      </programlisting>
+     </example>
+    </para>
+   </note>  
   <para>
    同样的语法可以用在函数中，它返回引用，以及用在 <literal>new</literal>
    运算符中（PHP 4.0.4 以及以后版本）：
@@ -131,31 +157,6 @@ echo $ref; // 3 - last element of the iterated array
     </example>
    </para>
   </note>
-  <warning>
-   <para>
-    复杂数组最好拷贝而不是引用。下面的例子不会如期望中那样工作。
-    <example>
-     <title>复杂数组的引用</title>
-     <programlisting role="php">
-<![CDATA[
-<?php
-$top = array(
-    'A' => array(),
-    'B' => array(
-        'B_b' => array(),
-    ),
-);
-
-$top['A']['parent'] = &$top;
-$top['B']['parent'] = &$top;
-$top['B']['B_b']['data'] = 'test';
-print_r($top['A']['parent']['B']['B_b']); // array()
-?>
-]]>
-     </programlisting>
-    </example>
-   </para>
-  </warning>
   <para>
    引用做的第二件事是用引用传递变量。这是通过在函数内建立一个本地变量并且该变量在呼叫范围内引用了同一个内容来实现的。例如：
    <informalexample>
@@ -297,34 +298,38 @@ foo(5) // 导致致命错误
   <para>
    引用返回用在当想用函数找到引用应该被绑定在哪一个变量上面时。<emphasis>不要</emphasis>用返回引用来增加性能，引擎足够聪明来自己进行优化。仅在有合理的技术原因时才返回引用！要返回引用，使用此语法：
    <informalexample>
-    <programlisting role="php">
+     <programlisting role="php">
 <![CDATA[
 <?php
-function &find_var($param)
-{
-    /* ...code... */
-    return $found_var;
+class foo {
+    public $value = 42;
+
+    public function &getValue() {
+        return $this->value;
+    }
 }
 
-$foo =& find_var($bar);
-$foo->x = 2;
-?>
+$obj = new foo;
+$myValue = &$obj->getValue(); // $myValue is a reference to $obj->value, which is 42.
+$obj->value = 2;
+echo $myValue;                // prints the new value of $obj->value, i.e. 2.
+?> 
 ]]>
-    </programlisting>
+     </programlisting>
    </informalexample>
-   本例中 <varname>find_var</varname> 函数所返回的对象的属性将被赋值，而不是拷贝，就和没有用引用语法一样。
+   本例中 <varname>getValue</varname> 函数所返回的对象的属性将被赋值，而不是拷贝，就和没有用引用语法一样。
   </para>
   <note>
    <simpara>
     和参数传递不同，这里必须在两个地方都用 <literal>&amp;</literal>
-    符号——指出返回的是一个引用，而不是通常的一个拷贝，同样也指出 <varname>$foo</varname>
+    符号——指出返回的是一个引用，而不是通常的一个拷贝，同样也指出 <varname>$myValue</varname>
     是作为引用的绑定，而不是通常的赋值。
    </simpara>
   </note>
   <note>
    <simpara>
     如果试图这样从函数返回引用：<literal>return
-    ($found_var);</literal>，这将<emphasis>不会</emphasis>起作用，因为在试图返回一个<emphasis>表达式</emphasis>的结果而不是一个引用的变量。只能从函数返回引用变量——没别的方法。如果代码试图返回一个动态表达式或
+    ($this->value);</literal>，这将<emphasis>不会</emphasis>起作用，因为在试图返回一个<emphasis>表达式</emphasis>的结果而不是一个引用的变量。只能从函数返回引用变量——没别的方法。如果代码试图返回一个动态表达式或
     <literal>new</literal> 运算符的结果，自 PHP 4.4.0 和 PHP 5.1.0 起会发出一条
     <constant>E_NOTICE</constant> 错误。
    </simpara>
