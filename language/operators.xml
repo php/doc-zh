@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="gb2312"?>
-<!-- $Revision: 1.20 $ -->
-<!-- $Author: bjori $ -->
-<!-- EN-Revision: 1.101 Maintainer: dallas Status: ready -->
+<!-- $Revision: 1.21 $ -->
+<!-- $Author: eniac2008 $ -->
+<!-- EN-Revision: 1.128 Maintainer: Altair Status: ready -->
+<!-- CREDITS: dallas -->
  <chapter xml:id="language.operators" xmlns="http://docbook.org/ns/docbook">
   <title>运算符</title>
   <simpara>
@@ -41,8 +42,8 @@
       <tbody>
        <row>
         <entry>非结合</entry>
-        <entry>new</entry>
-        <entry><link linkend="language.oop5.basic.new">new</link></entry>
+        <entry>clone new</entry>
+        <entry><link linkend="language.oop5.cloning">clone</link> 和 <link linkend="language.oop5.basic.new">new</link></entry>
        </row>
        <row>
         <entry>左</entry>
@@ -58,23 +59,37 @@
        </row>
        <row>
         <entry>非结合</entry>
-        <entry>! ~ - (int) (float) (string) (array) (object) @</entry>
+        <entry>~ - (int) (float) (string) (array) (object) (bool) @</entry>
         <entry>
          <link linkend="language.types">类型</link>
         </entry>
        </row>
        <row>
+        <entry>非结合</entry>
+        <entry>instanceof</entry>
+        <entry>
+         <link linkend="language.types">类型</link>
+        </entry>
+       </row>
+       <row>
+        <entry>右结合</entry>
+        <entry>!</entry>
+        <entry>
+         <link linkend="language.operators.logical">逻辑操作符</link>
+        </entry>
+       </row>      
+       <row>
         <entry>左</entry>
         <entry>* / %</entry>
         <entry>
-         <link linkend="language.operators.arithmetic">算数运算符</link>
+         <link linkend="language.operators.arithmetic">算术运算符</link>
         </entry>
        </row>
        <row>
         <entry>左</entry>
         <entry>+ - .</entry>
         <entry>
-         <link linkend="language.operators.arithmetic">算数运算符</link>和<link
+         <link linkend="language.operators.arithmetic">算术运算符</link>和<link
          linkend="language.operators.string">字符串运算符</link></entry>
        </row>
        <row>
@@ -86,7 +101,7 @@
        </row>
        <row>
         <entry>非结合</entry>
-        <entry>&lt; &lt;= &gt; &gt;=</entry>
+        <entry>&lt; &lt;= &gt; &gt;= &lt;&gt;</entry>
         <entry>
          <link linkend="language.operators.comparison">比较运算符</link>
         </entry>
@@ -200,9 +215,9 @@ $a = $b += 3; // $a = ($b += 3) -> $a = 5, $b = 5
    </para>
    <note>
     <para>
-     尽管 <literal>!</literal> 比 <literal>=</literal> 的优先级高，PHP
+     尽管 <literal>=</literal> 比其它大多数的运算符的优先级低，PHP
      仍旧允许类似如下的表达式：<literal>if (!$a = foo())</literal>，在此例中
-     <literal>foo()</literal> 的输出被赋给了 <varname>$a</varname>。
+     <literal>foo()</literal> 的返回值被赋给了 <varname>$a</varname>。
     </para>
    </note>
   </sect1>
@@ -257,7 +272,10 @@ $a = $b += 3; // $a = ($b += 3) -> $a = 5, $b = 5
     </tgroup>
    </table>
    <simpara>
-    除号（“/”）总是返回浮点数，即使两个运算数是整数（或由字符串转换成的整数）也是这样。
+    除法运算符总是返回符点数。只有在下列情况例外：两个操作数都是整数（或字符串转换成的整数）并且正好能整除，这时它返回一个整数。
+   </simpara>
+   <simpara>
+   	取模运算符的操作数在运算之前都会转换成整数（除去小数部分）。
    </simpara>
    <note>
     <simpara>
@@ -269,16 +287,6 @@ $a = $b += 3; // $a = ($b += 3) -> $a = 5, $b = 5
     参见手册中的<link linkend="ref.math">数学函数</link>。
    </simpara>
 
-   <!--
-   <simpara>
-    The division operator ("/") returns an integer value (the 结果
-    of an integer division) if the two operands are integers (or
-    strings that get converted to integers) and the quotient is an
-    integer. If either operand is a floating-point value, or the
-    operation 结果s in a non-integer value, a floating-point value
-    is returned.
-   </simpara>
-   -->
   </sect1>
 
   <sect1 xml:id="language.operators.assignment">
@@ -319,11 +327,11 @@ $b .= "There!"; // sets $b to "Hello There!", just like $b = $b . "There!";
     </informalexample>
    </para>
    <para>
-    注意赋值运算将原变量的值拷贝到新变量中（传值赋值），所以改变其中一个并不影响另一个。这也适合于在很密集的循环中拷贝一些值例如大数组。自
-    PHP 4 起支持引用赋值，用 <computeroutput>$var =
-    &amp;$othervar;</computeroutput> 语法，但在 PHP 3
-    中不可能这样做。引用赋值意味着两个变量都指向同一个数据，没有任何数据的拷贝。有关引用的更多信息见<link
-    linkend="language.references">引用的说明</link>。
+    注意赋值运算将原变量的值拷贝到新变量中（传值赋值），所以改变其中一个并不影响另一个。这也适合于在很密集的循环中拷贝一些值例如大数组。也可以使用引用赋值，用 <computeroutput>$var =
+    &amp;$othervar;</computeroutput> 语法。引用赋值意味着两个变量都指向同一个数据，没有任何数据的拷贝。有关引用的更多信息见<link
+    linkend="language.references">引用的说明</link>。在
+    PHP 5中，对象总是通过引用赋值的，除非明确使用新的 <link
+    linkend="language.oop5.cloning">clone</link>关键字。
    </para>
   </sect1>
 
@@ -345,6 +353,12 @@ echo "12" ^ "9"; // 输出退格字符（ascii 8）
 
 echo "hallo" ^ "hello"; // 输出 ascii 值 #0 #4 #0 #0 #0
                             // 'a' ^ 'e' = #4
+
+echo 2 ^ "3"; // 输出 1
+              // 2 ^ ((int)"3") == 1
+
+echo "2" ^ 3; // 输出 1
+              // ((int)"2") ^ 3 == 1                            
 ?>
 ]]>
      </programlisting>
@@ -477,7 +491,7 @@ echo "hallo" ^ "hello"; // 输出 ascii 值 #0 #4 #0 #0 #0
 <?php
 var_dump(0 == "a"); // 0 == 0 -> true
 var_dump("1" == "01"); // 1 == 1 -> true
-
+var_dump("1" == "1e0"); // 1 == 1 -> true
 switch ("a") {
 case 0:
     echo "0";
@@ -623,7 +637,36 @@ function standard_array_compare($op1, $op2)
       版本会为此发出一条警告。
      </simpara>
     </note>
-   </sect2>
+    <note>
+     <para>
+      建议避免将三元运算符堆积在一起使用。当在一条语句中使用多个三元运算符时会造成
+      PHP 运算结果不清晰：
+      Is is recommended that you avoid "stacking" ternary expressions. PHP's
+      behaviour when using more than one ternary operator within a single
+      statement is non-obvious:
+      <example>
+       <title>不清晰的三元运算符行为</title>
+       <programlisting role="php">
+<![CDATA[
+<?php
+// 乍看起来下面的输出是 'true'
+echo (true?'true':false?'t':'f');
+
+// 然而，上面语句的实际输出是't'，因为三元运算符是从左往右计算的
+
+// 下面是与上面等价的语句，但更清晰
+echo ((true ? 'true' : 'false') ? 't' : 'f');
+
+// here, you can see that the first expression is evaluated to 'true', which
+// in turn evaluates to (bool)true, thus returning the true branch of the
+// second ternary expression.
+?>
+]]>
+       </programlisting>
+      </example>
+     </para>
+    </note>
+    </sect2>
 
   </sect1>
 
@@ -636,7 +679,7 @@ function standard_array_compare($op1, $op2)
    <simpara>
     如果激活了 <link linkend="ini.track-errors"><option>track_errors</option></link>
     特性，表达式所产生的任何错误信息都被存放在变量
-    <link linkend="reserved.variables.phperrormsg">$php_errormsg</link>
+    <varname>$php_errormsg</varname>
     中。此变量在每次出错时都会被覆盖，所以如果想用它的话就要尽早检查。
    </simpara>
    <para>
@@ -862,6 +905,40 @@ AC
    <simpara>
     “与”和“或”有两种不同形式运算符的原因是它们运算的优先级不同（见<link linkend="language.operators.precedence">运算符优先级</link>）。
    </simpara>
+   <example>
+    <title>逻辑运算符示例</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+
+// 下面的 foo() 不会被调用，因为它们被运算符“短路”了。
+$a = (false && foo());
+$b = (true  || foo());
+$c = (false and foo());
+$d = (true  or  foo());
+
+// "||" 的优先级比 "or" 高
+$e = false || true; // $e 被赋值为 (false || true)，结果为 true
+$f = false or true; // $f 被赋值为 false [Altair注："=" 的优先级比 "or" 高]
+var_dump($e, $f);
+
+// "&&" 的优先级比 "and"　高
+$g = true && false; // $g 被赋值为 (true && false)，结果为 false
+$h = true and false; // $h 被赋值为 true [Altair注："=" 的优先级比 "and" 高]
+var_dump($g, $h);
+?>
+]]>
+    </programlisting>
+    &example.outputs.similar;
+    <screen>
+<![CDATA[
+bool(true)
+bool(false)
+bool(false)
+bool(true)
+]]>
+    </screen>
+   </example>   
   </sect1>
 
   <sect1 xml:id="language.operators.string">
@@ -938,7 +1015,7 @@ $a .= "World!";     // now $a contains "Hello World!"
     </tgroup>
    </table>
    <para>
-    <literal>+</literal> 运算符把右边的数组附加到左边的数组后面，但是重复的键值不会被覆盖。
+    <literal>+</literal> 运算符把右边的数组元素（除去键值与左边的数组元素相同的那些元素）附加到左边的数组后面，但是重复的键值不会被覆盖。
    </para>
    <para>
     <informalexample>
@@ -1011,40 +1088,190 @@ var_dump($a === $b); // bool(false)
   <sect1 xml:id="language.operators.type">
    <title>类型运算符</title>
    <para>
-    PHP 只有一个类型运算符：<literal>instanceof</literal>
-    用来测定一个给定的对象，它的父对象或它们所实现的<link
-    linkend="language.oop5.interfaces">接口</link>是否来自指定的<link
-    linkend="language.oop">对象类</link>。
+    <literal>instanceof</literal> 用于确定一个 PHP 变量是否属于某一类 
+    <link linkend="language.oop5.basic.class">class</link> 的实例：
+    <example>
+     <title>instanceof 使用示例</title>
+     <programlisting role="php">
+<![CDATA[
+<?php
+class MyClass
+{
+}
+
+class NotMyClass
+{
+}
+$a = new MyClass;
+
+var_dump($a instanceof MyClass);
+var_dump($a instanceof NotMyClass);
+?>
+]]>
+     </programlisting>
+     &example.outputs;
+     <screen>
+<![CDATA[
+bool(true)
+bool(false)
+]]>
+     </screen>
+    </example>
+   </para>
+   <para>
+    <literal>instanceof</literal>　也可用来确定一个变量是不是继承自某一父类的子类的实例：
+     can also be used to determine whether a variable
+    is an instantiated object of a class that inherits from a parent class:
+    <example>
+     <title>instanceof 与继承类示例</title>
+     <programlisting role="php">
+<![CDATA[
+<?php
+class ParentClass
+{
+}
+
+class MyClass extends ParentClass
+{
+}
+
+$a = new MyClass;
+
+var_dump($a instanceof MyClass);
+var_dump($a instanceof ParentClass);
+?>
+]]>
+     </programlisting>
+     &example.outputs;
+     <screen>
+<![CDATA[
+bool(true)
+bool(true)
+]]>
+     </screen>
+    </example>
+   </para>
+   <para>
+    检查一个对象 <emphasis>不是</emphasis> 某个类的实例，可以使用 <link 
+    linkend="language.operators.logical">逻辑运算符 <literal>not</literal></link>。
+    <example>
+     <title>使用instanceof检查对象 <emphasis>不是</emphasis> 某一类的实例</title>
+     <programlisting role="php">
+<![CDATA[
+<?php
+class MyClass
+{
+}
+
+$a = new MyClass;
+var_dump(!($a instanceof stdClass));
+?>
+]]>
+     </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+bool(true)
+]]>
+     </screen>
+    </example>
+   </para>
+   <para>
+    最后，<literal>instanceof</literal>也可用于确定一个变量是不是实现了某个<link 
+    linkend="language.oop5.interfaces">接口</link>的对象的实例:
+    <example>
+     <title>Using instanceof for class</title>
+     <programlisting role="php">
+<![CDATA[
+<?php
+interface MyInterface
+{
+}
+
+class MyClass implements MyInterface
+{
+}
+
+$a = new MyClass;
+
+var_dump($a instanceof MyClass);
+var_dump($a instanceof MyInterface);
+?>
+]]>
+     </programlisting>
+     &example.outputs;
+     <screen>
+<![CDATA[
+bool(true)
+bool(true)
+]]>
+     </screen>
+    </example>
+   </para>
+   <para>
+    虽然 <literal>instanceof</literal> 通常直接与类名一起使用，但也可以使用对象或字符串变量：
+    <example>
+     <title>Using instanceof with other variables</title>
+     <programlisting role="php">
+<![CDATA[
+<?php
+interface MyInterface
+{
+}
+
+class MyClass implements MyInterface
+{
+}
+
+$a = new MyClass;
+$b = new MyClass;
+$c = 'MyClass';
+$d = 'NotMyClass';
+
+var_dump($a instanceof $b); // $b is an object of class MyClass
+var_dump($a instanceof $c); // $c is a string 'MyClass'
+var_dump($a instanceof $d); // $d is a string 'NotMyClass'
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+bool(true)
+bool(true)
+bool(false)
+]]>
+     </screen>
+    </example>
+   </para>
+   <para>
+    然而 instanceof 的使用还有一些陷阱必须了解。在
+    PHP 5.1.0之前，如果要检查的类名称不存在，<literal>instanceof</literal> 会调用 <link
+    linkend="language.oop5.autoload">__autoload()</link>。另外，如果该类没有被装载则会产生一个致命错误。可以通过使用<literal>动态类引用(dynamic 
+    class reference)</literal>或用一个包含类名的字符串变量来避开这种问题：
+    <example>
+     <title>避免 PHP 5.0 中 instanceof 引起的类名查找和致命错误问题</title>
+     <programlisting role="php">
+<![CDATA[
+<?php
+$d = 'NotMyClass';
+var_dump($a instanceof $d); // no fatal error here
+?>
+     ]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+bool(false)
+]]>
+     </screen>
+    </example>
    </para>
    <simpara>
     <literal>instanceof</literal> 运算符是 PHP 5 引进的。在此之前用
     <function>is_a</function>，但是
     <function>is_a</function> 已经过时了，最好用 <literal>instanceof</literal>。
    </simpara>
-   <informalexample>
-    <programlisting role="php">
-<![CDATA[
-<?php
-class A { }
-class B { }
-
-$thing = new A;
-
-if ($thing instanceof A) {
-    echo 'A';
-}
-if ($thing instanceof B) {
-    echo 'B';
-}
-?>
-]]>
-    </programlisting>
-    <simpara>
-     由于 <varname>$thing</varname> 是类型 A 的一个 <type>object</type>，而不是
-     B 的，只有和类型 A 相符合的程序块被运行：
-    </simpara>
-    <screen>A</screen>
-   </informalexample>
    <para>
     参见 <function>get_class</function> 和
     <function>is_a</function>。
