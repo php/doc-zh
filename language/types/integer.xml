@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision: 1.1 $ -->
+<!-- $Author: eniac2008 $ -->
+<!-- EN-Revision: 1.4 Maintainer: Altair Status: ready -->
+<!-- CREDITS: Gregory dallas -->
+<sect1 xml:id="language.types.integer">
+ <title>整型</title>
+ 
+ <simpara>
+   一个 <type>integer</type> 是集合 Z = {..., -2, -1, 0, 1, 2, ...} 中的一个数。
+ </simpara>
+  
+ <para>
+  参见
+ </para>
+
+ <itemizedlist>
+  <listitem>
+   <simpara>
+    <link linkend="ref.gmp">任意长度整数 / GMP</link>
+   </simpara>
+  </listitem>
+  <listitem>
+   <simpara>
+    <link linkend="language.types.float">浮点数</link>
+   </simpara>
+  </listitem>
+  <listitem>
+   <simpara>
+    <link linkend="ref.bc">任意精度数学库 / BCMath</link>
+   </simpara>
+  </listitem>
+ </itemizedlist>
+
+ <sect2 xml:id="language.types.integer.syntax">
+  <title>语法</title>
+
+  <simpara>
+    整型值可以使用十进制，十六进制或八进制表示，前面可以加上可选的符号（- 或者 +）。
+  </simpara>
+
+  <para>
+    八进制表示数字前必须加上 <literal>0</literal>（零），十六进制表示数字前必须加上 <literal>0x</literal>。
+  </para>
+
+  <example>
+   <title>整数文字表达</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+$a = 1234; // 十进制数
+$a = -123; // 负数
+$a = 0123; // 八进制数 (等于十进制 83)
+$a = 0x1A; // 十六进制数 (等于十进制 26)
+?>
+]]>
+   </programlisting>
+  </example>
+
+  <para>
+   <type>整型(integer)</type>的形式描述：
+  </para>
+ 
+  <informalexample>
+   <programlisting>
+<![CDATA[
+decimal     : [1-9][0-9]*
+            | 0
+
+hexadecimal : 0[xX][0-9a-fA-F]+
+
+octal       : 0[0-7]+
+
+integer     : [+-]?decimal
+            | [+-]?hexadecimal
+            | [+-]?octal
+]]>
+   </programlisting>
+  </informalexample>
+
+  <para>
+    整型数的字长和平台有关，尽管通常最大值是大约二十亿（32 位有符号）。PHP 
+    不支持无符号整数。<type>Integer</type>值的字长可以用常量<constant>PHP_INT_SIZE</constant>来表示，自
+    PHP 4.4.0 和 PHP 5.0.5后，最大值可以用常量<constant>PHP_INT_MAX</constant>来表示。
+  </para>
+
+  <warning>
+   <para>
+     如果向八进制数传递了一个非法数字（即 8 或 9），则后面其余数字会被忽略。
+   </para>
+
+   <example>
+    <title>八进制数的怪事</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+var_dump(01090); // 八进制 010 = 十进制 8
+?>
+]]>
+    </programlisting>
+   </example>
+  </warning>
+ </sect2>
+
+ <sect2 xml:id="language.types.integer.overflow">
+  <title>整数溢出</title>
+
+  <para>
+    如果给定的一个数超出了 <type>integer</type> 的范围，将会被解释为
+    <type>float</type>。同样如果执行的运算结果超出了
+    <type>integer</type> 范围，也会返回 <type>float</type>。
+  </para>
+
+  <informalexample>
+   <programlisting role="php">
+<![CDATA[
+<?php
+$large_number =  2147483647;
+var_dump($large_number);
+// 输出为：int(2147483647)
+
+$large_number =  2147483648;
+var_dump($large_number);
+// 输出为：float(2147483648)
+
+// 同样也适用于十六进制表示的整数： 从 2^31 到 2^32-1:
+var_dump( 0xffffffff );
+// 输出: float(4294967295)
+
+// 不适用于大于 2^32-1　的十六进制表示的数:
+var_dump( 0x100000000 );
+// 输出: int(2147483647)
+
+$million = 1000000;
+$large_number =  50000 * $million;
+var_dump($large_number);
+// 输出: float(50000000000)
+?>
+]]>
+   </programlisting>
+  </informalexample>
+
+  <warning>
+   <simpara>
+      不幸的是 PHP 中有个 bug，因此当有负数参与时结果并不总是正确。例如当运算
+      <literal>-50000 * $million</literal> 时结果是
+      <literal>-429496728</literal>。不过当两个运算数都是正数时就没问题。
+   </simpara>
+
+   <simpara>
+     这个问题已经在 PHP 4.1.0 中解决了。
+   </simpara>
+  </warning>
+  
+  <para>
+    PHP 中没有整除的运算符。<literal>1/2</literal> 产生出 <type>float</type>
+    <literal>0.5</literal>。可以总是舍弃小数部分，或者使用 <function>round</function> 函数。
+
+   There is no <type>integer</type> division operator in PHP.
+   <literal>1/2</literal> yields the <type>float</type> <literal>0.5</literal>.
+   The value can be casted to an <type>integer</type> to round it downwards, or
+   the <function>round</function> function provides finer control over rounding.
+  </para>
+
+  <informalexample>
+   <programlisting role="php">
+<![CDATA[
+<?php
+var_dump(25/7);         // float(3.5714285714286) 
+var_dump((int) (25/7)); // int(3)
+var_dump(round(25/7));  // float(4) 
+?>
+]]>
+   </programlisting>
+  </informalexample>
+ </sect2>
+
+ <sect2 xml:id="language.types.integer.casting">
+  <title>转换为整型</title>
+
+  <simpara>
+    要明确地将一个值转换为 <type>integer</type>，用 <literal>(int)</literal> 或
+    <literal>(integer)</literal> 强制转换。不过大多数情况下都不需要强制转换，因为当运算符，函数或流程控制需要一个
+    <type>integer</type> 参数时，值会自动转换。还可以通过函数
+    <function>intval</function> 来将一个值转换成整型。
+  </simpara>
+
+  <simpara>
+   参见: <link linkend="language.types.type-juggling">类型转换的判别</link>.
+  </simpara>
+   
+  <sect3 xml:id="language.types.integer.casting.from-boolean">
+   <title>从<link linkend="language.types.boolean">布尔值</link>转换</title>
+
+   <simpara>
+     &false; 将产生出 <literal>0</literal>（零），&true; 将产生出
+     <literal>1</literal>（壹）。
+   </simpara>
+  </sect3>
+
+  <sect3 xml:id="language.types.integer.casting.from-float">
+   <title>
+    从<link linkend="language.types.float">符点数</link>转换
+   </title> 
+
+   <simpara>
+     当从浮点数转换成整数时，将<emphasis>向零</emphasis>取整。
+   </simpara>
+    
+   <para>
+     如果浮点数超出了整数范围（通常为
+     <literal>+/- 2.15e+9 = 2^31</literal>），则结果不确定，因为没有足够的精度使浮点数给出一个确切的整数结果。在此情况下没有警告，甚至没有任何通知！
+   </para>
+    
+   <warning>
+    <para>
+      决不要将未知的分数强制转换为 <type>integer</type>，这样有时会导致不可预料的结果。
+    </para>
+
+    <informalexample>
+     <programlisting role="php">
+<![CDATA[
+<?php
+echo (int) ( (0.1+0.7) * 10 ); // 显示 7!
+?>
+]]>
+     </programlisting>
+    </informalexample>
+    
+    <para>
+     参见 <link linkend="warn.float-precision">关于浮点数精度的警告</link>。
+    </para>
+   </warning>
+  </sect3>
+   
+  <sect3 xml:id="language.types.integer.casting.from-string">
+   <title>从字符串转换</title>
+
+   <simpara>
+    参见 <link linkend="language.types.string.conversion">字符串转换为数字</link>
+   </simpara>
+  </sect3>
+   
+  <sect3 xml:id="language.types.integer.casting.from-other">
+   <title>从其它类型转换</title>
+
+   <caution>
+    <simpara>
+      没有定义从其它类型转换为整型的行为。<emphasis>不要</emphasis>依赖任何可见的行为，因为它会未加通知地改变。
+     The behaviour of converting to <type>integer</type> is undefined for other
+     types. Do <emphasis>not</emphasis> rely on any observed behaviour, as it
+     can change without notice.
+    </simpara>
+   </caution>
+  </sect3>
+
+ </sect2>
+</sect1>
+ 
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"../../manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
