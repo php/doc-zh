@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision: 283934 $ -->
+<!-- $Author: haohappy $ -->
+<!-- EN-Revision: 04077dd209c5fb9de2b55fcaf57cd4beef8c4273 Maintainer: haohappy Status: ready -->
+
+<sect1 xml:id="control-structures.switch" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <title><literal>switch</literal></title>
+  <simpara>
+   <literal>switch</literal> 语句和具有同样表达式的一系列的 IF
+   语句相似。很多场合下需要把同一个变量（或表达式）与很多不同的值比较，并根据它等于哪个值来执行不同的代码。这正是
+   <literal>switch</literal> 语句的用途。
+  </simpara>
+  <note>
+   <simpara>
+    注意和其它语言不同，<link linkend="control-structures.continue">continue</link>
+    语句作用到 switch 上的作用类似于 <literal>break</literal>。如果在循环中有一个
+    switch 并希望 continue 到外层循环中的下一个轮回，用 <literal>continue 2</literal>。
+   </simpara>
+  </note>
+  <note>
+   <para>
+     Note that switch/case does
+     <link linkend="types.comparisions-loose">loose comparision</link>.
+   </para>
+  </note>  
+  <para>
+   下面两个例子使用两种不同方法实现同样的事，一个用一系列的
+   <literal>if</literal> 语句，另一个用 <literal>switch</literal> 语句：
+   <example>
+    <title><literal>switch</literal> 结构</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+if ($i == 0) {
+    echo "i equals 0";
+} elseif ($i == 1) {
+    echo "i equals 1";
+} elseif ($i == 2) {
+    echo "i equals 2";
+}
+
+switch ($i) {
+    case 0:
+        echo "i equals 0";
+        break;
+    case 1:
+        echo "i equals 1";
+        break;
+    case 2:
+        echo "i equals 2";
+        break;
+}
+?>
+]]>
+    </programlisting>
+   </example>
+   <example>
+    <title><literal>switch</literal> 结构可以用字符串</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+switch ($i) {
+case "apple":
+    echo "i is apple";
+    break;
+case "bar":
+    echo "i is bar";
+    break;
+case "cake":
+    echo "i is cake";
+    break;
+}
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   为避免错误，理解 <literal>switch</literal> 是怎样执行的非常重要。<literal>switch</literal>
+   语句一行接一行地执行（实际上是语句接语句）。开始时没有代码被执行。仅当一个
+   <literal>case</literal> 语句中的值和 <literal>switch</literal>
+   表达式的值匹配时 PHP 才开始执行语句，直到 <literal>switch</literal>
+   的程序段结束或者遇到第一个 <literal>break</literal>
+   语句为止。如果不在 case 的语句段最后写上 <literal>break</literal>
+   的话，PHP 将继续执行下一个 case 中的语句段。例如：
+   <informalexample>
+    <programlisting role="php">
+<![CDATA[
+<?php
+switch ($i) {
+    case 0:
+        echo "i equals 0";
+    case 1:
+        echo "i equals 1";
+    case 2:
+        echo "i equals 2";
+}
+?>
+]]>
+    </programlisting>
+   </informalexample>
+  </para>
+  <simpara>
+   这里如果 <varname>$i</varname> 等于 0，PHP 将执行所有的 print 语句！如果
+   <varname>$i</varname> 等于 1，PHP 将执行后面两条 print 语句。只有当
+   <varname>$i</varname> 等于 2 时，才会得到“预期”的结果——只显示“i equals 2”。所以，别忘了
+   <literal>break</literal> 语句就很重要（即使在某些情况下故意想避免提供它们时）。
+  </simpara>
+  <simpara>
+   在 <literal>switch</literal> 语句中条件只求值一次并用来和每个
+   <literal>case</literal> 语句比较。在 <literal>elseif</literal>
+   语句中条件会再次求值。如果条件比一个简单的比较要复杂得多或者在一个很多次的循环中，那么用
+   <literal>switch</literal> 语句可能会快一些。
+  </simpara>
+  <para>
+   在一个 case 中的语句也可以为空，这样只不过将控制转移到了下一个 case 中的语句。
+   <informalexample>
+    <programlisting role="php">
+<![CDATA[
+<?php
+switch ($i) {
+    case 0:
+    case 1:
+    case 2:
+        echo "i is less than 3 but not negative";
+        break;
+    case 3:
+        echo "i is 3";
+}
+?>
+]]>
+    </programlisting>
+   </informalexample>
+  </para>
+  <para>
+   一个 case 的特例是 <literal>default</literal>。它匹配了任何和其它
+   case 都不匹配的情况。例如：
+   <informalexample>
+    <programlisting role="php">
+<![CDATA[
+<?php
+switch ($i) {
+    case 0:
+        echo "i equals 0";
+        break;
+    case 1:
+        echo "i equals 1";
+        break;
+    case 2:
+        echo "i equals 2";
+        break;
+    default:
+        echo "i is not equal to 0, 1 or 2";
+}
+?>
+]]>
+    </programlisting>
+   </informalexample>
+  </para>
+  <para>
+   <literal>case</literal>
+   表达式可以是任何求值为简单类型的表达式，即整型或浮点数以及字符串。不能用数组或对象，除非它们被解除引用成为简单类型。
+  </para>
+  <para>
+   <literal>switch</literal> 支持替代语法的流程控制。更多信息见<link
+   linkend="control-structures.alternative-syntax">流程控制的替代语法</link>一节。
+   <informalexample>
+    <programlisting role="php">
+<![CDATA[
+<?php
+switch ($i):
+    case 0:
+        echo "i equals 0";
+        break;
+    case 1:
+        echo "i equals 1";
+        break;
+    case 2:
+        echo "i equals 2";
+        break;
+    default:
+        echo "i is not equal to 0, 1 or 2";
+endswitch;
+?>
+]]>
+    </programlisting>
+   </informalexample>
+  </para>
+  <para>
+    允许使用分号(;)代替case语句后的冒号(:)，例如：
+    <informalexample>
+     <programlisting role="php">
+<![CDATA[
+<?php
+switch($beer)
+{
+    case 'tuborg';
+    case 'carlsberg';
+    case 'heineken';
+        echo 'Good choice';
+    break;
+    default;
+        echo 'Please make a new selection...';
+    break;
+}
+?>
+]]>
+     </programlisting>
+    </informalexample>
+  </para>  
+ </sect1>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"../../manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
