@@ -538,6 +538,136 @@ $foo->$funcname();   // This calls $foo->Variable()
      </para>
     </sect1>
 
+	<sect1 xml:id="functions.anonymous">
+   <title>匿名函数</title>
+
+   <simpara>
+	匿名函数（Anonymous functions），也叫闭包函数（<literal>closures</literal>），允许
+	临时创建一个没有指定名称的函数。最经常用作回调函数（<link linkend="language.types.callback">callback</link>）的参数。
+	当然，也有其他应用的情况。
+   </simpara>
+
+   <example>
+    <title>Anonymous function 示例</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+echo preg_replace_callback('~-([a-z])~', function ($match) {
+    return strtoupper($match[1]);
+}, 'hello-world');
+// 输出 helloWorld
+?>
+]]>
+    </programlisting>
+   </example>
+
+   <simpara>
+	闭包函数也可以作为变量的值来使用。PHP会自动把表达式转换成内置类<classname>Closure</classname>的
+	对象实例。把一个closure对象赋值给一个变量的方式与普通变量赋值的语法是一样的，最后也要加上分号。
+   </simpara>
+
+   <example>
+    <title>匿名函数变量赋值示例</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$greet = function($name)
+{
+    printf("Hello %s\r\n", $name);
+};
+
+$greet('World');
+$greet('PHP');
+?>
+]]>
+    </programlisting>
+   </example>
+   
+   <simpara>
+	Closure对象也会从父作用域中继承类属性。这些变量都必须在函数或类的头部声明。从父作用域中继承
+	变量与使用全局变量是*不同*的。全局变量存在于一个全局的范围，无论当前在执行的是哪个函数。而closure
+	的父类作用域则是声明该closure的函数（不一定要是它被调用的函数）。示例如下：
+   </simpara>
+
+   <example>
+    <title>Closures和作用域</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+// 一个基本的购物车，包括一些已经添加的商品和每种商品的数量。
+// 其中有一个方法用来计算购物车中所有商品的总价格。该方法使用了一个closure作为回调函数。
+class Cart
+{
+    const PRICE_BUTTER  = 1.00;
+    const PRICE_MILK    = 3.00;
+    const PRICE_EGGS    = 6.95;
+
+    protected   $products = array();
+    
+    public function add($product, $quantity)
+    {
+        $this->products[$product] = $quantity;
+    }
+    
+    public function getQuantity($product)
+    {
+        return isset($this->products[$product]) ? $this->products[$product] :
+               FALSE;
+    }
+    
+    public function getTotal($tax)
+    {
+        $total = 0.00;
+        
+        $callback =
+            function ($quantity, $product) use ($tax, &$total)
+            {
+                $pricePerItem = constant(__CLASS__ . "::PRICE_" .
+                    strtoupper($product));
+                $total += ($pricePerItem * $quantity) * ($tax + 1.0);
+            };
+        
+        array_walk($this->products, $callback);
+        return round($total, 2);;
+    }
+}
+
+$my_cart = new Cart;
+
+// 往购物车里添加条目
+$my_cart->add('butter', 1);
+$my_cart->add('milk', 3);
+$my_cart->add('eggs', 6);
+
+// 打出出总价格，其中有 5% 的销售税.
+print $my_cart->getTotal(0.05) . "\n";
+// The result is 54.29
+?>
+]]>
+    </programlisting>
+   </example>
+   
+   <simpara>
+	匿名函数目前是通过<link linkend="reserved.classes.closure">
+    <classname>Closure</classname></link>类来实现的。目前还不稳定，不适用于正式开发。
+   </simpara>
+   
+   <note>
+    <simpara>    
+	 匿名函数只在PHP 5.3.0 及以上版本有效。
+    </simpara>
+   </note>
+
+   <note>
+    <simpara>
+     在closure内部可以调用 <function>func_num_args</function>,
+     <function>func_get_arg</function>, 和 <function>func_get_args</function>
+     等函数来获取参数信息。
+    </simpara>
+   </note>
+
+  </sect1>
+
  </chapter>
 
 <!-- Keep this comment at the end of the file
