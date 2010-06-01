@@ -1,64 +1,64 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- $Revision:  $ -->
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision: 300063 $ -->
 <!-- $Author: herrywood $ -->
 <!-- $EN-Revision: 2fd3f0c96d9d221fe37109775af4df4cf949d5d8 $ -->
  <sect1 xml:id="internals2.memory.management" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-  <title>�ڴ��������</title>
+  <title>内存管理基础</title>
 
   <para>
-   �� C ���Ա��ʱ��������Ҫ�ֹ��ؽ����ڴ��������Ϊ PHP �������� Web
-   ��������ģ�飬�ڴ������Ԥ���ڴ�й©���ܹ���������Ҫ֪�� PHP
-   ���������̻߳����У�����ζ��ȫ�ֱ������ܵ��¾���״�����й��߳���ȫ�����ݴ�������Ϣ��μ���Ϊ�̸߳�����ʩ��
-   <xref linkend="internals2.memory.TSRM"/>��
+   用 C 语言编程时，开发者要手工地进行内存管理。因为 PHP 经常用作 Web
+   服务器的模块，内存管理与预防内存泄漏紧密关联。此外要知道 PHP
+   可能用于线程环境中，这意味着全局变量可能导致竞争状况。有关线程内全局数据处理的信息请参见作为线程隔离设施的
+   <xref linkend="internals2.memory.TSRM"/>。
   </para>
 
   <para>
-   ���⣬Zend ����Ҫ���һ��ʮ�������ʹ��ģʽ����һ�αȽ϶̵�ʱ���ڣ�����
-   zval �ṹ��С���ڴ���������С�ڴ�鱻�������ٱ��ͷš�PHP ���ڴ����Ҳ������
-   <link linkend="ini.memory-limit">memory_limit(�ڴ�����)</link>��
+   此外，Zend 引擎要面对一个十分特殊的使用模式：在一段比较短的时间内，许多
+   zval 结构大小的内存块和其他的小内存块被申请又再被释放。PHP 的内存管理也很重视
+   <link linkend="ini.memory-limit">memory_limit(内存限制)</link>。
   </para>
 
   <para>
-   Ϊ���������ϵ�����Zend
-   �����ṩΪ�˴���������������ṩ��һ��������ڴ���������������������ָֻ��Ҫ�����ڵ���������ٻ����������ʱ�ͷŵ����ݡ���չ��������Ҫ�Ӵ��±����г��Ĺ�������ȻһЩ���ṩ�ı�ݹ������ú�ʵ�ֵģ����ڱ����л�����һ���Դ���
+   为了满足以上的需求，Zend
+   引擎提供为了处理请求相关数据提供了一种特殊的内存管理器。请求相关数据是指只需要服务于单个请求，最迟会在请求结束时释放的数据。扩展开发者主要接触下表中列出的惯例。虽然一些所提供的便捷功能是用宏实现的，但在本文中会象函数一样对待。
   </para>
 
   <table xml:id="internals2.memory.management.apis">
-   <title>��Ҫ���ڴ� APIs</title>
+   <title>主要的内存 APIs</title>
    <tgroup cols="2">
     <thead>
      <row>
-      <entry>ԭ��</entry>
-      <entry>˵��</entry>
+      <entry>原型</entry>
+      <entry>说明</entry>
      </row>
     </thead>
     <tbody>
      
      <row>
       <entry><code>void *emalloc(size_t size)</code></entry>
-      <entry>���� <code>size</code> �ֽڵ��ڴ档</entry>
+      <entry>分配 <code>size</code> 字节的内存。</entry>
      </row>
 
      <row>
       <entry><code>void *ecalloc(size_t nmemb, size_t size)</code></entry>
       <entry>
-	   �� <code>nmemb</code> Ԫ�ط��� <code>size</code> �ֽڵĻ���������ʼ��Ϊ�㡣
+	   给 <code>nmemb</code> 元素分配 <code>size</code> 字节的缓冲区并初始化为零。
       </entry>
      </row>
 
      <row>
       <entry><code>void *erealloc(void *ptr, size_t size)</code></entry>
       <entry>
-       �޸�ʹ�� <code>emalloc</code> ����Ļ����� <code>ptr</code> �Ĵ�СΪ
-	   <code>size</code> �ֽڡ�
+       修改使用 <code>emalloc</code> 分配的缓冲区 <code>ptr</code> 的大小为
+	   <code>size</code> 字节。
       </entry>
      </row>
 
      <row>
       <entry><code>void efree(void *ptr)</code></entry>
       <entry>
-       �ͷ� <code>ptr</code> ָ��Ļ��������������������� <code>emalloc</code>
-	   ����ġ�
+       释放 <code>ptr</code> 指向的缓冲区。缓冲区必须是由 <code>emalloc</code>
+	   分配的。
       </entry>
      </row>
 
@@ -67,17 +67,17 @@
        <code>void *safe_emalloc(size_t nmemb, size_t size, size_t offset)</code>
       </entry>
       <entry>
-	   ���仺���������ÿ���СΪ <code>size</code> �ֽڵ� <code>nmemb</code>
-	   �飬������ <code>offset</code> �ֽڡ�������
-	   <code>emalloc(nmemb * size + offset)</code>���������������������Ᵽ����
+	   分配缓冲区来存放每块大小为 <code>size</code> 字节的 <code>nmemb</code>
+	   块，并附加 <code>offset</code> 字节。类似于
+	   <code>emalloc(nmemb * size + offset)</code>，但增加了针对溢出的特殊保护。
       </entry>
      </row>
 
      <row>
       <entry><code>char *estrdup(const char *s)</code></entry>
       <entry>
-       ����һ���ɴ�� NULL ��β���ַ��� <code>s</code> �Ļ�����������
-	   <code>s</code> ���Ƶ��������ڡ�
+       分配一个可存放 NULL 结尾的字符串 <code>s</code> 的缓冲区，并将
+	   <code>s</code> 复制到缓冲区内。
       </entry>
      </row>
 
@@ -86,7 +86,7 @@
        <code>char *estrndup(const char *s, unsigned int length)</code>
       </entry>
       <entry>
-       ������ <code>estrdup</code>���� NULL ��β���ַ�����������֪�ġ�
+       类似于 <code>estrdup</code>，但 NULL 结尾的字符串长度是已知的。
       </entry>
      </row>
     </tbody>
@@ -95,19 +95,19 @@
 
   <note>
    <simpara>
-    ���� C ��׼�����ƵĲ��ֲ�ͬ���������������ڴ������Zend
-	������ڴ�����������᷵�� NULL ֵ��������������ֹ��ǰ����
+    和与 C 标准库相似的部分不同，如果分配请求的内存出错，Zend
+	引擎的内存管理函数不会返回 NULL 值，而会跳出并中止当前请求。
    </simpara>
   </note>
 
   <para>
-   ������������ֹ���ڴ�й©�������ܿ���ͷ������ڴ����ڴ��������Ҫ��ɲ��֡���Ϊ��ȫԭ�����������ʱ��
-   Zend ������ͷ������������ᵽ�� API ��������ڴ档��� PHP
-   ʹ�� <code>--enable-debug</code> ����ѡ����й������⽫����һ�����档
+   如上所述，防止有内存泄漏并尽可能快地释放所有内存是内存管理的重要组成部分。因为安全原因，在请求结束时，
+   Zend 引擎会释放所有由上面提到的 API 所分配的内存。如果 PHP
+   使用 <code>--enable-debug</code> 配置选项进行构建，这将产生一个警告。
   </para>
 
   <example xml:id="internals2.memory.management.example.leak">
-   <title>PHP ��й©����</title>
+   <title>PHP 的泄漏报警</title>
    <programlisting role="c">
 <![CDATA[
 ZEND_FUNCTION(leak)
@@ -134,16 +134,16 @@ ZEND_FUNCTION(leak)
 
   <note>
    <simpara>
-    ��ʹ�� PHP ����ʱ����Ҫȷ�ϱ������ڴ�Ҫʹ�� emalloc
-	�����䣬��ע�����ü��������ϸ����鿴 <xref linkend="internals2.variables"/>��
+    当使用 PHP 变量时，需要确认变量的内存要使用 emalloc
+	来分配，并注意引用计数。相关细节请查看 <xref linkend="internals2.variables"/>。
    </simpara>
   </note>
 
   <note>
    <simpara>
-    �ڴ�й©�������Է����� emalloc �����ڴ�鵼�µ�й©��Ϊ����������������ʹ���ڴ���������
-	valgrind �� libumem �ȡ�Ҫ�򻯴˷��������� PHP
-	����ʱͨ�����û������� USE_ZEND_ALLOC=0 ������ PHP ���ڴ��������
+    内存泄漏检测仅可以发现由 emalloc 分配内存块导致的泄漏。为进行深层分析，建议使用内存检测器，如
+	valgrind 或 libumem 等。要简化此分析，可在 PHP
+	启动时通过设置环境变量 USE_ZEND_ALLOC=0 来禁用 PHP 的内存管理器。
    </simpara>
   </note>
 
