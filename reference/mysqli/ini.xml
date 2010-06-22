@@ -19,40 +19,70 @@
     </thead>
     <tbody>
      <row>
-      <entry>mysqli.max_links</entry>
+      <entry>mysqli.allow_persistent</entry>
+      <entry>"1"</entry>
+      <entry>PHP_INI_SYSTEM</entry>
+      <entry>自 PHP 5.3.0 起可用。</entry>
+     </row>
+     <row>
+      <entry>mysqli.max_persistent</entry>
+      <entry>"-1"</entry>
+      <entry>PHP_INI_SYSTEM</entry>
+      <entry>自 PHP 5.3.0 起可用。</entry>
+     </row>
+     <row>
+      <entry><link linkend="ini.mysqli.max-links">mysqli.max_links</link></entry>
       <entry>"-1"</entry>
       <entry>PHP_INI_SYSTEM</entry>
       <entry>自 PHP 5.0.0 起可用。</entry>
      </row>
      <row>
-      <entry>mysqli.default_port</entry>
+      <entry><link linkend="ini.mysqli.default-port">mysqli.default_port</link></entry>
       <entry>"3306"</entry>
       <entry>PHP_INI_ALL</entry>
       <entry>自 PHP 5.0.0 起可用。</entry>
      </row>
      <row>
-      <entry>mysqli.default_socket</entry>
+      <entry><link linkend="ini.mysqli.default-socket">mysqli.default_socket</link></entry>
       <entry>NULL</entry>
       <entry>PHP_INI_ALL</entry>
       <entry>自 PHP 5.0.0 起可用。</entry>
      </row>
      <row>
-      <entry>mysqli.default_host</entry>
+      <entry><link linkend="ini.mysqli.default-host">mysqli.default_host</link></entry>
       <entry>NULL</entry>
       <entry>PHP_INI_ALL</entry>
       <entry>自 PHP 5.0.0 起可用。</entry>
      </row>
      <row>
-      <entry>mysqli.default_user</entry>
+      <entry><link linkend="ini.mysqli.default-user">mysqli.default_user</link></entry>
       <entry>NULL</entry>
       <entry>PHP_INI_ALL</entry>
       <entry>自 PHP 5.0.0 起可用。</entry>
      </row>
      <row>
-      <entry>mysqli.default_pw</entry>
+      <entry><link linkend="ini.mysqli.default-pw">mysqli.default_pw</link></entry>
       <entry>NULL</entry>
       <entry>PHP_INI_ALL</entry>
       <entry>自 PHP 5.0.0 起可用。</entry>
+     </row>
+     <row>
+      <entry><link linkend="ini.mysqli.reconnect">mysqli.reconnect</link></entry>
+      <entry>"0"</entry>
+      <entry>PHP_INI_SYSTEM</entry>
+      <entry>自 PHP 4.3.5 起可用。</entry>
+     </row>
+     <row>
+      <entry><link linkend="ini.mysqli.allow-local-infile">mysqli.allow_local_infile</link></entry>
+      <entry>"1"</entry>
+      <entry>PHP_INI_SYSTEM</entry>
+      <entry>自 PHP 5.2.4 起可用。</entry>
+     </row>
+     <row>
+      <entry><link linkend="ini.mysqli.cache-size">mysqli.cache_size</link></entry>
+      <entry>"2000"</entry>
+      <entry>PHP_INI_SYSTEM</entry>
+      <entry>自 PHP 5.3.0 起可用。</entry>
      </row>
     </tbody>
    </tgroup>
@@ -66,6 +96,28 @@
 
  <para>
  <variablelist>
+  <varlistentry xml:id="ini.mysqli.allow-persistent">
+   <term>
+    <parameter>mysqli.allow_persistent</parameter>
+    <type>integer</type>
+   </term>
+   <listitem>
+    <para>
+	     启用<function>mysqli_connect</function>创建持久连接功能。
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry xml:id="ini.mysqli.max-persistent">
+   <term>
+    <parameter>mysqli.max_persistent</parameter>
+    <type>integer</type>
+   </term>
+   <listitem>
+    <para>
+	  可创建的持久连接最大数目。 设为0时无上限。
+    </para>
+   </listitem>
+  </varlistentry>
   <varlistentry xml:id="ini.mysqli.max-links">
    <term>
     <parameter>mysqli.max_links</parameter>
@@ -80,18 +132,17 @@
    <varlistentry xml:id="ini.mysqli.default-port">
    <term>
     <parameter>mysqli.default_port</parameter>
-    <type>string</type>
+    <type>integer</type>
    </term>
    <listitem>
     <para>
-     The default TCP port number to use when connecting to
-     the database server if no other port is specified. If
-     no default is specified, the port will be obtained
-     from the <literal>MYSQL_TCP_PORT</literal> environment
-     variable, the <literal>mysql-tcp</literal> entry in
-     <filename>/etc/services</filename> or the compile-time
-     <literal>MYSQL_PORT</literal> constant, in that order. Win32
-     will only use the <literal>MYSQL_PORT</literal> constant.
+	   当未指定其它端口时，连接数据库所使用的缺省端口号。如果未
+	   指定缺省端口号，端口号将依次取下列值：
+	   环境变量 <literal>MYSQL_TCP_PORT</literal>，
+	  文件<filename>/etc/services</filename>中的
+	 <literal>mysql-tcp</literal>，
+	  或编译时指定的<literal>MYSQL_PORT</literal>常量。
+	 Win32将仅适用<literal>MYSQL_PORT</literal>常量。
     </para>
    </listitem>
   </varlistentry>
@@ -103,8 +154,7 @@
    </term>
    <listitem>
     <para>
-     The default socket name to use when connecting to a local
-     database server if no other socket name is specified.
+            未指定其它socket名称时，连接到本地数据库所使用的缺省socket名称。
     </para>
    </listitem>
   </varlistentry>
@@ -115,9 +165,8 @@
    </term>
    <listitem>
     <para>
-     The default server host to use when connecting to the database
-     server if no other host is specified. Doesn't apply in
-     <link linkend="ini.safe-mode">safe mode</link>.
+             未指定其它主机名时，连接到数据库服务器时所使用的缺省主机名。
+	 安全模式<link linkend="ini.safe-mode">safe mode</link>下无效。
     </para>
    </listitem>
   </varlistentry>
@@ -129,9 +178,8 @@
    </term>
    <listitem>
     <para>
-     The default user name to use when connecting to the database
-     server if no other name is specified. Doesn't apply in
-     <link linkend="ini.safe-mode">safe mode</link>.
+     未指定用户名时，连接数据库服务器时所使用的缺省用户名。
+     安全模式<link linkend="ini.safe-mode">safe mode</link>下无效。        
     </para>
    </listitem>
   </varlistentry>
@@ -143,13 +191,11 @@
    </term>
    <listitem>
     <para>
-     The default password to use when connecting to the database
-     server if no other password is specified. Doesn't apply in
-     <link linkend="ini.safe-mode">safe mode</link>.
+     未指定密码时，连接数据库服务器时所使用的缺省密码。
+     安全模式<link linkend="ini.safe-mode">safe mode</link>下无效。        
     </para>
    </listitem>
   </varlistentry>
-  
   <varlistentry xml:id="ini.mysqli.reconnect">
    <term>
     <parameter>mysqli.reconnect</parameter>
@@ -157,7 +203,7 @@
    </term>
    <listitem>
     <para>
-     Automatically reconnect if the connection was lost.
+            连接断开后自动重新连接。
     </para>
    </listitem>
   </varlistentry>
@@ -165,7 +211,7 @@
   <varlistentry xml:id="ini.mysqli.allow-local-infile">
    <term>
     <parameter>mysqli.allow_local_infile</parameter>
-    <type>integer</type>
+    <type>integer</type> 
    </term>
    <listitem>
     <para>
@@ -185,7 +231,7 @@
     </para>
    </listitem>
   </varlistentry>
-  
+
  </variablelist>
  </para>
 </section>
