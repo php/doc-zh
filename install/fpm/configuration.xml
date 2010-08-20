@@ -1,0 +1,462 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision: 301097 $ -->
+  <sect1 xml:id="install.fpm.configuration" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+   <title>运行时配置</title>
+   <para>
+    FPM 配置文件为<filename>php-fpm.conf</filename>，其语法类似 &php.ini; 。
+   </para>
+   <sect2> 
+    <title><filename>php-fpm.conf</filename> 全局配置段</title>
+    <variablelist>
+     <varlistentry xml:id="pid">
+      <term>
+       <parameter>pid</parameter>
+       <type>string</type>
+      </term>
+      <listitem>
+       <para>
+        PID文件的位置. 默认为空.
+       </para> 
+      </listitem>
+     </varlistentry>
+     <varlistentry xml:id="error-log">
+      <term>
+       <parameter>error_log</parameter>
+       <type>string</type>
+      </term>
+      <listitem>
+       <para>
+        错误日志的位置. 默认：
+        <literal>安装路径#INSTALL_PREFIX#/log/php-fpm.log</literal>.
+       </para> 
+      </listitem>
+     </varlistentry>
+     <varlistentry xml:id="log-level">
+      <term>
+       <parameter>log_level</parameter>
+       <type>string</type>
+      </term>
+      <listitem>
+       <para>
+        错误级别. 可用级别为: alert（必须立即处理）, error（错误情况）, warning（警告情况）, notice（一般重要信息）,
+        debug（调试信息）. 默认: notice.
+       </para> 
+      </listitem>
+     </varlistentry>
+     <varlistentry xml:id="emergency-restart-threshold">
+      <term>
+       <parameter>emergency_restart_threshold</parameter>
+       <type>int</type>
+      </term>
+      <listitem>
+       <para>
+        如果子进程在<literal>emergency_restart_interval</literal>设定的时间内收到该参数设定次数的SIGSEGV 或者 SIGBUS退出信息号，则FPM会重新启动。  0 表示 '关闭该功能'. 默认值: 0 (关闭).
+       </para> 
+      </listitem>
+     </varlistentry>
+     <varlistentry xml:id="emergency-restart-interval">
+      <term>
+       <parameter>emergency_restart_interval</parameter>
+       <type>mixed</type>
+      </term>
+      <listitem>
+       <para>
+        emergency_restart_interval用于设定平滑重启的间隔时间. 这么做有助于解决加速器中共享内存的使用问题.
+        可用单位: s(秒), m(分), h(小时), 或者 d(天).
+        默认单位： s(秒). 默认值: 0 (关闭).
+       </para> 
+      </listitem>
+     </varlistentry>
+     <varlistentry xml:id="process-control-timeout">
+      <term>
+       <parameter>process_control_timeout</parameter>
+       <type>mixed</type>
+      </term>
+      <listitem>
+       <para>
+        设置子进程接受主进程复用信号的超时时间. 可用单位: s(秒), m(分), h(小时), 或者 d(天)
+        默认单位: s(秒). 默认值: 0.
+       </para> 
+      </listitem>
+     </varlistentry>
+     <varlistentry xml:id="daemonize">
+      <term>
+       <parameter>daemonize</parameter>
+       <type>boolean</type>
+      </term>
+      <listitem>
+       <para>
+        设置FPM在后台运行. 设置 'no' 将 FPM 保持在前台运行用于调试. 默认值: yes.
+       </para> 
+      </listitem>
+     </varlistentry>
+    </variablelist>
+   </sect2>
+
+   <sect2> 
+    <title>运行配置区段</title>
+    <para>
+     在FPM中，可以使用不同的设置来运行多个进程池。
+     这些设置可以针对每个进程池单独设置。 
+    </para>
+    <variablelist>
+     <varlistentry xml:id="listen">
+      <term>
+       <parameter>listen</parameter>
+       <type>string</type>
+      </term>
+      <listitem>
+       <para>
+        设置接受FastCGI请求的地址. 可用格式为:
+        'ip:port', 'port', '/path/to/unix/socket'. 每个进程池都需要设置.
+       </para> 
+      </listitem>
+     </varlistentry>
+     <varlistentry xml:id="listen-backlog">
+      <term>
+       <parameter>listen.backlog</parameter>
+       <type>int</type>
+      </term>
+      <listitem>
+       <para>
+        设置 listen(2) 的半连接队列长度.  '-1' 表示无限制. 默认值:
+        -1.
+       </para> 
+      </listitem>
+     </varlistentry>
+     <varlistentry xml:id="listen-allowed-clients">
+      <term>
+       <parameter>listen.allowed_clients</parameter>
+       <type>string</type>
+      </term>
+      <listitem>
+       <para>
+        设置允许连接到FastCGI的服务器IPV4地址. 等同于PHP FastCGI (5.2.2+)中的 FCGI_WEB_SERVER_ADDRS环境变量. 仅对TCP监听起作用.
+        每个地址是用逗号分隔. 如果没有设置或者为空，则允许任何服务器请求连接. 默认值: any.
+       </para> 
+      </listitem>
+     </varlistentry>
+     <varlistentry xml:id="listen-owner">
+      <term>
+       <parameter>listen.owner</parameter>
+       <type>string</type>
+      </term>
+      <listitem>
+       <para>
+        如果使用，表示设置Unix套接字的权限. 在Linux中，读写权限必须设置，以便用于WEB服务器连接. 在很多BSD派生的系统中可以忽略权限允许自由连接.
+        默认值: 运行所使用的用户合租, 权限为0666.
+       </para> 
+      </listitem>
+     </varlistentry>
+     <varlistentry xml:id="listen-group">
+      <term>
+       <parameter>listen.group</parameter>
+       <type>string</type>
+      </term>
+      <listitem>
+       <para>
+        参见 <literal>listen.owner</literal>.
+       </para> 
+      </listitem>
+     </varlistentry>
+     <varlistentry xml:id="listen-mode">
+      <term>
+       <parameter>listen.mode</parameter>
+       <type>string</type>
+      </term>
+      <listitem>
+       <para>
+        参见 <literal>listen.owner</literal>.
+       </para> 
+      </listitem>
+     </varlistentry>
+     <varlistentry xml:id="user">
+      <term>
+       <parameter>user</parameter>
+       <type>string</type>
+      </term>
+      <listitem>
+       <para>
+        FPM 进程运行的Unix用户. 必须设置.
+       </para> 
+      </listitem>
+     </varlistentry>
+     <varlistentry xml:id="group">
+      <term>
+       <parameter>group</parameter>
+       <type>string</type>
+      </term>
+      <listitem>
+       <para>
+        FPM 进程运行的Unix用户组. 如果没有设置，则默认用户的组被使用. 
+       </para> 
+      </listitem>
+     </varlistentry>
+     <varlistentry xml:id="pm">
+      <term>
+       <parameter>pm</parameter>
+       <type>string</type>
+      </term>
+      <listitem>
+       <para>
+        设置进程管理器如何管理子进程. 可用值: <literal>static</literal>, <literal>dynamic</literal>. 
+        必须设置.
+       </para>
+       <para>
+        <literal>static</literal> - 子进程的数量是固定的 (<literal>pm.max_children</literal>).
+       </para>
+       <para>
+        <literal>dynamic</literal> - 子进程的数量在下面配置的基础上动态设置: <literal>pm.max_children</literal>, <literal>pm.start_servers</literal>, 
+        <literal>pm.min_spare_servers</literal>, <literal>pm.max_spare_servers</literal>.
+       </para>
+      </listitem>
+     </varlistentry>
+     <varlistentry xml:id="pm.max-chidlren">
+      <term>
+       <parameter>pm.max_children</parameter>
+       <type>int</type>
+      </term>
+      <listitem>
+       <para>
+        子进程的数量，<literal>pm</literal> 设置为
+        <literal>static</literal> 时表示创建的， <literal>pm</literal> 设置为 <literal>dynamic</literal> 时表示最大可创建的. 必须设置.
+       </para>
+       <para>
+        该选项设置可以同时提供服务的请求数限制. 类似 Apache 的 mpm_prefork 中 MaxClients 的设置和 普通PHP FastCGI中的 <varname>PHP_FCGI_CHILDREN</varname> 环境变量.
+       </para>
+      </listitem>
+     </varlistentry>
+     <varlistentry xml:id="pm.start-servers">
+      <term>
+       <parameter>pm.start_servers</parameter>
+       <type>in</type>
+      </term>
+      <listitem>
+       <para>
+        设置启动时创建的子进程数目. 
+        仅在 <literal>pm</literal> 设置为 <literal>dynamic</literal> 时使用.
+        默认值: min_spare_servers + (max_spare_servers -
+        min_spare_servers) / 2.
+       </para> 
+      </listitem>
+     </varlistentry>
+     <varlistentry xml:id="pm.min-spare-servers">
+      <term>
+       <parameter>pm.min_spare_servers</parameter>
+       <type>int</type>
+      </term>
+      <listitem>
+       <para>
+        设置空闲服务进程的最低数目. 仅在 <literal>pm</literal> 设置为 <literal>dynamic</literal> 时使用. 必须设置.
+       </para> 
+      </listitem>
+     </varlistentry>
+     <varlistentry xml:id="pm.max-spare-servers">
+      <term>
+       <parameter>pm.max_spare_servers</parameter>
+       <type>int</type>
+      </term>
+      <listitem>
+       <para>
+        设置空闲服务进程的最大数目. 仅在 <literal>pm</literal> 设置为 <literal>dynamic</literal> 时使用. 必须设置.
+       </para> 
+      </listitem>
+     </varlistentry>
+     <varlistentry xml:id="pm.max-requests">
+      <term>
+       <parameter>pm.max_requests</parameter>
+       <type>int</type>
+      </term>
+      <listitem>
+       <para>
+        设置每个子进程重生之前服务的请求数. 对于可能存在内存泄漏的第三方模块来说是非常有用的. 如果设置为 '0' 则一直接受请求. 等同于
+        <varname>PHP_FCGI_MAX_REQUESTS</varname> 环境变量. 默认值: 0.
+       </para> 
+      </listitem>
+     </varlistentry>
+     <varlistentry xml:id="pm.status-path">
+      <term>
+       <parameter>pm.status_path</parameter>
+       <type>string</type>
+      </term>
+      <listitem>
+       <para>
+        FPM状态页面的网址. 如果没有设置, 则无法访问状态页面. 默认值: none.
+       </para> 
+      </listitem>
+     </varlistentry>
+     <varlistentry xml:id="ping.path">
+      <term>
+       <parameter>ping.path</parameter>
+       <type>string</type>
+      </term>
+      <listitem>
+       <para>
+        FPM监控页面的ping网址. 如果没有设置, 则无法访问ping页面. 该页面用于外部检测FPM是否存活并且可以响应请求. 请注意必须以斜线开头 (/).
+       </para> 
+      </listitem>
+     </varlistentry>
+     <varlistentry xml:id="ping.response">
+      <term>
+       <parameter>ping.response</parameter>
+       <type>string</type>
+      </term>
+      <listitem>
+       <para>
+        用于定义ping请求的返回相应. 返回为 HTTP 200 的 text/plain 格式文本.
+        默认值: pong.
+       </para> 
+      </listitem>
+     </varlistentry>
+     <varlistentry xml:id="request-terminate-timeout">
+      <term>
+       <parameter>request_terminate_timeout</parameter>
+       <type>mixed</type>
+      </term>
+      <listitem>
+       <para>
+        设置单个请求的超时中止时间. 该选项可能会对php.ini设置中的'max_execution_time'因为某些特殊原因没有中止运行的脚本有用. 设置为 '0' 表示        'Off'. Available units: s(econds)(default), m(inutes), h(ours), or d(ays).
+        Default value: 0.
+       </para> 
+      </listitem>
+     </varlistentry>
+     <varlistentry xml:id="request-slowlog-timeout">
+      <term>
+       <parameter>request_slowlog_timeout</parameter>
+       <type>mixed</type>
+      </term>
+      <listitem>
+       <para>
+        当一个请求该设置的超时时间后，就会将对应的PHP调用堆栈信息完整写入到慢日志中. 设置为 '0' 表示 'Off'.
+        可用单位: s(秒)(默认), m(分), h(小时), 或者 d(天).
+        默认值: 0.
+       </para> 
+      </listitem>
+     </varlistentry>
+     <varlistentry xml:id="slowlog">
+      <term>
+       <parameter>slowlog</parameter>
+       <type>string</type>
+      </term>
+      <listitem>
+       <para>
+        慢请求的记录日志. 默认值:
+        <literal>#INSTALL_PREFIX#/log/php-fpm.log.slow</literal>.
+       </para> 
+      </listitem>
+     </varlistentry>
+     <varlistentry xml:id="rlimit-files">
+      <term>
+       <parameter>rlimit_files</parameter>
+       <type>int</type>
+      </term>
+      <listitem>
+       <para>
+        设置文件打开描述符的rlimit限制. 默认值: 系统定义值.
+       </para> 
+      </listitem>
+     </varlistentry>
+     <varlistentry xml:id="rlimit-core">
+      <term>
+       <parameter>rlimit_core</parameter>
+       <type>int</type>
+      </term>
+      <listitem>
+       <para>
+        设置核心rlimit最大限制值. 可用值: 'unlimited' 、0或者正整数.
+        默认值: 系统定义值.
+       </para> 
+      </listitem>
+     </varlistentry>
+     <varlistentry xml:id="chroot">
+      <term>
+       <parameter>chroot</parameter>
+       <type>string</type>
+      </term>
+      <listitem>
+       <para>
+        启动时的Chroot目录. 所定义的目录需要是绝对路径. 如果没有设置, 则chroot不被使用.
+       </para> 
+      </listitem>
+     </varlistentry>
+     <varlistentry xml:id="chdir">
+      <term>
+       <parameter>chdir</parameter>
+       <type>string</type>
+      </term>
+      <listitem>
+       <para>
+        设置启动目录，启动时会自动Chdir到该目录. 所定义的目录需要是绝对路径. 默认值: 当前目录，或者/目录（chroot时）.
+       </para> 
+      </listitem>
+     </varlistentry>
+     <varlistentry xml:id="catch-workers-output">
+      <term>
+       <parameter>catch_workers_output</parameter>
+       <type>boolean</type>
+      </term>
+      <listitem>
+       <para>
+        重定向运行过程中的stdout和stderr到主要的错误日志文件中. 如果没有设置,
+        stdout 和 stderr 将会根据FastCGI的规则被重定向到 /dev/null .
+        默认值: 空.
+       </para> 
+      </listitem>
+     </varlistentry>
+    </variablelist>
+    <para>
+     你还可以在为一个运行池传递附加的环境变量，或者更新PHP的配置值.
+     你可以在 <filename>php-fpm.conf</filename> 中下如下面的配置参数来做到：
+     <example>
+      <title>给运行池船体环境变量和设置PHP的配置值</title>
+      <programlisting role="ini">
+       <![CDATA[
+       env[HOSTNAME] = $HOSTNAME
+       env[PATH] = /usr/local/bin:/usr/bin:/bin
+       env[TMP] = /tmp
+       env[TMPDIR] = /tmp
+       env[TEMP] = /tmp
+
+       php_admin_value[sendmail_path] = /usr/sbin/sendmail -t -i -f www@my.domain.com
+       php_flag[display_errors] = off
+       php_admin_value[error_log] = /var/log/fpm-php.www.log
+       php_admin_flag[log_errors] = on
+       php_admin_value[memory_limit] = 32M
+       ]]>
+      </programlisting>
+     </example>
+     PHP配置值通过 <literal>php_value</literal> 或者
+     <literal>php_flag</literal> 设置，并且会覆盖以前的值.
+     请注意 
+     <link linkend="ini.disable-functions">disable_functions</link> 或者 
+     <link linkend="ini.disable-classes">disable_classes</link> 在 <filename>php.ini</filename> 之中定义的值不会被覆盖掉, 
+     但是会将新的设置附加在原有值的后面.
+    </para>
+    <para>
+     使用 <literal>php_admin_value</literal> 或者 <literal>php_admin_flag</literal>
+     定义的值，不能被PHP代码中的 <function>ini_set</function> 覆盖.
+    </para>
+   </sect2>
+   
+  </sect1>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
