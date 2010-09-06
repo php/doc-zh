@@ -1,31 +1,23 @@
-<?xml version="1.0" encoding="iso-8859-1"?>
-<!-- $Revision: 283798 $ -->
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision: 297028 $ -->
  <sect1 xml:id="language.oop5.late-static-bindings" xmlns="http://docbook.org/ns/docbook">
-  <title>Late Static Bindings</title>
+  <title>Late Static Bindings（后期静态绑定）</title>
   <para>
-   As of PHP 5.3.0, PHP implements a feature called late static bindings which
-   can be used to reference the called class in a context of static inheritance.
+   从PHP 5.3.0开始，PHP增加了一个叫做后期静态绑定的功能，用于在继承范围内引用静态调用的类。
   </para>
 
   <para>
-   This feature was named "late static bindings" with an internal perspective in
-   mind. "Late binding" comes from the fact that <literal>static::</literal>
-   will no longer be resolved using the class where the method is defined but
-   it will rather be computed using runtime information.
-
-   It was also called a "static binding" as it can be used for (but is not
-   limited to) static method calls.
+   该功能从语言内部角度考虑被命名为”后期静态绑定“。”后期绑定“的意思是说，<literal>static::</literal>不再被解析为定义当前方法所在的类，而是在实际运行时计算的。也可以称之为”静态绑定“，因为它可以用于（但不限于）静态方法的调用。
   </para>
 
   <sect2 xml:id="language.oop5.late-static-bindings.self">
-   <title>Limitations of <literal>self::</literal></title>
+   <title><literal>self::</literal> 的限制</title>
    <para>
-    Static references to the current class like <literal>self::</literal> or
-    <literal>__CLASS__</literal> are resolved using the class in which the
-    function belongs, as in where it was defined:
+    使用<literal>self::</literal> 或者
+    <literal>__CLASS__</literal>对当前类的静态引用，取决于定义当前方法所在的类：
    </para>
    <example>
-    <title><literal>self::</literal> usage</title>
+    <title><literal>self::</literal> 用法</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -40,7 +32,7 @@ class A {
 
 class B extends A {
     public static function who() {
-         echo __CLASS__;
+        echo __CLASS__;
     }
 }
 
@@ -59,19 +51,14 @@ A
   </sect2>
 
   <sect2 xml:id="language.oop5.late-static-bindings.usage">
-   <title>Late Static Bindings' usage</title>
+   <title>后期静态绑定的用法</title>
 
    <para>
-    Late static bindings tries to solve that limitation by introducing a
-    keyword that references the class that was initially called at runtime.
-    Basically, a keyword that would allow you to reference
-    <literal>B</literal> from <literal>test()</literal> in the previous
-    example. It was decided not to introduce a new keyword but rather use
-    <literal>static</literal> that was already reserved.
+    后期静态绑定试图通过引入一个关键字表示运行时最初调用的类来绕过限制。简单地说，这个关键字能够让你在上述例子中调用<literal>test()</literal>时引用的类是<literal>B</literal>而不是<literal>A</literal>。最终决定不引入新的关键字，而是使用已经预留的<literal>static</literal>关键字。
    </para>
 
    <example>
-    <title><literal>static::</literal> simple usage</title>
+    <title><literal>static::</literal> 简单用法</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -80,13 +67,13 @@ class A {
         echo __CLASS__;
     }
     public static function test() {
-        static::who(); // Here comes Late Static Bindings
+        static::who(); // 后期静态绑定从这里开始
     }
 }
 
 class B extends A {
     public static function who() {
-         echo __CLASS__;
+        echo __CLASS__;
     }
 }
 
@@ -103,14 +90,11 @@ B
    </example>
    <note>
     <para>
-     <literal>static::</literal> does not work like <literal>$this</literal> for
-     static methods! <literal>$this-></literal> follows the rules of
-     inheritance while <literal>static::</literal> doesn't. This difference is
-     detailed later on this manual page.
+     <literal>static::</literal> 在处理静态方法时与 <literal>$this</literal> 是不同的。 <literal>$this-></literal> 会遵循继承规则，但是 <literal>static::</literal> 不会。该差异将稍后在本手册中详细说明。
     </para>
    </note>
    <example>
-    <title><literal>static::</literal> usage in a non-static context</title>
+    <title><literal>static::</literal> 用于非静态引用</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -153,13 +137,11 @@ TestParent
    </example>
    <note>
     <para>
-     Late static bindings' resolution will stop at a fully resolved static call
-     with no fallback. On the other hand, static calls using keywords like
-     <literal>parent::</literal> or <literal>self::</literal> will forward the
-     calling information.
+后期静态绑定的处理方式解决了以往完全没有办法解决的静态调用。另外一方面，如果静态调用使用
+     <literal>parent::</literal> 或者 <literal>self::</literal> 将转发调用信息。
     </para>
     <example>
-     <title>Forwarding and non-forwarding calls</title>
+     <title>转发和非转发调用</title>
      <programlisting role="php">
 <![CDATA[
 <?php
@@ -206,15 +188,12 @@ C
    </note>
   </sect2>
   <sect2 xml:id="language.oop5.late-static-bindings.edge-cases">
-   <title>Edge cases</title>
+   <title>特殊情况</title>
    <para>
-    There are lots of different ways to trigger a method call in PHP, like
-    callbacks or magic methods. As late static bindings base their resolution
-    on runtime information, it might give unexpected results in so-called edge
-    cases.
+    在PHP中有很多方式来触发一个方法的调用，例如回调函数或者魔术方法。因为后期静态绑定取决于运行时的信息，因此在特殊情况下可能会得到意想不到的结果。
    </para>
    <example>
-    <title>Late static bindings inside magic methods</title>
+    <title>在魔术方法中使用后期静态绑定</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -261,7 +240,7 @@ sgml-indent-step:1
 sgml-indent-data:t
 indent-tabs-mode:nil
 sgml-parent-document:nil
-sgml-default-dtd-file:"../../manual.ced"
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
 sgml-exposed-tags:nil
 sgml-local-catalogs:nil
 sgml-local-ecat-files:nil
