@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision: 300047 $ -->
+<refentry xml:id="function.curl-setopt-array" xmlns="http://docbook.org/ns/docbook">
+ <refnamediv>
+  <refname>curl_setopt_array</refname>
+  <refpurpose>为cURL传输会话批量设置选项</refpurpose>
+ </refnamediv>
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <type>bool</type><methodname>curl_setopt_array</methodname>
+   <methodparam><type>resource</type><parameter>ch</parameter></methodparam>
+   <methodparam><type>array</type><parameter>options</parameter></methodparam>
+  </methodsynopsis>
+  <para>
+   为cURL传输会话批量设置选项。这个函数对于需要设置大量的cURL选项是非常有用的，不需要重复地调用<function>curl_setopt</function>。
+  </para>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    &curl.ch.description;
+    <varlistentry>
+     <term><parameter>options</parameter></term>
+     <listitem>
+      <para>
+       一个<type>array</type>用来确定将被设置的选项及其值。数组的键值必须是一个有效的<function>curl_setopt</function>常量或者是它们对等的整数值。
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   如果全部的选项都被成功设置，返回&true;。如果一个选项不能被成功设置，马上返回&false;，忽略其后的任何在<parameter>options</parameter>数组中的选项。
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title>
+     初始化一个新的cURL辉煌并抓取一个web页面
+    </title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+// 创建一个新cURL资源
+$ch = curl_init();
+
+// 设置URL和相应的选项
+$options = array(CURLOPT_URL => 'http://www.example.com/',
+                 CURLOPT_HEADER => false
+                );
+
+curl_setopt_array($ch, $options);
+
+// 抓取URL并把它传递给浏览器
+curl_exec($ch);
+
+// 关闭cURL资源，并且释放系统资源
+curl_close($ch);
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   早于PHP 5.1.3这个函数可以做如下模拟：
+  </para>
+  <para>
+   <example>
+    <title>我们对<function>curl_setopt_array</function>的等价实现</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+if (!function_exists('curl_setopt_array')) {
+   function curl_setopt_array(&$ch, $curl_options)
+   {
+       foreach ($curl_options as $option => $value) {
+           if (!curl_setopt($ch, $option, $value)) {
+               return false;
+           } 
+       }
+       return true;
+   }
+}
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+ </refsect1>
+
+ <refsect1 role="notes">
+  &reftitle.notes;
+  <note>
+   <para>
+    就<function>curl_setopt</function>来说，传递一个数组到<constant>CURLOPT_POST</constant>将会把数据以<emphasis>multipart/form-data</emphasis>的方式编码，然而传递一个URL-encoded字符串将会以<emphasis>application/x-www-form-urlencoded</emphasis>的方式对数据进行编码。
+   </para>
+  </note>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>curl_setopt</function></member>
+   </simplelist>
+  </para>
+ </refsect1>
+</refentry>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
