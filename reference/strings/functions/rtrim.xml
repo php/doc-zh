@@ -1,56 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision: 297028 $ -->
-<!-- splitted from ./en/functions/strings.xml, last change in rev 1.2 -->
-<refentry xmlns="http://docbook.org/ns/docbook" xml:id="function.trim">
+<refentry xmlns="http://docbook.org/ns/docbook" xml:id="function.rtrim">
  <refnamediv>
-  <refname>trim</refname> 
-  <refpurpose>去除字符串首尾处的空白字符（或者其他字符）</refpurpose>
+  <refname>rtrim</refname>
+  <refpurpose>删除字符串末端的空白字符（或者其他字符）</refpurpose>
  </refnamediv>
-
+ 
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <type>string</type><methodname>trim</methodname>
+   <type>string</type><methodname>rtrim</methodname>
    <methodparam><type>string</type><parameter>str</parameter></methodparam>
    <methodparam choice="opt"><type>string</type><parameter>charlist</parameter></methodparam>
   </methodsynopsis>
   <para>
-   此函数返回字符串 <parameter>str</parameter> 去除首尾空白字符后的结果。如果不指定第二个参数，<function>trim</function> 将去除这些字符：
+   该函数删除 <parameter>str</parameter> 末端的空白字符并返回。
+  </para>
+  <para>
+   不使用第二个参数，<function>rtrim</function> 仅删除以下字符：
    <!-- sorted by importance. Printed 3 times: trim, ltrim, rtrim -->
    <itemizedlist>
     <listitem>
      <simpara>
-      " " (<acronym>ASCII</acronym> <literal>32</literal> 
-      (<literal>0x20</literal>))，普通空格符。
+      " " (<acronym>ASCII</acronym> <literal>32</literal>
+      (<literal>0x20</literal>))，普通空白符。
      </simpara>
     </listitem>
     <listitem>
      <simpara>
-      "\t" (<acronym>ASCII</acronym> <literal>9</literal> 
+      "\t" (<acronym>ASCII</acronym> <literal>9</literal>
       (<literal>0x09</literal>))，制表符。
      </simpara>
     </listitem>
     <listitem>
      <simpara>
-      "\n" (<acronym>ASCII</acronym> <literal>10</literal> 
+      "\n" (<acronym>ASCII</acronym> <literal>10</literal>
       (<literal>0x0A</literal>))，换行符。
      </simpara>
     </listitem>
     <listitem>
      <simpara>
-      "\r" (<acronym>ASCII</acronym> <literal>13</literal> 
+      "\r" (<acronym>ASCII</acronym> <literal>13</literal>
       (<literal>0x0D</literal>))，回车符。
      </simpara>
     </listitem>
     <listitem>
      <simpara>
-      "\0" (<acronym>ASCII</acronym> <literal>0</literal> 
-      (<literal>0x00</literal>))，空字节符。
+      "\0" (<acronym>ASCII</acronym> <literal>0</literal>
+      (<literal>0x00</literal>))，<literal>NUL</literal> 空字节符。
      </simpara>
     </listitem>
     <listitem>
      <simpara> <!-- not \v, since not supported by PHP -->
-      "\x0B" (<acronym>ASCII</acronym> <literal>11</literal> 
+      "\x0B" (<acronym>ASCII</acronym> <literal>11</literal>
       (<literal>0x0B</literal>))，垂直制表符。
      </simpara>
     </listitem>
@@ -66,7 +68,7 @@
      <term><parameter>str</parameter></term>
      <listitem>
       <para>
-       待处理的<type>字符串</type>。
+       输入字符串。
       </para>
      </listitem>
     </varlistentry>
@@ -74,7 +76,7 @@
      <term><parameter>charlist</parameter></term>
      <listitem>
       <para>
-	   可选参数，过滤字符也可由 <parameter>charlist</parameter> 参数指定。一般要列出所有希望过滤的字符，也可以使用 “<literal>..</literal>” 列出一个字符范围。
+	   通过指定 <parameter>charlist</parameter>，可以指定想要删除的字符列表。简单地列出你想要删除的全部字符。使用 <literal>..</literal> 格式，可以指定一个范围。
       </para>
      </listitem>
     </varlistentry>
@@ -85,7 +87,7 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   过滤后的字符串。
+   返回改变后的字符串。
   </para>
  </refsect1>
 
@@ -104,7 +106,7 @@
       <row>
        <entry>4.1.0</entry>
        <entry>
-	    新增可选的 <parameter>charlist</parameter> 参数。
+        新增 <parameter>charlist</parameter> 参数。
        </entry>
       </row>
      </tbody>
@@ -117,30 +119,30 @@
   &reftitle.examples;
   <para>
    <example>
-    <title><function>trim</function> 使用范例</title>
+    <title><function>rtrim</function> 使用范例</title>
     <programlisting role="php">
 <![CDATA[
 <?php
 
-$text   = "\t\tThese are a few words :) ...  ";
+$text = "\t\tThese are a few words :) ...  ";
 $binary = "\x09Example string\x0A";
 $hello  = "Hello World";
 var_dump($text, $binary, $hello);
 
 print "\n";
 
-$trimmed = trim($text);
+$trimmed = rtrim($text);
 var_dump($trimmed);
 
-$trimmed = trim($text, " \t.");
+$trimmed = rtrim($text, " \t.");
 var_dump($trimmed);
 
-$trimmed = trim($hello, "Hdle");
+$trimmed = rtrim($hello, "Hdle");
 var_dump($trimmed);
 
-// 清除 $binary 首位的 ASCII 控制字符
-// （包括 0-31）
-$clean = trim($binary, "\x00..\x1F");
+// 删除 $binary 末端的 ASCII 码控制字符
+// (包括 0 - 31)
+$clean = rtrim($binary, "\x00..\x1F");
 var_dump($clean);
 
 ?>
@@ -154,57 +156,13 @@ string(16) "    Example string
 "
 string(11) "Hello World"
 
-string(28) "These are a few words :) ..."
-string(24) "These are a few words :)"
-string(5) "o Wor"
-string(14) "Example string"
+string(30) "        These are a few words :) ..."
+string(26) "        These are a few words :)"
+string(9) "Hello Wor"
+string(15) "    Example string"
 ]]>
     </screen>
-   </example>
-  </para>
-  <para>
-   <example>
-    <title>使用 <function>trim</function> 清理数组值</title>
-    <programlisting role="php">
-<![CDATA[
-<?php
-function trim_value(&$value) 
-{ 
-    $value = trim($value); 
-}
-
-$fruit = array('apple','banana ', ' cranberry ');
-var_dump($fruit);
-
-array_walk($fruit, 'trim_value');
-var_dump($fruit);
-
-?>
-]]>
-    </programlisting>
-    &example.outputs;
-    <screen>
-<![CDATA[
-array(3) {
-  [0]=>
-  string(5) "apple"
-  [1]=>
-  string(7) "banana "
-  [2]=>
-  string(11) " cranberry "
-}
-array(3) {
-  [0]=>
-  string(5) "apple"
-  [1]=>
-  string(6) "banana"
-  [2]=>
-  string(9) "cranberry"
-}
-
-]]>
-    </screen>
-   </example>
+   </example>   
   </para>
  </refsect1>
 
@@ -212,11 +170,12 @@ array(3) {
   &reftitle.seealso;
   <para>
    <simplelist>
+    <member><function>trim</function></member>
     <member><function>ltrim</function></member>
-    <member><function>rtrim</function></member>
    </simplelist>
   </para>
  </refsect1>
+
 </refentry>
 
 <!-- Keep this comment at the end of the file
