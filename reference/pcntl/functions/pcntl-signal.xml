@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision$ -->
+<refentry xml:id="function.pcntl-signal" xmlns="http://docbook.org/ns/docbook">
+ <refnamediv>
+  <refname>pcntl_signal</refname>
+  <refpurpose>安装一个信号处理器</refpurpose>
+ </refnamediv>
+ 
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <type>bool</type><methodname>pcntl_signal</methodname>
+   <methodparam><type>int</type><parameter>signo</parameter></methodparam>
+   <methodparam><type>callback</type><parameter>handler</parameter></methodparam>
+   <methodparam choice="opt"><type>bool</type><parameter>restart_syscalls</parameter><initializer>true</initializer></methodparam>
+  </methodsynopsis>
+  <para>
+   函数<function>pcntl_signal</function>为<parameter>signo</parameter>指定的信号安装一个新
+   的信号处理器。
+  </para>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>signo</parameter></term>
+     <listitem>
+      <para>
+       信号编号。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>handler</parameter></term>
+     <listitem>
+      <para>
+      信号处理器可以是用户创建的函数或方法的名字，也可以是系统常量
+       <constant>SIG_IGN</constant>（译注：忽略信号处理程序）或<constant>SIG_DFL（默认信号处理程序）</constant>. 
+      </para>
+      <note>
+       <para>
+       注意当你使用一个对象方法的时候，该对象的引用计数回增加使得它在你改变为其他处理或脚本结束之前是持久存在的。
+       </para>
+      </note>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>restart_syscalls</parameter></term>
+     <listitem>
+      <para>
+      指定当信号到达时系统调用重启是否可用。（译注：经查资料，此参数意为系统调用被信号打断时，系统调用是否从
+      开始处重新开始，但根据http://bugs.php.net/bug.php?id=52121，此参数存在bug无效。）
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   &return.success;
+  </para>
+ </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <para>
+   <informaltable>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>&Version;</entry>
+       <entry>&Description;</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>4.3.0</entry>
+       <entry>
+        增加参数<parameter>restart_syscalls</parameter>。
+       </entry>
+      </row>
+      <row>
+       <entry>4.3.0</entry>
+       <entry>
+        对象方法可以作为回调被使用。
+       </entry>
+      </row>
+      <row>
+       <entry>4.3.0</entry>
+       <entry>PCNTL现在使用了ticks作为信号处理的回调机制，ticks在速度上远远超过了之前的处理机制。
+  这个变化与“用户ticks”遵循了相同的语义。您可以使用<function>declare</function>
+  语句在程序中指定允许发生回调的位置。这使得我们对异步事件处理的开销最小化。在编译PHP时
+  启用pcntl将始终承担这种开销，不论您的脚本中是否真正使用了pcntl。
+       PHP 4.3.0使用ticks作为信号处理回调机制，这比以前的机制快了很多。这个变化与
+       "<link linkend="control-structures.declare.ticks">用户ticks</link>"
+       遵循了相同的语义。您可以使用<link
+        linkend="control-structures.declare">declare()</link>
+  		语句在程序中指定允许发生回调的位置。
+       </entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </informaltable>
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title><function>pcntl_signal</function>示例</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+//使用ticks需要PHP 4.3.0以上版本
+declare(ticks = 1);
+
+//信号处理函数
+function sig_handler($signo)
+{
+
+     switch ($signo) {
+         case SIGTERM:
+             // 处理SIGTERM信号
+             exit;
+             break;
+         case SIGHUP:
+             //处理SIGHUP信号
+             break;
+         case SIGUSR1:
+             echo "Caught SIGUSR1...\n";
+             break;
+         default:
+             // 处理所有其他信号
+     }
+
+}
+
+echo "Installing signal handler...\n";
+
+//安装信号处理器
+pcntl_signal(SIGTERM, "sig_handler");
+pcntl_signal(SIGHUP,  "sig_handler");
+pcntl_signal(SIGUSR1, "sig_handler");
+
+// 或者在PHP 4.3.0以上版本可以使用对象方法
+// pcntl_signal(SIGUSR1, array($obj, "do_something");
+
+echo "Generating signal SIGTERM to self...\n";
+
+//向当前进程发送SIGUSR1信号
+posix_kill(posix_getpid(), SIGUSR1);
+
+echo "Done\n"
+
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>pcntl_fork</function></member>
+    <member><function>pcntl_waitpid</function></member>
+   </simplelist>
+  </para>
+ </refsect1>
+
+</refentry>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->

@@ -1,27 +1,23 @@
-<?xml version="1.0" encoding="iso-8859-1"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision: 283798 $ -->
  <sect1 xml:id="language.oop5.typehinting" xmlns="http://docbook.org/ns/docbook">
-  <title>Type Hinting</title>
+  <title>类型约束</title>
   <para>
-   PHP 5 introduces Type Hinting. Functions are now able to force parameters
-   to be objects (by specifying the name of the class in the function
-   prototype) or arrays (since PHP 5.1). However, if <type>NULL</type> is used
-   as the default parameter value, it will be allowed as an argument for any 
-   later call.
+   PHP 5 可以使用类型约束。函数的参数可以指定只能为对象（在函数原型里面指定类的名字），php 5.1 之后也可以指定只能为数组。
+   注意，即使使用了类型约束，如果使用<type>NULL</type>作为参数的默认值，那么在调用函数的时候依然可以使用<type>NULL</type>作为实参。
   </para>
   
   <example>
-   <title>Type Hinting examples</title>
+   <title>类型约束示例</title>
     <programlisting role="php">
 <![CDATA[
 <?php
-// An example class
+//如下面的类
 class MyClass
 {
     /**
-     * A test function
-     *
-     * First parameter must be an object of type OtherClass
+     * 测试函数
+	 * 第一个参数必须为类OtherClass的一个对象
      */
     public function test(OtherClass $otherclass) {
         echo $otherclass->var;
@@ -29,16 +25,15 @@ class MyClass
 
 
     /**
-     * Another test function
-     *
-     * First parameter must be an array
+     * 另一个测试函数
+	 * 第一个参数必须为数组 
      */
     public function test_array(array $input_array) {
         print_r($input_array);
     }
 }
 
-// Another example class
+//另外一个类
 class OtherClass {
     public $var = 'Hello World';
 }
@@ -46,70 +41,69 @@ class OtherClass {
 ]]>
    </programlisting>
    <para>
-    Failing to satisfy the type hint results in a catchable fatal error.
+	函数调用的参数与定义的参数类型不一致时，会抛出一个致命错误。
    </para>
     <programlisting role="php">
 <![CDATA[
 <?php
-// An instance of each class
+// 两个类的对象
 $myclass = new MyClass;
 $otherclass = new OtherClass;
 
-// Fatal Error: Argument 1 must be an object of class OtherClass
+// 致命错误：参数1必须是类OtherClass的一个对象
 $myclass->test('hello');
 
-// Fatal Error: Argument 1 must be an instance of OtherClass
+// 致命错误：参数1必须为类OtherClass的一个实例
 $foo = new stdClass;
 $myclass->test($foo);
 
-// Fatal Error: Argument 1 must not be null
+// 致命错误：参数1不能为null
 $myclass->test(null);
 
-// Works: Prints Hello World
+// 正确：输出 Hello World 
 $myclass->test($otherclass);
 
-// Fatal Error: Argument 1 must be an array
+// 致命错误：参数1必须为数组
 $myclass->test_array('a string');
 
-// Works: Prints the array
+// 正确：输出 数组
 $myclass->test_array(array('a', 'b', 'c'));
 ?>
 ]]>
    </programlisting>
    <para>
-    Type hinting also works with functions:
+	类型约束不只是用在类的成员函数里，也能使用在函数里。
    </para>
     <programlisting role="php">
 <![CDATA[
 <?php
-// An example class
+// 如下面的类
 class MyClass {
     public $var = 'Hello World';
 }
 
 /**
- * A test function
- *
- * First parameter must be an object of type MyClass
+ * 测试函数
+ * 第一个参数必须是类MyClass的一个对象
  */
 function MyFunction (MyClass $foo) {
     echo $foo->var;
 }
 
-// Works
+// 正确
 $myclass = new MyClass;
 MyFunction($myclass);
 ?>
 ]]>
    </programlisting>
    <para>
-    Type hinting allowing NULL value:
+	类型约束允许NULL值：
    </para>
     <programlisting role="php">
 <![CDATA[
 <?php
 
-/* Accepting NULL value */
+/* 接受NULL值 */
 function test(stdClass $obj = NULL) {
 
 }
@@ -122,9 +116,7 @@ test(new stdClass);
    </programlisting>
   </example>
   <para>
-   Type Hints can only be of the <type>object</type> and <type>array</type>
-   (since PHP 5.1) type. Traditional type hinting with <type>int</type> and
-   <type>string</type> isn't supported.
+   类型约束只支持<type>对象</type> 和 <type>数组</type>（php 5.1之后）两种类型。而不支持<type>整型</type> 和 <type>字符串</type>类型。
   </para>
  </sect1>
  

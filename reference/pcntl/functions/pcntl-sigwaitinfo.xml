@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision$ -->
+<refentry xml:id="function.pcntl-sigwaitinfo" xmlns="http://docbook.org/ns/docbook">
+ <refnamediv>
+  <refname>pcntl_sigwaitinfo</refname>
+  <refpurpose>等待信号</refpurpose>
+ </refnamediv>
+ 
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <type>int</type><methodname>pcntl_sigwaitinfo</methodname>
+   <methodparam><type>array</type><parameter>set</parameter></methodparam>
+   <methodparam choice="opt"><type>array</type><parameter role="reference">siginfo</parameter></methodparam>
+  </methodsynopsis>
+  <para>
+   <function>pcntl_sigwaitinfo</function>函数暂停调用脚本的执行直到接收到<parameter>set</parameter>
+   参数中列出的某个信号。只要其中的一个信号已经在等待状态(比如： 通过
+   <function>pcntl_sigprocmask</function>函数阻塞)，
+   函数<function>pcntl_sigwaitinfo</function>就回立刻返回。
+  </para>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>set</parameter></term>
+     <listitem>
+      <para>
+       要等待的信号数组。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>siginfo</parameter></term>
+     <listitem>
+      <para>
+       <parameter>siginfo</parameter>是一个输出参数，用来返回信号的信息。
+      </para>
+      <para>
+       以下元素会为所有信号设置：
+       <simplelist>
+        <member>signo: 信号编号</member>
+        <member>errno: 错误编号</member>
+        <member>code: 信号代码</member>
+       </simplelist>
+      </para>
+      <para>
+       下面元素可能会为<constant>SIGCHLD</constant>信号设置:
+       <simplelist>
+        <member>status: 退出的值或信号</member>
+        <member>utime: 用户消耗的时间</member>
+        <member>stime: 系统（内核）消耗的时间</member>
+        <member>pid: 发送进程ID</member>
+        <member>uid: 发送进程的实际用户ID</member>
+       </simplelist>
+      </para>
+      <para>
+       信号<constant>SIGILL</constant>,
+       <constant>SIGFPE</constant>, <constant>SIGSEGV</constant> 和
+       <constant>SIGBUS</constant> 可能会被设置的元素:
+       <simplelist>
+        <member>addr: 发生故障的内存位置</member>
+       </simplelist>
+      </para>
+      <para>
+       可能会为<constant>SIGPOLL</constant>
+       信号设置的元素：
+       <simplelist>
+        <member>band: Band event</member>
+        <member>fd: 文件描述符</member>
+       </simplelist>
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   成功时，函数<function>pcntl_sigwaitinfo</function>返回一个信号编号。
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title><function>pcntl_sigwaitinfo</function> example</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+echo "Blocking SIGHUP signal\n";
+pcntl_sigprocmask(SIG_BLOCK, array(SIGHUP));
+
+echo "Sending SIGHUP to self\n";
+posix_kill(posix_getpid(), SIGHUP);
+
+echo "Waiting for signals\n";
+$info = array();
+pcntl_sigwaitinfo(array(SIGHUP), $info);
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>pcntl_sigprocmask</function></member>
+    <member><function>pcntl_sigtimedwait</function></member>
+   </simplelist>
+  </para>
+ </refsect1>
+
+</refentry>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
