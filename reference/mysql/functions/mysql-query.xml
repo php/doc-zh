@@ -1,14 +1,14 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
 <!-- $Author$ -->
 <!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
   <refentry xml:id="function.mysql-query" xmlns="http://docbook.org/ns/docbook">
    <refnamediv>
     <refname>mysql_query</refname>
-    <refpurpose>����һ�� MySQL ��ѯ</refpurpose>
+    <refpurpose>发送一条 MySQL 查询</refpurpose>
    </refnamediv>
    <refsect1>
-    <title>˵��</title>
+    <title>说明</title>
      <methodsynopsis>
       <type>resource</type><methodname>mysql_query</methodname>
       <methodparam><type>string</type><parameter>query</parameter></methodparam>
@@ -16,32 +16,32 @@
      </methodsynopsis>
     <para>
      <function>mysql_query</function>
-     ����ָ�������ӱ�ʶ�������ķ������еĵ�ǰ����ݿⷢ��һ����ѯ�����û��ָ��
-     <parameter>link_identifier</parameter>����ʹ����һ���򿪵����ӡ����û�д򿪵����ӣ��������᳢���޲�������
+     向与指定的连接标识符关联的服务器中的当前活动数据库发送一条查询。如果没有指定
+     <parameter>link_identifier</parameter>，则使用上一个打开的连接。如果没有打开的连接，本函数会尝试无参数调用
      <function>mysql_connect</function>
-     ����������һ�����Ӳ�ʹ��֮����ѯ����ᱻ���档
+     函数来建立一个连接并使用之。查询结果会被缓存。
     </para>
     <note>
      <para>
-      ��ѯ�ַ�����Ӧ�ԷֺŽ�����
+      查询字符串不应以分号结束。
      </para>
     </note>
     <para>
-     <function>mysql_query</function> ����
-     SELECT��SHOW��EXPLAIN �� DESCRIBE
-     ��䷵��һ����Դ��ʶ���������ѯִ�в���ȷ�򷵻�
-     &false;�������������͵� SQL
-     ��䣬<function>mysql_query</function>
-     ��ִ�гɹ�ʱ���� &true;������ʱ���� &false;����
-     &false; �ķ���ֵ��ζ�Ų�ѯ�ǺϷ��Ĳ��ܹ���������ִ�С��Ⲣ��˵���κ��й�Ӱ�쵽�Ļ򷵻ص�������
-     ���п���һ����ѯִ�гɹ��˵���δӰ�쵽��δ�����κ��С�
+     <function>mysql_query</function> 仅对
+     SELECT，SHOW，EXPLAIN 或 DESCRIBE
+     语句返回一个资源标识符，如果查询执行不正确则返回
+     &false;。对于其它类型的 SQL
+     语句，<function>mysql_query</function>
+     在执行成功时返回 &true;，出错时返回 &false;。非
+     &false; 的返回值意味着查询是合法的并能够被服务器执行。这并不说明任何有关影响到的或返回的行数。
+     很有可能一条查询执行成功了但并未影响到或并未返回任何行。
     </para>
     <para>
-     ���²�ѯ�﷨���д������
+     以下查询语法上有错，因此
      <function>mysql_query</function>
-     ʧ�ܲ����� &false;��
+     失败并返回 &false;：
      <example>
-      <title><function>mysql_query</function> ����</title>
+      <title><function>mysql_query</function> 例子</title>
       <programlisting role="php">
 <![CDATA[
 <php
@@ -53,13 +53,13 @@ $result = mysql_query("SELECT * WHERE 1=1")
      </example>
     </para>
     <para>
-     ���²�ѯ��
+     以下查询当
      <literal>my_col</literal>
-     �����Ǳ�
+     并不是表
      <literal>my_tbl</literal>
-     �е���ʱ�������д������
+     中的列时语义上有错，因此
      <function>mysql_query</function>
-     ʧ�ܲ����� &false;��
+     失败并返回 &false;：
      <example>
       <title><function>mysql_query</function></title>
       <programlisting role="php">
@@ -73,32 +73,32 @@ $result = mysql_query("SELECT my_col FROM my_tbl")
      </example>
     </para>
     <para>
-     ���û��Ȩ�޷��ʲ�ѯ��������õı�ʱ��<function>mysql_query</function>
-     Ҳ�᷵�� &false;��
+     如果没有权限访问查询语句中引用的表时，<function>mysql_query</function>
+     也会返回 &false;。
     </para>
     <para>
-     �ٶ���ѯ�ɹ������Ե���
+     假定查询成功，可以调用
      <function>mysql_num_rows</function>
-     ���鿴��Ӧ�� SELECT
-     ��䷵���˶����У����ߵ���
+     来查看对应于 SELECT
+     语句返回了多少行，或者调用
      <function>mysql_affected_rows</function>
-     ���鿴��Ӧ��
-     DELETE��INSERT��REPLACE �� UPDATE
-     ���Ӱ�쵽�˶����С�
+     来查看对应于
+     DELETE，INSERT，REPLACE 或 UPDATE
+     语句影响到了多少行。
     </para>
     <para>
-     ���� SELECT��SHOW��DESCRIBE �� EXPLAIN ���
+     仅对 SELECT，SHOW，DESCRIBE 或 EXPLAIN 语句
      <function>mysql_query</function>
-     �Ż᷵��һ���µĽ����ʶ�������Խ��䴫�ݸ�
+     才会返回一个新的结果标识符，可以将其传递给
      <function>mysql_fetch_array</function>
-     ����������������ĺ��������������������ͨ������
+     和其它处理结果表的函数。处理完结果集后可以通过调用
      <function>mysql_free_result</function>
-     ���ͷ���֮��������Դ�����ܽű�ִ����Ϻ���Զ��ͷ��ڴ档
+     来释放与之关联的资源，尽管脚本执行完毕后会自动释放内存。
     </para>
     <para>
-     �μ�
-     <function>mysql_num_rows</function>��<function>mysql_affected_rows</function>��<function>mysql_unbuffered_query</function>��<function>mysql_free_result</function>��<function>mysql_fetch_array</function>��<function>mysql_fetch_row</function>��<function>mysql_fetch_assoc</function>��<function>mysql_result</function>��<function>mysql_select_db</function> ��
-     <function>mysql_connect</function>��
+     参见
+     <function>mysql_num_rows</function>，<function>mysql_affected_rows</function>，<function>mysql_unbuffered_query</function>，<function>mysql_free_result</function>，<function>mysql_fetch_array</function>，<function>mysql_fetch_row</function>，<function>mysql_fetch_assoc</function>，<function>mysql_result</function>，<function>mysql_select_db</function> 和
+     <function>mysql_connect</function>。
     </para>
    </refsect1>
   </refentry>

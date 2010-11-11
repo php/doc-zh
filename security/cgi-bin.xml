@@ -1,95 +1,95 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
 <!-- $Author$ -->
 <!-- EN-Revision: n/a Maintainer: lm92 Status: ready -->
 <!-- CREDITS: dallas -->
 <chapter xml:id="security.cgi-bin" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-   <title>�� CGI ģʽ��װʱ</title>
+   <title>以 CGI 模式安装时</title>
 
    <sect1 xml:id="security.cgi-bin.attacks">
-    <title>�����ܵ��Ĺ���</title>
+    <title>可能受到的攻击</title>
     <simpara>
-     �������� PHP Ƕ�뵽���������������� Apache����Ϊһ��ģ�鰲װ�Ļ�������ѡ����
-     <acronym>CGI</acronym> ��ģʽ��װ�����߰� PHP ���ڲ�ͬ�� CGI
-     ��װ�Ա�Ϊ���봴����ȫ�� chroot �� setuid ���������ְ�װ��ʽͨ�����
-     PHP �Ŀ�ִ���ļ���װ�� web �������� cgi-bin
-     Ŀ¼��CERT ������ <link xlink:href="&url.cert;">CA-96.11</link>
-     ���鲻Ҫ���κεĽ������ŵ� cgi-bin Ŀ¼������ PHP
-     ������Ϊһ�������Ľ������������������ʹ�����Է�ֹ�������͵Ĺ�����
+     如果不想把 PHP 嵌入到服务器端软件（如 Apache）作为一个模块安装的话，可以选择以
+     <acronym>CGI</acronym> 的模式安装。或者把 PHP 用于不同的 CGI
+     封装以便为代码创建安全的 chroot 和 setuid 环境。这种安装方式通常会把
+     PHP 的可执行文件安装到 web 服务器的 cgi-bin
+     目录。CERT 建议书 <link xlink:href="&url.cert;">CA-96.11</link>
+     建议不要把任何的解释器放到 cgi-bin 目录。尽管 PHP
+     可以作为一个独立的解释器，但是它的设计使它可以防止下面类型的攻击：
     </simpara>
     <itemizedlist>
      <listitem>
       <simpara>
-       ����ϵͳ�ļ���<filename
+       访问系统文件：<filename
        role="url">http://my.host/cgi-bin/php?/etc/passwd</filename>
       </simpara>
       <simpara>
-       �� URL ������ʺţ�?���������Ϣ�ᴫ�� CGI
-       �ӿ���Ϊ�����еĲ����������Ľ����������������д򿪲�ִ�е�һ��������ָ�����ļ���
+       在 URL 请求的问号（?）后面的信息会传给 CGI
+       接口作为命名行的参数。其它的解释器会在命令行中打开并执行第一个参数所指定的文件。
       </simpara>
       <simpara>
-       ���ǣ��� CGI ģʽ��װ�� PHP ������������ʱ������ܾ�������Щ������
+       但是，以 CGI 模式安装的 PHP 解释器被调用时，它会拒绝解释这些参数。
       </simpara>
      </listitem>
      <listitem>
       <simpara>
-       ���ʷ������ϵ�����Ŀ¼��<filename
+       访问服务器上的任意目录：<filename
        role="url">http://my.host/cgi-bin/php/secret/doc.html</filename>
       </simpara>
       <simpara>
-       �����������������PHP ����������Ŀ¼����� URL ��Ϣ
-       <filename role="uri">/secret/doc.html</filename> �������еش���
-       <acronym>CGI</acronym> ���򲢽��н��͡�ͨ��һЩ web
-       �������ĻὫ���ض���ҳ�棬��
-       <filename role="uri">http://my.host/secret/script.php</filename>������������Ļ���ĳЩ���������ȼ���û�����
-       <filename role="uri">/secret</filename> Ŀ¼��Ȩ�ޣ�Ȼ��Żᴴ��
+       好像上面这种情况，PHP 解释器所在目录后面的 URL 信息
+       <filename role="uri">/secret/doc.html</filename> 将会例行地传给
+       <acronym>CGI</acronym> 程序并进行解释。通常一些 web
+       服务器的会将它重定向到页面，如
+       <filename role="uri">http://my.host/secret/script.php</filename>。如果是这样的话，某些服务器会先检查用户访问
+       <filename role="uri">/secret</filename> 目录的权限，然后才会创建
        <filename role="uri">http://my.host/cgi-bin/php/secret/script.php</filename>
-       �ϵ�ҳ���ض��򡣲��ҵ��ǣ��ܶ��������û�м���û�����
-       /secret/script.php ��Ȩ�ޣ�ֻ�����
-       <filename role="uri">/cgi-bin/php</filename> ��Ȩ�ޣ������κ��ܷ���
-       <filename role="uri">/cgi-bin/php</filename> ���û��Ϳ��Է���
-       web Ŀ¼�µ������ļ��ˡ�
+       上的页面重定向。不幸的是，很多服务器并没有检查用户访问
+       /secret/script.php 的权限，只检查了
+       <filename role="uri">/cgi-bin/php</filename> 的权限，这样任何能访问
+       <filename role="uri">/cgi-bin/php</filename> 的用户就可以访问
+       web 目录下的任意文件了。
       </simpara>
       <simpara>
-       �� PHP �����ʱ����ѡ��
+       在 PHP 里，编译时配置选项
        <link linkend="configure.enable-force-cgi-redirect">--enable-force-cgi-redirect</link>
-       �Լ�����ʱ����ָ�� <link linkend="ini.doc-root">doc_root</link> ��
+       以及运行时配置指令 <link linkend="ini.doc-root">doc_root</link> 和
        <link linkend="ini.user-dir">user_dir</link>
-       ������Ϊ�������ϵ��ļ���Ŀ¼�������ƣ����ڷ�ֹ���๥�������潫�Ը���ѡ������ý�����ϸ���⡣
+       都可以为服务器上的文件和目录添加限制，用于防止这类攻击。下面将对各个选项的设置进行详细讲解。
       </simpara>
      </listitem>
     </itemizedlist>
    </sect1>
 
    <sect1 xml:id="security.cgi-bin.default">
-    <title>����һ��ֻ���й������ļ�</title>
+    <title>情形一：只运行公开的文件</title>
 
     <simpara>
-     ��� web ���������������ݶ��ܵ������ IP
-     ��ַ�ķ������ƣ��Ͳ���Ҫ������Щѡ����
-     web ��������֧���ض��򣬻��� web ���������ܺ� PHP
-     ͨ�Ŷ�ʹ���������ø�Ϊ��ȫ�������� configure �ű���ָ��
+     如果 web 服务器中所有内容都受到密码或 IP
+     地址的访问限制，就不需要设置这些选项。如果
+     web 服务器不支持重定向，或者 web 服务器不能和 PHP
+     通信而使访问请求变得更为安全，可以在 configure 脚本中指定
      <link linkend="configure.enable-force-cgi-redirect">--enable-force-cgi-redirect</link>
-     ѡ�����֮�⣬��Ҫȷ�� PHP ��������������ʽ���ã�����ͨ��ֱ�ӵ�
+     选项。除此之外，还要确认 PHP 程序不依赖其它方式调用，比如通过直接的
      <filename role="php">http://my.host/cgi-bin/php/dir/script.php</filename>
-     ���ʻ�ͨ���ض������
-     <filename role="php">http://my.host/dir/script.php</filename>��
+     访问或通过重定向访问
+     <filename role="php">http://my.host/dir/script.php</filename>。
     </simpara>
     <simpara>
-     ��Apache�У��ض������ʹ�� AddHandler �� Action ��������ã��뿴��һ�ڡ�
+     在Apache中，重定向可以使用 AddHandler 和 Action 语句来设置，请看下一节。
     </simpara>
    </sect1>
 
    <sect1 xml:id="security.cgi-bin.force-redirect">
-    <title>���ζ���ʹ�� --enable-force-cgi-redirect ѡ��</title>
+    <title>情形二：使用 --enable-force-cgi-redirect 选项</title>
     <simpara>
-     �˱���ѡ����Է�ֹ�κ���ͨ����
+     此编译选项可以防止任何人通过如
      <filename role="php">http://my.host/cgi-bin/php/secretdir/script.php</filename>
-     ������ URL ֱ�ӵ��� PHP��PHP �ڴ�ģʽ��ֻ������Ѿ�ͨ����
-     web ���������ض������� URL��
+     这样的 URL 直接调用 PHP。PHP 在此模式下只会解析已经通过了
+     web 服务器的重定向规则的 URL。
     </simpara>
     <simpara>
-     ͨ�� Apache �е��ض������ÿ���ͨ������ָ����ɣ�
+     通常 Apache 中的重定向设置可以通过以下指令完成：
     </simpara>
     <programlisting role="apache-conf">
 <![CDATA[
@@ -98,67 +98,67 @@ AddHandler php-script .php
 ]]>
     </programlisting>
     <simpara>
-     ��ѡ��ֻ�� Apache �½��й����ԣ�����Ҫ������ Apache
-     ���ض�������������õķǱ�׼ CGI ��������
-     <envar>REDIRECT_STATUS</envar>����� web
-     ��������֧���κη�ʽ�ܹ��ж�������ֱ�ӵĻ����ض���ģ��Ͳ���ʹ�����ѡ���Ӧ���������������뿴��һ�ڡ�
+     此选项只在 Apache 下进行过测试，并且要依赖于 Apache
+     在重定向操作中所设置的非标准 CGI 环境变量
+     <envar>REDIRECT_STATUS</envar>。如果 web
+     服务器不支持任何方式能够判断请求是直接的还是重定向的，就不能使用这个选项，而应该用其它方法。请看下一节。
     </simpara>
    </sect1>
 
    <sect1 xml:id="security.cgi-bin.doc-root">
-    <title>������������ doc_root �� user_dir</title>
+    <title>情形三：设置 doc_root 或 user_dir</title>
     <simpara>
-     �� web �����������ĵ�Ŀ¼�а�����̬������ű��Ϳ�ִ�г�����ʱ����Ϊ��һ�ֲ���ȫ��ʵ���������Ϊ�����ϵĴ����δ��ִ�нű�����Ϊ��ͨ
-     HTML �ĵ���ʾ���ǾͿ��ܵ���֪ʶ��Ȩ���������ϵ�й¶�����Ժܶ�ϵͳ����Ա����ר������һ��ֻ��ͨ��
-     PHP CGI �����ʵ�Ŀ¼��������Ŀ¼�е�����ֻ�ᱻ����������ԭ����ʾ������
+     在 web 服务器的主文档目录中包含动态内容如脚本和可执行程序有时被认为是一种不安全的实践。如果因为配置上的错误而未能执行脚本而作为普通
+     HTML 文档显示，那就可能导致知识产权或密码资料的泄露。所以很多系统管理员都会专门设置一个只能通过
+     PHP CGI 来访问的目录，这样该目录中的内容只会被解析而不会原样显示出来。
     </simpara>
     <simpara>
-     ����ǰ����˵�޷��ж��Ƿ��ض������������б�Ҫ�����ĵ�Ŀ¼֮�⽨��һ��ר���ڽű���
-     doc_root Ŀ¼��
+     对于前面所说无法判断是否重定向的情况，很有必要在主文档目录之外建立一个专用于脚本的
+     doc_root 目录。
     </simpara>
     <simpara>
-     ����ͨ��<link linkend="configuration.file">�����ļ�</link>�ڵ�
+     可以通过<link linkend="configuration.file">配置文件</link>内的
      <link linkend="ini.doc-root">doc_root</link>
-     �����û�������
-     <envar>PHP_DOCUMENT_ROOT</envar> ������ PHP �ű���Ŀ¼����������˸����ô
-     PHP ��ֻ����� <parameter>doc_root</parameter>
-     Ŀ¼�µ��ļ�����ȷ��Ŀ¼��Ľű����ᱻ PHP
-     ������ִ�У�������˵�� <parameter>user_dir</parameter> ���⣩��
+     或设置环境变量
+     <envar>PHP_DOCUMENT_ROOT</envar> 来定义 PHP 脚本主目录。如果设置了该项，那么
+     PHP 就只会解释 <parameter>doc_root</parameter>
+     目录下的文件，并确保目录外的脚本不会被 PHP
+     解释器执行（下面所说的 <parameter>user_dir</parameter> 除外）。
     </simpara>
     <simpara>
-     ��һ�����õ�ѡ�����
-     <link linkend="ini.user-dir">user_dir</link>���� user_dir
-     û�����õ�ʱ��<parameter>doc_root</parameter>
-     ����Ψһ�ܿ�����������ļ���ѡ�������
+     另一个可用的选项就是
+     <link linkend="ini.user-dir">user_dir</link>。当 user_dir
+     没有设置的时候，<parameter>doc_root</parameter>
+     就是唯一能控制在哪里打开文件的选项。访问如
      <filename role="url">http://my.host/~user/doc.php</filename>
-     ��� URL ʱ����������û���Ŀ¼���ļ�����ֻ��ִ��
-     doc_root Ŀ¼�µ�
-     <filename role="uri">~user/doc.php</filename>�������Ŀ¼��
-     [<literal>~</literal>] ����ͷ����
+     这个 URL 时，并不会打开用户主目录下文件，而只会执行
+     doc_root 目录下的
+     <filename role="uri">~user/doc.php</filename>（这个子目录以
+     [<literal>~</literal>] 作开头）。
     </simpara>
     <simpara>
-     ��������� user_dir������
-     <filename role="dir">public_php</filename>����ô��
+     如果设置了 user_dir，例如
+     <filename role="dir">public_php</filename>，那么像
      <filename role="url">http://my.host/~user/doc.php</filename>
-     ���������󽫻�ִ���û���Ŀ¼�µ�
-     <filename role="dir">public_php</filename> ��Ŀ¼�µ�
-     <filename>doc.php</filename> �ļ��������û���Ŀ¼�ľ���·����
-     <filename role="dir">/home/user</filename>����ô��ִ���ļ�������
-     <filename>/home/user/public_php/doc.php</filename>��
+     这样的请求将会执行用户主目录下的
+     <filename role="dir">public_php</filename> 子目录下的
+     <filename>doc.php</filename> 文件。假设用户主目录的绝对路径是
+     <filename role="dir">/home/user</filename>，那么被执行文件将会是
+     <filename>/home/user/public_php/doc.php</filename>。
     </simpara>
     <simpara>
-     <parameter>user_dir</parameter> ��������
-     <parameter>doc_root</parameter> �޹أ����Կ��Էֱ����
-     PHP �ű�����Ŀ¼���û�Ŀ¼��
+     <parameter>user_dir</parameter> 的设置与
+     <parameter>doc_root</parameter> 无关，所以可以分别控制
+     PHP 脚本的主目录和用户目录。
     </simpara>
    </sect1>
 
    <sect1 xml:id="security.cgi-bin.shell">
-    <title>�����ģ�PHP ���������� web Ŀ¼����</title>
+    <title>情形四：PHP 解释器放在 web 目录以外</title>
     <para>
-     һ���ǳ���ȫ���������ǰ� PHP ���������� web Ŀ¼��ĵط�������˵
-     <filename role="dir">/usr/local/bin</filename>��������Ψһ����ĵط����Ǳ�����ÿһ������
-     PHP ������ļ��ĵ�һ�м���������䣺
+     一个非常安全的做法就是把 PHP 解释器放在 web 目录外的地方，比如说
+     <filename role="dir">/usr/local/bin</filename>。这样做唯一不便的地方就是必须在每一个包含
+     PHP 代码的文件的第一行加入如下语句：
      <informalexample>
       <programlisting>
 <![CDATA[
@@ -166,15 +166,15 @@ AddHandler php-script .php
 ]]>
       </programlisting>
      </informalexample>
-     ��Ҫ����Щ�ļ������Ըĳɿ�ִ�С�Ҳ����˵��Ҫ������
-     Perl �� sh �������κνű�����д�� CGI �ű�һ����ʹ���� <literal>#!</literal>
-     ��ͷ�� shell-escape �������������ǡ�
+     还要将这些文件的属性改成可执行。也就是说，要像处理用
+     Perl 或 sh 或其它任何脚本语言写的 CGI 脚本一样，使用以 <literal>#!</literal>
+     开头的 shell-escape 机制来启动它们。
     </para>
     <para>
-     ����������£�Ҫʹ PHP ����ȷ����
-     <envar>PATH_INFO</envar> �� <envar>PATH_TRANSLATED</envar>
-     �ȱ����Ļ����ڱ��� PHP ������ʱ�������
-     <link linkend="configure.enable-discard-path">--enable-discard-path</link> ������
+     在这种情况下，要使 PHP 能正确处理
+     <envar>PATH_INFO</envar> 和 <envar>PATH_TRANSLATED</envar>
+     等变量的话，在编译 PHP 解释器时必须加入
+     <link linkend="configure.enable-discard-path">--enable-discard-path</link> 参数。
     </para>
    </sect1>
 

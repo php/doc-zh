@@ -1,32 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
 <!-- $Author$ -->
-<!-- EN-Revision:1.36 Maintainer: Haohappy Status: ready -->
-<chapter xml:id="faq.using" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+<!-- $EN-Revision: 8e3c3f725ce77309538959f52a7c17415e9e55a8 $ -->
+<chapter xml:id="faq.using"
+         xmlns="http://docbook.org/ns/docbook"
+         xmlns:xlink="http://www.w3.org/1999/xlink">
   <title>使用 PHP</title>
   <titleabbrev>使用 PHP</titleabbrev>
-
-  <para>
-   本节汇集了你在写 PHP 脚本时可能碰到的大多数普通错误。
-  </para>
-
+  <para>本节汇集了你在写 PHP 脚本时可能碰到的大多数普通错误。</para>
   <qandaset>
-   <qandaentry xml:id="faq.using.anyform">
-    <question>
-     <para>
-      我想写一个可以处理任何表单来的数据的通用 PHP 脚本。我怎么知道哪个 POST 方法变量可用呢？
-     </para>
-    </question>
-    <answer>
-     <para>
-      PHP 提供很多“<link linkend="language.variables.predefined">预定义变量</link>”，例如超全局变量
-      <varname>$_POST</varname>。可以遍历 <varname>$_POST</varname>
-      变量，因为它是一个和所有通过 POST
-      方法传递数据相联系的数组。例如，可以用
-      <link linkend="control-structures.foreach">foreach</link>
-      简单地遍历它，检查 <function>empty</function> 值，以及将它们输出。
+    <qandaentry xml:id="faq.using.parameterorder">
+      <question>
+        <para>I cannot remember the parameter order of PHP functions, are they random?</para>
+      </question>
+      <answer>
+        <para>PHP is a glue that brings together hundreds of external libraries, so sometimes this gets messy. However, a simple rule of thumb is as follows:</para>
+        <para>
+        <link linkend="book.array">Array function</link>parameters are ordered as &quot;
+        <emphasis>needle, haystack</emphasis>&quot; whereas 
+        <link linkend="book.strings">String functions</link>are the opposite, so &quot;
+        <emphasis>haystack, needle</emphasis>&quot;.</para>
+      </answer>
+    </qandaentry>
+    <qandaentry xml:id="faq.using.anyform">
+      <question>
+        <para>我想写一个可以处理任何表单来的数据的通用 PHP 脚本。我怎么知道哪个 POST 方法变量可用呢？</para>
+      </question>
+      <answer>
+      <para>PHP 提供很多“
+      <link linkend="language.variables.predefined">预定义变量</link>”，例如超全局变量 
+      <varname>$_POST</varname>。可以遍历 
+      <varname>$_POST</varname>变量，因为它是一个和所有通过 POST 方法传递数据相联系的数组。例如，可以用 
+      <link linkend="control-structures.foreach">foreach</link>简单地遍历它，检查 
+      <function>empty</function>值，以及将它们输出。 
       <programlisting role="php">
-<![CDATA[
+        <![CDATA[
 <?php
 $empty = $post = array();
 foreach ($_POST as $varname => $varvalue) {
@@ -49,64 +57,39 @@ if (empty($empty)) {
 }
 ?>
 ]]>
-      </programlisting>
-     </para>
-
-     &note.superglobals;
-
-    </answer>
-   </qandaentry>
-
-   <qandaentry xml:id="faq.using.addslashes">
-    <question>
-     <para>
-      我需要在所有的单引号（'）前加一个反斜线（\），使它们变成（\'），我如何能够通过正则表达式来实现？我同样希望能够将（"）转换成（\"），将（\）转换成（\\）。
-     </para>
-    </question>
-    <answer>
-     <para>
-      函数 <function>addslashes</function> 能够实现这种操作。请参阅函数
-      <function>mysql_escape_string</function>。另外，还可以用函数
-      <function>stripslashes</function> 来去掉反斜线。
-     </para>
-
-     &note.magicquotes.gpc;
-
-    </answer>
-   </qandaentry>
-
-   <qandaentry xml:id="faq.using.stripslashes">
+</programlisting></para>&amp;note.superglobals;</answer>
+    </qandaentry>
+    <qandaentry xml:id="faq.using.addslashes">
       <question>
-       <para>
-        我所有的（"）和（'）都被变成了（\"）和（\'），我如何才能去掉这些不必要的反斜线？它们为什么及如何出现？
-       </para>
+        <para>我需要在所有的单引号（&#39;）前加一个反斜线（\），使它们变成（\&#39;），我如何能够通过正则表达式来实现？我同样希望能够将（&quot;）转换成（\&quot;），将（\）转换成（\\）。</para>
       </question>
       <answer>
-       <para>
-        PHP 函数 <function>stripslashes</function> 能够从
-        <type>string</type> 中去掉所有的反斜线。这些反斜线出现最有可能的原因是
-        PHP 设置项 <link linkend="ini.magic-quotes-gpc">magic_quotes_gpc</link> 被开启。
-       </para>
-
-       &note.magicquotes.gpc;
-
-      </answer>
-     </qandaentry>
-
-	 <qandaentry xml:id="faq.register-globals">
-    <question>
-     <para>
-     PHP 选项 register_globals 对我有什么影响？
-     </para>
-    </question>
-    <answer>
-     <para>     
-	  首先要理解这个设置选项的作用。假如我们使用以下URL： 
-	  <literal>http://example.com/foo.php?animal=cat</literal>，那么在<filename>foo.php</filename>中我们可能会使用以下代码：
-     </para>
-     <para>
-      <programlisting role="php">
-<![CDATA[
+      <para>函数 
+      <function>addslashes</function>能够实现这种操作。请参阅函数 
+      <function>mysql_escape_string</function>。另外，还可以用函数 
+      <function>stripslashes</function>来去掉反斜线。</para>&amp;note.magicquotes.gpc;</answer>
+    </qandaentry>
+    <qandaentry xml:id="faq.using.stripslashes">
+      <question>
+        <para>我所有的（&quot;）和（&#39;）都被变成了（\&quot;）和（\&#39;），我如何才能去掉这些不必要的反斜线？它们为什么及如何出现？</para>
+      </question>
+      <answer>
+      <para>PHP 函数 
+      <function>stripslashes</function>能够从 
+      <type>string</type>中去掉所有的反斜线。这些反斜线出现最有可能的原因是 PHP 设置项 
+      <link linkend="ini.magic-quotes-gpc">magic_quotes_gpc</link>被开启。</para>&amp;note.magicquotes.gpc;</answer>
+    </qandaentry>
+    <qandaentry xml:id="faq.register-globals">
+      <question>
+        <para>PHP 选项 register_globals 对我有什么影响？</para>
+      </question>
+      <answer>
+        <para>首先要理解这个设置选项的作用。假如我们使用以下URL： 
+        <literal>http://example.com/foo.php?animal=cat</literal>，那么在
+        <filename>foo.php</filename>中我们可能会使用以下代码：</para>
+        <para>
+          <programlisting role="php">
+            <![CDATA[
 <?php
 // 建议使用这种访问变量的方式
 echo $_GET['animal'];
@@ -124,37 +107,33 @@ echo $_SERVER['PHP_SELF'];
 echo $PHP_SELF;
 ?>
 ]]>
-     </programlisting>
-    </para>
-    <para>
- 	 上面的代码解释了register_globals的作用，就是自动生成变量。这种编程方式被很多人所不喜，所以在PHP当中register_globals默认设置为off。在PHP6，这个选项被删除了。所以目前绝大部分虚拟主机都默认把register_globals禁用。请注意，你在阅读过时的文章、教程时可能需要把该选项开启，否则可能示例代码不能通过。但在实际开发当中，强烈建议将其设置为off，否则可能会导致安全问题。
-
-    </para>
-    <para>
-    请参阅以下资源进一步了解：
-     <simplelist>
-      <member>The <link linkend="ini.register-globals">register_globals</link> 选项</member>
-      <member>The <link linkend="security.globals">注册全局变量的安全问题</link></member>
-      <member><link linkend="language.variables.external">处理外部变量</link></member>
-      <member>Use <link linkend="language.variables.superglobals">超级全局变量</link> </member>
-     </simplelist>
-    </para>
-    <note>
-     <para>
-      以上示例中，我们使用了一个<acronym>URL</acronym>，其中包含了一个QUERY_STRING。PHP会把QUERY_STRING中的信息通过GET
-	  HTTP请求传递，所以我们可以通过超级全局变量（superglobal）<varname>$_GET</varname>来访问其中的变量。
-     </para>
-    </note>
-   </answer>
-  </qandaentry>
-
-   <qandaentry xml:id="faq.using.wrong-order">
-    <question>
-     <para>
-      当我这样做时，输出显示的次序是错的：
-
-     <programlisting role="php">
-<![CDATA[
+</programlisting>
+        </para>
+        <para>上面的代码解释了register_globals的作用，就是自动生成变量。这种编程方式被很多人所不喜，所以在PHP当中register_globals默认设置为off。在PHP6，这个选项被删除了。所以目前绝大部分虚拟主机都默认把register_globals禁用。请注意，你在阅读过时的文章、教程时可能需要把该选项开启，否则可能示例代码不能通过。但在实际开发当中，强烈建议将其设置为off，否则可能会导致安全问题。</para>
+        <para>请参阅以下资源进一步了解： 
+        <simplelist>
+          <member>The 
+          <link linkend="ini.register-globals">register_globals</link>选项</member>
+          <member>The 
+          <link linkend="security.globals">注册全局变量的安全问题</link></member>
+          <member>
+            <link linkend="language.variables.external">处理外部变量</link>
+          </member>
+          <member>Use 
+          <link linkend="language.variables.superglobals">超级全局变量</link></member>
+        </simplelist></para>
+        <note>
+          <para>以上示例中，我们使用了一个
+          <acronym>URL</acronym>，其中包含了一个QUERY_STRING。PHP会把QUERY_STRING中的信息通过GET HTTP请求传递，所以我们可以通过超级全局变量（superglobal）
+          <varname>$_GET</varname>来访问其中的变量。</para>
+        </note>
+      </answer>
+    </qandaentry>
+    <qandaentry xml:id="faq.using.wrong-order">
+      <question>
+        <para>当我这样做时，输出显示的次序是错的： 
+        <programlisting role="php">
+          <![CDATA[
 <?php
 function myfunc($argument)
 {
@@ -164,77 +143,53 @@ $variable = 10;
 echo "myfunc($variable) = " . myfunc($variable);
 ?>
 ]]>
-    </programlisting>
-     这是怎么回事？
-     </para>
-    </question>
-    <answer>
-     <para>
-      要在一个表达式中（例如在上面的例子中和其它字符串连接）使用函数的结果，需要
-      <function>return</function> 这个值，而不是 <function>echo</function> 它。
-     </para>
-    </answer>
-   </qandaentry>
-
-   <qandaentry xml:id="faq.using.newlines">
-    <question>
-     <para>
-      下面代码怎么没有分成两行显示？
-      <programlisting role="php">
-<![CDATA[
+</programlisting>这是怎么回事？</para>
+      </question>
+      <answer>
+        <para>要在一个表达式中（例如在上面的例子中和其它字符串连接）使用函数的结果，需要 
+        <function>return</function>这个值，而不是 
+        <function>echo</function>它。</para>
+      </answer>
+    </qandaentry>
+    <qandaentry xml:id="faq.using.newlines">
+      <question>
+        <para>下面代码怎么没有分成两行显示？ 
+        <programlisting role="php">
+          <![CDATA[
 <pre>
 <?php echo "This should be the first line."; ?>
 <?php echo "This should show up after the new line above."; ?>
 </pre>
 ]]>
-      </programlisting>
-     </para>
-    </question>
-    <answer>
-     <para>
-      在 PHP 中，一段代码的结束标记要么是“?&gt;”要么是“?&gt;\n”（\n 表示换行）。因此在上面的例子中，输出的句子将显示在同一行中，因为
-      PHP 忽略了代码结束标记后面的换行。这意味着如果要输出一个换行符，需要在每段
-      PHP 代码的结束标记后面多加一个换行。
-     </para>
-     <para>
-      PHP 为什么这么做呢？因为在格式化正常的 HTML
-      时，这样通常会更容易。假如输出了换行而你不需要这个换行时，就不得不用一个非常长的行来达到这样的效果，或者让产生的
-      HTML 页面的源文件的格式很难读。
-     </para>
-    </answer>
-   </qandaentry>
-
-   <qandaentry xml:id="faq.using.headers-sent">
-    <question>
-     <para>
-      我得到消息“Warning: Cannot send session cookie - headers already
-      sent...”或者“Cannot add header information - headers already sent...”。
-     </para>
-    </question>
-    <answer>
-     <para>
-      函数 <function>header</function>，<function>setcookie</function> 和
-      <link linkend="ref.session">session
-      函数</link>需要在输出流中添加头信息。但是头信息只能在其它任何输出内容之前发送。在使用这些函数前不能有任何（如
-      HTML）的输出。函数 <function>headers_sent</function>
-      能够检查脚本是否已经发送了头信息。请参阅<link
-      linkend="ref.outcontrol">输出控制函数</link>。
-     </para>
-    </answer>
-   </qandaentry>
-
-   <qandaentry xml:id="faq.using.header">
-    <question>
-     <para>
-      我需要直接访问请求报头中的信息，怎么能办到？
-     </para>
-    </question>
-    <answer>
-     <para>
-      如果以 Apache 的模块方式运行 PHP，那么函数 <function>getallheaders</function>
-      可以做这件事。因此下面的代码可以显示所有的请求报头：
-      <programlisting role="php">
-<![CDATA[
+</programlisting></para>
+      </question>
+      <answer>
+        <para>在 PHP 中，一段代码的结束标记要么是“?&gt;”要么是“?&gt;\n”（\n 表示换行）。因此在上面的例子中，输出的句子将显示在同一行中，因为 PHP 忽略了代码结束标记后面的换行。这意味着如果要输出一个换行符，需要在每段 PHP 代码的结束标记后面多加一个换行。</para>
+        <para>PHP 为什么这么做呢？因为在格式化正常的 HTML 时，这样通常会更容易。假如输出了换行而你不需要这个换行时，就不得不用一个非常长的行来达到这样的效果，或者让产生的 HTML 页面的源文件的格式很难读。</para>
+      </answer>
+    </qandaentry>
+    <qandaentry xml:id="faq.using.headers-sent">
+      <question>
+        <para>我得到消息“Warning: Cannot send session cookie - headers already sent...”或者“Cannot add header information - headers already sent...”。</para>
+      </question>
+      <answer>
+        <para>函数 
+        <function>header</function>，
+        <function>setcookie</function>和 
+        <link linkend="ref.session">session 函数</link>需要在输出流中添加头信息。但是头信息只能在其它任何输出内容之前发送。在使用这些函数前不能有任何（如 HTML）的输出。函数 
+        <function>headers_sent</function>能够检查脚本是否已经发送了头信息。请参阅
+        <link linkend="ref.outcontrol">输出控制函数</link>。</para>
+      </answer>
+    </qandaentry>
+    <qandaentry xml:id="faq.using.header">
+      <question>
+        <para>我需要直接访问请求报头中的信息，怎么能办到？</para>
+      </question>
+      <answer>
+        <para>如果以 Apache 的模块方式运行 PHP，那么函数 
+        <function>getallheaders</function>可以做这件事。因此下面的代码可以显示所有的请求报头： 
+        <programlisting role="php">
+          <![CDATA[
 <?php
 $headers = getallheaders();
 foreach ($headers as $name => $content) {
@@ -242,194 +197,149 @@ foreach ($headers as $name => $content) {
 }
 ?>
 ]]>
-      </programlisting>
-     </para>
-     <para>
-      请参阅函数 <function>apache_lookup_uri</function>、<function>apache_response_headers</function> 和 <function>fsockopen</function>。
-     </para>
-    </answer>
-   </qandaentry>
-
-   <qandaentry xml:id="faq.using.authentication">
-    <question>
-     <para>
-      当我用 IIS 进行 HTTP 认证时得到“No Input file specified”消息。
-     </para>
-    </question>
-    <answer>
-     <para>
-      IIS 的安全模型这里有毛病。这是所有 IIS 下运行的 CGI 程序所共有的问题。一个解决办法是建立一个纯
-      HTML 文件（不经过 PHP 解析）作为要进入认证目录的登录页面，然后用 META 标记来重定向到
-      PHP 页面，或者用一个连接到 PHP 页面。然后 PHP 就可以正确识别认证信息了。如果是用
-      ISAPI 模块，那没有这个问题。其它 NT 下的 web
-      服务器不受此影响。更多信息见 <link
-      xlink:href="&url.iis;">&url.iis;</link>及
-      <link linkend="features.http-auth">HTTP 认证</link>一章。
-     </para>
-    </answer>
-   </qandaentry>
-
-   <qandaentry xml:id="faq.using.iis.sharing">
-    <question>
-     <para>
-      Windows：不能访问另一台电脑上用 IIS 共享的文件。
-     </para>
-    </question>
-    <answer>
-     <para>
-      必须要做些修改。打开 <literal>Internet 信息服务</literal>，找到你的
-      PHP 文件并打开属性页，选择<literal>文件安全性</literal>标签，点击<literal>匿名访问和身份验证控制</literal>的“编辑”按钮。
-     </para>
-     <para>
-      解决此问题有两个方法，一是不要选中<literal>匿名访问</literal>并且选中<literal>集成
-      Windows 身份验证</literal>，二是选中<literal>匿名访问</literal>并编辑匿名访问使用的帐户，改成一个有权限的。
-     </para>
-    </answer>
-   </qandaentry>
-
-   <qandaentry xml:id="faq.using.netscape">
-    <question>
-     <para>
-      我的 PHP 脚本在 IE 和 Lynx 下能工作，但是在 Netscape 中有的输出丢失了。当我用“查看源文件”时可以在
-      IE 中看到内容，但是 Netscape 中不能。
-     </para>
-    </question>
-    <answer>
-     <para>
-      Netscape 在关于 HTML 标记（例如 table）上比 IE 更严格。用一个 HTML 验证器，例如
-      <link xlink:href="&url.w3.validator;">validator.w3.org</link> 来验证你的 HTML
-      输出可能会有帮助。例如漏了 &lt;/table&gt; 可能会导致这样的结果。
-     </para>
-     <para>
-      同样，IE 和 Lynx 都忽略了 HTML 流中的任何 NULs（<literal>\0</literal>），Netscape
-      就不。最好的检查方法是编译 <link linkend="features.commandline">PHP 的命令行模式</link>版本（也称为
-      CGI 版本）并从命令行运行你的脚本。在 *nix 中，用管道传递到 <literal>od -c</literal> 并查看任何
-      <literal>\0</literal> 字符。如果在 Windows 下你需要能够查看二进制文件格式的编辑器或程序。当
-      Netscape 碰到 NUL 时就不会输出之后该行的任何内容而 IE 和 Lynx 都会。
-     </para>
-    </answer>
-   </qandaentry>
-
-   <qandaentry xml:id="faq.using.mixml">
-    <question>
-     <para>
-      我怎样混合使用 XML 和 PHP？它不认我的 &lt;?xml 标记！
-     </para>
-    </question>
-    <answer>
-     <para>
-      要能够在 PHP 代码中直接嵌入 &lt;?xml，需要将 PHP 设置项
-      <link linkend="ini.short-open-tag">short_open_tags</link> 设置为
-      <literal>0</literal> 以关闭短标记格式。无法通过函数
-      <function>ini_set</function> 来更改这项设置。不管
-      <link linkend="ini.short-open-tag">short_open_tags</link>
-      是开或者关，都可以用类似于 <literal>&lt;?php echo '&lt;?xml'; ?&gt;</literal>
-      的方法达到目的。该项设置的默认值为开。
-     </para>
-    </answer>
-   </qandaentry>
-
-   <qandaentry xml:id="faq.using.editor">
-    <question>
-     <para>
-      怎样用 FrontPage 或者其它非要把我的代码移来移去的 HTML 编辑器来编辑 PHP？
-     </para>
-    </question>
-    <answer>
-     <para>
-      最简单的方法是让 PHP 代码也能使用 ASP 标记。这可以让你用 ASP 风格的 &lt;% 和 %&gt; 代码定界符。一些流行的
-      HTML 编辑器在处理此格式上更加智能化一些（目前如此）。要使用 ASP 风格的标记，需要在 &php.ini; 中打开
-      <link linkend="ini.asp-tags">asp_tags</link>，或者用相应的 Apache 配置选项。
-     </para>
-    </answer>
-   </qandaentry>
-
-   <qandaentry xml:id="faq.using.variables">
-    <question>
-     <para>
-      哪里可以找到所有可用的 PHP 预定义变量的完整列表？
-     </para>
-    </question>
-    <answer>
-     <para>
-      请阅读手册中的<link
-      linkend="language.variables.predefined">预定义变量</link>一章，该部分的文档已经包含了一部分可以用于你的脚本的预定义变量的列表。可用变量的完整列表（及更多信息）可以通过调用
-      <function>phpinfo</function> 函数来查阅。请务必阅读手册中<link
-      linkend="language.variables.external">来自 PHP
-      之外的变量</link>一节，这部分文档阐述了外部变量的概念，例如来自
-      HTML 表单、Cookie 和 URL 的变量。
-     </para>
-     &note.registerglobals;
-    </answer>
-   </qandaentry>
-
-   <qandaentry xml:id="faq.using.freepdf">
-    <question>
-     <para>
-      怎样才能不用非免费的商业库（例如    
-      <link linkend="ref.pdf">PDFLib</link>）
-      来生成 PDF 文档？我想要个免费的并且不需要再连接别的 PDF 库。
-     </para>
-    </question>
-    <answer>
-     <para>
-      有几个选择，例如
-      <link xlink:href="&url.pdf.ros;">&url.pdf.ros;</link>，<link
-      xlink:href="&url.pdf.fpdf;">&url.pdf.fpdf;</link>，<link
-      xlink:href="&url.pdf.pdf4php;">&url.pdf.pdf4php;</link> 和 <link
-      xlink:href="&url.pdf.phppdflib;">&url.pdf.phppdflib;</link>。还有一个
-      <link xlink:href="&url.pdf.panda;">Panda</link> 模块。
-     </para>
-    </answer>
-   </qandaentry>
-
-  <qandaentry xml:id="faq.using.cgi-vars">
-    <question>
-     <para>
-      我试着在用户自定义函数中访问一个标准的 CGI 变量（例如 $DOCUMENT_ROOT 或 $HTTP_REFERER），但是找不到，哪里出了错？
-     </para>
-    </question>
-    <answer>
-     <para>
-      首先非常重要的一点是 PHP 设置项 <link linkend="ini.register-globals">register_globals</link> 同样会对服务器端和环境变量产生影响。当 register_globals = off （从 PHP 4.2.0 开始其默认值为 off），变量 <varname>$DOCUMENT_ROOT</varname> 将不会存在，而只有 <varname>$_SERVER['DOCUMENT_ROOT']</varname>。如果 register_globals = on 则变量 <varname>$DOCUMENT_ROOT</varname> 和 <varname>$GLOBALS['DOCUMENT_ROOT']</varname> 将同时存在。
-     </para>
-     <para>
-      如果确认 register_globals = on 但不知道为什么
-      <varname>$DOCUMENT_ROOT</varname>
-      在函数内部不可用，这是因为它和其它的变量一样需要在函数中执行
-      <literal>global $DOCUMENT_ROOT</literal>。请参阅手册中的<link
-      linkend="language.variables.scope">变量范围</link>一节。建议在
-      register_globals = off 的情况下进行编码。
-     </para>
-
-     &note.superglobals;
-
-    </answer>
-   </qandaentry>
-
-   <qandaentry xml:id="faq.using.shorthandbytes">
-    <question>
-     <para>
-      有些 PHP　选项可以接受缩写的字节值，与仅能接受 <type>integer</type>
-      字节值相反。都有哪些缩写字节值？可以将其用于 &php.ini; 之外吗？
-     </para>
-    </question>
-    <answer>
-     <para>
-      可用的选择有 K（对应 Kilobytes），M（对应 Megabytes）和
-      G（对应 Gigabytes；自 PHP 5.1.0
-      起可用），区分大小写。其余的都认为是字节。<literal>1M</literal>
-      等于一个 Megabyte，即 <literal>1048576</literal> 字节。<literal>1K</literal>
-      等于一个 Kilobyte，即 <literal>1024</literal> 字节。不能在 &php.ini;
-      之外使用这些符号，最好用整数的 <type>integer</type> 字节值。参见
-      <function>ini_get</function> 文档中的转换示例。
-     </para>
-    </answer>
-   </qandaentry>
-
+</programlisting></para>
+        <para>请参阅函数 
+        <function>apache_lookup_uri</function>、
+        <function>apache_response_headers</function>和 
+        <function>fsockopen</function>。</para>
+      </answer>
+    </qandaentry>
+    <qandaentry xml:id="faq.using.authentication">
+      <question>
+        <para>当我用 IIS 进行 HTTP 认证时得到“No Input file specified”消息。</para>
+      </question>
+      <answer>
+        <para>IIS 的安全模型这里有毛病。这是所有 IIS 下运行的 CGI 程序所共有的问题。一个解决办法是建立一个纯 HTML 文件（不经过 PHP 解析）作为要进入认证目录的登录页面，然后用 META 标记来重定向到 PHP 页面，或者用一个连接到 PHP 页面。然后 PHP 就可以正确识别认证信息了。如果是用 ISAPI 模块，那没有这个问题。其它 NT 下的 web 服务器不受此影响。更多信息见 
+        <link xlink:href="&amp;url.iis;">&amp;url.iis;</link>及 
+        <link linkend="features.http-auth">HTTP 认证</link>一章。</para>
+      </answer>
+    </qandaentry>
+    <qandaentry xml:id="faq.using.iis.sharing">
+      <question>
+        <para>Windows：不能访问另一台电脑上用 IIS 共享的文件。</para>
+      </question>
+      <answer>
+        <para>必须要做些修改。打开 
+        <literal>Internet 信息服务</literal>，找到你的 PHP 文件并打开属性页，选择
+        <literal>文件安全性</literal>标签，点击
+        <literal>匿名访问和身份验证控制</literal>的“编辑”按钮。</para>
+        <para>解决此问题有两个方法，一是不要选中
+        <literal>匿名访问</literal>并且选中
+        <literal>集成 Windows 身份验证</literal>，二是选中
+        <literal>匿名访问</literal>并编辑匿名访问使用的帐户，改成一个有权限的。</para>
+      </answer>
+    </qandaentry>
+    <qandaentry xml:id="faq.using.netscape">
+      <question>
+        <para>我的 PHP 脚本在 IE 和 Lynx 下能工作，但是在 Netscape 中有的输出丢失了。当我用“查看源文件”时可以在 IE 中看到内容，但是 Netscape 中不能。</para>
+      </question>
+      <answer>
+        <para>Netscape 在关于 HTML 标记（例如 table）上比 IE 更严格。用一个 HTML 验证器，例如 
+        <link xlink:href="&amp;url.w3.validator;">validator.w3.org</link>来验证你的 HTML 输出可能会有帮助。例如漏了 &lt;/table&gt; 可能会导致这样的结果。</para>
+        <para>同样，IE 和 Lynx 都忽略了 HTML 流中的任何 NULs（
+        <literal>\0</literal>），Netscape 就不。最好的检查方法是编译 
+        <link linkend="features.commandline">PHP 的命令行模式</link>版本（也称为 CGI 版本）并从命令行运行你的脚本。在 *nix 中，用管道传递到 
+        <literal>od -c</literal>并查看任何 
+        <literal>\0</literal>字符。如果在 Windows 下你需要能够查看二进制文件格式的编辑器或程序。当 Netscape 碰到 NUL 时就不会输出之后该行的任何内容而 IE 和 Lynx 都会。</para>
+      </answer>
+    </qandaentry>
+    <qandaentry xml:id="faq.using.mixml">
+      <question>
+        <para>我怎样混合使用 XML 和 PHP？它不认我的 &lt;?xml 标记！</para>
+      </question>
+      <answer>
+        <para>要能够在 PHP 代码中直接嵌入 &lt;?xml，需要将 PHP 设置项 
+        <link linkend="ini.short-open-tag">short_open_tags</link>设置为 
+        <literal>0</literal>以关闭短标记格式。无法通过函数 
+        <function>ini_set</function>来更改这项设置。不管 
+        <link linkend="ini.short-open-tag">short_open_tags</link>是开或者关，都可以用类似于 
+        <literal>&lt;?php echo &#39;&lt;?xml&#39;; ?&gt;</literal>的方法达到目的。该项设置的默认值为开。</para>
+      </answer>
+    </qandaentry>
+    <qandaentry xml:id="faq.using.editor">
+      <question>
+        <para>怎样用 FrontPage 或者其它非要把我的代码移来移去的 HTML 编辑器来编辑 PHP？</para>
+      </question>
+      <answer>
+        <para>最简单的方法是让 PHP 代码也能使用 ASP 标记。这可以让你用 ASP 风格的 &lt;% 和 %&gt; 代码定界符。一些流行的 HTML 编辑器在处理此格式上更加智能化一些（目前如此）。要使用 ASP 风格的标记，需要在 &amp;php.ini; 中打开 
+        <link linkend="ini.asp-tags">asp_tags</link>，或者用相应的 Apache 配置选项。</para>
+      </answer>
+    </qandaentry>
+    <qandaentry xml:id="faq.using.variables">
+      <question>
+        <para>哪里可以找到所有可用的 PHP 预定义变量的完整列表？</para>
+      </question>
+      <answer>
+      <para>请阅读手册中的
+      <link linkend="language.variables.predefined">预定义变量</link>一章，该部分的文档已经包含了一部分可以用于你的脚本的预定义变量的列表。可用变量的完整列表（及更多信息）可以通过调用 
+      <function>phpinfo</function>函数来查阅。请务必阅读手册中
+      <link linkend="language.variables.external">来自 PHP 之外的变量</link>一节，这部分文档阐述了外部变量的概念，例如来自 HTML 表单、Cookie 和 URL 的变量。</para>&amp;note.registerglobals;</answer>
+    </qandaentry>
+    <qandaentry xml:id="faq.using.freepdf">
+      <question>
+        <para>怎样才能不用非免费的商业库（例如 
+        <link linkend="ref.pdf">PDFLib</link>） 来生成 PDF 文档？我想要个免费的并且不需要再连接别的 PDF 库。</para>
+      </question>
+      <answer>
+        <para>有几个选择，例如 
+        <link xlink:href="&amp;url.pdf.ros;">&amp;url.pdf.ros;</link>，
+        <link xlink:href="&amp;url.pdf.fpdf;">&amp;url.pdf.fpdf;</link>，
+        <link xlink:href="&amp;url.pdf.pdf4php;">&amp;url.pdf.pdf4php;</link>和 
+        <link xlink:href="&amp;url.pdf.phppdflib;">&amp;url.pdf.phppdflib;</link>。还有一个 
+        <link xlink:href="&amp;url.pdf.panda;">Panda</link>模块。</para>
+      </answer>
+    </qandaentry>
+    <qandaentry xml:id="faq.using.cgi-vars">
+      <question>
+        <para>我试着在用户自定义函数中访问一个标准的 CGI 变量（例如 $DOCUMENT_ROOT 或 $HTTP_REFERER），但是找不到，哪里出了错？</para>
+      </question>
+      <answer>
+      <para>首先非常重要的一点是 PHP 设置项 
+      <link linkend="ini.register-globals">register_globals</link>同样会对服务器端和环境变量产生影响。当 register_globals = off （从 PHP 4.2.0 开始其默认值为 off），变量 
+      <varname>$DOCUMENT_ROOT</varname>将不会存在，而只有 
+      <varname>$_SERVER[&#39;DOCUMENT_ROOT&#39;]</varname>。如果 register_globals = on 则变量 
+      <varname>$DOCUMENT_ROOT</varname>和 
+      <varname>$GLOBALS[&#39;DOCUMENT_ROOT&#39;]</varname>将同时存在。</para>
+      <para>如果确认 register_globals = on 但不知道为什么 
+      <varname>$DOCUMENT_ROOT</varname>在函数内部不可用，这是因为它和其它的变量一样需要在函数中执行 
+      <literal>global $DOCUMENT_ROOT</literal>。请参阅手册中的
+      <link linkend="language.variables.scope">变量范围</link>一节。建议在 register_globals = off 的情况下进行编码。</para>&amp;note.superglobals;</answer>
+    </qandaentry>
+    <qandaentry xml:id="faq.using.shorthandbytes">
+      <question>
+        <para>有些 PHP　选项可以接受缩写的字节值，与仅能接受 
+        <type>integer</type>字节值相反。都有哪些缩写字节值？可以将其用于 &amp;php.ini; 之外吗？</para>
+      </question>
+      <answer>
+        <para>可用的选择有 K（对应 Kilobytes），M（对应 Megabytes）和 G（对应 Gigabytes；自 PHP 5.1.0 起可用），区分大小写。其余的都认为是字节。
+        <literal>1M</literal>等于一个 Megabyte，即 
+        <literal>1048576</literal>字节。
+        <literal>1K</literal>等于一个 Kilobyte，即 
+        <literal>1024</literal>字节。不能在 &amp;php.ini; 之外使用这些符号，最好用整数的 
+        <type>integer</type>字节值。参见 
+        <function>ini_get</function>文档中的转换示例。</para>
+        <note>
+          <title>kilobyte versus kibibyte</title>
+          <para>The PHP notation describes one kilobyte as equalling 1024 bytes, whereas the 
+          <acronym>IEC</acronym>standard considers this to be a kibibyte instead. Summary: k and K = 1024 bytes.</para>
+        </note>
+      </answer>
+    </qandaentry>
+    <qandaentry xml:id="faq.using.windowslocalhostissue">
+      <question>
+        <para>Windows: I keep getting connection timeouts when using 
+        <literal>localhost</literal>, whereas 
+        <literal>&quot;127.0.0.1&quot;</literal>works?</para>
+      </question>
+      <answer>
+        <para>Prior to PHP 5.3.4, there was a bug in the network resolving code inside PHP that caused 
+        <literal>localhost</literal>in all stream related situations to fail if IPv6 was enabled. To work around this issue you can either use 
+        <literal>&quot;127.0.0.1&quot;</literal>or disable IPv6 resolving in the 
+        <filename>hosts</filename>file.</para>
+      </answer>
+    </qandaentry>
   </qandaset>
- </chapter>
-
+</chapter>
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
@@ -441,7 +351,7 @@ sgml-indent-step:1
 sgml-indent-data:t
 indent-tabs-mode:nil
 sgml-parent-document:nil
-sgml-default-dtd-file:"../../manual.ced"
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
 sgml-exposed-tags:nil
 sgml-local-catalogs:nil
 sgml-local-ecat-files:nil

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
 <!-- $Author$ -->
 <!-- EN-Revision: n/a Maintainer: yorgo Status: ready -->
@@ -6,7 +6,7 @@
 <refentry xml:id="function.mysql-affected-rows" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>mysql_affected_rows</refname>
-  <refpurpose>ȡ��ǰһ�� MySQL ������Ӱ��ļ�¼����</refpurpose>
+  <refpurpose>取得前一次 MySQL 操作所影响的记录行数</refpurpose>
  </refnamediv>
  <refsect1 role="description">
   &reftitle.description;
@@ -15,8 +15,8 @@
    <methodparam choice="opt"><type>resource</type><parameter>link_identifier</parameter></methodparam>
   </methodsynopsis>
   <para>
-   ȡ�����һ���� <parameter>link_identifier</parameter> ������
-   INSERT��UPDATE �� DELETE ��ѯ��Ӱ��ļ�¼������
+   取得最近一次与 <parameter>link_identifier</parameter> 关联的
+   INSERT，UPDATE 或 DELETE 查询所影响的记录行数。
   </para>
  </refsect1>
 
@@ -32,19 +32,19 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   ִ�гɹ��򷵻���Ӱ����е���Ŀ��������һ�β�ѯʧ�ܵĻ����������� -1��
+   执行成功则返回受影响的行的数目，如果最近一次查询失败的话，函数返回 -1。
   </para>
   <para>
-   ������һ�β�����û���κ�������WHERE���� DELETE
-   ��ѯ���ڱ������еļ�¼���ᱻɾ����������������ֵ�� 4.1.2 ��֮ǰ��Ϊ 0��
+   如果最近一次操作是没有任何条件（WHERE）的 DELETE
+   查询，在表中所有的记录都会被删除，但本函数返回值在 4.1.2 版之前都为 0。
   </para>
   <para>
-   ��ʹ�� UPDATE ��ѯ��MySQL ���Ὣԭֵ����ֵһ�����и��¡�����ʹ��
+   当使用 UPDATE 查询，MySQL 不会将原值和新值一样的列更新。这样使得
    <function>mysql_affected_rows</function>
-   ��������ֵ��һ�����ǲ�ѯ���������ϵļ�¼����ֻ���������޸ĵļ�¼���Żᱻ���ء�
+   函数返回值不一定就是查询条件所符合的记录数，只有真正被修改的记录数才会被返回。
   </para>
   <para>
-   REPLACE �������ɾ��������ͬ�����ļ�¼��Ȼ�����һ���¼�¼�����������ص��Ǳ�ɾ���ļ�¼�����ϱ�����ļ�¼����
+   REPLACE 语句首先删除具有相同主键的记录，然后插入一个新记录。本函数返回的是被删除的记录数加上被插入的记录数。
   </para>
  </refsect1>
 
@@ -52,7 +52,7 @@
   &reftitle.examples;
   <para>
    <example>
-    <title><function>mysql_affected_rows</function> ����</title>
+    <title><function>mysql_affected_rows</function> 例子</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -62,11 +62,11 @@ if (!$link) {
 }
 mysql_select_db('mydb');
 
-/* �������ر�ɾ����¼��׼ȷ��Ŀ */
+/* 本例返回被删除记录的准确数目 */
 mysql_query('DELETE FROM mytable WHERE id < 10');
 printf("Records deleted: %d\n", mysql_affected_rows());
 
-/* ���ڷ���ֵ�� WHERE �Ӿ䣬Ӧ���� 0 */
+/* 对于非真值的 WHERE 子句，应返回 0 */
 mysql_query('DELETE FROM mytable WHERE 0');
 printf("Records deleted: %d\n", mysql_affected_rows());
 ?>
@@ -83,7 +83,7 @@ Records deleted: 0
   </para>
   <para>
    <example>
-    <title>ʹ���������� <function>mysql_affected_rows</function> ����</title>
+    <title>使用事务处理的 <function>mysql_affected_rows</function> 例子</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -113,17 +113,17 @@ Updated Records: 10
  <refsect1 role="notes">
   &reftitle.notes;
   <note>
-   <title>������</title>
+   <title>事务处理</title>
    <para>
-    ���ʹ����������transactions������Ҫ�� INSERT��UPDATE �� DELETE ��ѯ�����
-    <function>mysql_affected_rows</function> �������������� COMMIT ����֮��
+    如果使用事务处理（transactions），需要在 INSERT，UPDATE 或 DELETE 查询后调用
+    <function>mysql_affected_rows</function> 函数，而不是在 COMMIT 命令之后。
    </para>
   </note>
   <note>
-   <title>SELECT ���</title>
+   <title>SELECT 语句</title>
    <para>
-    Ҫ��ȡ SELECT �����ص�������������
-    <function>mysql_num_rows</function>��
+    要获取 SELECT 所返回的行数，可以用
+    <function>mysql_num_rows</function>。
    </para>
   </note>
  </refsect1>

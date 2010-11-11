@@ -1,24 +1,20 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
 <!-- $Author$ -->
-<!-- EN-Revision:1.7 Maintainer: class007 Status: ready -->
-<!-- CREDITS: dallas -->
-<sect1 xml:id="install.unix.apache" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
- <title>Unix ϵͳ�µ� Apache 1.3.x</title>
- <para>
-  ���ڰ����� Unix ƽ̨�� Apache �°�װ PHP ��˵������ʾ�������������ҳ��Ҳ��
-  <link linkend="install.unix.apache2">Apache 2 �İ�װ��˵��</link>��
- </para>
- <para>
-  ���Դ�<link linkend="configure">��������ѡ���б�</link>�Լ�λ���ֲ��Ӧ���ֵ��ض���չ����ѡ����ѡ��������ڰ�װ�����
-  10 �����������ӵ� <command>configure</command>
-  �����С��汾�������ﱻʡ�����Ա�֤��˵������ȷ�ԡ���Ҫ������ġ�xxx���滻Ϊ�Լ�ʹ�õ��ļ�����ȷֵ��
- </para>
-
- <example xml:id="install.unix.apache.example">
-  <title>PHP �� Apache ����ģ��汾��װ˵��</title>
-  <screen>
-<![CDATA[
+<!-- $EN-Revision: 5179a9d3ad94cd96a537d0d68ab0facaf43d7189 $ -->
+<sect1 xml:id="install.unix.apache"
+       xmlns="http://docbook.org/ns/docbook"
+       xmlns:xlink="http://www.w3.org/1999/xlink">
+  <title>Unix 系统下的 Apache 1.3.x</title>
+  <para>本节包括在 Unix 平台的 Apache 下安装 PHP 的说明和提示。我们在另外的页面也有 
+  <link linkend="install.unix.apache2">Apache 2 的安装和说明</link>。</para>
+  <para>可以从
+  <link linkend="configure">核心配置选项列表</link>以及位于手册对应部分的特定扩展配置选项中选择参数并在安装步骤第 10 步将它们添加到 
+  <command>configure</command>命令中。版本号在这里被省略了以保证此说明的正确性。需要将这里的“xxx”替换为自己使用的文件的正确值。</para>
+  <example xml:id="install.unix.apache.example">
+    <title>PHP 的 Apache 共享模块版本安装说明</title>
+    <screen>
+      <![CDATA[
 1.  gunzip apache_xxx.tar.gz
 2.  tar -xvf apache_xxx.tar
 3.  gunzip php-xxx.tar.gz
@@ -28,54 +24,50 @@
 7.  make
 8.  make install
 9.  cd ../php-xxx
-10. ���ڣ����� PHP�����Ƕ��� PHP �Ĳ�ͬѡ���ʱ������Ҫ������Щ��չ�⡣ʹ��
+10. 现在，配置 PHP。这是定制 PHP 的不同选项的时候，例如要加载哪些扩展库。使用
       ./configure --help
-    ���г����õ�ѡ��������ʾ����ֻ�Ǽ򵥵����� Apache 1 �� MySQL ֧�֡�
-    �û��� apxs ��·�����ܺʹ�ʾ���еĲ�ͬ��
+    来列出可用的选项。在下面的示例中只是简单地配置 Apache 1 和 MySQL 支持。
+    用户的 apxs 的路径可能和此示例中的不同。
       ./configure --with-mysql --with-apxs=/www/bin/apxs
 11. make
 12. make install
-    ����ڰ�װ֮������޸�����ѡ���ôֻ���ظ��������������ֻ����������
-    Apache �Ϳ���ʹ��ģ����Ч������Ҫ���±��� Apache��ע������ر�ָ����
-    ��make install�����ǻᰲװ PEAR������ PHP �������� phpize��PHP CLI �Լ�������
-13. ���� php.ini �ļ���
+    如果在安装之后决定修改配置选项，那么只需重复以上最后三步。只须重新启动
+    Apache 就可以使新模块生效。不需要重新编译 Apache。注意除非特别指出，
+    “make install”总是会安装 PEAR，各种 PHP 工具例如 phpize，PHP CLI 以及其它。
+13. 建立 php.ini 文件。
       cp php.ini-dist /usr/local/lib/php.ini
-    ���Ա༭ php.ini ������ PHP ѡ������� php.ini ��������Ŀ¼���ڵ�
-    10 ����������ѡ�
+    可以编辑 php.ini 来设置 PHP 选项。如果想把 php.ini 放在其它目录，在第
+    10 步加上以下选项：
       --with-config-file-path=/path
-    ���ѡ���� php.ini-recommended��ȷ���Ķ�һ�����еı��˵������Ϊ��Щ��
-    Ӱ�쵽 PHP ����Ϊ��
-14. �༭ httpd.conf ������ PHP ģ�顣�� LoadModule ����ұߵ�·������ָ��ϵͳ��
-    PHP ģ�����ڵ�·��������� make install ��������Ѿ������ˣ������Ǽ��ȷ��һ�¡�
-    �� PHP 4��
+    如果选择了 php.ini-recommended，确保阅读一下其中的变更说明，因为这些会
+    影响到 PHP 的行为。
+14. 编辑 httpd.conf 来加载 PHP 模块。在 LoadModule 语句右边的路径必须指向系统中
+    PHP 模块所在的路径。上面的 make install 步骤可能已经添加了，但还是检查确认一下。
+    对 PHP 4：
       LoadModule php4_module        libexec/libphp4.so
-    �� PHP 5��
+    对 PHP 5：
       LoadModule php5_module        libexec/libphp5.so
-15. �� httpd.conf �м��� AddModule ���֣��� ClearModuleList �����ĳ����������һ�䣺
-    �� PHP 4��
+15. 在 httpd.conf 中加入 AddModule 部分，在 ClearModuleList 下面的某处，加上这一句：
+    对 PHP 4：
       AddModule mod_php4.c
-    �� PHP 5��
+    对 PHP 5：
       AddModule mod_php5.c
-16. ���� Apache ����Щ��׺��Ϊ PHP ���������磬�� Apache �� .php ��׺���ļ�����Ϊ
-    PHP�����Խ��κκ�׺���ļ�����Ϊ PHP��ֻҪ����������м��벢�ÿո�ֿ���������
-    ����һ�� .phtml ��ʾ����
+16. 告诉 Apache 将哪些后缀作为 PHP 解析。例如，让 Apache 把 .php 后缀的文件解析为
+    PHP。可以将任何后缀的文件解析为 PHP，只要在以下语句中加入并用空格分开。这里以
+    添加一个 .phtml 来示例。
       AddType application/x-httpd-php .php .phtml
-    Ϊ�˽� .phps ��Ϊ PHP ��Դ�ļ������﷨������ʾ�������Լ��ϣ�
+    为了将 .phps 作为 PHP 的源文件进行语法高亮显示，还可以加上：
       AddType application/x-httpd-php-source .phps
-17. ��ͨ���Ĺ������� Apache��������ȫֹͣ Apache �������������������� HUP ����
-    USR1 �ź�ʹ Apache ���¼��أ���
+17. 用通常的过程启动 Apache（必须完全停止 Apache 再重新启动，而不是用 HUP 或者
+    USR1 信号使 Apache 重新加载）。
 ]]>
-  </screen>
- </example>
-
- <para>
-  Ҳ���Խ� PHP ��Ϊ��̬��������װ��
- </para>
-
- <example xml:id="install.unix.apache.example-static">
-  <title>PHP �� Apache ��̬ģ��汾��װ˵��</title>
-  <screen>
-<![CDATA[
+</screen>
+  </example>
+  <para>也可以将 PHP 作为静态对象来安装：</para>
+  <example xml:id="install.unix.apache.example-static">
+    <title>PHP 的 Apache 静态模块版本安装说明</title>
+    <screen>
+      <![CDATA[
 1.  gunzip -c apache_1.3.x.tar.gz | tar xf -
 2.  cd apache_1.3.x
 3.  ./configure
@@ -90,160 +82,133 @@
 10. cd ../apache_1.3.x
 
 11. ./configure --prefix=/www --activate-module=src/modules/php5/libphp5.a
-    ������һ������ȷ�ģ��ǵģ�����֪�� libphp5.a �в����ڣ�������ʱ��
-      ������֮�󱻴�������
+    （上面一行是正确的！是的，我们知道 libphp5.a 尚不存在，还不到时候，
+      它会在之后被创建。）
 
 12. make
-    ������Ӧ����һ�� httpd �������ļ������Խ������Ƶ� Apache bin Ŀ¼���������
-      ��һ�ΰ�װ����Ҫ��make install����)
+    （现在应该有一个 httpd 二进制文件，可以将它复制到 Apache bin 目录。如果这是
+      第一次安装，还要“make install”。)
 
 13. cd ../php-5.x.y
 14. cp php.ini-dist /usr/local/lib/php.ini
 
-15. ���Ա༭ /usr/local/lib/php.ini �ļ������� PHP ѡ��༭ httpd.conf ��
-    srm.conf �ļ������ӣ�
+15. 可以编辑 /usr/local/lib/php.ini 文件以设置 PHP 选项。编辑 httpd.conf 或
+    srm.conf 文件，添加：
     AddType application/x-httpd-php .php
 ]]>
-   </screen>
+</screen>
   </example>
   <note>
-   <para>
-    ���� PHP 4���� <literal>php-5</literal> ����
-    <literal>php-4</literal>���� <literal>php5</literal>
-    ���� <literal>php4</literal>��
-   </para>
+    <para>对于 PHP 4，把 
+    <literal>php-5</literal>换成 
+    <literal>php-4</literal>，把 
+    <literal>php5</literal>换成 
+    <literal>php4</literal>。</para>
   </note>
+  <para>根据 Unix 系统和 Apache 安装方法的不同，有很多方法停止和重启动 Apache。以下是一些不同的 Apache／UNIX 下重启动 Apache 的典型命令。需要把 
+  <literal>/path/to/</literal>替换成自己系统上的确切路径。</para>
   <para>
-   ���� Unix ϵͳ�� Apache ��װ�����Ĳ�ͬ���кܶ෽��ֹͣ��������
-   Apache��������һЩ��ͬ�� Apache��UNIX �������� Apache �ĵ��������Ҫ��
-   <literal>/path/to/</literal> �滻���Լ�ϵͳ�ϵ�ȷ��·����
-  </para>
-  <para>
-   <example>
-    <title>������ Apache ��ʾ������</title>
-    <programlisting role="shell">
-<![CDATA[
-1. ��һЩ Linux �� SysV �ı����£�
+    <example>
+      <title>重启动 Apache 的示例命令</title>
+      <programlisting role="shell">
+        <![CDATA[
+1. 在一些 Linux 和 SysV 的变种下：
 /etc/rc.d/init.d/httpd restart
 
-2. ʹ�� apachectl �ű���
+2. 使用 apachectl 脚本：
 /path/to/apachectl stop
 /path/to/apachectl start
 
-3. httpdctl �� httpsdctl��ʹ���� OpenSSL�������� apachectl��
+3. httpdctl 和 httpsdctl（使用了 OpenSSL），类似 apachectl：
 /path/to/httpsdctl stop
 /path/to/httpsdctl start
 
-4. ʹ���� mod_ssl�������� SSL ��������������Ҫ�ֹ���������
+4. 使用了 mod_ssl，或其他 SSL 服务器，可能需要手工重启动：
 /path/to/apachectl stop
 /path/to/apachectl startssl
 ]]>
-    </programlisting>
-   </example>
+</programlisting>
+    </example>
   </para>
-  <para>
-   apachectl �� http(s)dctl �������ڵ�·���ڲ�ͬϵͳ��ͨ����һ�������ϵͳ����
-   <literal>locate</literal> ���� <literal>whereis</literal> ����
-   <literal>which</literal> �����ô���԰����ҵ���Щ���Ƴ���
-  </para>
-
-  <para>
-   ���� PHP �� Apache �Ĳ�ͬ���ӻ��У�
-   <informalexample>
+  <para>apachectl 和 http(s)dctl 程序所在的路径在不同系统中通常不一样。如果系统中有 
+  <literal>locate</literal>或者 
+  <literal>whereis</literal>或者 
+  <literal>which</literal>命令，那么可以帮助找到这些控制程序。</para>
+  <para>编译 PHP 和 Apache 的不同例子还有： 
+  <informalexample>
     <programlisting role="shell">
-<![CDATA[
+      <![CDATA[
 ./configure --with-apxs --with-pgsql
 ]]>
-    </programlisting>
-   </informalexample>
-  </para>
+</programlisting>
+  </informalexample></para>
+  <para>此配置将生成在 Apache 的 httpd.conf 文件中用 LoadModule 加载的 
+  <filename>libphp5.so</filename>共享库（PHP 4 是 
+  <filename>libphp4.so</filename>）。而 PostgreSQL 支持将嵌入到此共享库中。</para>
   <para>
-   �����ý������� Apache �� httpd.conf �ļ����� LoadModule
-   ���ص� <filename>libphp5.so</filename> �����⣨PHP 4
-   �� <filename>libphp4.so</filename>������ PostgreSQL
-   ֧�ֽ�Ƕ�뵽�˹������С�
-  </para>
-  <para>
-   <informalexample>
-    <programlisting role="shell">
-<![CDATA[
+    <informalexample>
+      <programlisting role="shell">
+        <![CDATA[
 ./configure --with-apxs --with-pgsql=shared
 ]]>
-    </programlisting>
-   </informalexample>
+</programlisting>
+    </informalexample>
   </para>
+  <para>此配置将生成 Apache 的 
+  <filename>libphp5.so</filename>共享库，并且还生成 
+  <filename>pgsql.so</filename>共享库，可以在 &amp;php.ini; 文件中用 extension 指令加载，或者在 PHP 脚本中用 
+  <function>dl</function>函数明确地加载。</para>
   <para>
-   �����ý����� Apache �� <filename>libphp5.so</filename>
-   �����⣬���һ����� <filename>pgsql.so</filename> �����⣬������
-   &php.ini; �ļ����� extension ָ����أ������� PHP �ű�����
-   <function>dl</function> ������ȷ�ؼ��ء�
-  </para>
-  <para>
-   <informalexample>
-    <programlisting role="shell">
-<![CDATA[
+    <informalexample>
+      <programlisting role="shell">
+        <![CDATA[
 ./configure --with-apache=/path/to/apache_source --with-pgsql
 ]]>
-    </programlisting>
-   </informalexample>
+</programlisting>
+    </informalexample>
   </para>
+  <para>此配置将生成 
+  <filename>libmodphp5.a</filename>库，
+  <filename>mod_php5.c</filename>和一些相关的文件并且拷贝到 Apache 源程序目录中的 
+  <literal>src/modules/php5</literal>目录下。然后用 
+  <literal>--activate-module=src/modules/php5/libphp5.a</literal>编译 Apache，Apache 编译系统会生成 
+  <filename>libphp5.a</filename>并且将其静态地连接到 
+  <filename>httpd</filename>程序中（在 PHP 4 中把 
+  <literal>php5</literal>替换成 
+  <literal>php4</literal>）。PostgreSQL 支持也直接包括在这个 
+  <filename>httpd</filename>程序中了，因此最终结果是单一的一个包括了所有 Apache 和 PHP 支持的 
+  <filename>httpd</filename>可执行文件。</para>
   <para>
-   �����ý����� <filename>libmodphp5.a</filename> �⣬<filename>mod_php5.c</filename>
-   ��һЩ��ص��ļ����ҿ����� Apache Դ����Ŀ¼�е� <literal>src/modules/php5</literal>
-   Ŀ¼�¡�Ȼ���� <literal>--activate-module=src/modules/php5/libphp5.a</literal>
-   ���� Apache��Apache ����ϵͳ������ <filename>libphp5.a</filename>
-   ���ҽ��侲̬�����ӵ� <filename>httpd</filename> �����У��� PHP 4 �а�
-   <literal>php5</literal> �滻�� <literal>php4</literal>����PostgreSQL
-   ֧��Ҳֱ�Ӱ�������� <filename>httpd</filename>
-   �������ˣ�������ս���ǵ�һ��һ������������ Apache �� PHP
-   ֧�ֵ� <filename>httpd</filename> ��ִ���ļ���
-  </para>
-  <para>
-   <informalexample>
-    <programlisting role="shell">
-<![CDATA[
+    <informalexample>
+      <programlisting role="shell">
+        <![CDATA[
 ./configure --with-apache=/path/to/apache_source --with-pgsql=shared
 ]]>
-    </programlisting>
-   </informalexample>
+</programlisting>
+    </informalexample>
   </para>
-  <para>
-   �����ú�����һ����������û�������� <filename>httpd</filename>
-   ��ִ���ļ��а��� PostgreSQL ��֧���Լ�������һ��
-   <filename>pgsql.so</filename>  ���������⡣�ù����������
-   &php.ini; �ļ��л����� <function>dl</function> �������ء�
-  </para>
-  <para>
-   ��ѡ��ͬ�ķ������� PHP ʱ����Ҫ����ÿ�ַ��������ƺ�ȱ�㡣�ù�������ʽ����
-   PHP ��ζ�ſ��Ե������� Apache�����Ҳ��������ӻ��޸��� PHP
-   ��ʱ�����±������г��������÷������� PHP����̬��ʽ����ζ�� PHP
-   ���Լ��غ����еø��졣������Ϣ�� Apache ��
-   <link xlink:href="&url.apachedso;">DSO ֧��ҳ��</link>��
-  </para>
- <note>
-  <para>
-   Apache Ĭ�ϵ� httpd.conf �ļ���Ŀǰ�����������µ����ݣ�
-   <informalexample>
-    <programlisting role="apache-conf">
-<![CDATA[
+  <para>此配置和上面一样——除了没有在最后的 
+  <filename>httpd</filename>可执行文件中包括 PostgreSQL 的支持以及生成了一个 
+  <filename>pgsql.so</filename>共享库以外。该共享库可以在 &amp;php.ini; 文件中或者用 
+  <function>dl</function>函数加载。</para>
+  <para>当选择不同的方法编译 PHP 时，需要考虑每种方法的优势和缺点。用共享对象方式编译 PHP 意味着可以单独编译 Apache，并且不用在添加或修改了 PHP 的时候重新编译所有程序。用内置方法编译 PHP（静态方式）意味着 PHP 可以加载和运行得更快。更多信息见 Apache 的 
+  <link xlink:href="&amp;url.apachedso;">DSO 支持页面</link>。</para>
+  <note>
+    <para>Apache 默认的 httpd.conf 文件中目前包括类似如下的内容： 
+    <informalexample>
+      <programlisting role="apache-conf">
+        <![CDATA[
 User nobody
 Group "#-1"
 ]]>
-    </programlisting>
-   </informalexample>
-   ���ǰ����޸ĳɡ�Group nogroup�������������Ƶģ���Group
-   daemon��Ҳ��ͨ�ã���PHP �����ܴ��ļ���
-  </para>
- </note>
- <note>
-  <para>
-   ȷ����ʹ�� <option role="configure">--with-apxs=/path/to/apxs</option>
-   ʱָ�� Apache ��װ���Ŀ¼�е� apxs�����Բ����� Apache Դ�����е�
-   apxs ��Ҫ�ð�װ��� apxs��
-  </para>
- </note>
+</programlisting>
+    </informalexample>除非把它修改成“Group nogroup”或者其它类似的（“Group daemon”也很通用），PHP 将不能打开文件。</para>
+  </note>
+  <note>
+    <para>确认在使用 
+    <option role="configure">--with-apxs=/path/to/apxs</option>时指向 Apache 安装后的目录中的 apxs。绝对不能用 Apache 源程序中的 apxs 而要用安装后的 apxs。</para>
+  </note>
 </sect1>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
@@ -255,7 +220,7 @@ sgml-indent-step:1
 sgml-indent-data:t
 indent-tabs-mode:nil
 sgml-parent-document:nil
-sgml-default-dtd-file:"../../manual.ced"
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
 sgml-exposed-tags:nil
 sgml-local-catalogs:nil
 sgml-local-ecat-files:nil

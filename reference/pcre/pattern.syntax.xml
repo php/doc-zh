@@ -1,49 +1,49 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
 <!-- $Author$ -->
 <!-- EN-Revision: n/a Maintainer: dallas Status: partial -->
 <refentry xml:id="reference.pcre.pattern.syntax" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
-  <refname>ģʽ�﷨</refname>
-  <refpurpose>��˵ Perl �����������ʽ���﷨</refpurpose>
+  <refname>模式语法</refname>
+  <refpurpose>解说 Perl 兼容正则表达式的语法</refpurpose>
  </refnamediv>
 
  <refsect1>
-  <title>˵��</title>
+  <title>说明</title>
   <simpara>
-   PCRE ����һ���ú� Perl 5
-   ��ͬ���﷨������ʵ�����������ʽģʽƥ��ĺ������������������𣨼����棩����ǰ
-   PCRE ��ʵ������ Perl 5.005 ����ġ�
+   PCRE 库是一组用和 Perl 5
+   相同的语法和语义实现了正则表达式模式匹配的函数，不过有少许区别（见下面）。当前
+   PCRE 的实现是与 Perl 5.005 相符的。
   </simpara>
  </refsect1>
 
  <refsect1>
-  <title>�� Perl ������</title>
+  <title>与 Perl 的区别</title>
   <para>
-   ����̸���������Ǿ� Perl 5.005 ��˵�ġ�
+   这里谈到的区别是就 Perl 5.005 来说的。
   <orderedlist>
    <listitem>
     <simpara>
-     Ĭ������£��հ��ַ��� C ���Կ⺯�� isspace()
-     ����ʶ����κ��ַ��������п��������ַ����ͱ�������һ��ͨ��
-     isspace() ƥ��ո񣬻�ҳ�������з����س�����ˮƽ�Ʊ����ʹ�ֱ�Ʊ�����Perl 5
-     ���ٽ���ֱ�Ʊ��������ڿհ��ַ����ˡ���ʵ�ϳ������������� Perl
-     �ĵ��е�ת������ \v ��δ��ʶ������������ַ����ٵ� 5.002
-     Ϊֹ�������ɿհ��ַ��ġ��� 5.004 �� 5.005 �� \s ��ƥ����ַ���
+     默认情况下，空白字符是 C 语言库函数 isspace()
+     所能识别的任何字符，尽管有可能与别的字符类型表编译在一起。通常
+     isspace() 匹配空格，换页符，换行符，回车符，水平制表符和垂直制表符。Perl 5
+     不再将垂直制表符包括在空白字符中了。事实上长久以来存在于 Perl
+     文档中的转义序列 \v 从未被识别过，不过该字符至少到 5.002
+     为止都被当成空白字符的。在 5.004 和 5.005 中 \s 不匹配此字符。
     </simpara>
    </listitem>
    <listitem>
     <simpara>
-     PCRE ����������ǰ������ʹ���ظ�����������Perl
-     ���������������ܲ����������еĺ��塣���磬(?!a){3}
-     �����Ƕ������������ַ����ǡ�a�������Ƕ�����һ���ַ����ǡ�a�����Ρ�
+     PCRE 不允许在向前断言中使用重复的数量符。Perl
+     允许这样，但可能不是你想象中的含义。例如，(?!a){3}
+     并不是断言下面三个字符不是“a”，而是断言下一个字符不是“a”三次。
     </simpara>
    </listitem>
    <listitem>
     <simpara>
-     ����������ų�ģʽ�����е���ģʽ��Ȼ������������δ��ƫ���������趨����Ŀ��Perl
-     ��ƥ��ʧ��ǰ�Ӵ���ģʽ���趨�����ֱ�������ֻ���Ŵ���ʽ����ֻ����һ����֧ʱ��
-     <!-- �ѽ⣡
+     捕获出现在排除模式断言中的子模式虽然被计数，但并未在偏移向量中设定其条目。Perl
+     在匹配失败前从此种模式中设定其数字变量，但只在排触摸式断言只包含一个分支时。
+     <!-- 费解！
      Capturing subpatterns that occur inside negative looka-
      head assertions are counted, but their entries in the
      offsets vector are never set. Perl sets its numerical variables
@@ -56,75 +56,75 @@
    </listitem>
    <listitem>
     <simpara>
-     ����Ŀ���ַ�����֧�ֶ����Ƶ����ַ��������ܳ�����ģʽ�ַ����У���Ϊ����������ͨ��
-     C �ַ������ݣ��Զ���������ֹ��ת�����С�\x00��������ģʽ��������ʾ�������㡣
+     尽管目标字符串中支持二进制的零字符，但不能出现在模式字符串中，因为它被当作普通的
+     C 字符串传递，以二进制零终止。转义序列“\x00”可以在模式中用来表示二进制零。
     </simpara>
     </listitem>
     <listitem>
      <simpara>
-      ��֧������ Perl ת�����У�\l��\u��\L��\U����ʵ����Щ����
-      Perl ���ַ���������ʵ�ֵģ�������ģʽƥ�������һ���֡�
+      不支持下列 Perl 转义序列：\l，\u，\L，\U。事实上这些是由
+      Perl 的字符串处理来实现的，并不是模式匹配引擎的一部分。
      </simpara>
     </listitem>
     <listitem>
      <simpara>
-      ��֧�� Perl �� \G ���ԣ���Ϊ��͵�����ģʽƥ���޹ء�
+      不支持 Perl 的 \G 断言，因为这和单个的模式匹配无关。
      </simpara>
     </listitem>
     <listitem>
      <simpara>
-      �����ԣ�PCRE ��֧�� (?{code}) �ṹ��
+      很明显，PCRE 不支持 (?{code}) 结构。
      </simpara>
     </listitem>
     <listitem>
      <simpara>
-      ������ģʽ�ظ���ʱ���й� Perl 5.005_02
-      �����ַ������趨��Щ�Źֵĵط�������˵����ģʽ
-      /^(a(b)?)+$/ ȥƥ�� "aba" �Ὣ $2 ��Ϊ "b"��������ģʽ
-      /^(aa(bb)?)+$/ ȥƥ�� "aabbaa" ��ʹ $2 ��ֵ��Ȼ���������ģʽ�ĳ�
-      /^(aa(b(b))?)+$/���� $2���� $3������ֵ�ˡ���
-      Perl 5.004 ��������������� $2 ���ᱻ��ֵ���� PCRE ��Ҳ��
-      &true;������Ժ� Perl ���ˣ�PCRE ����Ҳ����Ÿġ�
+      当部分模式重复的时候，有关 Perl 5.005_02
+      捕获字符串的设定有些古怪的地方。举例说，用模式
+      /^(a(b)?)+$/ 去匹配 "aba" 会将 $2 设为 "b"，但是用模式
+      /^(aa(bb)?)+$/ 去匹配 "aabbaa" 会使 $2 无值。然而，如果把模式改成
+      /^(aa(b(b))?)+$/，则 $2（和 $3）就有值了。在
+      Perl 5.004 中以上两种情况下 $2 都会被赋值，在 PCRE 中也是
+      &true;。如果以后 Perl 改了，PCRE 可能也会跟着改。
      </simpara>
     </listitem>
     <listitem>
     <simpara>
-     ��һ��δ�����ì���� Perl 5.005_02 ��ģʽ
-     /^(a)?(?(1)a|b)+$/ ��ƥ�����ַ��� "a"������ PCRE
-     ���ᡣȻ������ Perl �� PCRE ���� /^(a)?a/
-     ȥƥ�� "a" ��ʹ $1 û��ֵ��
+     另一个未解决的矛盾是 Perl 5.005_02 中模式
+     /^(a)?(?(1)a|b)+$/ 能匹配上字符串 "a"，但是 PCRE
+     不会。然而，在 Perl 和 PCRE 中用 /^(a)?a/
+     去匹配 "a" 会使 $1 没有值。
     </simpara>
     </listitem>
     <listitem>
      <para>
-      PCRE �ṩ��һЩ�� Perl �������ʽ���Ƶ���չ��
+      PCRE 提供了一些对 Perl 正则表达式机制的扩展：
       <orderedlist>
        <listitem>
         <simpara>
-         ���������Ա���ƥ��̶������ַ�������ÿ�������Եķ�֧����ƥ�䲻ͬ���ȵ��ַ�����Perl
-         5.005 Ҫ�����з�֧�ĳ�����ͬ��
+         尽管向后断言必须匹配固定长度字符串，但每个向后断言的分支可以匹配不同长度的字符串。Perl
+         5.005 要求所有分支的长度相同。
         </simpara>
        </listitem>
        <listitem>
         <simpara>
-         ����趨��
+         如果设定了
          <link linkend="reference.pcre.pattern.modifiers">PCRE_DOLLAR_ENDONLY</link>
-         ��û���趨
-         <link linkend="reference.pcre.pattern.modifiers">PCRE_MULTILINE</link>����
-         $ Ԫ�ַ�ֻƥ���ַ�������ĩβ��
+         而没有设定
+         <link linkend="reference.pcre.pattern.modifiers">PCRE_MULTILINE</link>，则
+         $ 元字符只匹配字符串的最末尾。
         </simpara>
        </listitem>
        <listitem>
         <simpara>
-         ����趨��
-         <link linkend="reference.pcre.pattern.modifiers">PCRE_EXTRA</link>����б�ߺ����һ��û�����⺬�����ĸ�������
+         如果设定了
+         <link linkend="reference.pcre.pattern.modifiers">PCRE_EXTRA</link>，反斜线后面跟一个没有特殊含义的字母会出错。
         </simpara>
        </listitem>
        <listitem>
         <simpara>
-         ����趨��
-         <link linkend="reference.pcre.pattern.modifiers">PCRE_UNGREEDY</link>�����ظ�����������
-         greed ����ת������Ĭ��ʱ���� greedy��������������һ���ʺžͱ�� greedy �ˡ�
+         如果设定了
+         <link linkend="reference.pcre.pattern.modifiers">PCRE_UNGREEDY</link>，则重复的数量符的
+         greed 被反转，即，默认时不是 greedy，但如果后面跟上一个问号就变成 greedy 了。
         </simpara>
        </listitem>
       </orderedlist>
@@ -200,33 +200,33 @@
  </refsect1>
 
  <refsect1 xml:id="regexp.reference">
-  <title>�������ʽ���</title>
+  <title>正则表达式详解</title>
   <refsect2 xml:id="regexp.introduction">
-   <title>����</title>
+   <title>介绍</title>
    <para>
-    ����˵�� PCRE ��֧�ֵ��������ʽ���﷨�����塣Perl
-    �ĵ��ͺܶ���������Ҳ��˵���������ʽ���е������кܶ����ӡ�Jeffrey
-    Friedl д�ġ�Mastering  Regular  Expressions������ O'Reilly
-    �����緢�У�ISBN 1-56592-257-3���������˴���ϸ�ڡ������˵��ֻ�Ǹ��ο��ĵ���
+    下面说明 PCRE 所支持的正则表达式的语法和语义。Perl
+    文档和很多其它书中也解说了正则表达式，有的书中有很多例子。Jeffrey
+    Friedl 写的“Mastering  Regular  Expressions”，由 O'Reilly
+    出版社发行（ISBN 1-56592-257-3），包含了大量细节。这里的说明只是个参考文档。
    </para>
    <para>
-    �������ʽ�Ǵ�������ȥƥ��Ŀ���ַ�����һ��ģʽ��������ַ���ģʽ�б�ʾ����������ƥ��Ŀ������Ӧ���ַ�����Ϊһ��С���ӣ�ģʽ
-    <literal>The quick brown fox</literal> ƥ����Ŀ���ַ�����������ȫ��ͬ��һ���֡�
+    正则表达式是从左向右去匹配目标字符串的一组模式。大多数字符在模式中表示它们自身并匹配目标中相应的字符。作为一个小例子，模式
+    <literal>The quick brown fox</literal> 匹配了目标字符串中与其完全相同的一部分。
    </para>
   </refsect2>
   <refsect2 xml:id="regexp.reference.meta">
-   <title>Ԫ�ַ�</title>
+   <title>元字符</title>
    <para>
-    �������ʽ�������������ܹ���ģʽ�а���ѡ���ѭ��������ͨ��ʹ��<emphasis>Ԫ�ַ�</emphasis>��������ģʽ�У�Ԫ�ַ���������������������һЩ����ķ�ʽ��������
+    正则表达式的威力在于其能够在模式中包含选择和循环。它们通过使用<emphasis>元字符</emphasis>来编码在模式中，元字符不代表其自身，它们用一些特殊的方式来解析。
    </para>
    <para>
-    �����鲻ͬ��Ԫ�ַ���һ����ģʽ�г��˷������ڶ��ܱ�ʶ��ģ�����һ�����ڷ������ڱ�ʶ��ġ�������֮���Ԫ�ַ�����Щ��
+    有两组不同的元字符：一种是模式中除了方括号内都能被识别的，还有一种是在方括号内被识别的。方括号之外的元字符有这些：
     <variablelist>
      <varlistentry>
       <term><emphasis>\</emphasis></term>
       <listitem>
        <simpara>
-        ��������;��ͨ��ת���
+        有数种用途的通用转义符
        </simpara>
       </listitem>
      </varlistentry>
@@ -234,7 +234,7 @@
       <term><emphasis>^</emphasis></term>
       <listitem>
        <simpara>
-        ����Ŀ��Ŀ�ͷ�����ڶ���ģʽ���еĿ�ͷ��������һ���з�֮��
+        断言目标的开头（或在多行模式下行的开头，即紧随一换行符之后）
        </simpara>
       </listitem>
      </varlistentry>
@@ -242,7 +242,7 @@
       <term><emphasis>$</emphasis></term>
       <listitem>
        <simpara>
-        ����Ŀ��Ľ�β�����ڶ���ģʽ���еĽ�β��������һ���з�֮ǰ��
+        断言目标的结尾（或在多行模式下行的结尾，即紧随一换行符之前）
        </simpara>
       </listitem>
      </varlistentry>
@@ -250,7 +250,7 @@
       <term><emphasis>.</emphasis></term>
       <listitem>
        <simpara>
-        ƥ����˻��з��������һ���ַ���Ĭ������£�
+        匹配除了换行符外的任意一个字符（默认情况下）
        </simpara>
       </listitem>
      </varlistentry>
@@ -258,7 +258,7 @@
       <term><emphasis>[</emphasis></term>
       <listitem>
        <simpara>
-        �ַ��ඨ�忪ʼ
+        字符类定义开始
        </simpara>
       </listitem>
      </varlistentry>
@@ -266,7 +266,7 @@
       <term><emphasis>]</emphasis></term>
       <listitem>
        <simpara>
-        �ַ��ඨ�����
+        字符类定义结束
        </simpara>
       </listitem>
      </varlistentry>
@@ -274,7 +274,7 @@
       <term><emphasis>|</emphasis></term>
       <listitem>
        <simpara>
-        ��ʼһ����ѡһ�ķ�֧
+        开始一个多选一的分支
        </simpara>
       </listitem>
      </varlistentry>
@@ -282,7 +282,7 @@
       <term><emphasis>(</emphasis></term>
       <listitem>
        <simpara>
-        ��ģʽ��ʼ
+        子模式开始
        </simpara>
       </listitem>
      </varlistentry>
@@ -290,7 +290,7 @@
       <term><emphasis>)</emphasis></term>
       <listitem>
        <simpara>
-        ��ģʽ����
+        子模式结束
        </simpara>
       </listitem>
      </varlistentry>
@@ -298,7 +298,7 @@
       <term><emphasis>?</emphasis></term>
       <listitem>
        <simpara>
-        ��չ ( �ĺ��壬Ҳ�� 0 �� 1 �����޶������Լ������޶�����Сֵ
+        扩展 ( 的含义，也是 0 或 1 数量限定符，以及数量限定符最小值
        </simpara>
       </listitem>
      </varlistentry>
@@ -306,7 +306,7 @@
       <term><emphasis>*</emphasis></term>
       <listitem>
        <simpara>
-        ƥ�� 0 �������������޶���
+        匹配 0 个或多个的数量限定符
        </simpara>
       </listitem>
      </varlistentry>
@@ -314,7 +314,7 @@
       <term><emphasis>+</emphasis></term>
       <listitem>
        <simpara>
-        ƥ�� 1 �������������޶���
+        匹配 1 个或多个的数量限定符
        </simpara>
       </listitem>
      </varlistentry>
@@ -322,7 +322,7 @@
       <term><emphasis>{</emphasis></term>
       <listitem>
        <simpara>
-        ���٣���������޶���ʼ
+        最少／最多数量限定开始
        </simpara>
       </listitem>
      </varlistentry>
@@ -330,18 +330,18 @@
       <term><emphasis>}</emphasis></term>
       <listitem>
        <simpara>
-        ���٣���������޶�����
+        最少／最多数量限定结束
        </simpara>
       </listitem>
      </varlistentry>
     </variablelist>
-    ģʽ�з������ڵĲ��ֳ�Ϊ���ַ��ࡱ���ַ����п��õ�Ԫ�ַ�Ϊ��
+    模式中方括号内的部分称为“字符类”。字符类中可用的元字符为：
     <variablelist>
      <varlistentry>
       <term><emphasis>\</emphasis></term>
       <listitem>
        <simpara>
-        ͨ��ת���ַ�
+        通用转义字符
        </simpara>
       </listitem>
      </varlistentry>
@@ -349,7 +349,7 @@
       <term><emphasis>^</emphasis></term>
       <listitem>
        <simpara>
-        �ų��ַ��࣬��������Ϊ��һ���ַ�ʱ��Ч
+        排除字符类，但仅当其为第一个字符时有效
        </simpara>
       </listitem>
      </varlistentry>
@@ -357,7 +357,7 @@
       <term><emphasis>-</emphasis></term>
       <listitem>
        <simpara>
-        ָ���ַ���Χ
+        指出字符范围
        </simpara>
       </listitem>
      </varlistentry>
@@ -365,37 +365,37 @@
       <term><emphasis>]</emphasis></term>
       <listitem>
        <simpara>
-        �����ַ���
+        结束字符类
        </simpara>
       </listitem>
      </varlistentry>
     </variablelist>
-    ����˵����ÿһ��Ԫ�ַ����÷���
+    以下说明了每一个元字符的用法。
    </para>
   </refsect2>
 
   <refsect2 xml:id="regexp.reference.backslash">
-   <title>��б�ߣ�\��</title>
+   <title>反斜线（\）</title>
    <para>
-    ��б���ַ��м�����;�����ȣ����������һ������ĸ�����ַ�����ȡ�����ַ����ܾ��е��κ����⺬�塣���ֽ���б������ת���ַ����÷��������������ַ���֮�л���֮�⡣
+    反斜线字符有几种用途。首先，如果其后跟着一个非字母数字字符，则取消该字符可能具有的任何特殊含义。此种将反斜线用作转义字符的用法适用于无论是字符类之中还是之外。
    </para>
    <para>
-    ���磬�����ƥ��һ����*���ַ�������ģʽ���á�\*������������������һ���ַ��Ƿ�ᱻ����Ԫ�ַ������ͣ�����ڷ���ĸ�����ַ�֮ǰ����һ����\����ָ�����ַ��ʹ����䱾�����ǰ�ȫ�ġ������ǣ����Ҫƥ��һ����б�ߣ��á�\\����
+    例如，如果想匹配一个“*”字符，则在模式中用“\*”。这适用于无论下一个字符是否会被当作元字符来解释，因此在非字母数字字符之前加上一个“\”来指明该字符就代表其本身总是安全的。尤其是，如果要匹配一个反斜线，用“\\”。
    </para>
    <note>
     <para>
-     �����Ż�˫������������ PHP <link 
-     linkend="language.types.string.syntax">�ַ���</link>�еķ�б�������⺬�塣��˱������������ʽ��
-     \\ ��ƥ�� \������ PHP ������Ҫ�� "\\\\" �� '\\\\'��
+     单引号或双引号括起来的 PHP <link 
+     linkend="language.types.string.syntax">字符串</link>中的反斜线有特殊含义。因此必须用正则表达式的
+     \\ 来匹配 \，而在 PHP 代码中要用 "\\\\" 或 '\\\\'。
     </para>
    </note>
    <para>
-    ���ģʽ����ʱ������
+    如果模式编译时加上了
     <link linkend="reference.pcre.pattern.modifiers">PCRE_EXTENDED</link>
-    ѡ�ģʽ�еĿհ��ַ����ַ���������ģ��Լ��ַ���֮��ġ�#�������з�֮����ַ��������ԡ�������ת��ķ�б�߽��հ��ַ����ߡ�#���ַ�������ģʽ��ȥ��
+    选项，模式中的空白字符（字符类中以外的）以及字符类之外的“#”到换行符之间的字符都被忽略。可以用转义的反斜线将空白字符或者“#”字符包括到模式中去。
    </para>
    <para>
-    ��б�ߵĵڶ�����;�ṩ��һ����ģʽ���Կɼ���ʽȥ���벻�ɴ�ӡ�ַ��ķ�������û�в��ɴ�ӡ�ַ����ֵ����ƣ����˴���ģʽ�����Ķ����������⡣�����ı��༭����׼��ģʽ��ʱ��ͨ�������µ�ת����������ʾ��Щ�������ַ�������һЩ��
+    反斜线的第二种用途提供了一种在模式中以可见方式去编码不可打印字符的方法。并没有不可打印字符出现的限制，除了代表模式结束的二进制零以外。但用文本编辑器来准备模式的时候，通常用以下的转义序列来表示那些二进制字符更容易一些：
    </para>
    <para>
     <variablelist>
@@ -403,7 +403,7 @@
       <term><emphasis>\a</emphasis></term>
       <listitem>
        <simpara>
-        alarm���� BEL �ַ���0x07��
+        alarm，即 BEL 字符（0x07）
        </simpara>
       </listitem>
      </varlistentry>
@@ -411,7 +411,7 @@
       <term><emphasis>\cx</emphasis></term>
       <listitem>
        <simpara>
-        "control-x"������ x �������ַ�
+        "control-x"，其中 x 是任意字符
        </simpara>
       </listitem>
      </varlistentry>
@@ -419,7 +419,7 @@
       <term><emphasis>\e</emphasis></term>
       <listitem>
        <simpara>
-        escape��0x1B��
+        escape（0x1B）
        </simpara>
       </listitem>
      </varlistentry>
@@ -427,7 +427,7 @@
       <term><emphasis>\f</emphasis></term>
       <listitem>
        <simpara>
-        ��ҳ�� formfeed��0x0C��
+        换页符 formfeed（0x0C）
        </simpara>
       </listitem>
      </varlistentry>
@@ -435,7 +435,7 @@
       <term><emphasis>\n</emphasis></term>
       <listitem>
        <simpara>
-        ���з� newline��0x0A��
+        换行符 newline（0x0A）
        </simpara>
       </listitem>
      </varlistentry>
@@ -443,7 +443,7 @@
       <term><emphasis>\r</emphasis></term>
       <listitem>
        <simpara>
-        �س��� carriage return��0x0D��
+        回车符 carriage return（0x0D）
        </simpara>
       </listitem>
      </varlistentry>
@@ -451,7 +451,7 @@
       <term><emphasis>\t</emphasis></term>
       <listitem>
        <simpara>
-        �Ʊ��� tab��0x09��
+        制表符 tab（0x09）
        </simpara>
       </listitem>
      </varlistentry>
@@ -459,7 +459,7 @@
       <term><emphasis>\xhh</emphasis></term>
       <listitem>
        <simpara>
-        ʮ�����ƴ���Ϊ hh ���ַ�
+        十六进制代码为 hh 的字符
        </simpara>
       </listitem>
      </varlistentry>
@@ -467,37 +467,37 @@
       <term><emphasis>\ddd</emphasis></term>
       <listitem>
        <simpara>
-        �˽��ƴ���Ϊ ddd ���ַ����� backreference
+        八进制代码为 ddd 的字符，或 backreference
        </simpara>
       </listitem>
      </varlistentry>
     </variablelist>
    </para>
    <para>
-    ��<literal>\cx</literal>���ľ�ȷЧ�����£������<literal>x</literal>����Сд��ĸ����ת��Ϊ��д��ĸ�������ַ��еĵ�
-    6 λ��0x40������ת���Ӷ���<literal>\cz</literal>����Ϊ
-    0x1A������<literal>\c{</literal>����Ϊ
-    0x3B������<literal>\c;</literal>����Ϊ 0x7B��
+    “<literal>\cx</literal>”的精确效果如下：如果“<literal>x</literal>”是小写字母，则被转换为大写字母。接着字符中的第
+    6 位（0x40）被反转。从而“<literal>\cz</literal>”成为
+    0x1A，但“<literal>\c{</literal>”成为
+    0x3B，而“<literal>\c;</literal>”成为 0x7B。
    </para>
    <para>
-    �ڡ�<literal>\x</literal>��֮������ٶ�ȡ����ʮ���������֣����е���ĸ�����Ǵ�д��Сд������ <emphasis>UTF-8
-    ģʽ</emphasis>�£������á�<literal>\x{...}</literal>�����������е������Ǳ�ʾʮ���������ֵ��ַ�����ԭ����ʮ������ת������
-    <literal>\xhh</literal> �����ֵ���� 127 �Ļ���ƥ����һ��˫�ֽ� UTF-8 �ַ���
+    在“<literal>\x</literal>”之后最多再读取两个十六进制数字（其中的字母可以是大写或小写）。在 <emphasis>UTF-8
+    模式</emphasis>下，允许用“<literal>\x{...}</literal>”，花括号中的内容是表示十六进制数字的字符串。原来的十六进制转义序列
+    <literal>\xhh</literal> 如果其值大于 127 的话则匹配了一个双字节 UTF-8 字符。
    </para>
    <para>
-    �ڡ�<literal>\0</literal>��֮������ٶ�ȡ�����˽������֡�������������£���������������֣���ֻʹ���ѳ��ֵġ�������С�<literal>\0\x\07</literal>���������������Ƶ����һ��
-    BEL �ַ�������ǰ˽���������ȷ���ڿ�ʼ����������ṩ�������֡�
+    在“<literal>\0</literal>”之后最多再读取两个八进制数字。以上两种情况下，如果少于两个数字，则只使用已出现的。因此序列“<literal>\0\x\07</literal>”代表两个二进制的零加一个
+    BEL 字符。如果是八进制数字则确保在开始的零后面再提供两个数字。
    </para>
    <para>
-    ������б�ߺ������һ������ 0
-    �����ֱȽϸ��ӡ����ַ���֮�⣬PCRE
-    ��ʮ�������ֶ�ȡ�����ּ����������֡��������С��
-    10������֮ǰ����ʽ�в������ٸ����ֵ���Բ���ţ���������н�����Ϊ<emphasis>��������</emphasis>���йش����������˵���ں��棬�Լ������ڵ���ģʽ��
+    处理反斜线后面跟着一个不是 0
+    的数字比较复杂。在字符类之外，PCRE
+    以十进制数字读取该数字及其后面的数字。如果数字小于
+    10，或者之前表达式中捕获到至少该数字的左圆括号，则这个序列将被作为<emphasis>逆向引用</emphasis>。有关此如何运作的说明在后面，以及括号内的子模式。
    </para>
    <para>
-    ���ַ���֮�У��������ʮ�������ִ��� 9
-    ����֮ǰû����ô�ಶ�����ģʽ��PCRE ���´ӷ�б�߿�ʼ��ȡ������������˽������֣��������λ��
-    8 �����ز�����һ����һ�ֽڡ��κ��������ֶ��������������磺
+    在字符类之中，或者如果十进制数字大于 9
+    并且之前没有那么多捕获的子模式，PCRE 重新从反斜线开始读取其后的最多三个八进制数字，并以最低位的
+    8 个比特产生出一个单一字节。任何其后的数字都代表自身。例如：
    </para>
    <para>
     <variablelist>
@@ -505,7 +505,7 @@
       <term><emphasis>\040</emphasis></term>
       <listitem>
        <simpara>
-        ��һ�ֱ�ʾ�ո�ķ���
+        另一种表示空格的方法
        </simpara>
       </listitem>
      </varlistentry>
@@ -513,7 +513,7 @@
       <term><emphasis>\40</emphasis></term>
       <listitem>
        <simpara>
-        ͬ�ϣ����֮ǰ�������ģʽ���� 40 ���Ļ�
+        同上，如果之前捕获的子模式少于 40 个的话
        </simpara>
       </listitem>
      </varlistentry>
@@ -521,7 +521,7 @@
       <term><emphasis>\7</emphasis></term>
       <listitem>
        <simpara>
-        ����һ����������
+        总是一个逆向引用
        </simpara>
       </listitem>
      </varlistentry>
@@ -529,7 +529,7 @@
       <term><emphasis>\11</emphasis></term>
       <listitem>
        <simpara>
-        �����Ǹ��������ã��������Ʊ��� tab
+        可能是个逆向引用，或者是制表符 tab
        </simpara>
       </listitem>
      </varlistentry>
@@ -537,7 +537,7 @@
       <term><emphasis>\011</emphasis></term>
       <listitem>
        <simpara>
-        ���Ǳ�ʾ�Ʊ��� tab
+        总是表示制表符 tab
        </simpara>
       </listitem>
      </varlistentry>
@@ -545,7 +545,7 @@
       <term><emphasis>\0113</emphasis></term>
       <listitem>
        <simpara>
-        ��ʾ�Ʊ��� tab �������һ���ַ���3��
+        表示制表符 tab 后面跟着一个字符“3”
        </simpara>
       </listitem>
      </varlistentry>
@@ -553,7 +553,7 @@
       <term><emphasis>\113</emphasis></term>
        <listitem>
        <simpara>
-        ��ʾ�˽��ƴ���Ϊ 113 ���ַ�����Ϊ���ܳ��� 99 ���������ã�
+        表示八进制代码为 113 的字符（因为不能超过 99 个逆向引用）
        </simpara>
       </listitem>
      </varlistentry>
@@ -561,7 +561,7 @@
       <term><emphasis>\377</emphasis></term>
       <listitem>
        <simpara>
-        ��ʾһ�����еı��ض��� 1 ���ֽ�
+        表示一个所有的比特都是 1 的字节
        </simpara>
       </listitem>
      </varlistentry>
@@ -569,20 +569,20 @@
       <term><emphasis>\81</emphasis></term>
       <listitem>
        <simpara>
-        Ҫô��һ���������ã�Ҫô��һ�������Ƶ��������������ַ���8���͡�1��
+        要么是一个逆向引用，要么是一个二进制的零后面跟着两个字符“8”和“1”
        </simpara>
       </listitem>
      </varlistentry>
     </variablelist>
    </para>
    <para>
-    ע��˽���ֵ 100 ������ֵ֮ǰ���������ͷ����Ϊ�����ȡ����б�ߺ󣩳��������˽������֡�
+    注意八进制值 100 或更大的值之前不能以零打头，因为不会读取（反斜线后）超过三个八进制数字。
    </para>
    <para>
-    ���еĶ�����һ����һ�ֽڵ����п��������ַ���֮�л�֮�⡣���⣬���ַ���֮�У����С�<literal>\b</literal>��������Ϊ��б���ַ���0x08���������ַ���֮���в�ͬ���壨�����棩��
+    所有的定义了一个单一字节的序列可以用于字符类之中或之外。此外，在字符类之中，序列“<literal>\b</literal>”被解释为反斜线字符（0x08），而在字符类之外有不同含义（见下面）。
    </para>
    <para>
-    ��б�ߵĵ������÷���ָ��ͨ���ַ����ͣ�
+    反斜线的第三个用法是指定通用字符类型：
    </para>
    <para>
     <variablelist>
@@ -590,7 +590,7 @@
       <term><emphasis>\d</emphasis></term>
       <listitem>
        <simpara>
-        ��һʮ��������
+        任一十进制数字
        </simpara>
       </listitem>
      </varlistentry>
@@ -598,7 +598,7 @@
       <term><emphasis>\D</emphasis></term>
       <listitem>
        <simpara>
-        ��һ��ʮ���������ַ�
+        任一非十进制数的字符
        </simpara>
       </listitem>
      </varlistentry>
@@ -606,7 +606,7 @@
       <term><emphasis>\s</emphasis></term>
       <listitem>
        <simpara>
-        ��һ�հ��ַ�
+        任一空白字符
        </simpara>
       </listitem>
      </varlistentry>
@@ -614,7 +614,7 @@
       <term><emphasis>\S</emphasis></term>
       <listitem>
        <simpara>
-        ��һ�ǿհ��ַ�
+        任一非空白字符
        </simpara>
       </listitem>
      </varlistentry>
@@ -622,7 +622,7 @@
       <term><emphasis>\w</emphasis></term>
       <listitem>
        <simpara>
-        ��һ���֡����ַ�
+        任一“字”的字符
        </simpara>
       </listitem>
      </varlistentry>
@@ -630,27 +630,27 @@
       <term><emphasis>\W</emphasis></term>
       <listitem>
        <simpara>
-        ��һ�����֡����ַ�
+        任一“非字”的字符
        </simpara>
       </listitem>
      </varlistentry>
     </variablelist>
    </para>
    <para>
-    �κ�һ��ת�����н��������ַ���Ϸָ����������Ĳ��֡���һ�������ַ�ƥ��һ���ҽ�һ��ת�����С�
+    任何一个转义序列将完整的字符组合分割成两个分离的部分。任一给定的字符匹配一个且仅一个转义序列。
    </para>
    <para>
-    ���֡����ַ���ָ�κ�һ����ĸ�����ֻ��»��ߣ�Ҳ����˵���κο�����
-    Perl "<literal>word</literal>" ���ַ�����ĸ�����ֵĶ�����
-    PCRE �ַ������ƣ����ܻ����ָ�������ƥ����ı䡣����˵����
-    "fr" (French) ����ĳЩ������� 128 ���ַ�������ʾ������ĸ����Щ�ַ��ܹ���
-    <literal>\w</literal> ��ƥ�䡣
+    “字”的字符是指任何一个字母或数字或下划线，也就是说，任何可以是
+    Perl "<literal>word</literal>" 的字符。字母和数字的定义由
+    PCRE 字符表控制，可能会根据指定区域的匹配而改变。举例说，在
+    "fr" (French) 区域，某些编码大于 128 的字符用来表示重音字母，这些字符能够被
+    <literal>\w</literal> 所匹配。
    </para>
    <para>
-    ��Щ�ַ��������п��Գ������ַ���֮�к�֮�⡣ÿһ��ƥ����Ӧ�����е�һ���ַ��������ǰƥ�����Ŀ���ַ����Ľ�β����������ƥ�䶼ʧ�ܣ���Ϊû���ַ��ɹ�ƥ�䡣
+    这些字符类型序列可以出现在字符类之中和之外。每一个匹配相应类型中的一个字符。如果当前匹配点在目标字符串的结尾，以上所有匹配都失败，因为没有字符可供匹配。
    </para>
    <para>
-    ��б�ߵĵ��ĸ��÷���ĳЩ�򵥵Ķ��ԡ�������ָ��һ��ƥ���е��ض�λ�ñ���ﵽ������������������Ŀ���ַ����е��κ��ַ�����ģʽ�и����ӵĶ��Ե��÷���������������б�ߵĶ����У�
+    反斜线的第四个用法是某些简单的断言。断言是指在一个匹配中的特定位置必须达到的条件，并不会消耗目标字符串中的任何字符。子模式中更复杂的断言的用法在下面描述。反斜线的断言有：
    </para>
    <para>
     <variablelist>
@@ -658,7 +658,7 @@
       <term><emphasis>\b</emphasis></term>
       <listitem>
        <simpara>
-        �ַֽ���
+        字分界线
        </simpara>
       </listitem>
      </varlistentry>
@@ -666,7 +666,7 @@
       <term><emphasis>\B</emphasis></term>
       <listitem>
        <simpara>
-        ���ַֽ���
+        非字分界线
        </simpara>
       </listitem>
      </varlistentry>
@@ -674,7 +674,7 @@
       <term><emphasis>\A</emphasis></term>
       <listitem>
        <simpara>
-        Ŀ��Ŀ�ͷ�������ڶ���ģʽ��
+        目标的开头（独立于多行模式）
        </simpara>
       </listitem>
      </varlistentry>
@@ -682,7 +682,7 @@
       <term><emphasis>\Z</emphasis></term>
       <listitem>
        <simpara>
-        Ŀ��Ľ�β��λ�ڽ�β�Ļ��з�ǰ�������ڶ���ģʽ��
+        目标的结尾或位于结尾的换行符前（独立于多行模式）
        </simpara>
       </listitem>
      </varlistentry>
@@ -690,385 +690,385 @@
       <term><emphasis>\z</emphasis></term>
       <listitem>
        <simpara>
-        Ŀ��Ľ�β�������ڶ���ģʽ��
+        目标的结尾（独立于多行模式）
        </simpara>
       </listitem>
      </varlistentry>
      <varlistentry>
       <term><emphasis>\G</emphasis></term>
-      <listitem><simpara>Ŀ���еĵ�һ��ƥ��λ��</simpara></listitem>
+      <listitem><simpara>目标中的第一个匹配位置</simpara></listitem>
      </varlistentry>
     </variablelist>
    </para>
    <para>
-    ��Щ���Կ��ܲ��ܳ������ַ����У�����ע��
-    "<literal>\b</literal>" �в�ͬ�ĺ��壬���ַ���֮��Ҳ���Ƿ�б���ַ�����
+    这些断言可能不能出现在字符类中（但是注意
+    "<literal>\b</literal>" 有不同的含义，在字符类之中也就是反斜线字符）。
    </para>
    <para>
-    �ֱ߽���Ŀ���ַ����е�һ��λ�ã��䵱ǰ�ַ���ǰһ���ַ�����ͬʱƥ��
-    <literal>\w</literal> ���� <literal>\W</literal>��Ҳ��������һ��ƥ��
-    <literal>\w</literal> ����һ��ƥ��
-    <literal>\W</literal>�����������ַ����Ŀ�ͷ���β�������һ�������һ���ַ�ƥ��
-    \w �Ļ���
+    字边界是目标字符串中的一个位置，其当前字符和前一个字符不能同时匹配
+    <literal>\w</literal> 或者 <literal>\W</literal>（也就是其中一个匹配
+    <literal>\w</literal> 而另一个匹配
+    <literal>\W</literal>），或者是字符串的开头或结尾，假如第一个或最后一个字符匹配
+    \w 的话。
    </para>
    <para>
-    <literal>\A</literal>��<literal>\Z</literal> �� <literal>\z</literal>
-    �����봫ͳ������������Ԫ��������˵�����Ĳ�֮ͬ���������ǽ�ƥ��Ŀ���ַ����ľ��Կ�ͷ�ͽ�β�������趨���κ�ѡ����ǲ���
-    <link linkend="reference.pcre.pattern.modifiers">PCRE_NOTBOL</link> ��
+    <literal>\A</literal>，<literal>\Z</literal> 和 <literal>\z</literal>
+    断言与传统的音调符和美元符（下面说明）的不同之处在于它们仅匹配目标字符串的绝对开头和结尾而不管设定了任何选项。它们不受
+    <link linkend="reference.pcre.pattern.modifiers">PCRE_NOTBOL</link> 或
     <link linkend="reference.pcre.pattern.modifiers">PCRE_NOTEOL</link>
-    ѡ���Ӱ�졣<literal>\Z</literal> ��
-    <literal>\z</literal> �Ĳ�֮ͬ������ <literal>\Z</literal>
-    ƥ������Ϊ�ַ������һ���ַ��Ļ��з�֮ǰ�Լ��ַ����Ľ�β����
-    <literal>\z</literal> ��ƥ���ַ����Ľ�β��
+    选项的影响。<literal>\Z</literal> 和
+    <literal>\z</literal> 的不同之处在于 <literal>\Z</literal>
+    匹配了作为字符串最后一个字符的换行符之前以及字符串的结尾，而
+    <literal>\z</literal> 仅匹配字符串的结尾。
    </para>
    <para>
-    <literal>\G</literal> ���Խ��ڵ�ǰƥ��λ����ƥ�俪ʼ��һ��ʱΪ�棬��
-    <function>preg_match</function> �� <parameter>offset</parameter>
-    ����ָ���������� <parameter>offset</parameter>
-    ��ֵ����ʱ��� <literal>\A</literal> ��ͬ���� PHP 4.3.3 ����á�
+    <literal>\G</literal> 断言仅在当前匹配位置是匹配开始那一点时为真，如
+    <function>preg_match</function> 的 <parameter>offset</parameter>
+    参数指定那样。当 <parameter>offset</parameter>
+    的值非零时这和 <literal>\A</literal> 不同。自 PHP 4.3.3 起可用。
    </para>
    <para>
-    <literal>\Q</literal> �� <literal>\E</literal> �� PHP 4.3.3
-    ��ɱ�������ģʽ�к����������ʽƥ���ַ������磺<literal>\w+\Q.$.\E$</literal>
-    ��ƥ��һ������������ֵ��ַ��������ŵ��������ϵ� <literal>.$.</literal>
-    ����λ���ַ���ĩβ��
+    <literal>\Q</literal> 和 <literal>\E</literal> 自 PHP 4.3.3
+    起可被用来在模式中忽略正则表达式匹配字符。例如：<literal>\w+\Q.$.\E$</literal>
+    将匹配一个或多个可组成字的字符，其后接着的是字面上的 <literal>.$.</literal>
+    并且位于字符串末尾。
    </para>
   </refsect2>
 
   <refsect2 xml:id="regexp.reference.unicode">
-   <title>Unicode �ַ�����</title>
+   <title>Unicode 字符属性</title>
    <para>
-    �� PHP 4.4.0 �� 5.1.0 �𣬵�ѡ����
+    自 PHP 4.4.0 和 5.1.0 起，当选择了
     additional escape sequences to match generic character types are available
-    <emphasis>UTF-8 ģʽ</emphasis>ʱ�����ָ����ת�����п��ã�
+    <emphasis>UTF-8 模式</emphasis>时有三种更多的转移序列可用：
    </para>
    <variablelist>
     <varlistentry>
      <term><emphasis>\p{xx}</emphasis></term>
-     <listitem><simpara>���� xx ���Ե�һ���ַ�</simpara></listitem>
+     <listitem><simpara>具有 xx 属性的一个字符</simpara></listitem>
     </varlistentry>
     <varlistentry>
      <term><emphasis>\P{xx}</emphasis></term>
-     <listitem><simpara>û�� xx ���Ե�һ���ַ�</simpara></listitem>
+     <listitem><simpara>没有 xx 属性的一个字符</simpara></listitem>
     </varlistentry>
     <varlistentry>
      <term><emphasis>\X</emphasis></term>
-     <listitem><simpara>һ����չ Unicode ����</simpara></listitem>
+     <listitem><simpara>一个扩展 Unicode 序列</simpara></listitem>
     </varlistentry>
    </variablelist>
    <para>
-    ������ <literal>xx</literal> ����ʾ������������ Unicode
-    ͨ���������ԡ�ÿ���ַ�����һ���������ԣ���������д��ĸָ����Ϊ��
-    Perl ���ݣ������������ź��������м����һ���ϼ�ͷ��������ʾ�ų����ԡ�����
-    <literal>\p{^Lu}</literal> �ͺ� <literal>\P{Lu}</literal> ��ͬ��
+    以上由 <literal>xx</literal> 所表示的属性名限于 Unicode
+    通用类型属性。每个字符具有一个此种属性，由两个缩写字母指定。为和
+    Perl 兼容，可以在左花括号和属性名中间加入一个上箭头符号来表示排除属性。例如
+    <literal>\p{^Lu}</literal> 就和 <literal>\P{Lu}</literal> 相同。
    </para>
    <para>
-    ����� <literal>\p</literal> �� <literal>\P</literal>
-    ��ֻ����һ����ĸ������������и���ĸ��ͷ�����ԡ�������£���������ų��Ļ�������ʡ�Ի����š����������е����������ͬЧ����
+    如果在 <literal>\p</literal> 或 <literal>\P</literal>
+    中只用了一个字母，则包括了所有该字母开头的属性。此情况下，如果不是排除的话，可以省略花括号。下面例子中的两项具有相同效果：
    </para>
    <literallayout>
     \p{L}
     \pL
    </literallayout>
    <table>
-    <title>��֧�ֵ����Դ���</title>
+    <title>所支持的属性代码</title>
     <tgroup cols="2">
      <tbody>
-      <row><entry><literal>C</literal></entry><entry>Other - ����</entry></row>
-      <row><entry><literal>Cc</literal></entry><entry>Control - ����</entry></row>
-      <row><entry><literal>Cf</literal></entry><entry>Format - ��ʽ</entry></row>
-      <row><entry><literal>Cn</literal></entry><entry>Unassigned - �޷���</entry></row>
-      <row><entry><literal>Co</literal></entry><entry>Private use - ˽��</entry></row>
-      <row rowsep="1"><entry><literal>Cs</literal></entry><entry>Surrogate - ����</entry></row>
-      <row><entry><literal>L</literal></entry><entry>Letter -��ĸ</entry></row>
-      <row><entry><literal>Ll</literal></entry><entry>Lower case letter - Сд��ĸ</entry></row>
-      <row><entry><literal>Lm</literal></entry><entry>Modifier letter - ��������ĸ</entry></row>
-      <row><entry><literal>Lo</literal></entry><entry>Other letter - ������ĸ</entry></row>
-      <row><entry><literal>Lt</literal></entry><entry>Title case letter - �����д��ĸ</entry></row>
-      <row rowsep="1"><entry><literal>Lu</literal></entry><entry>Upper case letter - ��д��ĸ</entry></row>
-      <row><entry><literal>M</literal></entry><entry>Mark - ���</entry></row>
-      <row><entry><literal>Mc</literal></entry><entry>Spacing mark - �ո���</entry></row>
-      <row><entry><literal>Me</literal></entry><entry>Enclosing mark - ���Ʊ��</entry></row>
-      <row rowsep="1"><entry><literal>Mn</literal></entry><entry>Non-spacing mark - �ǿո���</entry></row>
-      <row><entry><literal>N</literal></entry><entry>Number - ����</entry></row>
-      <row><entry><literal>Nd</literal></entry><entry>Decimal number - ʮ��������</entry></row>
-      <row><entry><literal>Nl</literal></entry><entry>Letter number - ��ĸ����</entry></row>
-      <row rowsep="1"><entry><literal>No</literal></entry><entry>Other number - ��������</entry></row>
-      <row><entry><literal>P</literal></entry><entry>Punctuation - ������</entry></row>
-      <row><entry><literal>Pc</literal></entry><entry>Connector punctuation - ���ӱ���</entry></row>
-      <row><entry><literal>Pd</literal></entry><entry>Dash punctuation - ���߱���</entry></row>
-      <row><entry><literal>Pe</literal></entry><entry>Close punctuation - ��������</entry></row>
-      <row><entry><literal>Pf</literal></entry><entry>Final punctuation - ���ձ���</entry></row>
-      <row><entry><literal>Pi</literal></entry><entry>Initial punctuation - ��ʼ����</entry></row>
-      <row><entry><literal>Po</literal></entry><entry>Other punctuation - ����������</entry></row>
-      <row rowsep="1"><entry><literal>Ps</literal></entry><entry>Open punctuation - ��ʼ����</entry></row>
-      <row><entry><literal>S</literal></entry><entry>Symbol - ����</entry></row>
-      <row><entry><literal>Sc</literal></entry><entry>Currency symbol - ���ҷ���</entry></row>
-      <row><entry><literal>Sk</literal></entry><entry>Modifier symbol - ��������</entry></row>
-      <row><entry><literal>Sm</literal></entry><entry>Mathematical symbol - ��������</entry></row>
-      <row rowsep="1"><entry><literal>So</literal></entry><entry>Other symbol - ��������</entry></row>
-      <row><entry><literal>Z</literal></entry><entry>Separator - �ָ���</entry></row>
-      <row><entry><literal>Zl</literal></entry><entry>Line separator - �зָ���</entry></row>
-      <row><entry><literal>Zp</literal></entry><entry>Paragraph separator - ����ָ���</entry></row>
-      <row><entry><literal>Zs</literal></entry><entry>Space separator - �ո�ָ���</entry></row>
+      <row><entry><literal>C</literal></entry><entry>Other - 其它</entry></row>
+      <row><entry><literal>Cc</literal></entry><entry>Control - 控制</entry></row>
+      <row><entry><literal>Cf</literal></entry><entry>Format - 格式</entry></row>
+      <row><entry><literal>Cn</literal></entry><entry>Unassigned - 无符号</entry></row>
+      <row><entry><literal>Co</literal></entry><entry>Private use - 私有</entry></row>
+      <row rowsep="1"><entry><literal>Cs</literal></entry><entry>Surrogate - 代替</entry></row>
+      <row><entry><literal>L</literal></entry><entry>Letter -字母</entry></row>
+      <row><entry><literal>Ll</literal></entry><entry>Lower case letter - 小写字母</entry></row>
+      <row><entry><literal>Lm</literal></entry><entry>Modifier letter - 修正符字母</entry></row>
+      <row><entry><literal>Lo</literal></entry><entry>Other letter - 其它字母</entry></row>
+      <row><entry><literal>Lt</literal></entry><entry>Title case letter - 标题大写字母</entry></row>
+      <row rowsep="1"><entry><literal>Lu</literal></entry><entry>Upper case letter - 大写字母</entry></row>
+      <row><entry><literal>M</literal></entry><entry>Mark - 标记</entry></row>
+      <row><entry><literal>Mc</literal></entry><entry>Spacing mark - 空格标记</entry></row>
+      <row><entry><literal>Me</literal></entry><entry>Enclosing mark - 环绕标记</entry></row>
+      <row rowsep="1"><entry><literal>Mn</literal></entry><entry>Non-spacing mark - 非空格标记</entry></row>
+      <row><entry><literal>N</literal></entry><entry>Number - 数字</entry></row>
+      <row><entry><literal>Nd</literal></entry><entry>Decimal number - 十进制数字</entry></row>
+      <row><entry><literal>Nl</literal></entry><entry>Letter number - 字母数字</entry></row>
+      <row rowsep="1"><entry><literal>No</literal></entry><entry>Other number - 其它数字</entry></row>
+      <row><entry><literal>P</literal></entry><entry>Punctuation - 标点符号</entry></row>
+      <row><entry><literal>Pc</literal></entry><entry>Connector punctuation - 连接标点符</entry></row>
+      <row><entry><literal>Pd</literal></entry><entry>Dash punctuation - 横线标点符</entry></row>
+      <row><entry><literal>Pe</literal></entry><entry>Close punctuation - 结束标点符</entry></row>
+      <row><entry><literal>Pf</literal></entry><entry>Final punctuation - 最终标点符</entry></row>
+      <row><entry><literal>Pi</literal></entry><entry>Initial punctuation - 起始标点符</entry></row>
+      <row><entry><literal>Po</literal></entry><entry>Other punctuation - 其它标点符号</entry></row>
+      <row rowsep="1"><entry><literal>Ps</literal></entry><entry>Open punctuation - 开始标点符</entry></row>
+      <row><entry><literal>S</literal></entry><entry>Symbol - 符号</entry></row>
+      <row><entry><literal>Sc</literal></entry><entry>Currency symbol - 货币符号</entry></row>
+      <row><entry><literal>Sk</literal></entry><entry>Modifier symbol - 修正符号</entry></row>
+      <row><entry><literal>Sm</literal></entry><entry>Mathematical symbol - 算术符号</entry></row>
+      <row rowsep="1"><entry><literal>So</literal></entry><entry>Other symbol - 其它符号</entry></row>
+      <row><entry><literal>Z</literal></entry><entry>Separator - 分隔符</entry></row>
+      <row><entry><literal>Zl</literal></entry><entry>Line separator - 行分隔符</entry></row>
+      <row><entry><literal>Zp</literal></entry><entry>Paragraph separator - 段落分隔符</entry></row>
+      <row><entry><literal>Zs</literal></entry><entry>Space separator - 空格分隔符</entry></row>
      </tbody>
     </tgroup>
    </table>
    <para>
-    PCRE ��֧����չ�������� "Greek" �� "InMusicalSymbols"��
+    PCRE 不支持扩展属性例如 "Greek" 或 "InMusicalSymbols"。
    </para>
    <para>
-    ָ�������ִ�Сд��ƥ�䲻Ӱ�����ת�����С����� <literal>\p{Lu}</literal>
-    ���ǽ��ʹ�д��ĸƥ�䡣
+    指定不区分大小写的匹配不影响此类转义序列。例如 <literal>\p{Lu}</literal>
+    总是仅和大写字母匹配。
    </para>
    <para>
-    <literal>\X</literal> ת�Ʒ�ƥ���������չ Unicode ���е��κ���Ŀ�� Unicode �ַ���<literal>\X</literal>
-    �� <literal>(?>\PM\pM*)</literal> ��ͬ��
+    <literal>\X</literal> 转移符匹配能组成扩展 Unicode 序列的任何数目的 Unicode 字符。<literal>\X</literal>
+    和 <literal>(?>\PM\pM*)</literal> 相同。
    </para>
    <para>
-    Ҳ���ǣ���ƥ��һ��û�С�mark�����ԣ����������������С�mark�����Ե��ַ������ҽ������п���ԭ���飨���£������͵ľ��С�mark�����Ե���ĸ��Ӱ�쵽ǰ����ַ�����������
+    也就是，它匹配一个没有“mark”属性，后面跟着零或多个具有“mark”属性的字符，并且将此序列看成原子组（见下）。典型的具有“mark”属性的字母是影响到前面的字符的重音符。
    </para>
    <para>
-    �� Unicode ������ƥ���ַ������죬��Ϊ PCRE
-    ���ò�����һ����������һ����ǧ�ַ����ݵĽṹ��������Ϊʲô��
-    PCRE �д�ͳ��ת���������� <literal>\d</literal> ��
-    <literal>\w</literal> ��ʹ�� Unicode ���ԡ�
+    用 Unicode 属性来匹配字符并不快，因为 PCRE
+    不得不搜索一个包含超过一万五千字符数据的结构。这正是为什么在
+    PCRE 中传统的转义序列例如 <literal>\d</literal> 和
+    <literal>\w</literal> 不使用 Unicode 属性。
    </para>
   </refsect2>
 
   <refsect2 xml:id="regexp.reference.circudollar">
-   <title>��������^������Ԫ����$��</title>
+   <title>音调符（^）和美元符（$）</title>
    <para>
-    ���ַ���֮�⣬Ĭ��ƥ��ģʽ�£���������һ�����ڵ�ǰƥ�����Ŀ���ַ����Ŀ�ͷʱ��Ϊ��Ķ��ԡ����ַ���֮�У��������ĺ�����ȫ��ͬ�������棩��
+    在字符类之外，默认匹配模式下，音调符是一个仅在当前匹配点是目标字符串的开头时才为真的断言。在字符类之中，音调符的含义完全不同（见下面）。
    </para>
    <para>
-    ����漰����ѡһʱ����������Ҫ��ģʽ�ĵ�һ���ַ��������������ĳ����֧����Ӧ���Ǹ�ѡ���֧�ĵ�һ���ַ���������е�ѡ���֧������������ͷ�������˵�����ģʽ����Ϊֻƥ��Ŀ��Ŀ�ͷ����ô����һ������ģʽ����Ҳ�������ṹ����ʹģʽ��Ϊ���̵ġ���
+    如果涉及到几选一时音调符不需要是模式的第一个字符，但如果出现在某个分支中则应该是该选择分支的第一个字符。如果所有的选择分支都以音调符开头，这就是说，如果模式限制为只匹配目标的开头，那么这是一个紧固模式。（也有其它结构可以使模式成为紧固的。）
    </para>
    <para>
-    ��Ԫ����һ�����ڵ�ǰƥ�����Ŀ���ַ����Ľ�β���ߵ����һ���ַ��ǻ��з�ʱ��ǰ���λ��ʱΪ
-    &true; �Ķ��ԣ�Ĭ������£�������漰����ѡһʱ��Ԫ������Ҫ��ģʽ�����һ���ַ�����Ӧ��������ֵķ�֧�е����һ���ַ�����Ԫ�����ַ���֮��û�����⺬�塣
+    美元符是一个仅在当前匹配点是目标字符串的结尾或者当最后一个字符是换行符时其前面的位置时为
+    &true; 的断言（默认情况下）。如果涉及到几选一时美元符不需要是模式的最后一个字符，但应该是其出现的分支中的最后一个字符。美元符在字符类之中没有特殊含义。
    </para>
    <para>
-    ��Ԫ���ĺ���ɱ��ı�ʹ���ƥ���ַ����Ľ�β��ֻҪ�ڱ����ƥ��ʱ�趨��
+    美元符的含义可被改变使其仅匹配字符串的结尾，只要在编译或匹配时设定了
     <link linkend="reference.pcre.pattern.modifiers">PCRE_DOLLAR_ENDONLY</link>
-    ѡ��ɡ��Ⲣ��Ӱ�� \Z ���ԡ�
+    选项即可。这并不影响 \Z 断言。
    </para>
    <para>
-    ����趨��
+    如果设定了
     <link linkend="reference.pcre.pattern.modifiers">PCRE_MULTILINE</link>
-    ѡ��������������Ԫ���ĺ��屻�ı��ˡ���������£����Ƿֱ�ƥ��������ڲ�
-    "\n" �ַ���֮���֮ǰ���ټ���Ŀ���ַ����Ŀ�ͷ�ͽ�β������ģʽ
-    /^abc$/ �ڶ���ģʽ��ƥ����Ŀ���ַ���
-    "def\nabc"��������ʱ��ƥ�䡣��ˣ��������з�֧����
-    "^" ��ͷ���ڵ���ģʽ�³�Ϊ���̵�ģʽ�ڶ���ģʽ��Ϊ�ǽ��̵ġ�����趨��
-    <link linkend="reference.pcre.pattern.modifiers">PCRE_MULTILINE</link>����
+    选项则音调符和美元符的含义被改变了。此种情况下，它们分别匹配紧接着内部
+    "\n" 字符的之后和之前，再加上目标字符串的开头和结尾。例如模式
+    /^abc$/ 在多行模式下匹配了目标字符串
+    "def\nabc"，但正常时不匹配。因此，由于所有分支都以
+    "^" 开头而在单行模式下成为紧固的模式在多行模式下为非紧固的。如果设定了
+    <link linkend="reference.pcre.pattern.modifiers">PCRE_MULTILINE</link>，则
     <link linkend="reference.pcre.pattern.modifiers">PCRE_DOLLAR_ENDONLY</link>
-    ѡ��ᱻ���ԡ�
+    选项会被忽略。
    </para>
    <para>
-    ע�� \A��\Z �� \z ��������������¶���������ƥ��Ŀ��Ŀ�ͷ�ͽ�β�����ģʽ���еķ�֧����
-    \A ��ʼ�������ǽ��̵ģ������Ƿ��趨��
-    <link linkend="reference.pcre.pattern.modifiers">PCRE_MULTILINE</link>��
+    注意 \A，\Z 和 \z 序列在两种情况下都可以用来匹配目标的开头和结尾，如果模式所有的分支都以
+    \A 开始则其总是紧固的，不论是否设定了
+    <link linkend="reference.pcre.pattern.modifiers">PCRE_MULTILINE</link>。
    </para>
   </refsect2>
 
   <refsect2 xml:id="regexp.reference.dot">
-   <title>��ţ�.��</title>
+   <title>句号（.）</title>
    <para>
-    ���ַ���֮�⣬ģʽ�е�Բ�����ƥ��Ŀ���е��κ�һ���ַ����������ɴ�ӡ�ַ�������ƥ�任�з���Ĭ������£�������趨��
+    在字符类之外，模式中的圆点可以匹配目标中的任何一个字符，包括不可打印字符，但不匹配换行符（默认情况下）。如果设定了
     <link linkend="reference.pcre.pattern.modifiers">PCRE_DOTALL</link>
-    ��Բ��Ҳ��ƥ�任�з�������Բ���봦������������Ԫ������ȫ�����ģ�Ψһ����ϵ�������Ƕ��漰�����з���Բ�����ַ���֮��û�����⺬�塣
+    则圆点也会匹配换行符。处理圆点与处理音调符和美元符是完全独立的，唯一的联系就是它们都涉及到换行符。圆点在字符类之中没有特殊含义。
    </para>
    <para>
-    <emphasis>\C</emphasis> ��������ƥ�䵥һ�ֽڡ���
-    <emphasis>UTF-8 ģʽ</emphasis>���������壬��Ϊ��ſ���ƥ���ɶ���ֽ���ɵ������ַ���
+    <emphasis>\C</emphasis> 可以用来匹配单一字节。在
+    <emphasis>UTF-8 模式</emphasis>下这有意义，因为句号可以匹配由多个字节组成的整个字符。
    </para>
   </refsect2>
 
   <refsect2 xml:id="regexp.reference.squarebrackets">
-   <title>�����ţ�[]��</title>
+   <title>方括号（[]）</title>
    <para>
-    �����ſ�ʼ��һ���ַ��࣬�ҷ����Ž���֮������һ���ҷ����Ų��������ַ���������ַ���֮����Ҫһ���ҷ����ţ�����Ӧ�����ַ����еĵ�һ���ַ���������������Ļ��������������֮�󣩣������÷�б��ת�塣
+    左方括号开始了一个字符类，右方括号结束之。单独一个右方括号不是特殊字符。如果在字符类之中需要一个右方括号，则其应该是字符类中的第一个字符（如果有音调符的话，则紧接音调符之后），或者用反斜线转义。
    </para>
    <para>
-    �ַ���ƥ��Ŀ���е�һ���ַ������ַ��������ַ��ඨ����ַ����е�һ���������ַ����еĵ�һ���ַ������������������Ŀ���ַ����벻���ַ��ඨ����ַ����С�������ַ�������Ҫ������������������벻�ǵ�һ���ַ������÷�б��ת�塣
+    字符类匹配目标中的一个字符，该字符必须是字符类定义的字符集中的一个；除非字符类中的第一个字符是音调符，此情况下目标字符必须不在字符类定义的字符集中。如果在字符类中需要音调符本身，则其必须不是第一个字符，或用反斜线转义。
    </para>
    <para>
-    ����˵���ַ��� [aeiou] ƥ�����κ�һ��СдԪ����ĸ���� [^aeiou]
-    ƥ�����κ�һ������СдԪ����ĸ���ַ���ע��������ֻ��һ��ͨ��ö��ָ����Щ�����ַ���֮�е��ַ��ķ��š����Ƕ��ԣ��Ծɻ����ĵ�Ŀ���ַ����е�һ���ַ��������ǰλ�����ַ�����β�Ļ���ʧ�ܡ�
+    举例说，字符类 [aeiou] 匹配了任何一个小写元音字母，而 [^aeiou]
+    匹配了任何一个不是小写元音字母的字符。注意音调符只是一个通过枚举指定那些不在字符类之中的字符的符号。不是断言：仍旧会消耗掉目标字符串中的一个字符，如果当前位置在字符串结尾的话则失败。
    </para>
    <para>
-    ���趨�˲����ִ�Сд��ƥ��ʱ���ַ����е��κ���ĸͬʱ���������Сд��ʽ����˾���˵��Сд��
-    [aeiou] ͬʱƥ���� "A" �� "a"��Сд��
-    [^aeiou] ��ƥ�� "A"�������ִ�Сдʱ���ƥ�䡣
+    当设定了不区分大小写的匹配时，字符类中的任何字母同时代表了其大小写形式，因此举例说，小写的
+    [aeiou] 同时匹配了 "A" 和 "a"，小写的
+    [^aeiou] 不匹配 "A"，但区分大小写时则会匹配。
    </para>
    <para>
-    ���з����ַ����в�������Դ�������
-   <link linkend="reference.pcre.pattern.modifiers">PCRE_DOTALL</link> ����
+    换行符在字符类中不会特殊对待，不论
+   <link linkend="reference.pcre.pattern.modifiers">PCRE_DOTALL</link> 或者
    <link linkend="reference.pcre.pattern.modifiers">PCRE_MULTILINE</link>
-   ѡ���趨��ʲôֵ������ [^a] ���ַ��������ܹ��ͻ��з���ƥ��ġ�
+   选项设定了什么值。形如 [^a] 的字符类总是能够和换行符相匹配的。
    </para>
    <para>
-    ���ţ�-���ַ��������ַ�����ָ��һ���ַ���Χ�����磬[d-m]
-    ƥ���� d �� m ֮����κ��ַ����������ߡ�����ַ�������Ҫ���ű�����������÷�б��ת����߷ŵ�һ�����ܱ�����Ϊָ����Χ��λ�ã����͵�λ�����ַ����еĵ�һ�������һ���ַ���
+    减号（-）字符可以在字符类中指定一个字符范围。例如，[d-m]
+    匹配了 d 和 m 之间的任何字符，包括两者。如果字符类中需要减号本身，则必须用反斜线转义或者放到一个不能被解释为指定范围的位置，典型的位置是字符类中的第一个或最后一个字符。
    </para>
    <para>
-    �����ϵ� "]" �����ܱ������ַ���Χ�Ľ���������
-    [W-]46] ��ģʽ�ᱻ����Ϊ���������ַ����ַ��ࣨ"W" and "-"����������ַ���
-    "46]"��������ƥ�� "W46]" ���� "-46]"��Ȼ���������
-    "]" �÷�б��ת�壬��ᱻ���ɷ�Χ�Ľ��������͡����
-    [W-\]46] �ᱻ����Ϊһ���ַ��࣬������һ����Χ�Լ������������ַ����˽��ƻ�ʮ�����Ʊ�ʾ��
-    "]" Ҳ����������ʾ��Χ�Ľ�����
+    字面上的 "]" 不可能被当成字符范围的结束。形如
+    [W-]46] 的模式会被解释为包括两个字符的字符类（"W" and "-"）后面跟着字符串
+    "46]"，因此其会匹配 "W46]" 或者 "-46]"。然而，如果将
+    "]" 用反斜线转义，则会被当成范围的结束来解释。因此
+    [W-\]46] 会被解释为一个字符类，包含有一个范围以及两个单独的字符。八进制或十六进制表示的
+    "]" 也可以用来表示范围的结束。
    </para>
    <para>
-    ��Χ���� ASCII �Ƚ�˳���������ġ�Ҳ�������������ֱ�ʾ���ַ�������
-    [\000-\037]���ڲ����ִ�Сдƥ���������Χ���������ĸ����ͬʱƥ���Сд��ĸ������
-    [W-c] �ȼ��� [][\^_`wxyzabc] �����ִ�Сд��ƥ�䡣���ʹ����
-    "fr" ������ַ�����[\xc8-\xcb] ƥ���˴�Сд������ E �ַ���
+    范围是以 ASCII 比较顺序来操作的。也可以用于用数字表示的字符，例如
+    [\000-\037]。在不区分大小写匹配中如果范围里包括了字母，则同时匹配大小写字母。例如
+    [W-c] 等价于 [][\^_`wxyzabc] 不区分大小写地匹配。如果使用了
+    "fr" 区域的字符表，[\xc8-\xcb] 匹配了大小写的重音 E 字符。
    </para>
    <para>
-    �ַ����� \d��\D��\s��\S��\w �� \W
-    Ҳ���Գ������ַ����У�����������ƥ����ַ����ӽ��ַ����С����磬[\dABCDEF]
-    ƥ�����κ�ʮ���������֡������������Ժܷ�����ƶ��ϸ���ַ���������
-    [^\W_] ƥ�����κ���ĸ�����֣�����ƥ���»��ߡ�
+    字符类型 \d，\D，\s，\S，\w 和 \W
+    也可以出现于字符类中，并将其所能匹配的字符添加进字符类中。例如，[\dABCDEF]
+    匹配了任何十六进制数字。用音调符可以很方便地制定严格的字符集，例如
+    [^\W_] 匹配了任何字母或数字，但不匹配下划线。
    </para>
    <para>
-    �κγ��� \��-��^��λ�ڿ�ͷ���Լ������� ]
-    ֮��ķ���ĸ�����ַ����ַ����ж�û�����⺬�壬���ǽ�����ת��Ҳû�л�����
+    任何除了 \，-，^（位于开头）以及结束的 ]
+    之外的非字母数字字符在字符类中都没有特殊含义，但是将它们转义也没有坏处。
    </para>
   </refsect2>
 
   <refsect2 xml:id="regexp.reference.verticalbar">
-   <title>���ߣ�|��</title>
+   <title>竖线（|）</title>
    <para>
-    �����ַ������ָ���ѡһģʽ�����磬ģʽ��
+    竖线字符用来分隔多选一模式。例如，模式：
     <screen>
 <![CDATA[
        gilbert|sullivan
 ]]>
     </screen>
-    ƥ���� "gilbert" ���� "sullivan"
-    �е�һ������������������֧��Ҳ�����пյķ�֧��ƥ����ַ�������ƥ����̴�������������ÿ����֧����ʹ�õ�һ���ɹ�ƥ��ķ�֧�������֧����ģʽ�������涨�壩�У��򡰳ɹ�ƥ�䡱��ʾͬʱƥ������ģʽ�еķ�֧�Լ���ģʽ���������֡�
+    匹配了 "gilbert" 或者 "sullivan"
+    中的一个。可以有任意多个分支，也可以有空的分支（匹配空字符串）。匹配进程从左到右轮流尝试每个分支，并使用第一个成功匹配的分支。如果分支在子模式（在下面定义）中，则“成功匹配”表示同时匹配了子模式中的分支以及主模式的其它部分。
    </para>
   </refsect2>
 
   <refsect2 xml:id="regexp.reference.internal-options">
-   <title>�ڲ�ѡ���趨</title>
+   <title>内部选项设定</title>
    <para>
     <link
-    linkend="reference.pcre.pattern.modifiers">PCRE_CASELESS</link>��<link
-    linkend="reference.pcre.pattern.modifiers">PCRE_MULTILINE</link>��<link
-    linkend="reference.pcre.pattern.modifiers">PCRE_DOTALL</link>��<link
-    linkend="reference.pcre.pattern.modifiers">PCRE_EXTRA</link> ��
+    linkend="reference.pcre.pattern.modifiers">PCRE_CASELESS</link>，<link
+    linkend="reference.pcre.pattern.modifiers">PCRE_MULTILINE</link>，<link
+    linkend="reference.pcre.pattern.modifiers">PCRE_DOTALL</link>，<link
+    linkend="reference.pcre.pattern.modifiers">PCRE_EXTRA</link> 和
     <link linkend="reference.pcre.pattern.modifiers">PCRE_EXTENDED</link>
-    ���趨������ģʽ�ڲ�ͨ��������
-    "(?" �� ")" ֮��� Perl ѡ����ĸ�������ı䡣ѡ����ĸΪ��
+    的设定可以在模式内部通过包含在
+    "(?" 和 ")" 之间的 Perl 选项字母序列来改变。选项字母为：
     <table>
-     <title>�ڲ�ѡ����ĸ</title>
+     <title>内部选项字母</title>
      <tgroup cols="2">
       <tbody>
        <row>
         <entry><literal>i</literal></entry>
-        <entry>���� <link linkend="reference.pcre.pattern.modifiers">PCRE_CASELESS</link></entry>
+        <entry>代表 <link linkend="reference.pcre.pattern.modifiers">PCRE_CASELESS</link></entry>
        </row>
        <row>
         <entry><literal>m</literal></entry>
-        <entry>���� <link linkend="reference.pcre.pattern.modifiers">PCRE_MULTILINE</link></entry>
+        <entry>代表 <link linkend="reference.pcre.pattern.modifiers">PCRE_MULTILINE</link></entry>
        </row>
        <row>
         <entry><literal>s</literal></entry>
-        <entry>���� <link linkend="reference.pcre.pattern.modifiers">PCRE_DOTALL</link></entry>
+        <entry>代表 <link linkend="reference.pcre.pattern.modifiers">PCRE_DOTALL</link></entry>
        </row>
        <row>
         <entry><literal>x</literal></entry>
-        <entry>���� <link linkend="reference.pcre.pattern.modifiers">PCRE_EXTENDED</link></entry>
+        <entry>代表 <link linkend="reference.pcre.pattern.modifiers">PCRE_EXTENDED</link></entry>
         </row>
        <row>
         <entry><literal>U</literal></entry>
-        <entry>���� <link linkend="reference.pcre.pattern.modifiers">PCRE_UNGREEDY</link></entry>
+        <entry>代表 <link linkend="reference.pcre.pattern.modifiers">PCRE_UNGREEDY</link></entry>
        </row>
        <row>
         <entry><literal>X</literal></entry>
-        <entry>���� <link linkend="reference.pcre.pattern.modifiers">PCRE_EXTRA</link></entry>
+        <entry>代表 <link linkend="reference.pcre.pattern.modifiers">PCRE_EXTRA</link></entry>
        </row>
       </tbody>
      </tgroup>
     </table>
    </para>
    <para>
-    ���磬(?im) �趨�˲����ִ�Сд������ƥ�䡣Ҳ����ͨ������ĸǰ���ϼ�����ȡ����Щѡ�������ϵ�ѡ��
-    (?im-sx)���趨��
-    <link linkend="reference.pcre.pattern.modifiers">PCRE_CASELESS</link> ��
-    <link linkend="reference.pcre.pattern.modifiers">PCRE_MULTILINE</link>����ȡ����
-    <link linkend="reference.pcre.pattern.modifiers">PCRE_DOTALL</link> ��
-    <link linkend="reference.pcre.pattern.modifiers">PCRE_EXTENDED</link>�����һ����ĸ�ڼ���֮ǰ��֮�󶼳����ˣ����ѡ�ȡ���趨��
+    例如，(?im) 设定了不区分大小写，多行匹配。也可以通过在字母前加上减号来取消这些选项。例如组合的选项
+    (?im-sx)，设定了
+    <link linkend="reference.pcre.pattern.modifiers">PCRE_CASELESS</link> 和
+    <link linkend="reference.pcre.pattern.modifiers">PCRE_MULTILINE</link>，并取消了
+    <link linkend="reference.pcre.pattern.modifiers">PCRE_DOTALL</link> 和
+    <link linkend="reference.pcre.pattern.modifiers">PCRE_EXTENDED</link>。如果一个字母在减号之前与之后都出现了，则该选项被取消设定。
    </para>
    <para>
-    ���ѡ��ı�����ڶ��㣨��������ģʽ�������У�����ı�Ӧ��������ʣ��ģʽ�����
-    <literal>/ab(?i)c/</literal> ֻƥ�� "abc" ��
-    and "abC"������Ϊ���� PHP 4.3.3 ��󶨵� PCRE 4.0 �б��޸ĵġ��ڴ˰汾֮ǰ
-    <literal>/ab(?i)c/</literal> ��ִ����
-    <literal>/abc/i</literal> ��ͬ������ƥ�� "ABC" �� "aBc"����
+    如果选项改变出现于顶层（即不在子模式的括号中），则改变应用于其后的剩余模式。因此
+    <literal>/ab(?i)c/</literal> 只匹配 "abc" 和
+    and "abC"。此行为是自 PHP 4.3.3 起绑定的 PCRE 4.0 中被修改的。在此版本之前
+    <literal>/ab(?i)c/</literal> 的执行与
+    <literal>/abc/i</literal> 相同（例如匹配 "ABC" 和 "aBc"）。
    </para>
    <para>
-    ���ѡ��ı��������ģʽ�У���Ч����ͬ������
-    Perl 5.005 ����Ϊ��һ���仯����ģʽ�е�ѡ��ı�ֻӰ�쵽��ģʽ�ڲ����Ĳ��֣����
+    如果选项改变出现于子模式中，则效果不同。这是
+    Perl 5.005 的行为的一个变化。子模式中的选项改变只影响到子模式内部其后的部分，因此
     <literal>(a(?i)b)c</literal>
-    ��ֻƥ�� "abc" �� "aBc"���ٶ�û��ʹ��
-    <link linkend="reference.pcre.pattern.modifiers">PCRE_CASELESS</link>��������ζ��ѡ����ģʽ�Ĳ�ͬ��λ������ɲ�ͬ���趨����һ����֧�еĸı���Դ��ݵ�ͬһ����ģʽ�к���ķ�֧�У�����
+    将只匹配 "abc" 和 "aBc"（假定没有使用
+    <link linkend="reference.pcre.pattern.modifiers">PCRE_CASELESS</link>）。这意味着选项在模式的不同部位可以造成不同的设定。在一个分支中的改变可以传递到同一个子模式中后面的分支中，例如
     <literal>(a(?i)b|c)</literal>
-    ��ƥ�� "ab"��"aB"��"c" �� "C"��������ƥ�� "C"
-    ��ʱ���һ����֧����ѡ���趨֮ǰ�ͱ�������������Ϊѡ���趨��Ч�����ڱ���ʱȷ���ģ��������ɷǳ��������Ϊ��
+    将匹配 "ab"，"aB"，"c" 和 "C"，尽管在匹配 "C"
+    的时候第一个分支会在选项设定之前就被丢弃。这是因为选项设定的效果是在编译时确定的，否则会造成非常怪异的行为。
    </para>
    <para>
-    PCRE ר��ѡ��
-    <link linkend="reference.pcre.pattern.modifiers">PCRE_UNGREEDY</link> ��
+    PCRE 专用选项
+    <link linkend="reference.pcre.pattern.modifiers">PCRE_UNGREEDY</link> 和
     <link linkend="reference.pcre.pattern.modifiers">PCRE_EXTRA</link>
-    ���Ժ� Perl ����ѡ����ͬ���ķ�ʽ���ı䣬�ֱ�ʹ����ĸ
-    U �� X��(?X) ����趨��Щ���⣬������������κ���������֮ǰ����÷����ͷ��λ�á�
+    可以和 Perl 兼容选项以同样的方式来改变，分别使用字母
+    U 和 X。(?X) 标记设定有些特殊，它必须出现于任何其它特性之前。最好放在最开头的位置。
    </para>
   </refsect2>
 
   <refsect2 xml:id="regexp.reference.subpatterns">
-   <title>��ģʽ</title>
+   <title>子模式</title>
    <para>
-    ��ģʽ��Բ���Ŷ��磬����Ƕ�ס���ģʽ�е�һ���ֱ��Ϊ��ģʽ���ԣ�
+    子模式由圆括号定界，可以嵌套。将模式中的一部分标记为子模式可以：
    </para>
    <para>
-    1. ����ѡһ�ķ�֧�ֲ��������磬ģʽ��
+    1. 将多选一的分支局部化。例如，模式：
     <screen>
 <![CDATA[
        cat(aract|erpillar|)
 ]]>
     </screen>
-    ƥ���� "cat"��"cataract" �� "caterpillar"
-    ֮һ��û��Բ���ŵĻ���ƥ�� "cataract"��"erpillar" ����ַ�����
+    匹配了 "cat"，"cataract" 或 "caterpillar"
+    之一，没有圆括号的话将匹配 "cataract"，"erpillar" 或空字符串。
    </para>
    <para>
-    2. ����ģʽ�趨Ϊ������ģʽ����ͬ��ǰ����ģ���������ģʽƥ��ʱ��Ŀ���ַ�����ƥ������ģʽ�Ĳ��ֻ�ͨ��
-    <function>pcre_exec</function> �� <emphasis>ovector</emphasis>
-    �������ݻص����ߡ���Բ���Ŵ����Ҽ������� 1 ��ʼ����ȡ�ò�����ģʽ����Ŀ��
+    2. 将子模式设定为捕获子模式（如同以前定义的）。当整个模式匹配时，目标字符串中匹配了子模式的部分会通过
+    <function>pcre_exec</function> 的 <emphasis>ovector</emphasis>
+    参数传递回调用者。左圆括号从左到右计数（从 1 开始）以取得捕获子模式的数目。
    </para>
    <para>
-    ���磬������ַ��� "the red king" ����ģʽ
+    例如，如果将字符串 "the red king" 来和模式
     <screen>
 <![CDATA[
        the ((red|white) (king|queen))
 ]]>
     </screen>
-    ����ƥ�䣬������Ӵ�Ϊ "red king"��"red"
-    �Լ� "king"��������Ϊ 1��2 �� 3��
+    进行匹配，捕获的子串为 "red king"，"red"
+    以及 "king"，并被计为 1，2 和 3。
    </para>
    <para>
-    �򵥵�����ʵ�����ֹ��ܵ���ʵ�������а����ġ���������Ҫһ����ģʽ������Ҫ�����ʱ����������ź������
-    "?:"����ģʽ�����κβ��񣬲����ڼ����κ�֮�󲶻����ģʽʱҲ�������ڡ����磬������ַ���
-    "the white queen" ȥ��ģʽ  <literal>the ((?:red|white) (king|queen))</literal> ƥ�䣬������Ӵ���
-    "white queen" �� "queen"��������Ϊ 1 �� 2����������Ӵ��������Ŀ��
-    99��������ģʽ����������ĺ�û����ģ������Ŀ�� 200��
+    简单的括号实现两种功能的事实不总是有帮助的。经常有需要一组子模式但不需要捕获的时候。如果左括号后面跟着
+    "?:"，子模式不做任何捕获，并且在计算任何之后捕获的子模式时也不算在内。例如，如果用字符串
+    "the white queen" 去和模式  <literal>the ((?:red|white) (king|queen))</literal> 匹配，捕获的子串是
+    "white queen" 和 "queen"，并被计为 1 和 2。所捕获的子串的最大数目是
+    99，所有子模式，包括捕获的和没捕获的，最大数目是 200。
    </para>
    <para>
-    ��Ϊ������ټǣ�����ڷǲ�����ģʽ�Ŀ�ͷ��Ҫ�κ�ѡ���趨����ѡ����ĸ���Գ�����
-    "?" �� ":" �м䡣�����������ģʽ
+    作为方便的速记，如果在非捕获子模式的开头需要任何选项设定，则选项字母可以出现在
+    "?" 和 ":" 中间。因此下面两个模式
    </para>
 
    <literallayout>
@@ -1077,95 +1077,95 @@
    </literallayout>
 
    <para>
-    ƥ������ȫ��ͬ��һ���ַ�������Ϊ��֧ѡ���Ǵ������ҳ��Եģ�����ֱ����ģʽ����ǰ����������ѡ������һ����֧�е�ѡ���趨��Ӱ�쵽֮��ķ�֧����������ģʽ��ƥ��
-    "SUNDAY" �� "Saturday"��
+    匹配了完全相同的一组字符串。因为分支选项是从左向右尝试的，并且直到子模式结束前都不会重置选项，因此在一个分支中的选项设定会影响到之后的分支，所以以上模式会匹配
+    "SUNDAY" 和 "Saturday"。
    </para>
 
    <para>
-    �� PHP 4.3.3 ���п���ͨ�� <literal>(?P&lt;name&gt;pattern)</literal>
-    ����һ��ģʽ������ƥ�����������ͬʱ������ģʽ��Ϊ������������Ϊ�����Ĳ��֡�
+    自 PHP 4.3.3 起有可能通过 <literal>(?P&lt;name&gt;pattern)</literal>
+    来给一个模式命名。匹配结果的数组会同时包含以模式名为索引和以数字为索引的部分。
    </para>
   </refsect2>
 
   <refsect2 xml:id="regexp.reference.repetition">
-   <title>�ظ�</title>
+   <title>重复</title>
    <para>
-    �ظ�����������ָ���ģ����Խ������κ�һ�
+    重复是由数量符指定的，可以接以下任何一项：
     <itemizedlist>
-     <listitem><simpara>�����ַ��������Ǳ�ת���</simpara></listitem>
-     <listitem><simpara>. ƥ���ַ�</simpara></listitem>
-     <listitem><simpara>һ���ַ�</simpara></listitem>
-     <listitem><simpara>һ���������ã�����һ�ڣ�</simpara></listitem>
-     <listitem><simpara>һ�������е���ģʽ�������Ǹ����� - ���£�</simpara></listitem>
+     <listitem><simpara>单个字符，可以是被转义的</simpara></listitem>
+     <listitem><simpara>. 匹配字符</simpara></listitem>
+     <listitem><simpara>一类字符</simpara></listitem>
+     <listitem><simpara>一个反向引用（见下一节）</simpara></listitem>
+     <listitem><simpara>一个括号中的子模式（除非是个断言 - 见下）</simpara></listitem>
     </itemizedlist>
   </para>
   <para>
-   ��ͨ���ظ�������ָ������������ƥ�����С�������Ŀ�������ǽ��������ַ��ڻ������У��м��ö��ŷָ������ֱ���С��
-   65536�����ҵ�һ�����ֱ���С�ڻ���ڵڶ������֡����磺<literal>z{2,4}</literal>
-   ƥ���� "zz"��"zzz" �� "zzzz"���������һ����Ų����������ַ������ʡ���˵ڶ������ֵ����ж��ţ����ʾû�����ޡ����ͬʱʡ���˵ڶ������ֺͶ��ţ���������ָ����ƥ���׼ȷ��Ŀ�����
-   <literal>[aeiou]{3,}</literal> ƥ���������� 3 ��Ԫ�������ǿ���ƥ����ࡣ<literal>\d{8}</literal>
-   ��ƥ�������� 8 �����֡������ڲ���������������λ�û��߲������������﷨�������ţ������������ϵĸ��ַ�������
-   {,6} ����һ�������������������ϵ����ĸ��ַ���
+   普通的重复数量符指定了所允许的匹配的最小和最大数目，方法是将两个数字放在花括号中，中间用逗号分隔。数字必须小于
+   65536，并且第一个数字必须小于或等于第二个数字。例如：<literal>z{2,4}</literal>
+   匹配了 "zz"，"zzz" 或 "zzzz"。单个的右花括号不算是特殊字符。如果省略了第二个数字但是有逗号，则表示没有上限。如果同时省略了第二个数字和逗号，则数量符指定了匹配的准确数目。因此
+   <literal>[aeiou]{3,}</literal> 匹配至少连续 3 个元音，但是可以匹配更多。<literal>\d{8}</literal>
+   则匹配了正好 8 个数字。出现在不允许放置数量符位置或者不符合数量符语法的左花括号，被当成字面上的该字符。例如
+   {,6} 不是一个数量符，而是字面上的这四个字符。
   </para>
   <para>
-   ������ {0} �������ģ����±���ʽ����Ϊǰһ��������������ڡ�
+   数量符 {0} 是允许的，导致表达式理解为前一项和数量符不存在。
   </para>
   <para>
-   Ϊ����������Լ���ʷ�Եļ��ݣ���������õ����������е��ַ�����д��
+   为方便起见（以及历史性的兼容），三个最常用的数量符都有单字符的缩写：
    <table>
-    <title>���ַ�������</title>
+    <title>单字符数量符</title>
     <tgroup cols="2">
      <tbody>
       <row>
        <entry><literal>*</literal></entry>
-       <entry>��ͬ�� <literal>{0,}</literal></entry>
+       <entry>等同于 <literal>{0,}</literal></entry>
       </row>
       <row>
        <entry><literal>+</literal></entry>
-       <entry>��ͬ�� <literal>{1,}</literal></entry>
+       <entry>等同于 <literal>{1,}</literal></entry>
       </row>
       <row>
        <entry><literal>?</literal></entry>
-       <entry>��ͬ�� <literal>{0,1}</literal></entry>
+       <entry>等同于 <literal>{0,1}</literal></entry>
       </row>
      </tbody>
     </tgroup>
    </table>
   </para>
   <para>
-   �п���ͨ����һ����ƥ���κ��ַ�����ģʽ�����һ��û�����޵����������������ѭ�������磺<literal>(a?)*</literal>��
+   有可能通过在一个不匹配任何字符的子模式后面跟一个没有上限的数量符构造出无限循环，例如：<literal>(a?)*</literal>。
   </para>
   <para>
-   �Դ���ģʽ���ڰ汾�� Perl �� PCRE
-   ���ڱ���ʱ�������󡣲�����������ĳЩ��������ã�����Ѿ����ܴ���ģʽ�ˣ���������κ���ģʽ���ظ�ȷʵ��ƥ���κ��ַ�����ѭ���ᱻǿ�ƴ�ϡ�
+   对此类模式早期版本的 Perl 和 PCRE
+   会在编译时给出错误。不过由于这在某些情况下有用，如今已经接受此种模式了，但是如果任何子模式的重复确实不匹配任何字符，则循环会被强制打断。
   </para>
   <para>
-   Ĭ��ʱ���������ǡ�̰���͡���greedy���ģ������ڲ�����ʣ��ģʽʧ�ܵ�����¾����ܶ��ƥ�䣨ֱ������������Ŀ���ޣ�����������ľ��������ǳ���ƥ��
-   C ���Ե�ע�͡��� /* �� */ �����м䣬���ܻ���ֵ����� *
-   �� / �ַ����� C ע�������ͼ�� <literal>/\*.*\*/</literal>
-   ȥ���ַ��� <literal>/* first comment */  not comment  /* second comment */</literal>
-   ƥ���ʧ�ܣ���Ϊ���� .* ��Ŀ��̰���ԣ���ƥ��������ַ�����
+   默认时，数量符是“贪吃型”（greedy）的，即会在不导致剩余模式失败的情况下尽可能多地匹配（直到所允许的数目上限）。这会出问题的经典例子是尝试匹配
+   C 语言的注释。在 /* 和 */ 序列中间，可能会出现单个的 *
+   和 / 字符。对 C 注释如果试图用 <literal>/\*.*\*/</literal>
+   去和字符串 <literal>/* first comment */  not comment  /* second comment */</literal>
+   匹配会失败，因为由于 .* 项目的贪吃性，会匹配成整个字符串。
   </para>
   <para>
-   ����������ں����һ���ʺ������������ֹ̰ͣ���ԣ������ƥ�価�����ٵ���Ŀ�����ģʽ
+   不过，如果在后面加一个问号数量符，则会停止贪吃性，而变成匹配尽可能少的数目，因此模式
 
        <literal>/\*.*?\*/</literal>
 
-   �ͻ���ȷƥ�� C ע�͡������������ĺ��岢û�иı䣬ֻ�����ȵ�ƥ����Ŀ����Ҫ���ʺŵĴ��÷������Լ���Ϊ��������ʹ�û�������Ϊ�������÷�����ʱ��������һ����֣�����
+   就会正确匹配 C 注释。各种数量符的含义并没有改变，只是优先的匹配数目。不要将问号的此用法和其自己作为数量符的使用混淆。因为有两种用法，有时可以两个一起出现，例如
 
        <literal>\d??\d</literal>
 
-   ������ƥ��һ�����֣��������ѡ��Ҳ����ƥ��������ʹʣ��ģʽƥ�䡣
+   会优先匹配一个数字，但如别无选择也可以匹配两个以使剩余模式匹配。
   </para>
   <para>
-   ����趨�� <link linkend="reference.pcre.pattern.modifiers">PCRE_UNGREEDY</link> ѡ���ѡ�� Perl
-   ��û�У���������Ĭ�ϲ���̰���͵ģ������ڸ���ģʽ�����һ���ʺſ��Խ�����̰���͵ġ����仰˵������Է�תĬ�ϵ���Ϊ��
+   如果设定了 <link linkend="reference.pcre.pattern.modifiers">PCRE_UNGREEDY</link> 选项（此选项 Perl
+   中没有）则数量符默认不是贪吃型的，但是在个别模式后加上一个问号可以将其变成贪吃型的。换句话说，这可以反转默认的行为。
   </para>
   <para>
-   �������һ�� <literal>+</literal> ���������ǡ�ռ���ԡ���possessive���ġ�����ƥ�価���ܶ���ַ�������ʣ���ģʽ�����
-   <literal>.*abc</literal> ����ƥ�� "aabc" ����
-   <literal>.*+abc</literal> �Ͳ��ᣬ��Ϊ <literal>.*+</literal>
-   �Ѿ�ƥ���������ַ������� PHP 4.3.3 �������ռ�����������������ӿ촦�����̡�
+   后面跟上一个 <literal>+</literal> 的数量符是“占有性”（possessive）的。它会匹配尽可能多的字符而不管剩余的模式。因此
+   <literal>.*abc</literal> 可以匹配 "aabc" 但是
+   <literal>.*+abc</literal> 就不会，因为 <literal>.*+</literal>
+   已经匹配了整个字符串。自 PHP 4.3.3 起可以用占有性数量符可以来加快处理过程。
   </para>
   <para>
      When a parenthesized subpattern is quantified with a minimum
@@ -1595,13 +1595,13 @@
   </refsect2>
 
   <refsect2 xml:id="regexp.reference.comments">
-   <title>ע��</title>
+   <title>注释</title>
    <para>
-    ���� (?# �����ע�͵Ŀ�ͷֱ����һ��������Ϊֹ��������Ƕ��ע�͡�ע����ģʽƥ������ȫû�����á�
+    序列 (?# 标记了注释的开头直到下一个右括号为止。不允许嵌套注释。注释在模式匹配中完全没有作用。
    </para>
    <para>
-    ����趨�� <link linkend="reference.pcre.pattern.modifiers">PCRE_EXTENDED</link>
-    ѡ������ַ����м䲢��δת��� # �ַ������ע�͵Ŀ�ͷ��ֱ��ģʽ�е���һ�����з�������
+    如果设定了 <link linkend="reference.pcre.pattern.modifiers">PCRE_EXTENDED</link>
+    选项，则不在字符类中间并且未转义的 # 字符标记了注释的开头，直到模式中的下一个换行符结束。
    </para>
   </refsect2>
 

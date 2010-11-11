@@ -1,11 +1,11 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
 <!-- $Author$ -->
 <!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
 <refentry xml:id="function.readdir" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>readdir</refname>
-  <refpurpose>��Ŀ¼����ж�ȡ��Ŀ</refpurpose>
+  <refpurpose>从目录句柄中读取条目</refpurpose>
  </refnamediv>
 
  <refsect1 role="description">
@@ -15,7 +15,7 @@
    <methodparam><type>resource</type><parameter>dir_handle</parameter></methodparam>
   </methodsynopsis>
   <para>
-   ����Ŀ¼����һ���ļ����ļ������ļ��������ļ�ϵͳ�е����򷵻ء�
+   返回目录中下一个文件的文件名。文件名以在文件系统中的排序返回。
   </para>
  </refsect1>
 
@@ -27,8 +27,8 @@
      <term><parameter>dir_handle</parameter></term>
      <listitem>
       <para>
-       Ŀ¼����� <type>resource</type>��֮ǰ��
-       <function>opendir</function> ��
+       目录句柄的 <type>resource</type>，之前由
+       <function>opendir</function> 打开
       </para>
      </listitem>
     </varlistentry>
@@ -39,7 +39,7 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   �ɹ��򷵻��ļ�����ʧ�ܷ��� &false;��
+   成功则返回文件名，失败返回 &false;。
   </para>
  </refsect1>
 
@@ -47,28 +47,28 @@
   &reftitle.examples;
   <para>
    <example>
-    <title>�г�Ŀ¼�е������ļ�</title>
+    <title>列出目录中的所有文件</title>
     <para>
-     ���������������м�� <function>readdir</function>
-     ����ֵ�ķ��������ȷ�ز��Է���ֵ�Ƿ�ȫ���ڣ�ֵ�����Ͷ���ͬ����������Ϣ�μ�<link
-     linkend="language.operators.comparison">�Ƚ������</link>��&false;�������κ�Ŀ¼���������ֵΪ
-     &false; �Ķ��ᵼ��ѭ��ֹͣ������һ��Ŀ¼��Ϊ��0������
+     请留意下面例子中检查 <function>readdir</function>
+     返回值的风格。这里明确地测试返回值是否全等于（值和类型都相同——更多信息参见<link
+     linkend="language.operators.comparison">比较运算符</link>）&false;，否则任何目录项的名称求值为
+     &false; 的都会导致循环停止（例如一个目录名为“0”）。
     </para>
     <programlisting role="php">
 <![CDATA[
 <?php
-// ע���� 4.0.0-RC2 ֮ǰ������ !== �����
+// 注意在 4.0.0-RC2 之前不存在 !== 运算符
 
 if ($handle = opendir('/path/to/files')) {
     echo "Directory handle: $handle\n";
     echo "Files:\n";
 
-    /* ������ȷ�ر���Ŀ¼���� */
+    /* 这是正确地遍历目录方法 */
     while (false !== ($file = readdir($handle))) {
         echo "$file\n";
     }
 
-    /* ���Ǵ���ر���Ŀ¼�ķ��� */
+    /* 这是错误地遍历目录的方法 */
     while ($file = readdir($handle)) {
         echo "$file\n";
     }
@@ -82,7 +82,7 @@ if ($handle = opendir('/path/to/files')) {
   </para>
   <para>
    <example>
-    <title>�г���ǰĿ¼�������ļ���ȥ�� <literal>.</literal> �� <literal>..</literal></title>
+    <title>列出当前目录的所有文件并去掉 <literal>.</literal> 和 <literal>..</literal></title>
     <programlisting role="php">
 <![CDATA[
 <?php

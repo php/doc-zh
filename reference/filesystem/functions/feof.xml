@@ -1,42 +1,42 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
 <!-- $Author$ -->
 <!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
 <refentry xml:id="function.feof" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>feof</refname>
-  <refpurpose>�����ļ�ָ���Ƿ����ļ�������λ��</refpurpose>
+  <refpurpose>测试文件指针是否到了文件结束的位置</refpurpose>
  </refnamediv>
  <refsect1>
-  <title>˵��</title>
+  <title>说明</title>
   <methodsynopsis>
    <type>bool</type><methodname>feof</methodname>
    <methodparam><type>resource</type><parameter>handle</parameter></methodparam>
   </methodsynopsis>
   <para>
-   ����ļ�ָ�뵽�� EOF ���߳���ʱ�򷵻� &true;�����򷵻�һ�����󣨰��� socket
-   ��ʱ������������򷵻� &false;��
+   如果文件指针到了 EOF 或者出错时则返回 &true;，否则返回一个错误（包括 socket
+   超时），其它情况则返回 &false;。
   </para>
   <warning>
    <simpara>
-    ���������û�йر��� <function>fsockopen</function> ���򿪵����ӣ�<function>feof</function>
-    ��һֱ�ȴ�ֱ����ʱ������ &true;��Ĭ�ϵĳ�ʱ������ 60 �룬����ʹ��
-    <function>stream_set_timeout</function> ���ı����ֵ��
+    如果服务器没有关闭由 <function>fsockopen</function> 所打开的连接，<function>feof</function>
+    会一直等待直到超时而返回 &true;。默认的超时限制是 60 秒，可以使用
+    <function>stream_set_timeout</function> 来改变这个值。
    </simpara>
   </warning>
   &fs.validfp.all;
   <warning>
    <para>
-    ������ݵ��ļ�ָ����Ч���ܻ���������ѭ���У���Ϊ EOF ���᷵�� TRUE��
+    如果传递的文件指针无效可能会陷入无限循环中，因为 EOF 不会返回 TRUE。
     <example>
-     <title>ʹ����Ч�ļ�ָ��� <function>feof</function> ����</title>
+     <title>使用无效文件指针的 <function>feof</function> 例子</title>
      <programlisting role="php">
 <![CDATA[
 <?php
-// ����ļ����ɶ�ȡ���߲����ڣ�fopen �������� FALSE
+// 如果文件不可读取或者不存在，fopen 函数返回 FALSE
 $file = @fopen("no_such_file", "r");
 
-// ���� fopen �� FALSE �ᷢ��һ��������Ϣ����������������ѭ��
+// 来自 fopen 的 FALSE 会发出一条警告信息并在这里陷入无限循环
 while (!feof($file)) {
 }
 

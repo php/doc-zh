@@ -1,25 +1,25 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
 <!-- $Author$ -->
 <!-- EN-Revision: 96c9d88bad9a7d7d44bfb7f26c226df7ee9ddf26 Maintainer: lm92 Status: ready -->
 <!-- CREDITS: dallas -->
 <chapter xml:id="security.variables" xmlns="http://docbook.org/ns/docbook">
-   <title>�û��ύ������</title>
+   <title>用户提交的数据</title>
    <para>
-    �ܶ� PHP ���������ڵ��ش����㲢���� PHP
-    ���Ա��������⣬���Ǳ���ߵİ�ȫ��ʶ���߶����µġ���ˣ�����ʱʱע��ÿһ�δ�����ܴ��ڵ����⣬ȥ���ַ���ȷ�����ύʱ������ɵ�Ӱ�졣
+    很多 PHP 程序所存在的重大弱点并不是 PHP
+    语言本身的问题，而是编程者的安全意识不高而导致的。因此，必须时时注意每一段代码可能存在的问题，去发现非正确数据提交时可能造成的影响。
     <example>
-     <title>Σ�յı����÷�</title>
+     <title>危险的变量用法</title>
      <programlisting role="php">
 <![CDATA[
 <?php
-// ���û�Ŀ¼��ɾ��һ���ļ������ߡ�����ɾ������Ķ�����
+// 从用户目录中删除一个文件，或者……能删除更多的东西？
 unlink ($evil_var);
 
-// ��¼�û��ĵ�½�����ߡ����ܷ��� /etc/passwd �������ݣ�
+// 记录用户的登陆，或者……能否在 /etc/passwd 添加数据？
 fwrite ($fp, $evil_var);
 
-// ִ��һЩ��ͨ��������ߡ�������ִ�� rm -rf * ��
+// 执行一些普通的命令，或者……可以执行 rm -rf * ？
 system ($evil_var);
 exec ($evil_var);
 
@@ -29,40 +29,40 @@ exec ($evil_var);
     </example>
    </para>
    <para>
-    ����ʱ��������Ĵ��룬��ȷ��ÿһ���ӿͻ����ύ�ı����������ʵ��ļ�飬Ȼ�����Լ�����һЩ���⣺
+    必须时常留意你的代码，以确保每一个从客户端提交的变量都经过适当的检查，然后问自己以下一些问题：
     <itemizedlist>
      <listitem>
       <simpara>
-       �˽ű��Ƿ�ֻ��Ӱ����Ԥ�ڵ��ļ���
+       此脚本是否只能影响所预期的文件？
       </simpara>
      </listitem>
      <listitem>
       <simpara>
-       �����������ݱ��ύ���ܷ�������ã�
+       非正常的数据被提交后能否产生作用？
       </simpara>
      </listitem>
      <listitem>
       <simpara>
-       �˽ű������ڼƻ������;��
+       此脚本能用于计划外的用途吗？
       </simpara>
      </listitem>
      <listitem>
       <simpara>
-       �˽ű��ܷ�������ű�������������£�
+       此脚本能否和其它脚本结合起来做坏事？
       </simpara>
      </listitem>
      <listitem>
       <simpara>
-       �Ƿ����е����񶼱���ּ�¼�ˣ�
+       是否所有的事务都被充分记录了？
       </simpara>
      </listitem>
     </itemizedlist>
-    ��д�����ʱ�����Լ���Щ���⣬�����Ժ����ҪΪ�����Ӱ�ȫ�Զ���д�����ˡ�ע������Щ����Ļ���Ҳ��������ȫ�ܱ�֤ϵͳ�İ�ȫ���������ٿ�����߰�ȫ�ԡ�
+    在写代码的时候问自己这些问题，否则以后可能要为了增加安全性而重写代码了。注意了这些问题的话，也许还不完全能保证系统的安全，但是至少可以提高安全性。
    </para>
    <para>
-    �����Կ��ǹر� register_globals��magic_quotes
-    ��������ʹ��̸����㵫��ʹĳ�������ĺϷ��ԣ���Դ����ֵ�����ҵ����á��ڿ���ʱ������ʹ�� error_reporting(E_ALL)
-    ģʽ����������ʹ��ǰ�Ƿ��б����򱻳�ʼ���������Ϳ��Է�ֹĳЩ�����������ݵ������ˡ�
+    还可以考虑关闭 register_globals，magic_quotes
+    或者其它使编程更方便但会使某个变量的合法性，来源和其值被搞乱的设置。在开发时，可以使用 error_reporting(E_ALL)
+    模式帮助检查变量使用前是否有被检查或被初始化，这样就可以防止某些非正常的数据的挠乱了。
    </para>
   </chapter>
 

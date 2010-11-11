@@ -1,43 +1,43 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
 <!-- $Author$ -->
 <!-- EN-Revision: n/a Maintainer: Gregory Status: ready -->
 <!-- CREDITS: dallas -->
 <chapter xml:id="features.http-auth" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
- <title>�� PHP ���� HTTP ��֤</title>
+ <title>用 PHP 进行 HTTP 认证</title>
 
  <simpara>
-  PHP �� <acronym>HTTP</acronym> ��֤���ƽ��� PHP �� Apache
-  ģ�鷽ʽ����ʱ����Ч����˸ù��ܲ������� CGI �汾����
-  Apache ģ��� PHP �ű��У�������
+  PHP 的 <acronym>HTTP</acronym> 认证机制仅在 PHP 以 Apache
+  模块方式运行时才有效，因此该功能不适用于 CGI 版本。在
+  Apache 模块的 PHP 脚本中，可以用
   <function>header</function>
-  ��������ͻ�����������͡�Authentication
-  Required����Ϣ��ʹ�䵯��һ���û������������봰�ڡ����û������û���������󣬰�����
-  URL �� PHP �ű��������<link linkend="reserved.variables">Ԥ�������</link>
-  <varname>PHP_AUTH_USER</varname>��<varname>PHP_AUTH_PW</varname> ��
+  函数来向客户端浏览器发送“Authentication
+  Required”信息，使其弹出一个用户名／密码输入窗口。当用户输入用户名和密码后，包含有
+  URL 的 PHP 脚本将会加上<link linkend="reserved.variables">预定义变量</link>
+  <varname>PHP_AUTH_USER</varname>，<varname>PHP_AUTH_PW</varname> 和
   <varname>AUTH_TYPE</varname>
-  ���ٴε��ã������������ֱ��趨Ϊ�û������������֤���͡�Ԥ�������������
-  <link linkend="reserved.variables.server">$_SERVER</link> ����
-  <varname>$HTTP_SERVER_VARS</varname> �����С�֧�֡�Basic���͡�Digest������
-  PHP 5.1.0 ����֤����������� <function>header</function> �����Ի�ȡ������Ϣ��
+  被再次调用，这三个变量分别被设定为用户名，密码和认证类型。预定义变量保存在
+  <link linkend="reserved.variables.server">$_SERVER</link> 或者
+  <varname>$HTTP_SERVER_VARS</varname> 数组中。支持“Basic”和“Digest”（自
+  PHP 5.1.0 起）认证方法。请参阅 <function>header</function> 函数以获取更多信息。
  </simpara>
 
  <note>
-  <title>PHP �汾����</title>
+  <title>PHP 版本问题</title>
   <para>
-   <link linkend="language.variables.superglobals">Autoglobals</link> ȫ�ֱ���������
-   <link linkend="reserved.variables.server">$_SERVER</link>�ȣ���
+   <link linkend="language.variables.superglobals">Autoglobals</link> 全局变量，包括
+   <link linkend="reserved.variables.server">$_SERVER</link>等，自
    PHP <link xlink:href="&url.php.release4.1.0;">4.1.0</link>
-   ����Ч��<varname>$HTTP_SERVER_VARS</varname> �� PHP 3 ��ʼ��Ч��
+   起有效，<varname>$HTTP_SERVER_VARS</varname> 从 PHP 3 开始有效。
   </para>
  </note>
 
  <para>
-  ��������ҳ����ǿ�ȿͻ�����֤�Ľű�������
+  以下是在页面上强迫客户端认证的脚本范例：
  </para>
  <para>
   <example>
-   <title>Basic HTTP ��֤����</title>
+   <title>Basic HTTP 认证范例</title>
    <programlisting role="php">
 <![CDATA[
 <?php
@@ -58,10 +58,10 @@
 
  <para>
   <example>
-   <title>Digest HTTP ��֤����</title>
+   <title>Digest HTTP 认证范例</title>
    <para>
-    ������ʾ����ʵ��һ���򵥵� Digest HTTP ��֤�ű���������Ϣ��ο�
-    <link xlink:href="&url.rfc;2617">RFC 2617</link>��
+    本例演示怎样实现一个简单的 Digest HTTP 认证脚本。更多信息请参考
+    <link xlink:href="&url.rfc;2617">RFC 2617</link>。
    </para>
    <programlisting role="php">
 <![CDATA[
@@ -122,53 +122,53 @@ function http_digest_parse($txt)
  </para>
 
  <note>
-  <title>����������</title>
+  <title>兼容性问题</title>
   <para>
-   �ڱ�д HTTP
-   ��ͷ����ʱ�����С�ġ�Ϊ�˶����еĿͻ��˱�֤�����ԣ��ؼ��֡�Basic���ĵ�һ����ĸ�����дΪ��B�����ֽ��ַ���������˫���ţ����ǵ����ţ����ã������ڱ�ͷ��
-   <emphasis>HTTP/1.0 401</emphasis> �У��� <emphasis>401</emphasis> ǰ�������ҽ���һ���ո�
+   在编写 HTTP
+   标头代码时请格外小心。为了对所有的客户端保证兼容性，关键字“Basic”的第一个字母必须大写为“B”，分界字符串必须用双引号（不是单引号）引用；并且在标头行
+   <emphasis>HTTP/1.0 401</emphasis> 中，在 <emphasis>401</emphasis> 前必须有且仅有一个空格。
   </para>
  </note>
 
  <para>
-  �����������У�����ֻ��ӡ���� <varname>PHP_AUTH_USER</varname> ��
+  在以上例子中，仅仅只打印出了 <varname>PHP_AUTH_USER</varname> 和
   <varname>PHP_AUTH_PW</varname>
-  ��ֵ������ʵ�������У�������Ҫ���û���������ĺϷ��Խ��м�顣�����������ݿ�Ĳ�ѯ�������� dbm �ļ��м�����
+  的值，但在实际运用中，可能需要对用户名和密码的合法性进行检查。或许进行数据库的查询，或许从 dbm 文件中检索。
  </para>
 
  <para>
-  ע����Щ Internet Explorer
-  ��������������⡣���Ա�ͷ��˳���Ե��ƺ��е㴵ë��á�Ŀǰ�����ڷ���
-  <literal>HTTP/1.0 401</literal> ֮ǰ�ȷ���
-  <emphasis>WWW-Authenticate</emphasis> ��ͷ�ƺ����Խ�������⡣
+  注意有些 Internet Explorer
+  浏览器本身有问题。它对标头的顺序显得似乎有点吹毛求疵。目前看来在发送
+  <literal>HTTP/1.0 401</literal> 之前先发送
+  <emphasis>WWW-Authenticate</emphasis> 标头似乎可以解决此问题。
  </para>
 
  <simpara>
-  �� PHP 4.3.0
-  ��Ϊ�˷�ֹ����ͨ����д�ű������ô�ͳ�ⲿ������֤��ҳ���ϻ�ȡ���룬���ⲿ��֤���ض�ҳ����Ч������&safemode;������ʱ��PHP_AUTH
-  ���������ᱻ���á���������Σ�<varname>REMOTE_USER</varname>
-  ���Ա����������ⲿ��֤���û�����˿�����
-  <varname>$_SERVER['REMOTE_USER']</varname> ������
+  自 PHP 4.3.0
+  起，为了防止有人通过编写脚本来从用传统外部机制认证的页面上获取密码，当外部认证对特定页面有效，并且&safemode;被开启时，PHP_AUTH
+  变量将不会被设置。但无论如何，<varname>REMOTE_USER</varname>
+  可以被用来辨认外部认证的用户，因此可以用
+  <varname>$_SERVER['REMOTE_USER']</varname> 变量。
  </simpara>
 
  <note>
-  <title>����˵��</title>
+  <title>配置说明</title>
   <para>
-   PHP ���Ƿ��� <literal>AuthType</literal> ָ�����ж��ⲿ��֤�����Ƿ���Ч��
+   PHP 用是否有 <literal>AuthType</literal> 指令来判断外部认证机制是否有效。
   </para>
  </note>
 
  <simpara>
-  ע�⣬����Ȼ���ܷ�ֹ����ͨ��δ��֤�� URL ����ͬһ����������֤�� URL ��͵ȡ���롣
+  注意，这仍然不能防止有人通过未认证的 URL 来从同一服务器上认证的 URL 上偷取密码。
  </simpara>
  <simpara>
-  Netscape Navigator �� Internet Explorer ������������յ� 401
-  �ķ���˷�����Ϣʱ������еı��������������� Windows
-  ��֤���档���ܹ���Ч��ע��һ���û�������ʹ���������������ǵ��û��������롣��Щ�������ַ�����ʹ��¼״̬�����ڡ���������Ϊ��ע������ť����Ӧ��Ϊ��
+  Netscape Navigator 和 Internet Explorer 浏览器都会在收到 401
+  的服务端返回信息时清空所有的本地浏览器整个域的 Windows
+  认证缓存。这能够有效的注销一个用户，并迫使他们重新输入他们的用户名和密码。有些人用这种方法来使登录状态“过期”，或者作为“注销”按钮的响应行为。
  </simpara>
  <para>
   <example>
-    <title>ǿ�����������û���������� HTTP ��֤�ķ���</title>
+    <title>强迫重新输入用户名和密码的 HTTP 认证的范例</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -197,37 +197,37 @@ function http_digest_parse($txt)
   </example>
  </para>
  <simpara>
-  ����Ϊ���� HTTP �� Basic ��֤��׼��˵�����Ǳ���ģ���˲����������ַ�������
-  Lynx ������Ĳ��Ա��� Lynx ���յ� 401
-  �ķ���˷�����Ϣʱ���������֤�ļ������ֻҪ����֤�ļ��ļ��Ҫ��û�б仯��ֻҪ�û���������ˡ���ť���ٵ����ǰ������ť����ԭ����Դ��Ȼ�ܹ������ʡ��������û�����ͨ������_������������ǵ���֤��Ϣ��
+  该行为对于 HTTP 的 Basic 认证标准来说并不是必须的，因此不能依靠这种方法。对
+  Lynx 浏览器的测试表明 Lynx 在收到 401
+  的服务端返回信息时不会清空认证文件，因此只要对认证文件的检查要求没有变化，只要用户点击“后退”按钮，再点击“前进”按钮，其原有资源仍然能够被访问。不过，用户可以通过按“_”键来清空他们的认证信息。
  </simpara>
  <simpara>
-  ͬʱ��ע�⣬�� PHP 4.3.3 ֮ǰ������΢�� IIS �����ƣ�HTTP
-  ��֤�޷������� IIS �������� CGI ģʽ�¡�Ϊ���ܹ�ʹ���� PHP 4.3.3
-  ���ϰ汾�ܹ���������Ҫ�༭ IIS
-  �����á�Ŀ¼��ȫ����������༭������ֻѡ���������ʡ����������еĸ�ѡ��Ӧ�����ա�
+  同时请注意，在 PHP 4.3.3 之前，由于微软 IIS 的限制，HTTP
+  认证无法工作在 IIS 服务器的 CGI 模式下。为了能够使其在 PHP 4.3.3
+  以上版本能够工作，需要编辑 IIS
+  的设置“目录安全”。点击“编辑”并且只选择“匿名访问”，其它所有的复选框都应该留空。
  </simpara>
  <simpara>
-  ��һ���������� IIS �� ISAPI ģʽ��ʹ�� PHP 4 ��ʱ���޷�ʹ��
-  <literal>PHP_AUTH_*</literal> ��������ֻ��ʹ��
-  <literal>HTTP_AUTHORIZATION</literal>�����磬�������´��룺<literal>list($user, $pw)
-  = explode(':', base64_decode(substr($_SERVER['HTTP_AUTHORIZATION'], 6)));</literal>��
+  另一个限制是在 IIS 的 ISAPI 模式下使用 PHP 4 的时候，无法使用
+  <literal>PHP_AUTH_*</literal> 变量，而只能使用
+  <literal>HTTP_AUTHORIZATION</literal>。例如，考虑如下代码：<literal>list($user, $pw)
+  = explode(':', base64_decode(substr($_SERVER['HTTP_AUTHORIZATION'], 6)));</literal>。
  </simpara>
 
  <note>
-  <title>IIS ע������</title>
+  <title>IIS 注意事项</title>
   <simpara>
-   Ҫ HTTP ��֤�ܹ��� IIS �¹�����PHP ����ѡ��
+   要 HTTP 认证能够在 IIS 下工作，PHP 配置选项
    <link linkend="ini.cgi.rfc2616-headers">cgi.rfc2616_headers</link>
-   �������ó� <literal>0</literal>��Ĭ��ֵ����
+   必须设置成 <literal>0</literal>（默认值）。
   </simpara>
  </note>
 
  <note>
   <para>
-   ���<link linkend="ini.safe-mode">��ȫģʽ</link>������ű���
-   UID �ᱻ�ӵ� <literal>WWW-Authenticate</literal> ��ͷ��
-   <literal>realm</literal> ���֡�
+   如果<link linkend="ini.safe-mode">安全模式</link>被激活，脚本的
+   UID 会被加到 <literal>WWW-Authenticate</literal> 标头的
+   <literal>realm</literal> 部分。
   </para>
  </note>
 
