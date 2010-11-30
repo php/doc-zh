@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision$ -->
+<refentry xml:id="memcache.addserver" xmlns="http://docbook.org/ns/docbook">
+ <refnamediv>
+  <refname>Memcache::addServer</refname>
+  <refpurpose>向连接池中添加一个memcache服务器</refpurpose>
+ </refnamediv>
+ 
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <type>bool</type><methodname>Memcache::addServer</methodname>
+   <methodparam><type>string</type><parameter>host</parameter></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>port</parameter><initializer>11211</initializer></methodparam>
+   <methodparam choice="opt"><type>bool</type><parameter>persistent</parameter></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>weight</parameter></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>timeout</parameter></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>retry_interval</parameter></methodparam>
+   <methodparam choice="opt"><type>bool</type><parameter>status</parameter></methodparam>
+   <methodparam choice="opt"><type>callback</type><parameter>failure_callback</parameter></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>timeoutms</parameter></methodparam>
+  </methodsynopsis>
+  
+  <para>
+   <function>Memcache::addServer</function>增加一个服务器到连接池中。通过<function>Memcache::addServer</function>
+   打开的连接将会在脚本执行结束后自动关闭，也可以使用<function>Memcache::close</function>进行手动关闭。 
+   您也可以使用<function>memcache_add_server</function>来添加服务器。
+  </para>
+  
+  <para>
+   当使用这个方法的时候(与<function>Memcache::connect</function>和<function>Memcache::pconnect</function>相反)
+   网络连接并不会立刻建立，而是直到真正使用的时候才建立。 因此在加入大量服务器到连接池中时也是没有开销的，因为它们可能并不会被使用。
+  </para>
+  
+  <para>
+  故障转移可能在方法的任何一个层次发生，通常只要其他服务器可用用户就不会感受到。任何的socket或memcache服务器级别的错误
+  （比如内存溢出）都可能导致故障转移。而一般的客户端错误比如使用Memcache::add尝试增加一个已经存在的key则不会导致故障转移。
+  </para>
+
+  <note>
+   <para>
+    这个方法在2.0.0版本加入Memcache。
+   </para>
+  </note>
+
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>host</parameter></term>
+     <listitem>
+      <para>
+      要连接的memcached服务端监听的主机位置。这个参数通常指定其他类型的传输比如Unix域套接字使用
+      <literal>unix:///path/to/memcached.sock</literal>，这种情况下参数<parameter>port</parameter>
+       必须设置为<literal>0</literal>。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>port</parameter></term>
+     <listitem>
+      <para>
+      要连接的memcached服务端监听的端口。当使用UNIX域套接字连接时设置为<literal>0</literal>。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>persistent</parameter></term>
+     <listitem>
+      <para>
+      控制是否使用持久化连接。默认&true;。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>weight</parameter></term>
+     <listitem>
+      <para>
+      为此服务器创建的桶的数量，用来控制此服务器被选中的权重，单个服务器被选中的概率是相对于所有服务器weight总和而言的。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>timeout</parameter></term>
+     <listitem>
+      <para>
+      连接持续（超时）时间（单位秒），默认值1秒，修改此值之前请三思，过长的连接持续时间可能会导致失去所有的缓存优势。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>retry_interval</parameter></term>
+     <listitem>
+      <para>
+      服务器连接失败时重试的间隔时间，默认值15秒。如果此参数设置为-1表示不重试。此参数和<parameter>persistent</parameter>参数在扩展以
+      <function>dl</function>函数动态加载的时候无效。
+      </para>
+      <para>
+      每个失败的连接结构有自己的超时时间，并且在它失效之前选择后端服务请求时该结构会被跳过。一旦一个连接失效，
+      它将会被成功重新连接或被标记为失败连接以在下一个<parameter>retry_interval</parameter>秒重连。
+      典型的影响是每个web服务子进程在服务于一个页面时将会每<parameter>retry_interval</parameter>秒
+      尝试重新连接一次。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>status</parameter></term>
+     <listitem>
+      <para>
+      控制此服务器是否可以被标记为在线状态。设置此参数值为&false;并且<parameter>retry_interval</parameter>参数
+      设置为-1时允许将失败的服务器保留在一个池中以免影响key的分配算法。对于这个服务器的请求会进行故障转移或者立即失败，
+      这受限于<parameter>memcache.allow_failover</parameter>参数的设置。该参数默认&true;，表明允许进行故障转移。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>failure_callback</parameter></term>
+     <listitem>
+      <para>
+      允许用户指定一个运行时发生错误后的回调函数。回调函数会在故障转移之前运行。回调函数会接受到两个参数，分别是失败主机的
+      主机名和端口号。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>timeoutms</parameter></term>
+     <listitem>
+      <para>
+       
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   &return.success;
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title><function>Memcache::addServer</function> 示例</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+
+/* OO API */
+
+$memcache = new Memcache;
+$memcache->addServer('memcache_host', 11211);
+$memcache->addServer('memcache_host2', 11211);
+
+/* procedural API */
+
+$memcache_obj = memcache_connect('memcache_host', 11211);
+memcache_add_server($memcache_obj, 'memcache_host2', 11211);
+
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>Memcache::connect</function></member>
+    <member><function>Memcache::pconnect</function></member>
+    <member><function>Memcache::close</function></member>
+    <member><function>Memcache::setServerParams</function></member>
+    <member><function>Memcache::getServerStatus</function></member>
+   </simplelist>
+  </para>
+ </refsect1>
+
+</refentry>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
