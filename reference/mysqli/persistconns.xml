@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision: 293632 $ -->
+<chapter xml:id="mysqli.persistconns" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+
+ <title>mysqli扩展和持久化连接</title>
+
+ <para>
+ <literal>mysqli</literal>扩展的持久化连接在PHP5.3中被引入。支持已经存在于PDO MYSQL
+ 和ext/mysql中。持久化连接背后的思想是客户端进程和数据库之间的连接可以通过一个客户端进程来保持重用，
+ 而不是多次的创建和销毁。这降低了每次需要创建一个新连接的开销，未使用的连接被缓存起来并且准备随时被重用。
+ </para>
+ 
+ <para>
+ 不像mysql扩展，mysqli没有提供一个特殊的方法用于打开持久化连接。需要打开一个持久化连接时，你必须在
+ 连接时在主机名前增加<literal>p:</literal>。
+ </para>
+
+ <para>
+ 使用持久化连接的问题在于它们可能在客户端处于不可预知的状态。比如，一个表锁可能在客户端意外终止之前被激活。
+ 一个新的客户端进程重用这个持久化连接就会<quote>按照原样</quote>得到这个连接。这样，一个新的客户端进程
+ 为了更好的使用持久化连接，就需要做任何可能的清理工作，这样就增加了对程序员的负担。
+ </para>
+
+ <para>
+ <literal>mysqli</literal>扩展的持久化连接提供了内建的清理处理代码。<literal>mysqli</literal>
+ 所做的清理工作包括：
+ </para>
+
+ <itemizedlist>
+
+  <listitem>
+   <para>
+   回滚活动的事务
+   </para>
+  </listitem>
+
+  <listitem>
+   <para>
+   关闭并且删除临时表
+   </para>
+  </listitem>
+
+  <listitem>
+   <para>
+   对表解锁、
+   </para>
+  </listitem>
+
+  <listitem>
+   <para>
+   重置会话变量
+   </para>
+  </listitem>
+
+  <listitem>
+   <para>
+   关闭prepared语句（在PHP中经常发生）
+   </para>
+  </listitem>
+
+  <listitem>
+   <para>
+    关闭处理程序
+   </para>
+  </listitem>
+
+  <listitem>
+   <para>
+   释放通过<function>GET_LOCK</function>获得的锁
+   </para>
+  </listitem>
+
+ </itemizedlist>
+
+ <para>
+ 这确保了从连接池返回的持久化连接在客户端进程使用它之前处于干净的状态。
+ </para>
+
+ <para>
+ <literal>mysqli</literal>扩展通过自动的调用C-API函数<literal>mysql_change_user()</literal>
+ 来完成这个清理工作。
+ </para>
+
+ <para>
+ 自动清理的特性有优点也有缺点。优点是程序员不再需要担心附加的清理代码，因为它们会自动调用。然而缺点就是
+ 代码可能会<emphasis>潜在的</emphasis>慢一点，因为每次从连接池返回一个连接都需要执行这些清理代码。
+ </para>
+
+ <para>
+ 这个自动清理的代码可以通过在编译php时定义<constant>MYSQLI_NO_CHANGE_USER_ON_PCONNECT</constant>
+ 来关闭。
+ </para>
+
+ <note>
+  <para>
+  <literal>mysqli</literal>扩展在使用Mysql Native Driver或Mysql Client Library（libmysql）时都支持持久化连接。
+  </para>
+ </note>
+
+</chapter>
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->

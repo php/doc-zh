@@ -1,25 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision: 288721 $ -->
 
-<refentry xml:id="memcached.appendbykey" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+<refentry xml:id="memcached.prepend" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
-  <refname>Memcached::appendByKey</refname>
-  <refpurpose>向指定服务器上已存在元素后追加数据</refpurpose>
+  <refname>Memcached::prepend</refname>
+  <refpurpose>向一个已存在的元素前面追加数据</refpurpose>
  </refnamediv>
 
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <modifier>public</modifier> <type>bool</type><methodname>Memcached::appendByKey</methodname>
-   <methodparam><type>string</type><parameter>server_key</parameter></methodparam>
+   <modifier>public</modifier> <type>bool</type><methodname>Memcached::prepend</methodname>
    <methodparam><type>string</type><parameter>key</parameter></methodparam>
    <methodparam><type>string</type><parameter>value</parameter></methodparam>
   </methodsynopsis>
   <para>
-   除了可以使用<parameter>server_key</parameter>自由的将<parameter>key</parameter>映射到指定服务器外，
-   <function>Memcached::appendByKey</function>在功能上等同于<methodname>Memcached::append</methodname>。
-   (译注: 关于*ByKey系列方法及$server_key的工作原理请参照addByKey方法文档)
+   <function>Memcached::prepend</function>向已存在元素的字符串值前追加<parameter>value</parameter>。
+   <parameter>value</parameter>被强制转换成字符串类型主要是因为对于mix类型的追加没有很好的定义。
   </para>
+  <note>
+   <para>
+    如果<constant>Memcached::OPT_COMPRESSION</constant>常量开启，这个操作会失败，并引发一个警告，因为向压缩数据
+    后追加数据可能会导致解压不了。
+   </para>
+  </note>
  </refsect1>
 
  <refsect1 role="parameters">
@@ -27,18 +31,10 @@
   <para>
    <variablelist>
     <varlistentry>
-     <term><parameter>server_key</parameter></term>
-     <listitem>
-      <para>
-       &memcached.parameter.server_key;
-      </para>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
      <term><parameter>key</parameter></term>
      <listitem>
       <para>
-       &memcached.parameter.key;
+       要向前追加数据的元素的key。
       </para>
      </listitem>
     </varlistentry>
@@ -58,8 +54,35 @@
   &reftitle.returnvalues;
   <para>
    &return.success;
-   如果key不存在，<methodname>Memcached::getResultCode</methodname>将返回
-   <constant>Memcached::RES_NOTSTORED</constant>。
+   如果key不存在，<methodname>Memcached::getResultCode</methodname>返回<constant>Memcached::RES_NOTSTORED</constant>。
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title><function>Memcached::prepend</function> 示例</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$m = new Memcached();
+$m->addServer('localhost', 11211);
+$m->setOption(Memcached::OPT_COMPRESSION, false);
+
+$m->set('foo', 'abc');
+$m->prepend('foo', 'def');
+var_dump($m->get('foo'));
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+string(6) "defabc"
+]]>
+    </screen>
+   </example>
   </para>
  </refsect1>
 
@@ -67,8 +90,8 @@
   &reftitle.seealso;
   <para>
    <simplelist>
+    <member><methodname>Memcached::prependByKey</methodname></member>
     <member><methodname>Memcached::append</methodname></member>
-    <member><methodname>Memcached::prepend</methodname></member>
    </simplelist>
   </para>
  </refsect1>

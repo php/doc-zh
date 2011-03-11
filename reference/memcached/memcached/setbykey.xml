@@ -1,24 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- $Revision: 291194 $ -->
+<!-- $Revision: 288721 $ -->
 
-<refentry xml:id="memcached.getbykey" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+<refentry xml:id="memcached.setbykey" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
-  <refname>Memcached::getByKey</refname>
-  <refpurpose>从特定的服务器检索元素</refpurpose>
+  <refname>Memcached::setByKey</refname>
+  <refpurpose>Store an item on a specific server</refpurpose>
  </refnamediv>
 
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <modifier>public</modifier> <type>mixed</type><methodname>Memcached::getByKey</methodname>
+   <modifier>public</modifier> <type>bool</type><methodname>Memcached::setByKey</methodname>
    <methodparam><type>string</type><parameter>server_key</parameter></methodparam>
    <methodparam><type>string</type><parameter>key</parameter></methodparam>
-   <methodparam choice="opt"><type>callback</type><parameter>cache_cb</parameter></methodparam>
-   <methodparam choice="opt"><type>float</type><parameter role="reference">cas_token</parameter></methodparam>
+   <methodparam><type>mixed</type><parameter>value</parameter></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>expiration</parameter></methodparam>
   </methodsynopsis>
   <para>
-   <function>Memcached::getByKey</function>除了可以通过<parameter>server_key</parameter>参数自由的指定<parameter>key</parameter>
-   所映射的服务器外， 在功能上等同于<methodname>Memcached::get</methodname>。(译注: 关于*ByKey系列方法及$server_key的工作原理请参照addByKey方法文档)
+   除了可以使用<parameter>server_key</parameter>自由的将<parameter>key</parameter>映射到指定服务器外，
+   <function>Memcached::setByKey</function>在功能上等同于<methodname>Memcached::set</methodname>。
+   (译注: 关于*ByKey系列方法及$server_key的工作原理请参照addByKey方法文档)。
   </para>
  </refsect1>
 
@@ -38,23 +39,23 @@
      <term><parameter>key</parameter></term>
      <listitem>
       <para>
-       要抓取的元素的key。
+       &memcached.parameter.key;
       </para>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>cache_cb</parameter></term>
+     <term><parameter>value</parameter></term>
      <listitem>
       <para>
-       通读缓存回掉函数或&null;.
+       &memcached.parameter.value;
       </para>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>cas_token</parameter></term>
+     <term><parameter>expiration</parameter></term>
      <listitem>
       <para>
-       检索的元素的CAS标记值。
+       &memcached.parameter.expiration;
       </para>
      </listitem>
     </varlistentry>
@@ -65,8 +66,29 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-  返回存储在服务端的元素的值或者在其他情况下返回&false;。
-   如果key不存在，<methodname>Memcached::getResultCode</methodname>返回<constant>Memcached::RES_NOTFOUND</constant>。
+   &return.success;
+   &memcached.result.getresultcode;
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title><function>Memcached::setByKey</function> 示例</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$m = new Memcached();
+$m->addServer('localhost', 11211);
+
+/* 保证block-ip系列key的存储在同一台服务器上。*/
+$m->setByKey('api-cache', 'block-ip:169.254.253.252', 1);
+$m->setByKey('api-cache', 'block-ip:169.127.127.202', 1);
+?>
+]]>
+    </programlisting>
+   </example>
   </para>
  </refsect1>
 
@@ -74,9 +96,7 @@
   &reftitle.seealso;
   <para>
    <simplelist>
-    <member><methodname>Memcached::get</methodname></member>
-    <member><methodname>Memcached::getMulti</methodname></member>
-    <member><methodname>Memcached::getDelayed</methodname></member>
+    <member><methodname>Memcached::set</methodname></member>
    </simplelist>
   </para>
  </refsect1>

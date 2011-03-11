@@ -1,27 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- $Revision$ -->
+<!-- $Revision: 288721 $ -->
 
-<refentry xml:id="memcached.addbykey" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+<refentry xml:id="memcached.set" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
-  <refname>Memcached::addByKey</refname>
-  <refpurpose>在指定服务器上的一个新的key下增加一个元素</refpurpose>
+  <refname>Memcached::set</refname>
+  <refpurpose>存储一个元素</refpurpose>
  </refnamediv>
 
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <modifier>public</modifier> <type>bool</type><methodname>Memcached::addByKey</methodname>
-   <methodparam><type>string</type><parameter>server_key</parameter></methodparam>
+   <modifier>public</modifier> <type>bool</type><methodname>Memcached::set</methodname>
    <methodparam><type>string</type><parameter>key</parameter></methodparam>
    <methodparam><type>mixed</type><parameter>value</parameter></methodparam>
    <methodparam choice="opt"><type>int</type><parameter>expiration</parameter></methodparam>
   </methodsynopsis>
   <para>
-   <function>Memcached::addByKey</function>在功能上等同于<methodname>Memcached::add</methodname>，
-   不过这种方式可以自由的指定<parameter>server_key</parameter>用于将<parameter>key</parameter>
-   映射到特定的服务器。这在你需要将一些相关联的key保存在一个特定的服务器时非常有用。(译注: $server_key也是一个普通的key, 
-   *ByKey系列接口的工作过程是: 首先, 对$server_key进行hash, 得到$server_key应该存储的服务器, 然后将相应的操作在
-   $server_key所在的服务器上进行.)
+   <function>Memcached::set</function>将<parameter>value</parameter>
+   存储在一个memcached服务器上的<parameter>key</parameter>下。<parameter>expiration</parameter>参数
+   用于控制值的过期时间。
+  </para>
+  <para>
+  值可以是任何有效的非资源型php类型， 因为资源类型不能被序列化存储。如果<constant>Memcached::OPT_COMPRESSION</constant>
+  选项开启， 序列化的值同样会被压缩存储。
   </para>
  </refsect1>
 
@@ -29,14 +30,6 @@
   &reftitle.parameters;
   <para>
    <variablelist>
-    <varlistentry>
-     <term><parameter>server_key</parameter></term>
-     <listitem>
-      <para>
-       &memcached.parameter.server_key;
-      </para>
-     </listitem>
-    </varlistentry>
     <varlistentry>
      <term><parameter>key</parameter></term>
      <listitem>
@@ -69,7 +62,51 @@
   &reftitle.returnvalues;
   <para>
    &return.success;
-   如果key已经存在，<methodname>Memcached::getResultCode</methodname>方法将会返回<constant>Memcached::RES_NOTSTORED</constant>。
+   &memcached.result.getresultcode;
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title><function>Memcached::set</function> 示例</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$m = new Memcached();
+$m->addServer('localhost', 11211);
+
+$m->set('int', 99);
+$m->set('string', 'a simple string');
+$m->set('array', array(11, 12));
+/* 'object'这个key将在5分钟后过期 */
+$m->set('object', new stdclass, time() + 300);
+
+
+var_dump($m->get('int'));
+var_dump($m->get('string'));
+var_dump($m->get('array'));
+var_dump($m->get('object'));
+?>
+]]>
+    </programlisting>
+    &example.outputs.similar;
+    <screen>
+<![CDATA[
+int(99)
+string(15) "a simple string"
+array(2) {
+  [0]=>
+  int(11)
+  [1]=>
+  int(12)
+}
+object(stdClass)#1 (0) {
+}
+]]>
+    </screen>
+   </example>
   </para>
  </refsect1>
 
@@ -77,8 +114,8 @@
   &reftitle.seealso;
   <para>
    <simplelist>
+    <member><methodname>Memcached::setByKey</methodname></member>
     <member><methodname>Memcached::add</methodname></member>
-    <member><methodname>Memcached::set</methodname></member>
     <member><methodname>Memcached::replace</methodname></member>
    </simplelist>
   </para>
