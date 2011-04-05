@@ -1,147 +1,169 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
-  <refentry xml:id="reference.pcre.pattern.modifiers" xmlns="http://docbook.org/ns/docbook">
-   <refnamediv>
-    <refname>模式修正符</refname>
-    <refpurpose>解说正则表达式模式中使用的修正符</refpurpose>
-   </refnamediv>
-   <refsect1>
-    <title>说明</title>
-    <para>
-     下面列出了当前在 PCRE 中可能使用的修正符。括号中是这些修正符的内部
-     PCRE 名。修正符中的空格和换行被忽略，其它字符会导致错误。
-    </para>
-    <para>
-     <blockquote>
-      <variablelist>
-       <varlistentry>
-        <term><emphasis>i</emphasis> (PCRE_CASELESS)</term>
-        <listitem>
-         <simpara>
-          如果设定此修正符，模式中的字符将同时匹配大小写字母。
-         </simpara>
-        </listitem>
-       </varlistentry>
-       <varlistentry>
-        <term><emphasis>m</emphasis>（PCRE_MULTILINE）</term>
-        <listitem>
-         <simpara>
-          默认情况下，PCRE 将目标字符串作为单一的一“行”字符所组成的（甚至其中包含有换行符也是如此）。“行起始”元字符（^）仅仅匹配字符串的起始，“行结束”元字符（$）仅仅匹配字符串的结束，或者最后一个字符是换行符时其前面（除非设定了
-          <emphasis>D</emphasis> 修正符）。这和
-          Perl 是一样的。
-         </simpara>
-         <simpara>
-          当设定了此修正符，“行起始”和“行结束”除了匹配整个字符串开头和结束外，还分别匹配其中的换行符的之后和之前。这和
-          Perl 的 /m 修正符是等效的。如果目标字符串中没有“\n”字符或者模式中没有
-          ^ 或 $，则设定此修正符没有任何效果。
-         </simpara>
-        </listitem>
-       </varlistentry>
-       <varlistentry>
-        <term><emphasis>s</emphasis>（PCRE_DOTALL）</term>
-        <listitem>
-         <simpara>
-          如果设定了此修正符，模式中的圆点元字符（.）匹配所有的字符，包括换行符。没有此设定的话，则不包括换行符。这和
-          Perl 的 /s 修正符是等效的。排除字符类例如
-          [^a] 总是匹配换行符的，无论是否设定了此修正符。
-         </simpara>
-        </listitem>
-       </varlistentry>
-       <varlistentry>
-        <term><emphasis>x</emphasis>（PCRE_EXTENDED）</term>
-        <listitem>
-         <simpara>
-          如果设定了此修正符，模式中的空白字符除了被转义的或在字符类中的以外完全被忽略，在未转义的字符类之外的
-          # 以及下一个换行符之间的所有字符，包括两头，也都被忽略。这和
-          Perl 的 /x 修正符是等效的，使得可以在复杂的模式中加入注释。然而注意，这仅适用于数据字符。空白字符可能永远不会出现于模式中的特殊字符序列，例如引入条件子模式的序列
-          (?( 中间。
-         </simpara>
-        </listitem>
-       </varlistentry>
-       <varlistentry>
-        <term><emphasis>e</emphasis></term>
-        <listitem>
-         <simpara>
-          如果设定了此修正符，<function>preg_replace</function>
-          在替换字符串中对逆向引用作正常的替换，将其作为 PHP
-          代码求值，并用其结果来替换所搜索的字符串。
-         </simpara>
-         <para>
-          只有 <function>preg_replace</function> 使用此修正符，其它
-          PCRE 函数将忽略之。
-          <note>
-           <simpara>
-            本修正符在 PHP3 中不可用。
-           </simpara>
-          </note>
-         </para>
-        </listitem>
-       </varlistentry>
-       <varlistentry>
-        <term><emphasis>A</emphasis>（PCRE_ANCHORED）</term>
-        <listitem>
-         <simpara>
-          如果设定了此修正符，模式被强制为“anchored”，即强制仅从目标字符串的开头开始匹配。此效果也可以通过适当的模式本身来实现（在
-          Perl 中实现的唯一方法）。
-         </simpara>
-        </listitem>
-       </varlistentry>
-       <varlistentry>
-        <term><emphasis>D</emphasis>（PCRE_DOLLAR_ENDONLY）</term>
-        <listitem>
-         <simpara>
-          如果设定了此修正符，模式中的美元元字符仅匹配目标字符串的结尾。没有此选项时，如果最后一个字符是换行符的话，美元符号也会匹配此字符之前（但不会匹配任何其它换行符之前）。如果设定了
-          <emphasis>m</emphasis> 修正符则忽略此选项。Perl 中没有与其等价的修正符。
-         </simpara>
-        </listitem>
-       </varlistentry>
-       <varlistentry>
-        <term><emphasis>S</emphasis></term>
-        <listitem>
-         <simpara>
-          当一个模式将被使用若干次时，为加速匹配起见值得先对其进行分析。如果设定了此修正符则会进行额外的分析。目前，分析一个模式仅对没有单一固定起始字符的
-          non-anchored 模式有用。
-         </simpara>
-        </listitem>
-       </varlistentry>
-       <varlistentry>
-        <term><emphasis>U</emphasis>（PCRE_UNGREEDY）</term>
-        <listitem>
-         <simpara>
-          本修正符反转了匹配数量的值使其不是默认的重复，而变成在后面跟上“?”才变得重复。这和
-          Perl 不兼容。也可以通过在模式之中设定 (?U) 修正符或者在数量符之后跟一个问号（如
-          <literal>.*?</literal>）来启用此选项。
-         </simpara>
-        </listitem>
-       </varlistentry>
-       <varlistentry>
-        <term><emphasis>X</emphasis>（PCRE_EXTRA）</term>
-        <listitem>
-         <simpara>
-          此修正符启用了一个 PCRE 中与 Perl
-          不兼容的额外功能。模式中的任何反斜线后面跟上一个没有特殊意义的字母导致一个错误，从而保留此组合以备将来扩充。默认情况下，和
-          Perl 一样，一个反斜线后面跟一个没有特殊意义的字母被当成该字母本身。当前没有其它特性受此修正符控制。
-         </simpara>
-        </listitem>
-       </varlistentry>
-       <varlistentry>
-        <term><emphasis>u</emphasis>（PCRE_UTF8）</term>
-        <listitem>
-         <simpara>
-          此修正符启用了一个 PCRE 中与 Perl
-          不兼容的额外功能。模式字符串被当成 UTF-8。本修正符在
-          Unix 下自 PHP 4.1.0 起可用，在 win32 下自 PHP 4.2.3
-          起可用。自 PHP 4.3.5 起开始检查模式的 UTF-8 合法性。
-         </simpara>
-        </listitem>
-       </varlistentry>
-      </variablelist>
-     </blockquote>
-    </para>
-   </refsect1>
-  </refentry>
+<!-- splitted from ./en/functions/pcre.xml, last change in rev 1.2 -->
+<article xml:id="reference.pcre.pattern.modifiers" xmlns="http://docbook.org/ns/docbook">
+ <title>模式修饰符</title>
+ <titleabbrev>正则表达式模式中可用的模式修饰符</titleabbrev>
+  <para>
+  下面列出了当前可用的PCRE修饰符. 括号中提到的名字是PCRE内部这些修饰符的名称.
+  模式修饰符中的空格,换行符会被忽略, 其他字符会导致错误.
+  </para>
+  <para>
+   <blockquote>
+    <variablelist>
+     <varlistentry>
+      <term><emphasis>i</emphasis> (<literal>PCRE_CASELESS</literal>)</term>
+      <listitem>
+       <simpara>
+       如果设置了这个修饰符, 模式中的字母会进行大小写不敏感匹配.
+       </simpara>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><emphasis>m</emphasis> (<literal>PCRE_MULTILINE</literal>)</term>
+      <listitem>
+       <simpara>
+       默认情况下, PCRE认为目标字符串是由单行字符组成的(然而实际上它可能会包含多行), 
+   "行首"元字符(^)仅匹配字符串的开始位置, 而"行末"元字符($)仅匹配字符串末尾, 
+   或者最后的换行符(除非设置了<emphasis>D</emphasis>修饰符). 这个行为和perl相同.
+       </simpara>
+       <simpara>
+       当这个修饰符设置之后, "行首"和"行末"就会匹配目标字符串中任意换行符之前或之后, 另外,
+       还分别匹配目标字符串的最开始和最末尾位置. 这等同于perl的/m修饰符. 如果目标字符串
+       中没有"\n"字符, 或者模式中没有出现^或$, 设置这个修饰符不产生任何影响.
+       </simpara>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><emphasis>s</emphasis> (<literal>PCRE_DOTALL</literal>)</term>
+      <listitem>
+       <simpara>
+       如果设置了这个修饰符, 模式中的点号元字符匹配所有字符, 包含换行符. 如果没有这个
+       修饰符, 点号不匹配换行符. 这个修饰符等同于perl中的/s修饰符. 一个取反字符类比如
+       [^a]总是匹配换行符, 而不依赖于这个修饰符的设置.
+       </simpara>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><emphasis>x</emphasis> (<literal>PCRE_EXTENDED</literal>)</term>
+      <listitem>
+       <simpara>
+       如果设置了这个修饰符, 模式中的没有经过转义的或不在字符类中的空白数据字符总会被忽略, 
+       并且位于一个未转义的字符类外部的#字符和下一个换行符之间的字符也被忽略. 这个修饰符
+       等同于perl中的/x修饰符, 使被编译模式中可以包含注释. 注意: 这仅用于数据字符. 空白字符
+       还是不能在模式的特殊字符序列中出现, 比如序列(?(引入了一个条件子组(译注: 这种语法定义的
+       特殊字符序列中如果出现空白字符会导致编译错误. 比如(  ?(就会导致错误.).
+       </simpara>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><emphasis>e</emphasis> (<literal>PREG_REPLACE_EVAL</literal>)</term>
+      <listitem>
+       <simpara>
+       如果这个修饰符设置了, <function>preg_replace</function>在进行了对替换字符串的
+       后向引用替换之后, 将替换后的字符串作为php代码评估之行(eval函数方式), 并使用之行结果
+       作为实际参与替换的字符串. 单引号, 双引号, 反斜线(<literal>\</literal>)和NULL字符在
+       后向引用替换时会被用反斜线转义.
+       </simpara>
+       <tip>
+        <para>
+        请确保<parameter>replacement</parameter>参数由合法php代码字符串组成, 否则php将会
+       在<function>preg_replace</function>调用的行上 产生一个解释错误.
+        </para>
+       </tip>
+       <note>
+        <para>
+        仅<function>preg_replace</function>使用此修饰符, 其他PCRE函数忽略此修饰符.
+        </para>
+       </note>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><emphasis>A</emphasis> (<literal>PCRE_ANCHORED</literal>)</term>
+      <listitem>
+       <simpara>
+       如果设置了这个修饰符, 模式被强制为"锚定"模式, 也就是说约束匹配使其仅从
+       目标字符串的开始位置搜索. 这个效果同样可以使用适当的模式构造出来, 并且
+       这也是perl种实现这种模式的唯一途径.
+       </simpara>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><emphasis>D</emphasis> (<literal>PCRE_DOLLAR_ENDONLY</literal>)</term>
+      <listitem>
+       <simpara>
+       如果这个修饰符被设置, 模式中的元字符美元符号仅仅匹配目标字符串的末尾. 如果这个修饰符
+       没有设置, 当字符串以一个换行符结尾时, 美元符号还会匹配该换行符(但不会匹配之前的任何换行符).
+   如果设置了修饰符<emphasis>m</emphasis>, 这个修饰符被忽略. 在perl中没有与此修饰符等同的修饰符.
+       </simpara>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><emphasis>S</emphasis></term>
+      <listitem>
+       <simpara>
+       当一个模式需要多次使用的时候, 为了得到匹配速度的提升, 值得花费一些时间
+       对其进行一些额外的分析. 如果设置了这个修饰符, 这个额外的分析就会执行. 当前, 
+       这种对一个模式的分析仅仅适用于非锚定模式的匹配(即没有单独的固定开始字符).
+       </simpara>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><emphasis>U</emphasis> (<literal>PCRE_UNGREEDY</literal>)</term>
+      <listitem>
+       <simpara>
+       这个修饰符逆转了量词的"贪婪"模式. 使量词默认为非贪婪的, 通过量词后紧跟<literal>?</literal>
+       的方式可以使其成为贪婪的. 这和perl是不兼容的. 它同样可以使用
+       <link linkend="regexp.reference.internal-options">模式内修饰符设置</link>
+       (<literal>?U</literal>)进行设置, 或者在量词后以问号标记其非贪婪(比如<literal>.*?</literal>).
+       </simpara>
+       <note>
+        <para>
+        在非贪婪模式, 通常不能匹配超过
+        <link linkend="ini.pcre.backtrack-limit">pcre.backtrack_limit</link>
+        的字符.
+        </para>
+       </note>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><emphasis>X</emphasis> (<literal>PCRE_EXTRA</literal>)</term>
+      <listitem>
+       <simpara>
+       这个修饰符打开了PCRE与perl不兼容的附件功能. 模式中的任意反斜线后就ingen一个
+       没有特殊含义的字符都会导致一个错误, 以此保留这些字符以保证向后兼容性. 默认
+       情况下, 在perl中, 反斜线紧跟一个没有特殊含义的字符被认为是该字符的原文.
+       当前没有其他特性由这个修饰符控制.
+       </simpara>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><emphasis>J</emphasis> (<literal>PCRE_INFO_JCHANGED</literal>)</term>
+      <listitem>
+       <simpara>
+       内部选项设置(?J)修改本地的<literal>PCRE_DUPNAMES</literal>选项. 允许子组重名.
+       (译注:只能通过内部选项设置, 外部的/J设置会产生错误.)
+       </simpara>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><emphasis>u</emphasis> (<literal>PCRE8</literal>)</term>
+      <listitem>
+       <simpara>
+       此修正符打开一个与perl不兼容的附加功能. 模式字符串被认为是utf-8的. 这个修饰符
+       从unix版php 4.1.0或更高, win32版php 4.2.3开始可用. php 4.3.5开始检查模式的utf-8合法性.
+        This modifier turns on additional functionality of PCRE that
+        is incompatible with Perl. Pattern strings are treated as
+        UTF-8. This modifier is available from PHP 4.1.0 or greater
+        on Unix and from PHP 4.2.3 on win32.
+        UTF-8 validity of the pattern is checked since PHP 4.3.5.
+       </simpara>
+      </listitem>
+     </varlistentry>
+    </variablelist>
+   </blockquote>
+  </para>
+</article>
 
 <!-- Keep this comment at the end of the file
 Local variables:
@@ -154,7 +176,7 @@ sgml-indent-step:1
 sgml-indent-data:t
 indent-tabs-mode:nil
 sgml-parent-document:nil
-sgml-default-dtd-file:"../../../../manual.ced"
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
 sgml-exposed-tags:nil
 sgml-local-catalogs:nil
 sgml-local-ecat-files:nil

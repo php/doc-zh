@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision: 297028 $ -->
+<!-- splitted from ./en/functions/pcre.xml, last change in rev 1.2 -->
+<article xml:id="reference.pcre.pattern.differences" xmlns="http://docbook.org/ns/docbook">
+ <title>与perl的不同之处</title>
+ <titleabbrev>与perl的不同之处</titleabbrev>
+ <para>
+ 这里讨论的不同之处是与perl 5.005相比的.
+  <orderedlist>
+   <listitem>
+    <simpara>
+   尽管可以使用字符类编译pcre进行替代, 但仍然默认使用c库函数isspace()
+   判定一个字符是否是空白字符.通常isspace()匹配空格, 换页符, 换行符,
+   回车符, 水平制表符和垂直制表符. perl5不再将垂直制表符包括到空白字符集中.
+   \v这个转义实际上在很长时间都没有得到perl文档的承认. 然而, 这个字符自身
+   被认为是一个空白字符至少是在5.002以上. 在5.004和5.005它不和\s匹配.
+    </simpara>
+   </listitem>
+   <listitem>
+    <simpara>
+    PCRE不允许前瞻断言的量词修饰, perl允许这样做, 但是这并不是你想象的那样.
+    例如, (?!a){3}并不意味着接下来3个字符不是a, 而是断言下一个字符不是a并进行了
+    3次断言.
+    </simpara>
+   </listitem>
+   <listitem>
+    <simpara>
+    捕获子组发生在消极前瞻断言中时被计算在内, 但是在偏移向量中并没有设置它们的条目.
+    perl从断言失败之前匹配得到的这些模式匹配结果中设置了它的数值变量(因此是成功的), 
+    但这也仅在消极前瞻断言只有一个分支的时候.
+    </simpara>
+   </listitem>
+   <listitem>
+    <simpara>
+    尽管目标字符串中支持二进制0字符, 但是它们在模式字符串中是不允许的, 因为它们是通过普通的
+    c字符串传递的, 而c字符串是以0字符结束的. 转义序列"\x00"可以在模式中表示二进制0字符.
+    </simpara>
+    </listitem>
+    <listitem>
+    <simpara>
+    不支持下面的perl转义序列: \l, \u, \L, \U. 实际上这些都是通过perl一般的字符串处理来实现
+    的, 而不是模式匹配引擎的一部分.
+    </simpara>
+    </listitem>
+    <listitem>
+    <simpara>
+    不支持perl的\G断言, 因为它与单模式匹配没有关系.
+    </simpara>
+    </listitem>
+    <listitem>
+    <simpara>
+    很显然, PCRE不支持(?{code})和(??{code})的结构, 但是它支持递归模式.
+    </simpara>
+    </listitem>
+    <listitem>
+    <simpara>
+    在perl 5.005_2中档设置为捕获字符串的模式中有部分重复的时候会有一些古怪的现象发生, 
+    比如: /^(a(b)?)+$/捕获aba的时候, $2会被设置为b, 然而, 如果把模式修改为/^(aa(bb)?)+$/, 
+    用aabbaa去匹配, $2讲不会得到匹配结果. 如果将模式修改为/^(aa(b(b))?)+$/, $2和$3又都能
+    得到匹配结果. 在perl 5.004中$2在这几种情况下都能够得到匹配结果, 并且pcre也是这样. 如果
+    未来perl修改为一致那就不同了. pcre可能接下来会修改.
+    </simpara>
+    </listitem>
+    <listitem>
+    <simpara>
+    还有一个没有解决的差异是perl 5.005_02中, 模式/^(a)?(?(1)a|b)+$/会匹配字符串"a", 
+    而pcre中不会, 然而, perl和pcre中/^(a)?a/匹配"a"都会得到相同的结果, $1都未被设置.
+    </simpara>
+    </listitem>
+    <listitem>
+    <para>
+    PCRE提供了一些对perl正则表达式的扩展:
+      <orderedlist>
+       <listitem>
+        <simpara>
+        虽然后瞻断言要求必须匹配固定长度的字符串, 然而后瞻断言的每个可选分支
+        还是可以使用不同长度的字符串的, 而perl 5.005中要求它们必须拥有同样
+        的长度.
+       </simpara>
+      </listitem>
+      <listitem>
+       <simpara>
+       如果设置了<link linkend="reference.pcre.pattern.modifiers">PCRE_DOLLAR_ENDONLY</link>
+       并且没有设置<link linkend="reference.pcre.pattern.modifiers">PCRE_MULTILINE</link>, 
+       元字符$仅仅匹配字符串的末尾(而不是某个换行符之前).
+       </simpara>
+      </listitem>
+      <listitem>
+       <simpara>
+       如果设置了<link linkend="reference.pcre.pattern.modifiers">PCRE_EXTRA</link>, 
+       反斜线后紧跟一个没有特殊含义的字符讲会导致错误.
+       </simpara>
+      </listitem>
+      <listitem>
+       <simpara>
+       如果设置了<link linkend="reference.pcre.pattern.modifiers">PCRE_UNGREEDY</link>, 
+       贪婪量词修饰被逆转, 也就是说, 默认它们都是非贪婪的了, 但如果紧跟一个问号它们就会变成
+       贪婪的.(译注: 既完全将贪婪模式逆转.)
+       </simpara>
+      </listitem>
+     </orderedlist>
+    </para>
+   </listitem>
+  </orderedlist>
+ </para>
+</article>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
