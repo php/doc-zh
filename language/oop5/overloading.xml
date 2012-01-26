@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
 <!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: Haohappy Status: ready -->
+<!-- EN-Revision: 28d123ef985df5a7b86f3601e035968ee1b3b142 Maintainer: Haohappy,HyTest Status: ready -->
  <sect1 xml:id="language.oop5.overloading" xmlns="http://docbook.org/ns/docbook">
   <title>重载</title>
 
@@ -12,7 +12,7 @@
 
   <para>
    当调用当前环境下未定义或不可见的类属性或方法时，重载方法会被调用。本节后面将使用
-   <quote>不可访问成员（inaccessible members）</quote>和<quote>不可访问方法（inaccessible
+   <quote>不可访问属性（inaccessible properties）</quote>和<quote>不可访问方法（inaccessible
    methods）</quote>来称呼这些未定义或不可见的类属性或方法。
   </para>
 
@@ -47,16 +47,16 @@
       </thead>
       <tbody>
        <row>
-        <entry>5.1.0</entry>
+        <entry>5.3.0</entry>
         <entry>
-         新增 <literal>__isset()</literal> 和 <literal>__unset()</literal>两个魔术方法.
+         新增 <link linkend="object.callstatic">__callStatic()</link>魔术方法.
+         可见性未设置为public或未声明为static的时候会产生一个警告
         </entry>
        </row>
        <row>
-        <entry>5.3.0</entry>
+        <entry>5.1.0</entry>
         <entry>
-         新增 <literal>__callStatic()</literal>魔术方法.
-         可见性未设置为public或未声明为static的时候会产生一个警告
+         新增 <link linkend="object.isset">__isset()</link> 和 <link linkend="object.unset">__unset()</link>两个魔术方法.
         </entry>
        </row>
       </tbody>
@@ -69,58 +69,80 @@
   <sect2 xml:id="language.oop5.overloading.members">
    <title>属性重载</title>
 
-   <methodsynopsis>
-    <type>void</type><methodname>__set</methodname>
+   <methodsynopsis xml:id="object.set">
+    <modifier>public</modifier> <type>void</type><methodname>__set</methodname>
     <methodparam><type>string</type><parameter>name</parameter></methodparam>
     <methodparam><type>mixed</type><parameter>value</parameter></methodparam>
    </methodsynopsis>
-   <methodsynopsis>
-    <type>mixed</type><methodname>__get</methodname>
+   <methodsynopsis xml:id="object.get">
+    <modifier>public</modifier> <type>mixed</type><methodname>__get</methodname>
     <methodparam><type>string</type><parameter>name</parameter></methodparam>
    </methodsynopsis>
-   <methodsynopsis>
-    <type>bool</type><methodname>__isset</methodname>
+   <methodsynopsis xml:id="object.isset">
+    <modifier>public</modifier> <type>bool</type><methodname>__isset</methodname>
     <methodparam><type>string</type><parameter>name</parameter></methodparam>
    </methodsynopsis>
-   <methodsynopsis>
-    <type>void</type><methodname>__unset</methodname>
+   <methodsynopsis xml:id="object.unset">
+    <modifier>public</modifier> <type>void</type><methodname>__unset</methodname>
     <methodparam><type>string</type><parameter>name</parameter></methodparam>
    </methodsynopsis>
 
    <para>
-    在给未定义的变量赋值时，<literal>__set()</literal> 会被调用。
+    在给未定义的变量赋值时，<link linkend="object.set">__set()</link> 会被调用。
    </para>
 
    <para>
-   读取未定义的变量的值时，<literal>__get()</literal> 会被调用。
+   读取未定义的变量的值时，<link linkend="object.get">__get()</link> 会被调用。
    </para>
 
    <para>    	
-	当对未定义的变量调用<function>isset</function> 或 <function>empty</function>时，<literal>__isset()</literal> 
+	当对未定义的变量调用<function>isset</function> 或 <function>empty</function>时，<link linkend="object.isset">__isset()</link> 
 	会被调用。
    </para>
 
    <para>
-    当对未定义的变量调用<function>unset</function>时，<literal>__unset()</literal> 
+    当对未定义的变量调用<function>unset</function>时，<link linkend="object.unset">__unset()</link> 
 	会被调用。
    </para>
 
    <para>  
-	参数<varname>$name</varname>是指要操作的变量名称。<literal>__set()</literal>
+	参数<varname>$name</varname>是指要操作的变量名称。<link linkend="object.set">__set()</link>
     方法的<varname>$value</varname> 参数指定了<varname>$name</varname>变量的值。
    </para>
 
    <para>
 	属性重载只能在对象中进行。在静态方法中，这些魔术方法将不会被调用。所以这些方法都不能被
 	声明为<link linkend="language.oop5.static">static</link>。
+	从PHP 5.3.0起, 将这些魔术方法定义为<literal>static</literal>会产生一个警告。
    </para>
 
+   <note>
+    <para>
+             因为PHP处理赋值运算的方式, <link linkend="object.set">__set()</link> 的返回值将被忽略。
+             类似的, 在下面这样的链式赋值中, <link linkend="object.get">__get()</link> 不会被调用:
+     <literal><![CDATA[ $a = $obj->b = 8; ]]></literal>
+    </para>
+   </note>
+
+   <note>
+    <para>
+             在除isset外的其它语言结构中无法使用重载的属性, 这意味着当对一个重载的属性
+             使用empty时,重载魔术方法将不会被调用。
+     (译注:此特性在新版本已改变,英文手册未更新)
+    </para>
+    <para>
+             为避开此限制,可以将重载属性赋值到本地变量再使用empty。
+    </para>
+   </note>
+
    <example>
-    <title>使用__get, __set, __isset 和 __unset 进行重载</title>
+    <title>使用<link linkend="object.get">__get()</link>,
+     <link linkend="object.set">__set()</link>, <link linkend="object.isset">__isset()</link>
+            和 <link linkend="object.unset">__unset()</link>进行重载</title>
     <programlisting role="php">
 <![CDATA[
 <?php
-class MemberTest {
+class PropertyTest {
   	/**  被重载的数据保存在此  */
     private $data = array();
 
@@ -131,12 +153,14 @@ class MemberTest {
    	/**  只有从类外部访问这个属性时，重载才会发生 */
     private $hidden = 2;
 
-    public function __set($name, $value) {
+    public function __set($name, $value) 
+    {
         echo "Setting '$name' to '$value'\n";
         $this->data[$name] = $value;
     }
 
-    public function __get($name) {
+    public function __get($name) 
+    {
         echo "Getting '$name'\n";
         if (array_key_exists($name, $this->data)) {
             return $this->data[$name];
@@ -152,19 +176,22 @@ class MemberTest {
     }
 
     /**  PHP 5.1.0之后版本 */
-    public function __isset($name) {
+    public function __isset($name) 
+    {
         echo "Is '$name' set?\n";
         return isset($this->data[$name]);
     }
 
     /**  PHP 5.1.0之后版本 */
-    public function __unset($name) {
+    public function __unset($name) 
+    {
         echo "Unsetting '$name'\n";
         unset($this->data[$name]);
     }
 
     /**  非魔术方法  */
-    public function getHidden() {
+    public function getHidden() 
+    {
         return $this->hidden;
     }
 }
@@ -172,7 +199,7 @@ class MemberTest {
 
 echo "<pre>\n";
 
-$obj = new MemberTest;
+$obj = new PropertyTest;
 
 $obj->a = 1;
 echo $obj->a . "\n\n";
@@ -224,44 +251,48 @@ Notice:  Undefined property via __get(): hidden in <file> on line 70 in <file> o
   <sect2 xml:id="language.oop5.overloading.methods">
    <title>方法重载</title>
 
-   <methodsynopsis>
-    <type>mixed</type><methodname>__call</methodname>
+   <methodsynopsis xml:id="object.call">
+    <modifier>public</modifier> <type>mixed</type><methodname>__call</methodname>
     <methodparam><type>string</type><parameter>name</parameter></methodparam>
     <methodparam><type>array</type><parameter>arguments</parameter></methodparam>
    </methodsynopsis>
-   <methodsynopsis>
-    <type>mixed</type><methodname>__callStatic</methodname>
+   <methodsynopsis xml:id="object.callstatic">
+    <modifier>public static</modifier> <type>mixed</type><methodname>__callStatic</methodname>
     <methodparam><type>string</type><parameter>name</parameter></methodparam>
     <methodparam><type>array</type><parameter>arguments</parameter></methodparam>
    </methodsynopsis>
 
    <para>
-    当调用一个不可访问方法（如未定义，或者不可见）时，<literal>__call()</literal> 会被调用。
+    当调用一个不可访问方法（如未定义，或者不可见）时，<link linkend="object.call">__call()</link> 会被调用。
    </para>
 
    <para>
-	当在静态方法中调用一个不可访问方法（如未定义，或者不可见）时，<literal>__callStatic()</literal> 会被调用。
+	当在静态方法中调用一个不可访问方法（如未定义，或者不可见）时，<link linkend="object.callstatic">__callStatic()</link> 会被调用。
    </para>
 
    <para> 
-<varname>$name</varname>参数是要调用的方法名称。<varname>$arguments</varname>参数是一个数组，包含着要传递给方法的参数。
+	<varname>$name</varname>参数是要调用的方法名称。<varname>$arguments</varname>参数是一个数组，包含着要传递给方法的参数。
    </para>
 
    <example>
-    <title>使用 __call 和 ___callStatic 调用对象中的方法</title>
+    <title>使用 <link linkend="object.call">__call()</link>
+          和 <link linkend="object.callstatic">__callStatic()</link> 对方法重载</title>
     <programlisting role="php">
   <![CDATA[
 <?php
-class MethodTest {
-    public function __call($name, $arguments) {
-        // 注意: $name 区分大小写
+class MethodTest 
+{
+    public function __call($name, $arguments) 
+    {
+        // 注意: $name 的值区分大小写
         echo "Calling object method '$name' "
              . implode(', ', $arguments). "\n";
     }
 
     /**  PHP 5.3.0之后版本  */
-    public static function __callStatic($name, $arguments) {
-        // Note: value of $name is case sensitive.
+    public static function __callStatic($name, $arguments) 
+    {
+        // 注意: $name 的值区分大小写
         echo "Calling static method '$name' "
              . implode(', ', $arguments). "\n";
     }

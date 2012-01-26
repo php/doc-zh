@@ -1,60 +1,84 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
 <!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: Haohappy Status: ready -->
+<!-- EN-Revision: fcddfb2551140fba9a14a4c44dc9fa60004440c8 Maintainer: Haohappy,hytest Status: ready -->
  <sect1 xml:id="language.oop5.magic" xmlns="http://docbook.org/ns/docbook">
   <title>魔术方法</title>
   <para>
-    <literal>__construct</literal>,
-   <literal>__destruct</literal>
-   (参看 <link linkend="language.oop5.decon">构造方法和析构方法</link>),
-   <literal>__call</literal>,
-   <literal>__callStatic</literal>,
-   <literal>__get</literal>,
-   <literal>__set</literal>,
-   <literal>__isset</literal>,
-   <literal>__unset</literal>   
-   (参看 <link linkend="language.oop5.overloading">重载</link>),
-   <literal>__sleep</literal>,
-   <literal>__wakeup</literal>,
-   <literal>__toString</literal>,
-   <literal>__set_state</literal> 和
-   <link linkend="language.oop5.cloning">__clone</link>   
-   等方法在PHP中被称为“魔术方法”（Magic methods）。 你在命名自己的类方法时不能使用这些方法名。
+   <link linkend="object.construct">__construct()</link>,
+   <link linkend="object.destruct">__destruct()</link>,
+   <link linkend="object.call">__call()</link>,
+   <link linkend="object.callstatic">__callStatic()</link>,
+   <link linkend="object.get">__get()</link>,
+   <link linkend="object.set">__set()</link>,
+   <link linkend="object.isset">__isset()</link>,
+   <link linkend="object.unset">__unset()</link>,
+   <link linkend="object.sleep">__sleep()</link>,
+   <link linkend="object.wakeup">__wakeup()</link>,
+   <link linkend="object.tostring">__toString()</link>,
+   <link linkend="object.invoke">__invoke()</link>,
+   <link linkend="object.set-state">__set_state()</link> 和
+   <link linkend="object.clone">__clone()</link>
+       等方法在PHP中被称为<quote>魔术方法</quote>（Magic methods）。 
+   你在命名自己的类方法时不能使用这些方法名, 除非你希望使用<quote>魔术</quote>功能。
   </para>
 
   <caution>
    <simpara>
-    PHP把所有以__（两个下划线）开头的类方法当成魔术方法。所以你定义自己的类方法时，不要以
+    PHP把所有以__（两个下划线）开头的类方法当成魔术方法。所以当你定义类方法时，除了上述魔术方法,建议不要以
 	__为前缀。
    </simpara>
   </caution>
  
   <sect2 xml:id="language.oop5.magic.sleep">
-   <title><literal>__sleep</literal> 和 <literal>__wakeup</literal></title>
+   <title>
+    <link linkend="object.sleep">__sleep()</link> 和
+    <link linkend="object.wakeup">__wakeup()</link>
+   </title>
+   
+   <methodsynopsis xml:id="object.sleep">
+    <modifier>public</modifier> <type>array</type><methodname>__sleep</methodname>
+    <void/>
+   </methodsynopsis>
+   <methodsynopsis xml:id="object.wakeup">
+    <type>void</type><methodname>__wakeup</methodname>
+    <void/>
+   </methodsynopsis>
+   
    <para>
-	<function>serialize</function> 函数会检查是否存在一个魔术方法 <literal>__sleep</literal>.如果存在，__sleep()方法会先被调用，
-	然后才执行序列化操作。这个功能可以用于清理对象，并返回一个包含对象中所有变量名称的数组。如果该方法不返回任何内容，则&null;被序列化，导致
-	一个E_NOTICE错误。
+	<function>serialize</function> 函数会检查是否存在一个魔术方法 <link linkend="object.sleep">__sleep()</link>.如果存在，__sleep()方法会先被调用，
+	然后才执行序列化操作。这个功能可以用于清理对象，并返回一个包含对象中所有应被序列化的变量名称的数组。如果该方法不返回任何内容，则&null;被序列化，并产生
+	一个<constant>E_NOTICE</constant>错误。
     </para>
+   <note>
+    <para>
+     It is not possible for <link linkend="object.sleep">__sleep()</link> to return names of
+     private properties in parent classes. Doing this will result in an
+     <constant>E_NOTICE</constant> level error. Instead you may use the
+     <classname>Serializable</classname> interface.
+    </para>
+   </note>
+    
+    
    <para>
-  <literal>__sleep</literal>方法常用于提交未提交的数据，或类似的操作。同时，如果你有一些很大的对象，
-不需要保存，这个功能就很好用。
+  <link linkend="object.sleep">__sleep()</link>方法常用于提交未提交的数据，或类似的清理操作。同时，如果你有一些很大的对象，
+不需要全部保存，这个功能就很好用。
 
    </para>
    <para>
-   	与之相反，<function>unserialize</function>会检查是否存在一个<literal>__wakeup</literal>方法。如果存在，则会先调用
-<literal>__wakeup</literal>方法，预先准备对象数据。
+   	与之相反，<function>unserialize</function>会检查是否存在一个<link linkend="object.wakeup">__wakeup()</link>方法。如果存在，则会先调用
+<literal>__wakeup</literal>方法，预先准备对象需要的资源。
    </para>
    <para>
-   	<literal>__wakeup</literal>经常用在反序列化操作中，例如重新建立数据库连接，或执行其它初始化操作。
+   	<link linkend="object.wakeup">__wakeup()</link>经常用在反序列化操作中，例如重新建立数据库连接，或执行其它初始化操作。
    </para>
    <example>
     <title>Sleep 和 wakeup</title>
     <programlisting role="php">
 <![CDATA[
 <?php
-class Connection {
+class Connection 
+{
     protected $link;
     private $server, $username, $password, $db;
     
@@ -90,12 +114,18 @@ class Connection {
   </sect2>
 
   <sect2 xml:id="language.oop5.magic.tostring">
-   <title><literal>__toString</literal></title>
+   <title><link linkend="object.tostring">__toString()</link></title>
+   <methodsynopsis xml:id="object.tostring">
+    <modifier>public</modifier> <type>string</type><methodname>__toString</methodname>
+    <void/>
+   </methodsynopsis>
+   
    <para>
-    The <literal>__toString</literal> method allows a class to decide
-    how it will react when it is converted to a string.
-
-	 <literal>__toString</literal> 方法可以让一个类决定它如何转换成一个字符串。
+    The <link linkend="object.tostring">__toString()</link> method allows a class to decide
+    how it will react when it is treated like a string. For example,
+    what <literal>echo $obj;</literal> will print. This method must
+    return a string, as otherwise a fatal <constant>E_RECOVERABLE_ERROR</constant>
+    level error is emitted.
    </para>
    <example>
     <title>简单示例</title>
@@ -107,7 +137,8 @@ class TestClass
 {
     public $foo;
 
-    public function __construct($foo) {
+    public function __construct($foo) 
+    {
         $this->foo = $foo;
     }
 
@@ -129,18 +160,22 @@ Hello
     </screen>
    </example>
    <para>
-   在PHP 5.2.0之前，<literal>__toString</literal>方法只有结合使用<function>echo</function> 或 <function>print</function>时
+   在PHP 5.2.0之前，<link linkend="object.tostring">__toString()</link>方法只有结合使用<function>echo</function> 或 <function>print</function>时
 才能生效。PHP 5.2.0之后，则可以在任何字符串环境生效（例如通过<function>printf</function>，使用<literal>%s</literal>修饰符），但
-不能用于非字符串环境（如使用<literal>%d</literal>修饰符）。从PHP 5.2.0，如果将一个未定义<literal>__toString</literal>方法的对象
+不能用于非字符串环境（如使用<literal>%d</literal>修饰符）。从PHP 5.2.0，如果将一个未定义<link linkend="object.tostring">__toString()</link>方法的对象
 转换为字符串，会报出一个<constant>E_RECOVERABLE_ERROR</constant>错误。
 
    </para>
   </sect2>
 
   <sect2 xml:id="language.oop5.magic.invoke">
-   <title><literal>__invoke</literal></title>
+   <title><link linkend="object.invoke">__invoke()</link></title>
+   <methodsynopsis xml:id="object.invoke">
+    <type>mixed</type><methodname>__invoke</methodname>
+    <methodparam choice="opt"><parameter>...</parameter></methodparam>
+   </methodsynopsis>
    <para>
-     当尝试以调用函数的方式调用一个对象时，<literal>__invoke</literal> 方法会被自动调用。
+          当尝试以调用函数的方式调用一个对象时，<link linkend="object.invoke">__invoke()</link> 方法会被自动调用。
    </para>
    <note>
     <para>     
@@ -148,11 +183,12 @@ Hello
     </para>
    </note>
    <example>
-    <title>Using <literal>__invoke</literal></title>
+    <title>Using <link linkend="object.invoke">__invoke()</link></title>
     <programlisting role="php">
 <![CDATA[
 <?php
-class CallableClass {
+class CallableClass 
+{
 	function __invoke($x) {
 		var_dump($x);
 	}
@@ -174,7 +210,11 @@ bool(true)
   </sect2>
 
   <sect2 xml:id="language.oop5.magic.set-state">
-   <title><literal>__set_state</literal></title>
+   <title><link linkend="object.set-state">__set_state()</link></title>
+   <methodsynopsis xml:id="object.set-state">
+    <modifier>static</modifier> <type>object</type><methodname>__set_state</methodname>
+    <methodparam><type>array</type><parameter>properties</parameter></methodparam>
+   </methodsynopsis>
    <para>
     当调用<function>var_export</function>时，这个<link linkend="language.oop5.static">静态</link> 方法会被调用（自PHP 5.1.0起有效）。
    </para>
@@ -182,7 +222,7 @@ bool(true)
     本方法的唯一参数是一个数组，其中包含按<literal>array('property' => value, ...)</literal>格式排列的类属性。
    </para>
    <example>
-    <title>Using <literal>__set_state</literal> (PHP 5.1.0及更高版本支持)</title>
+    <title>使用 <link linkend="object.set-state">__set_state()</link>> (PHP 5.1.0及更高版本支持)</title>
     <programlisting role="php">
 <![CDATA[
 <?php

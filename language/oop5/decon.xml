@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
 <!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: lm92 Status: ready -->
+<!-- EN-Revision: 28d123ef985df5a7b86f3601e035968ee1b3b142 Maintainer: lm92 Status: ready -->
 <sect1 xml:id="language.oop5.decon" xmlns="http://docbook.org/ns/docbook">
  <title>构造函数和析构函数</title>
 
  <sect2 xml:id="language.oop5.decon.constructor">
   <title>构造函数</title>
-  <methodsynopsis>
-   <type>void</type><methodname>__construct</methodname>
-   <methodparam choice="opt"><type>mixed</type><parameter>args</parameter></methodparam>
-   <methodparam choice="opt"><parameter>...</parameter></methodparam>
-  </methodsynopsis>
+   <methodsynopsis xml:id="object.construct">
+    <type>void</type><methodname>__construct</methodname>
+    <methodparam choice="opt"><type>mixed</type><parameter>args</parameter></methodparam>
+    <methodparam choice="opt"><parameter>...</parameter></methodparam>
+   </methodsynopsis>
   <para>
-   PHP 5 允行开发者在一个类中定义一个方法作为构造函数。具有构造函数的类会在每次创建对象时先调用此方法，所以非常适合在使用对象之前做一些初始化工作。
+   PHP 5 允行开发者在一个类中定义一个方法作为构造函数。具有构造函数的类会在每次创建新对象时先调用此方法，所以非常适合在使用对象之前做一些初始化工作。
   </para>
   <note>
    <simpara>
-    如果子类中定义了构造函数则不会暗中调用其父类的构造函数。要执行父类的构造函数，需要在子类的构造函数中调用
+    如果子类中定义了构造函数则不会隐式调用其父类的构造函数。要执行父类的构造函数，需要在子类的构造函数中调用
     <function>parent::__construct</function>。
    </simpara>
   </note>
@@ -46,18 +46,43 @@ $obj = new SubClass();
    </programlisting>
   </example>
   <para>
-   为了实现向后兼容性，如果 PHP 5 在类中找不到 <function>__construct</function>
+   为了实现向后兼容性，如果 PHP 5 在类中找不到 <link linkend="object.construct">__construct()</link>
    函数，它就会尝试寻找旧式的构造函数，也就是和类同名的函数。因此唯一会产生兼容性问题的情况是：类中已有一个名为
    <function>__construct</function> 的方法，但它却又不是构造函数。
   </para>
+   <para>
+    与其它方法不同，当<link linkend="object.construct">__construct()</link>被
+    与父类<link linkend="object.construct">__construct()</link>具有不同参数的方法
+    覆盖时，PHP不会产生一个<constant>E_STRICT</constant>错误信息。
+   </para>
+   <para>
+    自PHP 5.3.3起, 在命名空间中,与类名同名的方法不再作为构造函数。 这一改变不影响
+    不在命名空间中的类。
+   </para>
+   <example>
+    <title>Constructors in namespaced classes</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+namespace Foo;
+class Bar {
+    public function Bar() {
+        // treated as constructor in PHP 5.3.0-5.3.2
+        // treated as regular method as of PHP 5.3.3
+    }
+}
+?>
+]]>
+    </programlisting>
+   </example>
  </sect2>
 
  <sect2 xml:id="language.oop5.decon.destructor">
   <title>析构函数</title>
-  <methodsynopsis>
-   <type>void</type><methodname>__destruct</methodname>
-   <void />
-  </methodsynopsis>
+   <methodsynopsis xml:id="object.destruct">
+    <type>void</type><methodname>__destruct</methodname>
+    <void />
+   </methodsynopsis>
   <para>
    PHP 5 引入了析构函数的概念，这类似于其它面向对象的语言，如
    C++。析构函数会在到某个对象的所有引用都被删除或者当对象被显式销毁时执行。
@@ -87,14 +112,19 @@ $obj = new MyDestructableClass();
    和构造函数一样，父类的析构函数不会被引擎暗中调用。要执行父类的析构函数，必须在子类的析构函数体中显式调用
    <function>parent::__destruct</function>。
   </para>
+   <para>
+    析构函数即使在使用<function>exit</function>终止脚本运行时也会被调用。在析构函数中
+    调用<function>exit</function>将会中止其余关闭操作的运行。
+   </para>
   <note>
    <para>
-    析构函数在脚本关闭时调用，此时所有的头信息已经发出。
+     析构函数在脚本关闭时调用，此时所有的HTTP头信息已经发出。
+            脚本关闭时的工作目录有可能和在SAPI(如apache)中时不一样。
    </para>
   </note>
   <note>
    <para>
-    试图在析构函数中抛出一个异常会导致致命错误。
+    试图在析构函数(在脚本终止时被调用)中抛出一个异常会导致致命错误。
    </para>
   </note>
  </sect2>
