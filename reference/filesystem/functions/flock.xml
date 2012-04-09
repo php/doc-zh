@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
+<!-- EN-Revision: 63533b05593c38442e9c46133a740812b4d63da9 Maintainer: HonestQiao Status: ready -->
+<!-- Reviewed: no Maintainer: HonestQiao -->
 <!-- CREDITS: lm92 -->
 <refentry xml:id="function.flock" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>flock</refname>
   <refpurpose>轻便的咨询文件锁定</refpurpose>
  </refnamediv>
- <refsect1>
-  <title>说明</title>
+ <refsect1 role="description">
+  &reftitle.description;
   <methodsynopsis>
    <type>bool</type><methodname>flock</methodname>
    <methodparam><type>int</type><parameter>handle</parameter></methodparam>
@@ -114,6 +114,201 @@ fclose($fp);
    <para>
     <function>flock</function> 不支持旧的文件系统，如 <literal>FAT</literal>
     以及它的派生系统。因此，此环境下总是返回 &false;（尤其是对 Windows 98 用户来说）。
+   </para>
+  </warning>
+ </refsect1>
+ 
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>handle</parameter></term>
+     <listitem>
+      &fs.file.pointer;
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>operation</parameter></term>
+     <listitem>
+      <para>
+       <parameter>operation</parameter> is one of the following:
+       <itemizedlist>
+        <listitem>
+         <simpara>
+          <constant>LOCK_SH</constant> to acquire a shared lock (reader).
+         </simpara>
+        </listitem>
+        <listitem>
+         <simpara>
+          <constant>LOCK_EX</constant> to acquire an exclusive lock (writer).
+         </simpara>
+        </listitem>
+        <listitem>
+         <simpara>
+          <constant>LOCK_UN</constant> to release a lock (shared or exclusive).
+         </simpara>
+        </listitem>
+       </itemizedlist>
+      </para>
+      <para>
+       It is also possible to add <constant>LOCK_NB</constant> as a bitmask to one 
+       of the above operations if you don't want <function>flock</function> to 
+       block while locking. (not supported on Windows)
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>wouldblock</parameter></term>
+     <listitem>
+      <para>
+       The optional third argument is set to &true; if the lock would block
+       (EWOULDBLOCK errno condition). (not supported on Windows)
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+ 
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   &return.success;
+  </para>
+ </refsect1>
+ 
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <para>
+   <informaltable>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>&Version;</entry>
+       <entry>&Description;</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>5.3.2</entry>
+       <entry>
+        The automatic unlocking when the file's resource handle is closed was
+        removed. Unlocking now always has to be done manually.
+       </entry>
+      </row>
+      <row>
+       <entry>4.0.1</entry>
+       <entry>
+        The <literal>LOCK_XXX</literal> constants were added. Prior to that
+        you must use 1 for <constant>LOCK_SH</constant>, 2 for
+        <constant>LOCK_EX</constant>, 3 for <constant>LOCK_UN</constant> and
+        4 for <constant>LOCK_NB</constant>
+       </entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </informaltable>
+  </para>
+ </refsect1>
+ 
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title><function>flock</function> example</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+
+$fp = fopen("/tmp/lock.txt", "r+");
+
+if (flock($fp, LOCK_EX)) {  // acquire an exclusive lock
+    ftruncate($fp, 0);      // truncate file
+    fwrite($fp, "Write something here\n");
+    fflush($fp);            // flush output before releasing the lock
+    flock($fp, LOCK_UN);    // release the lock
+} else {
+    echo "Couldn't get the lock!";
+}
+
+fclose($fp);
+
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   <example>
+    <title><function>flock</function> using the <constant>LOCK_NB</constant> option</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$fp = fopen('/tmp/lock.txt', 'r+');
+
+/* Activate the LOCK_NB option on an LOCK_EX operation */
+if(!flock($fp, LOCK_EX | LOCK_NB)) {
+    echo 'Unable to obtain lock';
+    exit(-1);
+}
+
+/* ... */
+
+fclose($fp);
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+ </refsect1>
+ 
+ <refsect1 role="notes">
+  &reftitle.notes;
+  <note>
+   <para>
+    <function>flock</function> uses mandatory locking instead of advisory
+    locking on Windows. Mandatory locking is also supported on Linux and
+    System V based operating systems via the usual mechanism supported by the
+    fcntl() system call: that is, if the file in question has the setgid
+    permission bit set and the group execution bit cleared. On Linux, the file
+    system will also need to be mounted with the mand option for this to work.
+   </para>
+  </note>
+  <note>
+   <para>
+    Because <function>flock</function> requires a file pointer, you may have
+    to use a special lock file to protect access to a file that you intend
+    to truncate by opening it in write mode (with a "w" or "w+" argument to
+    <function>fopen</function>).
+   </para>
+  </note>
+  <note>
+   <para>
+    May only be used on file pointers returned by <function>fopen</function>
+    for local files, or file pointers pointing to userspace streams that
+    implement the <function>streamWrapper::stream_lock</function> method.
+   </para>
+  </note>
+  <warning>
+   <para>
+    Assigning another value to <parameter>handle</parameter> argument in
+    subsequent code will release the lock.
+   </para>
+  </warning>
+  <warning>
+   <para>
+    On some operating systems <function>flock</function> is implemented at
+    the process level. When using a multithreaded server API like ISAPI you
+    may not be able to rely on <function>flock</function> to protect files
+    against other PHP scripts running in parallel threads of the same server
+    instance!
+   </para>
+   <para>
+    <function>flock</function> is not supported on antiquated filesystems like
+    <literal>FAT</literal> and its derivates and will therefore always
+    return &false; under this environments (this is especially true for
+    Windows 98 users).
    </para>
   </warning>
  </refsect1>

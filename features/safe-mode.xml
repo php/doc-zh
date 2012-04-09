@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: thomaslio Status: ready -->
+<!-- EN-Revision: 4f90edebfb15e0c08faa3aab702e3dbfd55e1012 Maintainer: HonestQiao Status: ready -->
+<!-- Reviewed: no Maintainer: HonestQiao -->
 <!-- CREDITS: Gregory, dallas -->
 <chapter xml:id="features.safe-mode" xmlns="http://docbook.org/ns/docbook">
  <title>安全模式</title>
@@ -11,12 +11,36 @@
   PHP 层上解决这个问题是不合理的，但修改 web
   服务器层和操作系统层显得非常不现实。因此许多人，特别是 ISP，目前使用安全模式。
  </para>
+&warn.deprecated.feature-5-3-0.removed-5-4-0;
 
- <warning>
   <para>
-   在 PHP 6.0.0 中去除了安全模式。
+   <table>
+    <title>Changelog for <literal>safe mode</literal></title>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>&Version;</entry>
+       <entry>&Description;</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>5.4.0</entry>
+       <entry>
+        Removed from PHP, and generates a fatal <constant>E_CORE_ERROR</constant>
+        level error when enabled.
+       </entry>
+      </row>
+      <row>
+       <entry>5.3.0</entry>
+       <entry>
+        Deprecated, and <constant>E_DEPRECATED</constant> errors were added.
+       </entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </table>
   </para>
- </warning>
 
  <sect1 xml:id="ini.sect.safe-mode">
   <title>保安措施和安全模式</title>
@@ -25,12 +49,12 @@
     <title>保安措施和安全模式配置指令</title>
     <tgroup cols="4">
      <thead>
-      <row>
-       <entry>名称</entry>
-       <entry>默认值</entry>
-       <entry>可修改范围</entry>
-       <entry>更新记录</entry>
-      </row>
+       <row>
+        <entry>&Name;</entry>
+        <entry>&Default;</entry>
+        <entry>&Changeable;</entry>
+        <entry>&Changelog;</entry>
+       </row>
      </thead>
      <tbody>
       <row>
@@ -90,7 +114,7 @@
      </tbody>
     </tgroup>
    </table>
-   PHP_INI_* 常量的进一步详细说明与定义见 <function>ini_set</function>。
+   &ini.php.constants;
   </para>
 
   &ini.descriptions.title;
@@ -191,86 +215,6 @@
        <function>putenv</function> 来改变这些环境变量。甚至在
        safe_mode_allowed_env_vars 中设置了允许修改时也不能改变这些变量。
       </para>
-     </listitem>
-    </varlistentry>
-     <varlistentry xml:id="ini.open-basedir">
-     <term>
-      <parameter>open_basedir</parameter>
-      <type>string</type>
-     </term>
-     <listitem>
-      <para>
-       将 PHP 所能打开的文件限制在指定的目录树，包括文件本身。本指令<emphasis>不受</emphasis>安全模式打开或者关闭的影响。
-      </para>
-      <para>
-       当一个脚本试图用例如 <function>fopen</function> 或者 <function>gzopen</function>
-       打开一个文件时，该文件的位置将被检查。当文件在指定的目录树之外时
-       PHP 将拒绝打开它。所有的符号连接都会被解析，所以不可能通过符号连接来避开此限制。
-      </para>
-      <para>
-       特殊值 <constant>.</constant>
-       指明脚本的工作目录将被作为基准目录。但这有些危险，因为脚本的工作目录可以轻易被
-       <function>chdir</function> 而改变。
-      </para>
-      <para>
-       在 <filename>httpd.conf</filename> 文件中中，open_basedir
-       可以像其它任何配置选项一样用“php_admin_value open_basedir none”的<link
-       linkend="configuration.changes.apache">方法</link>关闭（例如某些虚拟主机中）。
-      </para>
-      <para>
-       在 Windows 中，用分号分隔目录。在任何其它系统中用冒号分隔目录。作为
-       Apache 模块时，父目录中的 open_basedir 路径自动被继承。
-      </para>
-      <para>
-       用 open_basedir 指定的限制实际上是前缀，不是目录名。也就是说“open_basedir
-       = /dir/incl”也会允许访问“/dir/include”和“/dir/incls”，如果它们存在的话。如果要将访问限制在仅为指定的目录，用斜线结束路径名。例如：“open_basedir
-       = /dir/incl/”。
-      </para>
-      <note>
-       <para>
-        支持多个目录是 3.0.7 加入的。
-       </para>
-      </note>
-      <para>
-       默认是允许打开所有文件。
-      </para>
-     </listitem>
-    </varlistentry>
-    <varlistentry xml:id="ini.disable-functions">
-     <term>
-      <parameter>disable_functions</parameter>
-      <type>string</type>
-     </term>
-     <listitem>
-      <simpara>
-       本指令允许你基于<link linkend="security">安全</link>原因禁止某些函数。接受逗号分隔的函数名列表作为参数。
-       disable_functions 不受<link linkend="ini.safe-mode">安全模式</link>的影响。
-      </simpara>
-      <simpara>
-       本指令只能设置在 &php.ini; 中。例如不能将其设置在 &httpd.conf;。
-      </simpara>
-     </listitem>
-    </varlistentry>
-    <varlistentry xml:id="ini.disable-classes">
-     <term>
-      <parameter>disable_classes</parameter>
-      <type>string</type>
-     </term>
-     <listitem>
-      <simpara>
-       本指令可以使你出于<link
-       linkend="security">安全</link>的理由禁用某些类。用逗号分隔类名。disable_classes
-       不受<link linkend="ini.safe-mode">安全模式</link>的影响。
-      </simpara>
-      <simpara>
-       本指令只能设置在 &php.ini; 中。例如不能将其设置在 &httpd.conf;。
-      </simpara>
-      <note>
-       <title>可用性说明</title>
-       <simpara>
-        本指令自 PHP 4.3.2 起可用。
-       </simpara>
-      </note>
      </listitem>
     </varlistentry>
    </variablelist>

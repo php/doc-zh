@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
+<!-- EN-Revision: a9b26c34e481fa948bcc7d75b73b441605142dd7 Maintainer: HonestQiao Status: ready -->
+<!-- Reviewed: no Maintainer: HonestQiao -->
 <refentry xml:id="function.file" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>file</refname>
   <refpurpose>把整个文件读入一个数组中</refpurpose>
  </refnamediv>
- <refsect1>
-  <title>说明</title>
+ <refsect1 role="description">
+  &reftitle.description;
   <methodsynopsis>
    <type>array</type><methodname>file</methodname>
    <methodparam><type>string</type><parameter>filename</parameter></methodparam>
@@ -64,6 +64,222 @@ $html = implode('', file ('http://www.example.com/'));
   <para>
    参见 <function>readfile</function>，<function>fopen</function>，<function>fsockopen</function>，<function>popen</function>，<function>file_get_contents</function>
    和 <function>include</function>。
+  </para>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>filename</parameter></term>
+     <listitem>
+      <para>
+       Path to the file.
+      </para>
+      &tip.fopen-wrapper;
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>flags</parameter></term>
+     <listitem>
+      <para>
+       The optional parameter <parameter>flags</parameter> can be one, or
+       more, of the following constants:
+       <variablelist>
+        <varlistentry>
+         <term>
+          <constant>FILE_USE_INCLUDE_PATH</constant>
+         </term>
+         <listitem>
+          <simpara>
+           Search for the file in the <link 
+           linkend="ini.include-path">include_path</link>.
+          </simpara>
+         </listitem>
+        </varlistentry>
+        <varlistentry>
+         <term>
+          <constant>FILE_IGNORE_NEW_LINES</constant>
+         </term>
+         <listitem>
+          <simpara>
+           Do not add newline at the end of each array element
+          </simpara>
+         </listitem>
+        </varlistentry>
+        <varlistentry>
+         <term>
+          <constant>FILE_SKIP_EMPTY_LINES</constant>
+         </term>
+         <listitem>
+          <simpara>
+           Skip empty lines
+          </simpara>
+         </listitem>
+        </varlistentry>
+        <!-- FIXME PHP_6
+        <varlistentry>
+         <term>
+          <constant>FILE_TEXT</constant>
+         </term>
+         <listitem>
+          <simpara>
+           The content is returned in UTF-8 encoding. You can specify a different
+           encoding by creating a custom context. This flag cannot be used with 
+           <constant>FILE_BINARY</constant>.
+          </simpara>
+         </listitem>
+        </varlistentry>
+        <varlistentry>
+         <term>
+          <constant>FILE_BINARY</constant>
+         </term>
+         <listitem>
+          <simpara>
+           The content is read as binary data. This is the default setting 
+           and cannot be used with <constant>FILE_TEXT</constant>.
+          </simpara>
+         </listitem>
+        </varlistentry>
+        -->
+       </variablelist>
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>context</parameter></term>
+     <listitem>
+      <para>
+       A context resource created with the 
+       <function>stream_context_create</function> function.
+      </para>
+      <para>
+       &note.context-support;
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   Returns the file in an array. Each element of the array corresponds to a
+   line in the file, with the newline still attached. Upon failure,
+   <function>file</function> returns &false;.
+  </para>
+  <note>
+   <para>
+    Each line in the resulting array will include the line ending, unless
+    <constant>FILE_IGNORE_NEW_LINES</constant> is used, so you still need to
+    use <function>rtrim</function> if you do not want the line ending
+    present.
+   </para>
+  </note>
+  &note.line-endings;
+ </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <para>
+   <informaltable>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>&Version;</entry>
+       <entry>&Description;</entry>
+      </row>
+     </thead>
+     <tbody>
+      <!-- FIXME PHP_6
+      <row>
+       <entry>6.0.0</entry>
+       <entry>
+        Added support for the <constant>FILE_TEXT</constant> and 
+        <constant>FILE_BINARY</constant> flags.
+        <note>
+         <para>
+          For <literal>forward compatibility</literal>, these constants are
+          available as of PHP 5.2.7
+         </para>
+        </note>
+       </entry>
+      </row>
+       -->
+      <row>
+       <entry>5.0.0</entry>
+       <entry>
+        The <parameter>context</parameter> parameter was added
+       </entry>
+      </row>
+      <row>
+       <entry>5.0.0</entry>
+       <entry>
+        Prior to PHP 5.0.0 the <parameter>flags</parameter> parameter only
+        covered <link linkend="ini.include-path">include_path</link> and was
+        enabled with 1
+       </entry>
+      </row>
+      <row>
+       <entry>4.3.0</entry>
+       <entry>
+        <function>file</function> became binary safe
+       </entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </informaltable>
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title><function>file</function> example</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+// Get a file into an array.  In this example we'll go through HTTP to get
+// the HTML source of a URL.
+$lines = file('http://www.example.com/');
+
+// Loop through our array, show HTML source as HTML source; and line numbers too.
+foreach ($lines as $line_num => $line) {
+    echo "Line #<b>{$line_num}</b> : " . htmlspecialchars($line) . "<br />\n";
+}
+
+// Another example, let's get a web page into a string.  See also file_get_contents().
+$html = implode('', file('http://www.example.com/'));
+
+// Using the optional flags parameter since PHP 5
+$trimmed = file('somefile.txt', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+ </refsect1>
+
+ <refsect1 role="notes">
+  &reftitle.notes;
+  &warn.ssl-non-standard;
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>readfile</function></member>
+    <member><function>fopen</function></member>
+    <member><function>fsockopen</function></member>
+    <member><function>popen</function></member>
+    <member><function>file_get_contents</function></member>
+    <member><link linkend="function.include"><literal>include</literal></link></member>
+    <member><function>stream_context_create</function></member>
+   </simplelist>
   </para>
  </refsect1>
 </refentry>

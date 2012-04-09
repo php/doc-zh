@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: nio Status: ready -->
+<!-- EN-Revision: 96c9d88bad9a7d7d44bfb7f26c226df7ee9ddf26 Maintainer: HonestQiao Status: ready -->
+<!-- Reviewed: no Maintainer: HonestQiao -->
 <!-- splitted from ./en/functions/xmlrpc.xml, last change in rev 1.1 -->
   <refentry xml:id="function.xmlrpc-encode-request" xmlns="http://docbook.org/ns/docbook">
    <refnamediv>
     <refname>xmlrpc_encode_request</refname>
     <refpurpose>为 PHP 的值生成 XML</refpurpose>
    </refnamediv>
-   <refsect1>
-    <title>描述</title>
+ <refsect1 role="description">
+  &reftitle.description;
      <methodsynopsis>
       <type>string</type><methodname>xmlrpc_encode_request</methodname>
       <methodparam><type>string</type><parameter>method</parameter></methodparam>
@@ -17,10 +17,94 @@
       <methodparam choice="opt"><type>array</type><parameter>output_options</parameter></methodparam>
      </methodsynopsis>
      &warn.experimental.func;
-    <para>
-     &warn.undocumented.func;
-    </para>
    </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>method</parameter></term>
+     <listitem>
+      <para>
+       Name of the method to call.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>params</parameter></term>
+     <listitem>
+      <para>
+       Method parameters compatible with method signature.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>output_options</parameter></term>
+     <listitem>
+      <para>
+       Array specifying output options may contain (default values are
+       emphasised):
+       <itemizedlist>
+        <listitem><para>output_type: php, <emphasis>xml</emphasis></para></listitem>
+        <listitem><para>verbosity: no_white_space, newlines_only, <emphasis>pretty</emphasis></para></listitem>
+        <listitem><para>escaping: cdata, <emphasis>non-ascii, non-print, markup</emphasis>
+          (may be a string with one value or an array with multiple values)</para></listitem>
+        <listitem><para>version: simple, <emphasis>xmlrpc</emphasis>, soap 1.1, auto</para></listitem>
+        <listitem><para>encoding: <emphasis>iso-8859-1</emphasis>, other character set supported by iconv</para></listitem>
+       </itemizedlist>
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+ 
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   Returns a string containing the XML representation of the request.
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title>XMLRPC client functions example</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$request = xmlrpc_encode_request("method", array(1, 2, 3));
+$context = stream_context_create(array('http' => array(
+    'method' => "POST",
+    'header' => "Content-Type: text/xml",
+    'content' => $request
+)));
+$file = file_get_contents("http://www.example.com/xmlrpc", false, $context);
+$response = xmlrpc_decode($file);
+if ($response && xmlrpc_is_fault($response)) {
+    trigger_error("xmlrpc: $response[faultString] ($response[faultCode])");
+} else {
+    print_r($response);
+}
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>stream_context_create</function></member>
+    <member><function>file_get_contents</function></member>
+    <member><function>xmlrpc_decode</function></member>
+   </simplelist>
+  </para>
+ </refsect1>
   </refentry>
 
 <!-- Keep this comment at the end of the file

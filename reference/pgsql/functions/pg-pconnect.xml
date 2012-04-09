@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
-  <refentry xml:id="function.pg-pconnect" xmlns="http://docbook.org/ns/docbook">
+<!-- EN-Revision: 96c9d88bad9a7d7d44bfb7f26c226df7ee9ddf26 Maintainer: HonestQiao Status: ready -->
+<!-- Reviewed: no Maintainer: HonestQiao -->
+<refentry xml:id="function.pg-pconnect" xmlns="http://docbook.org/ns/docbook">
    <refnamediv>
     <refname>pg_pconnect</refname>
     <refpurpose>打开一个持久的 PostgreSQL 连接</refpurpose>
    </refnamediv>
-   <refsect1>
-    <title>说明</title>
+ <refsect1 role="description">
+  &reftitle.description;
     <methodsynopsis>
      <type>resource</type><methodname>pg_pconnect</methodname> 
      <methodparam><type>string</type><parameter>connection_string</parameter></methodparam>
@@ -34,6 +34,95 @@
      linkend="features.persistent-connections">持久数据库连接</link>。
     </para>
    </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>connection_string</parameter></term>
+     <listitem>
+      <para>
+       The <parameter>connection_string</parameter> can be empty to use all default parameters, or it 
+       can contain one or more parameter settings separated by whitespace. 
+       Each parameter setting is in the form <literal>keyword = value</literal>. Spaces around 
+       the equal sign are optional. To write an empty value or a value 
+       containing spaces, surround it with single quotes, e.g., <literal>keyword = 
+       'a value'</literal>. Single quotes and backslashes within the value must be 
+       escaped with a backslash, i.e., \' and \.  
+      </para>
+      <para>
+       The currently recognized parameter keywords are:
+       <parameter>host</parameter>, <parameter>hostaddr</parameter>, <parameter>port</parameter>,
+       <parameter>dbname</parameter>, <parameter>user</parameter>,
+       <parameter>password</parameter>, <parameter>connect_timeout</parameter>,
+       <parameter>options</parameter>, <parameter>tty</parameter> (ignored), <parameter>sslmode</parameter>,
+       <parameter>requiressl</parameter> (deprecated in favor of <parameter>sslmode</parameter>), and
+       <parameter>service</parameter>.  Which of these arguments exist depends
+       on your PostgreSQL version.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>connect_type</parameter></term>
+     <listitem>
+      <para>
+       If <constant>PGSQL_CONNECT_FORCE_NEW</constant> is passed, then a new connection
+       is created, even if the <parameter>connection_string</parameter> is identical to
+       an existing connection.
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   PostgreSQL connection resource on success, &false; on failure.
+  </para>
+ </refsect1>
+ 
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title>Using <function>pg_pconnect</function></title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$dbconn = pg_pconnect("dbname=mary");
+//connect to a database named "mary"
+
+$dbconn2 = pg_pconnect("host=localhost port=5432 dbname=mary");
+// connect to a database named "mary" on "localhost" at port "5432"
+
+$dbconn3 = pg_pconnect("host=sheep port=5432 dbname=mary user=lamb password=foo");
+//connect to a database named "mary" on the host "sheep" with a username and password
+
+$conn_string = "host=sheep port=5432 dbname=test user=lamb password=bar";
+$dbconn4 = pg_pconnect($conn_string);
+//connect to a database named "test" on the host "sheep" with a username and password
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+ </refsect1>
+ 
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>pg_connect</function></member>
+    <member>
+     <link linkend="features.persistent-connections">
+     Persistent Database Connections</link>
+    </member>
+   </simplelist>
+  </para>
+ </refsect1>
   </refentry>
 
 <!-- Keep this comment at the end of the file

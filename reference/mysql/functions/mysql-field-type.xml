@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
-  <refentry xml:id="function.mysql-field-type" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+<!-- EN-Revision: 96c9d88bad9a7d7d44bfb7f26c226df7ee9ddf26 Maintainer: HonestQiao Status: ready -->
+<!-- Reviewed: no Maintainer: HonestQiao -->
+<refentry xml:id="function.mysql-field-type" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
    <refnamediv>
     <refname>mysql_field_type</refname>
     <refpurpose>
      取得结果集中指定字段的类型
     </refpurpose>
    </refnamediv>
-   <refsect1>
-    <title>说明</title>
+ <refsect1 role="description">
+  &reftitle.description;
      <methodsynopsis>
       <type>string</type><methodname>mysql_field_type</methodname>
       <methodparam><type>resource</type><parameter>result</parameter></methodparam>
@@ -66,6 +66,90 @@ string type 9 not_null enum
      <function>mysql_fieldtype</function>，但反对这样做。
     </para>
    </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    &mysql.result.description;
+    &mysql.field-offset.req.description;
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   The returned field type
+   will be one of <literal>"int"</literal>, <literal>"real"</literal>, 
+   <literal>"string"</literal>, <literal>"blob"</literal>, and others as
+   detailed in the <link xlink:href="&url.mysql.docs;">MySQL
+   documentation</link>.
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title><function>mysql_field_type</function> example</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+mysql_connect("localhost", "mysql_username", "mysql_password");
+mysql_select_db("mysql");
+$result = mysql_query("SELECT * FROM func");
+$fields = mysql_num_fields($result);
+$rows   = mysql_num_rows($result);
+$table  = mysql_field_table($result, 0);
+echo "Your '" . $table . "' table has " . $fields . " fields and " . $rows . " record(s)\n";
+echo "The table has the following fields:\n";
+for ($i=0; $i < $fields; $i++) {
+    $type  = mysql_field_type($result, $i);
+    $name  = mysql_field_name($result, $i);
+    $len   = mysql_field_len($result, $i);
+    $flags = mysql_field_flags($result, $i);
+    echo $type . " " . $name . " " . $len . " " . $flags . "\n";
+}
+mysql_free_result($result);
+mysql_close();
+?>
+]]>
+    </programlisting>
+    &example.outputs.similar;
+    <screen>
+<![CDATA[
+Your 'func' table has 4 fields and 1 record(s)
+The table has the following fields:
+string name 64 not_null primary_key binary
+int ret 1 not_null
+string dl 128 not_null
+string type 9 not_null enum
+]]>
+    </screen>
+   </example>
+  </para>
+ </refsect1>
+
+ <refsect1 role="notes">
+  &reftitle.notes;
+  <note>
+   <para>
+    &info.deprecated.alias;
+    <function>mysql_fieldtype</function>
+   </para>
+  </note>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>mysql_field_name</function></member>
+    <member><function>mysql_field_len</function></member>
+   </simplelist>
+  </para>
+ </refsect1>
   </refentry>
 
 <!-- Keep this comment at the end of the file

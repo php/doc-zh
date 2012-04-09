@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: nio Status: ready -->
+<!-- EN-Revision: fcddfb2551140fba9a14a4c44dc9fa60004440c8 Maintainer: HonestQiao Status: ready -->
+<!-- Reviewed: no Maintainer: HonestQiao -->
 <!-- splitted from ./en/functions/var.xml, last change in rev 1.2 -->
   <refentry xml:id="function.unserialize" xmlns="http://docbook.org/ns/docbook">
    <refnamediv>
@@ -10,8 +10,8 @@
      从已存储的表示中创建 PHP 的值
     </refpurpose>
    </refnamediv>
-   <refsect1>
-    <title>描述</title>
+ <refsect1 role="description">
+  &reftitle.description;
      <methodsynopsis>
       <type>mixed</type><methodname>unserialize</methodname>
       <methodparam><type>string</type><parameter>str</parameter></methodparam>
@@ -101,6 +101,158 @@ if (!odbc_execute ($stmt, &$sqldata) || !odbc_fetch_into ($stmt, &$tmp)) {
     参见 <function>serialize</function>。
    </para>
    </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>str</parameter></term>
+     <listitem>
+      <para>
+       The serialized string.
+      </para>
+      <para>
+       If the variable being unserialized is an object, after successfully 
+       reconstructing the object PHP will automatically attempt to call the
+       <link linkend="object.wakeup">__wakeup()</link> member
+       function (if it exists).
+      </para>
+      <para>
+       <note>
+        <title>unserialize_callback_func directive</title>
+        <para>
+         It's possible to set a callback-function which will be called,
+         if an undefined class should be instantiated during unserializing.
+         (to prevent getting an incomplete <type>object</type> "__PHP_Incomplete_Class".)
+         Use your &php.ini;, <function>ini_set</function> or &htaccess; 
+         to define '<literal>unserialize_callback_func</literal>'.  Everytime an undefined class
+         should be instantiated, it'll be called.  To disable this feature just
+         empty this setting.
+        </para>
+       </note>
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   The converted value is returned, and can be a <type>boolean</type>,
+   <type>integer</type>, <type>float</type>, <type>string</type>,
+   <type>array</type> or <type>object</type>.
+  </para>
+  <para>
+   In case the passed string is not unserializeable, &false; is returned and
+   <constant>E_NOTICE</constant> is issued.
+  </para>
+ </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <para>
+   <informaltable>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>&Version;</entry>
+       <entry>&Description;</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>4.2.0</entry>
+       <entry>
+        The directive unserialize_callback_func became available.
+       </entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </informaltable>
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title><function>unserialize</function> example</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+// Here, we use unserialize() to load session data to the
+// $session_data array from the string selected from a database.
+// This example complements the one described with serialize().
+
+$conn = odbc_connect("webdb", "php", "chicken");
+$stmt = odbc_prepare($conn, "SELECT data FROM sessions WHERE id = ?");
+$sqldata = array($_SERVER['PHP_AUTH_USER']);
+if (!odbc_execute($stmt, $sqldata) || !odbc_fetch_into($stmt, $tmp)) {
+    // if the execute or fetch fails, initialize to empty array
+    $session_data = array();
+} else {
+    // we should now have the serialized data in $tmp[0].
+    $session_data = unserialize($tmp[0]);
+    if (!is_array($session_data)) {
+        // something went wrong, initialize to empty array
+        $session_data = array();
+    }
+}
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   <example>
+    <title>unserialize_callback_func example</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$serialized_object='O:1:"a":1:{s:5:"value";s:3:"100";}';
+
+// unserialize_callback_func directive available as of PHP 4.2.0
+ini_set('unserialize_callback_func', 'mycallback'); // set your callback_function
+
+function mycallback($classname) 
+{
+    // just include a file containing your classdefinition
+    // you get $classname to figure out which classdefinition is required
+}
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+ </refsect1>
+
+ <refsect1 role="notes">
+  &reftitle.notes;
+  <warning>
+   <para>
+    &false; is returned both in the case of an error and if unserializing
+    the serialized &false; value. It is possible to catch this special case by
+    comparing <parameter>str</parameter> with
+    <literal>serialize(false)</literal> or by catching the issued
+    <constant>E_NOTICE</constant>.
+   </para>
+  </warning>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>serialize</function></member>
+    <member><link linkend="language.oop5.autoload">Autoloading Objects</link></member>
+    <member><link linkend="unserialize-callback-func">unserialize_callback_func</link></member>
+    <member><link linkend="object.wakeup">__wakeup()</link></member>
+   </simplelist>
+  </para>
+ </refsect1>
   </refentry>
 
 <!-- Keep this comment at the end of the file

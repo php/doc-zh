@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: yincheng Status: ready -->
+<!-- EN-Revision: 96c9d88bad9a7d7d44bfb7f26c226df7ee9ddf26 Maintainer: HonestQiao Status: ready -->
+<!-- Reviewed: no Maintainer: HonestQiao -->
 <!-- CREDITS: dallas -->
 <refentry xml:id="function.oci-fetch" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>oci_fetch</refname>
   <refpurpose>Fetches the next row into result-buffer</refpurpose>
  </refnamediv>
- <refsect1>
-  <title>说明</title>
+ <refsect1 role="description">
+  &reftitle.description;
    <methodsynopsis>
     <type>bool</type><methodname>oci_fetch</methodname>
     <methodparam><type>resource</type><parameter>statement</parameter></methodparam>
@@ -17,10 +17,6 @@
   <para>
    <function>oci_fetch</function> 获取下一行（对于 SELECT 语句）到内部结果缓冲区。
   </para>
-  <para>
-   &return.success;
-  </para>
-  &oci.datatypes;
   <note>
    <para>
     在 PHP 5.0.0 之前的版本必须使用 <function>ocifetch</function>
@@ -28,6 +24,130 @@
     <function>oci_fetch</function> 的别名。不过其已被废弃，不推荐使用。
    </para>
   </note>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>statement</parameter></term>
+     <listitem>
+       &oci.arg.statement.id;
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   Returns &true; on success or &false; if there are no more rows in the
+   <parameter>statement</parameter>.
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title><function>oci_fetch</function> with defined variables</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+
+$conn = oci_connect('hr', 'welcome', 'localhost/XE');
+if (!$conn) {
+    $e = oci_error();
+    trigger_error(htmlentities($e['message'], ENT_QUOTES), E_USER_ERROR);
+}
+
+$sql = 'SELECT location_id, city FROM locations WHERE location_id < 1200';
+$stid = oci_parse($conn, $sql);
+
+// The defines MUST be done before executing
+oci_define_by_name($stid, 'LOCATION_ID', $locid);
+oci_define_by_name($stid, 'CITY', $city);
+
+oci_execute($stid);
+
+// Each fetch populates the previously defined variables with the next row's data
+while (oci_fetch($stid)) {
+    echo "Location id $locid is $city<br>\n";
+}
+
+// Displays:
+//   Location id 1000 is Roma
+//   Location id 1100 is Venice
+
+oci_free_statement($stid);
+oci_close($conn);
+
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   <example>
+    <title><function>oci_fetch</function> with <function>oci_result</function></title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+
+$conn = oci_connect('hr', 'welcome', 'localhost/XE');
+if (!$conn) {
+    $e = oci_error();
+    trigger_error(htmlentities($e['message'], ENT_QUOTES), E_USER_ERROR);
+}
+
+$sql = 'SELECT location_id, city FROM locations WHERE location_id < 1200';
+$stid = oci_parse($conn, $sql);
+oci_execute($stid);
+
+while (oci_fetch($stid)) {
+    echo oci_result($stid, 'LOCATION_ID') . " is ";
+    echo oci_result($stid, 'CITY') . "<br>\n";
+}
+
+// Displays:
+//   1000 is Roma
+//   1100 is Venice
+
+oci_free_statement($stid);
+oci_close($conn);
+
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+ </refsect1>
+
+ <refsect1 role="notes">
+  &reftitle.notes;
+  <note>
+   <para>
+    In PHP versions before 5.0.0 use <function>ocifetch</function>
+    instead.  &oci.name.compat.note;
+   </para>
+  </note>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>oci_define_by_name</function></member>
+    <member><function>oci_fetch_all</function></member>
+    <member><function>oci_fetch_array</function></member>
+    <member><function>oci_fetch_assoc</function></member>
+    <member><function>oci_fetch_object</function></member>
+    <member><function>oci_fetch_row</function></member>
+    <member><function>oci_result</function></member>
+   </simplelist>
+  </para>
  </refsect1>
 </refentry>
 

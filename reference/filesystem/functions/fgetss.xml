@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
+<!-- EN-Revision: 96c9d88bad9a7d7d44bfb7f26c226df7ee9ddf26 Maintainer: HonestQiao Status: ready -->
+<!-- Reviewed: no Maintainer: HonestQiao -->
 <refentry xml:id="function.fgetss" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>fgetss</refname>
   <refpurpose>从文件指针中读取一行并过滤掉 HTML 标记</refpurpose>
  </refnamediv>
- <refsect1>
-  <title>说明</title>
+ <refsect1 role="description">
+  &reftitle.description;
   <methodsynopsis>
    <type>string</type><methodname>fgetss</methodname>
    <methodparam><type>resource</type><parameter>handle</parameter></methodparam>
@@ -34,6 +34,129 @@
   <para>
    参见 <function>fgets</function>，<function>fopen</function>，<function>fsockopen</function>，<function>popen</function>
    和 <function>strip_tags</function>。
+  </para>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>handle</parameter></term>
+     <listitem>
+      &fs.validfp.all;
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>length</parameter></term>
+     <listitem>
+      <para>
+       Length of the data to be retrieved.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>allowable_tags</parameter></term>
+     <listitem>
+      <para>
+       You can use the optional third parameter to specify tags which should
+       not be stripped.
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   Returns a string of up to <parameter>length</parameter> - 1 bytes read from
+   the file pointed to by <parameter>handle</parameter>, with all HTML and PHP
+   code stripped.
+  </para>
+  <para>
+   If an error occurs, returns &false;.
+  </para>
+ </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <para>
+   <informaltable>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>&Version;</entry>
+       <entry>&Description;</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>5.0.0</entry>
+       <entry>
+        The <parameter>length</parameter> parameter is optional
+       </entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </informaltable>
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  <para>
+   <example>
+    <title>Reading a PHP file line-by-line</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$str = <<<EOD
+<html><body>
+ <p>Welcome! Today is the <?php echo(date('jS')); ?> of <?= date('F'); ?>.</p>
+</body></html>
+Text outside of the HTML block.
+EOD;
+file_put_contents('sample.php', $str);
+
+$handle = @fopen("sample.php", "r");
+if ($handle) {
+    while (!feof($handle)) {
+        $buffer = fgetss($handle, 4096);
+        echo $buffer;
+    }
+    fclose($handle);
+}
+?>
+]]>
+    </programlisting>
+    &example.outputs.similar;
+    <screen>
+<![CDATA[
+ Welcome! Today is the  of .
+
+Text outside of the HTML block.
+]]>
+    </screen>
+   </example>
+  </para>
+ </refsect1>
+
+ <refsect1 role="notes">
+  &reftitle.notes;
+  &note.line-endings;
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>fgets</function></member>
+    <member><function>fopen</function></member>
+    <member><function>popen</function></member>
+    <member><function>fsockopen</function></member>
+    <member><function>strip_tags</function></member>
+   </simplelist>
   </para>
  </refsect1>
 </refentry>

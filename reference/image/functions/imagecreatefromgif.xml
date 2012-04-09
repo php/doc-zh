@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
+<!-- EN-Revision: d732584196d90d7be728ea0ca101461c2ed8570c Maintainer: HonestQiao Status: ready -->
+<!-- Reviewed: no Maintainer: HonestQiao -->
 <refentry xml:id="function.imagecreatefromgif" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>imagecreatefromgif</refname>
-  <refpurpose>从 GIF 文件或 URL 新建一图像</refpurpose>
+  <refpurpose>&gd.image.new;</refpurpose>
  </refnamediv>
- <refsect1>
-  <title>说明</title>
+ <refsect1 role="description">
+  &reftitle.description;
   <methodsynopsis>
    <type>resource</type><methodname>imagecreatefromgif</methodname>
    <methodparam><type>string</type><parameter>filename</parameter></methodparam>
@@ -51,6 +51,83 @@ function LoadGif($imgname)
    </note>
   </para>
   &tip.fopen-wrapper;
+  &warn.no-win32-fopen-wrapper;
+ </refsect1>
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>filename</parameter></term>
+     <listitem>
+      <para>
+       Path to the GIF image.
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>&gd.return.identifier;</para>
+ </refsect1>
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <example>
+   <title>Example to handle an error during loading of a GIF</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+function LoadGif($imgname)
+{
+    /* Attempt to open */
+    $im = @imagecreatefromgif($imgname);
+
+    /* See if it failed */
+    if(!$im)
+    {
+        /* Create a blank image */
+        $im = imagecreatetruecolor (150, 30);
+        $bgc = imagecolorallocate ($im, 255, 255, 255);
+        $tc = imagecolorallocate ($im, 0, 0, 0);
+
+        imagefilledrectangle ($im, 0, 0, 150, 30, $bgc);
+
+        /* Output an error message */
+        imagestring ($im, 1, 5, 5, 'Error loading ' . $imgname, $tc);
+    }
+
+    return $im;
+}
+
+header('Content-Type: image/gif');
+
+$img = LoadGif('bogus.image');
+
+imagegif($img);
+imagedestroy($img);
+?>
+]]>
+   </programlisting>
+   &example.outputs.similar;
+   <mediaobject>
+    <alt>Output of example : Example to handle an error during loading of a GIF</alt>
+    <imageobject>
+     <imagedata fileref="en/reference/image/figures/imagecreatefromgif.gif"/>
+    </imageobject>
+   </mediaobject>
+  </example>
+ </refsect1>
+ <refsect1 role="notes">
+  &reftitle.notes;
+  <note>
+   <para>
+    GIF support was removed from the GD library in Version 1.6,
+    and added back in Version 2.0.28. This function is not
+    available between these versions.
+   </para>
+  </note>
   &warn.no-win32-fopen-wrapper;
  </refsect1>
 </refentry>

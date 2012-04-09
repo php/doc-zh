@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
+<!-- EN-Revision: addba5dcce72f6c9e66751d0d12fa830bdef4707 Maintainer: HonestQiao Status: ready -->
+<!-- Reviewed: no Maintainer: HonestQiao -->
 <refentry xml:id="function.imagecopyresampled" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>imagecopyresampled</refname>
   <refpurpose>重采样拷贝部分图像并调整大小</refpurpose>
  </refnamediv>
- <refsect1>
-  <title>说明</title>
+ <refsect1 role="description">
+  &reftitle.description;
   <methodsynopsis>
    <type>bool</type><methodname>imagecopyresampled</methodname>
    <methodparam><type>resource</type><parameter>dst_image</parameter></methodparam>
@@ -40,18 +40,99 @@
     <function>imagecreatetruecolor</function> 创建的。
    </para>
   </note>
-  &note.gd.2;
  </refsect1>
-
- <refsect1>
-
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>dst_image</parameter></term>
+     <listitem>
+      <para>&gd.image.destination;</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>src_image</parameter></term>
+     <listitem>
+      <para>&gd.image.source;</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>dst_x</parameter></term>
+     <listitem>
+      <para>
+       x-coordinate of destination point.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>dst_y</parameter></term>
+     <listitem>
+      <para>
+       y-coordinate of destination point.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>src_x</parameter></term>
+     <listitem>
+      <para>
+       x-coordinate of source point.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>src_y</parameter></term>
+     <listitem>
+      <para>
+       y-coordinate of source point.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>dst_w</parameter></term>
+     <listitem>
+      <para>
+       Destination width.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>dst_h</parameter></term>
+     <listitem>
+      <para>
+       Destination height.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>src_w</parameter></term>
+     <listitem>
+      <para>&gd.source.width;</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>src_h</parameter></term>
+     <listitem>
+      <para>&gd.source.height;</para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   &return.success;
+  </para>
+ </refsect1>
+ <refsect1 role="examples">
   &reftitle.examples;
-
   <para>
    <example>
-    <title>简单例子</title>
+    <title>Simple example</title>
     <para>
-     本例中将把一幅图像重采样为原始大小的一半。
+     This example will resample an image to half its original size.
     </para>
     <programlisting role="php">
 <![CDATA[
@@ -61,7 +142,7 @@ $filename = 'test.jpg';
 $percent = 0.5;
 
 // Content type
-header('Content-type: image/jpeg');
+header('Content-Type: image/jpeg');
 
 // Get new dimensions
 list($width, $height) = getimagesize($filename);
@@ -77,17 +158,24 @@ imagecopyresampled($image_p, $image, 0, 0, 0, 0, $new_width, $new_height, $width
 imagejpeg($image_p, null, 100);
 ?>
 ]]>
-     </programlisting>
-    </example>
-   </para>
-
-   <para>
-    <example>
-     <title>按比例重采样图像</title>
-     <para>
-      本例将把一幅图像按最宽或最高 200 像素来显示。
-     </para>
-     <programlisting role="php">
+    </programlisting>
+    &example.outputs.similar;
+    <mediaobject>
+     <alt>Output of example : Simple example</alt>
+     <imageobject>
+      <imagedata fileref="en/reference/image/figures/imagecopyresampled.jpg"/>
+     </imageobject>
+    </mediaobject>
+   </example>
+  </para>
+  <para>
+   <example>
+    <title>Resampling an image proportionally</title>
+    <para>
+     This example will display an image with the maximum width,
+     or height, of 200 pixels.
+    </para>
+    <programlisting role="php">
 <![CDATA[
 <?php
 // The file
@@ -98,15 +186,17 @@ $width = 200;
 $height = 200;
 
 // Content type
-header('Content-type: image/jpeg');
+header('Content-Type: image/jpeg');
 
 // Get new dimensions
 list($width_orig, $height_orig) = getimagesize($filename);
 
-if ($width && ($width_orig < $height_orig)) {
-    $width = ($height / $height_orig) * $width_orig;
+$ratio_orig = $width_orig/$height_orig;
+
+if ($width/$height > $ratio_orig) {
+   $width = $height*$ratio_orig;
 } else {
-    $height = ($width / $width_orig) * $height_orig;
+   $height = $width/$ratio_orig;
 }
 
 // Resample
@@ -118,16 +208,38 @@ imagecopyresampled($image_p, $image, 0, 0, 0, 0, $width, $height, $width_orig, $
 imagejpeg($image_p, null, 100);
 ?>
 ]]>
-     </programlisting>
-    </example>
-   </para>
-  </refsect1>
-
-  <refsect1>
-   &reftitle.seealso;
+    </programlisting>
+    &example.outputs.similar;
+    <mediaobject>
+     <alt>Output of example : Resampling an image proportionally</alt>
+     <imageobject>
+      <imagedata fileref="en/reference/image/figures/imagecopyresampled_2.jpg"/>
+     </imageobject>
+    </mediaobject>
+   </example>
+  </para>
+ </refsect1>
+ <refsect1 role="notes">
+  &reftitle.notes;
+  <note>
    <para>
-    <function>imagecopyresized</function>
+    There is a problem due to palette image limitations (255+1 colors).
+    Resampling or filtering an image commonly needs more colors than 255, a
+    kind of approximation is used to calculate the new resampled pixel and its
+    color.  With a palette image we try to allocate a new color, if that
+    failed, we choose the closest (in theory) computed color.  This is
+    not always the closest visual color. That may produce a weird result, like
+    blank (or visually blank) images.  To skip this problem, please use a
+    truecolor image as a destination image, such as one created by
+    <function>imagecreatetruecolor</function>.
    </para>
+  </note>
+ </refsect1>
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <function>imagecopyresized</function>
+  </para>
  </refsect1>
 </refentry>
 

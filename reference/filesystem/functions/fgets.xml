@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
+<!-- EN-Revision: 89fd31bb2e806fc27ea687df43ad438ce06d5dbb Maintainer: HonestQiao Status: ready -->
+<!-- Reviewed: no Maintainer: HonestQiao -->
 <refentry xml:id="function.fgets" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>fgets</refname>
   <refpurpose>从文件指针中读取一行</refpurpose>
  </refnamediv>
- <refsect1>
-  <title>说明</title>
+ <refsect1 role="description">
+  &reftitle.description;
   <methodsynopsis>
    <type>string</type><methodname>fgets</methodname>
    <methodparam><type>int</type><parameter>handle</parameter></methodparam>
@@ -69,6 +69,133 @@ if ($handle) {
   <para>
    参见 <function>fgetss</function>，<function>fread</function>，<function>fgetc</function>，<function>stream_get_line</function>，<function>fopen</function>，<function>popen</function>，<function>fsockopen</function>
    和 <function>stream_set_timeout</function>。
+  </para>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>handle</parameter></term>
+     <listitem>
+      &fs.validfp.all;
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>length</parameter></term>
+     <listitem>
+      <para>
+       Reading ends when <parameter>length</parameter> - 1 bytes have been
+       read, on a newline (which is included in the return value), or on EOF
+       (whichever comes first). If no length is specified, it will keep
+       reading from the stream until it reaches the end of the line.
+      </para>
+      <note>
+       <para>
+        Until PHP 4.3.0, omitting it would assume 1024 as the line length.
+        If the majority of the lines in the file are all larger than 8KB,
+        it is more resource efficient for your script to specify the maximum
+        line length.
+       </para>
+      </note>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   Returns a string of up to <parameter>length</parameter> - 1 bytes read from
+   the file pointed to by <parameter>handle</parameter>. If there is no more data 
+   to read in the file pointer, then &false; is returned.
+  </para>
+  <para>
+   If an error occurs, &false; is returned.
+  </para>
+ </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <para>
+   <informaltable>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>&Version;</entry>
+       <entry>&Description;</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>4.3.0</entry>
+       <entry>
+        <function>fgets</function> is now binary safe
+       </entry>
+      </row>
+      <row>
+       <entry>4.2.0</entry>
+       <entry>
+        The <parameter>length</parameter> parameter became optional
+       </entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </informaltable>
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title>Reading a file line by line</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$handle = @fopen("/tmp/inputfile.txt", "r");
+if ($handle) {
+    while (($buffer = fgets($handle, 4096)) !== false) {
+        echo $buffer;
+    }
+    if (!feof($handle)) {
+        echo "Error: unexpected fgets() fail\n";
+    }
+    fclose($handle);
+}
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+ </refsect1>
+
+ <refsect1 role="notes">
+  &reftitle.notes;
+  &note.line-endings;
+  <note>
+   <para>
+    People used to the 'C' semantics of <function>fgets</function>
+    should note the difference in how <literal>EOF</literal> is returned.
+   </para>
+  </note>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>fgetss</function></member>
+    <member><function>fread</function></member>
+    <member><function>fgetc</function></member>
+    <member><function>stream_get_line</function></member>
+    <member><function>fopen</function></member>
+    <member><function>popen</function></member>
+    <member><function>fsockopen</function></member>
+    <member><function>stream_set_timeout</function></member>
+   </simplelist>
   </para>
  </refsect1>
 </refentry>

@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
+<!-- EN-Revision: 6b345e4d7fc2b147f8418307d1db78e108aae018 Maintainer: HonestQiao Status: ready -->
+<!-- Reviewed: no Maintainer: HonestQiao -->
 <refentry xml:id="function.fileperms" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>fileperms</refname>
   <refpurpose>取得文件的权限</refpurpose>
  </refnamediv>
- <refsect1>
-  <title>说明</title>
+ <refsect1 role="description">
+  &reftitle.description;
   <methodsynopsis>
    <type>int</type><methodname>fileperms</methodname>
    <methodparam><type>string</type><parameter>filename</parameter></methodparam>
@@ -28,7 +28,7 @@ echo substr(sprintf('%o', fileperms('/etc/passwd')), -4);
 ?>
 ]]>
    </programlisting>
-   &example.outputs.similar;
+   &example.outputs;
    <screen>
 <![CDATA[
 1777
@@ -94,7 +94,7 @@ echo $info;
 ?>
 ]]>
    </programlisting>
-   &example.outputs.similar;
+   &example.outputs;
    <screen>
 <![CDATA[
 -rw-r--r--
@@ -104,6 +104,153 @@ echo $info;
   <simpara>
    参见 <function>is_readable</function> 和 <function>stat</function>。
   </simpara>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>filename</parameter></term>
+     <listitem>
+      <para>
+       Path to the file.
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   Returns the file's permissions as a numeric mode. Lower bits of this mode
+   are the same as the permissions expected by <function>chmod</function>,
+   however on most platforms the return value will also include information on
+   the type of file given as <parameter>filename</parameter>. The examples
+   below demonstrate how to test the return value for specific permissions and
+   file types on POSIX systems, including Linux and Mac OS X.
+  </para>
+  <para>
+   For local files, the specific return value is that of the
+   <literal>st_mode</literal> member of the structure returned by the C
+   library's <function>stat</function> function. Exactly which bits are set
+   can vary from platform to platform, and looking up your specific platform's
+   documentation is recommended if parsing the non-permission bits of the
+   return value is required.
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title>Display permissions as an octal value</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+echo substr(sprintf('%o', fileperms('/tmp')), -4);
+echo substr(sprintf('%o', fileperms('/etc/passwd')), -4);
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+1777
+0644
+]]>
+    </screen>
+   </example>
+   <example>
+    <title>Display full permissions</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$perms = fileperms('/etc/passwd');
+
+if (($perms & 0xC000) == 0xC000) {
+    // Socket
+    $info = 's';
+} elseif (($perms & 0xA000) == 0xA000) {
+    // Symbolic Link
+    $info = 'l';
+} elseif (($perms & 0x8000) == 0x8000) {
+    // Regular
+    $info = '-';
+} elseif (($perms & 0x6000) == 0x6000) {
+    // Block special
+    $info = 'b';
+} elseif (($perms & 0x4000) == 0x4000) {
+    // Directory
+    $info = 'd';
+} elseif (($perms & 0x2000) == 0x2000) {
+    // Character special
+    $info = 'c';
+} elseif (($perms & 0x1000) == 0x1000) {
+    // FIFO pipe
+    $info = 'p';
+} else {
+    // Unknown
+    $info = 'u';
+}
+
+// Owner
+$info .= (($perms & 0x0100) ? 'r' : '-');
+$info .= (($perms & 0x0080) ? 'w' : '-');
+$info .= (($perms & 0x0040) ?
+            (($perms & 0x0800) ? 's' : 'x' ) :
+            (($perms & 0x0800) ? 'S' : '-'));
+
+// Group
+$info .= (($perms & 0x0020) ? 'r' : '-');
+$info .= (($perms & 0x0010) ? 'w' : '-');
+$info .= (($perms & 0x0008) ?
+            (($perms & 0x0400) ? 's' : 'x' ) :
+            (($perms & 0x0400) ? 'S' : '-'));
+
+// World
+$info .= (($perms & 0x0004) ? 'r' : '-');
+$info .= (($perms & 0x0002) ? 'w' : '-');
+$info .= (($perms & 0x0001) ?
+            (($perms & 0x0200) ? 't' : 'x' ) :
+            (($perms & 0x0200) ? 'T' : '-'));
+
+echo $info;
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+-rw-r--r--
+]]>
+    </screen>
+   </example>
+  </para>
+ </refsect1>
+
+ <refsect1 role="errors">
+  &reftitle.errors;
+  &fs.emits.warning.on.failure;
+ </refsect1>
+
+ <refsect1 role="notes">
+  &reftitle.notes;
+  &note.clearstatcache;
+  &tip.fopen-wrapper.stat;
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>chmod</function></member>
+    <member><function>is_readable</function></member>
+    <member><function>stat</function></member>
+   </simplelist>
+  </para>
  </refsect1>
 </refentry>
 

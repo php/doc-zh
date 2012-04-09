@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
+<!-- EN-Revision: 2dea76047532c625240785803ebead57310856b6 Maintainer: HonestQiao Status: ready -->
+<!-- Reviewed: no Maintainer: HonestQiao -->
 <refentry xml:id="function.parse-ini-file" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>parse_ini_file</refname>
   <refpurpose>解析一个配置文件</refpurpose>
  </refnamediv>
- <refsect1>
-  <title>说明</title>
+ <refsect1 role="description">
+  &reftitle.description;
   <methodsynopsis>
    <type>array</type><methodname>parse_ini_file</methodname>
    <methodparam><type>string</type><parameter>filename</parameter></methodparam>
@@ -100,7 +100,7 @@ print_r($ini_array);
 ?>
 ]]>
     </programlisting>
-    &example.outputs;
+    &example.outputs.similar;
     <screen>
 <![CDATA[
 Array
@@ -135,6 +135,284 @@ Array
    由数字组成的键名和小节名会被 PHP 当作<link
    linkend="language.types.integer">整数</link>来处理，因此以
    0 开头的数字会被当作八进制而以 0x 开头的会被当作十六进制。
+  </para>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>filename</parameter></term>
+     <listitem>
+      <para>
+       The filename of the ini file being parsed.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>process_sections</parameter></term>
+     <listitem>
+      <para>
+       By setting the <parameter>process_sections</parameter>
+       parameter to &true;, you get a multidimensional array, with
+       the section names and settings included. The default
+       for <parameter>process_sections</parameter> is &false;      
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>scanner_mode</parameter></term>
+     <listitem>
+      <para>
+       Can either be <constant>INI_SCANNER_NORMAL</constant> (default) or 
+       <constant>INI_SCANNER_RAW</constant>. If <constant>INI_SCANNER_RAW</constant> 
+       is supplied, then option values will not be parsed.
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+ 
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   The settings are returned as an associative <type>array</type> on success,
+   and &false; on failure.
+  </para>
+ </refsect1>
+
+ 
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <para>
+   <informaltable>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>&Version;</entry>
+       <entry>&Description;</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>5.3.0</entry>
+       <entry>
+         Added optional <parameter>scanner_mode</parameter> parameter.
+         Single quotes may now be used around variable assignments.
+         Hash marks (<literal>#</literal>) may no longer be used as comments
+         and will throw a deprecation warning if used.
+       </entry>
+      </row>
+      <row>
+       <entry>5.2.7</entry>
+       <entry>
+        On syntax error this function will return &false; rather than an empty
+        array.
+       </entry>
+      </row>
+      <row>
+       <entry>5.2.4</entry>
+       <entry>
+        Keys and section names consisting of numbers are now evaluated as PHP
+        <link linkend="language.types.integer">integers</link> thus numbers
+        starting by 0 are evaluated as octals and numbers starting by 0x are
+        evaluated as hexadecimals.
+       </entry>
+      </row>
+      <row>
+       <entry>5.0.0</entry>
+       <entry>
+        Values enclosed in double quotes can contain new lines.
+       </entry>
+      </row>
+      <row>
+       <entry>4.2.1</entry>
+       <entry>
+        This function is now affected by &safemode;
+        and <link linkend="ini.open-basedir">open_basedir</link>.
+       </entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </informaltable>
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title>Contents of <filename>sample.ini</filename></title>
+    <programlisting>
+<![CDATA[
+; This is a sample configuration file
+; Comments start with ';', as in php.ini
+
+[first_section]
+one = 1
+five = 5
+animal = BIRD
+
+[second_section]
+path = "/usr/local/bin"
+URL = "http://www.example.com/~username"
+
+[third_section]
+phpversion[] = "5.0"
+phpversion[] = "5.1"
+phpversion[] = "5.2"
+phpversion[] = "5.3"
+]]>
+    </programlisting>
+   </example>
+   <example>
+    <title><function>parse_ini_file</function> example</title>
+    <para>
+     <link linkend="language.constants">Constants</link> may also be parsed
+     in the ini file so if you define a constant as an ini value before
+     running <function>parse_ini_file</function>, it will be integrated into
+     the results.  Only ini values are evaluated.  For example:
+    </para>
+    <programlisting role="php">
+<![CDATA[
+<?php
+
+define('BIRD', 'Dodo bird');
+
+// Parse without sections
+$ini_array = parse_ini_file("sample.ini");
+print_r($ini_array);
+
+// Parse with sections
+$ini_array = parse_ini_file("sample.ini", true);
+print_r($ini_array);
+
+?>
+]]>
+    </programlisting>
+    &example.outputs.similar;
+    <screen>
+<![CDATA[
+Array
+(
+    [one] => 1
+    [five] => 5
+    [animal] => Dodo bird
+    [path] => /usr/local/bin
+    [URL] => http://www.example.com/~username
+    [phpversion] => Array
+        (
+            [0] => 5.0
+            [1] => 5.1
+            [2] => 5.2
+            [3] => 5.3
+        )
+
+)
+Array
+(
+    [first_section] => Array
+        (
+            [one] => 1
+            [five] => 5
+            [animal] => Dodo bird
+        )
+
+    [second_section] => Array
+        (
+            [path] => /usr/local/bin
+            [URL] => http://www.example.com/~username
+        )
+
+    [third_section] => Array
+        (
+            [phpversion] => Array
+                (
+                    [0] => 5.0
+                    [1] => 5.1
+                    [2] => 5.2
+                    [3] => 5.3
+                )
+
+        )
+
+)
+]]>
+    </screen>
+   </example>
+  </para>
+  <para>
+   <example>
+    <title><function>parse_ini_file</function> parsing a php.ini file</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+// A simple function used for comparing the results below
+function yesno($expression)
+{
+    return($expression ? 'Yes' : 'No');
+}
+
+// Get the path to php.ini using the php_ini_loaded_file() 
+// function available as of PHP 5.2.4
+$ini_path = php_ini_loaded_file();
+
+// Parse php.ini
+$ini = parse_ini_file($ini_path);
+
+// Print and compare the values, note that using get_cfg_var()
+// will give the same results for parsed and loaded here
+echo '(parsed) magic_quotes_gpc = ' . yesno($ini['magic_quotes_gpc']) . PHP_EOL;
+echo '(loaded) magic_quotes_gpc = ' . yesno(get_cfg_var('magic_quotes_gpc')) . PHP_EOL;
+?>
+]]>
+    </programlisting>
+    &example.outputs.similar;
+    <screen>
+<![CDATA[
+(parsed) magic_quotes_gpc = Yes
+(loaded) magic_quotes_gpc = Yes
+]]>
+    </screen>
+   </example>
+  </para>
+ </refsect1>
+
+ <refsect1 role="notes">
+  &reftitle.notes;
+  <note>
+   <para>
+    This function has nothing to do with the
+    &php.ini; file. It is already processed by
+    the time you run your script. This function can be used to
+    read in your own application's configuration files.
+   </para>
+  </note>
+  <note>
+   <para>
+    If a value in the ini file contains any non-alphanumeric
+    characters it needs to be enclosed in double-quotes (").
+   </para>
+  </note>
+  <note>
+   <simpara>
+    There are reserved words which must not be used as keys for
+    ini files.  These include: null, yes, no, true, false, on, off, none.
+    Values null, no and false results in "", yes and true results in "1".
+    Characters <literal>?{}|&amp;~![()^"</literal> must not be used anywhere in
+    the key and have a special meaning in the value.
+   </simpara>
+  </note>
+ </refsect1>
+ 
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>parse_ini_string</function></member>
+   </simplelist>
   </para>
  </refsect1>
 </refentry>

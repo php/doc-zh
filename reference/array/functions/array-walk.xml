@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
+<!-- EN-Revision: 5faa7a6747bca628b3bdcc9f93aec5603b65581f Maintainer: HonestQiao Status: ready -->
+<!-- Reviewed: no Maintainer: HonestQiao -->
 <refentry xml:id="function.array-walk" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>array_walk</refname>
   <refpurpose>对数组中的每个成员应用用户函数</refpurpose>
  </refnamediv>
- <refsect1>
-  <title>说明</title>
+ <refsect1 role="description">
+  &reftitle.description;
   <methodsynopsis>
    <type>bool</type><methodname>array_walk</methodname>
    <methodparam><type>array</type><parameter role="reference">array</parameter></methodparam>
@@ -106,6 +106,149 @@ c. fruit: apple
    linkend="control-structures.foreach">foreach</link>，<function>each</function>，<function>call_user_func_array</function>，<function>array_map</function>
    和&seealso.callback;。
   </simpara>
+ </refsect1>
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>array</parameter></term>
+     <listitem>
+      <para>
+       The input array.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>funcname</parameter></term>
+     <listitem>
+      <para>
+       Typically, <parameter>funcname</parameter> takes on two parameters.
+       The <parameter>array</parameter> parameter's value being the first, and
+       the key/index second.
+      </para>
+      <note>
+       <para>
+        If <parameter>funcname</parameter> needs to be working with the
+        actual values of the array, specify the first parameter of
+        <parameter>funcname</parameter> as a
+        <link linkend="language.references">reference</link>. Then,
+        any changes made to those elements will be made in the
+        original array itself.
+       </para>
+      </note>
+      <note>
+        <para>
+          Many internal functions (for example <function>strtolower</function>)
+          will throw a warning if more than the expected number of argument
+          are passed in and are not usable directly as
+          <parameter>funcname</parameter>.
+        </para>
+      </note>
+      <para>
+       Only the values of the <parameter>array</parameter> may potentially be
+       changed; its structure cannot be altered, i.e., the programmer cannot
+       add, unset or reorder elements. If the callback does not respect this
+       requirement, the behavior of this function is undefined, and      
+       unpredictable.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>userdata</parameter></term>
+     <listitem>
+      <para>
+       If the optional <parameter>userdata</parameter> parameter is supplied,
+       it will be passed as the third parameter to the callback
+       <parameter>funcname</parameter>.
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   &return.success;
+  </para>
+ </refsect1>
+ <refsect1 role="errors">
+  &reftitle.errors;
+  <para>
+   If function <parameter>funcname</parameter> requires more parameters than
+   given to it, an error of level <link linkend="errorfunc.constants">
+   E_WARNING</link> will be generated each time <function>array_walk</function>
+   calls <parameter>funcname</parameter>. These warnings may be suppressed by
+   prepending the PHP error operator
+   <link linkend="language.operators.errorcontrol">@</link> to the
+   <function>array_walk</function> call, or by using
+   <function>error_reporting</function>.
+  </para>
+ </refsect1>
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title><function>array_walk</function> example</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$fruits = array("d" => "lemon", "a" => "orange", "b" => "banana", "c" => "apple");
+
+function test_alter(&$item1, $key, $prefix)
+{
+    $item1 = "$prefix: $item1";
+}
+
+function test_print($item2, $key)
+{
+    echo "$key. $item2<br />\n";
+}
+
+echo "Before ...:\n";
+array_walk($fruits, 'test_print');
+
+array_walk($fruits, 'test_alter', 'fruit');
+echo "... and after:\n";
+
+array_walk($fruits, 'test_print');
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen role="php">
+<![CDATA[
+Before ...:
+d. lemon
+a. orange
+b. banana
+c. apple
+... and after:
+d. fruit: lemon
+a. fruit: orange
+b. fruit: banana
+c. fruit: apple
+]]>
+    </screen>
+   </example>
+  </para>
+ </refsect1>
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>array_walk_recursive</function></member>
+    <member><function>iterator_apply</function></member>
+    <member><function>create_function</function></member>
+    <member><function>list</function></member>
+    <member><function>each</function></member>
+    <member><function>call_user_func_array</function></member>
+    <member><function>array_map</function></member>
+    <member>&seealso.callback;</member>
+    <member>&foreach;</member>
+   </simplelist>
+  </para>
  </refsect1>
 </refentry>
 

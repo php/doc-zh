@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: yincheng Status: ready -->
+<!-- EN-Revision: f453f7036c74f5f8ce5e15d3d5abbaf8dfd599e2 Maintainer: HonestQiao Status: ready -->
+<!-- Reviewed: no Maintainer: HonestQiao -->
 <!-- CREDITS: dallas -->
 <refentry xml:id="function.oci-rollback" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>oci_rollback</refname>
   <refpurpose>回滚未提交的事务</refpurpose>
  </refnamediv>
- <refsect1>
-  <title>说明</title>
+ <refsect1 role="description">
+  &reftitle.description;
   <methodsynopsis>
    <type>bool</type><methodname>oci_rollback</methodname>
    <methodparam><type>resource</type><parameter>connection</parameter></methodparam>
@@ -37,6 +37,141 @@
   </note>
   <para>
    参见 <function>oci_commit</function>。
+  </para>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>connection</parameter></term>
+     <listitem>
+      <para>
+       An Oracle connection identifier, returned by
+       <function>oci_connect</function>, <function>oci_pconnect</function>
+       or <function>oci_new_connect</function>.
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   &return.success;
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title><function>oci_rollback</function> example</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+
+// Insert into several tables, rolling back the changes if an error occurs
+
+$conn = oci_connect('hr', 'welcome', 'localhost/XE');
+
+$stid = oci_parse($conn, "INSERT INTO mysalary (id, name) VALUES (1, 'Chris')");
+
+// The OCI_NO_AUTO_COMMIT flag tells Oracle not to commit the INSERT immediately
+// Use OCI_DEFAULT as the flag for PHP <= 5.3.1.  The two flags are equivalent
+$r = oci_execute($stid, OCI_NO_AUTO_COMMIT);
+if (!$r) {    
+    $e = oci_error($stid);
+    trigger_error(htmlentities($e['message']), E_USER_ERROR);
+}
+
+$stid = oci_parse($conn, 'INSERT INTO myschedule (startday) VALUES (12)');
+$r = oci_execute($stid, OCI_NO_AUTO_COMMIT);
+if (!$r) {    
+    $e = oci_error($stid);
+    oci_rollback($conn);  // rollback changes to both tables
+    trigger_error(htmlentities($e['message']), E_USER_ERROR);
+}
+
+// Commit the changes to both tables
+$r = oci_commit($conn);
+if (!r) {
+    $e = oci_error($conn);
+    trigger_error(htmlentities($e['message']), E_USER_ERROR);
+}
+
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   <example>
+    <title>Rolling back to a <literal>SAVEPOINT</literal> example</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$stid = oci_parse($conn, 'UPDATE mytab SET id = 1111');
+oci_execute($stid, OCI_NO_AUTO_COMMIT);
+
+// Create the savepoint
+$stid = oci_parse($conn, 'SAVEPOINT mysavepoint');
+oci_execute($stid, OCI_NO_AUTO_COMMIT);
+
+$stid = oci_parse($conn, 'UPDATE mytab SET id = 2222');
+oci_execute($stid, OCI_NO_AUTO_COMMIT);
+
+// Use an explicit SQL statement to rollback to the savepoint
+$stid = oci_parse($conn, 'ROLLBACK TO SAVEPOINT mysavepoint');
+oci_execute($stid, OCI_NO_AUTO_COMMIT);
+
+oci_commit($conn);  // mytab now has id of 1111
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+ </refsect1>
+
+ <refsect1 role="notes">
+  &reftitle.notes;
+  <note>
+   <para>
+    Transactions are automatically rolled back when you close the
+    connection, or when the script ends, whichever is soonest. You
+    need to explicitly call <function>oci_commit</function> to commit
+    the transaction.
+   </para>
+   <para>
+    Any call to <function>oci_execute</function> that uses
+    <constant>OCI_COMMIT_ON_SUCCESS</constant> mode explicitly or by
+    default will commit any previous uncommitted transaction.
+   </para>
+   <para>
+    Any Oracle DDL statement such as <literal>CREATE</literal>
+    or <literal>DROP</literal> will automatically commit any
+    uncommitted transaction.
+   </para>
+  </note>
+  <note>
+   <para>
+    In PHP versions before 5.0.0 you must
+    use <function>ocirollback</function>
+    instead. &oci.name.compat.note;
+   </para>
+  </note>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>oci_commit</function></member>
+    <member><function>oci_execute</function></member>
+   </simplelist>
   </para>
  </refsect1>
 </refentry>

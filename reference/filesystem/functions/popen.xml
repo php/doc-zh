@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
+<!-- EN-Revision: 0419c2fe755e521b8dd3ee702d280ce65c7ce631 Maintainer: HonestQiao Status: ready -->
+<!-- Reviewed: no Maintainer: HonestQiao -->
 <refentry xml:id="function.popen" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>popen</refname>
   <refpurpose>打开进程文件指针</refpurpose>
  </refnamediv>
- <refsect1>
-  <title>说明</title>
+ <refsect1 role="description">
+  &reftitle.description;
   <methodsynopsis>
    <type>resource</type><methodname>popen</methodname>
    <methodparam><type>string</type><parameter>command</parameter></methodparam>
@@ -71,6 +71,109 @@ pclose($handle);
   <para>
    参见 <function>pclose</function>，<function>fopen</function> 和
    <function>proc_open</function>。
+  </para>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>command</parameter></term>
+     <listitem>
+      <para>
+       The command
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>mode</parameter></term>
+     <listitem>
+      <para>
+       The mode
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+ 
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   Returns a file pointer identical to that returned by
+   <function>fopen</function>, except that it is unidirectional (may
+   only be used for reading or writing) and must be closed with
+   <function>pclose</function>. This pointer may be used with
+   <function>fgets</function>, <function>fgetss</function>, and
+   <function>fwrite</function>. When the mode is 'r', the returned
+   file pointer equals to the STDOUT of the command, when the mode
+   is 'w', the returned file pointer equals to the STDIN of the
+   command.
+  </para>
+  <para>
+   If an error occurs, returns &false;.
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title><function>popen</function> example</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$handle = popen("/bin/ls", "r");
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   If the command to be executed could not be found, a valid
+   resource is returned. This may seem odd, but makes sense; it
+   allows you to access any error message returned by the shell:
+   <example>
+    <title><function>popen</function> example</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+error_reporting(E_ALL);
+
+/* Add redirection so we can get stderr. */
+$handle = popen('/path/to/executable 2>&1', 'r');
+echo "'$handle'; " . gettype($handle) . "\n";
+$read = fread($handle, 2096);
+echo $read;
+pclose($handle);
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+ </refsect1>
+ 
+ <refsect1 role="notes">
+  &reftitle.notes;
+  <note>
+   <para>
+    If you're looking for bi-directional support (two-way), use
+    <function>proc_open</function>.
+   </para>
+  </note>
+  &note.exec-path;
+  &warn.sm.exec;
+ </refsect1>
+ 
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>pclose</function></member>
+    <member><function>fopen</function></member>
+    <member><function>proc_open</function></member>
+   </simplelist>
   </para>
  </refsect1>
 </refentry>

@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
+<!-- EN-Revision: 5faa7a6747bca628b3bdcc9f93aec5603b65581f Maintainer: HonestQiao Status: ready -->
+<!-- Reviewed: no Maintainer: HonestQiao -->
 <refentry xml:id="function.array-udiff-uassoc" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>array_udiff_uassoc</refname>
   <refpurpose>带索引检查计算数组的差集，用回调函数比较数据和索引</refpurpose>
  </refnamediv>
- <refsect1>
-  <title>说明</title>
+ <refsect1 role="description">
+  &reftitle.description;
   <methodsynopsis>
    <type>array</type><methodname>array_udiff_uassoc</methodname>
    <methodparam><type>array</type><parameter>array1</parameter></methodparam>
@@ -104,6 +104,149 @@ Array
    <function>array_diff</function>，<function>array_diff_assoc</function>，<function>array_diff_uassoc</function>，<function>array_udiff</function>，<function>array_udiff_assoc</function>，<function>array_intersect</function>，<function>array_intersect_assoc</function>，<function>array_uintersect</function>，<function>array_uintersect_assoc</function>
    和
    <function>array_uintersect_uassoc</function>。
+  </para>
+ </refsect1>
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>array1</parameter></term>
+     <listitem>
+      <para>
+       The first array.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>array2</parameter></term>
+     <listitem>
+      <para>
+       The second array.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>data_compare_func</parameter></term>
+     <listitem>
+      <para>
+       &return.callbacksort;
+      </para>
+      &callback.cmp;
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>key_compare_func</parameter></term>
+     <listitem>
+      <para>
+       The comparison of keys (indices) is done also by the callback function
+       <parameter>key_compare_func</parameter>. This behaviour is unlike what
+       <function>array_udiff_assoc</function> does, since the latter compares
+       the indices by using an internal function.
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   Returns an <type>array</type> containing all the values from
+   <parameter>array1</parameter> that are not present in any of the other
+   arguments.
+  </para>
+ </refsect1>
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title><function>array_udiff_uassoc</function> example</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+class cr {
+    private $priv_member;
+    function cr($val)
+    {
+        $this->priv_member = $val;
+    }
+
+    static function comp_func_cr($a, $b)
+    {
+        if ($a->priv_member === $b->priv_member) return 0;
+        return ($a->priv_member > $b->priv_member)? 1:-1;
+    }
+
+    static function comp_func_key($a, $b)
+    {
+        if ($a === $b) return 0;
+        return ($a > $b)? 1:-1;
+    }
+}
+$a = array("0.1" => new cr(9), "0.5" => new cr(12), 0 => new cr(23), 1=> new cr(4), 2 => new cr(-15),);
+$b = array("0.2" => new cr(9), "0.5" => new cr(22), 0 => new cr(3), 1=> new cr(4), 2 => new cr(-15),);
+
+$result = array_udiff_uassoc($a, $b, array("cr", "comp_func_cr"), array("cr", "comp_func_key"));
+print_r($result);
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+Array
+(
+    [0.1] => cr Object
+        (
+            [priv_member:private] => 9
+        )
+
+    [0.5] => cr Object
+        (
+            [priv_member:private] => 12
+        )
+
+    [0] => cr Object
+        (
+            [priv_member:private] => 23
+        )
+)
+]]>
+    </screen>
+   </example>
+  </para>
+  <simpara>
+   In our example above you see the <literal>"1" =&gt; new cr(4)</literal>
+   pair is present in both arrays and thus it is not in the output from the
+   function. Keep in mind that you have to supply 2 callback functions.
+  </simpara>
+ </refsect1>
+ <refsect1 role="notes">
+  &reftitle.notes;
+  <note>
+   <simpara>
+    Please note that this function only checks one dimension of a n-dimensional
+    array. Of course you can check deeper dimensions by using, for example,
+    <literal>array_udiff_uassoc($array1[0], $array2[0], "data_compare_func",
+    "key_compare_func");</literal>.
+   </simpara>
+  </note>
+ </refsect1>
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>array_diff</function></member>
+    <member><function>array_diff_assoc</function></member>
+    <member><function>array_udiff</function></member>
+    <member><function>array_udiff_assoc</function></member>
+    <member><function>array_intersect</function></member>
+    <member><function>array_intersect_assoc</function></member>
+    <member><function>array_uintersect</function></member>
+    <member><function>array_uintersect_assoc</function></member>
+    <member><function>array_uintersect_uassoc</function></member>
+   </simplelist>
   </para>
  </refsect1>
 </refentry>

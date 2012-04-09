@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
-  <refentry xml:id="function.usort" xmlns="http://docbook.org/ns/docbook">
+<!-- EN-Revision: 5faa7a6747bca628b3bdcc9f93aec5603b65581f Maintainer: HonestQiao Status: ready -->
+<!-- Reviewed: no Maintainer: HonestQiao -->
+<refentry xml:id="function.usort" xmlns="http://docbook.org/ns/docbook">
    <refnamediv>
     <refname>usort</refname>
     <refpurpose>
      使用用户自定义的比较函数对数组中的值进行排序
     </refpurpose>
    </refnamediv>
-   <refsect1>
-    <title>说明</title>
+ <refsect1 role="description">
+  &reftitle.description;
      <methodsynopsis>
       <type>bool</type><methodname>usort</methodname>
       <methodparam><type>array</type><parameter role="reference">array</parameter></methodparam>
@@ -170,6 +170,203 @@ d
      和 <function>rsort</function>。
     </para>
    </refsect1>
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>array</parameter></term>
+     <listitem>
+      <para>
+       The input array.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>cmp_function</parameter></term>
+     <listitem>
+      <para>
+       &return.callbacksort;
+      </para>
+      &callback.cmp;
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   &return.success;
+  </para>
+ </refsect1>
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <para>
+   <informaltable>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>&Version;</entry>
+       <entry>&Description;</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>4.1.0</entry>
+       <entry>
+        A new sort algorithm was introduced. The <parameter>cmp_function</parameter>
+        doesn't keep the original order for elements comparing as equal.
+       </entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </informaltable>
+  </para>
+ </refsect1>
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title><function>usort</function> example</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+function cmp($a, $b)
+{
+    if ($a == $b) {
+        return 0;
+    }
+    return ($a < $b) ? -1 : 1;
+}
+
+$a = array(3, 2, 5, 6, 1);
+
+usort($a, "cmp");
+
+foreach ($a as $key => $value) {
+    echo "$key: $value\n";
+}
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+0: 1
+1: 2
+2: 3
+3: 5
+4: 6
+]]>
+    </screen>
+   </example>
+  </para>
+  <note>
+   <para>
+    Obviously in this trivial case the <function>sort</function>
+    function would be more appropriate.
+   </para>
+  </note>
+  <para>
+   <example>
+    <title>
+     <function>usort</function> example using multi-dimensional array
+    </title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+function cmp($a, $b)
+{
+    return strcmp($a["fruit"], $b["fruit"]);
+}
+
+$fruits[0]["fruit"] = "lemons";
+$fruits[1]["fruit"] = "apples";
+$fruits[2]["fruit"] = "grapes";
+
+usort($fruits, "cmp");
+
+while (list($key, $value) = each($fruits)) {
+    echo "$fruits[$key]: " . $value["fruit"] . "\n";
+}
+?>
+]]>
+    </programlisting>
+    <para>
+     When sorting a multi-dimensional array, <varname>$a</varname> and
+    <varname>$b</varname> contain references to the first index of the array.
+    </para>
+    &example.outputs;
+    <screen>
+<![CDATA[
+$fruits[0]: apples
+$fruits[1]: grapes
+$fruits[2]: lemons
+]]>
+    </screen>
+   </example>
+  </para>
+  <para>
+   <example>
+    <title>
+     <function>usort</function> example using a member function of an object
+    </title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+class TestObj {
+    var $name;
+
+    function TestObj($name)
+    {
+        $this->name = $name;
+    }
+
+    /* This is the static comparing function: */
+    static function cmp_obj($a, $b)
+    {
+        $al = strtolower($a->name);
+        $bl = strtolower($b->name);
+        if ($al == $bl) {
+            return 0;
+        }
+        return ($al > $bl) ? +1 : -1;
+    }
+}
+
+$a[] = new TestObj("c");
+$a[] = new TestObj("b");
+$a[] = new TestObj("d");
+
+usort($a, array("TestObj", "cmp_obj"));
+
+foreach ($a as $item) {
+    echo $item->name . "\n";
+}
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+b
+c
+d
+]]>
+    </screen>
+   </example>
+  </para>
+ </refsect1>
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>uasort</function></member>
+    <member>&seealso.array.sorting;</member>
+   </simplelist>
+  </para>
+ </refsect1>
   </refentry>
 
 <!-- Keep this comment at the end of the file

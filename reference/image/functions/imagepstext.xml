@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
+<!-- EN-Revision: 96c9d88bad9a7d7d44bfb7f26c226df7ee9ddf26 Maintainer: HonestQiao Status: ready -->
+<!-- Reviewed: no Maintainer: HonestQiao -->
 <refentry xml:id="function.imagepstext" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>imagepstext</refname>
   <refpurpose>用 PostScript Type1 字体把文本字符串画在图像上</refpurpose>
  </refnamediv>
- <refsect1>
-  <title>说明</title>
+ <refsect1 role="description">
+  &reftitle.description;
    <methodsynopsis>
     <type>array</type><methodname>imagepstext</methodname>
     <methodparam><type>resource</type><parameter>image</parameter></methodparam>
@@ -91,6 +91,186 @@
   </para>
   <para>
    参见 <function>imagepsbbox</function>。
+  </para>
+ </refsect1>
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    &gd.image.description;
+    <varlistentry>
+     <term><parameter>text</parameter></term>
+     <listitem>
+      <para>
+       The text to be written.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>font_index</parameter></term>
+     <listitem>
+      <para>
+       A font resource, returned by <function>imagepsloadfont</function>.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>size</parameter></term>
+     <listitem>
+      <para>
+       <parameter>size</parameter> is expressed in pixels.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>foreground</parameter></term>
+     <listitem>
+      <para>
+       The color in which the text will be painted.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>background</parameter></term>
+     <listitem>
+      <para>
+       The color to which the text will try to fade in with antialiasing.
+       No pixels with the color <parameter>background</parameter> are 
+       actually painted, so the background image does not need to be of solid
+       color.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>x</parameter></term>
+     <listitem>
+      <para>
+       x-coordinate for the lower-left corner of the first character.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>y</parameter></term>
+     <listitem>
+      <para>
+       y-coordinate for the lower-left corner of the first character.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>space</parameter></term>
+     <listitem>
+      <para>
+       Allows you to change the default value of a space in a font. This
+       amount is added to the normal value and can also be negative.
+       Expressed in character space units, where 1 unit is 1/1000th of an 
+       em-square.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>tightness</parameter></term>
+     <listitem>
+      <para>
+       <parameter>tightness</parameter> allows you to control the amount
+       of white space between characters. This amount is added to the
+       normal character width and can also be negative.
+       Expressed in character space units, where 1 unit is 1/1000th of an 
+       em-square.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>angle</parameter></term>
+     <listitem>
+      <para>
+       <parameter>angle</parameter> is in degrees.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>antialias_steps</parameter></term>
+     <listitem>
+      <para>
+       Allows you to control the number of colours used for antialiasing 
+       text. Allowed values are 4 and 16. The higher value is recommended
+       for text sizes lower than 20, where the effect in text quality is
+       quite visible.  With bigger sizes, use 4. It's less computationally
+       intensive.
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   This function returns an array containing the following elements:
+   <informaltable>
+    <tgroup cols="2">
+     <tbody>
+      <row>
+       <entry>0</entry>
+       <entry>lower left x-coordinate</entry>
+      </row>
+      <row>
+       <entry>1</entry>
+       <entry>lower left y-coordinate</entry>
+      </row>
+      <row>
+       <entry>2</entry>
+       <entry>upper right x-coordinate</entry>
+      </row>
+      <row>
+       <entry>3</entry>
+       <entry>upper right y-coordinate</entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </informaltable>
+  </para>
+ </refsect1>
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <example>
+   <title><function>imagepstext</function> usage</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+// Create image handle
+$im = imagecreatetruecolor(200, 200);
+
+// Allocate colors
+$black = imagecolorallocate($im, 0, 0, 0);
+$white = imagecolorallocate($im, 255, 255, 255);
+
+// Load the PostScript Font
+$font = imagepsloadfont('font.pfm');
+
+// Write the font to the image
+imagepstext($im, 'Sample text is simple', $font, 12, $black, $white, 50, 50);
+
+// Output and free memory
+header('Content-type: image/png');
+
+imagepng($im);
+imagedestroy($im);
+?>
+]]>
+   </programlisting>
+  </example>
+ </refsect1>
+ <refsect1 role="notes">
+  &reftitle.notes;
+  &note.config.t1lib;
+ </refsect1>
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>imagepsbbox</function></member>
+   </simplelist>
   </para>
  </refsect1>
 </refentry>

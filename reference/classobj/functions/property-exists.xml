@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
+<!-- EN-Revision: 0fd6eabb77d218a503bda1eb82270c96e26ca360 Maintainer: HonestQiao Status: ready -->
+<!-- Reviewed: no Maintainer: HonestQiao -->
 <refentry xml:id="function.property-exists" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>property_exists</refname>
@@ -57,11 +57,48 @@
   </para>
  </refsect1>
 
+ <refsect1 role="notes">
+  &reftitle.notes;
+  &note.uses-autoload;
+  <note>
+   <para>
+    The <function>property_exists</function> function cannot detect properties
+    that are magically accessible using the <link
+    linkend="language.oop5.overloading.members"><literal>__get</literal></link>
+    magic method.
+   </para>
+  </note>
+ </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <para>
+   <informaltable>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>&Version;</entry>
+       <entry>&Description;</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>5.3.0</entry>
+       <entry>
+        This function checks the existence of a property independent of 
+        accessibility.
+       </entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </informaltable>
+  </para>
+ </refsect1>
  <refsect1 role="examples">
   &reftitle.examples;
   <para>
    <example>
-    <title><function>property_exists</function> 例子</title>
+    <title>A <function>property_exists</function> example</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -69,23 +106,26 @@
 class myClass {
     public $mine;
     private $xpto;
+    static protected $test;
 
     static function test() {
-        var_dump(property_exists('myClass', 'xpto')); // true, it can be accessed from here
+        var_dump(property_exists('myClass', 'xpto')); //true
     }
 }
 
 var_dump(property_exists('myClass', 'mine'));   //true
 var_dump(property_exists(new myClass, 'mine')); //true
-var_dump(property_exists('myClass', 'xpto'));   //false, isn't public
+var_dump(property_exists('myClass', 'xpto'));   //true, as of PHP 5.3.0
+var_dump(property_exists('myClass', 'bar'));    //false
+var_dump(property_exists('myClass', 'test'));   //true, as of PHP 5.3.0
 myClass::test();
+
 ?>
 ]]>
     </programlisting>
    </example>
   </para>
  </refsect1>
-
  <refsect1 role="seealso">
   &reftitle.seealso;
   <para>

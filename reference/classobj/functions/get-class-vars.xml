@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: nio Status: ready -->
+<!-- EN-Revision: 5169e9e846f49a06a47a0223a7b5487f1a1c65d2 Maintainer: HonestQiao Status: ready -->
+<!-- Reviewed: no Maintainer: HonestQiao -->
 <!-- splitted from ./en/functions/classobj.xml, last change in rev 1.1 -->
 <refentry xml:id="function.get-class-vars" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>get_class_vars</refname>
   <refpurpose>返回由类的默认属性组成的数组</refpurpose>
  </refnamediv>
- <refsect1>
-  <title>说明</title>
+ <refsect1 role="description">
+  &reftitle.description;
   <methodsynopsis>
    <type>array</type><methodname>get_class_vars</methodname>
    <methodparam><type>string</type><parameter>class_name</parameter></methodparam>
@@ -78,6 +78,186 @@ var3 : 100
    参见 <function>get_class_methods</function>、
    <function>get_object_vars</function>
   </simpara>
+ </refsect1>
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>class_name</parameter></term>
+     <listitem>
+      <para>
+       The class name
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   Returns an associative array of declared properties visible from the
+   current scope, with their default value.
+   The resulting array elements are in the form of 
+   <literal>varname => value</literal>.
+   In case of an error, it returns &false;.
+  </para>
+ </refsect1>
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <para>
+   <informaltable>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>&Version;</entry>
+       <entry>&Description;</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>5.0.3</entry>
+       <entry>
+        Depending on the scope, <function>get_class_vars</function> will 
+        only return the properties that can be accessed from the current 
+        scope.
+       </entry>
+      </row>
+      <row>
+       <entry>5.0.2</entry>
+       <entry>
+        Calling <function>get_class_vars</function> will now expose 
+        all the properties as an array, unlike previous behaviour where 
+        protected and private properties were prefixed with nul bytes.
+       </entry>
+      </row>
+      <row>
+       <entry>5.0.1</entry>
+       <entry>
+        Calling <function>get_class_vars</function> will expose all 
+        properties, as when converting an object to a class.
+       </entry>
+      </row>
+      <row>
+       <entry>Prior to 4.2.0</entry>
+       <entry>
+        Uninitialized class variables will not be reported by 
+        <function>get_class_vars</function>
+       </entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </informaltable>
+  </para>
+ </refsect1>
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title><function>get_class_vars</function> example</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+
+class myclass {
+
+    var $var1; // this has no default value...
+    var $var2 = "xyz";
+    var $var3 = 100;
+    private $var4; // PHP 5
+
+    // constructor
+    function myclass() {
+        // change some properties
+        $this->var1 = "foo";
+        $this->var2 = "bar";
+        return true;
+    }
+
+}
+
+$my_class = new myclass();
+
+$class_vars = get_class_vars(get_class($my_class));
+
+foreach ($class_vars as $name => $value) {
+    echo "$name : $value\n";
+}
+
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+// Before PHP 4.2.0
+var2 : xyz
+var3 : 100
+
+// As of PHP 4.2.0
+var1 :
+var2 : xyz
+var3 : 100
+]]>
+    </screen>
+   </example>
+  </para>
+  <para>
+   <example>
+    <title><function>get_class_vars</function> and scoping behaviour</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+function format($array)
+{
+    return implode('|', array_keys($array)) . "\r\n";
+}
+
+class TestCase
+{
+    public $a    = 1;
+    protected $b = 2;
+    private $c   = 3;
+
+    public static function expose()
+    {
+        echo format(get_class_vars(__CLASS__));
+    }
+}
+
+TestCase::expose();
+echo format(get_class_vars('TestCase'));
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+// 5.0.0
+a| * b| TestCase c
+a| * b| TestCase c
+
+// 5.0.1 - 5.0.2
+a|b|c
+a|b|c
+
+// 5.0.3 +
+a|b|c
+a
+]]>
+    </screen>
+   </example>
+  </para>
+ </refsect1>
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>get_class_methods</function></member>
+    <member><function>get_object_vars</function></member>
+   </simplelist>
+  </para>
  </refsect1>
 </refentry>
 

@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
+<!-- EN-Revision: 58e026c0572f50bfcbb447e07423641cf8062d6a Maintainer: HonestQiao Status: ready -->
+<!-- Reviewed: no Maintainer: HonestQiao -->
 <refentry xml:id="function.feof" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>feof</refname>
   <refpurpose>测试文件指针是否到了文件结束的位置</refpurpose>
  </refnamediv>
- <refsect1>
-  <title>说明</title>
+ <refsect1 role="description">
+  &reftitle.description;
   <methodsynopsis>
    <type>bool</type><methodname>feof</methodname>
    <methodparam><type>resource</type><parameter>handle</parameter></methodparam>
@@ -37,6 +37,86 @@
 $file = @fopen("no_such_file", "r");
 
 // 来自 fopen 的 FALSE 会发出一条警告信息并在这里陷入无限循环
+while (!feof($file)) {
+}
+
+fclose($file);
+?>
+]]>
+     </programlisting>
+    </example>
+   </para>
+  </warning>
+ </refsect1>
+ 
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>handle</parameter></term>
+     <listitem>
+      &fs.validfp.all;
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+ 
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   Returns &true; if the file pointer is at EOF or an error occurs
+   (including socket timeout); otherwise returns &false;.
+  </para>
+ </refsect1>
+ 
+ <refsect1 role="notes">
+  &reftitle.notes;
+  <warning>
+   <para>
+    If a connection opened by <function>fsockopen</function> wasn't closed
+    by the server, <function>feof</function> will hang. To workaround this, see 
+    below example:
+    <example>
+     <title>Handling timeouts with <function>feof</function></title>
+     <programlisting role="php">
+<![CDATA[
+<?php
+function safe_feof($fp, &$start = NULL) {
+ $start = microtime(true);
+
+ return feof($fp);
+}
+
+/* Assuming $fp is previously opened by fsockopen() */
+
+$start = NULL;
+$timeout = ini_get('default_socket_timeout');
+
+while(!safe_feof($fp, $start) && (microtime(true) - $start) < $timeout)
+{
+ /* Handle */
+}
+?>
+]]>
+     </programlisting>
+    </example>
+   </para>
+  </warning>
+  <warning>
+   <para>
+    If the passed file pointer is not valid you may get an infinite loop, because
+    <function>feof</function> fails to return &true;.
+    <example>
+     <title><function>feof</function> example with an invalid file pointer</title>
+     <programlisting role="php">
+<![CDATA[
+<?php
+// if file can not be read or doesn't exist fopen function returns FALSE
+$file = @fopen("no_such_file", "r");
+
+// FALSE from fopen will issue warning and result in infinite loop here
 while (!feof($file)) {
 }
 

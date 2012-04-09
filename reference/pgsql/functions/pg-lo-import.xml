@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
-  <refentry xml:id="function.pg-lo-import" xmlns="http://docbook.org/ns/docbook">
+<!-- EN-Revision: f4dd676975248ba56b04008ff3219d4268f601e5 Maintainer: HonestQiao Status: ready -->
+<!-- Reviewed: no Maintainer: HonestQiao -->
+<refentry xml:id="function.pg-lo-import" xmlns="http://docbook.org/ns/docbook">
    <refnamediv>
     <refname>pg_lo_import</refname>
     <refpurpose>将文件导入为大型对象</refpurpose>
    </refnamediv>
-   <refsect1>
-    <title>说明</title>
+ <refsect1 role="description">
+  &reftitle.description;
      <methodsynopsis>
       <type>int</type><methodname>pg_lo_import</methodname>
       <methodparam choice="opt"><type>resource</type><parameter>connection</parameter></methodparam>
@@ -38,6 +38,118 @@
      参见 <function>pg_lo_export</function> 和 <function>pg_lo_open</function>。
     </para>
    </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>connection</parameter></term>
+     <listitem>
+      <para>
+       PostgreSQL database connection resource.  When 
+       <parameter>connection</parameter> is not present, the default connection 
+       is used. The default connection is the last connection made by 
+       <function>pg_connect</function> or <function>pg_pconnect</function>.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>pathname</parameter></term>
+     <listitem>
+      <para>
+       The full path and file name of the file on the client
+       filesystem from which to read the large object data.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>object_id</parameter></term>
+     <listitem>
+      <para>
+       If an <parameter>object_id</parameter> is given the function
+       will try to create a large object with this id, else a free
+       object id is assigned by the server. The parameter
+       was added in PHP 5.3 and relies on functionality that first
+       appeared in PostgreSQL 8.1.
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   The <varname>OID</varname> of the newly created large object, or
+   &false; on failure.
+  </para>
+ </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <para>
+   <informaltable>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>&Version;</entry>
+       <entry>&Description;</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>5.3.0</entry>
+       <entry><para>
+        The optional <parameter>object_id</parameter> was added.
+       </para></entry>
+      </row>
+      <row>
+       <entry>4.2.0</entry>
+       <entry><para>
+        The syntax of this function changed. It used to be:
+        <methodsynopsis>
+         <type>int</type><methodname>pg_lo_import</methodname>
+         <methodparam><type>string</type><parameter>pathname</parameter></methodparam>
+         <methodparam choice="opt"><type>resource</type><parameter>connection</parameter></methodparam>
+        </methodsynopsis>
+       </para></entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </informaltable>
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title><function>pg_lo_import</function> example</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+   $database = pg_connect("dbname=jacarta");
+   pg_query($database, "begin");
+   $oid = pg_lo_import($database, '/tmp/lob.dat');
+   pg_query($database, "commit");
+?>
+]]>
+    </programlisting>
+   </example> 
+  </para>
+ </refsect1>
+ 
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>pg_lo_export</function></member>
+    <member><function>pg_lo_open</function></member>
+   </simplelist>
+  </para>
+ </refsect1>
   </refentry>
 
 <!-- Keep this comment at the end of the file

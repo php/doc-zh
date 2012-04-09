@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: yincheng Status: ready -->
+<!-- EN-Revision: 96c9d88bad9a7d7d44bfb7f26c226df7ee9ddf26 Maintainer: HonestQiao Status: ready -->
+<!-- Reviewed: no Maintainer: HonestQiao -->
 <!-- CREDITS: dallas -->
 <refentry xml:id="function.oci-connect" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
   <refname>oci_connect</refname>
   <refpurpose>建立一个到 Oracle 服务器的连接</refpurpose>
  </refnamediv>
- <refsect1>
-  <title>说明</title>
+ <refsect1 role="description">
+  &reftitle.description;
   <methodsynopsis>
    <type>resource</type><methodname>oci_connect</methodname>
    <methodparam><type>string</type><parameter>username</parameter></methodparam>
@@ -36,16 +36,6 @@
    <link linkend="ini.oci8.privileged-connect">oci8.privileged_connect</link>
    设为 On。
   </para>
-  <note>
-   <simpara>
-    如果 PHP 用的是 Oracle Instant
-    Client，可以用容易的命名连接方法，说明见这里：<link
-    xlink:href="&url.oracle.oic.connect;">&url.oracle.oic.connect;</link>。基本上这意味着可以指定
-    "//db_host[:port]/database_name"
-    作为数据库名。但如果想用命名的旧方法则<emphasis>必须</emphasis>设定
-    <constant>ORACLE_HOME</constant> 或 <constant>TNS_ADMIN</constant> 二者之一。
-   </simpara>
-  </note>
   <note>
    <simpara>
     对 <function>oci_connect</function>
@@ -165,6 +155,298 @@ echo "</pre>";
    参见 <function>oci_pconnect</function>，<function>oci_new_connect</function>
    和 <function>oci_close</function>。
   </simpara>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>username</parameter></term>
+     <listitem>
+      <para>
+       The Oracle user name.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>password</parameter></term>
+     <listitem>
+      <para>
+       The password for <parameter>username</parameter>.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>connection_string</parameter></term>
+     <listitem>
+      &oci.db;
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>character_set</parameter></term>
+     <listitem>
+      &oci.charset;
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>session_mode</parameter></term>
+     <listitem>
+      &oci.sessionmode;
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   Returns a connection identifier or &false; on error.
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title>Basic <function>oci_connect</function> using Easy Connect syntax</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+
+// Connects to the XE service (i.e. database) on the "localhost" machine
+$conn = oci_connect('hr', 'welcome', 'localhost/XE');
+if (!$conn) {
+    $e = oci_error();
+    trigger_error(htmlentities($e['message'], ENT_QUOTES), E_USER_ERROR);
+}
+
+$stid = oci_parse($conn, 'SELECT * FROM employees');
+oci_execute($stid);
+
+echo "<table border='1'>\n";
+while ($row = oci_fetch_array($stid, OCI_ASSOC+OCI_RETURN_NULLS)) {
+    echo "<tr>\n";
+    foreach ($row as $item) {
+        echo "    <td>" . ($item !== null ? htmlentities($item, ENT_QUOTES) : "&nbsp;") . "</td>\n";
+    }
+    echo "</tr>\n";
+}
+echo "</table>\n";
+
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   <example>
+    <title>Basic <function>oci_connect</function> using a Network Connect name</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+
+// Connects to the MYDB database described in tnsnames.ora file,
+// One example tnsnames.ora entry for MYDB could be:
+//   MYDB =
+//     (DESCRIPTION =
+//       (ADDRESS = (PROTOCOL = TCP)(HOST = mymachine.oracle.com)(PORT = 1521))
+//       (CONNECT_DATA =
+//         (SERVER = DEDICATED)
+//         (SERVICE_NAME = XE)
+//       )
+//     )
+
+$conn = oci_connect('hr', 'welcome', 'MYDB');
+if (!$conn) {
+    $e = oci_error();
+    trigger_error(htmlentities($e['message'], ENT_QUOTES), E_USER_ERROR);
+}
+
+$stid = oci_parse($conn, 'SELECT * FROM employees');
+oci_execute($stid);
+
+echo "<table border='1'>\n";
+while ($row = oci_fetch_array($stid, OCI_ASSOC+OCI_RETURN_NULLS)) {
+    echo "<tr>\n";
+    foreach ($row as $item) {
+        echo "    <td>" . ($item !== null ? htmlentities($item, ENT_QUOTES) : "&nbsp;") . "</td>\n";
+    }
+    echo "</tr>\n";
+}
+echo "</table>\n";
+
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   <example>
+    <title><function>oci_connect</function> with an explicit character set</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+
+$conn = oci_connect('hr', 'welcome', 'localhost/XE', 'AL32UTF8');
+if (!$conn) {
+    $e = oci_error();
+    trigger_error(htmlentities($e['message'], ENT_QUOTES), E_USER_ERROR);
+}
+
+$stid = oci_parse($conn, 'SELECT * FROM employees');
+oci_execute($stid);
+
+echo "<table border='1'>\n";
+while ($row = oci_fetch_array($stid, OCI_ASSOC+OCI_RETURN_NULLS)) {
+    echo "<tr>\n";
+    foreach ($row as $item) {
+        echo "    <td>" . ($item !== null ? htmlentities($item, ENT_QUOTES) : "&nbsp;") . "</td>\n";
+    }
+    echo "</tr>\n";
+}
+echo "</table>\n";
+
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   <example>
+    <title>Using multiple calls to <function>oci_connect</function></title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+
+$c1 = oci_connect("hr", "welcome", 'localhost/XE');
+$c2 = oci_connect("hr", "welcome", 'localhost/XE');
+
+// Both $c1 and $c2 show the same PHP resource id meaning they use the
+// same underlying database connection
+echo "c1 is $c1<br>\n";
+echo "c2 is $c2<br>\n";
+
+function create_table($conn)
+{
+    $stmt = oci_parse($conn, "create table hallo (test varchar2(64))");
+    oci_execute($stmt);
+    echo "Created table<br>\n";
+}
+
+function drop_table($conn)
+{
+    $stmt = oci_parse($conn, "drop table hallo");
+    oci_execute($stmt);
+    echo "Dropped table<br>\n";
+}
+
+function insert_data($connname, $conn)
+{
+    $stmt = oci_parse($conn, "insert into hallo
+              values(to_char(sysdate,'DD-MON-YY HH24:MI:SS'))");
+    oci_execute($stmt, OCI_DEFAULT);
+    echo "$connname inserted row without committing<br>\n";
+}
+
+function rollback($connname, $conn)
+{
+    oci_rollback($conn);
+    echo "$connname rollback<br>\n";
+}
+
+function select_data($connname, $conn)
+{
+    $stmt = oci_parse($conn, "select * from hallo");
+    oci_execute($stmt, OCI_DEFAULT);
+    echo "$connname ----selecting<br>\n";
+    while (oci_fetch($stmt)) {
+        echo "    " . oci_result($stmt, "TEST") . "<br>\n";
+    }
+    echo "$connname ----done<br>\n";
+}
+
+create_table($c1);
+
+insert_data('c1', $c1);   // Insert a row using c1
+sleep(2);                 // sleep to show a different timestamp for the 2nd row
+insert_data('c2', $c2);   // Insert a row using c2
+
+select_data('c1', $c1);   // Results of both inserts are returned
+select_data('c2', $c2);   // Results of both inserts are returned
+
+rollback('c1', $c1);      // Rollback using c1
+
+select_data('c1', $c1);   // Both inserts have been rolled back
+select_data('c2', $c2);
+
+drop_table($c1);
+
+// Closing one of the connections makes the PHP variable unusable, but
+// the other could be used
+oci_close($c1);
+echo "c1 is $c1<br>\n";
+echo "c2 is $c2<br>\n";
+
+
+// Output is:
+//    c1 is Resource id #5
+//    c2 is Resource id #5
+//    Created table
+//    c1 inserted row without committing
+//    c2 inserted row without committing
+//    c1 ----selecting
+//        09-DEC-09 12:14:43
+//        09-DEC-09 12:14:45
+//    c1 ----done
+//    c2 ----selecting
+//        09-DEC-09 12:14:43
+//        09-DEC-09 12:14:45
+//    c2 ----done
+//    c1 rollback
+//    c1 ----selecting
+//    c1 ----done
+//    c2 ----selecting
+//    c2 ----done
+//    Dropped table
+//    c1 is 
+//    c2 is Resource id #5
+
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+ </refsect1>
+
+ <refsect1 role="notes">
+  &reftitle.notes;
+  <note>
+   <para>
+    An incorrectly installed or configured OCI8 extension will often
+    manifest itself as a connection problem or error.
+    See <link linkend="oci8.setup">Installing/Configuring</link> for
+    troubleshooting information.
+   </para>
+  </note>
+  <note>
+   <para>
+    In PHP versions before 5.0.0 use <function>ocilogon</function>
+    instead. &oci.name.compat.note;
+   </para>
+  </note>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>oci_pconnect</function></member>
+    <member><function>oci_new_connect</function></member>
+    <member><function>oci_close</function></member>
+   </simplelist>
+  </para>
  </refsect1>
 </refentry>
 

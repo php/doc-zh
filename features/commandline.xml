@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: class007 Status: ready -->
+<!-- EN-Revision: 3ac3e340846ebed0f806322504139b0116b96714 Maintainer: HonestQiao Status: ready -->
+<!-- Reviewed: no Maintainer: HonestQiao -->
 <!-- CREDITS: thomaslio, dallas -->
 <chapter xml:id="features.commandline" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <title>PHP 的命令行模式</title>
 
  <para>
-  从版本 4.3.0 开始，PHP 提供了一种新类型的 <literal>SAPI</literal>（Server
+  从版本 4.3.0 开始，PHP 提供了一种新类型的 &cli.sapi;（Server
   Application Programming Interface，服务端应用编程端口）支持，名为
-  <literal>CLI</literal>，意为 <emphasis>Command Line
+  &cli;，意为 <emphasis>Command Line
   Interface</emphasis>，即命令行接口。顾名思义，该
-  <literal>SAPI</literal> 模块主要用作 PHP 的开发外壳应用。<literal>CLI SAPI</literal>
-  和其它 <literal>SAPI</literal>
-  模块相比有很多的不同之处，我们将在本章中详细阐述。值得一提的是，<literal>CLI</literal>
+  &cli.sapi; 模块主要用作 PHP 的开发外壳应用。<literal>CLI SAPI</literal>
+  和其它 &cli.sapi;
+  模块相比有很多的不同之处，我们将在本章中详细阐述。值得一提的是，&cli;
   和 <literal>CGI</literal> 是不同的 SAPI，尽管它们之间有很多共同的行为。
  </para>
 
@@ -96,7 +96,7 @@
  </note>
 
  <para>
-  以下为 <literal>CLI SAPI</literal> 和其它 <literal>SAPI</literal> 模块相比的显著区别：
+  以下为 <literal>CLI SAPI</literal> 和其它 &cli.sapi; 模块相比的显著区别：
   <itemizedlist>
    <listitem>
     <para>
@@ -983,6 +983,185 @@ This is a command line PHP script with one option.
   请参阅 <link linkend="ref.readline">Readline</link>
   扩展模块的有关文档，以获取更多的函数的信息。这些函数可以帮助完善 PHP 命令行应用程序。
  </para>
+
+ <!--Built-in CLI Web Server: {{{-->
+ <section xml:id="features.commandline.webserver">
+  <title>Built-in web server</title>
+
+  <para>
+   As of PHP 5.4.0, the &cli.sapi; provides a built-in web server.
+  </para>
+
+  <para>
+   This web server is designed for developmental purposes only, and should not
+   be used in production.
+  </para>
+
+  <para>
+    URI requests are served from the current working directory where
+    PHP was started, unless the -t option is used to specify an
+    explicit document root.
+  </para>
+
+  <para>
+    If a URI request does not specify a file, then either index.php
+    or index.html in the given directory are returned.  If neither file
+    exists, then a 404 response code is returned.
+  </para>
+
+  <para>
+    If a PHP file is given on the command line when the web server is
+    started it is treated as a "router" script for the web server.
+    The script is run at the start of each HTTP request.  If this
+    script returns &false;, then the requested resource is returned
+    as-is.  Otherwise the script's output is returned to the browser.
+  </para>
+
+  <example>
+   <title>Starting the web server</title> 
+   <programlisting role="shell">
+<![CDATA[
+$ cd ~/public_html
+$ php -S localhost:8000
+]]>
+   </programlisting>
+   <para>
+     The terminal will show:
+   </para>
+   <screen>
+<![CDATA[
+PHP 5.4.0 Development Server started at Thu Jul 21 10:43:28 2011
+Listening on localhost:8000
+Document root is /home/me/public_html
+Press Ctrl-C to quit
+]]>
+   </screen>
+   <para>
+     After URI requests for http://localhost:8000/ and
+     http://localhost:8000/myscript.html the terminal will show
+     something similar to:
+   </para>
+   <screen>
+<![CDATA[
+PHP 5.4.0 Development Server started at Thu Jul 21 10:43:28 2011
+Listening on localhost:8000
+Document root is /home/me/public_html
+Press Ctrl-C to quit.
+[Thu Jul 21 10:48:48 2011] ::1:39144 GET /favicon.ico - Request read
+[Thu Jul 21 10:48:50 2011] ::1:39146 GET / - Request read
+[Thu Jul 21 10:48:50 2011] ::1:39147 GET /favicon.ico - Request read
+[Thu Jul 21 10:48:52 2011] ::1:39148 GET /myscript.html - Request read
+[Thu Jul 21 10:48:52 2011] ::1:39149 GET /favicon.ico - Request read
+]]>
+   </screen>
+  </example>
+
+  <example>
+   <title>Starting with a specific document root directory</title> 
+   <programlisting role="shell">
+<![CDATA[
+$ cd ~/public_html
+$ php -S localhost:8000 -t foo/
+]]>
+   </programlisting>
+   <para>
+     The terminal will show:
+   </para>
+   <screen>
+<![CDATA[
+PHP 5.4.0 Development Server started at Thu Jul 21 10:50:26 2011
+Listening on localhost:8000
+Document root is /home/me/public_html/foo
+Press Ctrl-C to quit
+]]>
+   </screen>
+  </example>
+
+  <example>
+   <title>Using a Router Script</title> 
+<para>
+  Requests for images will display them, but requests for HTML files will display "Welcome to PHP"
+</para>
+   <programlisting role="php">
+<![CDATA[
+<?php
+// router.php
+if (preg_match('/\.(?:png|jpg|jpeg|gif)$/', $_SERVER["REQUEST_URI"]))
+    return false;    // serve the requested resource as-is.
+else { 
+    echo "<p>Welcome to PHP</p>";
+}
+?>]]>
+   </programlisting>
+   <programlisting role="shell">
+<![CDATA[
+$ php -S localhost:8000 router.php
+]]>
+   </programlisting>
+   <para>
+     After several URI requests the terminal will show something similar to:
+   </para>
+   <screen>
+<![CDATA[
+PHP 5.4.0 Development Server started at Thu Jul 21 10:53:19 2011
+Listening on localhost:8000
+Document root is /home/me/public_html
+Press Ctrl-C to quit.
+[Thu Jul 21 10:53:45 2011] ::1:55801 GET /mylogo.jpg - Request read
+[Thu Jul 21 10:53:52 2011] ::1:55803 GET /abc.html - Request read
+[Thu Jul 21 10:53:52 2011] ::1:55804 GET /favicon.ico - Request read
+]]>
+   </screen>
+  </example>
+
+ </section>
+ <!--}}}-->
+
+  <section xml:id="features.commandline.ini">
+   <title>INI settings</title>
+   <para>
+    <table>
+     <title>CLI SAPI Configuration Options</title>
+     <tgroup cols="4">
+      <thead>
+       <row>
+        <entry>&Name;</entry>
+        <entry>&Default;</entry>
+        <entry>&Changeable;</entry>
+        <entry>&Changelog;</entry>
+       </row>
+      </thead>
+      <tbody>
+       <row>
+        <entry><link linkend="ini.cli-server.color">cli_server.color</link></entry>
+        <entry>"0"</entry>
+        <entry>PHP_INI_ALL</entry>
+        <entry>Available since PHP 5.4.0.</entry>
+       </row>
+      </tbody>
+     </tgroup>
+    </table>
+   </para>
+   
+   &ini.descriptions.title;
+   
+   <para>
+    <variablelist>
+     <varlistentry xml:id="ini.cli-server.color">
+      <term>
+       <parameter>cli_server.color</parameter>
+       <type>boolean</type>
+      </term>
+      <listitem>
+       <para>
+        Enable the built-in development web server to use ANSI color coding 
+        in terminal output.
+       </para>
+      </listitem>
+     </varlistentry>
+    </variablelist>
+   </para>
+  </section>
 
 </chapter>
 

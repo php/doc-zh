@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
+<!-- EN-Revision: ce8212a9d067d3871e97027c6e41f096151ee82e Maintainer: HonestQiao Status: ready -->
+<!-- Reviewed: no Maintainer: HonestQiao -->
 <refentry xml:id="function.extract" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>extract</refname>
   <refpurpose>从数组中将变量导入到当前的符号表</refpurpose>
  </refnamediv>
- <refsect1>
-  <title>说明</title>
+ <refsect1 role="description">
+  &reftitle.description;
   <methodsynopsis>
    <type>int</type><methodname>extract</methodname>
    <methodparam><type>array</type><parameter>var_array</parameter></methodparam>
@@ -185,6 +185,339 @@ blue, large, sphere, medium
   </para>
   <para>
    参见 <function>compact</function>。
+  </para>
+ </refsect1>
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>var_array</parameter></term>
+     <listitem>
+      <para>
+       An associative array. This function treats keys as variable names and
+       values as variable values.  For each key/value pair it will create a
+       variable in the current symbol table, subject to
+       <parameter>extract_type</parameter> and
+       <parameter>prefix</parameter> parameters.
+      </para>
+      <para>
+       You must use an associative array; a numerically indexed array
+       will not produce results unless you use <constant>EXTR_PREFIX_ALL</constant> or
+       <constant>EXTR_PREFIX_INVALID</constant>.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>extract_type</parameter></term>
+     <listitem>
+      <para>
+       The way invalid/numeric keys and collisions are treated is determined
+       by the <parameter>extract_type</parameter>. It can be one of the
+       following values:
+       <variablelist>
+        <varlistentry>
+         <term><constant>EXTR_OVERWRITE</constant></term>
+         <listitem>
+          <simpara>
+           If there is a collision, overwrite the existing variable.
+          </simpara>
+         </listitem>
+        </varlistentry>
+        <varlistentry>
+         <term><constant>EXTR_SKIP</constant></term>
+         <listitem>
+          <simpara>
+           If there is a collision, don't overwrite the existing
+           variable.
+          </simpara>
+         </listitem>
+        </varlistentry>
+        <varlistentry>
+         <term><constant>EXTR_PREFIX_SAME</constant></term>
+         <listitem>
+          <simpara>If there is a collision, prefix the variable name with
+          <parameter>prefix</parameter>.
+          </simpara>
+         </listitem>
+        </varlistentry>
+        <varlistentry>
+         <term><constant>EXTR_PREFIX_ALL</constant></term>
+         <listitem>
+          <simpara>
+           Prefix all variable names with
+           <parameter>prefix</parameter>.
+          </simpara>
+         </listitem>
+        </varlistentry>
+        <varlistentry>
+         <term><constant>EXTR_PREFIX_INVALID</constant></term>
+         <listitem>
+          <simpara>
+           Only prefix invalid/numeric variable names with
+           <parameter>prefix</parameter>.
+          </simpara>
+         </listitem>
+        </varlistentry>
+        <varlistentry>
+         <term><constant>EXTR_IF_EXISTS</constant></term>
+         <listitem>
+          <simpara>
+           Only overwrite the variable if it already exists in the
+           current symbol table, otherwise do nothing.  This is useful
+           for defining a list of valid variables and then extracting
+           only those variables you have defined out of
+           <varname>$_REQUEST</varname>, for example.
+          </simpara>
+         </listitem>
+        </varlistentry>
+        <varlistentry>
+         <term><constant>EXTR_PREFIX_IF_EXISTS</constant></term>
+         <listitem>
+          <simpara>
+           Only create prefixed variable names if the non-prefixed version
+           of the same variable exists in the current symbol table.
+          </simpara>
+         </listitem>
+        </varlistentry>
+        <varlistentry>
+         <term><constant>EXTR_REFS</constant></term>
+         <listitem>
+          <simpara>
+           Extracts variables as references. This effectively means that the
+           values of the imported variables are still referencing the values of
+           the <parameter>var_array</parameter> parameter. You can use this flag
+           on its own or combine it with any other flag by OR'ing the
+           <parameter>extract_type</parameter>.
+          </simpara>
+         </listitem>
+        </varlistentry>
+       </variablelist>
+      </para>
+      <para>
+       If <parameter>extract_type</parameter> is not specified, it is
+       assumed to be <constant>EXTR_OVERWRITE</constant>.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>prefix</parameter></term>
+     <listitem>
+      <para>
+       Note that <parameter>prefix</parameter> is only required if
+       <parameter>extract_type</parameter> is <constant>EXTR_PREFIX_SAME</constant>,
+       <constant>EXTR_PREFIX_ALL</constant>, <constant>EXTR_PREFIX_INVALID</constant>
+       or <constant>EXTR_PREFIX_IF_EXISTS</constant>. If
+       the prefixed result is not a valid variable name, it is not
+       imported into the symbol table. Prefixes are automatically separated from
+       the array key by an underscore character.
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   Returns the number of variables successfully imported into the symbol
+   table.
+  </para>
+ </refsect1>
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <para>
+   <informaltable>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>&Version;</entry>
+       <entry>&Description;</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>4.3.0</entry>
+       <entry>
+        <constant>EXTR_REFS</constant> was added.
+       </entry>
+      </row>
+      <row>
+       <entry>4.2.0</entry>
+       <entry>
+        <constant>EXTR_IF_EXISTS</constant> and <constant>EXTR_PREFIX_IF_EXISTS</constant>
+        were added.
+       </entry>
+      </row>
+      <row>
+       <entry>4.0.5</entry>
+       <entry>
+        This function now returns the number of variables extracted.
+        <constant>EXTR_PREFIX_INVALID</constant> was added.
+        <constant>EXTR_PREFIX_ALL</constant> includes numeric variables as well.
+       </entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </informaltable>
+  </para>
+ </refsect1>
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title><function>extract</function> example</title>
+    <para>
+     A possible use for <function>extract</function> is to import into the
+     symbol table variables contained in an associative array returned by
+     <function>wddx_deserialize</function>.
+    </para>
+    <programlisting role="php">
+<![CDATA[
+<?php
+
+/* Suppose that $var_array is an array returned from
+   wddx_deserialize */
+
+$size = "large";
+$var_array = array("color" => "blue",
+                   "size"  => "medium",
+                   "shape" => "sphere");
+extract($var_array, EXTR_PREFIX_SAME, "wddx");
+
+echo "$color, $size, $shape, $wddx_size\n";
+
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+blue, large, sphere, medium
+]]>
+    </screen>
+    <para>
+     The <varname>$size</varname> wasn't overwritten because we specified
+     <constant>EXTR_PREFIX_SAME</constant>, which resulted in
+     <varname>$wddx_size</varname> being created.  If <constant>EXTR_SKIP</constant> was
+     specified, then <varname>$wddx_size</varname> wouldn't even have been created.
+     <constant>EXTR_OVERWRITE</constant> would have caused <varname>$size</varname> to have
+     value "medium", and <constant>EXTR_PREFIX_ALL</constant> would result in new variables
+     being named <varname>$wddx_color</varname>,
+     <varname>$wddx_size</varname>, and
+     <varname>$wddx_shape</varname>.
+    </para>
+   </example>
+  </para>
+ </refsect1>
+ <refsect1 role="notes">
+  &reftitle.notes;
+  <warning>
+   <para>
+    Do not use <function>extract</function> on untrusted data, like
+    user input
+    (i.e. <varname>$_GET</varname>, <varname>$_FILES</varname>, etc.).
+    If you do, for example if you want to run old code that relies
+    on <link linkend="security.globals">register_globals</link>
+    temporarily, make sure you use one of the non-overwriting
+    <parameter>extract_type</parameter> values such as
+    <constant>EXTR_SKIP</constant> and be aware that you should extract
+    in the same order that's defined in
+    <link linkend="ini.variables-order">variables_order</link> within the
+    <link linkend="ini">&php.ini;</link>.
+   </para>
+  </warning>
+  <note>
+   <para>
+    If you
+    have <link linkend="security.globals">register_globals</link>
+    turned on and you use <function>extract</function>
+    on <varname>$_FILES</varname> and
+    specify <constant>EXTR_SKIP</constant>, you may be surprised at
+    the results.
+   </para>
+   <warning>
+    <para>
+     This is not recommended practice and is only documented here for
+     completeness. The use
+     of <link linkend="security.globals">register_globals</link> is
+     deprecated and calling <function>extract</function> on untrusted
+     data such as <varname>$_FILES</varname> is, as noted above, a
+     potential security risk. If you encounter this issue, it means
+     that you are using at least two poor coding practices.
+    </para>
+   </warning>
+   <programlisting role="php">
+<![CDATA[
+<?php
+
+/* Suppose that $testfile is the name of a file upload input
+   and that register_globals is turned on. */
+
+var_dump($testfile);
+extract($_FILES, EXTR_SKIP);
+var_dump($testfile);
+var_dump($testfile['tmp_name']);
+
+?>
+]]>
+   </programlisting>
+   <simpara>
+    You might expect to see something like the following:
+   </simpara>
+   <screen>
+<![CDATA[
+string(14) "/tmp/phpgCCPX8"
+array(5) {
+  ["name"]=>
+  string(10) "somefile.txt"
+  ["type"]=>
+  string(24) "application/octet-stream"
+  ["tmp_name"]=>
+  string(14) "/tmp/phpgCCPX8"
+  ["error"]=>
+  int(0)
+  ["size"]=>
+  int(4208)
+}
+string(14) "/tmp/phpgCCPX8"
+]]>
+   </screen>
+   <simpara>
+    However, you would instead see something like this:
+   </simpara>
+   <screen>
+<![CDATA[
+string(14) "/tmp/phpgCCPX8"
+string(14) "/tmp/phpgCCPX8"
+string(1) "/"
+]]>
+   </screen>
+   <para>
+    This is due to the fact that
+    since <link linkend="security.globals">register_globals</link> is
+    turned on, <varname>$testfile</varname> already exists in the
+    global scope when <function>extract</function> is called. And
+    since <constant>EXTR_SKIP</constant> is
+    specified, <varname>$testfile</varname> is not overwritten with
+    the contents of the <constant>$_FILES</constant> array
+    so <varname>$testfile</varname> remains a string.
+    Because <link linkend="language.types.string.substr">strings may
+    be accessed using array syntax</link> and the non-numeric string
+    <literal>tmp_name</literal> is interpreted
+    as <literal>0</literal>, PHP
+    sees <varname>$testfile['tmp_name']</varname>
+    as <varname>$testfile[0]</varname>.
+   </para>
+  </note>
+ </refsect1>
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>compact</function></member>
+    <member><function>list</function></member>
+   </simplelist>
   </para>
  </refsect1>
 </refentry>

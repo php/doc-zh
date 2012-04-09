@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
+<!-- EN-Revision: d732584196d90d7be728ea0ca101461c2ed8570c Maintainer: HonestQiao Status: ready -->
+<!-- Reviewed: no Maintainer: HonestQiao -->
 <refentry xml:id="function.imagegif" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
   <refname>imagegif</refname>
-  <refpurpose>以 GIF 格式将图像输出到浏览器或文件</refpurpose>
+  <refpurpose>&gd.image.output;</refpurpose>
  </refnamediv>
- <refsect1>
-  <title>说明</title>
+ <refsect1 role="description">
+  &reftitle.description;
   <methodsynopsis>
    <type>bool</type><methodname>imagegif</methodname>
    <methodparam><type>resource</type><parameter>image</parameter></methodparam>
@@ -90,6 +90,184 @@ if (imagetypes() & IMG_GIF) {
   <para>
    参见 <function>imagepng</function>，<function>imagewbmp</function>，<function>imagejpeg</function>
    和 <function>imagetypes</function>。
+  </para>
+ </refsect1>
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    &gd.image.description;
+    <varlistentry>
+     <term><parameter>filename</parameter></term>
+     <listitem>
+      <para>&gd.image.path;</para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   &return.success;
+  </para>
+ </refsect1>
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title>Outputting an image using <function>imagegif</function></title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+// Create a new image instance
+$im = imagecreatetruecolor(100, 100);
+
+// Make the background white
+imagefilledrectangle($im, 0, 0, 99, 99, 0xFFFFFF);
+
+// Draw a text string on the image
+imagestring($im, 3, 40, 20, 'GD Library', 0xFFBA00);
+
+// Output the image to browser
+header('Content-Type: image/gif');
+
+imagegif($im);
+imagedestroy($im);
+?>
+]]>
+    </programlisting>
+   </example>
+   <example>
+    <title>Converting a PNG image to GIF using <function>imagegif</function></title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+
+// Load the PNG
+$png = imagecreatefrompng('./php.png');
+
+// Save the image as a GIF
+imagegif($png, './php.gif');
+
+// Free from memory
+imagedestroy($png);
+
+// We're done
+echo 'Converted PNG image to GIF with success!';
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+ </refsect1>
+ <refsect1 role="notes">
+  &reftitle.notes;
+  <note>
+   <para>
+    <acronym>GIF</acronym> support was removed from the <acronym>GD</acronym>
+    library in Version 1.6, and added back in Version 2.0.28. This function 
+    is not available between these versions.  For more information, see the
+    <link xlink:href="&url.gd;">GD Project</link> site.
+   </para>      
+   <para>
+    The following code snippet allows you to write more
+    portable PHP applications by auto-detecting the
+    type of GD support which is available. Replace
+    the sequence <literal>header ("Content-Type: image/gif");
+    imagegif ($im);</literal> by the more flexible sequence:
+    <informalexample>
+     <programlisting role="php">
+<![CDATA[
+<?php
+// Create a new image instance
+$im = imagecreatetruecolor(100, 100);
+
+// Do some image operations here
+
+// Handle output
+if(function_exists('imagegif'))
+{
+    // For GIF
+    header('Content-Type: image/gif');
+
+    imagegif($im);
+}
+elseif(function_exists('imagejpeg'))
+{
+    // For JPEG
+    header('Content-Type: image/jpeg');
+
+    imagejpeg($im, NULL, 100);
+}
+elseif(function_exists('imagepng'))
+{
+    // For PNG
+    header('Content-Type: image/png');
+
+    imagepng($im);
+}
+elseif(function_exists('imagewbmp'))
+{
+    // For WBMP
+    header('Content-Type: image/vnd.wap.wbmp');
+
+    imagewbmp($im);
+}
+else
+{
+    imagedestroy($im);
+
+    die('No image support in this PHP server');
+}
+
+// If image support was found for one of these
+// formats, then free it from memory
+if($im)
+{
+    imagedestroy($im);
+}
+?>
+]]>
+     </programlisting>
+    </informalexample>
+   </para>
+  </note>
+  <note>
+   <para>
+    As of PHP 4.0.2 you can use the function
+    <function>imagetypes</function> in place of
+    <function>function_exists</function> for checking
+    the presence of the various supported image formats:
+    <informalexample>
+     <programlisting role="php">
+<![CDATA[
+<?php
+if(imagetypes() & IMG_GIF)
+{
+    header('Content-Type: image/gif');
+    imagegif($im);
+}
+elseif(imagetypes() & IMG_JPG)
+{
+    /* ... etc. */
+}
+?>
+]]>
+     </programlisting>
+    </informalexample>
+   </para>
+  </note>
+ </refsect1>
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>imagepng</function></member>
+    <member><function>imagewbmp</function></member>
+    <member><function>imagejpeg</function></member>
+    <member><function>imagetypes</function></member>
+   </simplelist>
   </para>
  </refsect1>
 </refentry>

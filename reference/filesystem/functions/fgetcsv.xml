@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
+<!-- EN-Revision: 38fb898f9a9623e4c134394da2082d784df2c253 Maintainer: HonestQiao Status: ready -->
+<!-- Reviewed: no Maintainer: HonestQiao -->
 <refentry xml:id="function.fgetcsv" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>fgetcsv</refname>
   <refpurpose>从文件指针中读入一行并解析 CSV 字段</refpurpose>
  </refnamediv>
- <refsect1>
-  <title>说明</title>
+ <refsect1 role="description">
+  &reftitle.description;
   <methodsynopsis>
    <type>array</type><methodname>fgetcsv</methodname>
    <methodparam><type>int</type><parameter>handle</parameter></methodparam>
@@ -103,6 +103,167 @@ fclose($handle);
   <para>
    参见 <function>explode</function>，<function>file</function>，<function>pack</function>
    和 <function>fputcsv</function>
+  </para>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>handle</parameter></term>
+     <listitem>
+      <para>
+       A valid file pointer to a file successfully opened by
+       <function>fopen</function>, <function>popen</function>, or
+       <function>fsockopen</function>.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>length</parameter></term>
+     <listitem>
+      <para>
+       Must be greater than the longest line (in characters) to be found in
+       the CSV file (allowing for trailing line-end characters). It became
+       optional in PHP 5. Omitting this parameter (or setting it to 0 in PHP
+       5.0.4 and later) the maximum line length is not limited, which is
+       slightly slower.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>delimiter</parameter></term>
+     <listitem>
+      <para>
+       Set the field delimiter (one character only).
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>enclosure</parameter></term>
+     <listitem>
+      <para>
+       Set the field enclosure character (one character only).
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>escape</parameter></term>
+     <listitem>
+      <para>
+       Set the escape character (one character only). Defaults as a backslash.
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   Returns an indexed array containing the fields read.
+  </para>
+  <note>
+   <para>
+    A blank line in a CSV file will be returned as an array
+    comprising a single <type>null</type> field, and will not be treated
+    as an error.
+   </para>
+  </note>
+  &note.line-endings;
+  <para>
+   <function>fgetcsv</function> returns &null; if an invalid
+   <parameter>handle</parameter> is supplied or &false; on other errors,
+   including end of file.
+  </para>
+ </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <para>
+   <informaltable>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>&Version;</entry>
+       <entry>&Description;</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>5.3.0</entry>
+       <entry>
+        The <parameter>escape</parameter> parameter was added
+       </entry>
+      </row>
+      <row>
+       <entry>4.3.5</entry>
+       <entry>
+        <function>fgetcsv</function> is now binary safe
+       </entry>
+      </row>
+      <row>
+       <entry>4.3.0</entry>
+       <entry>
+        The <parameter>enclosure</parameter> parameter was added
+       </entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </informaltable>
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title>Read and print the entire contents of a CSV file</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$row = 1;
+if (($handle = fopen("test.csv", "r")) !== FALSE) {
+    while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+        $num = count($data);
+        echo "<p> $num fields in line $row: <br /></p>\n";
+        $row++;
+        for ($c=0; $c < $num; $c++) {
+            echo $data[$c] . "<br />\n";
+        }
+    }
+    fclose($handle);
+}
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+ </refsect1>
+
+ <refsect1 role="notes">
+  &reftitle.notes;
+  <note>
+   <para>
+    Locale setting is taken into account by this function. If
+    <varname>LANG</varname> is e.g. <literal>en_US.UTF-8</literal>, files in
+    one-byte encoding are read wrong by this function.
+   </para>
+  </note>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>str_getcsv</function></member>
+    <member><function>explode</function></member>
+    <member><function>file</function></member>
+    <member><function>pack</function></member>
+    <member><function>fputcsv</function></member>
+   </simplelist>
   </para>
  </refsect1>
 </refentry>

@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
+<!-- EN-Revision: 343d5f4dd6f6a85ef06bd82cca1574512e04c1bd Maintainer: HonestQiao Status: ready -->
+<!-- Reviewed: no Maintainer: HonestQiao -->
 <refentry xml:id="function.move-uploaded-file" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>move_uploaded_file</refname>
   <refpurpose>将上传的文件移动到新位置</refpurpose>
  </refnamediv>
- <refsect1>
-  <title>说明</title>
+ <refsect1 role="description">
+  &reftitle.description;
   <methodsynopsis>
    <type>bool</type><methodname>move_uploaded_file</methodname>
    <methodparam><type>string</type><parameter>filename</parameter></methodparam>
@@ -51,6 +51,104 @@
   <para>
    参见 <function>is_uploaded_file</function>，以及<link
    linkend="features.file-upload">文件上传处理</link>一章中的简单使用例子。
+  </para>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>filename</parameter></term>
+     <listitem>
+      <para>
+       The filename of the uploaded file.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>destination</parameter></term>
+     <listitem>
+      <para>
+       The destination of the moved file.
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+ 
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   Returns &true; on success.
+  </para>
+  <para>
+   If <parameter>filename</parameter> is not a valid upload file,
+   then no action will occur, and
+   <function>move_uploaded_file</function> will return
+   &false;.
+  </para>
+  <para>
+   If <parameter>filename</parameter> is a valid upload file, but
+   cannot be moved for some reason, no action will occur, and
+   <function>move_uploaded_file</function> will return
+   &false;. Additionally, a warning will be issued.
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title>Uploading multiple files</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$uploads_dir = '/uploads';
+foreach ($_FILES["pictures"]["error"] as $key => $error) {
+    if ($error == UPLOAD_ERR_OK) {
+        $tmp_name = $_FILES["pictures"]["tmp_name"][$key];
+        $name = $_FILES["pictures"]["name"][$key];
+        move_uploaded_file($tmp_name, "$uploads_dir/$name");
+    }
+}
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+ </refsect1>
+
+ <refsect1 role="notes">
+  &reftitle.notes;
+  <note>
+   <para>
+    <function>move_uploaded_file</function> is both &safemode;
+    and <link linkend="ini.open-basedir">open_basedir</link>
+    aware. However, restrictions are placed only on the
+    <parameter>destination</parameter> path as to allow the moving
+    of uploaded files in which <parameter>filename</parameter> may conflict
+    with such restrictions. <function>move_uploaded_file</function> ensures
+    the safety of this operation by allowing only those files uploaded
+    through PHP to be moved.
+   </para>
+  </note>
+  <warning>
+   <para>
+    If the destination file already exists, it will be overwritten.
+   </para>
+  </warning>
+ </refsect1>
+ 
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>is_uploaded_file</function></member>
+    <member><function>rename</function></member>
+    <member>See <link linkend="features.file-upload">Handling file uploads</link> for a simple usage example</member>
+   </simplelist>
   </para>
  </refsect1>
 </refentry>

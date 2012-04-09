@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: nio Status: ready -->
+<!-- EN-Revision: eac82849b3c30b0779c0397391f5776bceb2da0a Maintainer: HonestQiao Status: ready -->
+<!-- Reviewed: no Maintainer: HonestQiao -->
 <!-- splitted from ./en/functions/var.xml, last change in rev 1.2 -->
   <refentry xml:id="function.isset" xmlns="http://docbook.org/ns/docbook">
    <refnamediv>
     <refname>isset</refname>
     <refpurpose>检测变量是否设置</refpurpose>
    </refnamediv>
-   <refsect1>
-    <title>描述</title>
+ <refsect1 role="description">
+  &reftitle.description;
      <methodsynopsis>
       <type>bool</type><methodname>isset</methodname>
       <methodparam><type>mixed</type><parameter>var</parameter></methodparam>
@@ -99,6 +99,209 @@ var_dump( array_key_exists('hello', $a) ); // TRUE
      运算符。
     </simpara>
    </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>var</parameter></term>
+     <listitem>
+      <para>
+       The variable to be checked.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>...</parameter></term>
+     <listitem>
+      <para>
+       Another variable ...
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   Returns &true; if <parameter>var</parameter> exists and has value other
+   than &null;, &false; otherwise.
+  </para>
+ </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <para>
+   <informaltable>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>&Version;</entry>
+       <entry>&Description;</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>5.4.0</entry>
+       <entry>
+        <para>
+         Checking non-numeric offsets of strings now returns &false;.
+        </para>
+       </entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </informaltable>
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title><function>isset</function> Examples</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+
+$var = '';
+
+// This will evaluate to TRUE so the text will be printed.
+if (isset($var)) {
+    echo "This var is set so I will print.";
+}
+
+// In the next examples we'll use var_dump to output
+// the return value of isset().
+
+$a = "test";
+$b = "anothertest";
+
+var_dump(isset($a));      // TRUE
+var_dump(isset($a, $b)); // TRUE
+
+unset ($a);
+
+var_dump(isset($a));     // FALSE
+var_dump(isset($a, $b)); // FALSE
+
+$foo = NULL;
+var_dump(isset($foo));   // FALSE
+
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   This also work for elements in arrays:
+   <informalexample>
+    <programlisting role="php">
+<![CDATA[
+<?php
+
+$a = array ('test' => 1, 'hello' => NULL, 'pie' => array('a' => 'apple'));
+
+var_dump(isset($a['test']));            // TRUE
+var_dump(isset($a['foo']));             // FALSE
+var_dump(isset($a['hello']));           // FALSE
+
+// The key 'hello' equals NULL so is considered unset
+// If you want to check for NULL key values then try: 
+var_dump(array_key_exists('hello', $a)); // TRUE
+
+// Checking deeper array values
+var_dump(isset($a['pie']['a']));        // TRUE
+var_dump(isset($a['pie']['b']));        // FALSE
+var_dump(isset($a['cake']['a']['b']));  // FALSE
+
+?>
+]]>
+    </programlisting>
+   </informalexample>
+  </para>
+  <example>
+   <title><function>isset</function> on String Offsets</title>
+   <para>
+    PHP 5.4 changes how <function>isset</function> behaves
+    when passed string offsets.
+   </para>
+   <programlisting role="php">
+<![CDATA[
+<?php
+$expected_array_got_string = 'somestring';
+var_dump(isset($expected_array_got_string['some_key']));
+var_dump(isset($expected_array_got_string[0]));
+var_dump(isset($expected_array_got_string['0']));
+var_dump(isset($expected_array_got_string[0.5]));
+var_dump(isset($expected_array_got_string['0.5']));
+var_dump(isset($expected_array_got_string['0 Mostel']));
+?>
+]]>
+   </programlisting>
+   &example.outputs.53;
+   <screen>
+<![CDATA[
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+]]>
+   </screen>
+   &example.outputs.54;
+   <screen>
+<![CDATA[
+bool(false)
+bool(true)
+bool(true)
+bool(true)
+bool(false)
+bool(false)
+]]>
+   </screen>
+  </example>
+ </refsect1>
+
+ <refsect1 role="notes">
+  &reftitle.notes;
+  <warning>
+   <para>
+    <function>isset</function> only works with variables as passing anything
+    else will result in a parse error.  For checking if 
+    <link linkend="language.constants">constants</link> are set use the 
+    <function>defined</function> function.
+   </para>
+  </warning>
+  &note.language-construct;
+  <note>
+   <para>
+    When using <function>isset</function> on inaccessible object properties,
+    the <link linkend="object.isset">__isset()</link>
+    overloading method will be called, if declared.
+   </para>
+  </note>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>empty</function></member>
+    <member><link linkend="object.isset">__isset()</link></member>
+    <member><function>unset</function></member>
+    <member><function>defined</function></member>
+    <member><link linkend="types.comparisons">the type comparison tables</link></member>
+    <member><function>array_key_exists</function></member>
+    <member><function>is_null</function></member>
+    <member>the error control <link linkend="language.operators.errorcontrol">@</link> operator</member>
+   </simplelist>
+  </para>
+ </refsect1>
   </refentry>
 
 <!-- Keep this comment at the end of the file
