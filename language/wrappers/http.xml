@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision$ -->
+<!-- EN-Revision: 1f067345c828ae456b72385969fdd85e54383d3d Maintainer: daijie Status: ready -->
+<!-- Reviewed: no -->
+
+<refentry xml:id="wrappers.http" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" role="noversion">
+ <refnamediv>
+  <refname>http://</refname>
+  <refname>https://</refname>
+  <refpurpose>访问 HTTP(s) 网址</refpurpose>
+ </refnamediv>
+
+ <refsect1 role="description"><!-- {{{ -->
+  &reftitle.description;
+  <para>
+   允许通过 HTTP 1.0 的 GET方法，以只读访问文件或资源。
+   HTTP 请求会附带一个 <literal>Host:</literal> 头，用于兼容基于域名的虚拟主机。
+   如果在你的 &php.ini; 文件中或字节流上下文（context）配置了 <link linkend="ini.user-agent">user_agent</link> 字符串，它也会被包含在请求之中。
+  </para>
+  <simpara>
+   数据流允许读取资源的 <emphasis>body</emphasis>，而 headers 则储存在了 <varname>$http_response_header</varname> 变量里。
+  </simpara>
+  <simpara>
+   如果需要知道文档资源来自哪个 URL（经过所有重定向的处理后），
+   需要处理数据流返回的系列响应报头（response headers）。
+  </simpara>
+  <simpara>
+   The <link linkend="ini.from">from</link> directive will be used for the
+   <literal>From:</literal> header if set and not overwritten by the
+   <xref linkend="context" />.
+  </simpara>
+ </refsect1><!-- }}} -->
+
+ <refsect1 role="usage"> <!-- {{{ -->
+  &reftitle.options;
+  <itemizedlist>
+   <listitem><simpara><filename>http://example.com</filename></simpara></listitem>
+   <listitem><simpara><filename>http://example.com/file.php?var1=val1&amp;var2=val2</filename></simpara></listitem>
+   <listitem><simpara><filename>http://user:password@example.com</filename></simpara></listitem>
+   <listitem><simpara><filename>https://example.com</filename></simpara></listitem>
+   <listitem><simpara><filename>https://example.com/file.php?var1=val1&amp;var2=val2</filename></simpara></listitem>
+   <listitem><simpara><filename>https://user:password@example.com</filename></simpara></listitem>
+  </itemizedlist>
+ </refsect1> <!-- }}} -->
+
+ <refsect1 role="options"><!-- {{{ -->
+  &reftitle.options;
+  <para>
+   <table>
+    <title>封装协议概要</title>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>属性</entry>
+       <entry>支持</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>受 <link linkend="ini.allow-url-fopen">allow_url_fopen</link> 限制</entry>
+       <entry>Yes</entry>
+      </row>
+      <row>
+       <entry>允许读取</entry>
+       <entry>Yes</entry>
+      </row>
+      <row>
+       <entry>允许写入</entry>
+       <entry>No</entry>
+      </row>
+      <row>
+       <entry>允许添加</entry>
+       <entry>No</entry>
+      </row>
+      <row>
+       <entry>允许同时读和写</entry>
+       <entry>N/A</entry>
+      </row>
+      <row>
+       <entry>支持 <function>stat</function></entry>
+       <entry>No</entry>
+      </row>
+      <row>
+       <entry>支持 <function>unlink</function></entry>
+       <entry>No</entry>
+      </row>
+      <row>
+       <entry>支持 <function>rename</function></entry>
+       <entry>No</entry>
+      </row>
+      <row>
+       <entry>支持 <function>mkdir</function></entry>
+       <entry>No</entry>
+      </row>
+      <row>
+       <entry>支持 <function>rmdir</function></entry>
+       <entry>No</entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </table>
+  </para>
+ </refsect1> <!-- }}} -->
+
+ <refsect1 role="changelog"><!-- {{{ -->
+  &reftitle.changelog;
+  <para>
+   <informaltable>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>&Version;</entry>
+       <entry>&Description;</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>4.3.7</entry>
+       <entry>
+        检测 IIS 服务器避免 <literal>"SSL: Fatal Protocol Error"</literal> 错误。
+       </entry>
+      </row>
+      <row>
+       <entry>4.3.0</entry>
+       <entry>
+        添加 <literal>https://</literal>。
+       </entry>
+      </row>
+      <row>
+       <entry>4.0.5</entry>
+       <entry>
+        增加了对重定向的支持。
+       </entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </informaltable>
+  </para>
+ </refsect1><!-- }}} -->
+
+ <refsect1 role="examples"><!-- {{{ -->
+  &reftitle.examples;
+  <example xml:id="wrappers.http.example.basic"><!-- {{{ -->
+   <title>检测重定向后最终的 URL</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+$url = 'http://www.example.com/redirecting_page.php';
+
+$fp = fopen($url, 'r');
+
+$meta_data = stream_get_meta_data($fp);
+foreach ($meta_data['wrapper_data'] as $response) {
+
+    /* 我们是否被重定向了？ */
+    if (strtolower(substr($response, 0, 10)) == 'location: ') {
+
+        /* 更新我们被重定向后的 $url */
+        $url = substr($response, 10);
+    }
+
+}
+
+?>
+]]>
+   </programlisting>
+  </example><!-- }}} -->
+
+  <example xml:id="wrappers.http.example.custom.headers"> <!-- {{{ -->
+   <title>通过一个 HTTP 请求发送自定义的 HTTP 头</title>
+   <para>
+    自定义头可以通过 <link linkend="context.http">上下文（context）
+    选项</link>来发送。
+    
+    同时也能够使用这种 hack：
+    通过利用 <literal>user_agent</literal> INI 设置的一个
+    处理的副作用来自定义头也是可能的。
+    
+    设置 <literal>user_agent</literal> 为任意有效字符串（比如默认设置是 <literal>PHP/version</literal>）
+    并附带一对 回车/换行符（\r\n）以及其他任意额外的 HTTP 头。
+   </para>
+   <programlisting role="php">
+<![CDATA[
+<?php
+ini_set('user_agent', "PHP\r\nX-MyCustomHeader: Foo");
+
+$fp = fopen('http://www.example.com/index.php', 'r');
+?>
+]]>
+   </programlisting>
+   <para>以下结果的请求将被发送：</para>
+   <screen>
+<![CDATA[
+GET /index.php HTTP/1.0
+Host: www.example.com
+User-Agent: PHP
+X-MyCustomHeader: Foo
+]]>
+   </screen>
+  </example><!-- }}} -->
+ </refsect1><!-- }}} -->
+
+ <refsect1 role="notes"><!-- {{{ -->
+  &reftitle.notes;
+  <note>
+   <simpara>
+    <link linkend="book.openssl">openssl</link> 扩展启用后才能够支持 HTTPS 协议。
+   </simpara>
+  </note>
+  <simpara>
+   HTTP 连接是只读的；还不支持对一个 HTTP 资源进行写数据或者复制文件。
+  </simpara>
+  <simpara>
+   比如发送 <emphasis>POST</emphasis> 和 <emphasis>PUT</emphasis> 请求，
+   可以在 <link linkend="context.http">HTTP Contexts</link> 的支持下实现。
+  </simpara>
+ </refsect1><!-- }}} -->
+
+ <refsect1 role="seealso"><!-- {{{ -->
+  &reftitle.seealso;
+  <simplelist>
+   <member><xref linkend="context.http" /></member>
+   <member><varname>$http_response_header</varname></member>
+   <member><function>stream_get_meta_data</function></member>
+  </simplelist>
+ </refsect1><!-- }}} -->
+
+</refentry>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
+

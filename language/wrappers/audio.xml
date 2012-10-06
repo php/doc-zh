@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision$ -->
+<!-- EN-Revision: d512da133791952053f20c2b2bbe230df275bcc1 Maintainer: daijie Status: ready -->
+<!-- Reviewed: no -->
+
+<refentry xml:id="wrappers.audio" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" role="noversion">
+ <refnamediv>
+  <refname>ogg://</refname>
+  <refpurpose>音频流</refpurpose>
+ </refnamediv>
+
+ <refsect1 role="description"><!-- {{{ -->
+  &reftitle.description;
+  <para>
+   通过包装器 <filename>ogg://</filename> 读取的文件，
+   是作为 <literal>OGG/Vorbis</literal> 格式的压缩音频编码。
+   同样，通过包装器 <filename>ogg://</filename> 写入或追加的数据格式也是压缩音频。
+   
+   当 <function>stream_get_meta_data</function> 用于一个打开读取的 <literal>OGG/Vorbis</literal>
+   文件时，会返回关于数据流的详细信息，包含了 <parameter>vendor</parameter> 标签、任何内含的
+   <parameter>comments</parameter>、
+   <parameter>channels</parameter> 数字、采样率（<parameter>rate</parameter>），以及
+   用 <parameter>bitrate_lower</parameter>、<parameter>bitrate_upper</parameter>、
+   <parameter>bitrate_nominal</parameter> 和 <parameter>bitrate_window</parameter>
+   描述的可变比特率范围。
+  </para>
+
+  <simpara><filename>ogg://</filename> PHP 4.3.0 及以上（PECL） </simpara>
+  <note>
+   <title>该封装器默认未激活</title>
+   <simpara>
+    要使用 <filename>ogg://</filename> 封装器，您必须安装
+     <link xlink:href="&url.pecl.package;oggvorbis">OGG/Vorbis</link> 扩展。
+    可以在 <link xlink:href="&url.pecl;">PECL</link> 上找到。
+   </simpara>
+  </note>
+ </refsect1><!-- }}} -->
+
+ <refsect1 role="usage"> <!-- {{{ -->
+  &reftitle.options;
+  <itemizedlist>
+   <listitem><simpara><filename>ogg://soundfile.ogg</filename></simpara></listitem>
+   <listitem><simpara><filename>ogg:///path/to/soundfile.ogg</filename></simpara></listitem>
+   <listitem><simpara><filename>ogg://http://www.example.com/path/to/soundstream.ogg</filename></simpara></listitem>
+  </itemizedlist>
+ </refsect1> <!-- }}} -->
+
+ <refsect1 role="options"><!-- {{{ -->
+  &reftitle.options;
+  <para>
+   <table>
+    <title>封装协议摘要</title>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>属性</entry>
+       <entry>支持</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>受限于 <link linkend="ini.allow-url-fopen">allow_url_fopen</link></entry>
+       <entry>No</entry>
+      </row>
+      <row>
+       <entry>允许读取</entry>
+       <entry>Yes</entry>
+      </row>
+      <row>
+       <entry>允许写入</entry>
+       <entry>Yes</entry>
+      </row>
+      <row>
+       <entry>允许附加</entry>
+       <entry>Yes</entry>
+      </row>
+      <row>
+       <entry>允许同时读写</entry>
+       <entry>No</entry>
+      </row>
+      <row>
+       <entry>支持 <function>stat</function></entry>
+       <entry>No</entry>
+      </row>
+      <row>
+       <entry>支持 <function>unlink</function></entry>
+       <entry>No</entry>
+      </row>
+      <row>
+       <entry>支持 <function>rename</function></entry>
+       <entry>No</entry>
+      </row>
+      <row>
+       <entry>支持 <function>mkdir</function></entry>
+       <entry>No</entry>
+      </row>
+      <row>
+       <entry>支持 <function>rmdir</function></entry>
+       <entry>No</entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </table>
+  </para>
+  <!-- FIXME: This should not be here! context.audio... -->
+  <para>
+   <table>
+    <title>上下文选项</title>
+    <tgroup cols="3">
+     <thead>
+      <row>
+       <entry>Name</entry>
+       <entry>Usage</entry>
+       <entry>Default</entry>
+       <entry>Mode</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry><literal>pcm_mode</literal></entry>
+       <entry>
+        读取时使用如下 PCM 编码之一: 
+        <constant>OGGVORBIS_PCM_U8</constant>、<constant>OGGVORBIS_PCM_S8</constant>、
+        <constant>OGGVORBIS_PCM_U16_BE</constant>、<constant>OGGVORBIS_PCM_S16_BE</constant>、
+        <constant>OGGVORBIS_PCM_U16_LE</constant> 和 <constant>OGGVORBIS_PCM_S16_LE</constant>。
+        (8 或 16 位，签名或未签名，大或小的 <literal>endian</literal>)
+       </entry>
+       <entry>OGGVORBIS_PCM_S16_LE</entry>
+       <entry>读取</entry>
+      </row>
+      <row>
+       <entry><literal>rate</literal></entry>
+       <entry>
+        输入数据的采样率，单位为 Hz
+       </entry>
+       <entry>44100</entry>
+       <entry>写入/附加</entry>
+      </row>
+      <row>
+       <entry><literal>bitrate</literal></entry>
+       <entry>
+        若给的值为整数，则是用固定的比特率进行编码。（16000 到 131072）若给的值为浮点数，则使用可变的比特率（质。(-1.0 到 1.0）
+       </entry>
+       <entry>128000</entry>
+       <entry>写入/附加</entry>
+      </row>
+      <row>
+       <entry><literal>channels</literal></entry>
+       <entry>
+        要编码的声道的数量，典型为 1 (单声道), 或 2 (立体声)。最高支持 16 声道。
+       </entry>
+       <entry>2</entry>
+       <entry>写入/附加</entry>
+      </row>
+      <row>
+       <entry><literal>comments</literal></entry>
+       <entry>
+        编码到音轨头部的字符串数组。
+       </entry>
+       <entry/>
+       <entry>写入/附加</entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </table>
+  </para>
+ </refsect1> <!-- }}} -->
+
+ <refsect1 role="examples"><!-- {{{ -->
+  &reftitle.examples;
+ </refsect1><!-- }}} -->
+
+</refentry>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
+
