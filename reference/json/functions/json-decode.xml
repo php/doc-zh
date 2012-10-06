@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
 <!-- EN-Revision: cbf0a79d44e0fc501a1acaa881454d1a2191de2c Maintainer: HonestQiao Status: ready -->
-<!-- Reviewed: no Maintainer: HonestQiao -->
 <refentry xml:id="function.json-decode" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>json_decode</refname>
@@ -13,7 +12,9 @@
   <methodsynopsis>
    <type>mixed</type><methodname>json_decode</methodname>
    <methodparam><type>string</type><parameter>json</parameter></methodparam>
-   <methodparam choice="opt"><type>bool</type><parameter>assoc</parameter></methodparam>
+   <methodparam choice="opt"><type>bool</type><parameter>assoc</parameter><initializer>false</initializer></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>depth</parameter><initializer>512</initializer></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>options</parameter><initializer>0</initializer></methodparam>
   </methodsynopsis>
   <para>
    接受一个 JSON 格式的字符串并且把它转换为 PHP 变量
@@ -30,6 +31,9 @@
       <para>
        待解码的 <parameter>json</parameter> <type>string</type> 格式的字符串。
       </para>
+      <para>
+       This function only works with UTF-8 encoded data.
+      </para>
      </listitem>
     </varlistentry>
     <varlistentry>
@@ -40,6 +44,24 @@
       </para>
      </listitem>
     </varlistentry>
+    <varlistentry>
+     <term><parameter>depth</parameter></term>
+     <listitem>
+      <para>
+       User specified recursion depth.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>options</parameter></term>
+     <listitem>
+      <para>
+       Bitmask of JSON decode options.  Currently only
+       <constant>JSON_BIGINT_AS_STRING</constant>
+       is supported (default is to cast large integers as floats)
+      </para>
+     </listitem>
+    </varlistentry>
    </variablelist>
   </para>
  </refsect1>
@@ -47,9 +69,12 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   Returns an <type>object</type> or if the optional
-   <parameter>assoc</parameter> parameter is &true;, an associative 
-   <type>array</type> is instead returned.
+   Returns the value encoded in <parameter>json</parameter> in appropriate
+   PHP type. Values <literal>true</literal>, <literal>false</literal> and
+   <literal>null</literal> (case-insensitive) are returned as &true;, &false;
+   and &null; respectively. &null; is returned if the
+   <parameter>json</parameter> cannot be decoded or if the encoded
+   data is deeper than the recursion limit.
   </para>
  </refsect1>
 
@@ -87,6 +112,139 @@ array(5) {
     ["d"] => int(4)
     ["e"] => int(5)
 }
+]]>
+    </screen>
+   </example>
+   <example>
+    <title>Accessing invalid object properties</title>
+    <simpara>
+     Accessing elements within an object that contain characters not
+     permitted under PHP's naming convention (e.g. the hyphen) can be
+     accomplished by encapsulating the element name within braces and the apostrophe.
+    </simpara>
+    <programlisting role="php">
+<![CDATA[
+<?php
+
+$json = '{"foo-bar": 12345}';
+
+$obj = json_decode($json);
+print $obj->{'foo-bar'}; // 12345
+
+?>
+]]>
+    </programlisting>
+   </example>
+   <example>
+    <title>common mistakes using <function>json_decode</function></title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+
+// the following strings are valid JavaScript but not valid JSON
+
+// the name and value must be enclosed in double quotes
+// single quotes are not valid 
+$bad_json = "{ 'bar': 'baz' }";
+json_decode($bad_json); // null
+
+// the name must be enclosed in double quotes
+$bad_json = '{ bar: "baz" }';
+json_decode($bad_json); // null
+
+// trailing commas are not allowed
+$bad_json = '{ bar: "baz", }';
+json_decode($bad_json); // null
+
+?>
+]]>
+    </programlisting>
+   </example>
+   <example>
+    <title><parameter>depth</parameter> errors</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+// Encode the data.
+$json = json_encode(
+    array(
+        1 => array(
+            'English' => array(
+                'One',
+                'January'
+            ),
+            'French' => array(
+                'Une',
+                'Janvier'
+            )
+        )
+    )
+);
+
+// Define the errors.
+$constants = get_defined_constants(true);
+$json_errors = array();
+foreach ($constants["json"] as $name => $value) {
+    if (!strncmp($name, "JSON_ERROR_", 11)) {
+        $json_errors[$value] = $name;
+    }
+}
+
+// Show the errors for different depths.
+foreach (range(4, 3, -1) as $depth) {
+    var_dump(json_decode($json, true, $depth));
+    echo 'Last error: ', $json_errors[json_last_error()], PHP_EOL, PHP_EOL;
+}
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+array(1) {
+  [1]=>
+  array(2) {
+    ["English"]=>
+    array(2) {
+      [0]=>
+      string(3) "One"
+      [1]=>
+      string(7) "January"
+    }
+    ["French"]=>
+    array(2) {
+      [0]=>
+      string(3) "Une"
+      [1]=>
+      string(7) "Janvier"
+    }
+  }
+}
+Last error: JSON_ERROR_NONE
+
+NULL
+Last error: JSON_ERROR_DEPTH
+]]>
+    </screen>
+   </example>
+   <example>
+    <title><function>json_decode</function> of large integers</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$json = '12345678901234567890';
+
+var_dump(json_decode($json));
+var_dump(json_decode($json, false, 512, JSON_BIGINT_AS_STRING));
+
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+float(1.2345678901235E+19)
+string(20) "12345678901234567890"
 ]]>
     </screen>
    </example>
@@ -151,6 +309,7 @@ array(5) {
   <para>
    <simplelist>
     <member><function>json_encode</function></member>
+    <member><function>json_last_error</function></member>
    </simplelist>
   </para>
  </refsect1>
