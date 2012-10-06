@@ -14,96 +14,17 @@
    <methodparam><type>array</type><parameter>array1</parameter></methodparam>
    <methodparam><type>array</type><parameter>array2</parameter></methodparam>
    <methodparam choice="opt"><type>array</type><parameter> ...</parameter></methodparam>
-   <methodparam><type>callback</type><parameter>data_compare_func</parameter></methodparam>
-   <methodparam><type>callback</type><parameter>key_compare_func</parameter></methodparam>
+   <methodparam><type>callable</type><parameter>data_compare_func</parameter></methodparam>
+   <methodparam><type>callable</type><parameter>key_compare_func</parameter></methodparam>
   </methodsynopsis>
   <para>
    <function>array_udiff_uassoc</function> 返回一个数组，该数组包括了所有在
-   <parameter>array1</parameter> 中但是不在任何其它参数数组中的值。注意和
+   <parameter>array1</parameter> 中但是不在任何其它参数数组中的值。
+  </para>
+  <para>
+   注意和
    <function>array_diff</function> 与 <function>array_udiff</function>
-   不同的是键名也用于比较。数组数据的比较是用用户提供的回调函数
-   <parameter>data_compare_func</parameter> 进行的。在此方面和
-   <function>array_diff_assoc</function>
-   的行为正好相反，后者是用内部函数进行比较的。对键名（索引）的检查也是由回调函数
-   <parameter>key_compare_func</parameter> 进行的。这和
-   <function>array_udiff_assoc</function> 的行为不同，后者是用内部函数比较索引的。
-  </para>
-  <para>
-   <example>
-    <title><function>array_udiff_uassoc</function> 例子</title>
-    <programlisting role="php">
-<![CDATA[
-<?php
-class cr {
-    private $priv_member;
-    function cr($val)
-    {
-        $this->priv_member = $val;
-    }
-
-    function comp_func_cr($a, $b)
-    {
-        if ($a->priv_member === $b->priv_member) return 0;
-        return ($a->priv_member > $b->priv_member)? 1:-1;
-    }
-
-    function comp_func_key($a, $b)
-    {
-        if ($a === $b) return 0;
-        return ($a > $b)? 1:-1;
-    }
-}
-$a = array("0.1" => new cr(9), "0.5" => new cr(12), 0 => new cr(23), 1=> new cr(4), 2 => new cr(-15),);
-$b = array("0.2" => new cr(9), "0.5" => new cr(22), 0 => new cr(3), 1=> new cr(4), 2 => new cr(-15),);
-
-$result = array_udiff_uassoc($a, $b, array("cr", "comp_func_cr"), array("cr", "comp_func_key"));
-print_r($result);
-?>
-]]>
-    </programlisting>
-    &example.outputs;
-    <screen>
-<![CDATA[
-Array
-(
-    [0.1] => cr Object
-        (
-            [priv_member:private] => 9
-        )
-
-    [0.5] => cr Object
-        (
-            [priv_member:private] => 12
-        )
-
-    [0] => cr Object
-        (
-            [priv_member:private] => 23
-        )
-)
-]]>
-    </screen>
-   </example>
-  </para>
-  <simpara>
-   在上例中键值对 <literal>"1" =&gt; new cr(4)</literal>
-   同时出现在两个数组中，因此不在本函数的输出中。要记住必须提供两个回调函数。
-  </simpara>
-  <simpara>
-   此比较是通过用户提供的回调函数来进行的。如果认为第一个参数小于，等于，或大于第二个参数时必须分别返回一个小于零，等于零，或大于零的整数。
-  </simpara>
-  <note>
-   <simpara>
-    注意本函数只检查了多维数组中的一维。当然，可以用
-    <literal>array_udiff_uassoc($array1[0], $array2[0], "data_compare_func", "key_compare_func");</literal>
-    来检查更深的维度。
-   </simpara>
-  </note>
-  <para>
-   参见
-   <function>array_diff</function>，<function>array_diff_assoc</function>，<function>array_diff_uassoc</function>，<function>array_udiff</function>，<function>array_udiff_assoc</function>，<function>array_intersect</function>，<function>array_intersect_assoc</function>，<function>array_uintersect</function>，<function>array_uintersect_assoc</function>
-   和
-   <function>array_uintersect_uassoc</function>。
+   不同的是键名也用于比较。
   </para>
  </refsect1>
  <refsect1 role="parameters">
@@ -114,7 +35,7 @@ Array
      <term><parameter>array1</parameter></term>
      <listitem>
       <para>
-       The first array.
+       第一个数组。
       </para>
      </listitem>
     </varlistentry>
@@ -122,7 +43,7 @@ Array
      <term><parameter>array2</parameter></term>
      <listitem>
       <para>
-       The second array.
+       第二个数组。
       </para>
      </listitem>
     </varlistentry>
@@ -139,10 +60,9 @@ Array
      <term><parameter>key_compare_func</parameter></term>
      <listitem>
       <para>
-       The comparison of keys (indices) is done also by the callback function
-       <parameter>key_compare_func</parameter>. This behaviour is unlike what
-       <function>array_udiff_assoc</function> does, since the latter compares
-       the indices by using an internal function.
+       对键名（索引）的检查也是由回调函数
+   <parameter>key_compare_func</parameter> 进行的。这和
+   <function>array_udiff_assoc</function> 的行为不同，后者是用内部函数比较索引的。
       </para>
      </listitem>
     </varlistentry>
@@ -161,7 +81,7 @@ Array
   &reftitle.examples;
   <para>
    <example>
-    <title><function>array_udiff_uassoc</function> example</title>
+    <title><function>array_udiff_uassoc</function> 例子</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -217,21 +137,19 @@ Array
    </example>
   </para>
   <simpara>
-   In our example above you see the <literal>"1" =&gt; new cr(4)</literal>
-   pair is present in both arrays and thus it is not in the output from the
-   function. Keep in mind that you have to supply 2 callback functions.
+   在上例中键值对 <literal>"1" =&gt; new cr(4)</literal>
+   同时出现在两个数组中，因此不在本函数的输出中。要记住必须提供两个回调函数。
   </simpara>
  </refsect1>
  <refsect1 role="notes">
   &reftitle.notes;
   <note>
    <simpara>
-    Please note that this function only checks one dimension of a n-dimensional
-    array. Of course you can check deeper dimensions by using, for example,
-    <literal>array_udiff_uassoc($array1[0], $array2[0], "data_compare_func",
-    "key_compare_func");</literal>.
+    注意本函数只检查了多维数组中的一维。当然，可以用
+    <literal>array_udiff_uassoc($array1[0], $array2[0], "data_compare_func", "key_compare_func");</literal>
+    来检查更深的维度。
    </simpara>
-  </note>
+   </note>
  </refsect1>
  <refsect1 role="seealso">
   &reftitle.seealso;
