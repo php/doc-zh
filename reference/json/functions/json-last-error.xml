@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision$ -->
+<!-- EN-Revision: f26226bf767affc9b6801cb409b7cd696aa74221 Maintainer: daijie Status: ready -->
+<!-- Reviewed: no -->
+
+<refentry xml:id="function.json-last-error" xmlns="http://docbook.org/ns/docbook">
+ <refnamediv>
+  <refname>json_last_error</refname>
+  <refpurpose>返回最后发生的错误</refpurpose>
+ </refnamediv>
+
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <type>int</type><methodname>json_last_error</methodname>
+   <void />
+  </methodsynopsis>
+  <para>
+   如果有，返回 JSON 编码解码时最后发生的错误。
+  </para>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  &no.function.parameters;
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   返回一个整型（integer），这个值会是以下的常量之一：
+  </para>
+  <table>
+   <title>JSON 错误码</title>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>常量</entry>
+      <entry>含义</entry>
+      <entry>可用性</entry>
+     </row>
+    </thead>
+    <tbody>
+     <row>
+      <entry><constant>JSON_ERROR_NONE</constant></entry>
+      <entry>没有错误发生</entry>
+      <entry></entry>
+     </row>
+     <row>
+      <entry><constant>JSON_ERROR_DEPTH</constant></entry>
+      <entry>到达了最大堆栈深度</entry>
+      <entry></entry>
+     </row>
+     <row>
+      <entry><constant>JSON_ERROR_STATE_MISMATCH</constant></entry>
+      <entry>无效或异常的 JSON</entry>
+      <entry></entry>
+     </row>
+     <row>
+      <entry><constant>JSON_ERROR_CTRL_CHAR</constant></entry>
+      <entry>控制字符错误，可能是编码不对</entry>
+      <entry></entry>
+     </row>
+     <row>
+      <entry><constant>JSON_ERROR_SYNTAX</constant></entry>
+      <entry>语法错误</entry>
+      <entry></entry>
+     </row>
+     <row>
+      <entry><constant>JSON_ERROR_UTF8</constant></entry>
+      <entry>异常的 UTF-8 字符，也许是因为不正确的编码。</entry>
+      <entry>PHP 5.3.3</entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </table>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title><function>json_last_error</function> 例子</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+// 一个有效的 json 字符串
+$json[] = '{"Organization": "PHP Documentation Team"}';
+
+// 一个无效的 json 字符串会导致一个语法错误，在这个例子里我们使用 ' 代替了 " 作为引号
+$json[] = "{'Organization': 'PHP Documentation Team'}";
+
+
+foreach ($json as $string) {
+    echo 'Decoding: ' . $string;
+    json_decode($string);
+
+    switch (json_last_error()) {
+        case JSON_ERROR_NONE:
+            echo ' - No errors';
+        break;
+        case JSON_ERROR_DEPTH:
+            echo ' - Maximum stack depth exceeded';
+        break;
+        case JSON_ERROR_STATE_MISMATCH:
+            echo ' - Underflow or the modes mismatch';
+        break;
+        case JSON_ERROR_CTRL_CHAR:
+            echo ' - Unexpected control character found';
+        break;
+        case JSON_ERROR_SYNTAX:
+            echo ' - Syntax error, malformed JSON';
+        break;
+        case JSON_ERROR_UTF8:
+            echo ' - Malformed UTF-8 characters, possibly incorrectly encoded';
+        break;
+        default:
+            echo ' - Unknown error';
+        break;
+    }
+
+    echo PHP_EOL;
+}
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+Decoding: {"Organization": "PHP Documentation Team"} - No errors
+Decoding: {'Organization': 'PHP Documentation Team'} - Syntax error, malformed JSON
+]]>
+    </screen>
+   </example>
+  </para>
+  <para>
+   <example>
+    <title><function>json_encode</function> 的 <function>json_last_error</function></title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+// 无效的 UTF8 序列
+$text = "\xB1\x31";
+
+$json  = json_encode($text);
+$error = json_last_error();
+
+var_dump($json, $error === JSON_ERROR_UTF8);
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+string(4) "null"
+bool(true)
+]]>
+    </screen>
+   </example>
+  </para>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>json_decode</function></member>
+    <member><function>json_encode</function></member>
+   </simplelist>
+  </para>
+ </refsect1>
+</refentry>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
