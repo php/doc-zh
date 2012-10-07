@@ -12,110 +12,21 @@
   &reftitle.description;
   <methodsynopsis>
    <type>bool</type><methodname>flock</methodname>
-   <methodparam><type>int</type><parameter>handle</parameter></methodparam>
+   <methodparam><type>resource</type><parameter>handle</parameter></methodparam>
    <methodparam><type>int</type><parameter>operation</parameter></methodparam>
    <methodparam choice="opt"><type>int</type><parameter role="reference">wouldblock</parameter></methodparam>
   </methodsynopsis>
-  <simpara>
+    <para>
+     <function>flock</function> 允许执行一个简单的可以在任何平台中使用的读取/写入模型（包括大部分的
+   Unix 派生版和甚至是 Windows）。
+  </para>
+    <para>
+     在 PHP 5.3.2版本之前，锁也会被 <function>fclose</function> 释放（在脚本结束后会自动调用）。
+  </para>
+  <para>
    PHP 支持以咨询方式（也就是说所有访问程序必须使用同一方式锁定, 否则它不会工作）锁定全部文件的一种轻便方法。
-  </simpara>
-  <note>
-   <para>
-    在 Windows 下 <function>flock</function> 将会强制执行。
-   </para>
-  </note>
-  <simpara>
-   <function>flock</function> 操作的 <parameter>handle</parameter>
-   必须是一个已经打开的文件指针。<parameter>operation</parameter>
-   可以是以下值之一：
-  </simpara>
-  <para>
-   <itemizedlist>
-    <listitem>
-     <simpara>
-      要取得共享锁定（读取的程序），将
-      <parameter>operation</parameter> 设为
-      <constant>LOCK_SH</constant>（PHP 4.0.1 以前的版本设置为 1）。
-     </simpara>
-    </listitem>
-    <listitem>
-     <simpara>
-      要取得独占锁定（写入的程序），将
-      <parameter>operation</parameter> 设为
-      <constant>LOCK_EX</constant>（PHP 4.0.1 以前的版本中设置为 2）。
-     </simpara>
-    </listitem>
-    <listitem>
-     <simpara>
-      要释放锁定（无论共享或独占），将
-      <parameter>operation</parameter> 设为
-      <constant>LOCK_UN</constant>（PHP 4.0.1 以前的版本中设置为 3）。
-     </simpara>
-    </listitem>
-    <listitem>
-     <simpara>
-      如果不希望 <function>flock</function> 在锁定时堵塞，则给
-      <parameter>operation</parameter> 加上
-      <constant>LOCK_NB</constant>（PHP 4.0.1 以前的版本中设置为 4）。
-     </simpara>
-    </listitem>
-   </itemizedlist>
+    默认情况下，这个函数会阻塞到获取锁；这可以通过下面文档中 <constant>LOCK_NB</constant> 选项来控制（在非 Windows 平台上）。
   </para>
-  <simpara>
-   <function>flock</function> 允许执行一个简单的可以在任何平台中使用的读取/写入模型（包括大部分的
-   Unix 派生版和甚至是 Windows）。如果锁定会堵塞的话（EWOULDBLOCK
-   错误码情况下），可选的第三个参数会被设置为 &true;。锁定操作也可以被
-   <function>fclose</function> 释放（代码执行完毕时也会自动调用）。
-  </simpara>
-  <simpara>
-   &return.success;
-  </simpara>
-  <para>
-   <example>
-    <title><function>flock</function> 例子</title>
-    <programlisting role="php">
-<![CDATA[
-<?php
-
-$fp = fopen("/tmp/lock.txt", "w+");
-
-if (flock($fp, LOCK_EX)) { // 进行排它型锁定
-    fwrite($fp, "Write something here\n");
-    flock($fp, LOCK_UN); // 释放锁定
-} else {
-    echo "Couldn't lock the file !";
-}
-
-fclose($fp);
-
-?>
-]]>
-    </programlisting>
-   </example>
-  </para>
-  <note>
-   <para>
-    由于 <function>flock</function>
-    需要一个文件指针， 因此可能不得不用一个特殊的锁定文件来保护打算通过写模式打开的文件的访问（在
-    <function>fopen</function> 函数中加入 "w" 或 "w+"）。
-   </para>
-  </note>
-  <warning>
-   <para>
-    <function>flock</function> 不能用于 NFS
-    以及其它一些网络文件系统。详细资料查看自己操作系统的文档。
-   </para>
-   <para>
-    在部分操作系统中 <function>flock</function> 以进程级实现。当用一个多线程服务器
-    API（比如 ISAPI）时，可能不可以依靠
-    <function>flock</function> 来保护文件，因为运行于同一服务器实例中其它并行线程的
-    PHP 脚本可以对该文件进行处理。
-   </para>
-   <para>
-    <function>flock</function> 不支持旧的文件系统，如 <literal>FAT</literal>
-    以及它的派生系统。因此，此环境下总是返回 &false;（尤其是对 Windows 98 用户来说）。
-   </para>
-  </warning>
  </refsect1>
  
  <refsect1 role="parameters">
@@ -132,29 +43,30 @@ fclose($fp);
      <term><parameter>operation</parameter></term>
      <listitem>
       <para>
-       <parameter>operation</parameter> is one of the following:
+       <parameter>operation</parameter>
+   可以是以下值之一：
        <itemizedlist>
         <listitem>
          <simpara>
-          <constant>LOCK_SH</constant> to acquire a shared lock (reader).
+         <constant>LOCK_SH</constant>取得共享锁定（读取的程序）。
          </simpara>
         </listitem>
         <listitem>
          <simpara>
-          <constant>LOCK_EX</constant> to acquire an exclusive lock (writer).
+         <constant>LOCK_EX</constant> 取得独占锁定（写入的程序。
          </simpara>
         </listitem>
         <listitem>
          <simpara>
-          <constant>LOCK_UN</constant> to release a lock (shared or exclusive).
+          <constant>LOCK_UN</constant> 释放锁定（无论共享或独占）。
          </simpara>
         </listitem>
        </itemizedlist>
       </para>
       <para>
-       It is also possible to add <constant>LOCK_NB</constant> as a bitmask to one 
-       of the above operations if you don't want <function>flock</function> to 
-       block while locking. (not supported on Windows)
+       如果不希望 <function>flock</function> 在锁定时堵塞，则是
+       <constant>LOCK_NB</constant>（Windows 上还不支持）。
+
       </para>
      </listitem>
     </varlistentry>
@@ -162,8 +74,8 @@ fclose($fp);
      <term><parameter>wouldblock</parameter></term>
      <listitem>
       <para>
-       The optional third argument is set to &true; if the lock would block
-       (EWOULDBLOCK errno condition). (not supported on Windows)
+       如果锁定会堵塞的话（EWOULDBLOCK
+   错误码情况下），可选的第三个参数会被设置为 &true;。（Windows 上不支持）
       </para>
      </listitem>
     </varlistentry>
@@ -193,17 +105,16 @@ fclose($fp);
       <row>
        <entry>5.3.2</entry>
        <entry>
-        The automatic unlocking when the file's resource handle is closed was
-        removed. Unlocking now always has to be done manually.
+        在文件资源句柄关闭时不再自动解锁。现在要解锁必须手动进行。
        </entry>
       </row>
       <row>
        <entry>4.0.1</entry>
        <entry>
-        The <literal>LOCK_XXX</literal> constants were added. Prior to that
-        you must use 1 for <constant>LOCK_SH</constant>, 2 for
-        <constant>LOCK_EX</constant>, 3 for <constant>LOCK_UN</constant> and
-        4 for <constant>LOCK_NB</constant>
+        增加了常量 <literal>LOCK_XXX</literal>。
+        之前你必须使用 1 代表 <constant>LOCK_SH</constant>，2 代表
+        <constant>LOCK_EX</constant>，3 代表<constant>LOCK_UN</constant>，4 代表
+         <constant>LOCK_NB</constant>。
        </entry>
       </row>
      </tbody>
@@ -216,18 +127,18 @@ fclose($fp);
   &reftitle.examples;
   <para>
    <example>
-    <title><function>flock</function> example</title>
+    <title><function>flock</function> 例子</title>
     <programlisting role="php">
 <![CDATA[
 <?php
 
 $fp = fopen("/tmp/lock.txt", "r+");
 
-if (flock($fp, LOCK_EX)) {  // acquire an exclusive lock
+if (flock($fp, LOCK_EX)) {  // 进行排它型锁定
     ftruncate($fp, 0);      // truncate file
     fwrite($fp, "Write something here\n");
     fflush($fp);            // flush output before releasing the lock
-    flock($fp, LOCK_UN);    // release the lock
+    flock($fp, LOCK_UN);    // 释放锁定
 } else {
     echo "Couldn't get the lock!";
 }
@@ -241,7 +152,7 @@ fclose($fp);
   </para>
   <para>
    <example>
-    <title><function>flock</function> using the <constant>LOCK_NB</constant> option</title>
+    <title><function>flock</function> 使用 <constant>LOCK_NB</constant> 选项</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -277,10 +188,9 @@ fclose($fp);
   </note>
   <note>
    <para>
-    Because <function>flock</function> requires a file pointer, you may have
-    to use a special lock file to protect access to a file that you intend
-    to truncate by opening it in write mode (with a "w" or "w+" argument to
-    <function>fopen</function>).
+    由于 <function>flock</function>
+    需要一个文件指针， 因此可能不得不用一个特殊的锁定文件来保护打算通过写模式打开的文件的访问（在
+    <function>fopen</function> 函数中加入 "w" 或 "w+"）。
    </para>
   </note>
   <note>
@@ -298,17 +208,14 @@ fclose($fp);
   </warning>
   <warning>
    <para>
-    On some operating systems <function>flock</function> is implemented at
-    the process level. When using a multithreaded server API like ISAPI you
-    may not be able to rely on <function>flock</function> to protect files
-    against other PHP scripts running in parallel threads of the same server
-    instance!
+    在部分操作系统中 <function>flock</function> 以进程级实现。当用一个多线程服务器
+    API（比如 ISAPI）时，可能不可以依靠
+    <function>flock</function> 来保护文件，因为运行于同一服务器实例中其它并行线程的
+    PHP 脚本可以对该文件进行处理。
    </para>
    <para>
-    <function>flock</function> is not supported on antiquated filesystems like
-    <literal>FAT</literal> and its derivates and will therefore always
-    return &false; under this environments (this is especially true for
-    Windows 98 users).
+    <function>flock</function> 不支持旧的文件系统，如 <literal>FAT</literal>
+    以及它的派生系统。因此，此环境下总是返回 &false;（尤其是对 Windows 98 用户来说）。
    </para>
   </warning>
  </refsect1>

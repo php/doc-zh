@@ -13,9 +13,9 @@
   <methodsynopsis>
    <type>mixed</type><methodname>substr_replace</methodname>
    <methodparam><type>mixed</type><parameter>string</parameter></methodparam>
-   <methodparam><type>string</type><parameter>replacement</parameter></methodparam>
-   <methodparam><type>int</type><parameter>start</parameter></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter>length</parameter></methodparam>
+   <methodparam><type>mixed</type><parameter>replacement</parameter></methodparam>
+   <methodparam><type>mixed</type><parameter>start</parameter></methodparam>
+   <methodparam choice="opt"><type>mixed</type><parameter>length</parameter></methodparam>
   </methodsynopsis>
   <para>
    <function>substr_replace</function> 在字符串 <parameter>string</parameter> 的副本中将由 <parameter>start</parameter> 和可选的 <parameter>length</parameter> 参数限定的子字符串使用 <parameter>replacement</parameter> 进行替换。
@@ -32,6 +32,15 @@
       <para>
        输入字符串。
       </para>
+      <para>
+       An <type>array</type> of <type>string</type>s can be provided, in which
+       case the replacements will occur on each string in turn. In this case,
+       the <parameter>replacement</parameter>, <parameter>start</parameter>
+       and <parameter>length</parameter> parameters may be provided either as
+       scalar values to be applied to each input string in turn, or as
+       <type>array</type>s, in which case the corresponding array element will
+       be used for each input string.
+      </para>
      </listitem>
     </varlistentry>
     <varlistentry>
@@ -46,10 +55,10 @@
      <term><parameter>start</parameter></term>
      <listitem>
       <para>
-	   如果 <parameter>start</parameter> 为正数，替换将从 <parameter>string</parameter> 的 <parameter>start</parameter> 位置开始。
+       如果 <parameter>start</parameter> 为正数，替换将从 <parameter>string</parameter> 的 <parameter>start</parameter> 位置开始。
       </para>
       <para>
-	   如果 <parameter>start</parameter> 为负数，替换将从 <parameter>string</parameter> 的倒数第 <parameter>start</parameter> 个位置开始。
+       如果 <parameter>start</parameter> 为负数，替换将从 <parameter>string</parameter> 的倒数第 <parameter>start</parameter> 个位置开始。
       </para>
      </listitem>
     </varlistentry>
@@ -57,7 +66,7 @@
      <term><parameter>length</parameter></term>
      <listitem>
       <para>
-	   如果设定了这个参数并且为正数，表示 <parameter>string</parameter> 中被替换的子字符串的长度。如果设定为负数，它表示待替换的子字符串结尾处距离 <parameter>string</parameter> 末端的字符个数。如果没有提供此参数，那么它默认为 strlen( <parameter>string</parameter> ) （字符串的长度）。当然，如果 <parameter>length</parameter> 为 0，那么这个函数的功能为将 <parameter>replacement</parameter> 插入到 <parameter>string</parameter> 的 <parameter>start</parameter> 位置处。
+       如果设定了这个参数并且为正数，表示 <parameter>string</parameter> 中被替换的子字符串的长度。如果设定为负数，它表示待替换的子字符串结尾处距离 <parameter>string</parameter> 末端的字符个数。如果没有提供此参数，那么它默认为 strlen( <parameter>string</parameter> ) （字符串的长度）。当然，如果 <parameter>length</parameter> 为 0，那么这个函数的功能为将 <parameter>replacement</parameter> 插入到 <parameter>string</parameter> 的 <parameter>start</parameter> 位置处。
       </para>
      </listitem>
     </varlistentry>
@@ -120,6 +129,32 @@ echo substr_replace($var, 'bob', -7, -1) . "<br />\n";
 
 /* 从 $var 中删除 “MNRPQR”。*/
 echo substr_replace($var, '', 10, -1) . "<br />\n";
+?>
+]]>
+    </programlisting>
+  </example>
+  </para>
+  <para>
+   <example>
+    <title>
+     Using <function>substr_replace</function> to replace multiple strings at
+     once
+    </title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$input = array('A: XXX', 'B: XXX', 'C: XXX');
+
+// A simple case: replace XXX in each string with YYY.
+echo implode('; ', substr_replace($input, 'YYY', 3, 3))."\n";
+
+// A more complicated case where each replacement is different.
+$replace = array('AAA', 'BBB', 'CCC');
+echo implode('; ', substr_replace($input, $replace, 3, 3))."\n";
+
+// Replace a different number of characters each time.
+$length = array(1, 2, 3);
+echo implode('; ', substr_replace($input, $replace, 3, $length))."\n";
 ?>
 ]]>
     </programlisting>

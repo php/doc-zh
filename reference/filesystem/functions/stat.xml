@@ -7,6 +7,7 @@
   <refname>stat</refname>
   <refpurpose>给出文件的信息</refpurpose>
  </refnamediv>
+ 
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
@@ -16,16 +17,32 @@
   <para>
    获取由 <parameter>filename</parameter> 指定的文件的统计信息。如果
    <parameter>filename</parameter>
-   是符号连接，则统计信息是关于被连接文件本身的，而不是符号连接。<function>lstat</function>
+   是符号连接，则统计信息是关于被连接文件本身的，而不是符号连接。
+  </para>
+  <para>
+   <function>lstat</function>
    和 <function>stat</function> 相同，只除了它会返回符号连接的状态。
   </para>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
   <para>
-   如果出错，<function>stat</function> 返回 &false;，并且发出一条警告。
+   <variablelist>
+    <varlistentry>
+     <term><parameter>filename</parameter></term>
+     <listitem>
+      <para>
+       文件的路径。
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
   </para>
-  <para>
-   返回一个数组包含有文件的统计信息，该数组具有以下列出的单元，数组下标从零开始。除了数字索引之外自
-   PHP 4.0.6 起还可以通过关联索引来访问。
-  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
   <para>
    <table>
     <title><function>stat</function> 和 <function>fstat</function> 返回格式</title>
@@ -106,125 +123,13 @@
      </tbody>
     </tgroup>
    </table>
-   * - 仅在支持 st_blksize 类型的系统下有效。其它系统（如 Windows）返回 -1。
-  </para>
-
-  &note.clearstatcache;
-  &tip.fopen-wrapper.stat;
-
-  <para>
-   参见 <function>lstat</function>，<function>fstat</function>，<function>filemtime</function> 和
-   <function>filegroup</function>。
-  </para>
- </refsect1>
-
- <refsect1 role="parameters">
-  &reftitle.parameters;
-  <para>
-   <variablelist>
-    <varlistentry>
-     <term><parameter>filename</parameter></term>
-     <listitem>
-      <para>
-       Path to the file.
-      </para>
-     </listitem>
-    </varlistentry>
-   </variablelist>
-  </para>
- </refsect1>
-
- <refsect1 role="returnvalues">
-  &reftitle.returnvalues;
-  <para>
-   <table>
-    <title><function>stat</function> and <function>fstat</function> result
-     format</title>
-    <tgroup cols="3">
-     <thead>
-      <row>
-       <entry>Numeric</entry>
-       <entry>Associative (since PHP 4.0.6)</entry>
-       <entry>Description</entry>
-      </row>
-     </thead>
-     <tbody>
-      <row>
-       <entry>0</entry>
-       <entry>dev</entry>
-       <entry>device number</entry>
-      </row>
-      <row>
-       <entry>1</entry>
-       <entry>ino</entry>
-       <entry>inode number *</entry>
-      </row>
-      <row>
-       <entry>2</entry>
-       <entry>mode</entry>
-       <entry>inode protection mode</entry>
-      </row>
-      <row>
-       <entry>3</entry>
-       <entry>nlink</entry>
-       <entry>number of links</entry>
-      </row>
-      <row>
-       <entry>4</entry>
-       <entry>uid</entry>
-       <entry>userid of owner *</entry>
-      </row>
-      <row>
-       <entry>5</entry>
-       <entry>gid</entry>
-       <entry>groupid of owner *</entry>
-      </row>
-      <row>
-       <entry>6</entry>
-       <entry>rdev</entry>
-       <entry>device type, if inode device</entry>
-      </row>
-      <row>
-       <entry>7</entry>
-       <entry>size</entry>
-       <entry>size in bytes</entry>
-      </row>
-      <row>
-       <entry>8</entry>
-       <entry>atime</entry>
-       <entry>time of last access (Unix timestamp)</entry>
-      </row>
-      <row>
-       <entry>9</entry>
-       <entry>mtime</entry>
-       <entry>time of last modification (Unix timestamp)</entry>
-      </row>
-      <row>
-       <entry>10</entry>
-       <entry>ctime</entry>
-       <entry>time of last inode change (Unix timestamp)</entry>
-      </row>
-      <row>
-       <entry>11</entry>
-       <entry>blksize</entry>
-       <entry>blocksize of filesystem IO **</entry>
-      </row>
-      <row>
-       <entry>12</entry>
-       <entry>blocks</entry>
-       <entry>number of 512-byte blocks allocated **</entry>
-      </row>
-     </tbody>
-    </tgroup>
-   </table>
-   * On Windows this will always be 0.
+   * Windows 下总是 0。
   </para>
   <para>
-   ** Only valid on systems supporting the st_blksize type - other
-   systems (e.g. Windows) return -1.
+      * - 仅在支持 st_blksize 类型的系统下有效。其它系统（如 Windows）返回 -1。
   </para>
   <para>
-   In case of error, <function>stat</function> returns &false;.
+   如果出错，<function>stat</function> 返回 &false;。
   </para>
   &fs.file.32bit;
  </refsect1>
@@ -232,7 +137,7 @@
  <refsect1 role="errors">
   &reftitle.errors;
   <para>
-   Upon failure, an <constant>E_WARNING</constant> is emitted.
+   错误时会产生 <constant>E_WARNING</constant> 级别的错误。
   </para>
  </refsect1>
 
@@ -251,9 +156,7 @@
       <row>
        <entry>4.0.6</entry>
        <entry>
-        In addition to returning these attributes in a numeric array, they
-        can be accessed with associative indices, as noted next to each
-        parameter
+        返回一个数组包含有文件的统计信息，该数组具有以下列出的单元，数组下标从零开始。除了数字索引之外自还可以通过关联索引来访问。
        </entry>
       </row>
      </tbody>
@@ -266,7 +169,7 @@
   &reftitle.examples;
   <para>
    <example>
-    <title><function>stat</function> example</title>
+    <title><function>stat</function> 例子</title>
     <programlisting role="php">
 <![CDATA[
 <?php

@@ -7,6 +7,7 @@
   <refname>popen</refname>
   <refpurpose>打开进程文件指针</refpurpose>
  </refnamediv>
+ 
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
@@ -15,23 +16,51 @@
    <methodparam><type>string</type><parameter>mode</parameter></methodparam>
   </methodsynopsis>
   <para>
-   打开一个指向进程的管道，该进程由派生给定的 <parameter>command</parameter> 命令执行而产生。
+   打开一个指向进程的管道，该进程由派生给定的 command 命令执行而产生。
   </para>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>command</parameter></term>
+     <listitem>
+      <para>
+       命令。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>mode</parameter></term>
+     <listitem>
+      <para>
+       模式。
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+ 
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
   <para>
    返回一个和 <function>fopen</function>
    所返回的相同的文件指针，只不过它是单向的（只能用于读或写）并且必须用
    <function>pclose</function> 来关闭。此指针可以用于
    <function>fgets</function>，<function>fgetss</function> 和
    <function>fwrite</function>。
+   当模式为 'r'，返回的文件指针等于命里的 STDOUT，当模式为 'w'，返回的文件指针等于命令的 STDIN。
   </para>
   <para>
    如果出错返回 &false;。
   </para>
-  <note>
-   <para>
-    如果需要双向支持，使用 <function>proc_open</function>。
-   </para>
-  </note>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
   <para>
    <example>
     <title><function>popen</function> 例子</title>
@@ -44,104 +73,17 @@ $handle = popen("/bin/ls", "r");
     </programlisting>
    </example>
   </para>
-  <note>
-   <para>
-    如果未找到要执行的命令，会返回一个合法的资源。这看上去很怪，但有道理。它允许访问
+  <para>
+  如果未找到要执行的命令，会返回一个合法的资源。这看上去很怪，但有道理。它允许访问
     shell 返回的任何错误信息：
-    <informalexample>
-     <programlisting role="php">
+   <example>
+    <title><function>popen</function> 例子</title>
+    <programlisting role="php">
 <![CDATA[
 <?php
 error_reporting(E_ALL);
 
 /* 加入重定向以得到标准错误输出 stderr。 */
-$handle = popen('/path/to/spooge 2>&1', 'r');
-echo "'$handle'; " . gettype($handle) . "\n";
-$read = fread($handle, 2096);
-echo $read;
-pclose($handle);
-?>
-]]>
-     </programlisting>
-    </informalexample>
-   </para>
-  </note>
-  &note.exec-path;
-  &warn.sm.exec;
-  <para>
-   参见 <function>pclose</function>，<function>fopen</function> 和
-   <function>proc_open</function>。
-  </para>
- </refsect1>
-
- <refsect1 role="parameters">
-  &reftitle.parameters;
-  <para>
-   <variablelist>
-    <varlistentry>
-     <term><parameter>command</parameter></term>
-     <listitem>
-      <para>
-       The command
-      </para>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
-     <term><parameter>mode</parameter></term>
-     <listitem>
-      <para>
-       The mode
-      </para>
-     </listitem>
-    </varlistentry>
-   </variablelist>
-  </para>
- </refsect1>
- 
- <refsect1 role="returnvalues">
-  &reftitle.returnvalues;
-  <para>
-   Returns a file pointer identical to that returned by
-   <function>fopen</function>, except that it is unidirectional (may
-   only be used for reading or writing) and must be closed with
-   <function>pclose</function>. This pointer may be used with
-   <function>fgets</function>, <function>fgetss</function>, and
-   <function>fwrite</function>. When the mode is 'r', the returned
-   file pointer equals to the STDOUT of the command, when the mode
-   is 'w', the returned file pointer equals to the STDIN of the
-   command.
-  </para>
-  <para>
-   If an error occurs, returns &false;.
-  </para>
- </refsect1>
-
- <refsect1 role="examples">
-  &reftitle.examples;
-  <para>
-   <example>
-    <title><function>popen</function> example</title>
-    <programlisting role="php">
-<![CDATA[
-<?php
-$handle = popen("/bin/ls", "r");
-?>
-]]>
-    </programlisting>
-   </example>
-  </para>
-  <para>
-   If the command to be executed could not be found, a valid
-   resource is returned. This may seem odd, but makes sense; it
-   allows you to access any error message returned by the shell:
-   <example>
-    <title><function>popen</function> example</title>
-    <programlisting role="php">
-<![CDATA[
-<?php
-error_reporting(E_ALL);
-
-/* Add redirection so we can get stderr. */
 $handle = popen('/path/to/executable 2>&1', 'r');
 echo "'$handle'; " . gettype($handle) . "\n";
 $read = fread($handle, 2096);
@@ -158,8 +100,7 @@ pclose($handle);
   &reftitle.notes;
   <note>
    <para>
-    If you're looking for bi-directional support (two-way), use
-    <function>proc_open</function>.
+    如果需要双向支持，使用 <function>proc_open</function>。
    </para>
   </note>
   &note.exec-path;

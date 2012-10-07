@@ -14,39 +14,8 @@
    <methodparam><type>resource</type><parameter>handle</parameter></methodparam>
   </methodsynopsis>
   <para>
-   如果文件指针到了 EOF 或者出错时则返回 &true;，否则返回一个错误（包括 socket
-   超时），其它情况则返回 &false;。
+   测试文件指针是否到了文件结束的位。
   </para>
-  <warning>
-   <simpara>
-    如果服务器没有关闭由 <function>fsockopen</function> 所打开的连接，<function>feof</function>
-    会一直等待直到超时而返回 &true;。默认的超时限制是 60 秒，可以使用
-    <function>stream_set_timeout</function> 来改变这个值。
-   </simpara>
-  </warning>
-  &fs.validfp.all;
-  <warning>
-   <para>
-    如果传递的文件指针无效可能会陷入无限循环中，因为 EOF 不会返回 TRUE。
-    <example>
-     <title>使用无效文件指针的 <function>feof</function> 例子</title>
-     <programlisting role="php">
-<![CDATA[
-<?php
-// 如果文件不可读取或者不存在，fopen 函数返回 FALSE
-$file = @fopen("no_such_file", "r");
-
-// 来自 fopen 的 FALSE 会发出一条警告信息并在这里陷入无限循环
-while (!feof($file)) {
-}
-
-fclose($file);
-?>
-]]>
-     </programlisting>
-    </example>
-   </para>
-  </warning>
  </refsect1>
  
  <refsect1 role="parameters">
@@ -66,8 +35,8 @@ fclose($file);
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   Returns &true; if the file pointer is at EOF or an error occurs
-   (including socket timeout); otherwise returns &false;.
+   如果文件指针到了 EOF 或者出错时则返回 &true;，否则返回一个错误（包括 socket
+   超时），其它情况则返回 &false;。
   </para>
  </refsect1>
  
@@ -75,11 +44,10 @@ fclose($file);
   &reftitle.notes;
   <warning>
    <para>
-    If a connection opened by <function>fsockopen</function> wasn't closed
-    by the server, <function>feof</function> will hang. To workaround this, see 
-    below example:
+        如果服务器没有关闭由 <function>fsockopen</function> 所打开的连接，<function>feof</function>
+    会一直等待直到超时。要解决这个问题可参见以下范例：
     <example>
-     <title>Handling timeouts with <function>feof</function></title>
+     <title>处理 <function>feof</function> 的超时</title>
      <programlisting role="php">
 <![CDATA[
 <?php
@@ -89,7 +57,7 @@ function safe_feof($fp, &$start = NULL) {
  return feof($fp);
 }
 
-/* Assuming $fp is previously opened by fsockopen() */
+/* $fp 的赋值是由之前 fsockopen() 打开  */
 
 $start = NULL;
 $timeout = ini_get('default_socket_timeout');
@@ -106,17 +74,16 @@ while(!safe_feof($fp, $start) && (microtime(true) - $start) < $timeout)
   </warning>
   <warning>
    <para>
-    If the passed file pointer is not valid you may get an infinite loop, because
-    <function>feof</function> fails to return &true;.
+    如果传递的文件指针无效可能会陷入无限循环中，因为 <function>feof</function> 不会返回 &true;。
     <example>
-     <title><function>feof</function> example with an invalid file pointer</title>
+     <title>使用无效文件指针的 <function>feof</function> 例子 </title>
      <programlisting role="php">
 <![CDATA[
 <?php
-// if file can not be read or doesn't exist fopen function returns FALSE
+// 如果文件不可读取或者不存在，fopen 函数返回 FALSE
 $file = @fopen("no_such_file", "r");
 
-// FALSE from fopen will issue warning and result in infinite loop here
+// 来自 fopen 的 FALSE 会发出一条警告信息并在这里陷入无限循环
 while (!feof($file)) {
 }
 
