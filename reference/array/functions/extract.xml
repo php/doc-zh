@@ -11,140 +11,184 @@
   &reftitle.description;
   <methodsynopsis>
    <type>int</type><methodname>extract</methodname>
-   <methodparam><type>array</type><parameter>var_array</parameter></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter>extract_type</parameter></methodparam>
-   <methodparam choice="opt"><type>string</type><parameter>prefix</parameter></methodparam>
+   <methodparam><type>array</type><parameter role="reference">var_array</parameter></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>extract_type</parameter><initializer>EXTR_OVERWRITE</initializer></methodparam>
+   <methodparam choice="opt"><type>string</type><parameter>prefix</parameter><initializer>&null;</initializer></methodparam>
   </methodsynopsis>
   <para>
-   本函数用来将变量从数组中导入到当前的符号表中。接受结合数组
-   <parameter>var_array</parameter> 作为参数并将键名当作变量名，值作为变量的值。对每个键／值对都会在当前的符号表中建立变量，并受到
-   <parameter>extract_type</parameter> 和 <parameter>prefix</parameter> 参数的影响。
+   本函数用来将变量从数组中导入到当前的符号表中。
   </para>
-  <note>
-   <para>
-    自版本 4.0.5 起本函数返回被提取的变量数目。
-   </para>
-  </note>
-  <note>
-   <para>
-    <constant>EXTR_IF_EXISTS</constant> 和
-    <constant>EXTR_PREFIX_IF_EXISTS</constant> 是版本 4.2.0 中引进的。
-   </para>
-  </note>
-  <note>
-   <para>
-    <constant>EXTR_REFS</constant> 是版本 4.3.0 中引进的。
-   </para>
-  </note>
   <para>
-   <function>extract</function> 检查每个键名看是否可以作为一个合法的变量名，同时也检查和符号表中已有的变量名的冲突。对待非法／数字和冲突的键名的方法将根据
-   <parameter>extract_type</parameter> 参数决定。可以是以下值之一：
+   检查每个键名看是否可以作为一个合法的变量名，同时也检查和符号表中已有的变量名的冲突。
+  </para>
+ </refsect1>
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
    <variablelist>
     <varlistentry>
-     <term><constant>EXTR_OVERWRITE</constant></term>
+     <term><parameter>var_array</parameter></term>
      <listitem>
-      <simpara>
-       如果有冲突，覆盖已有的变量。
-      </simpara>
+      <para>
+       一个关联数组。此函数会将键名当作变量名，值作为变量的值。
+       对每个键／值对都会在当前的符号表中建立变量，并受到
+   <parameter>extract_type</parameter> 和 <parameter>prefix</parameter> 参数的影响。
+      </para>
+      <para>
+        必须使用关联数组，数字索引的数组将不会产生结果，除非用了
+   <constant>EXTR_PREFIX_ALL</constant> 或者 <constant>EXTR_PREFIX_INVALID</constant>。
+      </para>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><constant>EXTR_SKIP</constant></term>
+     <term><parameter>extract_type</parameter></term>
      <listitem>
-      <simpara>
-       如果有冲突，不覆盖已有的变量。
-      </simpara>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
-     <term><constant>EXTR_PREFIX_SAME</constant></term>
-     <listitem>
-      <simpara>如果有冲突，在变量名前加上前缀 <parameter>prefix</parameter>。
-      </simpara>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
-     <term><constant>EXTR_PREFIX_ALL</constant></term>
-     <listitem>
-      <simpara>
-       给所有变量名加上前缀
-       <parameter>prefix</parameter>。自 PHP 4.0.5 起这也包括了对数字索引的处理。
-      </simpara>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
-     <term><constant>EXTR_PREFIX_INVALID</constant></term>
-     <listitem>
-      <simpara>
-       仅在非法／数字的变量名前加上前缀
-       <parameter>prefix</parameter>。本标记是 PHP 4.0.5 新加的。
-      </simpara>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
-     <term><constant>EXTR_IF_EXISTS</constant></term>
-     <listitem>
-      <simpara>
-       仅在当前符号表中已有同名变量时，覆盖它们的值。其它的都不处理。可以用在已经定义了一组合法的变量，然后要从一个数组例如
-       $_REQUEST 中提取值覆盖这些变量的场合。本标记是 PHP 4.2.0 新加的。
-      </simpara>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
-     <term><constant>EXTR_PREFIX_IF_EXISTS</constant></term>
-     <listitem>
-      <simpara>
-       仅在当前符号表中已有同名变量时，建立附加了前缀的变量名，其它的都不处理。本标记是
-       PHP 4.2.0 新加的。
-      </simpara>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
-     <term><constant>EXTR_REFS</constant></term>
-     <listitem>
-      <simpara>
-       将变量作为引用提取。这有力地表明了导入的变量仍然引用了
+      <para>
+        对待非法／数字和冲突的键名的方法将根据
+   <parameter>extract_type</parameter> 参数决定。可以是以下值之一：
+       <variablelist>
+        <varlistentry>
+         <term><constant>EXTR_OVERWRITE</constant></term>
+         <listitem>
+          <simpara>
+           如果有冲突，覆盖已有的变量。
+          </simpara>
+         </listitem>
+        </varlistentry>
+        <varlistentry>
+         <term><constant>EXTR_SKIP</constant></term>
+         <listitem>
+          <simpara>
+           如果有冲突，不覆盖已有的变量。
+          </simpara>
+         </listitem>
+        </varlistentry>
+        <varlistentry>
+         <term><constant>EXTR_PREFIX_SAME</constant></term>
+         <listitem>
+          <simpara>如果有冲突，在变量名前加上前缀 <parameter>prefix</parameter>。
+          </simpara>
+         </listitem>
+        </varlistentry>
+        <varlistentry>
+         <term><constant>EXTR_PREFIX_ALL</constant></term>
+         <listitem>
+          <simpara>
+           给所有变量名加上前缀
+       <parameter>prefix</parameter>。
+          </simpara>
+         </listitem>
+        </varlistentry>
+        <varlistentry>
+         <term><constant>EXTR_PREFIX_INVALID</constant></term>
+         <listitem>
+          <simpara>
+           仅在非法／数字的变量名前加上前缀 <parameter>prefix</parameter>。
+          </simpara>
+         </listitem>
+        </varlistentry>
+        <varlistentry>
+         <term><constant>EXTR_IF_EXISTS</constant></term>
+         <listitem>
+          <simpara>
+           仅在当前符号表中已有同名变量时，覆盖它们的值。其它的都不处理。
+           举个例子，以下情况非常有用：定义一些有效变量，然后从 <varname>$_REQUEST</varname> 中仅导入这些已定义的变量。
+          </simpara>
+         </listitem>
+        </varlistentry>
+        <varlistentry>
+         <term><constant>EXTR_PREFIX_IF_EXISTS</constant></term>
+         <listitem>
+          <simpara>
+           仅在当前符号表中已有同名变量时，建立附加了前缀的变量名，其它的都不处理。
+          </simpara>
+         </listitem>
+        </varlistentry>
+        <varlistentry>
+         <term><constant>EXTR_REFS</constant></term>
+         <listitem>
+          <simpara>
+           将变量作为引用提取。这有力地表明了导入的变量仍然引用了
        <parameter>var_array</parameter> 参数的值。可以单独使用这个标志或者在
-       <parameter>extract_type</parameter> 中用 OR 与其它任何标志结合使用。本标记是
-       PHP 4.3.0 新加的。
-      </simpara>
+       <parameter>extract_type</parameter> 中用 OR 与其它任何标志结合使用。
+          </simpara>
+         </listitem>
+        </varlistentry>
+       </variablelist>
+      </para>
+      <para>
+       如果没有指定 <parameter>extract_type</parameter>，则被假定为 <constant>EXTR_OVERWRITE</constant>。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>prefix</parameter></term>
+     <listitem>
+      <para>
+       注意 <parameter>prefix</parameter> 仅在
+   <parameter>extract_type</parameter> 的值是
+   <constant>EXTR_PREFIX_SAME</constant>，<constant>EXTR_PREFIX_ALL</constant>，<constant>EXTR_PREFIX_INVALID</constant>
+   或 <constant>EXTR_PREFIX_IF_EXISTS</constant>
+   时需要。
+       如果附加了前缀后的结果不是合法的变量名，将不会导入到符号表中。前缀和数组键名之间会自动加上一个下划线。
+      </para>
      </listitem>
     </varlistentry>
    </variablelist>
   </para>
+ </refsect1>
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
   <para>
-   如果没有指定 <parameter>extract_type</parameter>，则被假定为 <constant>EXTR_OVERWRITE</constant>。
+   返回成功导入到符号表中的变量数目。
   </para>
+ </refsect1>
+ <refsect1 role="changelog">
+  &reftitle.changelog;
   <para>
-   注意 <parameter>prefix</parameter> 仅在
-   <parameter>extract_type</parameter> 的值是
-   <constant>EXTR_PREFIX_SAME</constant>，<constant>EXTR_PREFIX_ALL</constant>，<constant>EXTR_PREFIX_INVALID</constant>
-   或 <constant>EXTR_PREFIX_IF_EXISTS</constant>
-   时需要。如果附加了前缀后的结果不是合法的变量名，将不会导入到符号表中。前缀和数组键名之间会自动加上一个下划线。
+   <informaltable>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>&Version;</entry>
+       <entry>&Description;</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>4.3.0</entry>
+       <entry>
+        增加了 <constant>EXTR_REFS</constant>。
+       </entry>
+      </row>
+      <row>
+       <entry>4.2.0</entry>
+       <entry>
+        引进 <constant>EXTR_IF_EXISTS</constant> 和 <constant>EXTR_PREFIX_IF_EXISTS</constant> 。
+       </entry>
+      </row>
+      <row>
+       <entry>4.0.5</entry>
+       <entry>
+        函数可以返回被提取的变量数目。
+        增加了 <constant>EXTR_PREFIX_INVALID</constant>。
+        从这时起 <constant>EXTR_PREFIX_ALL</constant> 也包括了对数字索引的处理。
+       </entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </informaltable>
   </para>
-  <para>
-   <function>extract</function> 返回成功导入到符号表中的变量数目。
-  </para>
-  <warning>
-   <para>
-    不要对不能信任的数据使用
-    <function>extract</function>，例如用户的输入（$_GET，...）。如果这样做，举例说，要临时运行依赖于
-    <link linkend="security.globals">register_globals</link>
-    的老代码，要确保使用不会覆盖的
-    <parameter>extract_type</parameter> 值，例如
-    <constant>EXTR_SKIP</constant>，并且要留意应该按照
-    <link linkend="ini">&php.ini;</link>
-    中由 <link linkend="ini.variables-order">variables_order</link>
-    定义的顺序来提取。
-   </para>
-  </warning>
-  <para>
-   <function>extract</function> 的一种可能用法是将 <function>wddx_deserialize</function>
-   返回的结合数组中的内容导入到符号表变量中去。
-  </para>
+ </refsect1>
+ <refsect1 role="examples">
+  &reftitle.examples;
   <para>
    <example>
     <title><function>extract</function> 例子</title>
+    <para>
+     <function>extract</function> 的一种可能用法是将 <function>wddx_deserialize</function>
+   返回的结合数组中的内容导入到符号表变量中去。
+    </para>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -168,244 +212,14 @@ echo "$color, $size, $shape, $wddx_size\n";
 blue, large, sphere, medium
 ]]>
     </screen>
-   </example>
-  </para>
-  <para>
-   <varname>$size</varname> 没有被覆盖，因为指定了
+    <para>
+       <varname>$size</varname> 没有被覆盖，因为指定了
    <constant>EXTR_PREFIX_SAME</constant>，这使得 <varname>$wddx_size</varname>
-   被建立。如果指定了 <constant>EXTR_SKIP</constant>，则 $wddx_size
+     被建立。如果指定了 <constant>EXTR_SKIP</constant>，则 <varname>$wddx_size</varname>
    也不会被建立。<constant>EXTR_OVERWRITE</constant> 将使 <varname>$size</varname>
    的值为“medium”，<constant>EXTR_PREFIX_ALL</constant> 将建立新变量
    <varname>$wddx_color</varname>，<varname>$wddx_size</varname> 和
    <varname>$wddx_shape</varname>。
-  </para>
-  <para>
-   必须使用关联数组，数字索引的数组将不会产生结果，除非用了
-   <constant>EXTR_PREFIX_ALL</constant> 或者 <constant>EXTR_PREFIX_INVALID</constant>。
-  </para>
-  <para>
-   参见 <function>compact</function>。
-  </para>
- </refsect1>
- <refsect1 role="parameters">
-  &reftitle.parameters;
-  <para>
-   <variablelist>
-    <varlistentry>
-     <term><parameter>var_array</parameter></term>
-     <listitem>
-      <para>
-       An associative array. This function treats keys as variable names and
-       values as variable values.  For each key/value pair it will create a
-       variable in the current symbol table, subject to
-       <parameter>extract_type</parameter> and
-       <parameter>prefix</parameter> parameters.
-      </para>
-      <para>
-       You must use an associative array; a numerically indexed array
-       will not produce results unless you use <constant>EXTR_PREFIX_ALL</constant> or
-       <constant>EXTR_PREFIX_INVALID</constant>.
-      </para>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
-     <term><parameter>extract_type</parameter></term>
-     <listitem>
-      <para>
-       The way invalid/numeric keys and collisions are treated is determined
-       by the <parameter>extract_type</parameter>. It can be one of the
-       following values:
-       <variablelist>
-        <varlistentry>
-         <term><constant>EXTR_OVERWRITE</constant></term>
-         <listitem>
-          <simpara>
-           If there is a collision, overwrite the existing variable.
-          </simpara>
-         </listitem>
-        </varlistentry>
-        <varlistentry>
-         <term><constant>EXTR_SKIP</constant></term>
-         <listitem>
-          <simpara>
-           If there is a collision, don't overwrite the existing
-           variable.
-          </simpara>
-         </listitem>
-        </varlistentry>
-        <varlistentry>
-         <term><constant>EXTR_PREFIX_SAME</constant></term>
-         <listitem>
-          <simpara>If there is a collision, prefix the variable name with
-          <parameter>prefix</parameter>.
-          </simpara>
-         </listitem>
-        </varlistentry>
-        <varlistentry>
-         <term><constant>EXTR_PREFIX_ALL</constant></term>
-         <listitem>
-          <simpara>
-           Prefix all variable names with
-           <parameter>prefix</parameter>.
-          </simpara>
-         </listitem>
-        </varlistentry>
-        <varlistentry>
-         <term><constant>EXTR_PREFIX_INVALID</constant></term>
-         <listitem>
-          <simpara>
-           Only prefix invalid/numeric variable names with
-           <parameter>prefix</parameter>.
-          </simpara>
-         </listitem>
-        </varlistentry>
-        <varlistentry>
-         <term><constant>EXTR_IF_EXISTS</constant></term>
-         <listitem>
-          <simpara>
-           Only overwrite the variable if it already exists in the
-           current symbol table, otherwise do nothing.  This is useful
-           for defining a list of valid variables and then extracting
-           only those variables you have defined out of
-           <varname>$_REQUEST</varname>, for example.
-          </simpara>
-         </listitem>
-        </varlistentry>
-        <varlistentry>
-         <term><constant>EXTR_PREFIX_IF_EXISTS</constant></term>
-         <listitem>
-          <simpara>
-           Only create prefixed variable names if the non-prefixed version
-           of the same variable exists in the current symbol table.
-          </simpara>
-         </listitem>
-        </varlistentry>
-        <varlistentry>
-         <term><constant>EXTR_REFS</constant></term>
-         <listitem>
-          <simpara>
-           Extracts variables as references. This effectively means that the
-           values of the imported variables are still referencing the values of
-           the <parameter>var_array</parameter> parameter. You can use this flag
-           on its own or combine it with any other flag by OR'ing the
-           <parameter>extract_type</parameter>.
-          </simpara>
-         </listitem>
-        </varlistentry>
-       </variablelist>
-      </para>
-      <para>
-       If <parameter>extract_type</parameter> is not specified, it is
-       assumed to be <constant>EXTR_OVERWRITE</constant>.
-      </para>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
-     <term><parameter>prefix</parameter></term>
-     <listitem>
-      <para>
-       Note that <parameter>prefix</parameter> is only required if
-       <parameter>extract_type</parameter> is <constant>EXTR_PREFIX_SAME</constant>,
-       <constant>EXTR_PREFIX_ALL</constant>, <constant>EXTR_PREFIX_INVALID</constant>
-       or <constant>EXTR_PREFIX_IF_EXISTS</constant>. If
-       the prefixed result is not a valid variable name, it is not
-       imported into the symbol table. Prefixes are automatically separated from
-       the array key by an underscore character.
-      </para>
-     </listitem>
-    </varlistentry>
-   </variablelist>
-  </para>
- </refsect1>
- <refsect1 role="returnvalues">
-  &reftitle.returnvalues;
-  <para>
-   Returns the number of variables successfully imported into the symbol
-   table.
-  </para>
- </refsect1>
- <refsect1 role="changelog">
-  &reftitle.changelog;
-  <para>
-   <informaltable>
-    <tgroup cols="2">
-     <thead>
-      <row>
-       <entry>&Version;</entry>
-       <entry>&Description;</entry>
-      </row>
-     </thead>
-     <tbody>
-      <row>
-       <entry>4.3.0</entry>
-       <entry>
-        <constant>EXTR_REFS</constant> was added.
-       </entry>
-      </row>
-      <row>
-       <entry>4.2.0</entry>
-       <entry>
-        <constant>EXTR_IF_EXISTS</constant> and <constant>EXTR_PREFIX_IF_EXISTS</constant>
-        were added.
-       </entry>
-      </row>
-      <row>
-       <entry>4.0.5</entry>
-       <entry>
-        This function now returns the number of variables extracted.
-        <constant>EXTR_PREFIX_INVALID</constant> was added.
-        <constant>EXTR_PREFIX_ALL</constant> includes numeric variables as well.
-       </entry>
-      </row>
-     </tbody>
-    </tgroup>
-   </informaltable>
-  </para>
- </refsect1>
- <refsect1 role="examples">
-  &reftitle.examples;
-  <para>
-   <example>
-    <title><function>extract</function> example</title>
-    <para>
-     A possible use for <function>extract</function> is to import into the
-     symbol table variables contained in an associative array returned by
-     <function>wddx_deserialize</function>.
-    </para>
-    <programlisting role="php">
-<![CDATA[
-<?php
-
-/* Suppose that $var_array is an array returned from
-   wddx_deserialize */
-
-$size = "large";
-$var_array = array("color" => "blue",
-                   "size"  => "medium",
-                   "shape" => "sphere");
-extract($var_array, EXTR_PREFIX_SAME, "wddx");
-
-echo "$color, $size, $shape, $wddx_size\n";
-
-?>
-]]>
-    </programlisting>
-    &example.outputs;
-    <screen>
-<![CDATA[
-blue, large, sphere, medium
-]]>
-    </screen>
-    <para>
-     The <varname>$size</varname> wasn't overwritten because we specified
-     <constant>EXTR_PREFIX_SAME</constant>, which resulted in
-     <varname>$wddx_size</varname> being created.  If <constant>EXTR_SKIP</constant> was
-     specified, then <varname>$wddx_size</varname> wouldn't even have been created.
-     <constant>EXTR_OVERWRITE</constant> would have caused <varname>$size</varname> to have
-     value "medium", and <constant>EXTR_PREFIX_ALL</constant> would result in new variables
-     being named <varname>$wddx_color</varname>,
-     <varname>$wddx_size</varname>, and
-     <varname>$wddx_shape</varname>.
     </para>
    </example>
   </para>
@@ -414,17 +228,13 @@ blue, large, sphere, medium
   &reftitle.notes;
   <warning>
    <para>
-    Do not use <function>extract</function> on untrusted data, like
-    user input
-    (i.e. <varname>$_GET</varname>, <varname>$_FILES</varname>, etc.).
-    If you do, for example if you want to run old code that relies
-    on <link linkend="security.globals">register_globals</link>
-    temporarily, make sure you use one of the non-overwriting
-    <parameter>extract_type</parameter> values such as
-    <constant>EXTR_SKIP</constant> and be aware that you should extract
-    in the same order that's defined in
-    <link linkend="ini.variables-order">variables_order</link> within the
-    <link linkend="ini">&php.ini;</link>.
+        不要对不能信任的数据使用
+    <function>extract</function>，例如用户的输入（<varname>$_GET</varname>， <varname>$_FILES</varname>，...）。如果这样做，举例说，要临时运行依赖于
+    <link linkend="security.globals">register_globals</link>
+    的老代码，要确保使用不会覆盖的
+    <parameter>extract_type</parameter> 值，例如
+    <constant>EXTR_SKIP</constant>，并且要留意应该按照 <link linkend="ini.variables-order">variables_order</link> 在 <link linkend="ini">&php.ini;</link> 里
+    定义的顺序来提取。
    </para>
   </warning>
   <note>

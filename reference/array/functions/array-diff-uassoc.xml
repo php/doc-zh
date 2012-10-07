@@ -14,74 +14,17 @@
    <methodparam><type>array</type><parameter>array1</parameter></methodparam>
    <methodparam><type>array</type><parameter>array2</parameter></methodparam>
    <methodparam choice="opt"><type>array</type><parameter>...</parameter></methodparam>
-   <methodparam><type>callback</type><parameter>key_compare_func</parameter></methodparam>
+   <methodparam><type>callable</type><parameter>key_compare_func</parameter></methodparam>
   </methodsynopsis>
   <para>
-   <function>array_diff_uassoc</function> 返回一个数组，该数组包括了所有在
-   <parameter>array1</parameter> 中但是不在任何其它参数数组中的值。注意和
+   对比了 <parameter>array1</parameter> 和 <parameter>array2</parameter> 并返回不同之处。
+   注意和
    <function>array_diff</function> 不同的是键名也用于比较。
   </para>
   <para>
-   此比较是通过用户提供的回调函数来进行的。如果认为第一个参数小于，等于，或大于第二个参数时必须分别返回一个小于零，等于零，或大于零的整数。这和
-   <function>array_diff_assoc</function>
-   不同的是还使用了比较索引的内部函数。
-  </para>
-  <para>
-   <example>
-    <title><function>array_diff_uassoc</function> 例子</title>
-    <programlisting role="php">
-<![CDATA[
-<?php
-function key_compare_func($a, $b)
-{
-    if ($a === $b) {
-        return 0;
-    }
-    return ($a > $b)? 1:-1;
-}
-
-$array1 = array("a" => "green", "b" => "brown", "c" => "blue", "red");
-$array2 = array("a" => "green", "yellow", "red");
-$result = array_diff_uassoc($array1, $array2, "key_compare_func");
-print_r($result);
-?>
-]]>
-    </programlisting>
-    &example.outputs;
-    <screen>
-<![CDATA[
-Array
-(
-    [b] => brown
-    [c] => blue
-    [0] => red
-)
-]]>
-    </screen>
-   </example>
-  </para>
-  <simpara>
-   上面的例子中 <literal>"a" =&gt; "green"</literal>
-   出现在两个数组中因此不在函数的输出中。但是
-   <literal>0 =&gt; "red"</literal> 却在输出中，因为第二个参数中的
-   <literal>"red"</literal> 的键名是 <literal>1</literal>。
-  </simpara>
-  <simpara>
-   两个索引是否相同是由用户提供的回调函数来检查的。
-  </simpara>
-  <note>
-   <simpara>
-    注意本函数只检查了多维数组中的一维。当然可以用
-    <literal>array_diff_uassoc($array1[0], $array2[0], "key_compare_func");</literal>
-    检查更深的维度。
-   </simpara>
-  </note>
-  <para>
-   参见
-   <function>array_diff</function>，<function>array_diff_assoc</function>，<function>array_udiff</function>，<function>array_udiff_assoc</function>，<function>array_udiff_uassoc</function>，<function>array_intersect</function>，<function>array_intersect_assoc</function>，<function>array_uintersect</function>，<function>array_uintersect_assoc</function>
-   和
-   <function>array_uintersect_uassoc</function>。
-  </para>
+   和 <function>array_diff_assoc</function>
+   不同的是使用了用户自定义的回调函数，而不是内置的函数。
+  </para>  
  </refsect1>
 
  <refsect1 role="parameters">
@@ -93,7 +36,7 @@ Array
      <term><parameter>array1</parameter></term>
      <listitem>
       <para>
-       The array to compare from
+       待比较的数组
       </para>
      </listitem>
     </varlistentry>
@@ -102,7 +45,7 @@ Array
      <term><parameter>array2</parameter></term>
      <listitem>
       <para>
-       An array to compare against
+       和这个数组进行比较
       </para>
      </listitem>
     </varlistentry>
@@ -111,7 +54,7 @@ Array
      <term><parameter>...</parameter></term>
      <listitem>
       <para>
-       More arrays to compare against
+       更多比较的数组
       </para>
      </listitem>
     </varlistentry>
@@ -133,8 +76,8 @@ Array
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   Returns an <type>array</type> containing all the entries from
-   <parameter>array1</parameter> that are not present in any of the other arrays.
+   返回一个 <type>array</type>，该数组包括了所有在
+   <parameter>array1</parameter> 中但是不在任何其它参数数组中的值。
   </para>
  </refsect1>
 
@@ -149,13 +92,12 @@ Array
   &reftitle.examples;
   <para>
    <example>
-    <title><function>array_diff_uassoc</function> example</title>
+    <title><function>array_diff_uassoc</function> 例子</title>
     <para>
-     The <literal>"a" =&gt; "green"</literal>
-     pair is present in both arrays and thus it is not in the output from the
-     function. Unlike this, the pair <literal>0 =&gt; "red"</literal>
-     is in the output because in the second argument <literal>"red"</literal>
-     has key which is <literal>1</literal>.
+     上面的例子中 <literal>"a" =&gt; "green"</literal>
+   出现在两个数组中因此不在函数的输出中。但是
+   <literal>0 =&gt; "red"</literal> 却在输出中，因为第二个参数中的
+   <literal>"red"</literal> 的键名是 <literal>1</literal>。
     </para>
     <programlisting role="php">
 <![CDATA[
@@ -197,9 +139,9 @@ Array
   &reftitle.notes;
   <note>
    <para>
-    This function only checks one dimension of a n-dimensional
-    array. Of course you can check deeper dimensions by using, for example,
-    <literal>array_diff_uassoc($array1[0], $array2[0], "key_compare_func");</literal>.
+    注意本函数只检查了多维数组中的一维。当然可以用
+    <literal>array_diff_uassoc($array1[0], $array2[0], "key_compare_func");</literal>
+    检查更深的维度。
    </para>
   </note>
  </refsect1>
