@@ -12,13 +12,13 @@
   &reftitle.description;
   <methodsynopsis>
    <type>int</type><methodname>mktime</methodname>
-   <methodparam choice="opt"><type>int</type><parameter>hour</parameter></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter>minute</parameter></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter>second</parameter></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter>month</parameter></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter>day</parameter></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter>year</parameter></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter>is_dst</parameter></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>hour</parameter><initializer>date("H")</initializer></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>minute</parameter><initializer>date("i")</initializer></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>second</parameter><initializer>date("s")</initializer></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>month</parameter><initializer>date("n")</initializer></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>day</parameter><initializer>date("j")</initializer></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>year</parameter><initializer>date("Y")</initializer></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>is_dst</parameter><initializer>-1</initializer></methodparam>
   </methodsynopsis>
   <para>
    根据给出的参数返回 Unix 时间戳。时间戳是一个长整数，包含了从
@@ -29,6 +29,17 @@
   </para>
  </refsect1>
 
+  <refsect1 role="notes">
+  &reftitle.notes;
+  <note>
+   <para>
+    As of PHP 5.1, when called with no arguments, <function>mktime</function>
+    throws an <constant>E_STRICT</constant> notice: use the 
+    <function>time</function> function instead.
+   </para>
+  </note>
+ </refsect1>
+ 
  <refsect1 role="parameters">
   &reftitle.parameters;
   <para>
@@ -38,6 +49,10 @@
      <listitem>
       <para>
        小时数。
+       The number of the hour relative to the start of the day determined by
+       <parameter>month</parameter>, <parameter>day</parameter> and <parameter>year</parameter>.
+       Negative values reference the hour before midnight of the day in question.
+       Values greater than 23 reference the appropriate hour in the following day(s).
       </para>
      </listitem>
     </varlistentry>
@@ -46,6 +61,9 @@
      <listitem>
       <para>
        分钟数。
+       The number of the minute relative to the start of the <parameter>hour</parameter>.
+       Negative values reference the minute in the previous hour.
+       Values greater than 59 reference the appropriate minute in the following hour(s).
       </para>
      </listitem>
     </varlistentry>
@@ -54,6 +72,9 @@
      <listitem>
       <para>
        秒数（一分钟之内）。
+       The number of seconds relative to the start of the <parameter>minute</parameter>.
+       Negative values reference the second in the previous minute.
+       Values greater than 59 reference the appropriate second in the following minute(s).
       </para>
      </listitem>
     </varlistentry>
@@ -62,6 +83,10 @@
      <listitem>
       <para>
        月份数。
+       The number of the month relative to the end of the previous year.
+       Values 1 to 12 reference the normal calendar months of the year in question.
+       Values less than 1 (including negative values) reference the months in the previous year in reverse order, so 0 is December, -1 is November, etc.
+       Values greater than 12 reference the appropriate month in the following year(s).
       </para>
      </listitem>
     </varlistentry>
@@ -70,6 +95,10 @@
      <listitem>
       <para>
        天数。
+       The number of the day relative to the end of the previous month.
+       Values 1 to 28, 29, 30 or 31 (depending upon the month) reference the normal days in the relevant month.
+       Values less than 1 (including negative values) reference the days in the previous month, so 0 is the last day of the previous month, -1 is the day before that, etc.
+       Values greater than the number of days in the relevant month reference the appropriate day in the following month(s).
       </para>
      </listitem>
     </varlistentry>
@@ -119,36 +148,7 @@
    &false;（在 PHP 5.1 之前返回 <literal>-1</literal>）。
   </para>
  </refsect1>
-
- <refsect1 role="changelog">
-  &reftitle.changelog;
-  <para>
-   <informaltable>
-    <tgroup cols="2">
-     <thead>
-      <row>
-       <entry>&Version;</entry>
-       <entry>&Description;</entry>
-      </row>
-     </thead>
-     <tbody>
-      <row>
-       <entry>3.0.10</entry>
-       <entry>加入了 <parameter>is_dst</parameter> 参数</entry>
-      </row>
-      <row>
-       <entry>5.1.0</entry>
-       <entry>
-        <parameter>is_dst</parameter> 参数被废弃。出错时函数返回
-        &false; 而不再是 <literal>-1</literal>。修正了本函数可以接受年月日参数全为零。
-       </entry>
-      </row>
-     </tbody>
-    </tgroup>
-   </informaltable>
-  </para>
- </refsect1>
-
+ 
  <refsect1 role="errors">
   &reftitle.errors;
   &date.timezone.errors.description;
@@ -176,11 +176,8 @@
       <row>
        <entry>5.1.0</entry>
        <entry>
-        The <parameter>is_dst</parameter> parameter became deprecated.
-        Made the function return &false; on error, instead of
-        <literal>-1</literal>.
-        Fixed the function to accept the year, month and day to be all passed
-        as zero.
+        <parameter>is_dst</parameter> 参数被废弃。出错时函数返回
+        &false; 而不再是 <literal>-1</literal>。修正了本函数可以接受年月日参数全为零。
        </entry>
       </row>
       <row>
@@ -191,9 +188,8 @@
         <function>time</function> function instead.
        </entry>
       </row>
-
-      &date.timezone.errors.changelog;
-
+            &date.timezone.errors.changelog;
+      
      </tbody>
     </tgroup>
    </informaltable>
@@ -202,6 +198,25 @@
 
  <refsect1 role="examples">
   &reftitle.examples;
+    <para>
+   <example>
+<title>基本例子 </title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+// Set the default timezone to use. Available as of PHP 5.1
+date_default_timezone_set('UTC');
+
+// Prints: July 1, 2000 is on a Saturday
+echo "July 1, 2000 is on a " . date("l", mktime(0, 0, 0, 7, 1, 2000));
+
+// Prints something like: 2006-04-05T01:02:03+00:00
+echo date('c', mktime(1, 2, 3, 4, 5, 2006));
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
   <para>
    <example>
     <title><function>mktime</function> 例子</title>
@@ -255,12 +270,13 @@ echo strftime("Last day in Feb 2000 is: %d", $lastday);
   </caution>
  </refsect1>
 
- <refsect1 role="seealso">
+  <refsect1 role="seealso">
   &reftitle.seealso;
   <para>
    <simplelist>
+    <member><function>checkdate</function></member>
     <member><function>gmmktime</function></member>
-    <member><function>date</function></member>
+    <member><function>date</function></member> 
     <member><function>time</function></member>
    </simplelist>
   </para>

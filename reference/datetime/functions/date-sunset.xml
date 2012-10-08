@@ -12,87 +12,18 @@
   <methodsynopsis>
    <type>mixed</type><methodname>date_sunset</methodname>
    <methodparam><type>int</type><parameter>timestamp</parameter></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter>format</parameter></methodparam>
-   <methodparam choice="opt"><type>float</type><parameter>latitude</parameter></methodparam>
-   <methodparam choice="opt"><type>float</type><parameter>longitude</parameter></methodparam>
-   <methodparam choice="opt"><type>float</type><parameter>zenith</parameter></methodparam>
-   <methodparam choice="opt"><type>float</type><parameter>gmt_offset</parameter></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>format</parameter><initializer>SUNFUNCS_RET_STRING</initializer></methodparam>
+   <methodparam choice="opt"><type>float</type><parameter>latitude</parameter><initializer>ini_get("date.default_latitude")</initializer></methodparam>
+   <methodparam choice="opt"><type>float</type><parameter>longitude</parameter><initializer>ini_get("date.default_longitude")</initializer></methodparam>
+   <methodparam choice="opt"><type>float</type><parameter>zenith</parameter><initializer>ini_get("date.sunset_zenith")</initializer></methodparam>
+   <methodparam choice="opt"><type>float</type><parameter>gmt_offset</parameter><initializer>0</initializer></methodparam>
   </methodsynopsis>
   <para>
    <function>date_sunset</function> 返回给定的日期（以
-   <parameter>timestamp</parameter> 指定）与地点的日落时间。<parameter>latitude</parameter>，<parameter>longitude</parameter>
-   和 <parameter>zenith</parameter> 参数默认值分别为配置选项中的
-   <literal>date.default_latitude</literal>，<literal>date.default_longitude</literal>
-   和 <literal>date.sunrise_zenith</literal>。
-  </para>
-  <para>
-   <parameter>latitude</parameter> 默认是指北纬。因此如果要指定南纬，必须传递一个负值。同样规则也适用于
-   <parameter>longitude</parameter>，其默认是指东经。
-  </para>
-  <para>
-   <parameter>gmt_offset</parameter> 参数的单位是小时。
-  </para>
-  <table>
-   <title><parameter>format</parameter> 常量</title>
-   <tgroup cols="2">
-    <thead>
-     <row>
-      <entry>常量</entry>
-      <entry>说明</entry>
-      <entry>取值举例</entry>
-     </row>
-    </thead>
-    <tbody>
-     <row>
-      <entry>SUNFUNCS_RET_STRING</entry>
-      <entry>以 <type>string</type> 格式返回结果</entry>
-      <entry>16:46</entry>
-     </row>
-     <row>
-      <entry>SUNFUNCS_RET_DOUBLE</entry>
-      <entry>以 <type>float</type> 格式返回结果</entry>
-      <entry>16.78243132</entry>
-     </row>
-     <row>
-      <entry>SUNFUNCS_RET_TIMESTAMP</entry>
-      <entry>以 <type>integer</type> 格式（时间戳）返回结果</entry>
-      <entry>1095034606</entry>
-     </row>
-    </tbody>
-   </tgroup>
-  </table>
-  <para>
-   <example>
-    <title><function>date_sunset</function> 例子</title>
-    <programlisting role="php">
-<![CDATA[
-<?php
-
-/* 计算葡萄牙里斯本的日落时间
-Latitude:  北纬 38.4 度
-Longitude: 西经 9 度
-Zenith ~= 90
-offset: +1 GMT
-*/
-
-echo date("D M d Y"). ', sunset time : ' .date_sunset(time(), SUNFUNCS_RET_STRING, 38.4, -9, 90, 1);
-
-?>
-]]>
-    </programlisting>
-    &example.outputs.similar;
-    <screen>
-<![CDATA[
-Mon Dec 20 2004, sunset time : 18:13
-]]>
-    </screen>
-   </example>
-  </para>
-  <para>
-   参见 <function>date_sunrise</function>。
+   <parameter>timestamp</parameter> 指定）与地点的日落时间。
   </para>
  </refsect1>
-
+ 
  <refsect1 role="parameters">
   &reftitle.parameters;
   <para>
@@ -101,8 +32,8 @@ Mon Dec 20 2004, sunset time : 18:13
      <term><parameter>timestamp</parameter></term>
      <listitem>
       <para>
-       The <parameter>timestamp</parameter> of the day from which the sunset
-       time is taken.
+       返回给定的日期（以
+       <parameter>timestamp</parameter> 指定）的日落时间。
       </para>
      </listitem>
     </varlistentry>
@@ -111,29 +42,29 @@ Mon Dec 20 2004, sunset time : 18:13
      <listitem>
       <para>
        <table>
-        <title><parameter>format</parameter> constants</title>
+        <title><parameter>format</parameter> 常量</title>
         <tgroup cols="2">
          <thead>
           <row>
-           <entry>constant</entry>
-           <entry>description</entry>
-           <entry>example</entry>
+           <entry>常量</entry>
+           <entry>说明</entry>
+           <entry>取值举例</entry>
           </row>
          </thead>
          <tbody>
           <row>
            <entry>SUNFUNCS_RET_STRING</entry>
-           <entry>returns the result as <type>string</type></entry>
+           <entry>以 <type>string</type> 格式返回结果</entry>
            <entry>16:46</entry>
           </row>
           <row>
            <entry>SUNFUNCS_RET_DOUBLE</entry>
-           <entry>returns the result as <type>float</type></entry>
+           <entry>以 <type>float</type> 格式返回结果</entry>
            <entry>16.78243132</entry>
           </row>
           <row>
            <entry>SUNFUNCS_RET_TIMESTAMP</entry>
-           <entry>returns the result as <type>integer</type> (timestamp)</entry>
+           <entry>以 <type>integer</type> 格式（时间戳）返回结果</entry>
            <entry>1095034606</entry>
           </row>
          </tbody>
@@ -146,8 +77,7 @@ Mon Dec 20 2004, sunset time : 18:13
      <term><parameter>latitude</parameter></term>
      <listitem>
       <para>
-       Defaults to North, pass in a negative value for South.
-       See also: <literal>date.default_latitude</literal>
+       默认是指北纬。因此如果要指定南纬，必须传递一个负值。参见： <literal>date.default_latitude</literal>。
       </para>
      </listitem>
     </varlistentry>
@@ -155,8 +85,7 @@ Mon Dec 20 2004, sunset time : 18:13
      <term><parameter>longitude</parameter></term>
      <listitem>
       <para>
-       Defaults to East, pass in a negative value for West.
-       See also: <literal>date.default_longitude</literal>
+       默认是指东经。因此如果要指定西经，必须传递一个负值。参见： <literal>date.default_longitude</literal>
       </para>
      </listitem>
     </varlistentry>
@@ -164,7 +93,7 @@ Mon Dec 20 2004, sunset time : 18:13
      <term><parameter>zenith</parameter></term>
      <listitem>
       <para>
-       Default: <literal>date.sunset_zenith</literal>
+       默认： <literal>date.sunset_zenith</literal>。
       </para>
      </listitem>
     </varlistentry>
@@ -172,21 +101,21 @@ Mon Dec 20 2004, sunset time : 18:13
      <term><parameter>gmtoffset</parameter></term>
      <listitem>
       <para>
-       Specified in hours.
+       单位是小时。
       </para>
      </listitem>
     </varlistentry>
    </variablelist>
   </para>
  </refsect1>
-
+ 
  <refsect1 role="errors">
   &reftitle.errors;
-   
-   &date.timezone.errors.description;
- 
+  
+  &date.timezone.errors.description;
+  
  </refsect1>
-
+ 
  <refsect1 role="changelog">
   &reftitle.changelog;
   <para>
@@ -201,18 +130,17 @@ Mon Dec 20 2004, sunset time : 18:13
      <tbody>
       
       &date.timezone.errors.changelog;
-     
+      
      </tbody>
     </tgroup>
    </informaltable>
   </para>
  </refsect1>
-
+ 
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   Returns the sunset time in a specified <parameter>format</parameter> on
-   success&return.falseforfailure;.
+   用指定的格式 <parameter>format</parameter> 返回日落时间，&return.falseforfailure;。
   </para>
  </refsect1>
  
@@ -220,7 +148,7 @@ Mon Dec 20 2004, sunset time : 18:13
   &reftitle.examples;
   <para>
    <example>
-    <title><function>date_sunset</function> example</title>
+    <title><function>date_sunset</function> 例子</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -246,7 +174,7 @@ Mon Dec 20 2004, sunset time : 18:13
    </example>
   </para>
  </refsect1>
-
+ 
  <refsect1 role="seealso">
   &reftitle.seealso;
   <para>
