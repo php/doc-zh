@@ -25,72 +25,7 @@
    图像格式为 <acronym>GIF87a</acronym>。如果用了
    <function>imagecolortransparent</function> 使图像为透明，则其格式为
    <acronym>GIF89a</acronym>。
-  </para>
-  <para>
-   <parameter>filename</parameter> 参数为可选，如果省略，则原始图像流将被直接输出。通过
-   <function>header</function> 发送 Content-type: image/gif 可以使 PHP
-   脚本直接输出 <acronym>GIF</acronym> 图像。
-   <note>
-    <para>
-     不过从 GD 库 1.6 起所有的 GIF 支持都移除了，如果使用这些 GD
-     库时本函数不可用。希望在 2004 年中期能够发布支持
-     <acronym>GIF</acronym> 的 GD 库。更多信息见
-     <link xlink:href="&url.gd;">GD Project</link> 站点。
-    </para>
-    <para>
-     以下代码段通过自动检测 GD 支持的图像类型来写出移植性更好的
-     PHP 程序。用更灵活的代码替代了原来的
-     <literal>header("Content-type: image/gif");
-     imagegif($im);</literal>：
-     <informalexample>
-      <programlisting role="php">
-<![CDATA[
-<?php
-if (function_exists("imagegif")) {
-    header("Content-type: image/gif");
-    imagegif($im);
-} elseif (function_exists("imagejpeg")) {
-    header("Content-type: image/jpeg");
-    imagejpeg($im, "", 0.5);
-} elseif (function_exists("imagepng")) {
-    header("Content-type: image/png");
-    imagepng($im);
-} elseif (function_exists("imagewbmp")) {
-    header("Content-type: image/vnd.wap.wbmp");
-    imagewbmp($im);
-} else {
-    die("No image support in this PHP server");
-}
-]]>
-      </programlisting>
-     </informalexample>
-    </para>
-   </note>
-   <note>
-    <para>
-     自 PHP 3.0.18 和 4.0.2 起可以用
-     <function>imagetypes</function> 函数代替
-     <function>function_exists</function> 来检查是否支持某种图像格式：
-     <informalexample>
-      <programlisting role="php">
-<![CDATA[
-<?php
-if (imagetypes() & IMG_GIF) {
-    header ("Content-type: image/gif");
-    imagegif ($im);
-} elseif (imagetypes() & IMG_JPG) {
-    /* ... etc. */
-}
-]]>
-      </programlisting>
-     </informalexample>
-    </para>
-   </note>
-  </para>
-  <para>
-   参见 <function>imagepng</function>，<function>imagewbmp</function>，<function>imagejpeg</function>
-   和 <function>imagetypes</function>。
-  </para>
+  </para>  
  </refsect1>
  <refsect1 role="parameters">
   &reftitle.parameters;
@@ -116,20 +51,20 @@ if (imagetypes() & IMG_GIF) {
   &reftitle.examples;
   <para>
    <example>
-    <title>Outputting an image using <function>imagegif</function></title>
+    <title>使用  <function>imagegif</function> 输出一个图像</title>
     <programlisting role="php">
 <![CDATA[
 <?php
-// Create a new image instance
+// 创建新的图像实例
 $im = imagecreatetruecolor(100, 100);
 
-// Make the background white
+// 设置背景为白色
 imagefilledrectangle($im, 0, 0, 99, 99, 0xFFFFFF);
 
-// Draw a text string on the image
+//在图像上写字
 imagestring($im, 3, 40, 20, 'GD Library', 0xFFBA00);
 
-// Output the image to browser
+// 输出图像到浏览器
 header('Content-Type: image/gif');
 
 imagegif($im);
@@ -139,21 +74,21 @@ imagedestroy($im);
     </programlisting>
    </example>
    <example>
-    <title>Converting a PNG image to GIF using <function>imagegif</function></title>
+    <title>使用 <function>imagegif</function> 将一个 PNG 转换成 GIF</title>
     <programlisting role="php">
 <![CDATA[
 <?php
 
-// Load the PNG
+// 载入 PNG
 $png = imagecreatefrompng('./php.png');
 
-// Save the image as a GIF
+// 以 GIF 保存图像
 imagegif($png, './php.gif');
 
-// Free from memory
+// 释放内存
 imagedestroy($png);
 
-// We're done
+// 完工
 echo 'Converted PNG image to GIF with success!';
 ?>
 ]]>
@@ -165,51 +100,48 @@ echo 'Converted PNG image to GIF with success!';
   &reftitle.notes;
   <note>
    <para>
-    <acronym>GIF</acronym> support was removed from the <acronym>GD</acronym>
-    library in Version 1.6, and added back in Version 2.0.28. This function 
-    is not available between these versions.  For more information, see the
-    <link xlink:href="&url.gd;">GD Project</link> site.
+    不过从 <acronym>GD</acronym> 库 1.6 起所有的 <acronym>GIF</acronym> 支持都移除了，并在版本 2.0.28 中加了回来。如果使用这些 版本之间的 GD 库时本函数不可用。 更多信息见
+     <link xlink:href="&url.gd;">GD Project</link> 站点。
    </para>      
    <para>
-    The following code snippet allows you to write more
-    portable PHP applications by auto-detecting the
-    type of GD support which is available. Replace
-    the sequence <literal>header ("Content-Type: image/gif");
-    imagegif ($im);</literal> by the more flexible sequence:
+    以下代码段通过自动检测 GD 支持的图像类型来写出移植性更好的
+     PHP 程序。用更灵活的代码替代了原来的
+     <literal>header("Content-type: image/gif");
+     imagegif($im);</literal>：
     <informalexample>
      <programlisting role="php">
 <![CDATA[
 <?php
-// Create a new image instance
+// 创建新的图像实例
 $im = imagecreatetruecolor(100, 100);
 
-// Do some image operations here
+// 在这里对图像进行一些操作
 
-// Handle output
+// 处理输出
 if(function_exists('imagegif'))
 {
-    // For GIF
+    // 针对 GIF
     header('Content-Type: image/gif');
 
     imagegif($im);
 }
 elseif(function_exists('imagejpeg'))
 {
-    // For JPEG
+    // 针对 JPEG
     header('Content-Type: image/jpeg');
 
     imagejpeg($im, NULL, 100);
 }
 elseif(function_exists('imagepng'))
 {
-    // For PNG
+    // 针对 PNG
     header('Content-Type: image/png');
 
     imagepng($im);
 }
 elseif(function_exists('imagewbmp'))
 {
-    // For WBMP
+    // 针对 WBMP
     header('Content-Type: image/vnd.wap.wbmp');
 
     imagewbmp($im);
@@ -221,8 +153,7 @@ else
     die('No image support in this PHP server');
 }
 
-// If image support was found for one of these
-// formats, then free it from memory
+// 如果发现图像是以上的格式之一，就从内存中释放
 if($im)
 {
     imagedestroy($im);
@@ -235,10 +166,9 @@ if($im)
   </note>
   <note>
    <para>
-    As of PHP 4.0.2 you can use the function
-    <function>imagetypes</function> in place of
-    <function>function_exists</function> for checking
-    the presence of the various supported image formats:
+    自 PHP 3.0.18 和 4.0.2 起可以用
+     <function>imagetypes</function> 函数代替
+     <function>function_exists</function> 来检查是否支持某种图像格式：
     <informalexample>
      <programlisting role="php">
 <![CDATA[
