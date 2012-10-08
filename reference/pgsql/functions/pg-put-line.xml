@@ -15,31 +15,31 @@
       <methodparam><type>string</type><parameter>data</parameter></methodparam>
      </methodsynopsis>
     <para>
-     <function>pg_put_line</function> 向 PostgreSQL 后端服务器发送以 NULL 结尾的字符串。例如可以通过 PostgreSQL 的 copy 操作来向表中高速插入数据。结尾的 NULL 字符会自动加入。&return.success;
+     <function>pg_put_line</function> 向 PostgreSQL 后端服务器发送以 NULL 结尾的字符串。例如可以通过 PostgreSQL 的 <literal>COPY</literal> 操作来向表中高速插入数据。结尾的 NULL 字符会自动加入。
     </para>
+    <para><literal>COPY</literal> is a high-speed data loading interface
+   supported by PostgreSQL.  Data is passed in without being parsed, 
+   and in a single transaction.
+  </para>
+  <para>
+   An alternative to using raw <function>pg_put_line</function> commands
+   is to use <function>pg_copy_from</function>.  This is a far simpler 
+   interface.
+  </para>
     <note>
      <para> 
-      应用程序必须明确地在最后一行发送两个字符 "\." 来向后端指明发送数据结束。
+      应用程序必须明确地在 <function>pg_end_copy</function> 之前最后一行发送两个字符 "\." 来向后端指明发送数据结束。
      </para>
     </note>
-    <para>
-     <example>
-      <title>向表中高速插入数据</title>
-      <programlisting role="php">
-<![CDATA[
-<?php 
-    $conn = pg_pconnect ("dbname=foo");
-    pg_query($conn, "create table bar (a int4, b char(16), d float8)");
-    pg_query($conn, "copy bar from stdin");
-    pg_put_line($conn, "3\thello world\t4.5\n");
-    pg_put_line($conn, "4\tgoodbye world\t7.11\n");
-    pg_put_line($conn, "\\.\n");
-    pg_end_copy($conn);
-?>
-]]>
-      </programlisting>
-     </example>
-    </para>
+   <warning>
+   <para>
+    Use of the <function>pg_put_line</function> causes most large object
+    operations, including <function>pg_lo_read</function> and
+    <function>pg_lo_tell</function>, to subsequently fail. You can use
+    <function>pg_copy_from</function> and <function>pg_copy_to</function>
+    instead.
+   </para>
+  </warning>
    </refsect1>
 
  <refsect1 role="parameters">
@@ -81,7 +81,7 @@
   &reftitle.examples;
   <para>
    <example>
-    <title><function>pg_put_line</function> example</title>
+    <title><function>pg_put_line</function> 例子</title>
     <programlisting role="php">
 <![CDATA[
 <?php 
