@@ -11,8 +11,9 @@
   PHP 层上解决这个问题是不合理的，但修改 web
   服务器层和操作系统层显得非常不现实。因此许多人，特别是 ISP，目前使用安全模式。
  </para>
-&warn.deprecated.feature-5-3-0.removed-5-4-0;
 
+ &warn.deprecated.feature-5-3-0.removed-5-4-0;
+ 
   <para>
    <table>
     <title>Changelog for <literal>safe mode</literal></title>
@@ -58,58 +59,40 @@
      </thead>
      <tbody>
       <row>
-       <entry>safe_mode</entry>
+        <entry><link linkend="ini.safe-mode">safe_mode</link></entry>
        <entry>"0"</entry>
        <entry>PHP_INI_SYSTEM</entry>
        <entry></entry>
       </row>
       <row>
-       <entry>safe_mode_gid</entry>
+        <entry><link linkend="ini.safe-mode-gid">safe_mode_gid</link></entry>
        <entry>"0"</entry>
        <entry>PHP_INI_SYSTEM</entry>
-       <entry>自 PHP 4.1.0 起可用</entry>
+       <entry>自 PHP 4.1.0 起可用，在 PHP 5.4.0 中移除。</entry>
       </row>
       <row>
-       <entry>safe_mode_include_dir</entry>
+        <entry><link linkend="ini.safe-mode-include-dir">safe_mode_include_dir</link></entry>
        <entry>NULL</entry>
        <entry>PHP_INI_SYSTEM</entry>
        <entry>自 PHP 4.1.0 起可用</entry>
       </row>
       <row>
-       <entry>safe_mode_exec_dir</entry>
+        <entry><link linkend="ini.safe-mode-exec-dir">safe_mode_exec_dir</link></entry>
        <entry>""</entry>
        <entry>PHP_INI_SYSTEM</entry>
        <entry></entry>
       </row>
       <row>
-       <entry>safe_mode_allowed_env_vars</entry>
+        <entry><link linkend="ini.safe-mode-allowed-env-vars">safe_mode_allowed_env_vars</link></entry>
        <entry>"PHP_"</entry>
        <entry>PHP_INI_SYSTEM</entry>
        <entry></entry>
       </row>
       <row>
-       <entry>safe_mode_protected_env_vars</entry>
+        <entry><link linkend="ini.safe-mode-protected-env-vars">safe_mode_protected_env_vars</link></entry>
        <entry>"LD_LIBRARY_PATH"</entry>
        <entry>PHP_INI_SYSTEM</entry>
        <entry></entry>
-      </row>
-      <row>
-       <entry>open_basedir</entry>
-       <entry>NULL</entry>
-       <entry>PHP_INI_SYSTEM</entry>
-       <entry></entry>
-      </row>
-      <row>
-       <entry>disable_functions</entry>
-       <entry>""</entry>
-       <entry>仅 &php.ini;</entry>
-       <entry>自 PHP 4.0.1 起可用</entry>
-      </row>
-      <row>
-       <entry>disable_classes</entry>
-       <entry>""</entry>
-       <entry>仅 &php.ini;</entry>
-       <entry>自 PHP 4.3.2 起可用</entry>
       </row>
      </tbody>
     </tgroup>
@@ -220,9 +203,12 @@
    </variablelist>
   </para>
   <para>
-   参见 <link linkend="ini.register-globals">register_globals</link>，<link
-   linkend="ini.display-errors">display_errors</link> 和 <link
-   linkend="ini.log-errors">log_errors</link>。
+   参见 <link linkend="ini.open-basedir">open_basedir</link>、
+    <link linkend="ini.disable-functions">disable_functions</link>、
+    <link linkend="ini.disable-classes">disable_classes</link>、
+    <link linkend="ini.register-globals">register_globals</link>、
+    <link linkend="ini.display-errors">display_errors</link> 和
+    <link linkend="ini.log-errors">log_errors</link>。
   </para>
 
   <para>
@@ -234,7 +220,7 @@
 -rw-r--r--    1 root     root       1116 May 26 18:01 /etc/passwd
 ]]>
    </programlisting>
-   运行 script.php
+   运行 <filename>script.php</filename>
    <programlisting role="php">
 <![CDATA[
 <?php
@@ -270,7 +256,7 @@ allowed to access /etc/passwd owned by uid 0 in /docroot/script.php on line 2
 ]]>
    </programlisting>
    如果在设置了 <link linkend="ini.open-basedir">open_basedir</link>
-   选项后运行同样的 script.php，则其结果会是：
+   选项后运行同样的 <filename>script.php</filename>，则其结果会是：
    <screen>
 <![CDATA[
 Warning: open_basedir restriction in effect. File is in wrong directory in
@@ -491,7 +477,7 @@ Warning: readfile() has been disabled for security reasons in
       <row>
        <entry><link linkend="features.http-auth">PHP_AUTH 变量</link></entry>
        <entry>
-	     在安全模式下，变量 <varname>PHP_AUTH_USER</varname>、<varname>PHP_AUTH_PW</varname> 和 <varname>PHP_AUTH_TYPE</varname> 在 <varname>$_SERVER</varname> 中不可用。但无论如何，您仍然可以使用 <varname>REMOTE_USER</varname> 来获取用户名称（USER）。（注意：仅 PHP 4.3.0 以后有效）
+         在安全模式下，变量 <varname>PHP_AUTH_USER</varname>、<varname>PHP_AUTH_PW</varname> 和 <varname>PHP_AUTH_TYPE</varname> 在 <varname>$_SERVER</varname> 中不可用。但无论如何，您仍然可以使用 <varname>REMOTE_USER</varname> 来获取用户名称（USER）。（注意：仅 PHP 4.3.0 以后有效）
        </entry>
       </row>
       <row>
@@ -536,12 +522,27 @@ Warning: readfile() has been disabled for security reasons in
        </entry>
       </row>
       <row>
-       <entry>
-        任何使用
-        <filename>php4/main/fopen_wrappers.c</filename> 的函数
-       </entry>
-       <entry>??</entry>
-      </row>
+        <entry>
+         <function>session_start</function>
+        </entry>
+        <entry>
+         The owner of a script must be the same as owner of a <link
+         linkend="ini.session.save-path">session.save_path</link> directory if
+         the default <literal>files</literal> <link
+         linkend="ini.session.save-handler">session.save_handler</link> is
+         used.
+        </entry>
+       </row>
+       <row>
+        <entry>
+         All filesystem and stream functions.
+        </entry>
+        <entry>
+         &sm.uidcheck; &sm.uidcheck.dir; (see the <link
+          linkend="ini.safe-mode-include-dir">safe_mode_include_dir</link>
+         &php.ini; option.
+        </entry>
+       </row>
      </tbody>
     </tgroup>
    </table>

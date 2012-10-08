@@ -8,76 +8,17 @@
     <refname>xml_set_external_entity_ref_handler</refname>
     <refpurpose>建立外部实体指向处理器</refpurpose>
    </refnamediv>
+   
  <refsect1 role="description">
   &reftitle.description;
     <methodsynopsis>
      <type>bool</type><methodname>xml_set_external_entity_ref_handler</methodname>
      <methodparam><type>resource</type><parameter>parser</parameter></methodparam>
-     <methodparam><type>callback</type><parameter>handler</parameter></methodparam>
+   <methodparam><type>callable</type><parameter>handler</parameter></methodparam>
     </methodsynopsis>
     <para>
-     为 <parameter>parser</parameter> 参数指定的 XML 解析器建立外部实体指向处理器函数。参数 <parameter>start_element_handler</parameter> 和 <parameter>end_element_handler</parameter> 为表示函数名称的字符串，这些函数必须在为 <parameter>parser</parameter> 指定的解析器调用 <function>xml_parse</function> 函数时已存在。
+     为 <parameter>parser</parameter> 参数指定的 XML 解析器建立外部实体指向处理器函数。
     </para>
-    <para>
-     由 <parameter>handler</parameter> 参数命名的函数名必须接受五个参数，并应该返回一个整型值。如果处理器的返回值为 &false;（这也是函数没有确定返回值时的返回值），XML 解析器将停止解析， <function>xml_get_error_code</function> 函数将返回  <constant>XML_ERROR_EXTERNAL_ENTITY_HANDLING</constant>。
-     <methodsynopsis>
-      <methodname><replaceable>handler</replaceable></methodname>
-      <methodparam><type>resource</type><parameter>parser</parameter></methodparam>
-      <methodparam><type>string</type><parameter>open_entity_names</parameter></methodparam>
-      <methodparam><type>string</type><parameter>base</parameter></methodparam>
-      <methodparam><type>string</type><parameter>system_id</parameter></methodparam>
-      <methodparam><type>string</type><parameter>public_id</parameter></methodparam>
-     </methodsynopsis>
-     <variablelist>
-      <varlistentry>
-       <term><parameter>parser</parameter></term>
-       <listitem>
-        <simpara>
-         第一个参数 <replaceable>parser</replaceable> 为指向要调用处理器的 XML 解析器的指针。
-        </simpara>
-       </listitem>
-      </varlistentry>
-      <varlistentry>
-       <term><parameter>open_entity_names</parameter></term>
-       <listitem>
-        <simpara>
-         第二个参数 <parameter>open_entity_names</parameter> 是为该实体的解析开放的实体名列表（包括被指向的实体名），这些实体名由空格隔开。
-        </simpara>
-       </listitem>
-      </varlistentry>
-      <varlistentry>
-       <term><parameter>base</parameter></term>
-       <listitem>
-        <simpara>
-         这个参数是解析外部实体的系统标识符（<parameter>system_id</parameter>）的基础。当前该参数通常都被设置为空字符串。
-        </simpara>
-       </listitem>
-      </varlistentry>
-      <varlistentry>
-       <term><parameter>system_id</parameter></term>
-       <listitem>
-        <simpara>
-         第四个参数 <parameter>system_id</parameter> 是在实体定义声明中指定的系统标识符。
-        </simpara>
-       </listitem>
-      </varlistentry>
-      <varlistentry>
-       <term><parameter>public_id</parameter></term>
-       <listitem>
-        <simpara>
-         第五个参数 <parameter>public_id</parameter> 是在实体定义声明中指定的公共标识符，如果未指定任何标识符，则该字符串为空。公共标识符中的空格将按照 XML 的要求被正常化。
-        </simpara>
-       </listitem>
-      </varlistentry>
-     </variablelist>
-    </para>
-    <para>
-     如果处理器函数名被设置为空字符串或者 &false;，则该有问题的处理器将被屏蔽。
-    </para>
-    <para>
-     如果处理器被成功的建立，该函数将返回 &true;；如果 <parameter>parser</parameter> 指向的不是合法的解析器，函数该函数将返回 &false;。
-    </para>
-    &note.func-callback;
    </refsect1>
 
  <refsect1 role="parameters">
@@ -88,7 +29,7 @@
      <term><parameter>parser</parameter></term>
      <listitem>
       <para>
-       A reference to the XML parser to set up external entity reference handler function.
+       XML 解析器的引用，用于建立外部实体指向处理器。
       </para>
      </listitem>
     </varlistentry>
@@ -96,17 +37,10 @@
      <term><parameter>handler</parameter></term>
      <listitem>
       <para>
-       <parameter>handler</parameter> is a string containing the name of a
-       function that must exist when <function>xml_parse</function> is called
-       for <parameter>parser</parameter>.
+       参数 <parameter>handler</parameter> 为表示函数名称的字符串，函数必须在为 <parameter>parser</parameter> 指定的解析器调用 <function>xml_parse</function> 函数时已存在。
       </para>
       <para>
-       The function named by <parameter>handler</parameter> must accept
-       five parameters, and should return an integer value.If the
-       value returned from the handler is &false; (which it will be if no
-       value is returned), the XML parser will stop parsing and
-       <function>xml_get_error_code</function> will return
-       <constant>XML_ERROR_EXTERNAL_ENTITY_HANDLING</constant>.
+       由 <parameter>handler</parameter> 参数命名的函数名必须接受五个参数，并应该返回一个整型值。如果处理器的返回值为 &false;（这也是函数没有确定返回值时的返回值），XML 解析器将停止解析， <function>xml_get_error_code</function> 函数将返回  <constant>XML_ERROR_EXTERNAL_ENTITY_HANDLING</constant>。
        <methodsynopsis>
         <methodname><replaceable>handler</replaceable></methodname>
         <methodparam><type>resource</type><parameter>parser</parameter></methodparam>
@@ -120,8 +54,7 @@
          <term><parameter>parser</parameter></term>
          <listitem>
           <simpara>
-           The first parameter, <replaceable>parser</replaceable>, is a
-           reference to the XML parser calling the handler.
+            第一个参数 <replaceable>parser</replaceable> 为指向要调用处理器的 XML 解析器的指针。
           </simpara>
          </listitem>
         </varlistentry>
@@ -129,10 +62,7 @@
          <term><parameter>open_entity_names</parameter></term>
          <listitem>
           <simpara>
-           The second parameter, <parameter>open_entity_names</parameter>, is a
-           space-separated list of the names of the entities that are open for
-           the parse of this entity (including the name of the referenced
-           entity).
+           第二个参数 <parameter>open_entity_names</parameter> 是为该实体的解析开放的实体名列表（包括被指向的实体名），这些实体名由空格隔开。
           </simpara>
          </listitem>
         </varlistentry>
@@ -140,9 +70,7 @@
          <term><parameter>base</parameter></term>
          <listitem>
           <simpara>
-           This is the base for resolving the system identifier
-           (<parameter>system_id</parameter>) of the external entity.Currently
-           this parameter will always be set to an empty string.
+          这个参数是解析外部实体的系统标识符（<parameter>system_id</parameter>）的基础。当前该参数通常都被设置为空字符串。
           </simpara>
          </listitem>
         </varlistentry>
@@ -150,8 +78,7 @@
          <term><parameter>system_id</parameter></term>
          <listitem>
           <simpara>
-           The fourth parameter, <parameter>system_id</parameter>, is the
-           system identifier as specified in the entity declaration.
+           第四个参数 <parameter>system_id</parameter> 是在实体定义声明中指定的系统标识符。
           </simpara>
          </listitem>
         </varlistentry>
@@ -159,19 +86,14 @@
          <term><parameter>public_id</parameter></term>
          <listitem>
           <simpara>
-           The fifth parameter, <parameter>public_id</parameter>, is the
-           public identifier as specified in the entity declaration, or
-           an empty string if none was specified; the whitespace in the
-           public identifier will have been normalized as required by
-           the XML spec.
+           第五个参数 <parameter>public_id</parameter> 是在实体定义声明中指定的公共标识符，如果未指定任何标识符，则该字符串为空。公共标识符中的空格将按照 XML 的要求被正常化。
           </simpara>
          </listitem>
         </varlistentry>
        </variablelist>
       </para>
       <para>
-       If a handler function is set to an empty string, or &false;, the handler
-       in question is disabled.
+       如果处理器函数名被设置为空字符串或者 &false;，则该有问题的处理器将被屏蔽。
       </para>
       &note.func-callback;
      </listitem>

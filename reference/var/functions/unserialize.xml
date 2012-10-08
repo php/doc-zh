@@ -10,96 +10,17 @@
      从已存储的表示中创建 PHP 的值
     </refpurpose>
    </refnamediv>
+   
  <refsect1 role="description">
   &reftitle.description;
-     <methodsynopsis>
-      <type>mixed</type><methodname>unserialize</methodname>
-      <methodparam><type>string</type><parameter>str</parameter></methodparam>
-      <methodparam choice="opt"><type>string</type><parameter>callback</parameter></methodparam>
-     </methodsynopsis>
+  <methodsynopsis>
+   <type>mixed</type><methodname>unserialize</methodname>
+   <methodparam><type>string</type><parameter>str</parameter></methodparam>
+  </methodsynopsis>
     <simpara>
      <function>unserialize</function> 对单一的已序列化的变量进行操作，将其转换回 
-     PHP 的值。返回的是转换之后的值，可为 
-     <type>integer</type>、<type>float</type>、<type>string</type>、<type>array</type>
-     或 <type>object</type>。如果传递的字符串不可解序列化，则返回 &false;。
+     PHP 的值。
     </simpara>
-    <note>
-     <title>unserialize_callback_func 指令</title>
-     <para>
-      如果在解序列化的时候需要实例化一个未定义类，则可以设置回调函数以供调用（以免得到的是不完整的
-      <type>object</type> “__PHP_Incomplete_Class”）。可通过
-      &php.ini;、<function>ini_set</function> 或 &htaccess; 
-      定义‘unserialize_callback_func’。每次实例化一个未定义类时它都会被调用。若要禁止这个特性，只需置空此设定。还需要注意的是
-      unserialize_callback_func 指令是从 PHP 4.2.0 开始提供使用的。
-     </para>
-    </note>
-    <note>
-     <para>
-     <parameter>callback</parameter> 参数是在 PHP 4.2.0 中添加的
-     </para>
-    </note>
-    <para>
-     若被解序列化的变量是一个对象，在成功地重新构造对象之后，PHP
-     会自动地试图去调用 <function>__wakeup</function>
-     成员函数（如果存在的话）。 
-     <example>
-      <title>unserialize_callback_func 示例</title>
-      <programlisting role="php">
-<![CDATA[
-<?php
-$serialized_object='O:1:"a":1:{s:5:"value";s:3:"100";}';
-
-// unserialize_callback_func 从 PHP 4.2.0 起可用
-ini_set('unserialize_callback_func','mycallback'); // 设置您的回调函数
-
-function mycallback($classname) {
-    // 只需包含含有类定义的文件
-    // $classname 指出需要的是哪一个类
-}
-?>
-]]>
-      </programlisting>
-     </example>
-    </para>
-    <note>
-     <para>
-      在 PHP 3 中，解序列化一个对象时是不保存方法的。而
-      PHP 4 打破了这个限制，同时保存了属性和方法。请参见<link 
-     linkend="language.oop5">类与对象</link>中的<link 
-     linkend="language.oop5.serialization">序列化对象</link>部分获取更多信息。
-     </para>
-    </note>
-    <para>
-     <example>
-      <title><function>unserialize</function> 示例</title>
-      <programlisting role="php">
-<![CDATA[
-<?php
-// 这里，我们使用 unserialize() 装载来自数据库的 $session_data 数组中的会话数据。
-// 此例是描述 serialize() 的那个例子的补充。
-
-$conn = odbc_connect ("webdb", "php", "chicken");
-$stmt = odbc_prepare ($conn, "SELECT data FROM sessions WHERE id = ?");
-$sqldata = array ($PHP_AUTH_USER);
-if (!odbc_execute ($stmt, &$sqldata) || !odbc_fetch_into ($stmt, &$tmp)) {
-    // 如果执行出错或返回错误，则初始化为空数组
-    $session_data = array();
-} else {
-    // 现在我们需要的是 $tmp[0] 中已序列化的数据。
-    $session_data = unserialize ($tmp[0]);
-    if (!is_array ($session_data)) {
-        // 出错，初始化为空数组
-        $session_data = array();
-    }
-}
-?>
-]]>
-      </programlisting>
-     </example>
-    </para>
-   <para>
-    参见 <function>serialize</function>。
-   </para>
    </refsect1>
 
  <refsect1 role="parameters">
@@ -110,25 +31,21 @@ if (!odbc_execute ($stmt, &$sqldata) || !odbc_fetch_into ($stmt, &$tmp)) {
      <term><parameter>str</parameter></term>
      <listitem>
       <para>
-       The serialized string.
+       序列化后的字符串。
       </para>
       <para>
-       If the variable being unserialized is an object, after successfully 
-       reconstructing the object PHP will automatically attempt to call the
-       <link linkend="object.wakeup">__wakeup()</link> member
-       function (if it exists).
+       若被解序列化的变量是一个对象，在成功地重新构造对象之后，PHP
+     会自动地试图去调用 <link linkend="object.wakeup">__wakeup()</link>
+     成员函数（如果存在的话）。
       </para>
       <para>
        <note>
-        <title>unserialize_callback_func directive</title>
+        <title>unserialize_callback_func 指令</title>
         <para>
-         It's possible to set a callback-function which will be called,
-         if an undefined class should be instantiated during unserializing.
-         (to prevent getting an incomplete <type>object</type> "__PHP_Incomplete_Class".)
-         Use your &php.ini;, <function>ini_set</function> or &htaccess; 
-         to define '<literal>unserialize_callback_func</literal>'.  Everytime an undefined class
-         should be instantiated, it'll be called.  To disable this feature just
-         empty this setting.
+        如果在解序列化的时候需要实例化一个未定义类，则可以设置回调函数以供调用（以免得到的是不完整的
+      <type>object</type> “__PHP_Incomplete_Class”）。可通过
+      &php.ini;、<function>ini_set</function> 或 &htaccess; 
+      定义‘unserialize_callback_func’。每次实例化一个未定义类时它都会被调用。若要禁止这个特性，只需置空此设定。
         </para>
        </note>
       </para>
@@ -141,13 +58,12 @@ if (!odbc_execute ($stmt, &$sqldata) || !odbc_fetch_into ($stmt, &$tmp)) {
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   The converted value is returned, and can be a <type>boolean</type>,
-   <type>integer</type>, <type>float</type>, <type>string</type>,
-   <type>array</type> or <type>object</type>.
-  </para>
+   返回的是转换之后的值，可为 
+     <type>integer</type>、<type>float</type>、<type>string</type>、<type>array</type>
+     或 <type>object</type>。
+     </para>
   <para>
-   In case the passed string is not unserializeable, &false; is returned and
-   <constant>E_NOTICE</constant> is issued.
+   如果传递的字符串不可解序列化，则返回 &false;，并产生一个 <constant>E_NOTICE</constant>。
   </para>
  </refsect1>
 
@@ -166,7 +82,7 @@ if (!odbc_execute ($stmt, &$sqldata) || !odbc_fetch_into ($stmt, &$tmp)) {
       <row>
        <entry>4.2.0</entry>
        <entry>
-        The directive unserialize_callback_func became available.
+        添加了 unserialize_callback_func 指令。
        </entry>
       </row>
      </tbody>
@@ -179,25 +95,24 @@ if (!odbc_execute ($stmt, &$sqldata) || !odbc_fetch_into ($stmt, &$tmp)) {
   &reftitle.examples;
   <para>
    <example>
-    <title><function>unserialize</function> example</title>
+    <title><function>unserialize</function> 例子</title>
     <programlisting role="php">
 <![CDATA[
 <?php
-// Here, we use unserialize() to load session data to the
-// $session_data array from the string selected from a database.
-// This example complements the one described with serialize().
+// 这里，我们使用 unserialize() 装载来自数据库的 $session_data 数组中的会话数据。
+// 此例是描述 serialize() 的那个例子的补充。
 
 $conn = odbc_connect("webdb", "php", "chicken");
 $stmt = odbc_prepare($conn, "SELECT data FROM sessions WHERE id = ?");
 $sqldata = array($_SERVER['PHP_AUTH_USER']);
 if (!odbc_execute($stmt, $sqldata) || !odbc_fetch_into($stmt, $tmp)) {
-    // if the execute or fetch fails, initialize to empty array
+    // 如果执行出错或返回错误，则初始化为空数组
     $session_data = array();
 } else {
-    // we should now have the serialized data in $tmp[0].
+    // 现在我们需要的是 $tmp[0] 中已序列化的数据。
     $session_data = unserialize($tmp[0]);
     if (!is_array($session_data)) {
-        // something went wrong, initialize to empty array
+        // 出错，初始化为空数组
         $session_data = array();
     }
 }
@@ -208,19 +123,19 @@ if (!odbc_execute($stmt, $sqldata) || !odbc_fetch_into($stmt, $tmp)) {
   </para>
   <para>
    <example>
-    <title>unserialize_callback_func example</title>
+    <title>unserialize_callback_func 例子</title>
     <programlisting role="php">
 <![CDATA[
 <?php
 $serialized_object='O:1:"a":1:{s:5:"value";s:3:"100";}';
 
-// unserialize_callback_func directive available as of PHP 4.2.0
-ini_set('unserialize_callback_func', 'mycallback'); // set your callback_function
+// unserialize_callback_func 从 PHP 4.2.0 起可用
+ini_set('unserialize_callback_func', 'mycallback'); // 设置您的回调函数
 
 function mycallback($classname) 
 {
-    // just include a file containing your classdefinition
-    // you get $classname to figure out which classdefinition is required
+   // 只需包含含有类定义的文件
+   // $classname 指出需要的是哪一个类
 }
 ?>
 ]]>
@@ -233,11 +148,8 @@ function mycallback($classname)
   &reftitle.notes;
   <warning>
    <para>
-    &false; is returned both in the case of an error and if unserializing
-    the serialized &false; value. It is possible to catch this special case by
-    comparing <parameter>str</parameter> with
-    <literal>serialize(false)</literal> or by catching the issued
-    <constant>E_NOTICE</constant>.
+    如果反序列化了 &false; 的值，或者在过程中发生了错误，都会返回 &false;。
+    可以通过 <parameter>str</parameter> 和 <literal>serialize(false)</literal> 进行比较，或者捕捉 <constant>E_NOTICE</constant> 错误来判断这种特殊情况。
    </para>
   </warning>
  </refsect1>
@@ -247,7 +159,7 @@ function mycallback($classname)
   <para>
    <simplelist>
     <member><function>serialize</function></member>
-    <member><link linkend="language.oop5.autoload">Autoloading Objects</link></member>
+    <member><link linkend="language.oop5.autoload">自动加载对象</link></member>
     <member><link linkend="unserialize-callback-func">unserialize_callback_func</link></member>
     <member><link linkend="object.wakeup">__wakeup()</link></member>
    </simplelist>

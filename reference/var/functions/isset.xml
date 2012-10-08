@@ -8,17 +8,17 @@
     <refname>isset</refname>
     <refpurpose>检测变量是否设置</refpurpose>
    </refnamediv>
+   
  <refsect1 role="description">
   &reftitle.description;
-     <methodsynopsis>
-      <type>bool</type><methodname>isset</methodname>
-      <methodparam><type>mixed</type><parameter>var</parameter></methodparam>
-      <methodparam choice="opt"><type>mixed</type><parameter>var</parameter></methodparam>
-      <methodparam choice="opt"><parameter>...</parameter></methodparam>
-     </methodsynopsis>
-    <simpara>
-     如果 <parameter>var</parameter> 存在则返回 &true;，否则返回 &false;。
-    </simpara>
+  <methodsynopsis>
+   <type>bool</type><methodname>isset</methodname>
+   <methodparam><type>mixed</type><parameter>var</parameter></methodparam>
+   <methodparam choice="opt"><type>mixed</type><parameter>...</parameter></methodparam>
+  </methodsynopsis>
+    <para>
+     检测变量是否设置，并且不是 &null;。
+  </para>
     <para>
      如果已经使用 <function>unset</function> 
      释放了一个变量之后，它将不再是 
@@ -26,79 +26,12 @@
      测试一个被设置成 &null; 的变量，将返回 &false;。同时要注意的是一个 &null; 字节（<literal>"\0"</literal>）并不等同于
      PHP 的  &null; 常数。
     </para>
-    <note>
-     <title>警告</title>
-     <para>
-      <function>isset</function> 
-      只能用于变量，因为传递任何其它参数都将造成解析错误。若想检测<link linkend="language.constants">常量</link>是否已设置，可使用 
-      <function>defined</function> 函数。
-     </para>
-    </note>
     <para>
-     <informalexample>
-      <programlisting role="php">
-<![CDATA[
-<?php
-
-$var = '';
-
-// 结果为 TRUE，所以后边的文本将被打印出来。
-if (isset($var)) {
-    print "This var is set set so I will print.";
-}
-
-// 在后边的例子中，我们将使用 var_dump 输出 isset() 的返回值。
-
-$a = "test";
-$b = "anothertest";
-
-var_dump( isset($a) );      // TRUE
-var_dump( isset ($a, $b) ); // TRUE
-
-unset ($a);
-
-var_dump( isset ($a) );     // FALSE
-var_dump( isset ($a, $b) ); // FALSE
-
-$foo = NULL;
-var_dump( isset ($foo) );   // FALSE
-
-?>
-]]>
-      </programlisting>
-     </informalexample>
-    </para>
-    <para>
-     这对于数组中的元素也同样有效：
-     <informalexample>
-      <programlisting role="php">
-<![CDATA[
-<?php
-
-$a = array ('test' => 1, 'hello' => NULL);
-
-var_dump( isset ($a['test']) );            // TRUE
-var_dump( isset ($a['foo']) );             // FALSE
-var_dump( isset ($a['hello']) );           // FALSE
-
-// 键 'hello' 的值等于 NULL，所以被认为是未置值的。
-// 如果想检测 NULL 键值，可以试试下边的方法。 
-var_dump( array_key_exists('hello', $a) ); // TRUE
-
-?>
-]]>
-      </programlisting>
-     </informalexample>
-    </para>
-    
-    &note.language-construct;
-    
-    <simpara>
-     参见 <function>empty</function>、<function>unset</function>、<function>defined</function>、<function>array_key_exists</function> 和错误控制 
-     <link linkend="language.operators.errorcontrol">@</link>
-     运算符。
-    </simpara>
-   </refsect1>
+   If multiple parameters are supplied then <function>isset</function> will
+   return &true; only if all of the parameters are set. Evaluation goes from
+   left to right and stops as soon as an unset variable is encountered.
+  </para>
+ </refsect1>
 
  <refsect1 role="parameters">
   &reftitle.parameters;
@@ -108,7 +41,7 @@ var_dump( array_key_exists('hello', $a) ); // TRUE
      <term><parameter>var</parameter></term>
      <listitem>
       <para>
-       The variable to be checked.
+       要检查的变量。
       </para>
      </listitem>
     </varlistentry>
@@ -116,7 +49,7 @@ var_dump( array_key_exists('hello', $a) ); // TRUE
      <term><parameter>...</parameter></term>
      <listitem>
       <para>
-       Another variable ...
+       其他变量。
       </para>
      </listitem>
     </varlistentry>
@@ -127,8 +60,7 @@ var_dump( array_key_exists('hello', $a) ); // TRUE
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   Returns &true; if <parameter>var</parameter> exists and has value other
-   than &null;, &false; otherwise.
+    如果 <parameter>var</parameter> 存在并且值不是 &null; 则返回 &true;，否则返回 &false;。
   </para>
  </refsect1>
 
@@ -148,7 +80,7 @@ var_dump( array_key_exists('hello', $a) ); // TRUE
        <entry>5.4.0</entry>
        <entry>
         <para>
-         Checking non-numeric offsets of strings now returns &false;.
+         检查字符的非数字偏移量将会返回 &false;。
         </para>
        </entry>
       </row>
@@ -162,19 +94,19 @@ var_dump( array_key_exists('hello', $a) ); // TRUE
   &reftitle.examples;
   <para>
    <example>
-    <title><function>isset</function> Examples</title>
+    <title><function>isset</function> 例子</title>
     <programlisting role="php">
 <![CDATA[
 <?php
 
 $var = '';
 
-// This will evaluate to TRUE so the text will be printed.
+// 结果为 TRUE，所以后边的文本将被打印出来。
 if (isset($var)) {
     echo "This var is set so I will print.";
 }
 
-// In the next examples we'll use var_dump to output
+// 在后边的例子中，我们将使用 var_dump 输出 isset() 的返回值。
 // the return value of isset().
 
 $a = "test";
@@ -197,7 +129,7 @@ var_dump(isset($foo));   // FALSE
    </example>
   </para>
   <para>
-   This also work for elements in arrays:
+     这对于数组中的元素也同样有效：
    <informalexample>
     <programlisting role="php">
 <![CDATA[
@@ -209,8 +141,8 @@ var_dump(isset($a['test']));            // TRUE
 var_dump(isset($a['foo']));             // FALSE
 var_dump(isset($a['hello']));           // FALSE
 
-// The key 'hello' equals NULL so is considered unset
-// If you want to check for NULL key values then try: 
+// 键 'hello' 的值等于 NULL，所以被认为是未置值的。
+// 如果想检测 NULL 键值，可以试试下边的方法。 
 var_dump(array_key_exists('hello', $a)); // TRUE
 
 // Checking deeper array values
@@ -271,18 +203,16 @@ bool(false)
   &reftitle.notes;
   <warning>
    <para>
-    <function>isset</function> only works with variables as passing anything
-    else will result in a parse error.  For checking if 
-    <link linkend="language.constants">constants</link> are set use the 
-    <function>defined</function> function.
+      <function>isset</function> 
+      只能用于变量，因为传递任何其它参数都将造成解析错误。若想检测<link linkend="language.constants">常量</link>是否已设置，可使用 
+      <function>defined</function> 函数。
    </para>
   </warning>
   &note.language-construct;
   <note>
    <para>
-    When using <function>isset</function> on inaccessible object properties,
-    the <link linkend="object.isset">__isset()</link>
-    overloading method will be called, if declared.
+    如果使用 <function>isset</function> 来检查对象无法访问的属性，如果 <link linkend="object.isset">__isset()</link>
+    方法已经定义则会调用这个重载方法。
    </para>
   </note>
  </refsect1>
@@ -298,7 +228,9 @@ bool(false)
     <member><link linkend="types.comparisons">the type comparison tables</link></member>
     <member><function>array_key_exists</function></member>
     <member><function>is_null</function></member>
-    <member>the error control <link linkend="language.operators.errorcontrol">@</link> operator</member>
+    <member>错误控制 
+     <link linkend="language.operators.errorcontrol">@</link>
+     运算符。</member>
    </simplelist>
   </para>
  </refsect1>

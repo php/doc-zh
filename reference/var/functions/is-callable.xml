@@ -10,62 +10,123 @@
      检测参数是否为合法的可调用结构
     </refpurpose>
    </refnamediv>
-   <refsect1>
-    <title>描述</title>
-     <methodsynopsis>
-      <type>bool</type><methodname>is_callable</methodname>
-      <methodparam><type>mixed</type><parameter>var</parameter></methodparam>
-      <methodparam choice="opt"><type>bool</type><parameter>syntax_only</parameter></methodparam>
-      <methodparam choice="opt"><type>string</type><parameter>callable_name</parameter></methodparam>
-     </methodsynopsis>
-<!--
-    <simpara>
-     The <parameter>var</parameter> parameter is the name of a function or method.  
-     Also, class or object methods are specified by passing a numerical array with 
-     two elements: the class or object, and a method name.
-    </simpara>
-    <simpara>
-     The optional <parameter>syntax_only</parameter> parameter will check
-     only for syntax and defaults to &false;  The third <parameter>
-     callable_name</parameter> parameter is also optional.
-    </simpara>
-    <para>
-     In our example below note, however, that despite the implication that 
-     <literal>a::b()</literal> is a callable static method, this is not the 
-     case.
-     <example>
-      <title>Using <function>is_callable</function></title>
-      <programlisting role="php">
+ 
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <type>bool</type><methodname>is_callable</methodname>
+   <methodparam><type>callable</type><parameter>name</parameter></methodparam>
+   <methodparam choice="opt"><type>bool</type><parameter>syntax_only</parameter><initializer>false</initializer></methodparam>
+   <methodparam choice="opt"><type>string</type><parameter role="reference">callable_name</parameter></methodparam>
+  </methodsynopsis>
+  <para>
+   验证变量的内容能否作为函数调用。
+   这可以检查包含有效函数名的变量，或者一个数组，包含了正确编码的对象以及函数名。
+  </para>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>name</parameter></term>
+     <listitem>
+      <para>
+       要检查的回调函数。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>syntax_only</parameter></term>
+     <listitem>
+      <para>
+       如果设置为 &true;，这个函数仅仅验证 <parameter>name</parameter> 可能是函数或方法。
+       它仅仅拒绝非字符，或者未包含能用于回调函数的有效结构。有效的应该包含两个元素，第一个是一个对象或者字符，第二个元素是个字符。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>callable_name</parameter></term>
+     <listitem>
+      <para>
+       接受“可调用的名称”。下面的例子是“someClass::someMethod”。
+       注意，尽管 someClass::SomeMethod() 的含义是可调用的静态方法，但例子的情况并不是这样的。
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   如果 <parameter>name</parameter> 可调用则返回 &true;，否则返回 &false;。
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title><function>is_callable</function> 例子</title>
+    <programlisting role="php">
 <![CDATA[
 <?php
-class a 
+//  How to check a variable to see if it can be called
+//  as a function.
+
+//
+//  Simple variable containing a function
+//
+
+function someFunction() 
 {
-    var $c;
-		
-    function b() {
-        return($this->c);
-    }
 }
 
-$d = new a;
+$functionVariable = 'someFunction';
 
-if(is_callable(array($d, 'b'), FALSE, $name)) {
+var_dump(is_callable($functionVariable, false, $callable_name));  // bool(true)
 
-    echo $name;
+echo $callable_name, "\n";  // someFunction
+
+//
+//  Array containing a method
+//
+
+class someClass {
+
+  function someMethod() 
+  {
+  }
+
 }
 
-/* The above will print:
-    
-    a::
+$anObject = new someClass();
 
-*/
+$methodVariable = array($anObject, 'someMethod');
+
+var_dump(is_callable($methodVariable, true, $callable_name));  //  bool(true)
+
+echo $callable_name, "\n";  //  someClass::someMethod
+
 ?>
 ]]>
-      </programlisting>
-     </example>
-    </para>
--->
-   </refsect1>
+    </programlisting>
+   </example>   
+  </para>   
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>function_exists</function></member>
+    <member><function>method_exists</function></member>
+   </simplelist>
+  </para>
+ </refsect1>
   </refentry>
 
 <!-- Keep this comment at the end of the file

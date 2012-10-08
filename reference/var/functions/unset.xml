@@ -8,40 +8,16 @@
     <refname>unset</refname>
     <refpurpose>释放给定的变量</refpurpose>
    </refnamediv>
+   
  <refsect1 role="description">
   &reftitle.description;
-     <methodsynopsis>
-      <type>void</type><methodname>unset</methodname>
-      <methodparam><type>mixed</type><parameter>var</parameter></methodparam>
-      <methodparam choice="opt"><type>mixed</type><parameter>var</parameter></methodparam>
-      <methodparam choice="opt"><parameter>...</parameter></methodparam>
-     </methodsynopsis>
+  <methodsynopsis>
+   <type>void</type><methodname>unset</methodname>
+   <methodparam><type>mixed</type><parameter>var</parameter></methodparam>
+   <methodparam choice="opt"><type>mixed</type><parameter>...</parameter></methodparam>
+  </methodsynopsis>
     <para>
-     <function>unset</function> 销毁指定的变量。注意在
-     PHP 3 中，<function>unset</function> 将返回
-     &true;（实际上是整型值 1），而在 PHP 4
-     中，<function>unset</function> 
-     不再是一个真正的函数：它现在是一个语句。这样就没有了返回值，试图获取
-     <function>unset</function> 的返回值将导致解析错误。
-    </para>
-    <para>
-     <example>
-      <title><function>unset</function> 示例</title>
-      <programlisting role="php">
-<![CDATA[
-<?php
-// 销毁单个变量
-unset ($foo);
-
-// 销毁单个数组元素
-unset ($bar['quux']);
-
-// 销毁一个以上的变量
-unset ($foo1, $foo2, $foo3);
-?>
-]]>
-      </programlisting>
-     </example>
+     <function>unset</function> 销毁指定的变量。
     </para>
     <para>
      <function>unset</function> 在函数中的行为会依赖于想要销毁的变量的类型而有所不同。
@@ -66,7 +42,9 @@ echo $foo;
 ]]>
       </programlisting>
      </informalexample>
-     上边的例子将输出：
+       </para>
+  &example.outputs;
+    <para>
      <informalexample>
       <screen>
 <![CDATA[
@@ -75,6 +53,26 @@ bar
       </screen>
      </informalexample>
     </para>
+  <para>
+       如果您想在函数中 <function>unset</function>
+     一个全局变量，可使用 <varname>$GLOBALS</varname>
+     数组来实现：
+   <informalexample>
+    <programlisting role="php">
+<![CDATA[
+<?php
+function foo() 
+{
+    unset($GLOBALS['bar']);
+}
+
+$bar = "something";
+foo();
+?>
+]]>
+    </programlisting>
+   </informalexample>
+  </para>
     <para>
      如果在函数中 <function>unset</function> 
      一个通过引用传递的变量，则只是局部变量被销毁，而在调用环境中的变量将保持调用
@@ -97,7 +95,9 @@ echo "$bar\n";
 ]]>
       </programlisting>
      </informalexample>
-     上边的例子将输出：
+  </para>
+   &example.outputs;
+  <para>
      <informalexample>
       <screen>
 <![CDATA[
@@ -114,11 +114,14 @@ something
       <programlisting role="php">
 <![CDATA[
 <?php
-function foo() {
-    static $a;
-    $a++;
-    echo "$a\n";
-    unset($a);
+function foo()
+{
+    static $bar;
+    $bar++;
+    echo "Before unset: $bar, ";
+    unset($bar);
+    $bar = 23;
+    echo "after unset: $bar\n";
 }
 
 foo();
@@ -128,42 +131,18 @@ foo();
 ]]>
       </programlisting>
      </informalexample>
-     上边的例子将输出：
+ </para>
+   &example.outputs;
+  <para>
      <informalexample>
       <screen>
 <![CDATA[
-1
-2
-3
+Before unset: 1, after unset: 23
+Before unset: 2, after unset: 23
+Before unset: 3, after unset: 23
 ]]>
       </screen>
      </informalexample>
-    </para>
-    <para>
-     如果您想在函数中 <function>unset</function>
-     一个全局变量，可使用 <varname>$GLOBALS</varname>
-     数组来实现：
-     <informalexample>
-      <programlisting role="php">
-<![CDATA[
-<?php
-function foo() {
-    unset($GLOBALS['bar']);
-}
-
-$bar = "something";
-foo();
-?>
-]]>
-      </programlisting>
-     </informalexample>
-    </para>
-    
-    &note.language-construct;
-    
-    <para>
-     参见 <function>isset</function> 和
-     <function>empty</function>。
     </para>
    </refsect1>
   
@@ -175,7 +154,7 @@ foo();
      <term><parameter>var</parameter></term>
      <listitem>
       <para>
-       The variable to be unset.
+       要销毁的变量。
       </para>
      </listitem>
     </varlistentry>
@@ -183,7 +162,7 @@ foo();
      <term><parameter>...</parameter></term>
      <listitem>
       <para>
-       Another variable ...
+       其他变量……
       </para>
      </listitem>
     </varlistentry>
@@ -213,7 +192,7 @@ foo();
       <row>
        <entry>4.0.1</entry>
        <entry>
-        Added support for multiple arguments.
+        添加了多个参数的支持。
        </entry>
       </row>
      </tbody>
@@ -226,29 +205,27 @@ foo();
   &reftitle.examples;
   <para>
    <example>
-    <title><function>unset</function> example</title>
+    <title><function>unset</function> 示例</title>
     <programlisting role="php">
 <![CDATA[
 <?php
-// destroy a single variable
-unset($foo);
+// 销毁单个变量
+unset ($foo);
 
-// destroy a single element of an array
-unset($bar['quux']);
+// 销毁单个数组元素
+unset ($bar['quux']);
 
-// destroy more than one variable
+// 销毁一个以上的变量
 unset($foo1, $foo2, $foo3);
 ?>
 ]]>
     </programlisting>
    </example>
    <example>
-    <title>Using <literal>(unset)</literal> casting</title>
+    <title>使用 <literal>(unset)</literal> 类型强制转换</title>
     <para>
-     <literal>(unset)</literal> casting is often confused with the
-     <function>unset</function> function. <literal>(unset)</literal>
-     casting serves only as a <literal>NULL</literal>-type cast, for
-     completeness. It does not alter the variable it's casting.
+     <literal>(unset)</literal> 类型强制转换常常和函数     <function>unset</function> 引起困惑。
+     为了完整性，<literal>(unset)</literal> 是作为一个  <literal>NULL</literal> 类型的强制转换。它不会改变变量的类型。
     </para>
     <programlisting role="php">
 <![CDATA[
@@ -281,15 +258,12 @@ string(6) "Felipe"
   </note>
   <note>
    <para>
-    It is not possible to unset <literal>$this</literal> inside an object
-    method since PHP 5.
+    在 PHP 5 之前无法在对象里销毁 <literal>$this</literal>。
    </para>
   </note>
   <note>
    <para>
-    When using <function>unset</function> on inaccessible object properties,
-    the <link linkend="object.unset">__unset()</link>
-    overloading method will be called, if declared.
+    在 <function>unset</function> 一个无法访问的对象属性时，如果定义了 <link linkend="object.unset">__unset()</link> 则对调用这个重载方法。
    </para>
   </note>
  </refsect1>

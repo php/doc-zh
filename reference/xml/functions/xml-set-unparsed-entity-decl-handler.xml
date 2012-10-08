@@ -15,13 +15,14 @@
     <methodsynopsis>
      <type>bool</type><methodname>xml_set_unparsed_entity_decl_handler</methodname>
      <methodparam><type>resource</type><parameter>parser</parameter></methodparam>
-     <methodparam><type>callback</type><parameter>handler</parameter></methodparam>
+   <methodparam><type>callable</type><parameter>handler</parameter></methodparam>
     </methodsynopsis>
     <para>
-     为 <parameter>parser</parameter> 参数指定的 XML 解析器建立未解析实体定义声明处理器函数。参数 <parameter>start_element_handler</parameter> 和 <parameter>end_element_handler</parameter> 为表示函数名称的字符串，这些函数必须在为 <parameter>parser</parameter> 指定的解析器调用 <function>xml_parse</function> 函数时已存在。
+     为 <parameter>parser</parameter> 参数指定的 XML 解析器建立未解析实体定义声明处理器函数。
+     
     </para>
     <para>
-     当 XML 解析器遇到如下含有 NDATA 声明的外部实体定义声明时，该处理器将被调用：
+     当 XML 解析器遇到如下含有 NDATA 声明的外部实体定义声明时，该 <parameter>handler</parameter> 处理器将被调用：
      <programlisting role="xml">
 <![CDATA[
 <!ENTITY <parameter>name</parameter> {<parameter>publicId</parameter> | <parameter>systemId</parameter>} 
@@ -32,75 +33,7 @@
     <para>
      请参阅 <link xlink:href="&url.rec-xml;#sec-external-ent">XML 1.0 参考的第 4.2.2 节</link>以获取有关已声明外部实体注释定义的信息。
     </para> 
-    <para>
-     由 <parameter>handler</parameter> 参数命名的函数名必须接受六个参数：
-     <methodsynopsis>
-      <methodname><replaceable>handler</replaceable></methodname>
-      <methodparam><type>resource</type><parameter>parser</parameter></methodparam>
-      <methodparam><type>string</type><parameter>entity_name</parameter></methodparam>
-      <methodparam><type>string</type><parameter>base</parameter></methodparam>
-      <methodparam><type>string</type><parameter>system_id</parameter></methodparam>
-      <methodparam><type>string</type><parameter>public_id</parameter></methodparam>
-      <methodparam><type>string</type><parameter>notation_name</parameter></methodparam>
-     </methodsynopsis>
-     <variablelist>
-      <varlistentry>
-       <term><parameter>parser</parameter></term>
-       <listitem>
-        <simpara>
-         第一个参数 <replaceable>parser</replaceable> 为指向要调用处理器的 XML 解析器的指针。
-        </simpara>
-       </listitem>
-      </varlistentry>
-      <varlistentry>
-       <term><parameter>entity_name</parameter></term>
-       <listitem>
-        <simpara>
-         将被定义的实体名。
-        </simpara>
-       </listitem>
-      </varlistentry>
-      <varlistentry>
-       <term><parameter>base</parameter></term>
-       <listitem>
-        <simpara>
-         这个参数是解析外部实体的系统标识符（<parameter>system_id</parameter>）的基础。当前该参数通常都被设置为空字符串。
-        </simpara>
-       </listitem>
-      </varlistentry>
-      <varlistentry>
-       <term><parameter>system_id</parameter></term>
-       <listitem>
-        <simpara>
-         外部实体的系统标识符。
-        </simpara>
-       </listitem>
-      </varlistentry>
-      <varlistentry>
-       <term><parameter>public_id</parameter></term>
-       <listitem>
-        <simpara> 
-         外部实体的公共标识符。
-        </simpara>
-       </listitem>
-      </varlistentry>
-      <varlistentry>
-       <term><parameter>notation_name</parameter></term>
-       <listitem>
-        <simpara> 
-         该实体的注释名（请参阅 <function>xml_set_notation_decl_handler</function>）。
-        </simpara>
-       </listitem>
-      </varlistentry>
-     </variablelist></para>
-    <para>
-     如果处理器函数名被设置为空字符串或者 &false;，则该有问题的处理器将被屏蔽。
-    </para>
-    <para>
-     如果处理器被成功的建立，该函数将返回 &true;；如果 <parameter>parser</parameter> 指向的不是合法的解析器，函数该函数将返回 &false;。
-    </para>
-    &note.func-callback;
-   </refsect1>
+ </refsect1>
 
  <refsect1 role="parameters">
   &reftitle.parameters;
@@ -110,7 +43,7 @@
      <term><parameter>parser</parameter></term>
      <listitem>
       <para>
-       A reference to the XML parser to set up unparsed entity declaration handler function.
+       XML 解析器的引用，用于建立未解析实体定义声明处理器。
       </para>
      </listitem>
     </varlistentry>
@@ -118,13 +51,10 @@
      <term><parameter>handler</parameter></term>
      <listitem>
       <para>
-       <parameter>handler</parameter> is a string containing the name of a
-       function that must exist when <function>xml_parse</function> is called
-       for <parameter>parser</parameter>.
+       参数<parameter>handler</parameter> 为表示函数名称的字符串，这个函数必须在为 <parameter>parser</parameter> 指定的解析器调用 <function>xml_parse</function> 函数时已存在。
       </para>
       <para>
-       The function named by <parameter>handler</parameter> must accept six
-       parameters:
+       由 <parameter>handler</parameter> 参数命名的函数名必须接受六个参数：
        <methodsynopsis>
         <methodname><replaceable>handler</replaceable></methodname>
         <methodparam><type>resource</type><parameter>parser</parameter></methodparam>
@@ -139,9 +69,7 @@
          <term><parameter>parser</parameter></term>
          <listitem>
           <simpara>
-           The first parameter, <replaceable>parser</replaceable>, is a
-           reference to the XML parser calling the
-           handler.
+           第一个参数 <replaceable>parser</replaceable> 为指向要调用处理器的 XML 解析器的指针。
           </simpara>
          </listitem>
         </varlistentry>
@@ -149,7 +77,7 @@
          <term><parameter>entity_name</parameter></term>
          <listitem>
           <simpara>
-           The name of the entity that is about to be defined.
+           将被定义的实体名。
           </simpara>
          </listitem>
         </varlistentry>
@@ -157,9 +85,7 @@
          <term><parameter>base</parameter></term>
          <listitem>
           <simpara>
-           This is the base for resolving the system identifier
-           (<parameter>systemId</parameter>) of the external entity.Currently
-           this parameter will always be set to an empty string.
+           这个参数是解析外部实体的系统标识符（<parameter>system_id</parameter>）的基础。当前该参数通常都被设置为空字符串。
           </simpara>
          </listitem>
         </varlistentry>
@@ -167,7 +93,7 @@
          <term><parameter>system_id</parameter></term>
          <listitem>
           <simpara>
-           System identifier for the external entity.
+           外部实体的系统标识符。
           </simpara>
          </listitem>
         </varlistentry>
@@ -175,7 +101,7 @@
          <term><parameter>public_id</parameter></term>
          <listitem>
           <simpara> 
-           Public identifier for the external entity.
+           外部实体的公共标识符。
           </simpara>
          </listitem>
         </varlistentry>
@@ -183,16 +109,14 @@
          <term><parameter>notation_name</parameter></term>
          <listitem>
           <simpara> 
-           Name of the notation of this entity (see
-           <function>xml_set_notation_decl_handler</function>).
+           该实体的注释名（请参阅 <function>xml_set_notation_decl_handler</function>）。
           </simpara>
          </listitem>
         </varlistentry>
        </variablelist>
       </para>
       <para>
-       If a handler function is set to an empty string, or &false;, the handler
-       in question is disabled.
+      如果处理器函数名被设置为空字符串或者 &false;，则该有问题的处理器将被屏蔽。
       </para>
       &note.func-callback;
      </listitem>
