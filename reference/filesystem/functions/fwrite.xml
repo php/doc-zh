@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
 <!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
+<!-- EN-Revision: 96c9d88bad9a7d7d44bfb7f26c226df7ee9ddf26 Maintainer: dallas Status: ready -->
 <refentry xml:id="function.fwrite" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>fwrite</refname>
   <refpurpose>写入文件（可安全用于二进制文件）</refpurpose>
  </refnamediv>
- <refsect1>
-  <title>说明</title>
+ 
+  <refsect1 role="description">
+  &reftitle.description;
   <methodsynopsis>
    <type>int</type><methodname>fwrite</methodname>
    <methodparam><type>resource</type><parameter>handle</parameter></methodparam>
@@ -17,28 +18,121 @@
   </methodsynopsis>
   <simpara>
    <function>fwrite</function> 把 <parameter>string</parameter> 的内容写入
-   文件指针 <parameter>handle</parameter> 处。 如果指定了
+   文件指针 <parameter>handle</parameter> 处。 
+  </simpara>
+ </refsect1>
+ 
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>handle</parameter></term>
+     <listitem>
+      &fs.file.pointer;
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>string</parameter></term>
+     <listitem>
+      <para>
+       The string that is to be written.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>length</parameter></term>
+     <listitem>
+      <para>
+       如果指定了
    <parameter>length</parameter>，当写入了
    <parameter>length</parameter> 个字节或者写完了 <parameter>string</parameter>
    以后，写入就会停止，视乎先碰到哪种情况。
-  </simpara>
-  <simpara>
-   <function>fwrite</function> 返回写入的字符数，出现错误时则返回 &false; 。
-  </simpara>
-  <simpara>
-   注意如果给出了
+      </para>
+      <para>
+        注意如果给出了
    <parameter>length</parameter>
    参数，则 <link
    linkend="ini.magic-quotes-runtime">magic_quotes_runtime</link>
    配置选项将被忽略，而
    <parameter>string</parameter> 中的斜线将不会被抽去。
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+ 
+  <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <simpara>
+   <function>fwrite</function> 返回写入的字符数，出现错误时则返回 &false; 。
   </simpara>
+ </refsect1>
+ 
+ <refsect1 role="notes">
+  &reftitle.notes;
   <note>
+   <para>
+    Writing to a network stream may end before the whole string is written.
+    Return value of <function>fwrite</function> may be checked:
+    <programlisting role="php">
+<![CDATA[
+<?php
+function fwrite_stream($fp, $string) {
+    for ($written = 0; $written < strlen($string); $written += $fwrite) {
+        $fwrite = fwrite($fp, substr($string, $written));
+        if ($fwrite === false) {
+            return $written;
+        }
+    }
+    return $written;
+}
+?>
+]]>
+    </programlisting>
+   </para>
+  </note>
+  
+   <note>
    <para>
     在区分二进制文件和文本文件的系统上（如 Windows）
     打开文件时，<function>fopen</function> 函数的 mode 参数要加上 'b'。
    </para>
   </note>
+  <note>
+   <para>
+    If <parameter>handle</parameter> was <function>fopen</function>ed in
+    append mode, <function>fwrite</function>s are atomic (unless the size of
+    <parameter>string</parameter> exceeds the filesystem's block size, on some
+    platforms, and as long as the file is on a local filesystem). That is,
+    there is no need to <function>flock</function> a resource before calling
+    <function>fwrite</function>; all of the data will be written without
+    interruption.
+   </para>
+  </note>
+    <note>
+   <para>
+    If writing twice to the file pointer, then the data will be appended to 
+    the end of the file content:
+        <programlisting role="php">
+<![CDATA[
+<?php
+$fp = fopen('data.txt', 'w');
+fwrite($fp, '1');
+fwrite($fp, '23');
+fclose($fp);
+
+// the content of 'data.txt' is now 123 and not 23!
+?>
+]]>
+        </programlisting>
+   </para>
+  </note>
+ </refsect1>
+ 
+  <refsect1 role="examples">
+  &reftitle.examples;
   <para>
    <example>
     <title>一个简单的 <function>fwrite</function> 例子</title>
@@ -77,12 +171,21 @@ if (is_writable($filename)) {
     </programlisting>
    </example>
   </para>
-  <simpara>
-   参见
-   <function>fread</function>，<function>fopen</function>，<function>fsockopen</function>，<function>popen</function>
-   和 <function>file_put_contents</function>。
-  </simpara>
  </refsect1>
+ 
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>fread</function></member>
+    <member><function>fopen</function></member>
+    <member><function>fsockopen</function></member>
+    <member><function>popen</function></member>
+    <member><function>file_get_contents</function></member>
+   </simplelist>
+  </para>
+ </refsect1>
+ 
 </refentry>
 
 <!-- Keep this comment at the end of the file

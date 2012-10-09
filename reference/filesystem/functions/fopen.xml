@@ -1,285 +1,78 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: ea3fa446b3fe414c2a9682ff81dbba37a5fba8b5 Maintainer: HonestQiao Status: ready -->
-<!-- Reviewed: no Maintainer: HonestQiao -->
+<!-- EN-Revision: fdccfb5a6462d4fe522a0c445094f7529690e04e Maintainer: HonestQiao Status: ready -->
 <!-- CREDITS: lm92 -->
 <refentry xml:id="function.fopen" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>fopen</refname>
   <refpurpose>打开文件或者 URL</refpurpose>
  </refnamediv>
+ 
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
    <type>resource</type><methodname>fopen</methodname>
    <methodparam><type>string</type><parameter>filename</parameter></methodparam>
    <methodparam><type>string</type><parameter>mode</parameter></methodparam>
-   <methodparam choice="opt"><type>bool</type><parameter>use_include_path</parameter></methodparam>
-   <methodparam choice="opt"><type>resource</type><parameter>zcontext</parameter></methodparam>
+   <methodparam choice="opt"><type>bool</type><parameter>use_include_path</parameter><initializer>false</initializer></methodparam>
+   <methodparam choice="opt"><type>resource</type><parameter>context</parameter></methodparam>
   </methodsynopsis>
-  <simpara>
+  <para>
    <function>fopen</function> 将
    <parameter>filename</parameter>
-   指定的名字资源绑定到一个流上。如果
-   <parameter>filename</parameter>
-   是 "scheme://..." 的格式，则被当成一个
-   URL，PHP 将搜索协议处理器（也被称为封装协议）来处理此模式。如果该协议尚未注册封装协议，PHP
-   将发出一条消息来帮助检查脚本中潜在的问题并将
-   <parameter>filename</parameter>
-   当成一个普通的文件名继续执行下去。
-  </simpara>
-  <simpara>
-   如果 PHP 认为
-   <parameter>filename</parameter>
-   指定的是一个本地文件，将尝试在该文件上打开一个流。该文件必须是
-   PHP 可以访问的，因此需要确认文件访问权限允许该访问。如果激活了&safemode;或者
-   <link linkend="ini.open-basedir">open_basedir</link>
-   则会应用进一步的限制。
-  </simpara>
-  <simpara>
-   如果 PHP 认为
-   <parameter>filename</parameter>
-   指定的是一个已注册的协议，而该协议被注册为一个网络
-   URL，PHP 将检查并确认
-   <link linkend="ini.allow-url-fopen">allow_url_fopen</link>
-   已被激活。如果关闭了，PHP 将发出一个警告，而 fopen 的调用则失败。
-  </simpara>
-  <note>
-   <simpara>
-    所支持的协议列表见<xref linkend="wrappers"/>。某些协议（也被称为
-    <literal>wrappers</literal>）支持
-    <literal>context</literal> 和／或 &php.ini;
-    选项。参见相应的页面哪些选项可以被设定（例如 &php.ini; 中用于
-    <literal>http</literal> wrapper 的 <literal>user_agent</literal> 值）。
-   </simpara>
-  </note>
-   &note.context-support;
-  <note>
-   <simpara>
-    自 PHP 4.3.2
-    起，对所有区别二进制和文本模式的平台默认模式都被设为二进制模式。如果在升级后脚本碰到问题，尝试暂时使用
-    <literal>'t'</literal> 标记，直到所有的脚本都照以下所说的改为更具移植性以后。
-   </simpara>
-  </note>
-  <para>
-   <parameter>mode</parameter>
-   参数指定了所要求到该流的访问类型。可以是以下：
-   <table>
-    <title><function>fopen</function> 中 <parameter>mode</parameter> 的可能值列表</title>
-    <tgroup cols="2">
-     <thead>
-      <row>
-       <entry><parameter>mode</parameter></entry>
-       <entry>说明</entry>
-      </row>
-     </thead>
-     <tbody>
-      <row>
-       <entry><literal>'r'</literal></entry>
-       <entry>
-        只读方式打开，将文件指针指向文件头。
-       </entry>
-      </row>
-      <row>
-       <entry><literal>'r+'</literal></entry>
-       <entry>
-        读写方式打开，将文件指针指向文件头。
-       </entry>
-      </row>
-      <row>
-       <entry><literal>'w'</literal></entry>
-       <entry>
-        写入方式打开，将文件指针指向文件头并将文件大小截为零。如果文件不存在则尝试创建之。
-       </entry>
-      </row>
-      <row>
-       <entry><literal>'w+'</literal></entry>
-       <entry>
-        读写方式打开，将文件指针指向文件头并将文件大小截为零。如果文件不存在则尝试创建之。
-       </entry>
-      </row>
-      <row>
-       <entry><literal>'a'</literal></entry>
-       <entry>
-        写入方式打开，将文件指针指向文件末尾。如果文件不存在则尝试创建之。
-       </entry>
-      </row>
-      <row>
-       <entry><literal>'a+'</literal></entry>
-       <entry>
-        读写方式打开，将文件指针指向文件末尾。如果文件不存在则尝试创建之。
-       </entry>
-      </row>
-      <row>
-       <entry><literal>'x'</literal></entry>
-       <entry>
-        创建并以写入方式打开，将文件指针指向文件头。如果文件已存在，则
-        <function>fopen</function> 调用失败并返回 &false;，并生成一条
-        <constant>E_WARNING</constant> 级别的错误信息。如果文件不存在则尝试创建之。这和给
-        底层的 <literal>open(2)</literal> 系统调用指定
-        <literal>O_EXCL|O_CREAT</literal> 标记是等价的。此选项被
-         PHP 4.3.2 以及以后的版本所支持，仅能用于本地文件。
-       </entry>
-      </row>
-      <row>
-       <entry><literal>'x+'</literal></entry>
-       <entry>
-        创建并以读写方式打开，将文件指针指向文件头。如果文件已存在，则
-        <function>fopen</function> 调用失败并返回 &false;，并生成一条
-        <constant>E_WARNING</constant> 级别的错误信息。如果文件不存在则尝试创建之。这和给
-        底层的 <literal>open(2)</literal> 系统调用指定
-        <literal>O_EXCL|O_CREAT</literal> 标记是等价的。此选项被
-        PHP 4.3.2 以及以后的版本所支持，仅能用于本地文件。
-       </entry>
-      </row>
-     </tbody>
-    </tgroup>
-   </table>
+   指定的名字资源绑定到一个流上。
   </para>
-  <note>
-   <para>
-    不同的操作系统家族具有不同的行结束习惯。当写入一个文本文件并想插入一个新行时，需要使用符合操作系统的行结束符号。基于
-    Unix 的系统使用 <literal>\n</literal>
-    作为行结束字符，基于 Windows 的系统使用 <literal>\r\n</literal>
-    作为行结束字符，基于 Macintosh 的系统使用 <literal>\r</literal>
-    作为行结束字符。
-   </para>
-   <para>
-    如果写入文件时使用了错误的行结束符号，则其它应用程序打开这些文件时可能会表现得很怪异。
-   </para>
-   <para>
-    Windows 下提供了一个文本转换标记（<literal>'t'</literal>）可以透明地将
-    <literal>\n</literal> 转换为 <literal>\r\n</literal>。与此对应还可以使用
-    <literal>'b'</literal> 来强制使用二进制模式，这样就不会转换数据。要使用这些标记，要么用
-    <literal>'b'</literal> 或者用 <literal>'t'</literal> 作为
-    <parameter>mode</parameter> 参数的最后一个字符。
-   </para>
-   <para>
-    默认的转换模式依赖于 SAPI 和所使用的 PHP
-    版本，因此为了便于移植鼓励总是指定恰当的标记。如果是操作纯文本文件并在脚本中使用了
-    <literal>\n</literal> 作为行结束符，但还要期望这些文件可以被其它应用程序例如
-    Notepad 读取，则在 mode 中使用
-    <literal>'t'</literal>。在所有其它情况下使用 <literal>'b'</literal>。
-   </para>
-   <para>
-    在操作二进制文件时如果没有指定 <literal>'b'</literal>
-    标记，可能会碰到一些奇怪的问题，包括坏掉的图片文件以及关于
-    <literal>\r\n</literal> 字符的奇怪问题。
-   </para>
-  </note>
-  <note>
-   <para>
-    为移植性考虑，强烈建议在用 <function>fopen</function>
-    打开文件时总是使用 <literal>'b'</literal> 标记。
-   </para>
-  </note>
-  <note>
-   <para>
-    再一次，为移植性考虑，强烈建议你重写那些依赖于
-    <literal>'t'</literal> 模式的代码使其使用正确的行结束符并改成
-    <literal>'b'</literal> 模式。
-   </para>
-  </note>
-  <para>
-   如果也需要在
-   <link linkend="ini.include-path">include_path</link>
-   中搜寻文件的话，可以将可选的第三个参数
-   <parameter>use_include_path</parameter>
-   设为 '1' 或 &true;。
-  </para>
-  <simpara>
-   如果打开失败，本函数返回 &false;。
-  </simpara>
-  <para>
-   <example>
-    <title><function>fopen</function> 例子</title>
-    <programlisting role="php">
-<![CDATA[
-<?php
-$handle = fopen("/home/rasmus/file.txt", "r");
-$handle = fopen("/home/rasmus/file.gif", "wb");
-$handle = fopen("http://www.example.com/", "r");
-$handle = fopen("ftp://user:password@example.com/somefile.txt", "w");
-?>
-]]>
-    </programlisting>
-   </example>
-  </para>
-  <simpara>
-   如果在用服务器模块版本的 PHP
-   时在打开和写入文件上遇到问题，记住要确保所使用的文件是服务器进程所能够访问的。
-  </simpara>
-  <para>
-   在 Windows 平台上，要小心转义文件路径中的每个反斜线，或者用斜线。
-   <informalexample>
-    <programlisting role="php">
-<![CDATA[
-<?php
-$handle = fopen("c:\\data\\info.txt", "r");
-?>
-]]>
-    </programlisting>
-   </informalexample>
-  </para>
-  &warn.ssl-non-standard;
-  &note.sm.uidcheck.dir;
-  <simpara>
-   参见<xref linkend="wrappers"/>，<function>fclose</function>，<function>fgets</function>，<function>fread</function>，<function>fwrite</function>，<function>fsockopen</function>，<function>file</function>，<function>file_exists</function>，<function>is_readable</function>，<function>stream_set_timeout</function>
-   和 <function>popen</function>。
-  </simpara>
  </refsect1>
-
+ 
  <refsect1 role="parameters">
   &reftitle.parameters;
-  <para>
-   <variablelist>
-    <varlistentry>
-     <term><parameter>filename</parameter></term>
-     <listitem>
-      <para>
-       If <parameter>filename</parameter> is of the form "scheme://...", it
-       is assumed to be a URL and PHP will search for a protocol handler
-       (also known as a wrapper) for that scheme. If no wrappers for that
-       protocol are registered, PHP will emit a notice to help you track
-       potential problems in your script and then continue as though
-       <parameter>filename</parameter> specifies a regular file.
-      </para>
-      <para>
-       If PHP has decided that <parameter>filename</parameter> specifies
-       a local file, then it will try to open a stream on that file.
-       The file must be accessible to PHP, so you need to ensure that
-       the file access permissions allow this access.
-       If you have enabled &safemode;,
-       or <link linkend="ini.open-basedir">open_basedir</link> further
-       restrictions may apply.
-      </para>
-      <para>
-       If PHP has decided that <parameter>filename</parameter> specifies
-       a registered protocol, and that protocol is registered as a
-       network URL, PHP will check to make sure that
-       <link linkend="ini.allow-url-fopen">allow_url_fopen</link> is
-       enabled. If it is switched off, PHP will emit a warning and
-       the fopen call will fail.
-      </para>
-      <note>
+   <para>
+    <variablelist>
+     <varlistentry>
+      <term><parameter>filename</parameter></term>
+      <listitem>
        <para>
-        The list of supported protocols can be found in <xref
-        linkend="wrappers"/>. Some protocols (also referred to as
-        <literal>wrappers</literal>) support <literal>context</literal>
-        and/or &php.ini; options. Refer to the specific page for the
-        protocol in use for a list of options which can be set. (e.g.
-        &php.ini; value <literal>user_agent</literal> used by the
-        <literal>http</literal> wrapper).
+        如果
+        <parameter>filename</parameter>
+        是 "scheme://..." 的格式，则被当成一个
+        URL，PHP 将搜索协议处理器（也被称为封装协议）来处理此模式。如果该协议尚未注册封装协议，PHP
+        将发出一条消息来帮助检查脚本中潜在的问题并将
+        <parameter>filename</parameter>
+        当成一个普通的文件名继续执行下去。
        </para>
-      </note>
-      <para>
-       On the Windows platform, be careful to escape any backslashes
-       used in the path to the file, or use forward slashes.
-       <informalexample>
-        <programlisting role="php">
+       <para>
+        如果 PHP 认为
+        <parameter>filename</parameter>
+        指定的是一个本地文件，将尝试在该文件上打开一个流。该文件必须是
+        PHP 可以访问的，因此需要确认文件访问权限允许该访问。如果激活了&safemode;或者
+        <link linkend="ini.open-basedir">open_basedir</link>
+        则会应用进一步的限制。
+       </para>
+       <para>
+        如果 PHP 认为
+        <parameter>filename</parameter>
+        指定的是一个已注册的协议，而该协议被注册为一个网络
+        URL，PHP 将检查并确认
+        <link linkend="ini.allow-url-fopen">allow_url_fopen</link>
+        已被激活。如果关闭了，PHP 将发出一个警告，而 fopen 的调用则失败。
+       </para>
+       <note>
+        <para>
+         所支持的协议列表见<xref linkend="wrappers"/>。某些协议（也被称为
+         <literal>wrappers</literal>）支持
+         <literal>context</literal> 和／或 &php.ini;
+         选项。参见相应的页面哪些选项可以被设定（例如 &php.ini; 中用于
+         <literal>http</literal> wrapper 的 <literal>user_agent</literal> 值）。
+        </para>
+       </note>
+       <para>
+        On the Windows platform, be careful to escape any backslashes
+        used in the path to the file, or use forward slashes.
+        <informalexample>
+         <programlisting role="php">
 <![CDATA[
 <?php
-$handle = fopen("c:\folder\resource.txt", "r");
+$handle = fopen("c:\\folder\\resource.txt", "r");
 ?>
 ]]>
         </programlisting>
@@ -291,83 +84,70 @@ $handle = fopen("c:\folder\resource.txt", "r");
      <term><parameter>mode</parameter></term>
      <listitem>
       <para>
-       The <parameter>mode</parameter> parameter specifies the type of access
-       you require to the stream.  It may be any of the following:
+       <parameter>mode</parameter>
+       参数指定了所要求到该流的访问类型。可以是以下：
        <table>
         <title>
-         A list of possible modes for <function>fopen</function>
-         using <parameter>mode</parameter>
+         <function>fopen</function> 中 <parameter>mode</parameter> 的可能值列表
         </title>
         <tgroup cols="2">
          <thead>
           <row>
            <entry><parameter>mode</parameter></entry>
-           <entry>Description</entry>
+           <entry>说明</entry>
           </row>
          </thead>
          <tbody>
           <row>
            <entry><literal>'r'</literal></entry>
            <entry>
-            Open for reading only; place the file pointer at the
-            beginning of the file.
+            只读方式打开，将文件指针指向文件头。
            </entry>
           </row>
           <row>
            <entry><literal>'r+'</literal></entry>
            <entry>
-            Open for reading and writing; place the file pointer at
-            the beginning of the file.
+            读写方式打开，将文件指针指向文件头。
            </entry>
           </row>
           <row>
            <entry><literal>'w'</literal></entry>
            <entry>
-            Open for writing only; place the file pointer at the
-            beginning of the file and truncate the file to zero length.
-            If the file does not exist, attempt to create it.
+            写入方式打开，将文件指针指向文件头并将文件大小截为零。如果文件不存在则尝试创建之。
            </entry>
           </row>
           <row>
            <entry><literal>'w+'</literal></entry>
            <entry>
-            Open for reading and writing; place the file pointer at
-            the beginning of the file and truncate the file to zero
-            length.  If the file does not exist, attempt to create it.
+            读写方式打开，将文件指针指向文件头并将文件大小截为零。如果文件不存在则尝试创建之。
            </entry>
           </row>
           <row>
            <entry><literal>'a'</literal></entry>
            <entry>
-            Open for writing only; place the file pointer at the end of
-            the file. If the file does not exist, attempt to create it.
+            写入方式打开，将文件指针指向文件末尾。如果文件不存在则尝试创建之。
            </entry>
           </row>
           <row>
            <entry><literal>'a+'</literal></entry>
            <entry>
-            Open for reading and writing; place the file pointer at
-            the end of the file. If the file does not exist, attempt to
-            create it.
+            读写方式打开，将文件指针指向文件末尾。如果文件不存在则尝试创建之。
            </entry>
           </row>
           <row>
            <entry><literal>'x'</literal></entry>
            <entry>
-            Create and open for writing only; place the file pointer at the
-            beginning of the file.  If the file already exists, the
-            <function>fopen</function> call will fail by returning &false; and
-            generating an error of level <constant>E_WARNING</constant>.  If
-            the file does not exist, attempt to create it.  This is equivalent
-            to specifying <literal>O_EXCL|O_CREAT</literal> flags for the
-            underlying <literal>open(2)</literal> system call. 
+            创建并以写入方式打开，将文件指针指向文件头。如果文件已存在，则
+            <function>fopen</function> 调用失败并返回 &false;，并生成一条
+            <constant>E_WARNING</constant> 级别的错误信息。如果文件不存在则尝试创建之。这和给
+            底层的 <literal>open(2)</literal> 系统调用指定
+            <literal>O_EXCL|O_CREAT</literal> 标记是等价的。
            </entry>
           </row>
           <row>
            <entry><literal>'x+'</literal></entry>
            <entry>
-            Create and open for reading and writing; otherwise it has the
-            same behavior as <literal>'x'</literal>.
+            创建并以读写方式打开，其他的行为和 <literal>'x'</literal> 一样。
            </entry>
           </row>
           <row>
@@ -399,55 +179,47 @@ $handle = fopen("c:\folder\resource.txt", "r");
       </para>
       <note>
        <para>
-        Different operating system families have different line-ending
-        conventions.  When you write a text file and want to insert a line
-        break, you need to use the correct line-ending character(s) for your
-        operating system.  Unix based systems use <literal>\n</literal> as the
-        line ending character, Windows based systems use <literal>\r\n</literal>
-        as the line ending characters and Macintosh based systems use
-        <literal>\r</literal> as the line ending character.
+        不同的操作系统家族具有不同的行结束习惯。当写入一个文本文件并想插入一个新行时，需要使用符合操作系统的行结束符号。基于
+        Unix 的系统使用 <literal>\n</literal>
+        作为行结束字符，基于 Windows 的系统使用 <literal>\r\n</literal>
+        作为行结束字符，基于 Macintosh 的系统使用 <literal>\r</literal>
+        作为行结束字符。
        </para>
        <para>
-        If you use the wrong line ending characters when writing your files, you
-        might find that other applications that open those files will "look
-        funny".
+        如果写入文件时使用了错误的行结束符号，则其它应用程序打开这些文件时可能会表现得很怪异。
+        
        </para>
        <para>
-        Windows offers a text-mode translation flag (<literal>'t'</literal>)
-        which will transparently translate <literal>\n</literal> to
-        <literal>\r\n</literal> when working with the file.  In contrast, you
-        can also use <literal>'b'</literal> to force binary mode, which will not
-        translate your data.  To use these flags, specify either
-        <literal>'b'</literal> or <literal>'t'</literal> as the last character
-        of the <parameter>mode</parameter> parameter.
+        Windows 下提供了一个文本转换标记（<literal>'t'</literal>）可以透明地将
+        <literal>\n</literal> 转换为 <literal>\r\n</literal>。与此对应还可以使用
+        <literal>'b'</literal> 来强制使用二进制模式，这样就不会转换数据。要使用这些标记，要么用
+        <literal>'b'</literal> 或者用 <literal>'t'</literal> 作为
+        <parameter>mode</parameter> 参数的最后一个字符。
        </para>
        <para>
-        The default translation mode depends on the SAPI and version of PHP that
-        you are using, so you are encouraged to always specify the appropriate
-        flag for portability reasons.  You should use the <literal>'t'</literal>
-        mode if you are working with plain-text files and you use
-        <literal>\n</literal> to delimit your line endings in your script, but
-        expect your files to be readable with applications such as notepad.  You
-        should use the <literal>'b'</literal> in all other cases.
+        默认的转换模式依赖于 SAPI 和所使用的 PHP
+        版本，因此为了便于移植鼓励总是指定恰当的标记。如果是操作纯文本文件并在脚本中使用了
+        <literal>\n</literal> 作为行结束符，但还要期望这些文件可以被其它应用程序例如
+        Notepad 读取，则在 mode 中使用
+        <literal>'t'</literal>。在所有其它情况下使用 <literal>'b'</literal>。
        </para>
        <para>
-        If you do not specify the 'b' flag when working with binary files, you
-        may experience strange problems with your data, including broken image
-        files and strange problems with <literal>\r\n</literal> characters.
+        在操作二进制文件时如果没有指定 <literal>'b'</literal>
+        标记，可能会碰到一些奇怪的问题，包括坏掉的图片文件以及关于
+        <literal>\r\n</literal> 字符的奇怪问题。
        </para>
       </note>
       <note>
        <para>
-        For portability, it is strongly recommended that you always
-        use the 'b' flag when opening files with <function>fopen</function>.
+        为移植性考虑，强烈建议在用 <function>fopen</function>
+        打开文件时总是使用 <literal>'b'</literal> 标记。
        </para>
       </note>
       <note>
        <para>
-        Again, for portability, it is also strongly recommended that
-        you re-write code that uses or relies upon the <literal>'t'</literal>
-        mode so that it uses the correct line endings and
-        <literal>'b'</literal> mode instead.
+        再一次，为移植性考虑，强烈建议你重写那些依赖于
+        <literal>'t'</literal> 模式的代码使其使用正确的行结束符并改成
+        <literal>'b'</literal> 模式。
        </para>
       </note>
      </listitem>
@@ -456,9 +228,11 @@ $handle = fopen("c:\folder\resource.txt", "r");
      <term><parameter>use_include_path</parameter></term>
      <listitem>
       <para>
-       The optional third <parameter>use_include_path</parameter> parameter
-       can be set to '1' or &true; if you want to search for the file in the
-       <link linkend="ini.include-path">include_path</link>, too.
+       如果也需要在
+       <link linkend="ini.include-path">include_path</link>
+       中搜寻文件的话，可以将可选的第三个参数
+       <parameter>use_include_path</parameter>
+       设为 '1' 或 &true;。
       </para>
      </listitem>
     </varlistentry>
@@ -469,26 +243,24 @@ $handle = fopen("c:\folder\resource.txt", "r");
      </listitem>
     </varlistentry>
    </variablelist>
-  </para>
+   </para>
  </refsect1>
-
+ 
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   Returns a file pointer resource on success, or &false; on error.
+   成功时返回文件指针资源，如果打开失败，本函数返回 &false;。
   </para>
  </refsect1>
-
+ 
  <refsect1 role="errors">
   &reftitle.errors;
   <para>
-   If the open fails, an error of level
-   <constant>E_WARNING</constant> is generated.  You may use <link
-   linkend="language.operators.errorcontrol">@</link> to suppress this
-   warning.
+   如果打开失败，会产生一个 <constant>E_WARNING</constant> 错误。可以通过 <link
+   linkend="language.operators.errorcontrol">@</link> 来屏蔽错误。
   </para>
  </refsect1>
-
+ 
  <refsect1 role="changelog">
   &reftitle.changelog;
   <para>
@@ -504,25 +276,21 @@ $handle = fopen("c:\folder\resource.txt", "r");
       <row>
        <entry>4.3.2</entry>
        <entry>
-        As of PHP 4.3.2, the default mode is set to binary for all platforms
-        that distinguish between binary and text mode.  If you are having
-        problems with your scripts after upgrading, try using the
-        <literal>'t'</literal> flag as a workaround until you have made your
-        script more portable as mentioned before
+        自 PHP 4.3.2
+        起，对所有区别二进制和文本模式的平台默认模式都被设为二进制模式。如果在升级后脚本碰到问题，尝试暂时使用
+        <literal>'t'</literal> 标记，直到所有的脚本都照以下所说的改为更具移植性以后。
        </entry>
       </row>
       <row>
        <entry>4.3.2</entry>
        <entry>
-        The <literal>'x'</literal> and <literal>'x+'</literal> options were
-        added
+        增加了选项 <literal>'x'</literal> 和 <literal>'x+'</literal>
        </entry>
       </row>
       <row>
        <entry>5.2.6</entry>
        <entry>
-        The <literal>'c'</literal> and <literal>'c+'</literal> options were
-        added
+        增加了选项 <literal>'c'</literal> 和 <literal>'c+'</literal>
        </entry>
       </row>
      </tbody>
@@ -530,12 +298,12 @@ $handle = fopen("c:\folder\resource.txt", "r");
    </informaltable>
   </para>
  </refsect1>
-
+ 
  <refsect1 role="examples">
   &reftitle.examples;
   <para>
    <example>
-    <title><function>fopen</function> examples</title>
+    <title><function>fopen</function> 例子</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -549,19 +317,27 @@ $handle = fopen("ftp://user:password@example.com/somefile.txt", "w");
    </example>
   </para>
  </refsect1>
-
+ 
  <refsect1 role="notes">
   &reftitle.notes;
   &warn.ssl-non-standard;
   &note.sm.uidcheck.dir;
-  <para>
-   If you are experiencing problems with reading and writing to files and
-   you're using the server module version of PHP, remember to make sure that
-   the files and directories you're using are accessible to the server
-   process.
-  </para>
+  <note>
+   <para>
+    如果在用服务器模块版本的 PHP
+    时在打开和写入文件上遇到问题，记住要确保所使用的文件和目录是服务器进程所能够访问的。
+   </para>
+  </note>
+  <note>
+   <para>
+    This function may also succeed when <parameter>filename</parameter> is a
+    directory. If you are unsure whether <parameter>filename</parameter> is a
+    file or a directory, you may need to use the <function>is_dir</function>
+    function before calling <function>fopen</function>.
+     </para>
+  </note>
  </refsect1>
-
+ 
  <refsect1 role="seealso">
   &reftitle.seealso;
   <para>

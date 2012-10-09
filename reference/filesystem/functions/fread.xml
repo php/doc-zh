@@ -1,76 +1,135 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
 <!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
+<!-- EN-Revision: 745c8fa1f6255bdbc7ac250223a4493ab2fe1a03 Maintainer: dallas Status: ready -->
 <!-- CREDITS: lm92 -->
 <refentry xml:id="function.fread" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>fread</refname>
   <refpurpose>读取文件（可安全用于二进制文件）</refpurpose>
  </refnamediv>
- <refsect1>
-  <title>说明</title>
+ 
+ <refsect1 role="description">
+  &reftitle.description;
   <methodsynopsis>
    <type>string</type><methodname>fread</methodname>
-   <methodparam><type>int</type><parameter>handle</parameter></methodparam>
+   <methodparam><type>resource</type><parameter>handle</parameter></methodparam>
    <methodparam><type>int</type><parameter>length</parameter></methodparam>
   </methodsynopsis>
-  <simpara>
+  <para>
    <function>fread</function> 从文件指针
    <parameter>handle</parameter> 读取最多
-   <parameter>length</parameter> 个字节。该函数在读取完最多
-   <parameter>length</parameter> 个字节数，或到达
-   EOF 的时候，或（对于网络流）当一个包可用时，或（在打开用户空间流之后）已读取了
-   8192 个字节时就会停止读取文件，视乎先碰到哪种情况。
-  </simpara>
-  <simpara>
-   返回所读取的字符串，如果出错返回 &false;。
-  </simpara>
+   <parameter>length</parameter> 个字节。
+   
+   该函数在遇上以下几种情况时停止读取文件：
+   <itemizedlist>
+    <listitem>
+     <simpara>
+      读取了 <parameter>length</parameter> 个字节
+     </simpara>
+    </listitem>
+    <listitem>
+     <simpara>
+      到达了文件末尾（EOF）
+     </simpara>
+    </listitem>
+    <listitem>
+     <simpara>
+      a packet becomes available or the <link linkend="function.socket-set-timeout">
+      socket timeout</link> occurs (for network streams)
+     </simpara>
+    </listitem>
+    <listitem>
+     <simpara>
+      if the stream is read buffered and it does not represent a plain file, at
+      most one read of up to a number of bytes equal to the chunk size (usually
+      8192) is made; depending on the previously buffered data, the size of the
+      returned data may be larger than the chunk size.
+     </simpara>
+    </listitem>
+   </itemizedlist>
+  </para>
+ </refsect1>
+ 
+  <refsect1 role="parameters">
+  &reftitle.parameters;
   <para>
-   <informalexample>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>handle</parameter></term>
+     <listitem>
+      &fs.file.pointer;
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>length</parameter></term>
+     <listitem>
+      <para>
+       最多读取 <parameter>length</parameter> 个字节。
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+ 
+  <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   返回所读取的字符串，&return.falseforfailure;。 
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title>一个简单的 <function>fread</function> 例子</title>
     <programlisting role="php">
 <![CDATA[
 <?php
 // get contents of a file into a string
 $filename = "/usr/local/something.txt";
 $handle = fopen($filename, "r");
-$contents = fread($handle, filesize ($filename));
+$contents = fread($handle, filesize($filename));
 fclose($handle);
 ?>
 ]]>
     </programlisting>
-   </informalexample>
+   </example>
   </para>
-  <warning>
-   <para>
-    在区分二进制文件和文本文件的系统上（如
-    Windows）打开文件时，<function>fopen</function> 函数的 mode 参数要加上 'b'。
-   </para>
-  </warning>
   <para>
-   <informalexample>
+   <example>
+    <title>Binary <function>fread</function> example</title>
+    <warning>
+     <para>
+     在区分二进制文件和文本文件的系统上（如
+    Windows）打开文件时，<function>fopen</function> 函数的 mode 参数要加上 'b'。
+     </para>
+    </warning>
     <programlisting role="php">
 <![CDATA[
 <?php
 $filename = "c:\\files\\somepic.gif";
 $handle = fopen($filename, "rb");
-$contents = fread($handle, filesize ($filename));
+$contents = fread($handle, filesize($filename));
 fclose($handle);
 ?>
 ]]>
     </programlisting>
-   </informalexample>
+   </example>
   </para>
-  <warning>
-   <para>
-    当从任何不是普通本地文件读取时，例如在读取从<link
-    linkend="features.remote-files">远程文件</link>或
-    <function>popen</function> 以及 <function>proc_open</function>
-    返回的流时，读取会在一个包可用之后停止。这意味着应该如下例所示将数据收集起来合并成大块。
-   </para>
-  </warning>
   <para>
-   <informalexample>
+   <example>
+    <title>Remote <function>fread</function> examples</title>
+    <warning>
+     <para>
+      当从任何不是普通本地文件读取时，例如在读取从<link
+    linkend="features.remote-files">远程文件</link>或
+    <function>popen</function> 以及 <function>fsockopen</function>
+    返回的流时，读取会在一个包可用之后停止。这意味着应该如下例所示将数据收集起来合并成大块。
+     </para>
+    </warning>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -81,15 +140,11 @@ fclose($handle);
 ?>
 ]]>
     </programlisting>
-   </informalexample>
-  </para>
-  <para>
-   <informalexample>
     <programlisting role="php">
 <![CDATA[
 <?php
-$handle = fopen ("http://www.example.com/", "rb");
-$contents = "";
+$handle = fopen("http://www.example.com/", "rb");
+$contents = '';
 while (!feof($handle)) {
   $contents .= fread($handle, 8192);
 }
@@ -97,19 +152,45 @@ fclose($handle);
 ?>
 ]]>
     </programlisting>
-   </informalexample>
+   </example>
   </para>
+ </refsect1>
+
+ <refsect1 role="notes">
+  &reftitle.notes;
   <note>
    <para>
     如果只是想将一个文件的内容读入到一个字符串中，用
     <function>file_get_contents</function>，它的性能比上面的代码好得多。
    </para>
   </note>
-  <simpara>
-   参见
-   <function>fwrite</function>，<function>fopen</function>，<function>fsockopen</function>，<function>popen</function>，<function>fgets</function>，<function>fgetss</function>，<function>fscanf</function>，<function>file</function>
-   和 <function>fpassthru</function>。
-  </simpara>
+  <note>
+   <para>
+    Note that <function>fread</function> reads from the current position of 
+    the file pointer. Use <function>ftell</function> to find the current 
+    position of the pointer and <function>rewind</function> to rewind the 
+    pointer position.
+   </para>
+  </note>
+ </refsect1>
+ 
+  <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>fwrite</function></member>
+    <member><function>fopen</function></member>
+    <member><function>fsockopen</function></member>
+    <member><function>popen</function></member>
+    <member><function>fgets</function></member>
+    <member><function>fgetss</function></member>
+    <member><function>fscanf</function></member>
+    <member><function>file</function></member>
+    <member><function>fpassthru</function></member>
+    <member><function>ftell</function></member>
+    <member><function>rewind</function></member>
+   </simplelist>
+  </para>
  </refsect1>
 </refentry>
 

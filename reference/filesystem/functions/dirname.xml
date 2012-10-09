@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
 <!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
+<!-- EN-Revision: 50e15d60d325cf561e9371dd8da0947a7698c6d9 Maintainer: dallas Status: ready -->
 <refentry xml:id="function.dirname" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>dirname</refname>
   <refpurpose>返回路径中的目录部分</refpurpose>
  </refnamediv>
- <refsect1>
-  <title>说明</title>
+ 
+  <refsect1 role="description">
+  &reftitle.description;
   <methodsynopsis>
    <type>string</type><methodname>dirname</methodname>
    <methodparam><type>string</type><parameter>path</parameter></methodparam>
@@ -16,34 +17,112 @@
   <para>
    给出一个包含有指向一个文件的全路径的字符串，本函数返回去掉文件名后的目录名。
   </para>
+ </refsect1>
+ 
+  <refsect1 role="parameters">
+  &reftitle.parameters;
   <para>
-   在 Windows 中，斜线（<literal>/</literal>）和反斜线（<literal>\</literal>）都可以用作目录分隔符。在其它环境下是斜线（<literal>/</literal>）。
+   <variablelist>
+    <varlistentry>
+     <term><parameter>path</parameter></term>
+     <listitem>
+      <para>
+       一个路径。
+      </para>
+      <para>
+       在 Windows 中，斜线（<literal>/</literal>）和反斜线（<literal>\</literal>）都可以用作目录分隔符。在其它环境下是斜线（<literal>/</literal>）。
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
   </para>
+ </refsect1>
+ 
+  <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   返回 path 的父目录。
+   如果在 <parameter>path</parameter>
+    中没有斜线，则返回一个点（'<literal>.</literal>'），表示当前目录。否则返回的是把
+    <parameter>path</parameter> 中结尾的
+    <literal>/component</literal>（最后一个斜线以及后面部分）去掉之后的字符串。
+  </para>
+ </refsect1>
+ 
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <para>
+   <informaltable>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>&Version;</entry>
+       <entry>&Description;</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>5.0.0</entry>
+       <entry>
+        <function>dirname</function> 的操作从 PHP 5.0.0 版开始是二进制安全的。
+       </entry>
+      </row>
+      <row>
+       <entry>4.0.3</entry>
+       <entry>
+        在这个版本中，<function>dirname</function> 被修正为
+    POSIX 兼容。
+       </entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </informaltable>
+  </para>
+ </refsect1>
+
+  <refsect1 role="examples">
+  &reftitle.examples;
   <para>
    <example>
     <title><function>dirname</function> 例子</title>
     <programlisting role="php">
 <![CDATA[
 <?php
-$path = "/etc/passwd";
-$file = dirname($path); // $file is set to "/etc"
+echo "1) " . dirname("/etc/passwd") . PHP_EOL; // 1) /etc
+echo "2) " . dirname("/etc/") . PHP_EOL; // 2) / (or \ on Windows)
+echo "3) " . dirname("."); // 3) .
 ?>
 ]]>
     </programlisting>
    </example>
   </para>
+ </refsect1>
+ 
+  <refsect1 role="notes">
+  &reftitle.notes;
   <note>
    <para>
-    在 PHP 4.0.3 中，<function>dirname</function> 被修正为
-    POSIX 兼容。本质上就意味着如果在 <parameter>path</parameter>
-    中没有斜线，则返回一个点（'<literal>.</literal>'），表示当前目录。否则返回的是把
-    <parameter>path</parameter> 中结尾的
-    <literal>/component</literal>（最后一个斜线以及后面部分）去掉之后的字符串。注意这意味着在老的函数返回一个空字符串的情形下通常从
-    <function>dirname</function> 得到的是斜线或者一个点。
+    <function>dirname</function> operates naively on the input string,
+    and is not aware of the actual filesystem, or path components such
+    as "<literal>..</literal>".
+   </para>
+  </note>
+  <note>
+   <para>
+    <function>dirname</function> is locale aware, so for it to see the 
+    correct directory name with multibyte character paths, the matching locale must 
+    be set using the <function>setlocale</function> function.
+   </para>
+  </note>
+  <note>
+   <para>
+    Since PHP 4.3.0, you will often get a slash or a dot back from
+    <function>dirname</function> in situations where the older
+    functionality would have given you the empty string.
    </para>
   </note>
   <para>
-   <function>dirname</function> 从 PHP 4.3.0 开始有所改变。请看以下例子：
+   检查下面发生变化的例子：
    <informalexample>
     <programlisting role="php">
 <![CDATA[
@@ -53,21 +132,28 @@ $file = dirname($path); // $file is set to "/etc"
 dirname('c:/'); // 返回 '.'
 
 // PHP 4.3.0 以后
-dirname('c:/'); // 返回 'c:'
+dirname('c:/x'); // 返回 'c:'
+dirname('c:/Temp/x'); // 返回 'c:/Temp'
+dirname('/x'); // 返回 '\'
 
 ?>
 ]]>
     </programlisting>
    </informalexample>
   </para>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
   <para>
-   <function>dirname</function> 的操作从 PHP 5.0.0 版开始是二进制安全的。
-  </para>
-  <para>
-   参见 <function>basename</function>，<function>pathinfo</function>
-   和 <function>realpath</function>。
+   <simplelist>
+    <member><function>basename</function></member>
+    <member><function>pathinfo</function></member>
+    <member><function>realpath</function></member>
+   </simplelist>
   </para>
  </refsect1>
+ 
 </refentry>
 
 <!-- Keep this comment at the end of the file

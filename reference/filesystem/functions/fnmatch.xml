@@ -1,19 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
 <!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
+<!-- EN-Revision: 0794362fa22667615df35ef2094ac9a700d3f477 Maintainer: dallas Status: ready -->
 <refentry xml:id="function.fnmatch" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>fnmatch</refname>
   <refpurpose>用模式匹配文件名</refpurpose>
  </refnamediv>
- <refsect1>
-  <title>说明</title>
+ 
+ <refsect1 role="description">
+  &reftitle.description;
   <methodsynopsis>
    <type>bool</type><methodname>fnmatch</methodname>
    <methodparam><type>string</type><parameter>pattern</parameter></methodparam>
    <methodparam><type>string</type><parameter>string</parameter></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter>flags</parameter></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>flags</parameter><initializer>0</initializer></methodparam>
   </methodsynopsis>
   <para>
    <function>fnmatch</function>
@@ -22,19 +23,129 @@
    是否匹配给出的 shell 统配符
    <parameter>pattern</parameter>。
   </para>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
   <para>
-   此函数对于文件名尤其有用，但也可以用于普通的字符串。普通用户可能习惯于
+   <variablelist>
+    <varlistentry>
+     <term><parameter>pattern</parameter></term>
+     <listitem>
+      <para>
+       shell 统配符。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>string</parameter></term>
+     <listitem>
+      <para>
+       要检查的字符串。
+       此函数对于文件名尤其有用，但也可以用于普通的字符串。
+      </para>
+      <para>
+       普通用户可能习惯于
    shell 模式或者至少其中最简单的形式
    <literal>'?'</literal> 和 <literal>'*'</literal>
    通配符，因此使用
    <function>fnmatch</function>
-   来代替 <function>ereg</function> 或者
+   来代替 
    <function>preg_match</function>
    来进行前端搜索表达式输入对于非程序员用户更加方便。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>flags</parameter></term>
+     <listitem>
+      <para>
+       The value of <parameter>flags</parameter> can be any combination of 
+       the following flags, joined with the
+       <link linkend="language.operators.bitwise">binary OR (|) operator</link>.
+       <table>
+        <title>
+         A list of possible flags for <function>fnmatch</function>
+        </title>
+        <tgroup cols="2">
+         <thead>
+          <row>
+           <entry><parameter>Flag</parameter></entry>
+           <entry>Description</entry>
+          </row>
+         </thead>
+         <tbody>
+          <row>
+           <entry><constant>FNM_NOESCAPE</constant></entry>
+           <entry>
+            Disable backslash escaping.
+           </entry>
+          </row>
+          <row>
+           <entry><constant>FNM_PATHNAME</constant></entry>
+           <entry>
+            Slash in string only matches slash in the given pattern.
+           </entry>
+          </row>
+          <row>
+           <entry><constant>FNM_PERIOD</constant></entry>
+           <entry>
+            Leading period in string must be exactly matched by period in the given pattern.
+           </entry>
+          </row>
+          <row>
+           <entry><constant>FNM_CASEFOLD</constant></entry>
+           <entry>
+            Caseless match. Part of the GNU extension.
+           </entry>
+          </row>
+         </tbody>
+        </tgroup>
+       </table>
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
   </para>
-  <example>
-   <title>用 shell 中的通配符模式匹配来检查颜色</title>
-   <programlisting role="php">
+ </refsect1>
+ 
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   匹配则返回 &true;，否则返回 &false;。
+  </para>
+ </refsect1>
+ 
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <para>
+   <informaltable>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>&Version;</entry>
+       <entry>&Description;</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>5.3.0</entry>
+       <entry>
+        此函数开始在 Windows 平台上生效。
+       </entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </informaltable>
+  </para>
+ </refsect1>
+ 
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title>用 shell 中的通配符模式匹配来检查颜色名称</title>
+    <programlisting role="php">
 <![CDATA[
 <?php
 if (fnmatch("*gr[ae]y", $color)) {
@@ -42,19 +153,33 @@ if (fnmatch("*gr[ae]y", $color)) {
 }
 ?>
 ]]>
-   </programlisting>
-  </example>
+    </programlisting>
+   </example>
+  </para>
+ </refsect1>
+ 
+ <refsect1 role="notes">
+  &reftitle.notes;
   <warning>
    <para>
     目前该函数无法在 Windows 或其它非 POSIX 兼容的系统上使用。
    </para>
   </warning>
+ </refsect1>
+ 
+ <refsect1 role="seealso">
+  &reftitle.seealso;
   <para>
-   参见
-   <function>glob</function>，<function>ereg</function>，<function>preg_match</function>
-   和 Unix 中 <literal>fnmatch(3)</literal> 的手册中的标志名（只要本文档中还未包括它们）。
+   <simplelist>
+    <member><function>glob</function></member>
+    <member><function>preg_match</function></member>
+    <member><function>sscanf</function></member>
+    <member><function>printf</function></member>
+    <member><function>sprintf</function></member>
+   </simplelist>
   </para>
  </refsect1>
+ 
 </refentry>
 
 <!-- Keep this comment at the end of the file
