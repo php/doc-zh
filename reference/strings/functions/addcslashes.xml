@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
 <!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: nio Status: ready -->
+<!-- EN-Revision: fcd0e743909608cc39c6df5f268cae91c125b894 Maintainer: nio Status: ready -->
 <refentry xml:id="function.addcslashes" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>addcslashes</refname>
   <refpurpose>以 C 语言风格使用反斜线转义字符串中的字符</refpurpose>
  </refnamediv>
- <refsect1>
-  <title>说明</title>
+ 
+  <refsect1 role="description">
+  &reftitle.description;
   <methodsynopsis>
    <type>string</type><methodname>addcslashes</methodname>
    <methodparam><type>string</type><parameter>str</parameter></methodparam>
@@ -16,21 +17,109 @@
   </methodsynopsis>
   <para>
    返回字符串，该字符串在属于参数 <parameter>charlist</parameter>
-   列表中的字符前都加上了反斜线。如果 <parameter>charlist</parameter>
+   列表中的字符前都加上了反斜线。
+  </para>
+ </refsect1>
+ 
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>str</parameter></term>
+     <listitem>
+      <para>
+       要转义的字符。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>charlist</parameter></term>
+     <listitem>
+      <para>
+       如果 <parameter>charlist</parameter>
    中包含有 <literal>\n</literal>，<literal>\r</literal>
    等字符，将以 C 语言风格转换，而其它非字母数字且 ASCII 码低于 32 以及高于 126 
    的字符均转换成使用八进制表示。
-  </para>
-  <para>
-   当选择对字符 0，a，b，f，n，r，t
+      </para>
+      <para>
+       当定义 charlist
+   参数中的字符序列时，需要确实知道介于自己设置的开始及结束范围之内的都是些什么字符。
+       <informalexample>
+        <programlisting role="php">
+<![CDATA[
+<?php
+echo addcslashes('foo[ ]', 'A..z');
+// 输出：\f\o\o\[ \]
+// 所有大小写字母均被转义
+// ... 但 [\]^_` 以及分隔符、换行符、回车符等也一并被转义了。
+?>
+]]>
+        </programlisting>
+       </informalexample>
+       另外，如果设置范围中的结束字符 ASCII 
+   码高于开始字符，则不会创建范围，只是将开始字符、结束字符以及其间的字符逐个转义。可使用
+   <function>ord</function> 函数获取字符的 ASCII 码值。
+       <informalexample>
+        <programlisting role="php">
+<![CDATA[
+<?php
+echo addcslashes("zoo['.']", 'z..A');
+// 输出：\zoo['\.']
+?>
+]]>
+        </programlisting>
+       </informalexample>
+      </para>
+      <para>
+       当选择对字符 0，a，b，f，n，r，t
    和 v 进行转义时需要小心，它们将被转换成
    \0，\a，\b，\f，\n，\r，\t 和 
    \v。在 PHP 中，只有 \0（NULL），\r（回车符），\n（换行符）和
    \t（制表符）是预定义的转义序列， 而在
    C 语言中，上述的所有转换后的字符都是预定义的转义序列。
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
   </para>
+ </refsect1>
+ 
+  <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
   <para>
-   <parameter>charlist</parameter> 参数，如“\0..\37”，将转义所有
+   返回转义后的字符。
+  </para>
+ </refsect1>
+ 
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <para>
+   <informaltable>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>&Version;</entry>
+       <entry>&Description;</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>5.2.5</entry>
+       <entry>
+        The escape sequences \v and \f were added.
+       </entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </informaltable>
+  </para>
+ </refsect1>
+ 
+  <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+    <parameter>charlist</parameter> 参数，如“\0..\37”，将转义所有
    ASCII 码介于 0 和 31 之间的字符。
    <example>
     <title><function>addcslashes</function> 例子</title>
@@ -43,41 +132,21 @@ $escaped = addcslashes($not_escaped, "\0..\37!@\177..\377");
     </programlisting>
    </example>
   </para>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
   <para>
-   当定义 charlist
-   参数中的字符序列时，需要确实知道介于自己设置的开始及结束范围之内的都是些什么字符。
-   <informalexample>
-    <programlisting role="php">
-<![CDATA[
-<?php
-echo addcslashes('foo[ ]', 'A..z');
-// 输出：\f\o\o\[ \]
-// 所有大小写字母均被转义
-// ... 但 [\]^_` 以及分隔符、换行符、回车符等也一并被转义了。
-?>
-]]>
-    </programlisting>
-   </informalexample>
-   另外，如果设置范围中的结束字符 ASCII 
-   码高于开始字符，则不会创建范围，只是将开始字符、结束字符以及其间的字符逐个转义。可使用
-   <function>ord</function> 函数获取字符的 ASCII 码值。
-   <informalexample>
-    <programlisting role="php">
-<![CDATA[
-<?php
-echo addcslashes("zoo['.']", 'z..A');
-// 输出：\zoo['\.']
-?>
-]]>
-    </programlisting>
-   </informalexample>
-  </para>
-  <para>
-   参见 
-   <function>stripcslashes</function>，<function>stripslashes</function>，<function>addslashes</function>，<function>htmlspecialchars</function>
-   和 <function>quotemeta</function>。
+   <simplelist>
+    <member><function>stripcslashes</function></member>
+    <member><function>stripslashes</function></member>
+    <member><function>addslashes</function></member>
+    <member><function>htmlspecialchars</function></member>
+    <member><function>quotemeta</function></member>
+   </simplelist>
   </para>
  </refsect1>
+
 </refentry>
 
 <!-- Keep this comment at the end of the file
