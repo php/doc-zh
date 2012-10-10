@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 8d6f8cfbd7129d3540018cdc9857d9a01733b729 Maintainer: HonestQiao Status: ready -->
+<!-- EN-Revision: ff6d5c7b5dca67d9d4b31411170826f886bc1d2d Maintainer: HonestQiao Status: ready -->
 <!-- Reviewed: no Maintainer: HonestQiao -->
 <chapter xml:id="configuration" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <title>运行时配置</title>
@@ -9,8 +9,7 @@
   <title>配置文件</title>
 
   <simpara>
-   配置文件（PHP 3 中是 <filename>php3.ini</filename>，自 PHP 4
-   起是 &php.ini;）在 PHP 启动时被读取。对于服务器模块版本的 PHP，仅在 web
+   配置文件（&php.ini;）在 PHP 启动时被读取。对于服务器模块版本的 PHP，仅在 web
    服务器启动时读取一次。对于
    <acronym>CGI</acronym> 和 <acronym>CLI</acronym> 版本，每次调用都会读取。
   </simpara>
@@ -18,40 +17,55 @@
    &php.ini; 的搜索路径如下（按顺序）：
    <itemizedlist>
     <listitem>
-     <para>
+     <simpara>
       SAPI 模块所指定的位置（Apache 2 中的 <literal>PHPIniDir</literal>
       指令，CGI 和 CLI 中的 <literal>-c</literal>
       命令行选项，NSAPI 中的
       <literal>php_ini</literal> 参数，THTTPD 中的
       <literal>PHP_INI_PATH</literal> 环境变量）
-     </para>
+     </simpara>
     </listitem>
     <listitem>
-     <para>
-      <literal>HKEY_LOCAL_MACHINE\SOFTWARE\PHP\IniFilePath</literal>（Windows 注册表位置）
-     </para>
+     <simpara>
+      <varname>PHPRC</varname>  环境变量。Before PHP 5.2.0,
+      this was checked after the registry key mentioned below.
+     </simpara>
     </listitem>
     <listitem>
-     <para>
-      <varname>PHPRC</varname> 环境变量
-     </para>
+          <simpara>
+      As of PHP 5.2.0, the location of the <literal>php.ini</literal> file
+      can be set for different versions of PHP. The following registry keys
+      are examined in order:
+      <literal>[HKEY_LOCAL_MACHINE\SOFTWARE\PHP\x.y.z]</literal>,
+      <literal>[HKEY_LOCAL_MACHINE\SOFTWARE\PHP\x.y]</literal> and
+      <literal>[HKEY_LOCAL_MACHINE\SOFTWARE\PHP\x]</literal>, where
+      x, y and z mean the PHP major, minor and release versions. If there is a
+      value for <literal>IniFilePath</literal> in any of these keys, the first
+      one found will be used as the location of the <literal>php.ini</literal>
+      (Windows only).
+     </simpara>
     </listitem>
     <listitem>
-     <para>
+     <simpara>
+   <literal>[HKEY_LOCAL_MACHINE\SOFTWARE\PHP]</literal> 内 <literal>IniFilePath</literal> 的值（Windows 注册表位置）。
+     </simpara>
+    </listitem>
+    <listitem>
+     <simpara>
       当前工作目录（对于 CLI）
-     </para>
+     </simpara>
     </listitem>
     <listitem>
-     <para>
+     <simpara>
       web 服务器目录（对于 SAPI 模块）或 PHP 所在目录（Windows 下其它情况）
-     </para>
+     </simpara>
     </listitem>
     <listitem>
-     <para>
+     <simpara>
       Windows 目录（<filename class="directory">C:\windows</filename>
       或 <filename class="directory">C:\winnt</filename>），或
       <literal>--with-config-file-path</literal> 编译时选项指定的位置
-     </para>
+     </simpara>
     </listitem>
    </itemizedlist>
   </para>
@@ -71,8 +85,8 @@
    由扩展库处理的 &php.ini; 指令，其文档分别在各扩展库的页面。<link
    linkend="ini">内核配置选项</link>见附录。不过也许不是所有的 PHP
    指令都在手册中有文档说明。要得到自己的 PHP 版本中的配置指令完整列表，请阅读
-   &php.ini; 文件，其中都有注释。此外，也许从 SVN 得到的<link
-   xlink:href="&url.php.svn.phpini;">最新版 &php.ini;</link> 也有帮助。
+   &php.ini; 文件，其中都有注释。此外，也许从 Git 得到的<link
+   xlink:href="&url.php.git.phpini;">最新版 &php.ini;</link> 也有帮助。
   </para>
   <para>
    <example>
@@ -104,6 +118,53 @@ include_path = ".;c:\php\lib"
   </para>
  </sect1>
 
+ <sect1 xml:id="configuration.file.per-user">
+  <title>.user.ini files</title>
+
+  <simpara>
+   Since PHP 5.3.0, PHP includes support for .htaccess-style INI files on a
+   per-directory basis. These files are processed <emphasis>only</emphasis> by
+   the CGI/FastCGI SAPI. This functionality obsoletes the PECL htscanner
+   extension. If you are using Apache, use &htaccess; files for the same
+   effect.
+  </simpara>
+
+  <simpara>
+   In addition to the main &php.ini; file, PHP scans for INI files in each
+   directory, starting with the directory of the requested PHP file, and
+   working its way up to the current document root (as set in
+   <varname>$_SERVER['DOCUMENT_ROOT']</varname>). In case the PHP file is
+   outside the document root, only its directory is scanned.
+  </simpara>
+  <simpara>
+   Only INI settings with the
+   modes <constant>PHP_INI_PERDIR</constant> and
+   <constant>PHP_INI_USER</constant> will be recognized in .user.ini-style INI
+   files.
+  </simpara>
+
+  <simpara>
+   Two new INI directives,
+   <literal>user_ini.filename</literal> and
+   <literal>user_ini.cache_ttl</literal>
+   <!--
+       <link linkend="ini.user-ini.filename">user_ini.filename</link> and
+       <link linkend="ini.user-ini.cache-ttl">user_ini.cache_ttl</link>
+   -->
+   control the use of user INI files.
+  </simpara>
+
+  <simpara>
+   <literal>user_ini.filename</literal> sets the name of the file PHP looks for
+   in each directory; if set to an empty string, PHP doesn't scan at all. The
+   default is <literal>.user.ini</literal>.
+  </simpara>
+
+  <simpara>
+   <literal>user_ini.cache_ttl</literal> controls how often user INI files are
+   re-read. The default is 300 seconds (5 minutes).
+  </simpara>
+ </sect1>
 
   <sect1 xml:id="configuration.changes.modes">
    <title>Where a configuration setting may be set</title>
@@ -133,32 +194,28 @@ include_path = ".;c:\php\lib"
       <thead>
        <row>
         <entry>Mode</entry>
-        <entry>Value</entry>
         <entry>Meaning</entry>
        </row>
       </thead>
       <tbody>
        <row>
         <entry><literal>PHP_INI_USER</literal></entry>
-        <entry>1</entry>
         <entry>
          Entry can be set in user scripts (like with <function>ini_set</function>)
          or in the <link linkend="configuration.changes.windows">Windows registry</link>
+         Since PHP 5.3, entry can be set in &user-ini;
         </entry>
        </row>
        <row>
         <entry><literal>PHP_INI_PERDIR</literal></entry>
-        <entry>6</entry>
         <entry>Entry can be set in &php.ini;, &htaccess; or &httpd.conf;</entry>
        </row>
        <row>
         <entry><literal>PHP_INI_SYSTEM</literal></entry>
-        <entry>4</entry>
         <entry>Entry can be set in &php.ini; or &httpd.conf;</entry>
        </row>
        <row>
         <entry><literal>PHP_INI_ALL</literal></entry>
-        <entry>7</entry>
         <entry>Entry can be set anywhere</entry>
        </row>
       </tbody>
@@ -181,20 +238,13 @@ include_path = ".;c:\php\lib"
    </simpara>
 
    <para>
-    在 PHP 4 和 PHP 5 中，有几个 Apache 指令可以使用户在 Apache
+    有几个 Apache 指令可以使用户在 Apache
     配置文件内部修改 PHP 的配置。哪些指令属于
     <constant>PHP_INI_ALL</constant>，<constant>PHP_INI_PERDIR</constant>
     或 <constant>PHP_INI_SYSTEM</constant> 中的哪一个，请参考附录中的
     <link linkend="ini.list">php.ini 配置选项列表</link>。
    </para>
-
-   <note>
-    <simpara>
-     在 PHP 3 中，每个 <filename>php3.ini</filename> 中的配置设定都有相应的
-     Apache 指令，不过名字前要加上前缀“php3_”。
-    </simpara>
-   </note>
-
+   
    <para>
     <variablelist>
      <varlistentry>
@@ -270,15 +320,11 @@ include_path = ".;c:\php\lib"
 <![CDATA[
 <IfModule mod_php5.c>
   php_value include_path ".:/usr/local/lib/php"
-  php_admin_flag safe_mode on
+  php_admin_flag engine on
 </IfModule>
 <IfModule mod_php4.c>
   php_value include_path ".:/usr/local/lib/php"
-  php_admin_flag safe_mode on
-</IfModule>
-<IfModule mod_php3.c>
-  php3_include_path ".:/usr/local/lib/php"
-  php3_safe_mode on
+  php_admin_flag engine on
 </IfModule>
 ]]>
      </programlisting>
@@ -308,8 +354,8 @@ include_path = ".;c:\php\lib"
      <literal>HKLM\SOFTWARE\PHP\Per Directory Values\c\inetpub\wwwroot</literal>
      项下面。其中的设定对于任何位于此目录及其任何子目录的脚本都有效。项中的值的名称是
      PHP 配置指令的名字，值的数据是字符串格式的指令值。值中的 PHP
-     常量不被解析。不过只有可修改范围是 PHP_INI_USER
-     的配置值可以用此方法设定，PHP_INI_PERDIR 的值就不行。
+     常量不被解析。不过只有可修改范围是 <constant>PHP_INI_USER</constant>
+     的配置值可以用此方法设定，<constant>PHP_INI_PERDIR</constant> 的值就不行。
     </simpara>
   </sect2>
 
