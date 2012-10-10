@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 5faa7a6747bca628b3bdcc9f93aec5603b65581f Maintainer: HonestQiao Status: ready -->
+<!-- EN-Revision: 15bd95f5d1026b858cb7f02ec490d583e6a0f796 Maintainer: HonestQiao Status: ready -->
 <!-- Reviewed: no Maintainer: HonestQiao -->
 <refentry xml:id="function.usort" xmlns="http://docbook.org/ns/docbook">
    <refnamediv>
@@ -14,162 +14,18 @@
      <methodsynopsis>
       <type>bool</type><methodname>usort</methodname>
       <methodparam><type>array</type><parameter role="reference">array</parameter></methodparam>
-      <methodparam><type>callback</type><parameter>cmp_function</parameter></methodparam>
+      <methodparam><type>callable</type><parameter>cmp_function</parameter></methodparam>
      </methodsynopsis>
     <para>
      本函数将用用户自定义的比较函数对一个数组中的值进行排序。如果要排序的数组需要用一种不寻常的标准进行排序，那么应该使用此函数。
     </para>
+  <note>
     <para>
-     比较函数必须在第一个参数被认为小于，等于或大于第二个参数时分别返回一个小于，等于或大于零的整数。
+     如果两个成员比较结果相同，则它们在排序后的数组中的顺序未经定义。
     </para>
-    <para>
-     <note>
-      <para>
-       如果两个成员比较结果相同，则它们在排序后的数组中的顺序未经定义。到
-       PHP 4.0.6 之前，用户自定义函数将保留这些单元的原有顺序。但是由于在
-       4.1.0 中引进了新的排序算法，结果将不是这样了，因为对此没有一个有效的解决方案。
-      </para>
-     </note>
-    </para>
-    &note.no-key-association;
-    <para>
-     &return.success;
-    </para>
-    <para>
-     <example>
-      <title><function>usort</function> 例子</title>
-      <programlisting role="php">
-<![CDATA[
-<?php
-function cmp($a, $b)
-{
-    if ($a == $b) {
-        return 0;
-    }
-    return ($a < $b) ? -1 : 1;
-}
-
-$a = array(3, 2, 5, 6, 1);
-
-usort($a, "cmp");
-
-foreach ($a as $key => $value) {
-    echo "$key: $value\n";
-}
-?>
-]]>
-      </programlisting>
-      &example.outputs;
-      <screen>
-<![CDATA[
-0: 1
-1: 2
-2: 3
-3: 5
-4: 6
-]]>
-      </screen>
-     </example>
-    </para>
-    <note>
-     <para>
-      很明显在这个小例子中用 <function>sort</function> 函数更合适。
-     </para>
-    </note>
-    <para>
-     <example>
-      <title>
-       使用多维数组的 <function>usort</function> 例子
-      </title>
-      <programlisting role="php">
-<![CDATA[
-<?php
-function cmp($a, $b)
-{
-    return strcmp($a["fruit"], $b["fruit"]);
-}
-
-$fruits[0]["fruit"] = "lemons";
-$fruits[1]["fruit"] = "apples";
-$fruits[2]["fruit"] = "grapes";
-
-usort($fruits, "cmp");
-
-while (list($key, $value) = each($fruits)) {
-    echo "\$fruits[$key]: " . $value["fruit"] . "\n";
-}
-?>
-]]>
-      </programlisting>
-      <para>
-       当排序多维数组时，<varname>$a</varname> 和 <varname>$b</varname> 包含到数组第一个索引的引用。
-      </para>
-      &example.outputs;
-      <screen>
-<![CDATA[
-$fruits[0]: apples
-$fruits[1]: grapes
-$fruits[2]: lemons
-]]>
-      </screen>
-     </example>
-    </para>
-    <para>
-     <example>
-      <title>
-       使用对象的成员函数的 <function>usort</function> 例子
-      </title>
-      <programlisting role="php">
-<![CDATA[
-<?php
-class TestObj {
-    var $name;
-
-    function TestObj($name)
-    {
-        $this->name = $name;
-    }
-
-    /* This is the static comparing function: */
-    function cmp_obj($a, $b)
-    {
-        $al = strtolower($a->name);
-        $bl = strtolower($b->name);
-        if ($al == $bl) {
-            return 0;
-        }
-        return ($al > $bl) ? +1 : -1;
-    }
-}
-
-$a[] = new TestObj("c");
-$a[] = new TestObj("b");
-$a[] = new TestObj("d");
-
-usort($a, array("TestObj", "cmp_obj"));
-
-foreach ($a as $item) {
-    echo $item->name . "\n";
-}
-?>
-]]>
-      </programlisting>
-      &example.outputs;
-      <screen>
-<![CDATA[
-b
-c
-d
-]]>
-      </screen>
-     </example>
-    </para>
-    <para>
-     参见
-     <function>uasort</function>，<function>uksort</function>，<function>sort</function>，<function>asort</function>，<function>arsort</function>，<function>ksort</function>，<function>natsort</function>
-     和 <function>rsort</function>。
-    </para>
-   </refsect1>
+  </note>
+  &note.no-key-association;
+ </refsect1>
  <refsect1 role="parameters">
   &reftitle.parameters;
   <para>
@@ -178,7 +34,7 @@ d
      <term><parameter>array</parameter></term>
      <listitem>
       <para>
-       The input array.
+       输入的数组
       </para>
      </listitem>
     </varlistentry>
@@ -189,6 +45,15 @@ d
        &return.callbacksort;
       </para>
       &callback.cmp;
+       <caution>
+       <para>
+        Returning <emphasis>non-integer</emphasis> values from the comparison
+        function, such as <type>float</type>, will result in an internal cast to
+        <type>integer</type> of the callback's return value. So values such as
+        0.99 and 0.1 will both be cast to an integer value of 0, which will
+        compare such values as equal.
+       </para>
+      </caution>
      </listitem>
     </varlistentry>
    </variablelist>
@@ -215,8 +80,7 @@ d
       <row>
        <entry>4.1.0</entry>
        <entry>
-        A new sort algorithm was introduced. The <parameter>cmp_function</parameter>
-        doesn't keep the original order for elements comparing as equal.
+        引进了新的排序算法。用户自定义函数 <parameter>cmp_function</parameter> 将不再保留这些单元的原有顺序。
        </entry>
       </row>
      </tbody>
@@ -227,8 +91,8 @@ d
  <refsect1 role="examples">
   &reftitle.examples;
   <para>
-   <example>
-    <title><function>usort</function> example</title>
+   <example xml:id="function.usort.examples.basic">
+    <title><function>usort</function> 例子</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -264,14 +128,13 @@ foreach ($a as $key => $value) {
   </para>
   <note>
    <para>
-    Obviously in this trivial case the <function>sort</function>
-    function would be more appropriate.
+    很明显在这个小例子中用 <function>sort</function> 函数更合适。
    </para>
   </note>
   <para>
-   <example>
+   <example xml:id="function.usort.examples.multi">
     <title>
-     <function>usort</function> example using multi-dimensional array
+     使用多维数组的 <function>usort</function> 例子
     </title>
     <programlisting role="php">
 <![CDATA[
@@ -294,8 +157,7 @@ while (list($key, $value) = each($fruits)) {
 ]]>
     </programlisting>
     <para>
-     When sorting a multi-dimensional array, <varname>$a</varname> and
-    <varname>$b</varname> contain references to the first index of the array.
+     当排序多维数组时，<varname>$a</varname> 和 <varname>$b</varname> 包含到数组第一个索引的引用。
     </para>
     &example.outputs;
     <screen>
@@ -308,7 +170,7 @@ $fruits[2]: lemons
    </example>
   </para>
   <para>
-   <example>
+   <example xml:id="function.usort.examples.object">
     <title>
      <function>usort</function> example using a member function of an object
     </title>
@@ -353,6 +215,41 @@ foreach ($a as $item) {
 b
 c
 d
+]]>
+    </screen>
+   </example>
+    <example xml:id="function.usort.examples.closure">
+    <title>
+     <function>usort</function> example using a <link linkend="functions.anonymous">closure</link>
+     to sort a multi-dimensional array
+    </title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$array[0] = array('key_a' => 'z', 'key_b' => 'c');
+$array[1] = array('key_a' => 'x', 'key_b' => 'b');
+$array[2] = array('key_a' => 'y', 'key_b' => 'a');
+
+function build_sorter($key) {
+    return function ($a, $b) use ($key) {
+        return strnatcmp($a[$key], $b[$key]);
+    };
+}
+
+usort($array, build_sorter('key_b'));
+
+foreach ($array as $item) {
+    echo $item['key_a'] . ', ' . $item['key_b'] . "\n";
+}
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+y, a
+x, b
+z, c
 ]]>
     </screen>
    </example>

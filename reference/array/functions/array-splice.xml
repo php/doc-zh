@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
 <!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
+<!-- EN-Revision: d6f393442baa05d31a005a940aacf5185d8cd563 Maintainer: dallas Status: ready -->
   <refentry xml:id="function.array-splice" xmlns="http://docbook.org/ns/docbook">
    <refnamediv>
     <refname>array_splice</refname>
@@ -9,104 +9,103 @@
      把数组中的一部分去掉并用其它值取代
     </refpurpose>
    </refnamediv>
-   <refsect1>
-    <title>说明</title>
-     <methodsynopsis>
-      <type>array</type><methodname>array_splice</methodname>
-      <methodparam><type>array</type><parameter role="reference">input</parameter></methodparam>
-      <methodparam><type>int</type><parameter>offset</parameter></methodparam>
-      <methodparam choice="opt"><type>int</type><parameter>length</parameter></methodparam>
-      <methodparam choice="opt"><type>array</type><parameter>
-        replacement
-       </parameter></methodparam>
-     </methodsynopsis>
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <type>array</type><methodname>array_splice</methodname>
+   <methodparam><type>array</type><parameter role="reference">input</parameter></methodparam>
+   <methodparam><type>int</type><parameter>offset</parameter></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>length</parameter><initializer>0</initializer></methodparam>
+   <methodparam choice="opt"><type>mixed</type><parameter>replacement</parameter></methodparam>
+  </methodsynopsis>
     <para>
-     <function>array_splice</function> 把 <parameter>input</parameter> 数组中由
+     把 <parameter>input</parameter> 数组中由
      <parameter>offset</parameter> 和 <parameter>length</parameter>
-     指定的单元去掉，如果提供了 <parameter>replacement</parameter> 参数，则用
-     <parameter>replacement</parameter>
-     数组中的单元取代。返回一个包含有被移除单元的数组。注意
+     指定的单元去掉，如果提供了 <parameter>replacement</parameter> 参数，则用其中的单元取代。
+  </para>
+  <para>
+     注意
      <parameter>input</parameter> 中的数字键名不被保留。
     </para>
-    <para>
-     如果 <parameter>offset</parameter> 为正，则从 <parameter>input</parameter>
+    <note>
+   <simpara>
+    If <parameter>replacement</parameter> is not an array, it will be
+    <link linkend="language.types.array.casting">typecast</link>
+    to one (i.e. <code>(array) $parameter</code>). This may result in unexpected
+    behavior when using an object or &null; <parameter>replacement</parameter>.
+   </simpara>
+  </note>
+  </refsect1>
+  <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>input</parameter></term>
+     <listitem>
+      <para>
+       输入的数组。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>offset</parameter></term>
+     <listitem>
+      <para>
+       如果 <parameter>offset</parameter> 为正，则从 <parameter>input</parameter>
      数组中该值指定的偏移量开始移除。如果 <parameter>offset</parameter>
      为负，则从 <parameter>input</parameter> 末尾倒数该值指定的偏移量开始移除。
-    </para>
-    <para>
-     如果省略 <parameter>length</parameter>，则移除数组中从 <parameter>offset</parameter>
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>length</parameter></term>
+     <listitem>
+      <para>
+       如果省略 <parameter>length</parameter>，则移除数组中从 <parameter>offset</parameter>
      到结尾的所有部分。如果指定了 <parameter>length</parameter>
      并且为正值，则移除这么多单元。如果指定了 <parameter>length</parameter>
      并且为负值，则移除从 <parameter>offset</parameter> 到数组末尾倒数
      <parameter>length</parameter> 为止中间所有的单元。小窍门：当给出了
      <parameter>replacement</parameter> 时要移除从 <parameter>offset</parameter>
      到数组末尾所有单元时，用 <literal>count($input)</literal> 作为 <parameter>length</parameter>。
-    </para>
-    <para>
-     如果给出了 <parameter>replacement</parameter> 数组，则被移除的单元被此数组中的单元替代。如果
-     <parameter>offset</parameter> 和 <parameter>length</parameter>
-     的组合结果是不会移除任何值，则 <parameter>replacement</parameter>
-     数组中的单元将被插入到 <parameter>offset</parameter>
-     指定的位置。注意替换数组中的键名不保留。如果用来替换的值只是一个单元，那么不需要给它加上
-     <literal>array()</literal>，除非该单元本身就是一个数组。
-    </para>
-    <para>
-     以下表达式以同样方式修改了 <varname>$input</varname>：
-     <table>
-      <title><function>array_splice</function> 等价表达式</title>
-      <tgroup cols="2">
-       <tbody>
-        <row>
-         <entry>
-          array_push($input, $x, $y)
-         </entry>
-         <entry>
-          array_splice($input, count($input), 0, array($x, $y))
-         </entry>
-        </row>
-        <row>
-         <entry>
-          array_pop($input)
-         </entry>
-         <entry>
-          array_splice($input, -1)
-         </entry>
-        </row>
-        <row>
-         <entry>
-          array_shift($input)
-         </entry>
-         <entry>
-          array_splice($input, 0, 1)
-         </entry>
-        </row>
-        <row>
-         <entry>
-          array_unshift($input, $x, $y)
-         </entry>
-         <entry>
-          array_splice($input, 0, 0, array($x, $y))
-         </entry>
-        </row>
-        <row>
-         <entry>
-          $input[$x] = $y // 对于键名和偏移量等值的数组
-         </entry>
-         <entry>
-          array_splice($input, $x, 1, $y)
-         </entry>
-        </row>
-       </tbody>
-      </tgroup>
-     </table>
-    </para>
-    <para>
-     返回一个包含被移除单元的数组。
-    </para>
-    <para>
-     <example>
-      <title><function>array_splice</function> 例子</title>
-      <programlisting role="php">
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>replacement</parameter></term>
+     <listitem>
+      <para>
+       如果给出了 <parameter>replacement</parameter> 数组，则被移除的单元被此数组中的单元替代。
+      </para>
+      <para>
+       如果
+        <parameter>offset</parameter> 和 <parameter>length</parameter>
+        的组合结果是不会移除任何值，则 <parameter>replacement</parameter>
+        数组中的单元将被插入到 <parameter>offset</parameter>
+        指定的位置。 注意替换数组中的键名不保留。
+      </para>
+      <para>
+       如果用来替换 <parameter>replacement</parameter> 只有一个单元，那么不需要给它加上
+        <literal>array()</literal>，除非该单元本身就是一个数组、一个对象或者 &null;。
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+    返回一个包含有被移除单元的数组。
+  </para>
+ </refsect1>
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title><function>array_splice</function> 例子</title>
+    <programlisting role="php">
 <![CDATA[
 <?php
 $input = array("red", "green", "blue", "yellow");
@@ -132,14 +131,44 @@ array_splice($input, 3, 0, "purple");
 //          "blue", "purple", "yellow");
 ?>
 ]]>
-      </programlisting>
-     </example>
-    </para>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   <example>
+    <title><function>array_splice</function> 例子</title>
     <para>
-     参见 <function>array_slice</function>，<function>unset</function>
-     和 <function>array_merge</function>。
+     以下表达式以同样方式修改了 <varname>$input</varname>：
     </para>
-   </refsect1>
+    <programlisting role="php">
+<![CDATA[
+<?php
+array_push($input, $x, $y);
+array_splice($input, count($input), 0, array($x, $y));
+array_pop($input);
+array_splice($input, -1);
+array_shift($input);
+array_splice($input, 0, 1);
+array_unshift($input, $x, $y);
+array_splice($input, 0, 0, array($x, $y));
+$input[$x] = $y; // 对于键名和偏移量等值的数组
+array_splice($input, $x, 1, $y);
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+ </refsect1>
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>array_slice</function></member>
+    <member><function>unset</function></member>
+    <member><function>array_merge</function></member>
+   </simplelist>
+  </para>
+ </refsect1>  
   </refentry>
 
 <!-- Keep this comment at the end of the file
