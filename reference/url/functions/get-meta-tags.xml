@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
 <!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: nio Status: ready -->
+<!-- EN-Revision: 3f9d61f86a14e3897b5e88dc543352bb143f8ea9 Maintainer: nio Status: ready -->
 <refentry xml:id="function.get-meta-tags" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>get_meta_tags</refname>
@@ -9,28 +9,38 @@
    从一个文件中提取所有的 meta 标签 content 属性，返回一个数组
   </refpurpose>
  </refnamediv>
- <refsect1>
-  <title>描述</title>
+ 
+ 
+  <refsect1 role="description">
+  &reftitle.description;
   <methodsynopsis>
    <type>array</type><methodname>get_meta_tags</methodname>
    <methodparam><type>string</type><parameter>filename</parameter></methodparam>
-   <methodparam choice="opt"><type>bool</type><parameter>use_include_path</parameter></methodparam>
+   <methodparam choice="opt"><type>bool</type><parameter>use_include_path</parameter><initializer>false</initializer></methodparam>
   </methodsynopsis>
   <para>
    打开 <parameter>filename</parameter> 逐行解析文件中的 
-   &lt;meta&gt; 标签。此参数可以是本地文件也可以是一个
-   <acronym>URL</acronym>。解析工作将在
+   &lt;meta&gt; 标签。解析工作将在
    <literal>&lt;/head&gt;</literal> 处停止。
   </para>
+ </refsect1>
+ 
+  <refsect1 role="parameters">
+  &reftitle.parameters;
   <para>
-   将 <parameter>use_include_path</parameter> 设置为 &true; 将使 
-   PHP 尝试按照 <link linkend="ini.include-path">include_path</link>
-   标准包含路径中的每个指向去打开文件。这只用于本地文件，不适用于 URL。
-  </para>
-  <para>
-   <example>
-    <title><function>get_meta_tags</function> 解析些什么</title>
-    <programlisting role="html">
+   <variablelist>
+    <varlistentry>
+     <term><parameter>filename</parameter></term>
+     <listitem>
+      <para>
+       HTML 文件的路径字符串。
+       此参数可以是本地文件也可以是一个
+   <acronym>URL</acronym>。
+      </para>
+      <para>
+       <example>
+        <title><function>get_meta_tags</function> 解析了什么</title>
+        <programlisting role="html">
 <![CDATA[
 <meta name="author" content="name">
 <meta name="keywords" content="php documentation">
@@ -38,19 +48,70 @@
 <meta name="geo.position" content="49.33;-86.59">
 </head> <!-- 解析工作在此处停止 -->
 ]]>
-    </programlisting>
-   </example>
-   （注意回车换行 － PHP 使用一个本地函数来解析输入，所以 Mac 上的文件将不能在 Unix 上正常工作）。
+        </programlisting>
+       </example>
+          （注意回车换行 － PHP 使用一个本地函数来解析输入，所以 Mac 上的文件将不能在 Unix 上正常工作）。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>use_include_path</parameter></term>
+     <listitem>
+      <para>
+       将 <parameter>use_include_path</parameter> 设置为 &true; 将使 
+   PHP 尝试按照 <link linkend="ini.include-path">include_path</link>
+   标准包含路径中的每个指向去打开文件。这只用于本地文件，不适用于 URL。
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
   </para>
-  <para> 
+ </refsect1>
+ 
+  <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   返回一个数组，包含所有解析过的 meta 标签。
+  </para>
+  <para>
    返回的关联数组以属性 name 的值作为键，属性 content 
-   的值作为值，所以你可以很容易地使用标准数组函数遍历此关联数组或访问某个值。属性
+   的值作为值，所以你可以很容易地使用标准数组函数遍历此关联数组或访问某个值。
+   属性
    name 中的特殊字符将使用‘_’替换，而其它字符则转换成小写。如果有两个
    meta 标签拥有相同的 name，则只返回最后出现的那一个。
   </para>
+ </refsect1>
+ 
+ 
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <para>
+   <informaltable>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>&Version;</entry>
+       <entry>&Description;</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>4.0.5</entry>
+       <entry>
+        开始支持没有使用引号括起来的 HTML 属性。
+       </entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </informaltable>
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
   <para>
    <example>
-    <title><function>get_meta_tags</function> 的返回值</title>
+    <title><function>get_meta_tags</function> 返回什么些</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -67,15 +128,24 @@ echo $tags['geo_position']; // 49.33;-86.59
     </programlisting>
    </example>
   </para>
+ </refsect1>
+
+ <refsect1 role="notes">
+  &reftitle.notes;
   <note>
    <para>
-    从 PHP 4.0.5 开始，<function>get_meta_tags</function>
-    支持没有使用引号括起来的 HTML 属性。
+    只有包含 name 属性的 meta 标签才会被解析。
    </para>
   </note>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
   <para>
-   参见 <function>htmlentities</function> 和
-   <function>urlencode</function>。
+   <simplelist>
+    <member><function>htmlentities</function></member>
+    <member><function>urlencode</function></member>
+   </simplelist>
   </para>
  </refsect1>
 </refentry>

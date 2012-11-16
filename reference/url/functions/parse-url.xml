@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 7885b223b069fe4f585b6a609132673d9fa528e8 Maintainer: HonestQiao Status: ready -->
+<!-- EN-Revision: 7e6843088bfd4961eebcfa40a29a8a4b2b917ba3 Maintainer: HonestQiao Status: ready -->
 <!-- Reviewed: no Maintainer: HonestQiao -->
 <!-- CREDITS: dallas -->
 <refentry xml:id="function.parse-url" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -8,11 +8,13 @@
   <refname>parse_url</refname>
   <refpurpose>解析 URL，返回其组成部分</refpurpose>
  </refnamediv>
+ 
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <type>array</type><methodname>parse_url</methodname>
+   <type>mixed</type><methodname>parse_url</methodname>
    <methodparam><type>string</type><parameter>url</parameter></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>component</parameter><initializer>-1</initializer></methodparam>
   </methodsynopsis>
   <para>
    本函数解析一个 URL 并返回一个关联数组，包含在 URL 中出现的各种组成部分。
@@ -32,7 +34,22 @@
      <term><parameter>url</parameter></term>
      <listitem>
       <para>
-       要解析的 URL
+       要解析的 URL。无效字符将使用
+       <literal>_</literal> 来替换。
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>component</parameter></term>
+     <listitem>
+      <para>
+       指定 <constant>PHP_URL_SCHEME</constant>、
+       <constant>PHP_URL_HOST</constant>、 <constant>PHP_URL_PORT</constant>、
+       <constant>PHP_URL_USER</constant>、 <constant>PHP_URL_PASS</constant>、
+       <constant>PHP_URL_PATH</constant>、 <constant>PHP_URL_QUERY</constant>
+       或 <constant>PHP_URL_FRAGMENT</constant> 的其中一个来获取 URL 中指定的部分的 <type>string</type>。 （除了指定为 <constant>PHP_URL_PORT</constant> 后，将返回一个 <type>integer</type> 的值）。
       </para>
      </listitem>
     </varlistentry>
@@ -44,7 +61,10 @@
   &reftitle.returnvalues;
   <para>
    对严重不合格的 URL，<function>parse_url</function> 可能会返回
-   &false; 并发出 <constant>E_WARNING</constant>。否则会返回一个关联数组，其组成部分为（至少有一个）：
+   &false;。 
+  </para>  
+   <para>
+    如果省略了 <parameter>component</parameter> 参数，将返回一个关联数组 <type>array</type>，在目前至少会有一个元素在该数组中。数组中可能的键有以下几种：
    <itemizedlist>
     <listitem>
      <simpara>
@@ -88,7 +108,11 @@
     </listitem>
    </itemizedlist>
   </para>
- </refsect1> 
+  <para>
+   如果指定了 <parameter>component</parameter> 参数，
+   <function>parse_url</function> 返回一个 <type>string</type> （或在指定为 <constant>PHP_URL_PORT</constant> 时返回一个 <type>integer</type>）而不是 <type>array</type>。如果 URL 中指定的组成部分不存在，将会返回 &null;。
+  </para>
+ </refsect1>
 
 
  <refsect1 role="changelog">
@@ -104,15 +128,20 @@
      </thead>
      <tbody>
       <row>
+       <entry>5.4.7</entry>
+       <entry>
+        修复了 <emphasis>host</emphasis> 在 <emphasis>协议</emphasis> 省略时的识别。
+       </entry>
+      </row>
+      <row>
        <entry>5.3.3</entry>
        <entry>
-        Removed the <constant>E_WARNING</constant> that was emitted when URL
-        parsing failed.
+        在 URL 解析失败时将不会产生 <constant>E_WARNING</constant> 级别的错误。
        </entry>
       </row>
       <row>
        <entry>5.1.2</entry>
-       <entry>Added the <parameter>component</parameter> parameter.</entry>
+       <entry>增加了参数 <parameter>component</parameter>。</entry>
       </row>
      </tbody>
     </tgroup>
@@ -122,6 +151,7 @@
 
  <refsect1 role="examples">
   &reftitle.examples;
+  <para>
   <example>
    <title><function>parse_url</function> 例子</title>
    <programlisting role="php">
@@ -130,6 +160,8 @@
 $url = 'http://username:password@hostname/path?arg=value#anchor';
 
 print_r(parse_url($url));
+
+echo parse_url($url, PHP_URL_PATH);
 ?>
 ]]>
     </programlisting>
@@ -146,9 +178,39 @@ Array
     [query] => arg=value
     [fragment] => anchor
 )
+/path
 ]]>
    </screen>
   </example>
+ </para>
+   <para>
+   <example>
+    <title><function>parse_url</function> 解析丢失协议的例子</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$url = '//www.example.com/path?googleguy=googley';
+
+// 在 5.4.7 之前这会输出路径 "//www.example.com/path"
+var_dump(parse_url($url));
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+array(3) {
+  ["host"]=>
+  string(15) "www.example.com"
+  ["path"]=>
+  string(5) "/path"
+  ["query"]=>
+  string(17) "googleguy=googley"
+}
+]]>
+    </screen>
+   </example>
+  </para>
  </refsect1>
 
  <refsect1 role="notes">
