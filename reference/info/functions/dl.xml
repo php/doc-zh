@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision$ -->
+<!-- EN-Revision: e900578fcc7dabd07d4320ae71ebfec10435de65 Maintainer: daijie Status: ready -->
+<!-- Reviewed: no -->
+
+<refentry xml:id="function.dl" xmlns="http://docbook.org/ns/docbook">
+ <refnamediv>
+  <refname>dl</refname>
+  <refpurpose>运行时载入一个 PHP 扩展</refpurpose>
+ </refnamediv>
+
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <type>bool</type><methodname>dl</methodname>
+   <methodparam><type>string</type><parameter>library</parameter></methodparam>
+  </methodsynopsis>
+  <para>
+   载入指定参数 <parameter>library</parameter> 的 PHP 扩展。
+  </para>
+  <para>
+   使用 <function>extension_loaded</function> 来测试指定的扩展是否已经激活。
+   这既能用于内建的扩展也可以用于动态加载的扩展（既可以通过 &php.ini; 也可以通过 <function>dl</function>）。
+  </para>
+  <warning>
+   <simpara>
+    在 PHP 5.3 里，此函数被某些 SAPI 移除了。
+   </simpara>
+  </warning>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>library</parameter></term>
+     <listitem>
+      <para>
+       此参数<emphasis>仅仅</emphasis>是要加载的扩展的文件名，依赖于你的平台。
+       比如，<link linkend="ref.sockets">sockets</link>（作为共享模块编译，而不是默认的！）在 Unix 平台上称为 <filename>sockets.so</filename> 而 在 Windows 平台上是 <filename>php_sockets.dll</filename>。
+      </para>
+      <para>
+       扩展加载的目录依赖于你的平台：
+      </para>
+      <para>
+       Windows - 如果没有在 &php.ini; 里明确设置，扩展默认会从 <filename>C:\php4\extensions\</filename> (PHP 4) 或 <filename>C:\php5\</filename> (PHP 5)加载。
+      </para>
+      <para>
+       Unix - 如果没有在 &php.ini; 里明确设置，默认的扩展目录依赖于
+       <itemizedlist>
+        <listitem>
+         <simpara>
+          PHP 是否通过 <literal>--enable-debug</literal> 选项构建
+         </simpara>
+        </listitem>
+        <listitem>
+         <simpara>
+          PHP 是否以（实验性质的）ZTS （Zned 线程安全）支持构建
+         </simpara>
+        </listitem>
+        <listitem>
+         <simpara>
+          当前的内部 <literal>ZEND_MODULE_API_NO</literal>（Zend 内部模块 API 数字，基本上是主要模块修改时的日期）
+         </simpara>
+        </listitem>
+       </itemizedlist>
+       考虑到上述，目录默认为 <literal>&lt;install-dir&gt;/lib/php/extensions/ &lt;debug-or-not&gt;-&lt;zts-or-not&gt;-ZEND_MODULE_API_NO</literal>，例如
+       <filename>/usr/local/php/lib/php/extensions/debug-non-zts-20010901</filename>
+       或
+       <filename>/usr/local/php/lib/php/extensions/no-debug-zts-20010901</filename>。
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   &return.success; 如果加载模块的功能是无效或者禁用的（既可以通过设置关闭 <link linkend="ini.enable-dl">enable_dl</link> 设置，也可以通过启用 &php.ini; 里的 &safemode;）将导致一个 <constant>E_ERROR</constant> 并中断执行。
+   如果因为指定的库无法加载而导致 <function>dl</function> 失败，除了返回 &false;，还会产生一个 <constant>E_WARNING</constant> 的消息。
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title><function>dl</function> 例子</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+// 加载一个扩展的例子，基于操作系统
+if (!extension_loaded('sqlite')) {
+    if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+        dl('php_sqlite.dll');
+    } else {
+        dl('sqlite.so');
+    }
+}
+
+// 或者，PHP_SHLIB_SUFFIX 常量在 PHP 4.3.0 后有效
+if (!extension_loaded('sqlite')) {
+    $prefix = (PHP_SHLIB_SUFFIX === 'dll') ? 'php_' : '';
+    dl($prefix . 'sqlite.' . PHP_SHLIB_SUFFIX);
+}
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+ </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <para>
+   <informaltable>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>&Version;</entry>
+       <entry>&Description;</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>5.3.0</entry>
+       <entry>
+        由于稳定性，<function>dl</function> 在某些 SAPI 中被禁用。仅仅允许 <function>dl</function> 的 SAPI 为 CLI 和 Embed。
+        使用 <link linkend="ini.extension">扩展加载指令</link> 作为替代。
+       </entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </informaltable>
+  </para>
+ </refsect1>
+
+ <refsect1 role="notes">
+  &reftitle.notes;
+  <note>
+   <para>
+    当 PHP 以支持 ZTS 构建时，<emphasis>不</emphasis>支持 <function>dl</function>。
+    使用 <link linkend="ini.extension">扩展加载指令</link> 作为替代。
+   </para>
+  </note>
+  <note>
+   <para>
+    在某些 Unix 平台上，<function>dl</function> 是大小写敏感的。
+   </para>
+  </note>
+  &note.sm.disabled;
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><link linkend="ini.extension">扩展加载指令</link></member>
+    <member><function>extension_loaded</function></member>
+   </simplelist>
+  </para>
+ </refsect1>
+
+</refentry>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->

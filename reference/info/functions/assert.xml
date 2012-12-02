@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision$ -->
+<!-- EN-Revision: dd9fa0aed7377da913904e3d26d59a22bec69015 Maintainer: daijie Status: ready -->
+<!-- Reviewed: no -->
+
+<refentry xml:id="function.assert" xmlns="http://docbook.org/ns/docbook">
+ <refnamediv>
+  <refname>assert</refname>
+  <refpurpose>检查一个断言是否为 &false;</refpurpose>
+ </refnamediv>
+ 
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <type>bool</type><methodname>assert</methodname>
+   <methodparam><type>mixed</type><parameter>assertion</parameter></methodparam>
+   <methodparam choice="opt"><type>string</type><parameter>description</parameter></methodparam>
+  </methodsynopsis>
+  <para>
+   <function>assert</function> 会检查指定的
+   <parameter>assertion</parameter> 并在结果为 &false; 时采取适当的行动。 
+  </para>
+  <para>
+   如果 <parameter>assertion</parameter> 是字符串，它将会被 <function>assert</function> 当做 PHP 代码来执行。
+   <parameter>assertion</parameter> 是字符串的优势是当禁用断言时它的开销会更小，并且在断言失败时消息会包含 <parameter>assertion</parameter> 表达式。
+   这意味着如果你传入了 boolean 的条件作为 <parameter>assertion</parameter>，这个条件将不会显示为断言函数的参数；在调用你定义的  <function>assert_options</function> 处理函数时，条件会转换为字符串，而布尔值 &false; 会被转换成空字符串。
+  </para>
+  <para>
+   断言这个功能应该只被用来调试。
+   你应该用于完整性检查时测试条件是否始终应该为 &true;，来指示某些程序错误，或者检查具体功能的存在（类似扩展函数或特定的系统限制和功能）。
+  </para>
+  <para>
+   断言不应该用于普通运行时操作，类似输入参数的检查。
+   作为一个经验法则，在断言禁用时你的代码也应该能够正确地运行。
+  </para>
+  <para>
+   <function>assert</function> 的行为可以通过 <function>assert_options</function> 来配置，或者手册页面上描述的 .ini 设置。
+  </para>
+  <para>
+   <function>assert_options</function> <constant>ASSERT_CALLBACK</constant> 配置指令允许设置回调函数来处理失败的断言。
+  </para>
+  <para>
+   <function>assert</function> 回调函数在构建自动测试套件的时候尤其有用，因为它们允许你简易地捕获传入断言的代码，并包含断言的位置信息。
+   当信息能够被其他方法捕获，使用断言可以让它更快更方便！
+  </para>
+  <para>
+   回调函数应该接受三个参数。
+   第一个参数包括了断言失败所在的文件。
+   第二个参数包含了断言失败所在的行号，第三个参数包含了失败的表达式（如有任意 &#x2014; 字面值例如 1 或者 "two" 将不会传递到这个参数）。
+   PHP 5.4.8 及更高版本的用户也可以提供第四个可选参数，如果设置了，用于将 <parameter>description</parameter> 指定到 <function>assert</function>。
+  </para>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>assertion</parameter></term>
+     <listitem>
+      <para>
+       断言。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>description</parameter></term>
+     <listitem>
+      <para>
+       如果 <parameter>assertion</parameter> 失败了，选项 description 将会包括在失败信息里。
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   assertion 是 false 则返回 &false;，否则是 &true;。
+  </para>
+ </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <para>
+   <informaltable>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>&Version;</entry>
+       <entry>&Description;</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>5.4.8</entry>
+       <entry>
+        增加了参数 <parameter>description</parameter>。
+        <parameter>description</parameter> 现在也作为第四个参数提供给 <constant>ASSERT_CALLBACK</constant> 模式里的回调函数。
+       </entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </informaltable>
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title>使用自定义处理程序处理失败的断言</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+// 激活断言，并设置它为 quiet
+assert_options(ASSERT_ACTIVE, 1);
+assert_options(ASSERT_WARNING, 0);
+assert_options(ASSERT_QUIET_EVAL, 1);
+
+//创建处理函数
+function my_assert_handler($file, $line, $code)
+{
+    echo "<hr>Assertion Failed:
+        File '$file'<br />
+        Line '$line'<br />
+        Code '$code'<br /><hr />";
+}
+
+// 设置回调函数
+assert_options(ASSERT_CALLBACK, 'my_assert_handler');
+
+// 让一则断言失败
+assert('mysql_query("")');
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   <example>
+    <title>使用自定义处理器打印描述信息</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+// 激活断言，并设置它为 quiet
+assert_options(ASSERT_ACTIVE, 1);
+assert_options(ASSERT_WARNING, 0);
+assert_options(ASSERT_QUIET_EVAL, 1);
+
+//创建处理函数
+function my_assert_handler($file, $line, $code, $desc = null)
+{
+    echo "Assertion failed at $file:$line: $code";
+    if ($desc) {
+        echo ": $desc";
+    }
+    echo "\n";
+}
+
+// 设置回调函数
+assert_options(ASSERT_CALLBACK, 'my_assert_handler');
+
+// Make an assertion that should fail
+assert('2 < 1');
+assert('2 < 1', 'Two is less than one');
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+Assertion failed at test.php:21: 2 < 1
+Assertion failed at test.php:22: 2 < 1: Two is less than one
+]]>
+    </screen>
+   </example>
+  </para>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>assert_options</function></member>
+   </simplelist>
+  </para>
+ </refsect1>
+
+</refentry>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
