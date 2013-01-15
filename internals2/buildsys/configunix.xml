@@ -13,9 +13,9 @@
   <tip>
    <para>
     当开发 PHP 扩展时，<emphasis>强烈</emphasis>建议安装 <command>autoconf</command>
-	2.13 版，尽管用更新的版本可使用。2.13 版被认为是在 <command>autoconf</command>
-	中可用性，适用性及用户基础等方面最好的版本。使用最新版本有时会与所期望的
-	<command>configure</command> 输出在样式上有所不同。
+    2.13 版，尽管用更新的版本可使用。2.13 版被认为是在 <command>autoconf</command>
+    中可用性，适用性及用户基础等方面最好的版本。使用最新版本有时会与所期望的
+    <command>configure</command> 输出在样式上有所不同。
    </para>
   </tip>
   
@@ -106,10 +106,10 @@ fi
    <title>autoconf 语法简介</title>
    <para>
     <filename>config.m4</filename> 文件使用 GNU <command>autoconf</command>
-	语法编写。简而言之，就是用强大的宏语言增强的
-	 shell 脚本。注释用字符串 <literal>dnl</literal> 分隔，字符串则放在左右方括号中间（例如，<literal>[</literal> 和
-	 <literal>]</literal>）。字符串可按需要多次嵌套引用。完整的语法参考可参见位于
-	 <link xlink:href="&url.internals.autoconf;"/> 的  <command>autoconf</command> 手册。
+    语法编写。简而言之，就是用强大的宏语言增强的
+    shell 脚本。注释用字符串 <literal>dnl</literal> 分隔，字符串则放在左右方括号中间（例如，<literal>[</literal> 和
+    <literal>]</literal>）。字符串可按需要多次嵌套引用。完整的语法参考可参见位于
+    <link xlink:href="&url.internals.autoconf;"/> 的  <command>autoconf</command> 手册。
    </para>
   </sect2>
   
@@ -117,14 +117,14 @@ fi
    <title>PHP_ARG_*: 赋予用户可选项</title>
    <para>
     在以上的 <filename>config.m4</filename> 例子中，两条注释后，最先见到的 3
-	行代码，使用了 <function>PHP_ARG_WITH</function> 和
-	<function>PHP_ARG_ENABLE</function>。这些给
-	<command>configure</command> 提供了可选项，和在运行
-	<command>./configure --help</command> 时显示的帮助文本。就象名称所暗示的，其两者的不同点在于是创建
-	<option role="configure">--with-*</option> 选项还是 <option role="configure">--enable-*</option>
-	选项。每个扩展应提供至少一个以上的选项以及扩展名称，以便用户可选择是否将扩展构建至  PHP
-	中。按惯例，<function>PHP_ARG_WITH</function> 用于取得参数的选项，例如扩展所需库或程序的位置；而
-	<function>PHP_ARG_ENABLE</function> 用于代表简单标志的选项。
+    行代码，使用了 <function>PHP_ARG_WITH</function> 和
+    <function>PHP_ARG_ENABLE</function>。这些给
+    <command>configure</command> 提供了可选项，和在运行
+    <command>./configure --help</command> 时显示的帮助文本。就象名称所暗示的，其两者的不同点在于是创建
+    <option role="configure">--with-*</option> 选项还是 <option role="configure">--enable-*</option>
+    选项。每个扩展应提供至少一个以上的选项以及扩展名称，以便用户可选择是否将扩展构建至  PHP
+    中。按惯例，<function>PHP_ARG_WITH</function> 用于取得参数的选项，例如扩展所需库或程序的位置；而
+    <function>PHP_ARG_ENABLE</function> 用于代表简单标志的选项。
    </para>
    <example xml:id="internals2.buildsys.configunix.php-arg.configure-out">
     <title>configure 输出举例</title>
@@ -149,7 +149,7 @@ checking for extra libraries for example... /another/library/path
    <note>
     <para>
      在调用 <command>configure</command> 时，不管选项在命令行中的顺序如何，都会按在
-	 <filename>config.m4</filename> 中指定的顺序进行检测。
+     <filename>config.m4</filename> 中指定的顺序进行检测。
     </para>
    </note>
   </sect2>
@@ -158,50 +158,50 @@ checking for extra libraries for example... /another/library/path
    <title>处理用户选择</title>
    <para>
     <filename>config.m4</filename>
-	可给用户提供一些做什么的选择，现在就是做出选择的时候了。在上例中，三个选项在未指定时显然默认为
-	&quot;no&quot;。习惯上，最好用此值作为用于启用扩展的选项的默认值，为了扩展与
-PHP 分开构建则用 <command>phpize</command> 覆盖此值，而要构建在 PHP
-	中时则不应被默认值将扩展空间弄乱。处理这三个选项的代码要复杂得多。
+    可给用户提供一些做什么的选择，现在就是做出选择的时候了。在上例中，三个选项在未指定时显然默认为
+    &quot;no&quot;。习惯上，最好用此值作为用于启用扩展的选项的默认值，为了扩展与
+    PHP 分开构建则用 <command>phpize</command> 覆盖此值，而要构建在 PHP
+    中时则不应被默认值将扩展空间弄乱。处理这三个选项的代码要复杂得多。
    </para>
    
    <sect3 xml:id="internals2.buildsys.configunix.processing.with-example">
     <title>处理 --with-example[=FILE] 选项</title>
     <para>
-	 首先检测是否设置了 <option role="configure">--with-example[=FILE]</option>
-	 选项。如此选项未被指定，或使用否定的格式（<option
-	 role="configure">--without-example</option>），或赋值为 &quot;no&quot;
-	 时，它会控制整个扩展的含有物其他任何事情都不会发生。在上面的例子中所指定的值为
-	 <literal>/some/library/path/example-config</literal>，所以第一个 test 成功了。
+     首先检测是否设置了 <option role="configure">--with-example[=FILE]</option>
+     选项。如此选项未被指定，或使用否定的格式（<option
+     role="configure">--without-example</option>），或赋值为 &quot;no&quot;
+     时，它会控制整个扩展的含有物其他任何事情都不会发生。在上面的例子中所指定的值为
+     <literal>/some/library/path/example-config</literal>，所以第一个 test 成功了。
     </para>
     
     <para>
-	 接下来，代码调用 <function>AC_MSG_CHECKING</function>，这是一个 <command>autoconf</command> 宏，输出一行标准的如
-	 &quot;checking for ...&quot; 的信息，并检测用户假定的
-	 <command>example-config</command> 是否是一个明确的路径。在这个例子中，<literal>PHP_EXAMPLE</literal>
-	 所取到的值为 <literal>/some/library/path/example-config</literal>，现已复制到
-	 EXAMPLE_PATH 变量中了。只有用户指定了
-	 <option role="configure">--with-example</option>，才会执行代码
-	 <command>$php_shtool path $EXAMPLE_CONFIG</command>，尝试使用用户当前的
-	 <literal>PATH</literal> 环境变量推测 <command>example-config</command>
-	 的位置。无论如何，下一步都是检测所选的 <literal>EXAMPLE_PATH</literal>
-	 是否是正常文件，是否可执行，及是否执行成功。如成功，则调用
-	 <function>AC_MSG_RESULT</function>，结束由
-	 <function>AC_MSG_CHECKING</function> 开始的输出行。否则，调用
-	 <function>AC_MSG_ERROR</function>，打印所给的信息并立即中断执行
-	 <command>configure</command>。
+     接下来，代码调用 <function>AC_MSG_CHECKING</function>，这是一个 <command>autoconf</command> 宏，输出一行标准的如
+     &quot;checking for ...&quot; 的信息，并检测用户假定的
+     <command>example-config</command> 是否是一个明确的路径。在这个例子中，<literal>PHP_EXAMPLE</literal>
+     所取到的值为 <literal>/some/library/path/example-config</literal>，现已复制到
+     EXAMPLE_PATH 变量中了。只有用户指定了
+     <option role="configure">--with-example</option>，才会执行代码
+     <command>$php_shtool path $EXAMPLE_CONFIG</command>，尝试使用用户当前的
+     <literal>PATH</literal> 环境变量推测 <command>example-config</command>
+     的位置。无论如何，下一步都是检测所选的 <literal>EXAMPLE_PATH</literal>
+     是否是正常文件，是否可执行，及是否执行成功。如成功，则调用
+     <function>AC_MSG_RESULT</function>，结束由
+     <function>AC_MSG_CHECKING</function> 开始的输出行。否则，调用
+     <function>AC_MSG_ERROR</function>，打印所给的信息并立即中断执行
+     <command>configure</command>。
     </para>
     
     <para>
-	 代码现在执行几次 <command>example-config</command>
-	 以确定一些站点特定的配置信息。下一步调用的是
-	 <function>PHP_CHECK_LIBRARY</function>，这是 PHP
-	 构建系统提供的一个宏，包装了 <command>autoconf</command> 的
-	 <function>AC_CHECK_LIB</function> 函数。<function>PHP_CHECK_LIBRARY</function>
-	 尝试编译、链接和执行程序，在第一个参数指定的库中调用由第二个参数指定的符号，使用第五个参数给出的字符串作为额外的链接选项。如果尝试成功了，则运行第三个参数所给出的脚本。此脚本从
-	 <command>example-config</command> 所提供的原始的选项字符串中取出头文件路径、库文件路径和库名称，告诉
-	 PHP 构建系统。如果尝试失败，脚本则运行第四个参数中的脚本。此时调用
-	 <function>AC_MSG_ERROR</function> 来中断程序执行。
-</para>
+     代码现在执行几次 <command>example-config</command>
+     以确定一些站点特定的配置信息。下一步调用的是
+     <function>PHP_CHECK_LIBRARY</function>，这是 PHP
+     构建系统提供的一个宏，包装了 <command>autoconf</command> 的
+     <function>AC_CHECK_LIB</function> 函数。<function>PHP_CHECK_LIBRARY</function>
+     尝试编译、链接和执行程序，在第一个参数指定的库中调用由第二个参数指定的符号，使用第五个参数给出的字符串作为额外的链接选项。如果尝试成功了，则运行第三个参数所给出的脚本。此脚本从
+     <command>example-config</command> 所提供的原始的选项字符串中取出头文件路径、库文件路径和库名称，告诉
+     PHP 构建系统。如果尝试失败，脚本则运行第四个参数中的脚本。此时调用
+     <function>AC_MSG_ERROR</function> 来中断程序执行。
+    </para>
    </sect3>
    
    <sect3 xml:id="internals2.buildsys.configunix.processing.enable-example-debug">
@@ -216,22 +216,22 @@ PHP 分开构建则用 <command>phpize</command> 覆盖此值，而要构建在 
    <sect3 xml:id="internals2.buildsys.configunix.processing.with-example-extra">
     <title>处理 --with-example-extra=DIR 选项</title>
     <para>
-	 对于此例子来说，由 <option role="configure">--with-example-extra=DIR</option>
-	 选项所请求的假定的“额外”功能操作不会与假定的
-	 <command>example-config</command>
-	 程序共享，也没有默认的搜索路径。因此，用户需要在所需的库之前提供设置程序。有点不象现实中的扩展，在这里的设置仅仅起说明性的作用。
+     对于此例子来说，由 <option role="configure">--with-example-extra=DIR</option>
+     选项所请求的假定的“额外”功能操作不会与假定的
+     <command>example-config</command>
+     程序共享，也没有默认的搜索路径。因此，用户需要在所需的库之前提供设置程序。有点不象现实中的扩展，在这里的设置仅仅起说明性的作用。
     </para>
     
     <para>
-	 代码开始用已熟知的方式来检测 <literal>PHP_EXAMPLE_EXTRA</literal>
-	 的真实值。如果所提供的为否定形式，则不会进行其他处理，用户也不会请求额外的功能。如果所提供的为未提供参数的肯定形式，则调用
-	 <function>AC_MSG_ERROR</function> 中止处理。下一步则再次调用
-	 <function>PHP_CHECK_LIBRARY</function>。这一次，因为没有提供预定义编译选项，<function>PHP_ADD_INCLUDE</function>
-	 和 <function>PHP_ADD_LIBRARY_WITH_PATH</function> 用于构建额外功能所需的头文件路径、库文件路径和库标志。也调用
-	 <function>AC_DEFINE</function>
-	 来指示所请求的额外功能代码是可用的，设置变量来告诉以后的代码，有额外的源代码要构建。如果检测失败，则调用所熟悉的
-	 <function>AC_MSG_ERROR</function>。另一种不同的处理失败的方式是更换为调用
-	 <function>AC_MSG_WARNING</function>，例如：
+     代码开始用已熟知的方式来检测 <literal>PHP_EXAMPLE_EXTRA</literal>
+     的真实值。如果所提供的为否定形式，则不会进行其他处理，用户也不会请求额外的功能。如果所提供的为未提供参数的肯定形式，则调用
+     <function>AC_MSG_ERROR</function> 中止处理。下一步则再次调用
+     <function>PHP_CHECK_LIBRARY</function>。这一次，因为没有提供预定义编译选项，<function>PHP_ADD_INCLUDE</function>
+     和 <function>PHP_ADD_LIBRARY_WITH_PATH</function> 用于构建额外功能所需的头文件路径、库文件路径和库标志。也调用
+     <function>AC_DEFINE</function>
+     来指示所请求的额外功能代码是可用的，设置变量来告诉以后的代码，有额外的源代码要构建。如果检测失败，则调用所熟悉的
+     <function>AC_MSG_ERROR</function>。另一种不同的处理失败的方式是更换为调用
+     <function>AC_MSG_WARNING</function>，例如：
     </para>
     <informalexample>
      <programlisting role="autoconf">
