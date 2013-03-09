@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision$ -->
+<!-- EN-Revision: 1ec11eb024dc2ca1f5b89d5ba8aecdbe5dd822d5 Maintainer: daijie Status: ready -->
+<!-- Reviewed: no -->
+
+<refentry xml:id="mongoclient.close" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <refnamediv>
+  <refname>MongoClient::close</refname>
+  <refpurpose>关闭连接</refpurpose>
+ </refnamediv>
+
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <modifier>public</modifier> <type>bool</type><methodname>MongoClient::close</methodname>
+   <methodparam choice="opt"><type>boolean|string</type><parameter>connection</parameter></methodparam>
+  </methodsynopsis>
+  <para>
+   <function>MongoClient::close</function> 方法强制关闭一个数据库连接，哪怕使用的是持久连接。
+   在正常情况下，你<emphasis>绝不</emphasis>需要这么做。
+  </para>
+  <para>
+  </para>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term>
+      <parameter>connection</parameter>
+     </term>
+     <listitem>
+      <para>
+       如果没有指定 connection，或者是 &false;，将会选择关闭写作操作的连接。
+       如果配置为单节点，将会关闭整个连接，但是如果你连接到一个集群，
+       close() 会<emphasis>仅仅</emphasis>关闭 primary 节点的连接。
+      </para>
+      <para>
+       如果 connection 是 &true;，连接管理器将会关闭所有由它管理的连接。
+       这也会包括创建对象时所引用的连接字符串之外的连接。
+      </para>
+      <para>
+       如果 connection 是一个字符串参数，它将仅仅关闭由该 hash 标识的连接。
+       Hash 是调用 <function>MongoClient::getConnections</function> 所返回，能够表示一个连接。
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   返回连接是否成功关闭。
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <example>
+   <title><function>MongoClient::close</function> 例子</title>
+   <para>这个例子演示了如何选择性地仅关闭备份节点的所有连接。</para>
+   <programlisting role="php">
+<![CDATA[
+<?php
+// 连接到集群
+$a = new MongoClient("mongodb://whisky:13000/?replicaset=seta");
+
+$connections = $a->getConnections();
+
+foreach ( $connections as $con )
+{
+    // 遍历所有连接，如果类型是 "SECONDARY" 则关闭连接
+    if ( $con['connection']['connection_type_desc'] == "SECONDARY" )
+    {
+        echo "Closing '{$con['hash']}': ";
+        $closed = $a->close( $con['hash'] );
+        echo $closed ? "ok" : "failed", "\n";
+    }
+}
+?>
+]]>
+   </programlisting>
+   &example.outputs;
+   <screen>
+<![CDATA[
+Closing 'whisky:13001;X;4948': ok
+]]>
+   </screen>
+  </example>
+ </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <para>
+   <informaltable>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>&Version;</entry>
+       <entry>&Description;</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>1.3.0</entry>
+       <entry>
+        <para>
+         在 1.3.0 版本中，为这个函数添加了 <parameter>connection</parameter> 参数。
+         在此之前，直邮写入连接才会被这个方法关闭。
+        </para>
+       </entry>
+      </row>
+      <row>
+       <entry>1.2.0</entry>
+       <entry>
+        <para>
+         在版本 1.2.0 之前，这个驱动默认不会使用持久连接，所有连接会在作用域结束时关闭。
+         由于版本 1.2.0 情况不再如此，所以调用 close 会是一个坏主意，在服务器有较高负载时可能会造成更高的压力。
+        </para>
+       </entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </informaltable>
+  </para>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <simplelist>
+   <member><function>MongoClient::getConnections</function></member>
+  </simplelist>
+ </refsect1>
+</refentry>
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+--> 
