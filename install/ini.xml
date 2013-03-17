@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: ff6d5c7b5dca67d9d4b31411170826f886bc1d2d Maintainer: HonestQiao Status: ready -->
-<!-- Reviewed: no Maintainer: HonestQiao -->
+<!-- EN-Revision: bf66db24167008a22b52eaaa1cfe06ae924f9ede Maintainer: HonestQiao Status: ready -->
+<!-- Reviewed: yes -->
 <chapter xml:id="configuration" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <title>运行时配置</title>
 
@@ -27,22 +27,18 @@
     </listitem>
     <listitem>
      <simpara>
-      <varname>PHPRC</varname>  环境变量。Before PHP 5.2.0,
-      this was checked after the registry key mentioned below.
+      <varname>PHPRC</varname>  环境变量。在 PHP 5.2.0
+      之前，其顺序在以下提及的注册表键值之后。
      </simpara>
     </listitem>
     <listitem>
-          <simpara>
-      As of PHP 5.2.0, the location of the <literal>php.ini</literal> file
-      can be set for different versions of PHP. The following registry keys
-      are examined in order:
-      <literal>[HKEY_LOCAL_MACHINE\SOFTWARE\PHP\x.y.z]</literal>,
-      <literal>[HKEY_LOCAL_MACHINE\SOFTWARE\PHP\x.y]</literal> and
-      <literal>[HKEY_LOCAL_MACHINE\SOFTWARE\PHP\x]</literal>, where
-      x, y and z mean the PHP major, minor and release versions. If there is a
-      value for <literal>IniFilePath</literal> in any of these keys, the first
-      one found will be used as the location of the <literal>php.ini</literal>
-      (Windows only).
+     <simpara>
+      自 PHP 5.2.0 起，可以为不同版本的 PHP 指定不同的 <literal>php.ini</literal>
+	  文件位置。将以下面的顺序检查注册表目录：<literal>[HKEY_LOCAL_MACHINE\SOFTWARE\PHP\x.y.z]</literal>，<literal>[HKEY_LOCAL_MACHINE\SOFTWARE\PHP\x.y]</literal> 和
+      <literal>[HKEY_LOCAL_MACHINE\SOFTWARE\PHP\x]</literal>，其中的
+      x，y 和 z 指的是 PHP 主版本号，次版本号和发行批次。如果在其中任何目录下的
+      <literal>IniFilePath</literal> 有键值，则第一个值将被用作
+	  <literal>php.ini</literal> 的位置（仅适用于 windows）。
      </simpara>
     </listitem>
     <listitem>
@@ -52,12 +48,12 @@
     </listitem>
     <listitem>
      <simpara>
-      当前工作目录（对于 CLI）
+      当前工作目录（对于 CLI）。
      </simpara>
     </listitem>
     <listitem>
      <simpara>
-      web 服务器目录（对于 SAPI 模块）或 PHP 所在目录（Windows 下其它情况）
+      web 服务器目录（对于 SAPI 模块）或 PHP 所在目录（Windows 下其它情况）。
      </simpara>
     </listitem>
     <listitem>
@@ -79,6 +75,11 @@
    <para>
     Apache web 服务器在启动时会把目录转到根目录，这将导致 PHP 尝试在根目录下读取
     &php.ini;，如果存在的话。
+   </para>
+  </note>
+  <note>
+   <para>
+    在 &php.ini; 中可以使用环境变量。
    </para>
   </note>
   <para>
@@ -119,104 +120,100 @@ include_path = ".;c:\php\lib"
  </sect1>
 
  <sect1 xml:id="configuration.file.per-user">
-  <title>.user.ini files</title>
+  <title>.user.ini 文件</title>
 
   <simpara>
-   Since PHP 5.3.0, PHP includes support for .htaccess-style INI files on a
-   per-directory basis. These files are processed <emphasis>only</emphasis> by
-   the CGI/FastCGI SAPI. This functionality obsoletes the PECL htscanner
-   extension. If you are using Apache, use &htaccess; files for the same
-   effect.
+   自 PHP 5.3.0 起，PHP 支持基于每个目录的 .htaccess
+   风格的 INI 文件。此类文件<emphasis>仅</emphasis>被
+   CGI／FastCGI SAPI 处理。此功能使得 PECL 的 htscanner
+   扩展作废。如果使用 Apache，则用 &htaccess; 文件有同样效果。
   </simpara>
 
   <simpara>
-   In addition to the main &php.ini; file, PHP scans for INI files in each
-   directory, starting with the directory of the requested PHP file, and
-   working its way up to the current document root (as set in
-   <varname>$_SERVER['DOCUMENT_ROOT']</varname>). In case the PHP file is
-   outside the document root, only its directory is scanned.
+   除了主 &php.ini; 之外，PHP 还会在每个目录下扫描 INI
+   文件，从被执行的 PHP 文件所在目录开始一直上升到 web
+   根目录（<varname>$_SERVER['DOCUMENT_ROOT']</varname>
+   所指定的）。如果被执行的 PHP 文件在 web 根目录之外，则只扫描该目录。
   </simpara>
   <simpara>
-   Only INI settings with the
-   modes <constant>PHP_INI_PERDIR</constant> and
-   <constant>PHP_INI_USER</constant> will be recognized in .user.ini-style INI
-   files.
+   在 .user.ini 风格的 INI 文件中只有具有 <constant>PHP_INI_PERDIR</constant>
+   和 <constant>PHP_INI_USER</constant> 模式的 INI
+   设置可被识别。
   </simpara>
 
   <simpara>
-   Two new INI directives,
-   <literal>user_ini.filename</literal> and
-   <literal>user_ini.cache_ttl</literal>
+   两个新的 INI 指令，<literal>user_ini.filename</literal> 和
+   <literal>user_ini.cache_ttl</literal> 控制着用户 INI 文件的使用。
    <!--
        <link linkend="ini.user-ini.filename">user_ini.filename</link> and
        <link linkend="ini.user-ini.cache-ttl">user_ini.cache_ttl</link>
    -->
-   control the use of user INI files.
   </simpara>
 
   <simpara>
-   <literal>user_ini.filename</literal> sets the name of the file PHP looks for
-   in each directory; if set to an empty string, PHP doesn't scan at all. The
-   default is <literal>.user.ini</literal>.
+   <literal>user_ini.filename</literal> 设定了 PHP
+   会在每个目录下搜寻的文件名；如果设定为空字符串则 PHP
+   不会搜寻。默认值是 <literal>.user.ini</literal>。
   </simpara>
 
   <simpara>
-   <literal>user_ini.cache_ttl</literal> controls how often user INI files are
-   re-read. The default is 300 seconds (5 minutes).
+   <literal>user_ini.cache_ttl</literal> 控制着重新读取用户
+   INI 文件的间隔时间。默认是 300 秒（5 分钟）。
   </simpara>
  </sect1>
 
   <sect1 xml:id="configuration.changes.modes">
-   <title>Where a configuration setting may be set</title>
+   <title>配置可被设定范围</title>
 
    <para>
-    These modes determine when and where a PHP directive may or may not
-    be set, and each directive within the manual refers to one of these
-    modes. For example, some settings may be set within a PHP script
-    using <function>ini_set</function>, whereas others may require 
-    &php.ini; or &httpd.conf;.
+    这些模式决定着一个 PHP
+	的指令在何时何地，是否能够被设定。手册中的每个指令都有其所属的模式。例如有些指令可以在
+	PHP 脚本中用 <function>ini_set</function> 来设定，而有些则只能在
+	&php.ini; 或 &httpd.conf; 中。
    </para>
 
    <para>
-    For example, the 
-    <link linkend="ini.output-buffering">output_buffering</link> setting
-    is <literal>PHP_INI_PERDIR</literal> therefore it may not be set using
-    <function>ini_set</function>. However, the
-    <link linkend="ini.display-errors">display_errors</link> directive is
-    <literal>PHP_INI_ALL</literal> therefore it may be set anywhere,
-    including with <function>ini_set</function>.
+    例如 
+    <link linkend="ini.output-buffering">output_buffering</link>
+	指令是属于
+    <literal>PHP_INI_PERDIR</literal>，因而就不能用
+    <function>ini_set</function> 来设定。但是
+    <link linkend="ini.display-errors">display_errors</link>
+	指令是属于
+    <literal>PHP_INI_ALL</literal> 因而就可以在任何地方被设定，包括
+    <function>ini_set</function>。
    </para>
 
    <para>
     <table>
-     <title>Definition of PHP_INI_* modes</title>
+     <title>PHP_INI_* 模式的定义</title>
      <tgroup cols="3">
       <thead>
        <row>
-        <entry>Mode</entry>
-        <entry>Meaning</entry>
+        <entry>模式</entry>
+        <entry>含义</entry>
        </row>
       </thead>
       <tbody>
        <row>
         <entry><literal>PHP_INI_USER</literal></entry>
         <entry>
-         Entry can be set in user scripts (like with <function>ini_set</function>)
-         or in the <link linkend="configuration.changes.windows">Windows registry</link>
-         Since PHP 5.3, entry can be set in &user-ini;
+         可在用户脚本（例如 <function>ini_set</function>）或
+         <link linkend="configuration.changes.windows">Windows 注册表</link>（自
+		 PHP 5.3 起）以及 &user-ini; 中设定
         </entry>
        </row>
        <row>
         <entry><literal>PHP_INI_PERDIR</literal></entry>
-        <entry>Entry can be set in &php.ini;, &htaccess; or &httpd.conf;</entry>
+        <entry>可在 &php.ini;，&htaccess; 或 &httpd.conf; 中设定</entry>
        </row>
        <row>
         <entry><literal>PHP_INI_SYSTEM</literal></entry>
-        <entry>Entry can be set in &php.ini; or &httpd.conf;</entry>
+        <entry>可在 &php.ini; 或 &httpd.conf; 中设定</entry>
        </row>
        <row>
         <entry><literal>PHP_INI_ALL</literal></entry>
-        <entry>Entry can be set anywhere</entry>
+        <entry>可在任何地方设定</entry>
        </row>
       </tbody>
      </tgroup>
