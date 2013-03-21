@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision$ -->
+<!-- EN-Revision: 96c9d88bad9a7d7d44bfb7f26c226df7ee9ddf26 Maintainer: min shan Status: ready -->
+<!-- Reviewed: yes -->
+
+<refentry xmlns="http://docbook.org/ns/docbook" xml:id="function.socket-create">
+ <refnamediv>
+  <refname>socket_create</refname>
+  <refpurpose>创建一个套接字（通讯节点）</refpurpose>
+ </refnamediv>
+ 
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <type>resource</type><methodname>socket_create</methodname>
+   <methodparam><type>int</type><parameter>domain</parameter></methodparam>
+   <methodparam><type>int</type><parameter>type</parameter></methodparam>
+   <methodparam><type>int</type><parameter>protocol</parameter></methodparam>
+  </methodsynopsis>
+  <para>
+   创建并返回一个套接字，也称作一个通讯节点。一个典型的网络连接由 2 个套接字构成，一个运行在客户端，另一个运行在服务器端。
+  </para>
+ </refsect1>
+ 
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>domain</parameter></term>
+     <listitem>
+      <para>
+       <parameter>domain</parameter> 参数指定哪个协议用在当前套接字上。
+      </para>
+      <table>
+       <title>可用的地址/协议</title>
+       <tgroup cols="2">
+        <thead>
+         <row>
+          <entry>Domain</entry>
+          <entry>描述</entry>
+         </row>
+        </thead>
+        <tbody>
+         <row>
+          <entry><constant>AF_INET</constant></entry>
+          <entry>
+           IPv4 网络协议。TCP 和 UDP 都可使用此协议。
+          </entry>
+         </row>
+         <row>
+          <entry><constant>AF_INET6</constant></entry>
+          <entry>
+           IPv6 网络协议。TCP 和 UDP 都可使用此协议。
+          </entry>
+         </row>
+         <row>
+          <entry><constant>AF_UNIX</constant></entry>
+          <entry>
+           本地通讯协议。具有高性能和低成本的 IPC（进程间通讯）。
+          </entry>
+         </row>
+        </tbody>
+       </tgroup>
+      </table>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>type</parameter></term>
+     <listitem>
+      <para>
+       <parameter>type</parameter> 参数用于选择套接字使用的类型。
+      </para>
+      <table>
+       <title>可用的套接字类型</title>
+       <tgroup cols="2">
+        <thead>
+         <row>
+          <entry>类型</entry>
+          <entry>描述</entry>
+         </row>
+        </thead>
+        <tbody>
+         <row>
+          <entry><constant>SOCK_STREAM</constant></entry>
+          <entry>
+           提供一个顺序化的、可靠的、全双工的、基于连接的字节流。支持数据传送流量控制机制。TCP 协议即基于这种流式套接字。
+          </entry>
+         </row>
+         <row>
+          <entry><constant>SOCK_DGRAM</constant></entry>
+          <entry>
+           提供数据报文的支持。(无连接，不可靠、固定最大长度).UDP协议即基于这种数据报文套接字。
+          </entry>
+         </row>
+         <row>
+          <entry><constant>SOCK_SEQPACKET</constant></entry>
+          <entry>
+           提供一个顺序化的、可靠的、全双工的、面向连接的、固定最大长度的数据通信；数据端通过接收每一个数据段来读取整个数据包。
+          </entry>
+         </row>
+         <row>
+          <entry><constant>SOCK_RAW</constant></entry>
+          <entry>
+           提供读取原始的网络协议。这种特殊的套接字可用于手工构建任意类型的协议。一般使用这个套接字来实现 ICMP 请求（例如 ping）。
+          </entry>
+         </row>
+         <row>
+          <entry><constant>SOCK_RDM</constant></entry>
+          <entry>
+           提供一个可靠的数据层，但不保证到达顺序。一般的操作系统都未实现此功能。
+          </entry>
+         </row>
+        </tbody>
+       </tgroup>
+      </table>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>protocol</parameter></term>
+     <listitem>
+      <para>
+       <parameter>protocol</parameter> 参数，是设置指定 <parameter>domain</parameter> 
+       套接字下的具体协议。这个值可以使用 <function>getprotobyname</function>
+       函数进行读取。如果所需的协议是 TCP 或 UDP，可以直接使用常量 <constant>SOL_TCP</constant> 和 <constant>SOL_UDP</constant> 。
+      </para>
+      <table>
+       <title>常见协议</title>
+       <tgroup cols="2">
+        <thead>
+         <row>
+          <entry>名称</entry>
+          <entry>描述</entry>
+         </row>
+        </thead>
+        <tbody>
+         <row>
+          <entry>icmp</entry>
+          <entry>
+           Internet Control Message Protocol
+           主要用于网关和主机报告错误的数据通信。例如“ping”命令（在目前大部分的操作系统中）就是使用 ICMP 协议实现的。
+          </entry>
+         </row>
+         <row>
+          <entry>udp</entry>
+          <entry>
+           User Datagram Protocol 是一个无连接的、不可靠的、具有固定最大长度的报文协议。由于这些特性，UDP 协议拥有最小的协议开销。
+          </entry>
+         </row>
+         <row>
+          <entry>tcp</entry>
+          <entry>
+           Transmission Control Protocol 是一个可靠的、基于连接的、面向数据流的全双工协议。TCP
+           能够保障所有的数据包是按照其发送顺序而接收的。如果任意数据包在通讯时丢失，TCP
+           将自动重发数据包直到目标主机应答已接收。因为可靠性和性能的原因，TCP 在数据传输层使用 8bit 字节边界。因此，TCP 应用程序必须允许传送部分报文的可能。
+          </entry>
+         </row>
+        </tbody>
+       </tgroup>
+      </table>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+ 
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   <function>socket_create</function> 正确时返回一个套接字，失败时返回
+   &false;。要读取错误代码，可以调用 <function>socket_last_error</function>。这个错误代码可以通过 <function>socket_strerror</function> 读取文字的错误说明。
+  </para>
+ </refsect1>
+ 
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <para>
+   <informaltable>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>&Version;</entry>
+       <entry>&Description;</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>5.0.0</entry>
+       <entry>
+        增加 <constant>AF_INET6</constant> 支持。
+       </entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </informaltable>
+  </para>
+ </refsect1>
+ 
+ <refsect1 role="errors">
+  &reftitle.errors;
+  <para>
+   如果使用一个无效的 <parameter>domain</parameter> 或 <parameter>type</parameter>，<function>socket_create</function>
+   会使用 <constant>AF_INET</constant> 和
+   <constant>SOCK_STREAM</constant> 替代无效参数，同时会发出 <constant>E_WARNING</constant> 警告信息。
+  </para>
+ </refsect1>
+ 
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>socket_accept</function></member>
+    <member><function>socket_bind</function></member>
+    <member><function>socket_connect</function></member>
+    <member><function>socket_listen</function></member>
+    <member><function>socket_last_error</function></member>
+    <member><function>socket_strerror</function></member>
+   </simplelist>
+  </para>
+ </refsect1>
+ 
+</refentry>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
