@@ -1,0 +1,295 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- $Revision: 329826 $ -->
+<!-- EN-Revision: 38e3798be2c72d46c78c9c98b1b4264adef6bd25 Maintainer: dallas Status: ready -->
+<sect1 xml:id="install.windows.manual" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <title>手工安装步骤</title>
+ <para>
+  本章包含有在 Microsoft Windows 中手工安装和配置 PHP
+  的指示。有关如何使用 PHP 安装程序在 Windows 下安装和配置
+  PHP 以及 web 服务器，请参阅
+  <link linkend="install.windows.installer.msi">Windows 安装程序（PHP 5.2 及更新版本）</link>一章。
+ </para>
+ <sect2 xml:id="install.windows.manual.download">
+  <title>选择和下载 PHP 发行包</title>
+  <para>
+   从 <link xlink:href="&url.php.win.downloads;">PHP for Windows: Binaries and Sources</link>
+   页面下载 PHP 的 zip 二进制发行包。有几个不同版本，根据所用 web 服务器选择合适的版本：
+   <itemizedlist spacing="compact">
+    <listitem>
+     <para>
+	  如果是用于 IIS 则选择 PHP 5.3 <emphasis>VC9 Non Thread Safe</emphasis>
+	  或者 <emphasis>VC6 Non Thread Safe</emphasis>；
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      如果是用 IIS7 或更高版本以及 PHP 5.3+，则应选择 VC9 的包。
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      如果是用于 Apache 1 或 Apache 2 则选择 PHP 5.3 <emphasis>VC6</emphasis>
+	  或者 PHP 5.2 <emphasis>VC6</emphasis>。
+     </para>
+    </listitem>
+   </itemizedlist>
+   <note>
+    <para>
+	 VC9 版本是用 Visual Studio 2008 编译的并且在性能和稳定性上都有所提高。VC9
+	 版本需要用户系统中安装有
+	 <link xlink:href="&url.microsoft.vc9.x86;">Microsoft 2008 C++ Runtime (x86)</link> 或者
+	 <link xlink:href="&url.microsoft.vc9.x64;">Microsoft 2008 C++ Runtime (x64)</link>。
+    </para>
+   </note>
+  </para>
+ </sect2>
+ <sect2 xml:id="install.windows.manual.package">
+  <title>PHP 压缩包的结构和内容</title>
+  <para>
+   将 zip 包解压缩到自己选择的目录，例如 C:\PHP\。此目录和文件结构类似于：
+   <example>
+    <title>PHP 5 压缩包的结构</title>
+     <programlisting>
+<![CDATA[
+
+c:\php
+   |
+   +--dev
+   |  |
+   |  |-php5ts.lib                 -- php5.lib 的非线程安全版本
+   |
+   +--ext                          -- PHP 扩展库的 DLL 文件目录
+   |  |
+   |  |-php_bz2.dll
+   |  |
+   |  |-php_cpdf.dll
+   |  |
+   |  |-...
+   |
+   +--extras                       -- 空 
+   |
+   +--pear                         -- PEAR 的初始版本
+   |
+   |
+   |-go-pear.bat                   -- PEAR 安装脚本
+   |
+   |-...
+   |
+   |-php-cgi.exe                   -- CGI 可执行文件
+   |
+   |-php-win.exe                   -- 无窗口执行脚本的可执行文件
+   |
+   |-php.exe                       -- PHP 命令行可执行文件（CLI）
+   |
+   |-...
+   |
+   |-php.ini-development           -- 默认的 php.ini 设置
+   |
+   |-php.ini-production            -- 推荐的 php.ini 设置
+   |
+   |-php5apache2_2.dll             -- 非线程安全版本中无此文件
+   |
+   |-php5apache2_2_filter.dll      -- 非线程安全版本中无此文件
+   |
+   |-...
+   |
+   |-php5ts.dll                    -- PHP 核心 DLL（php5.dll 的非线程安全版本）
+   | 
+   |-...
+
+]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   以下是 PHP zip 包中包含的模块和可执行文件列表：
+   <itemizedlist spacing="compact">
+    <listitem>
+     <para>
+      <filename>go-pear.bat</filename> - PEAR
+	  安装脚本。更多内容参见<link xlink:href="&url.pear.installation;">安装 PEAR</link>。
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      <filename>php-cgi.exe</filename> - CGI 可执行文件，可用于 IIS 上以 CGI 或者 FastCGI 方式运行 PHP。
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      <filename>php-win.exe</filename> - PHP 可执行文件，可运行 PHP 脚本而不打开命令行窗口（例如使用
+	  Windows 图形界面的 PHP 程序）。
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      <filename>php.exe</filename> - PHP 可执行文件，用于命令行界面运行 PHP 脚本（CLI）。
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      <filename>php5apache2_2.dll</filename> - Apache 2.2.X 模块。
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      <filename>php5apache2_2_filter.dll</filename> - Apache 2.2.X 过滤器。
+     </para>
+    </listitem>
+   </itemizedlist>
+  </para>
+ </sect2>
+ <sect2 xml:id="install.windows.manual.phpini">
+  <title>修改 <filename>php.ini</filename> 文件</title>
+  <para>
+   解压缩 PHP 的包之后，将 <filename>php.ini-production</filename> 拷贝为
+   同一目录下的 <filename>php.ini</filename>。如有必要，也可以将
+   <filename>php.ini</filename> 放到其它地方，但是需要更多配置步骤，具体见<link
+   linkend="configuration.file">配置文件</link>。
+  </para>
+  <para>
+    <filename>php.ini</filename> 文件决定 PHP 如何配置自身以及如何在其工作环境下运行。以下
+	<filename>php.ini</filename> 文件中的配置指令有助于使 PHP 更好地运行于 Windows
+	之中。有一些是可选项。还有很多其它指令也可能与用户环境有关，更多信息见
+    <link linkend="ini.list">php.ini 配置选项列表</link>。
+  </para>
+  <para>
+   必须的指令：
+   <itemizedlist spacing="compact">
+    <listitem>
+     <para>
+      <varname>extension_dir</varname> = <literal>&lt;指向扩展库目录的路径&gt;</literal> -
+	  <varname>extension_dir</varname> 需要指向存放 PHP
+	  扩展库文件的目录。可以是绝对路径（如 &quot;C:\PHP\ext&quot;）或相对路径（如
+	  &quot;.\ext&quot;）。在 <filename>php.ini</filename> 文件中要加载的扩展库都必须在
+	  <varname>extension_dir</varname> 所指定的目录之中。
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      <varname>extension</varname> = <literal>xxxxx.dll</literal> -
+	  对每个需要激活的扩展，都需要一行相应的 &quot;extension=&quot; 语句来说明
+	  PHP 启动时加载 <varname>extension_dir</varname> 目录下的哪些扩展。
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      <varname>log_errors</varname> = <literal>On</literal> - 
+	  PHP 有错误日志的功能可以将错误报告发送到一个文件中，或者系统服务中（例如系统日志），与下面的
+      <varname>error_log</varname> 指令配合工作。在 IIS 下运行时，<varname>log_errors</varname>
+	  应被激活，并且配合有效的 <varname>error_log</varname>。
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      <varname>error_log</varname> = <literal>&lt;指向错误日志文件的路径&gt;</literal> - 
+	  error_log 需要指向一个具有绝对或相对路径的文件名用于记录 PHP
+	  的错误日志。Web 服务器需要对此文件有可写权限。最常用的位置是各种临时目录，例如
+	  &quot;C:\inetpub\temp\php-errors.log&quot;。
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      <varname>cgi.force_redirect</varname> = <literal>0</literal> - 
+	  在 IIS 下运行时需要关闭此项指令。这是个在许多其它 web 服务器中都需要激活的目录安全功能，但是在
+	  IIS 下如果激活则会导致 PHP 引擎在 Windows 中出错。
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      <varname>cgi.fix_pathinfo</varname> = <literal>1</literal> - 
+	  此指令可以允许 PHP 遵从 CGI 规则访问真实路径信息。IIS 的 FastCGI 实现需要激活此指令。
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      <varname>fastcgi.impersonate</varname> = <literal>1</literal> - 
+	  IIS 下的 FastCGI 支持模拟呼叫用户方安全令牌的能力。这使得 IIS 可以定义请求方的安全上下文。
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      <varname>fastcgi.logging</varname> = <literal>0</literal> - 
+	  FastCGI 日志在 IIS 下应被关闭。如果激活，则任何类的任何消息都被 FastCGI
+	  视为错误条件从而导致 IIS 产生 HTTP 500 错误。
+     </para>
+    </listitem>
+   </itemizedlist>
+  </para>
+  <para>
+   可选指令：
+   <itemizedlist spacing="compact">
+    <listitem>
+     <para>
+      <varname>max_execution_time</varname> = <literal>##</literal> - 
+	  此指令设定任何脚本所能够运行的最长时间。默认值是 30 秒。如果
+	  PHP 程序需要更多时间运行则增大此值。
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      <varname>memory_limit</varname> = <literal>###M</literal> - 
+	  PHP 进程能够占用的内存，单位为兆字节。默认值是 128M，对大多数程序都够用了。某些复杂程序可能需要更多。
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      <varname>display_errors</varname> = <literal>Off</literal> - 
+	  此指令设定 PHP 是否将任何错误信息包含在返回给 web
+	  服务器的数据流中。如果设定为 &quot;On&quot;，则 PHP
+	  将任何由 <varname>error_reporting</varname> 指令所定义的错误信息作为错误数据流发给
+	  web 服务器。为安全起见，建议对在线服务器设为 &quot;Off&quot;
+	  以避免泄露任何可能包含在错误消息中的安全敏感信息。
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      <varname>open_basedir</varname> = <literal>&lt;指向目录的路径，由分号分隔&gt;</literal> -
+	  例如
+      openbasedir=&quot;C:\inetpub\wwwroot;C:\inetpub\temp&quot;。此指令指定了允许
+	  PHP 进行文件系统操作的目录。任何对这些目录之外的文件操作都会导致错误。此指令在共享主机环境中特别有用，可以阻止
+	  PHP 脚本访问任何其网站根目录之外的文件。
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      <varname>upload_max_filesize</varname> = <literal>###M</literal> 和 <varname>post_max_size</varname> = <literal>###M</literal> -
+	  分别是上传文件的最大大小和 POST 方法提交数据的最大大小。如果 PHP
+	  程序需要上传大型数据例如照片和视频文件，则应提高这两项的值。
+     </para>
+    </listitem>
+   </itemizedlist>
+  </para>
+  <para>
+   至此已在系统中安装了 PHP。下一步是选择一种 web 服务器并且使其能够运行
+   PHP。在目录中选择 web 服务器。
+  </para>
+  <para>
+   除了可在 web 服务器中运行 PHP 之外，PHP 还可以在命令行运行，如同
+   <literal>.BAT</literal> 批处理脚本一样。详见
+   <link linkend="install.windows.commandline">Windows
+   下的 PHP 命令行方式</link>。
+  </para>
+ </sect2>
+</sect1>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
