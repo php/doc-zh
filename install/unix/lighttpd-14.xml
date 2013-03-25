@@ -16,20 +16,19 @@
  </para>
  
  <para>
-  Fastcgi is the preferred SAPI to connect PHP and Lighttpd. Fastcgi is
-  automagically enabled in php-cgi in PHP 5.3, but for older versions configure
-  PHP with --enable-fastcgi.  To confirm that PHP has fastcgi enabled,
-  <literal>php -v</literal> should contain <literal>PHP 5.2.5 (cgi-fcgi)</literal>
-  Before PHP 5.2.3, fastcgi was enabled on the php binary (there was no php-cgi).
+  推荐使用 Fastcgi 作为 SAPI 模块来连接 PHP 和 Lighttpd。在 PHP 5.3
+  中自动激活了 Fastcgi，对于旧版本则在配置时使用
+  --enable-fastcgi。要确认 PHP 已激活 Fastcgi 可以使用命令
+  <literal>php -v</literal>，应该显示 <literal>PHP 5.2.5 (cgi-fcgi)</literal>。在
+  PHP 5.2.3 之前，Fastcgi 是包含在 php 可执行文件中（没有 php-cgi 文件）。
  </para>
  
  <sect2 xml:id="install.unix.lighttpd-14.lighttpd-spawn">
-  <title>Letting Lighttpd spawn php processes</title>
+  <title>使 Lighttpd 产生 php 进程</title>
 
   <para>
-   To configure Lighttpd to connect to php and spawn fastcgi processes, edit
-   lighttpd.conf. Sockets are preferred to connect to fastcgi processes on
-   the local system.
+   要配置 Lighttpd 连接到 php 并产生 fastcgi 进程，编辑
+   lighttpd.conf。推荐使用套接字在本机连接 fastcgi 进程。
   </para>
 
   <example>
@@ -57,41 +56,38 @@ fastcgi.server = ( ".php" =>
   </example>
 
   <para>
-   The bin-path directive allows lighttpd to spawn fastcgi processes dynamically.
-   PHP will spawn children according to the PHP_FCGI_CHILDREN environment
-   variable.  The "bin-environment" directive sets the environment for the
-   spawned processes. PHP will kill a child process after the number of
-   requests specified by PHP_FCGI_MAX_REQUESTS is reached. The directives
-   "min-procs" and "max-procs" should generally be avoided with PHP. PHP
-   manages its own children and opcode caches like APC will only share among
-   children managed by PHP. If "min-procs" is set to something greater than 1,
-   the total number of php responders will be multiplied PHP_FCGI_CHILDREN
-   (2 min-procs * 16 children gives 32 responders).
+   bin-path 指令允许 lighttpd 动态产生 fastcgi 进程。PHP
+   会根据 PHP_FCGI_CHILDREN
+   环境变量产生子进程。“bin-environment”指令设定了所产生的进行的环境。PHP
+   会在达到 PHP_FCGI_MAX_REQUESTS 所指定的请求数目之后杀死一个子进程。在
+   PHP 中通常应避免“min-procs”和“max-procs”指令。PHP
+   自己管理其子进程，并且例如 APC 之类的 opcode 缓存仅在 PHP
+   管理下的子进程之间共享。如果“min-procs”被设定成某个大于 1
+   的值，则 PHP 应答器的总数目为该值乘以 PHP_FCGI_CHILDREN（如 min-procs 为
+   2，PHP_FCGI_CHILDREN 为 16 则会产生 32 个应答器）。
   </para>
  </sect2>
 
  <sect2 xml:id="install.unix.lighttpd-14.spawn-fcgi">
-  <title>Spawning with spawn-fcgi</title>  
+  <title>通过 spawn-fcgi 产生进程</title>  
 
   <para>
-   Lighttpd provides a program called spawn-fcgi to ease the process of
-   spawning fastcgi processes easier.
+   Lighttpd 提供一个名为 spawn-fcgi 的程序来简化产生 fastcgi 进程的手续。
   </para>
  </sect2>
 
  <sect2 xml:id="install.unix.lighttpd-14.spawn-php">
-  <title>Spawning php-cgi</title>
+  <title>产生 php-cgi</title>
 
   <para>
-   It is possible to spawn processes without spawn-fcgi, though a bit of
-   heavy-lifting is required. Setting the PHP_FCGI_CHILDREN environment var
-   controls how many children PHP will spawn to handle incoming requests.
-   Setting PHP_FCGI_MAX_REQUESTS will determine how long (in requests) each
-   child will live. Here's a simple bash script to help spawn php responders.
+   有可能不通过 spawn-fcgi 来产生进程，但需要做些工作。设定
+   PHP_FCGI_CHILDREN 环境变量控制了 PHP 产生多少个子进程来处理请求。设定
+   PHP_FCGI_MAX_REQUESTS 将决定每个子进程存活多久（以请求数目决定）。以下为一个简单的
+   bash 脚本来帮助产生 php 应答器。
   </para>
      
   <example>
-   <title>Spawning FastCGI Responders</title>
+   <title>产生 FastCGI 应答器</title>
    <screen>
 <![CDATA[
 #!/bin/sh
@@ -122,15 +118,14 @@ echo $! > "$PHP_PID"
  </sect2>
 
  <sect2 xml:id="install.unix.lighttpd-14.remote-fcgi">
-  <title>Connecting to remote FCGI instances</title>
+  <title>连接远程 FCGI 实例</title>
 
   <para>
-   Fastcgi instances can be spawned on multiple remote machines in order to
-   scale applications.
+   Fastcgi 实例可被产生于多个远程机器以分散应用程序。
   </para>
    
   <example>
-   <title>Connecting to remote php-fastcgi instances</title>
+   <title>连接远程 php-fastcgi 实例</title>
    <screen>
 <![CDATA[
 fastcgi.server = ( ".php" =>
