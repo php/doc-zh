@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision$ -->
+<!-- $Author$ -->
+<!-- EN-Revision: 96c9d88bad9a7d7d44bfb7f26c226df7ee9ddf26 Maintainer: dallas Status: ready -->
+<sect1 xml:id="install.windows.apache2" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <title>Microsoft Windows 下的 Apache 2.x</title>
+ <para>
+  本节包括在 Microsoft Windows 系统中针对 Apache 2.x 安装 PHP 的指导与说明。在其它页面也有 
+  <link linkend="install.windows.apache1">Apache 1.3.x 用户指导与说明</link>。
+ </para>
+ <note>
+  <para>
+   应该先阅读<link linkend="install.windows.manual">手工安装步骤</link>！
+  </para>
+ </note>
+ 
+ <note>
+  <title>Apache 2.2 支持</title>
+  <para>
+   Apache 2.2 用户应留意对于 Apache 2.2 的 DLL 文件名是
+   <filename>php5apache2_2.dll</filename> 而不是
+   <filename>php5apache2.dll</filename>，并且只在 PHP 5.2.0
+   以及更高版本中出现。参见 <link xlink:href="&url.php.snapshots;">&url.php.snapshots;</link>。
+  </para>
+ </note>
+
+ <para>
+  强烈建议阅读 <link xlink:href="&amp;url.apache2.docs;">Apache 文档</link>来加深对
+  Apache 2.x 服务器的基本理解。此外在继续下去之前考虑先阅读一下 Apache 2.x 的 
+  <link xlink:href="&url.apache2.windows;">Windows 下使用说明</link>。
+ </para>
+ 
+ <para>
+  Apache 2.x 被设计运行于 Windows 版的服务器平台下，例如 Windows NT 4.0，Windows
+  2000，Windows XP 或 Windows 7。虽然 Apache 2.x 可以在 Windows 9x
+  下勉强运行，但对此平台的支持尚未完成，某些功能无法正确工作。对此并无补救计划。
+ </para>
+
+ <para>
+  下载最新版本的 <link xlink:href="&url.apache;">Apache 2.x</link>
+  以及适合的 PHP 版本。先完成<link linkend="install.windows.manual">手工安装步骤</link>后再回来继续将
+  PHP 集成入 Apache。
+ </para>
+
+ <para>
+  Windows 下有三种方法使 PHP 工作于 Apache 2.x 之中。可以以 handler，CGI，或者 FastCGI 方式运行 PHP。
+ </para>
+ 
+ &note.apache.slashes;
+
+ <sect2 xml:id="install.windows.apache2.module">
+  <title>以 Apache handler 方式安装</title>
+  <para>
+   需要将以下几行加入到 Apache 的 &httpd.conf; 配置文件中以加载 Apache 2.x 的 PHP 模块：
+   <example>
+    <title>PHP 在 Apache 2.x 中作为 handler</title>
+    <programlisting role="apache-conf">
+<![CDATA[
+# 
+LoadModule php5_module "c:/php/php5apache2.dll"
+AddHandler application/x-httpd-php .php
+
+# 配置 php.ini 的路径
+PHPIniDir "C:/php"
+]]>
+    </programlisting>
+   </example>
+  </para>
+  <note>
+   <simpara>
+    记得用自己 PHP 实际所在的路径替换掉上例中的 
+    <filename>c:/php/</filename>。要留意在 LoadModule 指令中使用了
+    <filename>php5apache2.dll</filename> 或者
+	<filename>php5apache2_2.dll</filename>，并且该文件确实位于所指定的位置。
+   </simpara>
+  </note>
+  <para>
+   以上配置将使 PHP 处理任何具有 .php 后缀的文件，即使该文件还有其它的文件后缀。例如一个名为
+   <filename>example.php.txt</filename> 的文件将被作为 PHP 文件运行。要确保只有以
+   <filename>.php</filename> <emphasis>结尾</emphasis>的文件才被执行，则用以下配置替换上面的：
+  </para>
+
+  <example>
+   <programlisting role="apache-conf">
+<![CDATA[
+ <FilesMatch \.php$>
+      SetHandler application/x-httpd-php
+ </FilesMatch>
+]]>
+   </programlisting>
+  </example>
+ </sect2>
+
+ <sect2 xml:id="install.windows.apache2.cgi">
+  <title>以 CGI 方式运行 PHP</title>
+  <para>
+   要更好地理解在 Apache 下运行 CGI，请参阅
+   <link xlink:href="&url.apache.cgi;">Apache CGI 文档</link>。
+  </para>
+  <para>
+   要将 PHP 以 CGI 方式运行，需要将 php-cgi 文件放入到用
+   ScriptAlias 指令所指定的 CGI 目录中。
+  </para>
+  <para>
+   然后需要给 PHP 文件中添加一 #! 的行来指明 PHP 可执行文件的位置：
+   <example>
+    <title>Apache 2.x 下 CGI 方式的 PHP</title>
+     <programlisting>
+<![CDATA[
+#!C:/php/php.exe
+<?php
+  phpinfo();
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+  &warn.install.cgi;
+ </sect2>
+
+ <sect2 xml:id="install.windows.apache2.fastcgi">
+  <title>以 FastCGI 方式运行 PHP</title>
+
+  <para>
+   以 FastCGI 方式运行 PHP 比起 CGI 方式有很多优点。设定的方式很直接：
+  </para>
+  <para>
+   从 <link xlink:href="&url.apache.fcgid;">&url.apache.fcgid;</link>
+   取得 mod_fcgid，该站点有 Win32 可执行文件的下载。按照下载文件中的指示安装此模块。
+  </para>
+  <para>
+   按以下方法配置 web 服务器，注意用自己系统上的路径替换其中相应的内容：
+
+  <example>
+   <title>配置 Apache 以 FastCGI 方式运行 PHP</title>
+   <programlisting>
+<![CDATA[
+LoadModule fcgid_module modules/mod_fcgid.so  
+
+# Where is your php.ini file?
+FcgidInitialEnv PHPRC        "c:/php" 
+
+AddHandler fcgid-script .php  
+FcgidWrapper "c:/php/php-cgi.exe" .php  
+]]>
+   </programlisting>
+   </example>
+   此时具有 .php 后缀的文件将被 PHP FastCGI 所解析执行。
+  </para>
+
+ </sect2>
+
+</sect1>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
