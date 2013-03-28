@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 8b6d169424ff189bb563ef4c3f35f8adff3f42c5 Maintainer: dallas Status: partial -->
+<!-- EN-Revision: 8b6d169424ff189bb563ef4c3f35f8adff3f42c5 Maintainer: dallas Status: ready -->
 
 <sect1 xml:id="install.windows.iis6" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <title>Microsoft IIS 5.1 和 IIS 6.0</title>
@@ -56,68 +56,67 @@ cscript %windir%\system32\inetsrv\fcgiconfig.js -add -section:"PHP" ^
    </example>
   </para>
   <para>
-   
-   This command will create an IIS script mapping for *.php file extension, which will result in all URLs 
-   that end with .php being handled by FastCGI extension. Also, it will configure FastCGI extension to 
-   use the executable <filename>php-cgi.exe</filename> to process the PHP requests.
+   此命令将创建对应于 *.php 文件后缀的 IIS 脚本映射，则所有以 *.php 结尾的 URL
+   都会被 FastCGI 扩展处理。此外还配置了 FastCGI 扩展使用 <filename>php-cgi.exe</filename>
+   可执行文件来处理 PHP 请求。
    <note>
      <para>
-      At this point the required installation and configuration steps are completed. The remaining 
-      instructions below are optional but highly recommended for achieving optimal functionality 
-      and performance of PHP on IIS.
+      至此所需的安装和配置步骤就完成了。以下剩余的指示是可选项，但是强烈推荐以使得在
+	  IIS 上达到最佳的 PHP 功能和性能。
      </para>
    </note>
   </para>
  </sect2>
  <sect2 xml:id="install.windows.iis6.impersonation">
-  <title>Impersonation and file system access</title>
+  <title>角色扮演及文件系统访问</title>
   <para>
-   It is recommended to enable FastCGI impersonation in PHP when using IIS. This 
-   is controlled by the <varname>fastcgi.impersonate</varname> directive in <filename>php.ini</filename> file. When 
-   impersonation is enabled, PHP will perform all the file system operations on 
-   behalf of the user account that has been determined by IIS authentication. This 
-   ensures that even if the same PHP process is shared across different IIS web 
-   sites, the PHP scripts in those web sites will not be able to access each 
-   others&#39; files as long as different user accounts are used for IIS authentication 
-   on each web site.
+   在 IIS 中使用 PHP 建议激活 FastCGI 的角色扮演功能。此功能在 <filename>php.ini</filename>
+   中由 <varname>fastcgi.impersonate</varname> 指令控制。激活角色扮演后，PHP
+   将以 IIS 所认证的用户帐号身份进行所有的文件系统操作。这将确保即使在（同一个主机）不同的
+   IIS 网站下使用了同一个 PHP 进程，只要每个网站使用了不同的用户帐号作为 IIS
+   身份认证，则这些网站的 PHP 脚本将不能访问彼此的文件。
   </para>
   <para>
-   For example IIS 5.1 and IIS 6.0, in its default configuration, has anonymous authentication enabled 
-   with built-in user account IUSR_&lt;MACHINE_NAME&gt; used as a default identity. This means that in 
-   order for IIS to execute PHP scripts, it is necessary to grant IUSR_&lt;MACHINE_NAME&gt; account 
-   read permission on those scripts. If PHP applications need to perform write operations on certain 
-   files or write files into some folders then IUSR_&lt;MACHINE_NAME&gt; account should have write permission to those.
+   例如在 IIS 5.1 和 IIS 6.0 中，默认配置下的匿名认证将使用内置的用户帐号 IUSR_&lt;MACHINE_NAME&gt;
+   作为默认身份。这意味着要使得
+   IIS 能够运行 PHP 脚本，至少要将这些脚本的读取权限授予 IUSR_&lt;MACHINE_NAME&gt; 帐号。如果 PHP
+   程序需要对某些文件或文件夹进行写入操作，那 IUSR_&lt;MACHINE_NAME&gt; 帐号也需要有相对应的写入权限。
   </para>
   <para>
-   To determine which user account is used by IIS anonymous authentication, follow these steps:
+   要查看哪个用户帐号被用作 IIS 匿名认证的身份，使用以下步骤：
    <procedure>
     <step>
-     <simpara>In the Windows Start Menu choose &quot;Run:&quot;, type &quot;inetmgr&quot; and click &quot;Ok&quot;;</simpara>
+     <simpara>
+	  在 Windows 开始菜单中选择“运行...”，输入“inetmgr”并点击“确定”；
+	 </simpara>
     </step>
     <step>
-     <simpara>Expand the list of web sites under the &quot;Web Sites&quot; node in the tree view, right-click on a web 
-      site that is being used and select &quot;Properties&quot;;
+     <simpara>
+	  在树形视图下展开“网站”节点，右键点击要使用的网站并选择“属性”；
      </simpara>    
     </step>
     <step>
-     <simpara>Click the &quot;Directory Security&quot; tab;</simpara>    
+     <simpara>
+	  点击“目录安全”面板；
+	 </simpara>    
     </step>
     <step>
-     <simpara>Take note of a &quot;User name:&quot; field in the &quot;Authentication Methods&quot; dialog</simpara>
+     <simpara>
+	  记录下在“认证方式”对话框中的“用户名”字段。
+	 </simpara>
     </step>
    </procedure>
    <mediaobject>
-    <alt>Anonymous authenication for IIS 5.1 and IIS 6.0</alt>
+    <alt>IIS 5.1 和 IIS 6.0 的匿名认证</alt>
     <imageobject>
      <imagedata fileref="en/install/windows/figures/iis6anonauth.png" width="654" depth="461" />
     </imageobject>
    </mediaobject>
   </para>
   <para>
-   To modify the permissions settings on files and folders, use the Windows Explorer user interface 
-   or <varname>icacls</varname> command.
+   要修改文件及文件夹的权限，使用 Windows 资源管理器或者 <varname>icacls</varname> 命令行。
    <example>
-    <title>Configuring file access permissions</title>
+    <title>配置文件访问权限</title>
     <programlisting>
 <![CDATA[
 icacls C:\inetpub\wwwroot\upload /grant IUSR:(OI)(CI)(M)
@@ -127,27 +126,35 @@ icacls C:\inetpub\wwwroot\upload /grant IUSR:(OI)(CI)(M)
   </para>
  </sect2>
  <sect2 xml:id="install.windows.iis6.defaultdoc">
-  <title>Set <filename>index.php</filename> as a default document in IIS</title>
+  <title>在 IIS 中把 <filename>index.php</filename> 设定为默认文档</title>
   <para>
-   The IIS default documents are used for HTTP requests that do not specify a document name. With PHP applications, 
-   <filename>index.php</filename> usually acts as a default document. To add <filename>index.php</filename> to the list of 
-   IIS default documents, follow these steps:
+   IIS 的默认文档用于没有指定文件名的 HTTP 请求。对于 PHP 应用来说默认文档通常为
+   <filename>index.php</filename>。要将 <filename>index.php</filename>
+   添加到 IIS 的默认文档列表中，使用以下步骤：
    <procedure>
     <step>
-     <simpara>In the Windows Start Menu choose &quot;Run:&quot;, type &quot;inetmgr&quot; and click &quot;Ok&quot;;</simpara>
+     <simpara>
+	  在 Windows 开始菜单中选择“运行...”，输入“inetmgr”并点击“确定”；
+	  </simpara>
     </step>
     <step>
-     <simpara>Right-click on the &quot;Web Sites&quot; node in the tree view and select &quot;Properties&quot;;</simpara>
+     <simpara>
+	  在树形视图下展开“网站”节点，右键点击要使用的网站并选择“属性”；
+	 </simpara>
     </step>
     <step>
-     <simpara>Click the &quot;Documents&quot; tab;</simpara>
+     <simpara>
+	  点击“文档”面板；
+	 </simpara>
     </step>
     <step>
-     <simpara>Click the &quot;Add...&quot; button and enter &quot;index.php&quot; for the &quot;Default content page:&quot;.</simpara>
+     <simpara>
+	  点击“添加...”按钮并在“默认内容页面”中输入“index.php”。
+	 </simpara>
     </step>
    </procedure>
    <mediaobject>
-    <alt>Setting index.php as default document for IIS</alt>
+    <alt>将 index.php 设为 IIS 的默认文档</alt>
     <imageobject>
      <imagedata fileref="en/install/windows/figures/iis6defaultdoc.png" width="659" depth="465" />
     </imageobject>
@@ -155,16 +162,16 @@ icacls C:\inetpub\wwwroot\upload /grant IUSR:(OI)(CI)(M)
   </para>
  </sect2>
  <sect2 xml:id="install.windows.iis6.recycling">
-  <title>FastCGI and PHP Recycling configuration</title>
+  <title>FastCGI 和 PHP 回收配置</title>
   <para>
-   Configure IIS FastCGI extension settings for recycling of PHP processes by using the commands shown below. 
-   The FastCGI setting <varname>instanceMaxRequests</varname> controls how many requests will be processed by a single 
-   <filename>php-cgi.exe</filename> process before FastCGI extension shuts it down. The PHP environment variable 
-   <varname>PHP_FCGI_MAX_REQUESTS</varname> controls how many requests a single <filename>php-cgi.exe</filename> process 
-   will handle before it recycles itself. Make sure that the value specified for FastCGI <varname>InstanceMaxRequests</varname>
-   setting is less than or equal to the value specified for <varname>PHP_FCGI_MAX_REQUESTS</varname>.
+   用以下命令配置 IIS FastCGI 对于 PHP 进程的回收设定。FastCGI 的设置
+   <varname>instanceMaxRequests</varname> 控制了单一的 <filename>php-cgi.exe</filename>
+   进程处理多少个请求之后会被 IIS 关闭。PHP 环境变量 <varname>PHP_FCGI_MAX_REQUESTS</varname>
+   控制了一个 <filename>php-cgi.exe</filename>
+   进程处理多少个请求之后会被自我回收。要确保 FastCGI 中 <varname>InstanceMaxRequests</varname>
+   的值小于或等于 <varname>PHP_FCGI_MAX_REQUESTS</varname> 的值。
    <example>
-    <title>Configuring FastCGI and PHP recycling</title>
+    <title>配置 FastCGI 和 PHP 的回收</title>
     <programlisting>
 <![CDATA[
 cscript %windir%\system32\inetsrv\fcgiconfig.js -set -section:"PHP" ^
@@ -178,14 +185,14 @@ cscript %windir%\system32\inetsrv\fcgiconfig.js -set -section:"PHP" ^
   </para>
  </sect2>
  <sect2 xml:id="install.windows.iis6.timeouts">
-  <title>Configuring FastCGI timeout settings</title>
+  <title>FastCGI 超时设定</title>
   <para>
-   Increase the timeout settings for FastCGI extension if there are applications that have long running PHP scripts. 
-   The two settings that control timeouts are <varname>ActivityTimeout</varname> and <varname>RequestTimeout</varname>. 
-   Refer to <link xlink:href="&url.iis.fastcgi.settings;">Configuring FastCGI Extension for IIS 6.0</link> for more 
-   information about those settings.
+   如果会有一些需时较长的 PHP 脚本运行，则增加超时的设定值。有两个控制超时的指令
+   <varname>activityTimeout</varname> 和
+   <varname>requestTimeout</varname>。有关这些设定的更多信息参见
+   <link xlink:href="&url.iis.fastcgi.settings;">Configuring FastCGI Extension for IIS 6.0</link>。
    <example>
-    <title>Configuring FastCGI timeout settings</title>
+    <title>配置 FastCGI 超时设定</title>
     <programlisting>
 <![CDATA[
 cscript %windir%\system32\inetsrv\fcgiconfig.js -set -section:"PHP" ^
@@ -199,17 +206,15 @@ cscript %windir%\system32\inetsrv\fcgiconfig.js -set -section:"PHP" ^
    </para>
  </sect2>
  <sect2 xml:id="install.windows.iis6.phpinilocation">
-  <title>Changing the Location of <filename>php.ini</filename> file</title>
+  <title>改变 <filename>php.ini</filename> 文件的位置</title>
   <para>
-   PHP searches for <filename>php.ini</filename> file in 
-   <link linkend="configuration.file">several locations</link> and it is 
-   possible to change the default locations of <filename>php.ini</filename> 
-   file by using <varname>PHPRC</varname> environment variable. To instruct PHP 
-   to load the configuration file from a custom location run the command shown below. 
-   The absolute path to the directory with <filename>php.ini</filename> file should be 
-   specified as a value of <varname>PHPRC</varname> environment variable.
+   PHP 在几个位置搜索<link linkend="configuration.file">配置文件</link>
+   <filename>php.ini</filename>，可以通过环境变量 <varname>PHPRC</varname>
+   来改变其默认位置。要使得 PHP 从用户指定的位置加载配置文件，使用以下命令。指向
+   <filename>php.ini</filename> 文件的绝对路径应作为环境变量 <varname>PHPRC</varname>
+   的值。
    <example>
-    <title>Changing the location of <filename>php.ini</filename> file</title>
+    <title>改变 <filename>php.ini</filename> 文件的位置</title>
     <programlisting>
 <![CDATA[
 cscript %windir%\system32\inetsrv\fcgiconfig.js -set -section:"PHP" ^
