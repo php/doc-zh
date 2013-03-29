@@ -1,64 +1,99 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
 <!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: verdana  Status:ready -->
-<!-- CREDITS: dallas,bjori -->
+<!-- EN-Revision: 203cd3e98e3c8c640cb34ed77bd61e9ddf3a86f8 Maintainer: verdana  Status:ready -->
+<!-- CREDITS: dallas -->
 <chapter xml:id="language.basic-syntax" xmlns="http://docbook.org/ns/docbook">
  <title>基本语法</title>
- <sect1 xml:id="language.basic-syntax.phpmode">
-  <title>从 HTML 中分离</title>
+ <sect1 xml:id="language.basic-syntax.phptags">
+  <title>PHP 标记</title>
   <para>
-   当 PHP 解析一个文件时，会寻找开始和结束标记，标记告诉
-   PHP 开始和停止解释其中的代码。此种方式的解析可以使
-   PHP 嵌入到各种不同的文档中，凡是在一对开始和结束标记之外的内容都会被
-   PHP 解析器忽略。大多数情况下 PHP 都是嵌入在 HTML 文档中的，如下例所示。
+   当解析一个文件时，PHP 会寻找起始和结束标记，也就是
+   <literal>&lt;?php</literal> 和 <literal>?&gt;</literal>，这告诉
+   PHP 开始和停止解析二者之间的代码。此种解析方式使得 PHP
+   可以被嵌入到各种不同的文档中去，而任何起始和结束标记之外的部分都会被
+   PHP 解析器忽略。
+  </para>
+  <para>
+   PHP 也允许使用短标记 <literal>&lt;?</literal> 和
+   <literal>?&gt;</literal>，但不鼓励使用。只有通过激活 &php.ini;
+   中的 <link linkend="ini.short-open-tag">short_open_tag</link>
+   配置指令或者在编译 PHP 时使用了配置选项 <option>--enable-short-tags</option>
+   时才能使用短标记。
+    option.
+  </para>
+  <para>
+   如果文件内容是纯 PHP 代码，最好在文件末尾删除 PHP
+   结束标记。这可以避免在 PHP 结束标记之后万一意外加入了空格或者换行符，会导致
+   PHP 开始输出这些空白，而脚本中此时并无输出的意图。
    <informalexample>
     <programlisting role="php">
 <![CDATA[
-<p>This is going to be ignored.</p>
-<?php echo 'While this is going to be parsed.'; ?>
-<p>This will also be ignored.</p>
+<?php
+echo "Hello world";
+
+// ... more code
+
+echo "Last statement";
+
+// 脚本至此结束，并无 PHP 结束标记
 ]]>
     </programlisting>
    </informalexample>
   </para>
+ </sect1>
+
+ <sect1 xml:id="language.basic-syntax.phpmode">
+  <title>从 HTML 中分离</title>
   <para>
-   还可以用更高级的结构：
+   凡是在一对开始和结束标记之外的内容都会被
+   PHP 解析器忽略，这使得 PHP 文件可以具备混合内容。 可以使 PHP
+   嵌入到 HTML 文档中去，如下例所示。
    <example>
-    <title>高级分离术</title>
     <programlisting role="php">
 <![CDATA[
-<?php
-if ($expression) {
-    ?>
-    <strong>This is true.</strong>
-    <?php
-} else {
-    ?>
-    <strong>This is false.</strong>
-    <?php
-}
-?>
+<p>This is going to be ignored by PHP and displayed by the browser.</p>
+<?php echo 'While this is going to be parsed.'; ?>
+<p>This will also be ignored by PHP and displayed by the browser.</p>
 ]]>
     </programlisting>
    </example>
-   上例可正常工作，因为当 PHP 碰到结束标记 ?&gt;
-   时，就简单地将其后的内容原样输出（
-   除非其后紧接着一个新行,参见<link linkend="language.basic-syntax.instruction-separation">指令分隔符</link>
-   )直到碰到下一个开始标记为止。当然，上面的例子很做作，但是对输出大块的文本而言，脱离
-   PHP 解析模式通常比将所有内容用 <function>echo</function>
-   或者 <function>print</function> 输出更有效率。
+   这将如预期中的运行，因为当 PHP 解释器碰到 ?&gt;
+   结束标记时就简单地将其后内容原样输出（除非马上紧接换行 - 见<link
+   linkend="language.basic-syntax.instruction-separation">指令分隔符</link>）直到碰到下一个开始标记；例外是处于条件语句中间时，此时
+   PHP 解释器会根据条件判断来决定哪些输出，哪些跳过。见下例。
+  </para>
+  <para>
+   使用条件结构：
+   <example>
+    <title>使用条件的高级分离术</title>
+     <programlisting role="php">
+<![CDATA[
+<?php if ($expression == true): ?>
+  This will show if the expression is true.
+<?php else: ?>
+  Otherwise this will show.
+<?php endif; ?>
+]]>
+     </programlisting>
+   </example>
+   上例中 PHP 将跳过条件语句未达成的段落，即使该段落位于 PHP 开始和结束标记之外。由于
+   PHP 解释器会在条件未达成时直接跳过该段条件语句块，因此 PHP 会根据条件来忽略之。
+  </para>
+  <para>
+   要输出大段文本时，跳出 PHP 解析模式通常比将文本通过
+   <function>echo</function> 或 <function>print</function> 输出更有效率。
   </para>
   <para>
    可以在 PHP 中使用四对不同的开始和结束标记。其中两种，&lt;?php ?&gt;
    和 &lt;script language="php"&gt; &lt;/script&gt; 总是可用的。另两种是短标记和
    <productname>ASP</productname> 风格标记，可以在 &php.ini;
    配置文件中打开或关闭。尽管有些人觉得短标记和
-   <productname>ASP</productname> 风格标记很方便，但移植性较差，通常不推荐。
+   <productname>ASP</productname> 风格标记很方便，但移植性较差，通常不推荐使用。
    <note>
     <para>
      此外注意如果将 PHP 嵌入到 XML 或 XHTML
-     中则需要使用 &lt;?php ?&gt; 以保持符合标准。
+     中则需要使用 &lt;?php ?&gt; 标记以保持符合标准。
     </para>
    </note>
   </para>
@@ -67,7 +102,7 @@ if ($expression) {
     <title>PHP 开始和结束标记</title>
     <programlisting role="php">
 <![CDATA[
-1.  <?php echo 'if you want to serve XHTML or XML documents, do like this'; ?>
+1.  <?php echo 'if you want to serve XHTML or XML documents, do it like this'; ?>
 
 2.  <script language="php">
         echo 'some editors (like FrontPage) don\'t
@@ -84,7 +119,7 @@ if ($expression) {
    </example>
   </para>
   <para>
-   上例中的 1 和 2 总是可用的，其中 1 是最常用，并建议使用的。
+   上例中的 1 和 2 中使用的标记总是可用的，其中示例 1 中是最常用，并建议使用的。
   </para>
   <para>
    短标记（上例 3）仅在通过 &php.ini; 配置文件中的指令
@@ -99,7 +134,19 @@ if ($expression) {
   </para>
   <note>
    <para>
-    在以下情况应避免使用短标记：开发需要发行的程序或者库，或者在用户不能控制的服务器上开发。因为目标服务器可能不支持短标记。为了代码的移植及发行，确保不要使用短标记。
+    在以下情况应避免使用短标记：开发需要再次发布的程序或者库，或者在用户不能控制的服务器上开发。因为目标服务器可能不支持短标记。为了代码的移植及发行，确保不要使用短标记。
+   </para>
+  </note>
+  <note>
+   <para>
+    在 PHP 5.2 和之前的版本中，解释器不允许一个文件的全部内容就是一个开始标记
+    <literal>&lt;?php</literal>。自 PHP 5.3 起则允许此种文件，但要开始标记后有一个或更多白空格符。
+   </para>
+  </note>
+  <note>
+   <para>
+    自 PHP 5.4 起，短格式的 echo 标记 <literal>&lt;?=</literal>
+	总会被识别并且合法，而不管 <link linkend="ini.short-open-tag">short_open_tag</link> 的设置是什么。
    </para>
   </note>
  </sect1>
@@ -166,8 +213,8 @@ if ($expression) {
    <informalexample>
     <programlisting role="php">
 <![CDATA[
-<h1>This is an <?php # echo "simple";?> example.</h1>
-<p>The header above will say 'This is an example'.
+<h1>This is an <?php # echo 'simple';?> example</h1>
+<p>The header above will say 'This is an  example'.</p>
 ]]>
     </programlisting>
    </informalexample>
