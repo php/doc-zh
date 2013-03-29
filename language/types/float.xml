@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
 <!-- $Author$ -->
-<!-- EN-Revision: af4410a7e15898c3dbe83d6ea38246745ed9c6fb Maintainer: Altair Status: ready -->
-<!-- CREDITS: Gregory dallas -->
-<sect1 xml:id="language.types.float">
+<!-- EN-Revision: ea5ef878791d0182c69e3fb69e05a7ddd97aad15 Maintainer: Altair Status: ready -->
+<!-- CREDITS: Gregory, dallas -->
+<sect1 xml:id="language.types.float" xmlns:xlink="http://www.w3.org/1999/xlink">
  <title>浮点型</title>
 
  <para>
@@ -27,7 +27,7 @@ $c = 7E-10;
  </para>
 
  <informalexample>
-  <programlisting role="php">
+  <programlisting>
 <![CDATA[
 LNUM          [0-9]+
 DNUM          ([0-9]*[\.]{LNUM}) | ({LNUM}[\.][0-9]*)
@@ -37,28 +37,32 @@ EXPONENT_DNUM [+-]?(({LNUM} | {DNUM}) [eE][+-]? {LNUM})
  </informalexample>
 
  <para>
-   浮点数的字长和平台相关，尽管通常最大值是 1.8e308 并具有 14 位十进制数字的精度（64
-   位 IEEE 格式）。
+  浮点数的字长和平台相关，尽管通常最大值是 1.8e308 并具有 14 位十进制数字的精度（64
+  位 IEEE 格式）。
  </para>
 
  <warning xml:id="warn.float-precision">
-  <title>关于浮点数精度的警告</title>
+  <title>浮点数的精度</title>
 
   <para>
-    显然简单的十进制分数如同 <literal>0.1</literal> 或 <literal>0.7</literal>
-    不能在不丢失一点点精度的情况下转换为内部二进制的格式。这就会造成混乱的结果：例如，<literal>floor((0.1+0.7)*10)</literal>
-    通常会返回 <literal>7</literal> 而不是预期中的
-    <literal>8</literal>，因为该结果内部的表示其实是类似 <literal role="infdec">7.9</literal>。
+   浮点数的精度有限。尽管取决于系统，PHP 通常使用 IEEE 754
+   双精度格式，则由于取整而导致的最大相对误差为
+   1.11e-16。非基本数学运算可能会给出更大误差，并且要考虑到进行复合运算时的误差传递。
+  </para>
+  <para>
+   此外，以十进制能够精确表示的有理数如 <literal>0.1</literal> 或
+   <literal>0.7</literal>，无论有多少尾数都不能被内部所使用的二进制精确表示，因此不能在不丢失一点点精度的情况下转换为二进制的格式。这就会造成混乱的结果：例如，<literal>floor((0.1+0.7)*10)</literal>
+   通常会返回 <literal>7</literal> 而不是预期中的
+   <literal>8</literal>，因为该结果内部的表示其实是类似
+   <literal>7.9999999999999991118...</literal>。
   </para>
 
   <para>
-    这和一个事实有关，那就是不可能精确的用有限位数表达某些十进制分数。例如，十进制的
-    <literal>1/3</literal> 变成了 <literal role="infdec">0.3</literal>。
+   所以永远不要相信浮点数结果精确到了最后一位，也永远不要比较两个浮点数是否相等。如果确实需要更高的精度，应该使用<link
+   linkend="ref.bc">任意精度数学函数</link>或者 <link linkend="ref.gmp">gmp 函数</link>。
   </para>
-
   <para>
-    所以永远不要相信浮点数结果精确到了最后一位，也永远不要比较两个浮点数是否相等。如果确实需要更高的精度，应该使用<link
-    linkend="ref.bc">任意精度数学函数</link>或者 <link linkend="ref.gmp">gmp 函数</link>。
+   参见<link xlink:href="&url.floating.point.guide;">浮点数指南</link>网页的简单解释。
   </para>
  </warning>
 
@@ -66,12 +70,56 @@ EXPONENT_DNUM [+-]?(({LNUM} | {DNUM}) [eE][+-]? {LNUM})
   <title>转换为浮点数</title>
   
   <para>
-    如果希望了解有关何时和如何将字符串转换成浮点数的信息，请查阅“<link
-    linkend="language.types.string.conversion">将字符串转换为数值</link>”一节。对于其它类型的值，其情况类似于先将值转换成整型，然后再转换成浮点。请参阅“<link
-    linkend="language.types.integer.casting">转换为整型</link>”一节以获取更多信息。自
-    PHP 5 起，如果试图将对象转换为浮点数，会发出一条 E_NOTICE 错误。
+   如果希望了解有关何时和如何将字符串转换成浮点数的信息，请查阅“<link
+   linkend="language.types.string.conversion">将字符串转换为数值</link>”一节。对于其它类型的值，其情况类似于先将值转换成整型，然后再转换成浮点。请参阅“<link
+   linkend="language.types.integer.casting">转换为整型</link>”一节以获取更多信息。自
+   PHP 5 起，如果试图将对象转换为浮点数，会发出一条 E_NOTICE 错误消息。
   </para>
 
+ </sect2>
+ <sect2 xml:id="language.types.float.comparison">
+  <title>比较浮点数</title>
+
+  <para>
+   如上述警告信息所言，由于内部表达方式的原因，比较两个浮点数是否相等是有问题的。不过还是有迂回的方法来比较浮点数值的。
+  </para>
+
+  <para>
+   要测试浮点数是否相等，要使用一个仅比该数值大一丁点的最小误差值。该值也被称为机器极小值（epsilon）或最小单元取整数，是计算中所能接受的最小的差别值。
+  </para>
+  
+  <informalexample>
+   <simpara>
+    <varname>$a</varname> 和 <varname>$b</varname> 在小数点后五位精度内都是相等的。
+   </simpara>
+   <programlisting role="php">
+<![CDATA[
+<?php
+$a = 1.23456789;
+$b = 1.23456780;
+$epsilon = 0.00001;
+
+if(abs($a-$b) < $epsilon) {
+    echo "true";
+}
+?>
+]]>
+   </programlisting>
+  </informalexample>
+ </sect2>
+ 
+ <sect2 xml:id="language.types.float.nan">
+  <title>NaN</title>
+  <para>
+   某些数学运算会产生一个由常量 <constant>NAN</constant>
+   所代表的结果。此结果代表着一个在浮点数运算中未定义或不可表述的值。任何拿此值与其它任何值进行的松散或严格比较的结果都是
+   &false;。
+  </para>
+  <para>
+   由于 <constant>NAN</constant> 代表着任何不同值，不应拿
+   <constant>NAN</constant> 去和其它值进行比较，包括其自身，应该用
+   <function>is_nan</function> 来检查。
+  </para>
  </sect2>
 </sect1>
 
