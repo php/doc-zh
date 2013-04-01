@@ -1,19 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
+<!-- EN-Revision: 8ad0d94e1c87b2daabff88e74acc31e8a11eec0a Maintainer: dallas Status: ready -->
 <sect1 xml:id="language.types.string">
- <title>字符串</title>
+ <title>String 字符串</title>
 
  <!-- FIXME PHP_6 Likely unicode support will alter this -->
  <para>
-  一个<type>字符串</type> 就是由一系列的字符组成，因此，一个字符就是一个字节。这就是说，一个字节只能有256种不同的变化，这也暗示了PHP无
-法原生支持Unicode 。 更多信息可参考函数
-  <function>utf8_encode</function>和 <function>utf8_decode</function>。
+  一个字符串 <type>string</type> 就是由一系列的字符组成，其中每个字符等同于一个字节。这意味着
+  PHP 只能支持 256 的字符集，因此不支持 Unicode 。详见<link linkend="language.types.string.details">字符串类型详解</link>。
  </para>
 
  <note>
   <simpara>
-    一个很长的<type>字符串</type>是没有问题的，PHP对于<type>字符串</type>; 而对字符串长度的限制只和运行PHP程序的该台计
-算机的内存大小有关。
+   <type>string</type> 最大可以达到 2GB。
   </simpara>
  </note>
 
@@ -21,7 +20,7 @@
   <title>语法</title>
 
   <para>
-   一个<type>字符串</type> 通过下面的4种方法来定义：
+   一个字符串可以用 4 种方式表达：
   </para>
 
   <itemizedlist>
@@ -42,8 +41,7 @@
    </listitem>
    <listitem>
     <simpara>
-     <link linkend="language.types.string.syntax.nowdoc">nowdoc 语法结构</link>
-     (自PHP 5.3.0以后)
+     <link linkend="language.types.string.syntax.nowdoc">nowdoc 语法结构</link>（自 PHP 5.3.0 起）
     </simpara>
    </listitem>
   </itemizedlist>
@@ -52,21 +50,21 @@
    <title>单引号</title>
 
    <para>
-    定义一个<type>字符串</type> 的最简单的方法是用单引号把它包围起来 (标点符号 <literal>'</literal>)。
+    定义一个字符串的最简单的方法是用单引号把它包围起来（字符 <literal>'</literal>）。
    </para>
 
    <para>
-    如果想要输出一个单引号，需在它的前面加个反斜线 (<literal>\</literal>)。在单引号前或在<type>字符串</type>的结尾处
-想要输出反斜线，输入两条 (<literal>\\</literal>)。注意，如果在任何其它的字符前加了反斜线，反斜线将会被直接输出。
+    要表达一个单引号自身，需在它的前面加个反斜线（<literal>\</literal>）来转义。要表达一个反斜线自身，则用两个反斜线（<literal>\\</literal>）。其它任何方式的反斜线都会被当成反斜线本身：也就是说如果想使用其它转义序列例如
+    <literal>\r</literal> 或者 <literal>\n</literal>，并不代表任何特殊含义，就单纯是这两个字符本身。
    </para>
 
    <note>
     <simpara>
      不像<link
-linkend="language.types.string.syntax.double">双引号</link>
-     和<link linkend="language.types.string.syntax.heredoc">heredoc</link>语法结构，
-在单引号<type>字符串</type>中的<link linkend="language.variables">变量</link> 和特殊含义的字符将 
-<emphasis>不会</emphasis> 被替换。
+     linkend="language.types.string.syntax.double">双引号</link>和
+	 <link linkend="language.types.string.syntax.heredoc">heredoc</link>
+	 语法结构，在单引号字符串中的<link
+	 linkend="language.variables">变量</link>和特殊字符的转义序列将<emphasis>不会</emphasis>被替换。
     </simpara>
    </note>
 
@@ -106,40 +104,44 @@ echo 'Variables do not $expand $either';
    <title>双引号</title>
 
    <para>
-    如果<type>字符串</type>是包围在双引号(")中， PHP将对一些特殊的字符进行解析：
+    如果字符串是包围在双引号（"）中， PHP 将对一些特殊的字符进行解析：
    </para>
 
    <table>
-    <title>Escaped characters</title>
+    <title>转义字符</title>
 
     <tgroup cols="2">
      <thead>
       <row>
-       <entry>Sequence</entry>
-       <entry>Meaning</entry>
+       <entry>序列</entry>
+       <entry>含义</entry>
       </row>
      </thead>
 
      <tbody>
       <row>
        <entry><literal>\n</literal></entry>
-       <entry>换行 (LF or 0x0A (10) in ASCII)</entry>
+       <entry>换行（ASCII 字符集中的 LF 或 0x0A (10)）</entry>
       </row>
       <row>
        <entry><literal>\r</literal></entry>
-       <entry>回车 (CR or 0x0D (13) in ASCII)</entry>
+       <entry>回车（ASCII 字符集中的 CR 或 0x0D (13)）</entry>
       </row>
       <row>
        <entry><literal>\t</literal></entry>
-       <entry>水平方向的 tab(HT or 0x09 (9) in ASCII)</entry>
+       <entry>水平制表符（ASCII 字符集中的 HT 或 0x09 (9)）</entry>
       </row>
       <row>
        <entry><literal>\v</literal></entry>
-       <entry>竖直方向的 tab (VT or 0x0B (11) in ASCII) (since PHP 5.2.5)</entry>
+       <entry>垂直制表符（ASCII 字符集中的 VT 或 0x0B (11)）（自 PHP 5.2.5 起）</entry>
+      </row>
+      <row>
+       <entry><literal>\e</literal></entry>
+       <entry>Escape（ASCII 字符集中的 ESC 或 0x1B (27)）（自 PHP 5.4.0 起）</entry>
       </row>
       <row>
        <entry><literal>\f</literal></entry>
-       <entry>换页 (FF or 0x0C (12) in ASCII) (since PHP 5.2.5)</entry>
+       <entry>换页（ASCII 字符集中的 FF 或 0x0C (12)）（自 PHP 5.2.5 起）</entry>
       </row>
       <row>
        <entry><literal>\\</literal></entry>
@@ -147,7 +149,7 @@ echo 'Variables do not $expand $either';
       </row>
       <row>
        <entry><literal>\$</literal></entry>
-       <entry>美金dollar标记</entry>
+       <entry>美元标记</entry>
       </row>
       <row>
        <entry><literal>\"</literal></entry>
@@ -156,13 +158,13 @@ echo 'Variables do not $expand $either';
       <row>
        <entry><literal>\[0-7]{1,3}</literal></entry>
        <entry>
-        符合该表达式顺序的字符串是一个八进制的字符
+        符合该正则表达式序列的是一个以八进制方式来表达的字符
        </entry>
       </row>
       <row>
        <entry><literal>\x[0-9A-Fa-f]{1,2}</literal></entry>
        <entry>
-        符合该表达式顺序的字符串是一个十六进制的字符
+        符合该正则表达式序列的是一个以十六进制方式来表达的字符
        </entry>
       </row>
      </tbody>
@@ -170,44 +172,44 @@ echo 'Variables do not $expand $either';
    </table>
 
    <para>
-    和单引号 <type>字符串</type>一样， 如果输出上述之外的字符，反斜线会被打印出来。 PHP5.1.1以
-前，<literal>\{$var}</literal> 中的反斜线还不会被显示出来。
+    和单引号字符串一样，转义任何其它字符都会导致反斜线被显示出来。PHP 5.1.1
+	以前，<literal>\{$var}</literal> 中的反斜线还不会被显示出来。
    </para>
 
    <para>
-    用双引号定义的 <type>字符串</type>最重要的特征是变量会被进行，更多信息见<link 
-linkend="language.types.string.parsing">字符串解析</link>。
+    用双引号定义的字符串最重要的特征是变量会被解析，详见<link 
+    linkend="language.types.string.parsing">变量解析</link>。
    </para>
   </sect3>
   
   <sect3 xml:id="language.types.string.syntax.heredoc">
-   <title>Heredoc结构</title>
+   <title>Heredoc 结构</title>
 
    <simpara>
-    第三种定义<type>字符串</type>的方法是用heredoc句法结构：<literal>&lt;&lt;&lt;</literal>。在该提示
-符后面，要定义个标识符，然后是一个新行。接下来是<type>字符串</type> 本身，最后要用前面定义的标识符作为结束标志。
+    第三种表达字符串的方法是用 heredoc
+	句法结构：<literal>&lt;&lt;&lt;</literal>。在该运算符之后要提供一个标识符，然后换行。接下来是字符串
+	<type>string</type> 本身，最后要用前面定义的标识符作为结束标志。
    </simpara>
 
    <simpara>
-    结束时所引用的标识符<emphasis>必须</emphasis>在一行的开始位置， 而且，标识符的命名也要像其它标签一样遵守PHP的规则：只能包含
-字母、数字和下划线，并且必须以字母和下划线作为开头。
+    结束时所引用的标识符<emphasis>必须</emphasis>在该行的第一列，而且，标识符的命名也要像其它标签一样遵守
+	PHP 的规则：只能包含字母、数字和下划线，并且必须以字母和下划线作为开头。
    </simpara>
    
    <warning>
     <simpara>
-     要注意的是结束标识符这行除了 <emphasis>可能</emphasis>有一个分号(<literal>;</literal>)外，绝对不能包括
-其它字符。这意味着标识符<emphasis>不能缩进</emphasis>，分号的前后也不能有任何空白或tabs。更重要的是结束标识符的前面必须是个被本地
-操作系统认可的新行标签，比如在UNIX和Mac OS X系统中是<literal>\n</literal> ，而结束标识符（可能有个分号）的后面也必须跟个
-新行标签。
+     要注意的是结束标识符这行除了<emphasis>可能</emphasis>有一个分号（<literal>;</literal>）外，绝对不能包含其它字符。这意味着标识符<emphasis>不能缩进</emphasis>，分号的前后也不能有任何空白或制表符。更重要的是结束标识符的前面必须是个被本地操作系统认可的换行，比如在
+	 UNIX 和 Mac OS X 系统中是 <literal>\n</literal>，而结束定界符（可能其后有个分号）之后也必须紧跟一个换行。
     </simpara>
 
     <simpara>
-     如果不遵守该规则导致结束标签不“干净”，PHP将认为它不是结束标识符而继续寻找。如果在文件结束前也没有找到一个正确的结束标识符，PHP将会在最后一
-行产生一个句法错误。
+     如果不遵守该规则导致结束标识不“干净”，PHP
+	 将认为它不是结束标识符而继续寻找。如果在文件结束前也没有找到一个正确的结束标识符，PHP
+	 将会在最后一行产生一个解析错误。
     </simpara>
 
     <para>
-    Heredocs结构不能用来初始化class，而从PHP 5.3以后，则该限制只能用在包含变量的情况下。
+     Heredocs 结构不能用来初始化类的属性。自 PHP 5.3 起，此限制仅对 heredoc 包含变量时有效。
     </para>
     
     <example>
@@ -218,7 +220,7 @@ linkend="language.types.string.parsing">字符串解析</link>。
 class foo {
     public $bar = <<<EOT
 bar
-EOT;
+    EOT;
 }
 ?>
 ]]>
@@ -227,13 +229,13 @@ EOT;
    </warning>
 
    <para>
-    Heredoc结构就象是没有使用双引号的双引号<type>字符串</type>， 这就是说在heredoc结构中引号不用被替换，但是上文中列出的字符
-(<literal>\n</literal>等)也可使用。 变量将被替换，但在heredoc结构中<type>字符串</type>表达复杂变量时，要格外小
-心。
+    Heredoc 结构就象是没有使用双引号的双引号字符串，这就是说在 heredoc
+	结构中单引号不用被转义，但是上文中列出的转义序列还可以使用。变量将被替换，但在 heredoc
+	结构中含有复杂的变量时要格外小心。
    </para>
 
    <example> 
-    <title>Heredoc结构的字符串示例</title>
+    <title>Heredoc 结构的字符串示例</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -277,11 +279,11 @@ This should print a capital 'A': A]]>
    </screen>
 
    <para>
-    也可以把Heredoc结构用在函数参数中来传输数据：
+    也可以把 Heredoc 结构用在函数参数中来传递数据：
    </para>
 
    <example> 
-    <title>Heredoc结构在参数中的示例</title>
+    <title>Heredoc 结构在参数中的示例</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -295,11 +297,11 @@ EOD
    </example>
 
    <para>
-   在PHP 5.3.0以后，也可以用Heredoc结构来初始化静态变量和类的属性和常量：
+    在 PHP 5.3.0 以后，也可以用 Heredoc 结构来初始化静态变量和类的属性和常量：
    </para>
 
    <example> 
-    <title>使用Heredoc结构来初始化静态值</title>
+    <title>使用 Heredoc 结构来初始化静态值</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -328,11 +330,11 @@ FOOBAR;
    </example>
 
    <para>
-    在PHP 5.3.0中还在Heredoc结构中用双引号来声明标志符：
+    自 PHP 5.3.0 起还可以在 Heredoc 结构中用双引号来声明标识符：
    </para>
 
    <example> 
-    <title>在heredoc结构中使用双引号</title>
+    <title>在 heredoc 结构中使用双引号</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -344,31 +346,28 @@ FOOBAR;
     </programlisting>
    </example>
 
-   <note>
-    <para>
-     PHP4才引入了Heredoc结构。
-    </para>
-   </note>
-
   </sect3>
   
   <sect3 xml:id="language.types.string.syntax.nowdoc">
-   <title>Nowdoc结构</title>
+   <title>Nowdoc 结构</title>
    
    <para>
-    就象heredoc结构类似于双引号字符串，Nowdoc结构是类似于单引号字符串的。Nowdoc结构很象heredoc结构，但是
-nowdoc<emphasis>不进行解析操作</emphasis> 。 这种结构很适合用在不需要进行转义的PHP代码和其它大段文本。与SGML的
-<literal>&lt;![CDATA[ ]]&gt;</literal> 结构是用来声明大段的不用解析的文本类似，nowdoc结构也有相同的特征。
+    就象 heredoc 结构类似于双引号字符串，Nowdoc 结构是类似于单引号字符串的。Nowdoc
+	结构很象 heredoc 结构，但是 nowdoc
+	中<emphasis>不进行解析操作</emphasis>。这种结构很适合用于嵌入 PHP
+	代码或其它大段文本而无需对其中的特殊字符进行转义。与 SGML 的
+    <literal>&lt;![CDATA[ ]]&gt;</literal> 结构是用来声明大段的不用解析的文本类似，nowdoc 结构也有相同的特征。
    </para>
    
    <para>
-    一个nowdoc结构也用和heredocs结构一样的标记 <literal>&lt;&lt;&lt;</literal>， 但是跟在后面的标志符要用
-单引号括起来，就像<literal>&lt;&lt;&lt;'EOT'</literal>这样。heredocs结构的所有规则也同样适用于nowdoc结
-构，尤其是结束标志符的规则。
+    一个 nowdoc 结构也用和 heredocs 结构一样的标记
+	<literal>&lt;&lt;&lt;</literal>， 但是跟在后面的标识符要用单引号括起来，即
+	<literal>&lt;&lt;&lt;'EOT'</literal>。Heredoc 结构的所有规则也同样适用于 nowdoc
+	结构，尤其是结束标识符的规则。
    </para>
    
    <example>
-    <title>Nowdoc结构字符串示例</title>
+    <title>Nowdoc 结构字符串示例</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -412,11 +411,11 @@ This should not print a capital 'A': \x41]]></screen>
    
    <note>
     <para>
-     不象 heredocs结构，nowdocs结构可以用在任意的静态数据环境中，最典型的示例是用来初始化类的属性或常量：
+     不象 heredoc 结构，nowdoc 结构可以用在任意的静态数据环境中，最典型的示例是用来初始化类的属性或常量：
     </para>
     
     <example>
-     <title>表态数据的示例</title>
+     <title>静态数据的示例</title>
      <programlisting role="php">
 <![CDATA[
 <?php
@@ -433,7 +432,7 @@ EOT;
 
    <note>
     <para>
-     Nowdoc结构是在PHP 5.3.0中加入的。
+     Nowdoc 结构是在 PHP 5.3.0 中加入的。
     </para>
    </note>
 
@@ -443,109 +442,118 @@ EOT;
    <title>变量解析</title>
 
    <simpara>
-    当<type>字符串</type>用双引号或heredoc结构定义时，其中的<link linkend="language.variables">变
-量</link>将会被解析。
+    当<type>字符串</type>用双引号或 heredoc 结构定义时，其中的<link
+	linkend="language.variables">变量</link>将会被解析。
    </simpara>
 
    <simpara>
-    这里共有两种语法规则：一种<link linkend="language.types.string.parsing.simple">简单
-</link> 规则，一种<link linkend="language.types.string.parsing.complex">复杂</link>规
-则。简单的句法规则是最常用和最方便的， 它可以用最少的代码在一个<type>字符串</type>中加入变量， <type>数组</type> 值，或  
-<type>对象</type>属性。
+    这里共有两种语法规则：一种<link
+	linkend="language.types.string.parsing.simple">简单</link>规则，一种<link
+	linkend="language.types.string.parsing.complex">复杂</link>规则。简单的语法规则是最常用和最方便的，它可以用最少的代码在一个
+	<type>string</type> 中嵌入一个变量，一个 <type>array</type> 的值，或一个 <type>object</type> 的属性。
    </simpara>
 
    <simpara>
-    复杂的句法规则是在PHP4以后加入的，被花括号包围的表达式是其明显标记。
+    复杂规则语法的显著标记是用花括号包围的表达式。
    </simpara>
 
    <sect4 xml:id="language.types.string.parsing.simple">
-    <title>简单句法规则</title>
+    <title>简单语法</title>
 
     <simpara>
-     当PHP解析器遇到一个美元符号 (<literal>$</literal>) ， 它会和其它很多解析器一样，去尽量形成一个合法的变量名。可以用花括
-号来明确变量名的界线。
+     当 PHP 解析器遇到一个美元符号（<literal>$</literal>）时，它会和其它很多解析器一样，去组合尽量多的标识以形成一个合法的变量名。可以用花括号来明确变量名的界线。
     </simpara>
 
     <informalexample>
      <programlisting role="php">
 <![CDATA[
 <?php
-$beer = 'Heineken';
-echo "$beer's taste is great"; //有效；单引号"'"是非法的变量名组成元素
-echo "He drank some $beers"; //无效;字母s是有效的变量名组成元素，但是这里的变量是$beer
-echo "He drank some ${beer}s"; // 有效
-echo "He drank some {$beer}s"; // 有效
+$juice = "apple";
+
+echo "He drank some $juice juice.".PHP_EOL;
+// Invalid. "s" is a valid character for a variable name, but the variable is $juice.
+echo "He drank some juice made of $juices.";
 ?>
 ]]>
      </programlisting>
+     &example.outputs;
+     <screen>
+<![CDATA[
+He drank some apple juice.
+He drank some juice made of .
+]]>
+     </screen>
     </informalexample>
 
     <simpara>
-     类似的，一个 <type>数组</type> 索引或一个 <type>对象</type> 属性也可被解析。数组索引要用方括号
-(<literal>]</literal>) 来表示边际， 对象属性则是和上述的变量规则相同。
+     类似的，一个 <type>array</type> 索引或一个 <type>object</type>
+	 属性也可被解析。数组索引要用方括号（<literal>]</literal>）来表示索引结束的边际，对象属性则是和上述的变量规则相同。
     </simpara>
 
-    <informalexample>
+    <example>
+	 <title>简单语法示例</title>
      <programlisting role="php">
 <![CDATA[
 <?php
-// 下面的例子是在字符串中引用数组
-// 当数组处于字符串外部时，要把数组的值用括号括起来且不要用花括号{ }
+$juices = array("apple", "orange", "koolaid1" => "purple");
 
-// 显示所有错误
-error_reporting(E_ALL);
+echo "He drank some $juices[0] juice.".PHP_EOL;
+echo "He drank some $juices[1] juice.".PHP_EOL;
+echo "He drank some juice made of $juice[0]s.".PHP_EOL; // Won't work
+echo "He drank some $juices[koolaid1] juice.".PHP_EOL;
 
-$fruits = array('strawberry' => 'red', 'banana' => 'yellow');
+class people {
+    public $john = "John Smith";
+    public $jane = "Jane Smith";
+    public $robert = "Robert Paulsen";
+    
+    public $smith = "Smith";
+}
 
-// 有效；但是注意在字符串外面不能这样引用数组
-echo "A banana is $fruits[banana].";
+$people = new people();
 
-// 有效
-echo "A banana is {$fruits['banana']}.";
-
-// 有效，但是PHP会先寻找常量banana
-echo "A banana is {$fruits[banana]}.";
-
-// 无效，要用花括号，这里将会产生一个解析错误
-echo "A banana is $fruits['banana'].";
-
-// 有效
-echo "A banana is " . $fruits['banana'] . ".";
-
-// 有效
-echo "This square is $square->width meters broad.";
-
-// 无效，解决方法见复杂结构
-echo "This square is $square->width00 centimeters broad.";
+echo "$people->john drank some $juices[0] juice.".PHP_EOL;
+echo "$people->john then said hello to $people->jane.".PHP_EOL;
+echo "$people->john's wife greeted $people->robert.".PHP_EOL;
+echo "$people->robert greeted the two $people->smiths."; // Won't work
 ?>
 ]]>
-<!-- XXX this won't work:
-echo "This square is $square->{width}00 centimeters broad."; 
-// XXX: php developers: it would be consequent to make this work.
-// XXX: like the $obj->{expr} syntax outside a string works, 
-// XXX: analogously to the ${expr} syntax for variable var's.
--->
      </programlisting>
-    </informalexample>
+     &example.outputs;
+     <screen>
+<![CDATA[
+He drank some apple juice.
+He drank some orange juice.
+He drank some juice made of s.
+He drank some purple juice.
+John Smith drank some apple juice.
+John Smith then said hello to Jane Smith.
+John Smith's wife greeted Robert Paulsen.
+Robert Paulsen greeted the two .
+]]>
+     </screen>
+    </example>
 
     <simpara>
-     如果想要表达更复杂的结构，请用复杂句法规则。
+     如果想要表达更复杂的结构，请用复杂语法。
     </simpara>
    </sect4>
 
    <sect4 xml:id="language.types.string.parsing.complex">
-    <title>复杂句法规则</title>
+    <title>复杂（花括号）语法</title>
 
     <simpara>
-     复杂句法规则不是结构复杂而命名，而是因为它可以使用复杂的表达式。
+     复杂语法不是因为其语法复杂而得名，而是因为它可以使用复杂的表达式。
     </simpara>
 
     <simpara>
-     任何想用在<type>字符串</type>中标量变量，数组变量或对象属性都可使用这种方法。
-     只需简单地像在<type>字符串</type>以外的地方那样写出表达式， 然后用花括号<literal>{</literal>和
-     <literal>}</literal>把它括起来。 由于 <literal>{</literal> 无法被转义，只有
-<literal>$</literal> 要紧挨着 <literal>{</literal>才会被认出来，可以用 
-<literal>{\$</literal> 来表达 <literal>{$</literal>。下面的示例可以更好的解释：
+     任何具有 <type>string</type>
+	 表达的标量变量，数组单元或对象属性都可使用此语法。只需简单地像在
+	 <type>string</type> 以外的地方那样写出表达式，然后用花括号
+	 <literal>{</literal> 和 <literal>}</literal> 把它括起来即可。由于
+	 <literal>{</literal> 无法被转义，只有 <literal>$</literal>
+	 紧挨着 <literal>{</literal> 时才会被识别。可以用
+	 <literal>{\$</literal> 来表达 <literal>{$</literal>。下面的示例可以更好的解释：
     </simpara>
 
     <informalexample>
@@ -567,11 +575,15 @@ echo "This is ${great}";
 // 有效
 echo "This square is {$square->width}00 centimeters broad."; 
 
+// 有效，只有通过花括号语法才能正确解析带引号的键名
+echo "This works: {$arr['key']}";
+
 // 有效
 echo "This works: {$arr[4][3]}";
 
-// 这是错误的表达式，因为就象$foo[bar] 的格式不能在字符串以外的地方使用一样。
-// 换句话说，只有在PHP能找到常量foo 的前提下才会正常工作；这里会产生一个E_NOTICE (undefined constant)级别的错误。
+// 这是错误的表达式，因为就象 $foo[bar] 的格式在字符串以外也是错的一样。
+// 换句话说，只有在 PHP 能找到常量 foo 的前提下才会正常工作；这里会产生一个
+// E_NOTICE (undefined constant) 级别的错误。
 echo "This is wrong: {$arr[foo][3]}"; 
 
 // 有效，当在字符串中使用多重数组时，一定要用括号将它括起来
@@ -584,11 +596,9 @@ echo "This works too: {$obj->values[3]->name}";
 
 echo "This is the value of the var named $name: {${$name}}";
 
-echo "This is the value of the var named by the return value of getName():
-{${getName()}}";
+echo "This is the value of the var named by the return value of getName(): {${getName()}}";
 
-echo "This is the value of the var named by the return value of
-\$object->getName(): {${$object->getName()}}";
+echo "This is the value of the var named by the return value of \$object->getName(): {${$object->getName()}}";
 
 // 无效，输出： This is the return value of getName(): {getName()}
 echo "This is the return value of getName(): {getName()}";
@@ -604,7 +614,7 @@ echo "I'd like to have another {${ strrev('reeb') }}, hips";
     </informalexample>
 
     <para>
-     也可以在字符串中用变量来调用类的属性。
+     也可以在字符串中用此语法通过变量来调用类的属性。
     </para>
 
    <informalexample>
@@ -632,9 +642,9 @@ I am bar.
     
     <note>
      <para>
-      函数、行为、类的静态变量和类的常量只有在PHP 5以后才可在 <literal>{$}</literal> 中使用。然而，只有在用返回的值作为名
-称的变量存在的情况下才会进行处理，只单一使用花括号 (<literal>{}</literal>) 无法处理从函数或行为的返回值或从类的常量或静态变量的返
-回值。
+      函数、方法、静态类变量和类常量只有在 PHP 5 以后才可在 <literal>{$}</literal>
+	  中使用。然而，只有在该字符串被定义的命名空间中才可以将其值作为变量名来访问。只单一使用花括号
+	  (<literal>{}</literal>) 无法处理从函数或方法的返回值或者类常量以及类静态变量的值。
      </para>
     </note>
 
@@ -670,36 +680,37 @@ echo "I'd like an {${beers::$ale}}\n";
    <title>存取和修改字符串中的字符</title>
 
    <para>
-    <type>字符串</type>中的字符可以通过一个以0为开始的，用类似<type>数组</type>结构中的方括号包含对应的数字来查找和修改，比如
-<varname>$str[42]</varname>， 可以把 <type>字符串</type>想像<type>数组</type> 。 函数
-<function>substr</function> 和 <function>substr_replace</function>可以用来实现多于一个字符
-的情况。
+    <type>string</type> 中的字符可以通过一个从 0 开始的下标，用类似
+	<type>array</type> 结构中的方括号包含对应的数字来访问和修改，比如
+	<varname>$str[42]</varname>。可以把 <type>string</type>
+	当成字符组成的 <type>array</type>。函数 <function>substr</function> 和
+	<function>substr_replace</function> 可用于操作多于一个字符的情况。
    </para>
 
    <note>
     <simpara>
-     <type>字符串</type>为了同样的目的也可以用花括号，比如     <varname>$str{42}</varname>，但是， 在
-PHP 5.3.0中不推荐使用这种格式，应该用方括号，就像     <varname>$str[42]</varname>。
+     <type>string</type> 也可用花括号访问，比如 <varname>$str{42}</varname>。
     </simpara>
    </note>
 
    <warning>
     <simpara>
-     方括号中的数字超出范围将会产生空白。非整数类型被转换成整数，非整数类型转变成整数，非法类型会产生一个
-<constant>E_NOTICE</constant>级别错误，负数在写入时会产生一个<constant>E_NOTICE</constant>，但读
-取的是空字符串。被指定的字符串只有第一个字符可用，空字符串用指定为空字节。下面为英文原文：
-     Writing to an out of range offset pads the string with spaces.
-     Non-integer types are converted to integer.
-     Illegal offset type emits <constant>E_NOTICE</constant>.
-     Negative offset emits <constant>E_NOTICE</constant> in write but reads
-empty string.
-     Only the first character of an assigned string is used.
-     Assigning empty string assigns NUL byte.
+     用超出字符串长度的下标写入将会拉长该字符串并以空格填充。非整数类型下标会被转换成整数。非法下标类型会产生一个
+     <constant>E_NOTICE</constant> 级别错误。用负数下标写入字符串时会产生一个 <constant>E_NOTICE</constant>
+	 级别错误，用负数下标读取字符串时返回空字符串。写入时只用到了赋值字符串的第一个字符。用空字符串赋值则赋给的值是
+	 NULL 字符。
+    </simpara>
+   </warning>
+
+   <warning>
+    <simpara>
+     PHP 的字符串在内部是字节组成的数组。因此用花括号访问或修改字符串对多字节字符集很不安全。仅应对单字节编码例如
+     ISO-8859-1 的字符串进行此类操作。
     </simpara>
    </warning>
 
    <example>
-    <title>Some string examples</title>
+    <title>一些字符串示例</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -723,10 +734,75 @@ $str[strlen($str)-1] = 'e';
     </programlisting>
    </example>
 
+   <para>
+    自 PHP 5.4 起字符串下标必须为整数或可转换为整数的字符串，否则会发出警告。之前例如
+	<literal>"foo"</literal> 的下标会无声地转换成 <literal>0</literal>。
+   </para>
+
+   <example>
+    <title>PHP 5.3 和 PHP 5.4 的区别</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$str = 'abc';
+
+var_dump($str['1']);
+var_dump(isset($str['1']));
+
+var_dump($str['1.0']);
+var_dump(isset($str['1.0']));
+
+var_dump($str['x']);
+var_dump(isset($str['x']));
+
+var_dump($str['1x']);
+var_dump(isset($str['1x']));
+?>
+]]>
+    </programlisting>
+    &example.outputs.53;
+    <screen>
+<![CDATA[
+string(1) "b"
+bool(true)
+string(1) "b"
+bool(true)
+string(1) "a"
+bool(true)
+string(1) "b"
+bool(true)
+]]>
+    </screen>
+    &example.outputs.54;
+    <screen>
+<![CDATA[
+string(1) "b"
+bool(true)
+
+Warning: Illegal string offset '1.0' in /tmp/t.php on line 7
+string(1) "b"
+bool(false)
+
+Warning: Illegal string offset 'x' in /tmp/t.php on line 9
+string(1) "a"
+bool(false)
+string(1) "b"
+bool(false)
+]]>
+    </screen>
+   </example>
+
    <note>
     <para>
-     用 <literal>[]</literal> 或
-     <literal>{}</literal> 存取其它类型的变量只会返回 &null;.
+     用 <literal>[]</literal> 或 <literal>{}</literal>
+	 访问任何其它类型（不包括数组或具有相应接口的对象实现）的变量只会无声地返回 &null;。
+    </para>
+   </note>
+
+   <note>
+    <para>
+     PHP 5.5 增加了直接在字符串原型中用
+	 <literal>[]</literal> 或 <literal>{}</literal> 访问字符的支持。
     </para>
    </note>
 
@@ -734,32 +810,31 @@ $str[strlen($str)-1] = 'e';
  </sect2><!-- end syntax -->
 
  <sect2 xml:id="language.types.string.useful-funcs">
-  <title>有用的函数和操作符</title>
+  <title>有用的函数和运算符</title>
 
   <para>
-   <type>字符串</type>可以用'.' (点) 操作符连接起来， 注意 '+' (加号) 操作符 <emphasis>没有</emphasis> 
-这个功能。
-   更多信息参考 <link linkend="language.operators.string">字符串操作符</link> 。
+   字符串可以用 '.'（点）运算符连接起来，注意
+   '+'（加号）运算符<emphasis>没有</emphasis>这个功能。更多信息参考<link linkend="language.operators.string">字符串运算符</link>。
   </para>
 
   <para>
-   对于<type>字符串</type> 的操作有很多有用的函数。
+   对于 <type>string</type> 的操作有很多有用的函数。
   </para>
 
   <simpara>
-   可以参考 <link linkend="ref.strings">字符串函数</link> 了解大部分函数， 高级的查找&amp;替换功能可以参考
-<link linkend="ref.regex">正则表达式函数</link> 或 <link linkend="ref.pcre">Perl类型的正则
-表达式函数</link>。
+   可以参考<link linkend="ref.strings">字符串函数</link>了解大部分函数，高级的查找与替换功能可以参考<link
+   linkend="ref.regex">正则表达式函数</link>或
+   <link linkend="ref.pcre">Perl 兼容正则表达式函数</link>。
   </simpara>
 
   <simpara>
-   另外还有<link linkend="ref.url">URL字符串的函数</link>， 也有加密/解密字符串的函数。
-   (<link linkend="ref.mcrypt">mcrypt</link> 和
-   <link linkend="ref.mhash">mhash</link>).
+   另外还有 <link linkend="ref.url">URL
+   字符串函数</link>，也有加密／解密字符串的函数（<link linkend="ref.mcrypt">mcrypt</link> 和
+   <link linkend="ref.mhash">mhash</link>）。
   </simpara>
 
   <simpara>
-   最后，可以参考 <link linkend="ref.ctype">字符类型函数</link>。
+   最后，可以参考<link linkend="ref.ctype">字符类型函数</link>。
   </simpara>
  </sect2>
 
@@ -767,86 +842,91 @@ $str[strlen($str)-1] = 'e';
   <title>转换成字符串</title>
   
   <para>
-   一个值可以通过在其前面加上<literal>(string)</literal>或用<function>strval</function>函数来转变成
-字符串。
-   在一个需要<type>字符串</type>的表达式中，<type>字符串</type>会自动转变，比如在使用函数
-<function>echo</function> 或 <function>print</function> 时， 或在一个变量和一个 <type>字符串
-</type>进行比较时，就会发生这种转变 <link linkend="language.types">类型</link> 和
-   <link linkend="language.types.type-juggling">类型转换</link> 可以更好的解释下面的事情，也可参考函
-数 <function>settype</function> 。
+   一个值可以通过在其前面加上 <literal>(string)</literal> 或用 <function>strval</function>
+   函数来转变成字符串。在一个需要字符串的表达式中，会自动转换为
+   <type>string</type>。比如在使用函数 <function>echo</function> 或 <function>print</function>
+   时，或在一个变量和一个 <type>string</type> 进行比较时，就会发生这种转换。<link
+   linkend="language.types">类型</link>和<link
+   linkend="language.types.type-juggling">类型转换</link>可以更好的解释下面的事情，也可参考函数
+   <function>settype</function>。
   </para>
   
   <para>
-   一个<type>boolean</type> &true; 值被转换成 <type>字符串</type><literal>"1"</literal>。 
-<type>Boolean</type> &false; 被转换成<literal>""</literal> (空的字符串)。 这种转变可以在
-<type>boolean</type> 和 <type>字符串</type> 之间往返进行。
+   一个布尔值 <type>boolean</type> 的 &true; 被转换成 <type>string</type> 的
+   <literal>"1"</literal>。<type>Boolean</type> 的 &false; 被转换成
+   <literal>""</literal>（空字符串）。这种转换可以在 <type>boolean</type>
+   和 <type>string</type> 之间相互进行。
   </para>
 
   <para> 
-   一个 <type>整数</type> 或 <type>浮点数</type> 被转变为数字的字面样式的<type>字符串</type>  (包括
-<type>浮点数</type>中的指数部分)，使用指数计数法的浮点数 (<literal>4.1E+6</literal>)也可转变。
+   一个整数 <type>integer</type> 或浮点数 <type>float</type> 被转换为数字的字面样式的
+   <type>string</type>（包括 <type>float</type>
+   中的指数部分）。使用指数计数法的浮点数（<literal>4.1E+6</literal>）也可转换。
   </para>
 
   <note>
    <para>
-    在脚本场所(category LC_NUMERIC)定义了小数点，更多可以参考函数 <function>setlocale</function>。
+    在脚本的区域（category LC_NUMERIC）中定义了十进制小数点字符。参见 <function>setlocale</function>。
    </para>
   </note>
 
   <para>
-   <type>数组</type>转换成 <type>字符串</type>
-   <literal>"Array"</literal>，因此， <function>echo</function> 和 
-<function>print</function> c无法显示出该<type>数组</type>的值。如果显示一个数组值，可以用 
-<literal>echo $arr['foo']</literal>这种结构，更多内容见下文。
+   数组 <type>array</type> 总是转换成字符串
+   <literal>"Array"</literal>，因此，<function>echo</function> 和 
+   <function>print</function> 无法显示出该<type>数组</type>的内容。要显示某个单元，可以用 
+   <literal>echo $arr['foo']</literal> 这种结构。要显示整个数组内容见下文。
   </para>
 
   <para>
-   在PHP 4中<type>对象</type>被转换成 <type>字符串</type>
-   <literal>"Object"</literal>，如果为了调试原因需要打印出对象的值，方法见正文。为了得到对象的类的名称，可以用 
-<function>get_class</function> 函数。 在PHP5中， 可以用
-   <link linkend="language.oop5.magic">__toString</link> 。
+   在 PHP 4 中对象 <type>object</type> 总是被转换成字符串
+   <literal>"Object"</literal>，如果为了调试原因需要打印出对象的值，请继续阅读下文。为了得到对象的类的名称，可以用 
+   <function>get_class</function> 函数。自 PHP 5 起，适当时可以用 <link
+   linkend="language.oop5.magic">__toString</link> 方法。
   </para>
 
   <para>
-   <type>资源</type>总会被转变成<literal>"Resource id #1"</literal>这种结构的 <type>字符串
-</type>， 其中的 <literal>1</literal> 是PHP分配给该资源的独特数字。不用过多关注这种结构，它马上要转变了。为了得到一个
-<type>resource</type>类型，可以用函数   <function>get_resource_type</function>。
+   资源 <type>resource</type> 总会被转变成 <literal>"Resource id #1" </literal>
+   这种结构的字符串，其中的 <literal>1</literal> 是 PHP
+   在运行时分配给该 <type>resource</type> 的唯一值。不要依赖此结构，可能会有变更。要得到一个
+   <type>resource</type> 的类型，可以用函数 <function>get_resource_type</function>。
   </para>
 
   <para>
-   &null; 总是被转变成空的字符串。
+   &null; 总是被转变成空字符串。
   </para>
   
   <para>
-   如上面所说的，直接把<type>数组</type>，
-   <type>对象</type>或 <type>资源</type> 转换成 <type>字符串</type> 不会得到超出其自身的更多信息。可以使用函数 
-<function>print_r</function> 和 <function>var_dump</function> 列出这些类型的内容。
+   如上面所说的，直接把 <type>array</type>，<type>object</type> 或 <type>resource</type>
+   转换成 <type>string</type> 不会得到除了其类型之外的任何有用信息。可以使用函数 
+   <function>print_r</function> 和 <function>var_dump</function> 列出这些类型的内容。
   </para>
   
   <para>
-   大部分的PHP值可以转变成 <type>字符串</type>s 来长期储存，这被称作串行化，可以用函数
-   <function>serialize</function> 来实现。 如果PHP引擎设定支持
-   <link linkend="ref.wddx">WDDX</link> ， PHP值也可储存成XML格式。
+   大部分的 PHP 值可以转变成 <type>string</type> 来永久保存，这被称作串行化，可以用函数
+   <function>serialize</function> 来实现。如果 PHP 引擎设定支持
+   <link linkend="ref.wddx">WDDX</link>，PHP 值也可被串行化为格式良好的 XML 文本。
   </para>
 
  </sect2>
 
  <sect2 xml:id="language.types.string.conversion">
-  <title>字符串转变成数字</title>
+  <title>字符串转换为数值</title>
 
   <simpara>
-   当一个<type>字符串</type> 被用在了一个数字的环境中，结果和类型如下：
+   当一个字符串被当作一个数值来取值，其结果和类型如下：
   </simpara>
 
   <simpara>
-   如果<type>字符串</type> 没有包含 '.'，'e'或'E' 并且数字值符合整数类型的限定 (   
-<constant>PHP_INT_MAX</constant>定义的)， 这个 <type>字符串</type> 可被认定是一个 
-<type>integer</type>， 在其它情况下被认定为一个<type>float</type>。
+   如果该字符串没有包含 '.'，'e' 或 'E'
+   并且其数字值在整型的范围之内（由 <constant>PHP_INT_MAX</constant>
+   所定义），该字符串将被当成 <type>integer</type>
+   来取值。其它所有情况下都被作为 <type>float</type> 来取值。
   </simpara>
 
   <para>
-   <type>字符串</type>的开始部分给定了它的值，如果   <type>字符串</type> 以合法的数字开始，这个数字可直接使用。 否则，值就
-是 0 (零)。 合法数值由符号，后面跟着一个或多个数字（可能有个小数点），再跟着可选的指数符号如'e' 或 'E'，后面跟着一个或多个数字。
+   该字符串的开始部分决定了它的值。如果该字符串以合法的数值开始，则使用该数值。否则其值为
+   0（零）。合法数值由可选的正负号，后面跟着一个或多个数字（可能有小数点），再跟着可选的指数部分。指数部分由
+   'e' 或 'E' 后面跟着一个或多个数字构成。
   </para>
 
   <informalexample>
@@ -867,11 +947,11 @@ $foo = "10.0 pigs " + 1.0;        // $foo is float (11)
   </informalexample>
 
   <simpara>
-   更多信息可以参考Unix手册中的strtod(3)。
+   更多信息可以参考 Unix 手册中的 strtod(3)。
   </simpara>
 
   <para>
-   本节中的示例可以通过复制/粘贴到下面的代码中来显示：
+   本节中的示例可以通过复制／粘贴到下面的代码中来显示：
   </para>
 
   <informalexample>
@@ -885,11 +965,87 @@ echo "\$foo==$foo; type is " . gettype ($foo) . "<br />\n";
   </informalexample>
 
   <para>
-   不要想像在C语言中的那样，通过一个整数转换得到相应字符，使用函数 <function>ord</function> 和 
-<function>chr</function> 实现ASCII码和字符间的转换。
+   不要想像在 C 语言中的那样，通过将一个字符转换成整数以得到其代码。使用函数
+   <function>ord</function> 和 <function>chr</function> 实现 ASCII 码和字符间的转换。
   </para>
 
  </sect2>
+
+ <sect2 xml:id="language.types.string.details">
+  
+  <title>字符串类型详解</title>
+  
+  <para>
+   PHP 中的 <type>string</type>
+   的实现方式是一个由字节组成的数组再加上一个整数指明缓冲区长度。并无如何将字节转换成字符的信息，由程序员来决定。字符串由什么值来组成并无限制；特别的，其值为
+   <literal>0</literal>（“NUL bytes”）的字节可以处于字符串任何位置（不过有几个函数，在本手册中被称为非“二进制安全”的，也许会把
+   NUL 字节之后的数据全都忽略）。
+  </para>
+  <para>
+   字符串类型的此特性解释了为什么 PHP 中没有单独的“byte”类型 -
+   已经用字符串来代替了。返回非文本值的函数 - 例如从网络套接字读取的任意数据
+   - 仍会返回字符串。
+  </para>
+  <para>
+   由于 PHP 并不特别指明字符串的编码，那字符串到底是怎样编码的呢？例如字符串
+   <literal>"á"</literal> 到底是等于
+   <literal>"\xE1"</literal>（ISO-8859-1），<literal>"\xC3\xA1"</literal>（UTF-8，C
+   form），<literal>"\x61\xCC\x81"</literal>（UTF-8，D
+   form）还是任何其它可能的表达呢？答案是字符串会被按照该脚本文件相同的编码方式来编码。因此如果一个脚本的编码是
+   ISO-8859-1，则其中的字符串也会被编码为 ISO-8859-1，以此类推。不过这并不适用于激活了 Zend Multibyte
+   时；此时脚本可以是以任何方式编码的（明确指定或被自动检测）然后被转换为某种内部编码，然后字符串将被用此方式编码。注意脚本的编码有一些约束（如果激活了 Zend Multibyte 则是其内部编码）-
+   这意味着此编码应该是 ASCII 的兼容超集，例如
+   UTF-8 或 ISO-8859-1。不过要注意，依赖状态的编码其中相同的字节值可以用于首字母和非首字母而转换状态，这可能会造成问题。
+  </para>
+  <para>
+   当然了，要做到有用，操作文本的函数必须假定字符串是如何编码的。不幸的是，PHP
+   关于此的函数有很多变种：
+  </para>
+  <itemizedlist>
+   <listitem>
+    <simpara>
+     某些函数假定字符串是以单字节编码的，但并不需要将字节解释为特定的字符。例如
+	 <function>substr</function>，<function>strpos</function>，<function>strlen</function> 和
+     <function>strcmp</function>。理解这些函数的另一种方法是它们作用于内存缓冲区，即按照字节和字节下标操作。
+    </simpara>
+   </listitem>
+   <listitem>
+    <simpara>
+     某些函数被传递入了字符串的编码方式，也可能会假定默认无此信息。例如
+     <function>htmlentities</function> 和
+     <link linkend="book.mbstring">mbstring</link> 扩展中的大部分函数。
+    </simpara>
+   </listitem>
+   <listitem>
+    <simpara>
+     其它函数使用了当前区域（见 <function>setlocale</function>），但是逐字节操作。例如
+	 <function>strcasecmp</function>，<function>strtoupper</function> 和
+	 <function>ucfirst</function>。这意味着这些函数只能用于单字节编码，而且编码要与区域匹配。例如
+     <literal>strtoupper("á")</literal> 在区域设定正确并且 <literal>á</literal>
+	 是单字节编码时会返回 <literal>"Á"</literal>。如果是用 UTF-8
+	 编码则不会返回正确结果，其结果根据当前区域有可能返回损坏的值。
+    </simpara>
+   </listitem>
+   <listitem>
+    <simpara>
+     最后一些函数会假定字符串是使用某特定编码的，通常是
+     UTF-8。<link linkend="book.intl">intl</link> 扩展和
+     <link linkend="book.pcre">PCRE</link>（上例中仅在使用了
+	 <literal>u</literal> 修饰符时）扩展中的大部分函数都是这样。尽管这是由于其特殊用途，<function>utf8_decode</function>
+	 会假定 UTF-8 编码而 <function>utf8_encode</function> 会假定
+     ISO-8859-1 编码。
+    </simpara>
+   </listitem>
+  </itemizedlist>
+
+  <para>
+   最后，要书写能够正确使用 Unicode 的程序依赖于很小心地避免那些可能会损坏数据的函数。要使用来自于
+   <link linkend="book.intl">intl</link> 和 <link linkend="book.mbstring">mbstring</link>
+   扩展的函数。不过使用能处理 Unicode 编码的函数只是个开始。不管用何种语言提供的函数，最基本的还是了解
+   Unicode 规格。例如一个程序如果假定只有大写和小写，那可是大错特错。
+  </para>
+ </sect2>
+
 </sect1><!-- end string -->
  
 <!-- Keep this comment at the end of the file
