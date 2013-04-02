@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- $Revision$ -->
+<!-- EN-Revision: 45bc78be1c290e1f53a5a330652b62e8d00a484c Maintainer: ichenshy Status: ready -->
+<!-- Reviewed: no -->
+
+<refentry xml:id="pdostatement.fetchall" xmlns="http://docbook.org/ns/docbook">
+ <refnamediv>
+  <refname>PDOStatement::fetchAll</refname>
+  <refpurpose>
+   返回一个包含结果集中所有行的数组
+  </refpurpose>
+ </refnamediv>
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <type>array</type><methodname>PDOStatement::fetchAll</methodname>
+   <methodparam choice="opt"><type>int</type><parameter>fetch_style</parameter></methodparam>
+   <methodparam choice="opt"><type>mixed</type><parameter>fetch_argument</parameter></methodparam>
+   <methodparam choice="opt"><type>array</type><parameter>ctor_args</parameter><initializer>array()</initializer></methodparam>
+  </methodsynopsis>
+
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>fetch_style</parameter></term>
+     <listitem>
+      <para>
+       控制返回数组的内容如同 <function>PDOStatement::fetch</function> 文档中记载的一样。默认为 <constant>PDO::ATTR_DEFAULT_FETCH_MODE</constant> 的值（ 其缺省值为 <constant>PDO::FETCH_BOTH</constant> ）
+      </para>
+      <para>
+       想要返回一个包含结果集中单独一列所有值的数组，需要指定 <constant>PDO::FETCH_COLUMN</constant> 。通过指定  <parameter>column-index</parameter>  参数获取想要的列。
+      </para>
+      <para>
+      想要获取结果集中单独一列的唯一值，需要将 <constant>PDO::FETCH_COLUMN</constant> 和 <constant>PDO::FETCH_UNIQUE</constant> 按位或。
+      </para>
+      <para>
+       想要返回一个根据指定列把值分组后的关联数组，需要将 <constant>PDO::FETCH_COLUMN</constant> 和 <constant>PDO::FETCH_GROUP</constant> 按位或。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>fetch_argument</parameter></term>
+     <listitem>
+      <para>
+       根据 <parameter>fetch_style</parameter> 参数的值，此参数有不同的意义：
+       <itemizedlist>
+        <listitem>
+         <para>
+          <constant>PDO::FETCH_COLUMN</constant>：返回指定以0开始索引的列。
+         </para>
+        </listitem>
+        <listitem>
+         <para>
+          <constant>PDO::FETCH_CLASS</constant>：返回指定类的实例，映射每行的列到类中对应的属性名。
+         </para>
+        </listitem>
+        <listitem>
+         <para>
+          <constant>PDO::FETCH_FUNC</constant>：将每行的列作为参数传递给指定的函数，并返回调用函数后的结果。
+         </para>
+        </listitem>
+       </itemizedlist>
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>ctor_args</parameter></term>
+     <listitem>
+      <para>
+       当 <parameter>fetch_style</parameter> 参数为 <constant>PDO::FETCH_CLASS</constant> 时，自定义类的构造函数的参数。
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   <function>PDOStatement::fetchAll</function> 返回一个包含结果集中所有剩余行的数组。此数组的每一行要么是一个列值的数组，要么是属性对应每个列名的一个对象。
+  </para>
+  <para>
+   使用此方法获取大结果集将导致系统负担加重且可能占用大量网络资源。与其取回所有数据后用PHP来操作，倒不如考虑使用数据库服务来处理结果集。例如，在取回数据并通过PHP处理前，在 SQL 中使用 WHERE  和 ORDER BY 子句来限定结果。
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example><title>获取结果集中所有剩余的行</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$sth = $dbh->prepare("SELECT name, colour FROM fruit");
+$sth->execute();
+
+/* 获取结果集中所有剩余的行 */
+print("Fetch all of the remaining rows in the result set:\n");
+$result = $sth->fetchAll();
+print_r($result);
+?>
+]]>
+    </programlisting>
+    &example.outputs.similar;
+    <screen>
+<![CDATA[
+Fetch all of the remaining rows in the result set:
+Array
+(
+    [0] => Array
+        (
+            [NAME] => pear
+            [0] => pear
+            [COLOUR] => green
+            [1] => green
+        )
+
+    [1] => Array
+        (
+            [NAME] => watermelon
+            [0] => watermelon
+            [COLOUR] => pink
+            [1] => pink
+        )
+
+)
+]]>
+    </screen>
+   </example>
+   <example><title>获取结果集中单独一列的所有值</title>
+    <para>
+     下面例子演示了如何从一个结果集中返回单独一列所有的值，尽管 SQL 语句自身可能返回每行多列。
+    </para>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$sth = $dbh->prepare("SELECT name, colour FROM fruit");
+$sth->execute();
+
+/* 获取第一列所有值 */
+$result = $sth->fetchAll(PDO::FETCH_COLUMN, 0);
+var_dump($result);
+?>
+]]>
+    </programlisting>
+    &example.outputs.similar;
+    <screen>
+<![CDATA[
+Array(3)
+(
+    [0] =>
+    string(5) => apple
+    [1] =>
+    string(4) => pear
+    [2] =>
+    string(10) => watermelon
+)
+]]>
+    </screen>
+   </example>
+   <example><title>根据单独的一列把所有值分组</title>
+    <para>
+     下面例子演示了如何返回一个根据结果集中指定列的值分组的关联数组。该数组包含三个键：返回的 <literal>apple</literal> 和 <literal>pear</literal> 数组包含了两种不同的颜色，而返回的 <literal>watermelon</literal> 数组仅包含一种颜色。 
+    </para>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$insert = $dbh->prepare("INSERT INTO fruit(name, colour) VALUES (?, ?)");
+$insert->execute(array('apple', 'green'));
+$insert->execute(array('pear', 'yellow'));
+
+$sth = $dbh->prepare("SELECT name, colour FROM fruit");
+$sth->execute();
+
+/* 根据第一列分组  */
+var_dump($sth->fetchAll(PDO::FETCH_COLUMN|PDO::FETCH_GROUP));
+?>
+]]>
+    </programlisting>
+    &example.outputs.similar;
+    <screen>
+<![CDATA[
+array(3) {
+  ["apple"]=>
+  array(2) {
+    [0]=>
+    string(5) "green"
+    [1]=>
+    string(3) "red"
+  }
+  ["pear"]=>
+  array(2) {
+    [0]=>
+    string(5) "green"
+    [1]=>
+    string(6) "yellow"
+  }
+  ["watermelon"]=>
+  array(1) {
+    [0]=>
+    string(5) "green"
+  }
+}
+
+]]>
+    </screen>
+   </example>
+   <example><title>每行结果实例化一个类</title>
+    <para>
+     下面列子演示了 <constant>PDO::FETCH_CLASS</constant> 获取风格的行为。
+    </para>
+    <programlisting role="php">
+<![CDATA[
+<?php
+class fruit {
+    public $name;
+    public $colour;
+}
+
+$sth = $dbh->prepare("SELECT name, colour FROM fruit");
+$sth->execute();
+
+$result = $sth->fetchAll(PDO::FETCH_CLASS, "fruit");
+var_dump($result);
+?>
+]]>
+    </programlisting>
+    &example.outputs.similar;
+    <screen>
+<![CDATA[
+array(3) {
+  [0]=>
+  object(fruit)#1 (2) {
+    ["name"]=>
+    string(5) "apple"
+    ["colour"]=>
+    string(5) "green"
+  }
+  [1]=>
+  object(fruit)#2 (2) {
+    ["name"]=>
+    string(4) "pear"
+    ["colour"]=>
+    string(6) "yellow"
+  }
+  [2]=>
+  object(fruit)#3 (2) {
+    ["name"]=>
+    string(10) "watermelon"
+    ["colour"]=>
+    string(4) "pink"
+  }
+}
+]]>
+    </screen>
+   </example>
+   <example><title> 每行调用一次函数</title>
+    <para>
+     下面列子演示了 <constant>PDO::FETCH_FUNC</constant> 获取风格的行为。
+    </para>
+    <programlisting role="php">
+<![CDATA[
+<?php
+function fruit($name, $colour) {
+    return "{$name}: {$colour}";
+}
+
+$sth = $dbh->prepare("SELECT name, colour FROM fruit");
+$sth->execute();
+
+$result = $sth->fetchAll(PDO::FETCH_FUNC, "fruit");
+var_dump($result);
+?>
+]]>
+    </programlisting>
+    &example.outputs.similar;
+    <screen>
+<![CDATA[
+array(3) {
+  [0]=>
+  string(12) "apple: green"
+  [1]=>
+  string(12) "pear: yellow"
+  [2]=>
+  string(16) "watermelon: pink"
+}
+]]>
+    </screen>
+   </example>
+
+  </para>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>PDO::query</function></member>
+    <member><function>PDOStatement::fetch</function></member>
+    <member><function>PDOStatement::fetchColumn</function></member>
+    <member><function>PDO::prepare</function></member>
+    <member><function>PDOStatement::setFetchMode</function></member>
+   </simplelist>
+  </para>
+ </refsect1>
+</refentry>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
