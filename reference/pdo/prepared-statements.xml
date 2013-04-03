@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision$ -->
+<!-- EN-Revision: a56106f69198dfe88c6084593c78a71c26b24353 Maintainer: ichenshy Status: ready -->
+<!-- Reviewed: no -->
+
+<chapter xml:id="pdo.prepared-statements" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <title>预处理语句与存储过程</title>
+ <para>
+  很多更成熟的数据库都支持预处理语句的概念。什么是预处理语句？可以把它看作是想要运行的 SQL 的一种编译过的模板，它可以使用变量参数进行定制。预处理语句可以带来两大好处：
+ </para>
+ <itemizedlist>
+  <listitem>
+   <simpara>
+    查询仅需解析（或预处理）一次，但可以用相同或不同的参数执行多次。当查询准备好后，数据库将分析、编译和优化执行该查询的计划。对于复杂的查询，此过程要花费较长的时间，如果需要以不同参数多次重复相同的查询，那么该过程将大大降低应用程序的速度。通过使用预处理语句，可以避免重复分析/编译/优化周期。简言之，预处理语句占用更少的资源，因而运行得更快。
+   </simpara>
+  </listitem>
+  <listitem>
+   <simpara>
+    提供给预处理语句的参数不需要用引号括起来，驱动程序会自动处理。如果应用程序只使用预处理语句，可以确保不会发生SQL 注入。（然而，如果查询的其他部分是由未转义的输入来构建的，则仍存在 SQL 注入的风险）。
+   </simpara>
+  </listitem>
+ </itemizedlist>
+ <para>
+  预处理语句如此有用，以至于它们唯一的特性是在驱动程序不支持的时PDO 将模拟处理。这样可以确保不管数据库是否具有这样的功能，都可以确保应用程序可以用相同的数据访问模式。
+ </para>
+ <para>
+  <example>
+   <title>用预处理语句进行重复插入</title>
+   <simpara>
+    下面例子通过用 <literal>name</literal> 和 <literal>value</literal> 替代相应的命名占位符来执行一个插入查询
+   </simpara>
+   <programlisting role="php">
+<![CDATA[
+<?php
+$stmt = $dbh->prepare("INSERT INTO REGISTRY (name, value) VALUES (:name, :value)");
+$stmt->bindParam(':name', $name);
+$stmt->bindParam(':value', $value);
+
+// 插入一行
+$name = 'one';
+$value = 1;
+$stmt->execute();
+
+//  用不同的值插入另一行
+$name = 'two';
+$value = 2;
+$stmt->execute();
+?>
+]]>
+   </programlisting>
+  </example>
+ </para>
+ <para>
+  <example>
+   <title>用预处理语句进行重复插入</title>
+   <simpara>
+   下面例子通过用 <literal>name</literal> 和 <literal>value</literal> 取代 <literal>?</literal> 占位符的位置来执行一条插入查询。
+   </simpara>
+   <programlisting role="php">
+<![CDATA[
+<?php
+$stmt = $dbh->prepare("INSERT INTO REGISTRY (name, value) VALUES (?, ?)");
+$stmt->bindParam(1, $name);
+$stmt->bindParam(2, $value);
+
+// 插入一行
+$name = 'one';
+$value = 1;
+$stmt->execute();
+
+// 用不同的值插入另一行
+$name = 'two';
+$value = 2;
+$stmt->execute();
+?>
+]]>
+   </programlisting>
+  </example>
+ </para>
+ <para>
+  <example>
+   <title>使用预处理语句获取数据</title>
+   <simpara>
+    下面例子获取数据基于键值已提供的形式。用户的输入被自动用引号括起来，因此不会有 SQL 注入攻击的危险。
+   </simpara>
+   <programlisting role="php">
+<![CDATA[
+<?php
+$stmt = $dbh->prepare("SELECT * FROM REGISTRY where name = ?");
+if ($stmt->execute(array($_GET['name']))) {
+  while ($row = $stmt->fetch()) {
+    print_r($row);
+  }
+}
+?>
+]]>
+   </programlisting>
+  </example>
+ </para>
+ <para>
+ 如果数据库驱动支持，应用程序还可以绑定输出和输入参数.输出参数通常用于从存储过程获取值。输出参数使用起来比输入参数要稍微复杂一些，因为当绑定一个输出参数时，必须知道给定参数的长度。如果为参数绑定的值大于建议的长度，就会产生一个错误。
+ </para>
+
+ <para>
+  <example>
+   <title>带输出参数调用存储过程</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+$stmt = $dbh->prepare("CALL sp_returns_string(?)");
+$stmt->bindParam(1, $return_value, PDO::PARAM_STR, 4000); 
+
+// 调用存储过程
+$stmt->execute();
+
+print "procedure returned $return_value\n";
+?>
+]]>
+   </programlisting>
+  </example>
+ </para>
+
+ <para>
+  还可以指定同时具有输入和输出值的参数，其语法类似于输出参数。在下一个例子中，字符串“hello”被传递给存储过程，当存储过程返回时，hello 被替换为该存储过程返回的值。
+ </para>
+
+ <para>
+  <example>
+   <title> 带输入/输出参数调用存储过程</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+$stmt = $dbh->prepare("CALL sp_takes_string_returns_string(?)");
+$value = 'hello';
+$stmt->bindParam(1, $value, PDO::PARAM_STR|PDO::PARAM_INPUT_OUTPUT, 4000); 
+
+// 调用存储过程
+$stmt->execute();
+
+print "procedure returned $value\n";
+?>
+]]>
+   </programlisting>
+  </example>
+ </para>
+ <para>
+  <example>
+   <title>占位符的无效使用</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+$stmt = $dbh->prepare("SELECT * FROM REGISTRY where name LIKE '%?%'");
+$stmt->execute(array($_GET['name']));
+
+// 占位符必须被用在整个值的位置
+$stmt = $dbh->prepare("SELECT * FROM REGISTRY where name LIKE ?");
+$stmt->execute(array("%$_GET[name]%"));
+?>
+]]>
+   </programlisting>
+  </example>
+ </para>
+</chapter>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
+

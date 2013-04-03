@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision$ -->
+<!-- EN-Revision: a56106f69198dfe88c6084593c78a71c26b24353 Maintainer: ichenshy Status: ready -->
+<!-- Reviewed: no -->
+
+<chapter xml:id="pdo.transactions" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <title>事务与自动提交</title>
+ <para>
+  现在通过 PDO 连接上了，在开始进行查询前，必须先理解 PDO 是如何管理事务的。事务支持四大特性（ACID）：原子性（Atomicity）、一致性（Consistency）、隔离性（Isolation）以及持久性（Durability）。通俗地讲，在一个事务中执行的任何操作，即使是分阶段执行的，也能保证安全地应用于数据库，并在提交时不会受到来自其他连接的干扰。事务操作也可以根据请求自动撤销（假设还没有提交），这使得在脚本中处理错误更加容易。
+ </para>
+ <para>
+  事务通常是通过把一批更改“积蓄”起来然后使之同时生效而实现的；这样做的好处是可以大大地提供这些更改的效率。换句话说，事务可以使脚本更快，而且可能更健壮（不过需要正确地使用事务才能获得这样的好处）。
+ </para>
+ <para>
+  不幸的是，并非每种数据库都支持事务，因此当第一次打开连接时，PDO 需要在所谓的“自动提交”模式下运行。自动提交模式意味着，如果数据库支持，运行的每个查询都有它自己的隐式事务，如果数据库不支持事务，则没有。如果需要一个事务，则必须用 <function>PDO::beginTransaction</function> 方法来启动。如果底层驱动不支持事务，则抛出一个 PDOException 异常（不管错误处理设置是怎样的，这都是一个严重的错误状态）。一旦开始了事务，可用 <function>PDO::commit</function> 或 <function>PDO::rollBack</function>来完成，这取决于事务中的代码是否运行成功。
+ </para>
+ <warning>
+  <para>
+   PDO 仅在驱动层检查是否具有事务处理能力。如果某些运行时条件意味着事务不可用，且数据库服务接受请求去启动一个事务，<methodname>PDO::beginTransaction</methodname> 将仍然返回 &true; 而且没有错误。
+  </para>
+  <para>
+   试着在 MySQL 数据库的  MyISAM 数据表中使用事务就是一个很好的例子。
+  </para>
+ </warning>
+ <para>
+  当脚本结束或连接即将被关闭时，如果尚有一个未完成的事务，那么 PDO 将自动回滚该事务。这种安全措施有助于在脚本意外终止时避免出现不一致的情况——如果没有显式地提交事务，那么假设是某个地方出错了，所以执行回滚来保证数据安全。
+ </para>
+ <warning>
+  <para>
+   只有通过 <function>PDO::beginTransaction</function> 启动一个事务后，才可能发生自动回滚。如果手动发出一条查询启动事务， 则 PDO 无法知晓，从而在必要时不能进行回滚。
+  </para>
+ </warning>
+ <para>
+  <example><title>在事务中执行批处理</title>
+   <para>
+    在下面例子中，假设为新员工创建一组条目，分配一个为23的ID。除了登记此人的基本数据之外，还需要记录他的工资。两个更新分别完成起来很简单，但通过封闭在 <function>PDO::beginTransaction</function> 和<function>PDO::commit</function> 调用中，可以保证在更改完成之前，其他人无法看到这些更改。如果发生了错误，catch 块回滚自事务启动以来发生的所有更改，并输出一条错误信息。
+   </para>
+   <programlisting role="php">
+<![CDATA[
+<?php
+try {
+  $dbh = new PDO('odbc:SAMPLE', 'db2inst1', 'ibmdb2', 
+      array(PDO::ATTR_PERSISTENT => true));
+  echo "Connected\n";
+} catch (Exception $e) {
+  die("Unable to connect: " . $e->getMessage());
+}
+
+try {  
+  $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+  $dbh->beginTransaction();
+  $dbh->exec("insert into staff (id, first, last) values (23, 'Joe', 'Bloggs')");
+  $dbh->exec("insert into salarychange (id, amount, changedate) 
+      values (23, 50000, NOW())");
+  $dbh->commit();
+  
+} catch (Exception $e) {
+  $dbh->rollBack();
+  echo "Failed: " . $e->getMessage();
+}
+?>
+]]>
+   </programlisting>
+  </example>
+ </para>
+ <para>
+  并不局限于在事务中更改，也可以发出复杂的查询来提取数据，还可以使用那些信息来构建更多的更改和查询；当事务激活时，可以保证其他人在操作进行当中无法作出更改。想更进一步阅读关于事务的信息，可参考数据库服务提供的文档。
+ </para>
+</chapter>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
+
