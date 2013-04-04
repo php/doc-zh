@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <!-- $Revision$ -->
 <!-- $Author$ -->
-<!-- EN-Revision: af4410a7e15898c3dbe83d6ea38246745ed9c6fb Maintainer: eniac2008 Status: ready -->
-<!-- CREDITS: dallas,bjori --> 
+<!-- EN-Revision: 62be8e53d5baf2dd884b560d8eb7a634d9bbf3b5 Maintainer: dallas Status: ready -->
+<!-- CREDITS: Altair --> 
  <chapter xml:id="language.constants" xmlns="http://docbook.org/ns/docbook">
   <title>常量</title>
 
   <simpara>
    常量是一个简单值的标识符（名字）。如同其名称所暗示的，在脚本执行期间该值不能改变（除了所谓的<link
-   linkend="language.constants.predefined">魔术常量</link>，它们其实不是常量）。常量默认为大小写敏感。通常常量标识符总是大写的。
+   linkend="language.constants.predefined">魔术常量</link>，它们其实不是常量）。常量默认为大小写敏感。传统上常量标识符总是大写的。
   </simpara>
   <para>
-   常量名和其它任何 PHP 标签遵循同样的命名规则。合法的常量名以字母或下划线开始，后面跟着任何字母，数字或下划线。用正则表达式是这样表达的：<literal>[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*</literal>
+   常量名和其它任何 PHP 标签遵循同样的命名规则。合法的常量名以字母或下划线开始，后面跟着任何字母，数字或下划线。用正则表达式是这样表达的：<literal>[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*</literal>。
   </para>
   &tip.userlandnaming;  
   <para>
@@ -42,25 +42,25 @@ define("__FOO__", "something");
 
   <note>
    <simpara>
-    在这里，字母是 a-z，A-Z，以及从 127 到 255（0x7f-0xff）的 ASCII 字符。
+    在这里，字母指的是 a-z，A-Z，以及从 127 到 255（0x7f-0xff）的 ASCII 字符。
    </simpara>
   </note>
 
   <simpara>
-   和 &link.superglobals; 一样，常量的范围是全局的。不用管作用域就可以在脚本的任何地方访问常量。有关作用得更多信息请阅读手册中的<link
+   和 &link.superglobals; 一样，常量的范围是全局的。不用管作用区域就可以在脚本的任何地方访问常量。有关作用区域的更多信息请阅读手册中的<link
    linkend="language.variables.scope">变量范围</link>。
   </simpara>
 
   <sect1 xml:id="language.constants.syntax">
    <title>语法</title>
    <simpara>
-    可以用 <function>define</function> 函数来定义常量。在
+    可以用 <function>define</function> 函数来定义常量，在
     PHP 5.3.0 以后，可以使用 <literal>const</literal> 
-    关键字在类定义的外部定义常量。一个常量一旦被定义，就不能再改变或者取消定义。
+    关键字在类定义之外定义常量。一个常量一旦被定义，就不能再改变或者取消定义。
    </simpara>
    <simpara>
-    常量只能包含标量数据（<type>boolean</type>，<type>integer</type>，<type>float</type> 和 <type>string</type>）。
-    可以定义 <type>resource</type> 常量，但应尽量避免，因为会造成不可预料的结果。
+    常量只能包含标量数据（<type>boolean</type>，<type>integer</type>，<type>float</type>
+	和 <type>string</type>）。可以定义 <type>resource</type> 常量，但应尽量避免，因为会造成不可预料的结果。
    </simpara>
    <simpara>
     可以简单的通过指定其名字来取得常量的值，与变量不同，<emphasis>不应该</emphasis>在常量前面加上
@@ -121,7 +121,7 @@ define("__FOO__", "something");
 <?php
 define("CONSTANT", "Hello world.");
 echo CONSTANT; // outputs "Hello world."
-echo Constant; // 输出 "Constant" 并发出一个提示性信息
+echo Constant; // 输出 "Constant" 并发出一个提示级别错误信息
 ?>
 ]]>
      </programlisting>
@@ -144,6 +144,14 @@ echo CONSTANT;
     </example>
    </para>
    
+   <note>
+    <para>
+	 和使用 <function>define</function> 来定义常量相反的是，使用 <literal>const</literal>
+	 关键字定义常量必须处于最顶端的作用区域，因为用此方法是在编译时定义的。这就意味着不能在函数内，循环内以及
+     <literal>if</literal> 语句之内用 <literal>const</literal> 来定义常量。
+    </para>
+   </note>
+
    <simpara>
     参见<link linkend="language.oop5.constants">类常量</link>。
    </simpara>
@@ -157,7 +165,7 @@ echo CONSTANT;
     linkend="reserved.constants">预定义常量</link>。不过很多常量都是由不同的扩展库定义的，只有在加载了这些扩展库时才会出现，或者动态加载后，或者在编译时已经包括进去了。
    </simpara>
    <para>
-    有七个魔术常量它们的值随着它们在代码中的位置改变而改变。例如
+    有八个魔术常量它们的值随着它们在代码中的位置改变而改变。例如
     <constant>__LINE__</constant> 的值就依赖于它在脚本中所处的行来决定。这些特殊的常量不区分大小写，如下：
    </para>
    <para>
@@ -171,13 +179,13 @@ echo CONSTANT;
        </row>
       </thead>
       <tbody>
-       <row>
+       <row xml:id="constant.line">
         <entry><constant>__LINE__</constant></entry>
         <entry>
          文件中的当前行号。
         </entry>
        </row>
-       <row>
+       <row xml:id="constant.file">
         <entry><constant>__FILE__</constant></entry>
         <entry>
          文件的完整路径和文件名。如果用在被包含文件中，则返回被包含的文件名。自
@@ -185,14 +193,14 @@ echo CONSTANT;
          总是包含一个绝对路径（如果是符号连接，则是解析后的绝对路径），而在此之前的版本有时会包含一个相对路径。
         </entry>
        </row>
-       <row>
+       <row xml:id="constant.dir">
         <entry><constant>__DIR__</constant></entry>
         <entry>
          文件所在的目录。如果用在被包括文件中，则返回被包括的文件所在的目录。它等价于
          <literal>dirname(__FILE__)</literal>。除非是根目录，否则目录中名不包括末尾的斜杠。（PHP 5.3.0中新增）
 =        </entry>
        </row>       
-       <row>
+       <row xml:id="constant.function">
         <entry><constant>__FUNCTION__</constant></entry>
         <entry>
          函数名称（PHP 4.3.0 新加）。自 PHP 5
@@ -200,24 +208,35 @@ echo CONSTANT;
          PHP 4 中该值总是小写字母的。
         </entry>
        </row>
-       <row>
+       <row xml:id="constant.class">
         <entry><constant>__CLASS__</constant></entry>
         <entry>
          类的名称（PHP 4.3.0 新加）。自 PHP 5
          起本常量返回该类被定义时的名字（区分大小写）。在
-         PHP 4 中该值总是小写字母的。
+         PHP 4 中该值总是小写字母的。类名包括其被声明的作用区域（例如
+		 <literal>Foo\Bar</literal>）。注意自 PHP 5.4 起 __CLASS__
+		 对 trait 也起作用。当用在 trait 方法中时，__CLASS__
+		 是调用 trait 方法的类的名字。
         </entry>
        </row>
-       <row>
+       <row xml:id="constant.trait">
+        <entry><constant>__TRAIT__</constant></entry>
+        <entry>
+         Trait 的名字（PHP 5.4.0 新加）。自 PHP 5.4 起此常量返回 trait
+		 被定义时的名字（区分大小写）。Trait 名包括其被声明的作用区域（例如
+		 <literal>Foo\Bar</literal>）。
+        </entry>
+       </row>
+       <row xml:id="constant.method">
         <entry><constant>__METHOD__</constant></entry>
         <entry>
          类的方法名（PHP 5.0.0 新加）。返回该方法被定义时的名字（区分大小写）。
         </entry>
        </row>
-       <row>
+       <row xml:id="constant.namespace">
         <entry><constant>__NAMESPACE__</constant></entry>
         <entry>
-         当前命名空间的名称（大小写敏感）。这个常量是在编译时定义的（PHP 5.3.0 新增）
+         当前命名空间的名称（区分大小写）。此常量是在编译时定义的（PHP 5.3.0 新增）。
         </entry>
        </row>
       </tbody>
