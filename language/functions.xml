@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: a9b26c34e481fa948bcc7d75b73b441605142dd7 Maintainer: HonestQiao Status: ready -->
-<!-- Reviewed: no Maintainer: HonestQiao -->
+<!-- EN-Revision: d22ce6b9c952e5bb15766b5f55cfe50dacf3f0b9 Maintainer: verdana Status: ready -->
 <!-- CREDITS: Gregory, dallas -->
  <chapter xml:id="language.functions" xmlns="http://docbook.org/ns/docbook">
   <title>函数</title>
@@ -18,7 +17,7 @@
      <programlisting role="php">
 <![CDATA[
 <?php
-function foo($arg_1, $arg_2, ..., $arg_n)
+function foo($arg_1, $arg_2, /* ..., */ $arg_n)
 {
     echo "Example function.\n";
     return $retval;
@@ -38,18 +37,21 @@ function foo($arg_1, $arg_2, ..., $arg_n)
    </para>
    &tip.userlandnaming;
    <para>
-    <emphasis>除非</emphasis>是下面两个例子中的情况，函数必须在其调用之前定义。
+    函数无需在调用之前被定义，<emphasis>除非</emphasis>是下面两个例子中函数是有条件被定义时。
+   </para>
+   <para>
+    当一个函数是有条件被定义时，其定义必须在调用<emphasis>之前</emphasis>先处理。
    </para>
    <para>
     <example>
-     <title>条件函数(Conditional functions)</title>
+     <title>有条件的函数</title>
      <programlisting role="php">
 <![CDATA[
 <?php
 
 $makefoo = true;
 
-/* 我们不能在处调用foo()函数，
+/* 不能在此处调用foo()函数，
    因为它还不存在，但可以调用bar()函数。*/
 
 bar();
@@ -61,7 +63,7 @@ if ($makefoo) {
   }
 }
 
-/* 现在我们可以安全调用函数 foo()了，
+/* 现在可以安全调用函数 foo()了，
    因为 $makefoo 值为真 */
 
 if ($makefoo) foo();
@@ -105,25 +107,25 @@ bar();
     </example>
    </para>
    <para>
-    PHP 中的所有函数和类都具有全局作用域，可以在内部定义外部调用，反之亦然。
+    PHP 中的所有函数和类都具有全局作用域，可以定义在一个函数之内而在之外调用，反之亦然。
    </para>
    <simpara>
     PHP 不支持函数重载，也不可能取消定义或者重定义已声明的函数。
    </simpara>
    <note>
     <simpara>
-     函数名是大小写无关的，不过在调用函数的时候，通常使用其在定义时相同的形式。
+     函数名是大小写无关的，不过在调用函数的时候，使用其在定义时相同的形式是个好习惯。
     </simpara>
    </note>
    <simpara>
-    PHP 支持<link linkend="functions.variable-arg-list">可变数量的参数</link>和<link 
-    linkend="functions.arguments.default">默认参数</link>。具体请参考：
-    <function>func_num_args</function>，<function>func_get_arg</function>，以及<function>func_get_args</function>。
+    PHP 的函数支持<link linkend="functions.variable-arg-list">可变数量的参数</link>和<link 
+    linkend="functions.arguments.default">默认参数</link>。参见
+    <function>func_num_args</function>，<function>func_get_arg</function> 和 <function>func_get_args</function>。
    </simpara>
 
    <para>
     在 PHP 中可以调用递归函数。但是要避免递归函数／方法调用超过
-    100-200 层，因为可能会破坏堆栈从而使当前脚本终止。
+    100-200 层，因为可能会使堆栈崩溃从而使当前脚本终止。
     <example>
      <title>递归函数</title>
      <programlisting role="php">
@@ -147,13 +149,13 @@ function recursion($a)
    <title>函数的参数</title>
 
    <simpara>
-    通过参数列表可以传递信息到函数，即以逗号作为分隔符的表达式列表。
+    通过参数列表可以传递信息到函数，即以逗号作为分隔符的表达式列表。参数是从左向右求值的。
    </simpara>
    <para>
     PHP 支持按值传递参数（默认），<link
     linkend="functions.arguments.by-reference">通过引用传递参数</link>以及<link
-    linkend="functions.arguments.default">默认参数</link>。也支持可变数量的参数；更多信息请参照<link
-    linkend="functions.variable-arg-list">可变长度参数列表</link>和涉及到的相关函数
+    linkend="functions.arguments.default">默认参数</link>。也支持<link
+    linkend="functions.variable-arg-list">可变长度参数列表</link>，更多信息参见
     <function>func_num_args</function>，<function>func_get_arg</function> 以及
     <function>func_get_args</function>。
    </para>
@@ -177,10 +179,10 @@ function takes_array($input)
     <title>通过引用传递参数</title>
 
     <simpara>
-     缺省情况下，函数参数通过值传递（因而即使在函数内部改变参数的值，它并不会改变函数外部的值）。如果希望允许函数修改它的参数值，必须通过引用传递参数。
+     默认情况下，函数参数通过值传递（因而即使在函数内部改变参数的值，它并不会改变函数外部的值）。如果希望允许函数修改它的参数值，必须通过引用传递参数。
     </simpara>
     <para>
-     如果想要函数的一个参数总是通过引用传递，可以在函数定义中该参数的前面预先加上符号 &amp;：
+     如果想要函数的一个参数总是通过引用传递，可以在函数定义中该参数的前面加上符号 &amp;：
     </para>
     <para>
      <example>
@@ -207,7 +209,7 @@ echo $str;    // outputs 'This is a string, and something extra.'
     <title>默认参数的值</title>
 
     <para>
-     函数可以定义 C++ 风格的标量参数默认值，如下：
+     函数可以定义 C++ 风格的标量参数默认值，如下所示：
     </para>
     <para>
      <example>
@@ -235,20 +237,8 @@ Making a cup of espresso.
       </screen>
      </example>
     </para>
-
     <para>
-     上面代码段的输出是：
-    </para>
-    <para>
-     <screen>
-Making a cup of cappuccino.
-Making a cup of .
-Making a cup of espresso.
-     </screen>
-    </para>
-
-    <para>
-     PHP 还允许使用数组和特殊类型 NULL 作为默认参数，例如：
+     PHP 还允许使用数组 <type>array</type> 和特殊类型 &null; 作为默认参数，例如：
     </para>
     <para>
      <example>
@@ -270,14 +260,14 @@ echo makecoffee(array("cappuccino", "lavazza"), "teapot");
     </para>
 
     <simpara>
-     默认值必须是常量表达式，不能是诸如变量，类成员，或者函数调用等表达式。
+     默认值必须是常量表达式，不能是诸如变量，类成员，或者函数调用等。
     </simpara>
     <para>
-     请注意当使用默认参数时，任何默认参数必须放在任何非默认参数的右侧；否则，函数将不会按照预期的情况工作。考虑下面的代码片断：
+     注意当使用默认参数时，任何默认参数必须放在任何非默认参数的右侧；否则，函数将不会按照预期的情况工作。考虑下面的代码片断：
     </para>
     <para>
      <example>
-      <title>函数默认参数不正确的用法</title>
+      <title>函数默认参数的不正确用法</title>
       <programlisting role="php">
 <![CDATA[
 <?php
@@ -290,17 +280,15 @@ echo makeyogurt("raspberry");   // won't work as expected
 ?>
 ]]>
       </programlisting>
-     </example>
-    </para>
-    <para>
-     上述例子的输出是：
-    </para>
-    <para>
-     <screen>
-Warning: Missing argument 2 in call to makeyogurt() in
-/usr/local/etc/httpd/htdocs/php3test/functest.html on line 41
+      &example.outputs;
+      <screen>
+<![CDATA[
+Warning: Missing argument 2 in call to makeyogurt() in 
+/usr/local/etc/httpd/htdocs/phptest/functest.html on line 41
 Making a bowl of raspberry .
-     </screen>
+]]>
+      </screen>
+     </example>
     </para>
     <para>
      现在，比较上面的例子和这个例子：
@@ -320,17 +308,14 @@ echo makeyogurt("raspberry");   // works as expected
 ?>
 ]]>
       </programlisting>
+      &example.outputs;
+      <screen>
+<![CDATA[
+Making a bowl of acidophilus raspberry.
+]]>
+      </screen>
      </example>
     </para>
-    <para>
-     这个例子的输出是：
-    </para>
-    <para>
-     <screen>
-Making a bowl of acidophilus raspberry.
-     </screen>
-    </para>
-
     <note>
      <simpara>
       自 PHP 5 起，默认值可以通过引用传递。
@@ -343,7 +328,7 @@ Making a bowl of acidophilus raspberry.
     <title>可变数量的参数列表</title>
 
     <simpara>
-     PHP 4 及更高版本已经在用户自定义函数中支持可变数量的参数列表。其实很简单，只需使用
+     PHP 在用户自定义函数中支持可变数量的参数列表。其实很简单，只需使用
      <function>func_num_args</function>，<function>func_get_arg</function>，和
      <function>func_get_args</function> 函数即可。
     </simpara>
@@ -363,6 +348,11 @@ Making a bowl of acidophilus raspberry.
     值通过使用可选的返回语句返回。可以返回包括数组和对象的任意类型。返回语句会立即中止函数的运行，并且将控制权交回调用该函数的代码行。更多信息见
     <function>return</function>。
    </para>
+   <note>
+    <para>
+     如果省略了 <function>return</function>，则返回值为 &null;。
+    </para>
+   </note>
    <para>
     <example>
      <title><function>return</function> 的使用</title>
@@ -400,7 +390,7 @@ list ($zero, $one, $two) = small_numbers();
      </example>
    </para>
    <para>
-    从函数返回一个引用，必须在函数声明和指派返回值给一个变量时都使用引用操作符 &amp; ：
+    从函数返回一个引用，必须在函数声明和指派返回值给一个变量时都使用引用运算符 &amp;：
    </para>
    <para>
     <example>
@@ -433,9 +423,9 @@ $newref =& returns_reference();
     将寻找与变量的值同名的函数，并且尝试执行它。可变函数可以用来实现包括回调函数，函数表在内的一些用途。
     </para>
    <para>
-    变量函数不能用于语言结构，例如
+    可变函数不能用于例如
     <function>echo</function>，<function>print</function>，<function>unset</function>，<function>isset</function>，<function>empty</function>，<function>include</function>，<function>require</function>
-    以及类似的语句。需要使用自己的包装函数来将这些结构用作变量函数。
+    以及类似的语言结构。需要使用自己的包装函数来将这些结构用作可变函数。
    </para>
    <para>
     <example>
@@ -471,7 +461,7 @@ $func('test');  // This calls echoit()
     </example>
    </para>
    <para>
-    还可以利用可变函数的特性来调用一个对象的方法。
+    也可以用可变函数的语法来调用一个对象的方法。
     <example>
      <title>可变方法范例</title>
      <programlisting role="php">
@@ -500,21 +490,48 @@ $foo->$funcname();   // This calls $foo->Variable()
      </programlisting>
     </example>
    </para>
+
    <para>
-    请参阅 <function>call_user_func</function>，<link
+    当调用静态方法时，函数调用要比静态属性优先：
+    <example>
+     <title>Variable 方法和静态属性示例</title>
+     <programlisting role="php">
+<![CDATA[
+<?php
+class Foo
+{
+    static $variable = 'static property';
+    static function Variable()
+    {
+        echo 'Method Variable called';
+    }
+}
+
+echo Foo::$variable; // This prints 'static property'. It does need a $variable in this scope.
+$variable = "Variable";
+Foo::$variable();  // This calls $foo->Variable() reading $variable in this scope.
+
+?>
+]]>
+     </programlisting>
+    </example>
+   </para>
+
+   <para>
+    参见 <function>is_callable</function>，<function>call_user_func</function>，<link
     linkend="language.variables.variable">可变变量</link>和
     <function>function_exists</function>。
    </para>
 
   </sect1>
 
-<sect1 xml:id="functions.internal">
+  <sect1 xml:id="functions.internal">
      <title>内部（内置）函数</title>
 
      <para>
       PHP 有很多标准的函数和结构。还有一些函数需要和特定地 PHP
-      扩展模块一起编译，否则在使用它们的时候就会得到一个致命的“未定义函数”错误。例如，要使用<link
-      linkend="ref.image">image</link>函数比如
+      扩展模块一起编译，否则在使用它们的时候就会得到一个致命的“未定义函数”错误。例如，要使用
+	  <link linkend="ref.image">image</link> 函数中的
       <function>imagecreatetruecolor</function>，需要在编译 PHP 的时候加上
       <productname>GD</productname> 的支持。或者，要使用
       <function>mysql_connect</function> 函数，就需要在编译 PHP 的时候加上
@@ -536,7 +553,9 @@ $foo->$funcname();   // This calls $foo->Variable()
      </para>
    <note>
     <simpara>
-     如果传递给函数的参数类型与实际的类型不一致，例如将一个<type>array</type>传递给一个<type>string</type>类型的变量，那么函数的返回值是不确定的。在这种情况下，通常函数会返回&null;。但这仅仅是一个约定，并不一定如此。
+     如果传递给函数的参数类型与实际的类型不一致，例如将一个 <type>array</type>
+	 传递给一个 <type>string</type> 类型的变量，那么函数的返回值是不确定的。在这种情况下，通常函数会返回
+	 &null;。但这仅仅是一个惯例，并不一定如此。
     </simpara>
    </note>    
      <para>
@@ -551,12 +570,12 @@ $foo->$funcname();   // This calls $foo->Variable()
 
    <simpara>
     匿名函数（Anonymous functions），也叫闭包函数（<literal>closures</literal>），允许
-    临时创建一个没有指定名称的函数。最经常用作回调函数（<link linkend="language.types.callback">callback</link>）的参数。
-    当然，也有其他应用的情况。
+    临时创建一个没有指定名称的函数。最经常用作回调函数（<link
+	linkend="language.types.callback">callback</link>）参数的值。当然，也有其它应用的情况。
    </simpara>
 
    <example>
-    <title>Anonymous function 示例</title>
+    <title>匿名函数示例</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -570,8 +589,9 @@ echo preg_replace_callback('~-([a-z])~', function ($match) {
    </example>
 
    <simpara>
-    闭包函数也可以作为变量的值来使用。PHP会自动把表达式转换成内置类<classname>Closure</classname>的
-    对象实例。把一个closure对象赋值给一个变量的方式与普通变量赋值的语法是一样的，最后也要加上分号。
+    闭包函数也可以作为变量的值来使用。PHP 会自动把此种表达式转换成内置类
+	<classname>Closure</classname> 的对象实例。把一个 closure
+	对象赋值给一个变量的方式与普通变量赋值的语法是一样的，最后也要加上分号：
    </simpara>
 
    <example>
@@ -592,18 +612,18 @@ $greet('PHP');
    </example>
    
    <simpara>
-    Closure对象也会从父作用域中继承类属性。这些变量都必须在函数或类的头部声明。从父作用域中继承
-    变量与使用全局变量是*不同*的。全局变量存在于一个全局的范围，无论当前在执行的是哪个函数。而closure
-    的父类作用域则是声明该closure的函数（不一定要是它被调用的函数）。示例如下：
+    Closure 对象也会从父作用域中继承类属性。这些变量都必须在函数或类的头部声明。从父作用域中继承变量与使用全局变量是<emphasis>不同</emphasis>的。全局变量存在于一个全局的范围，无论当前在执行的是哪个函数。而
+	closure 的父作用域则是声明该 closure 的函数（不一定要是它被调用的函数）。示例如下：
    </simpara>
 
    <example>
-    <title>Closures和作用域</title>
+    <title>Closures 和作用域</title>
     <programlisting role="php">
 <![CDATA[
 <?php
 // 一个基本的购物车，包括一些已经添加的商品和每种商品的数量。
-// 其中有一个方法用来计算购物车中所有商品的总价格。该方法使用了一个closure作为回调函数。
+// 其中有一个方法用来计算购物车中所有商品的总价格，该方法使
+// 用了一个 closure 作为回调函数。
 class Cart
 {
     const PRICE_BUTTER  = 1.00;
@@ -649,31 +669,17 @@ $my_cart->add('eggs', 6);
 
 // 打出出总价格，其中有 5% 的销售税.
 print $my_cart->getTotal(0.05) . "\n";
-// The result is 54.29
+// 最后结果是 54.29
 ?>
 ]]>
     </programlisting>
    </example>
    
    <simpara>
-    匿名函数目前是通过<link linkend="reserved.classes.closure">
-    <classname>Closure</classname></link>类来实现的。
+    匿名函数目前是通过
+	<link linkend="reserved.classes.closure"><classname>Closure</classname></link> 类来实现的。
    </simpara>
    
-   <note>
-    <simpara>    
-     匿名函数只在PHP 5.3.0 及以上版本有效。
-    </simpara>
-   </note>
-
-   <note>
-    <simpara>
-     在closure内部可以调用 <function>func_num_args</function>,
-     <function>func_get_arg</function>, 和 <function>func_get_args</function>
-     等函数来获取参数信息。
-    </simpara>
-   </note>
-
    <sect2 role="changelog">
     &reftitle.changelog;
     <para>
@@ -689,13 +695,13 @@ print $my_cart->getTotal(0.05) . "\n";
         <row>
          <entry>5.4.0</entry>
          <entry>
-          <varname>$this</varname> can be used in anonymous functions.
+          <varname>$this</varname> 可用于匿名函数。
          </entry>
         </row>
         <row>
          <entry>5.3.0</entry>
          <entry>
-          Anonymous functions become available.
+          可以使用匿名函数。
          </entry>
         </row>
        </tbody>
@@ -708,9 +714,9 @@ print $my_cart->getTotal(0.05) . "\n";
     &reftitle.notes;
     <note>
      <simpara>
-      It is possible to use <function>func_num_args</function>,
-      <function>func_get_arg</function>, and <function>func_get_args</function>
-      from within a closure.
+      可以在 closure 中使用
+	  <function>func_num_args</function>，<function>func_get_arg</function>
+	  和 <function>func_get_args</function>。
      </simpara>
     </note>
    </sect2>
