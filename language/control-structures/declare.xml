@@ -1,44 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
 <!-- $Author$ -->
-<!-- EN-Revision: af4410a7e15898c3dbe83d6ea38246745ed9c6fb Maintainer: haohappy Status: updating -->
+<!-- EN-Revision: 3ac3e340846ebed0f806322504139b0116b96714 Maintainer: dallas Status: ready -->
 
 <sect1 xml:id="control-structures.declare" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-  <title><literal>declare</literal></title>
-  <para>
-   <literal>declare</literal> 结构用来设定一段代码的执行指令。<literal>declare</literal>
-   的语法和其它流程控制结构相似：
-   <informalexample>
-    <programlisting>
+ <title><literal>declare</literal></title>
+ <?phpdoc print-version-for="declare"?>
+ <para>
+  <literal>declare</literal> 结构用来设定一段代码的执行指令。<literal>declare</literal>
+  的语法和其它流程控制结构相似：
+  <informalexample>
+   <programlisting>
 <![CDATA[
 declare (directive)
     statement
 ]]>
-    </programlisting>
-   </informalexample>
-  </para>
-  <para>
-   <literal>directive</literal> 部分允许设定 <literal>declare</literal>
-   代码段的行为。目前只认识两个指令：<literal>ticks</literal>（更多信息见下面
-   <link linkend="control-structures.declare.ticks">ticks</link> 指令）以及 
-   <literal>encoding</literal>(更多信息见下面 <link 
-   linkend="control-structures.declare.encoding">encoding</link>指令)。
-  </para>
-  <note>
-    <simpara>
-     encoding 是 PHP 5.3.0 新增指令。
-    </simpara>
-  </note> 
-  <para>
-   <literal>declare</literal> 代码段中的 <literal>statement</literal>
-   部分将被执行——怎样执行以及执行中有什么副作用出现取决于
-   <literal>directive</literal> 中设定的指令。
-  </para>
-  <para>
-   <literal>declare</literal> 结构也可用于全局范围，影响到其后的所有代码(但如果有
-    <literal>declare</literal> 结构的文件被其它文件包含，它对包含它的文件不起作用)。
-   <informalexample>
-    <programlisting role="php">
+   </programlisting>
+  </informalexample>
+ </para>
+ <para>
+  <literal>directive</literal> 部分允许设定 <literal>declare</literal>
+  代码段的行为。目前只认识两个指令：<literal>ticks</literal>（更多信息见下面
+  <link linkend="control-structures.declare.ticks">ticks</link> 指令）以及 
+  <literal>encoding</literal>（更多信息见下面 <link 
+  linkend="control-structures.declare.encoding">encoding</link> 指令）。
+ </para>
+ <note>
+  <simpara>
+   encoding 是 PHP 5.3.0 新增指令。
+  </simpara>
+ </note> 
+ <para>
+  <literal>declare</literal> 代码段中的 <literal>statement</literal>
+  部分将被执行——怎样执行以及执行中有什么副作用出现取决于
+  <literal>directive</literal> 中设定的指令。
+ </para>
+ <para>
+  <literal>declare</literal> 结构也可用于全局范围，影响到其后的所有代码（但如果有
+  <literal>declare</literal> 结构的文件被其它文件包含，则对包含它的父文件不起作用）。
+  <informalexample>
+   <programlisting role="php">
 <![CDATA[
 <?php
 // these are the same:
@@ -53,112 +54,131 @@ declare(ticks=1);
 // entire script here
 ?>
 ]]>
-    </programlisting>
-   </informalexample>
-  </para>
+   </programlisting>
+  </informalexample>
+ </para>
 
-  <sect2 xml:id="control-structures.declare.ticks">
-   <title>Ticks</title>
-   <caution>
-     <simpara>
-      ticks 指令在 PHP 5.3.0 中是过时指令，将会从 PHP 6.0.0 移除。
-     </simpara>
-   </caution>
-   <para>
-    Tick 是一个在 <literal>declare</literal> 代码段中解释器每执行
-    <varname>N</varname> 条低级语句就会发生的事件。<varname>N</varname>
-    的值是在 <literal>declare</literal> 中的 <literal>directive</literal> 部分用
-    <code>ticks=N</code> 来指定的。
-   </para>
-   <para>
-    在每个 tick 中出现的事件是由 <function>register_tick_function</function>
-    来指定的。更多细节见下面的例子。注意每个 tick 中可以出现多个事件。
-   </para>
-   <para>
-    <example>
-     <title>评估一段 PHP 代码的执行时间</title>
-     <programlisting role="php">
+ <sect2 xml:id="control-structures.declare.ticks">
+  <title>Ticks</title>
+  <para>
+   Tick（时钟周期）是一个在 <literal>declare</literal> 代码段中解释器每执行
+   <varname>N</varname> 条可计时的低级语句就会发生的事件。<varname>N</varname>
+   的值是在 <literal>declare</literal> 中的 <literal>directive</literal> 部分用
+   <code>ticks=N</code> 来指定的。
+  </para>
+  <para>
+   不是所有语句都可计时。通常条件表达式和参数表达式都不可计时。
+  </para>
+  <para>
+   在每个 tick 中出现的事件是由 <function>register_tick_function</function>
+   来指定的。更多细节见下面的例子。注意每个 tick 中可以出现多个事件。
+  </para>
+ <para>
+  <example>
+   <title>Tick 的用法示例</title>
+   <programlisting role="php">
 <![CDATA[
 <?php
-// A function that records the time when it is called
-function profile($dump = FALSE)
+
+declare(ticks=1);
+
+// A function called on each tick event
+function tick_handler()
 {
-    static $profile;
-
-    // Return the times stored in profile, then erase it
-    if ($dump) {
-        $temp = $profile;
-        unset($profile);
-        return ($temp);
-    }
-
-    $profile[] = microtime();
+    echo "tick_handler() called\n";
 }
 
-// Set up a tick handler
-register_tick_function("profile");
+register_tick_function('tick_handler');
 
-// Initialize the function before the declare block
-profile();
+$a = 1;
 
-// Run a block of code, throw a tick every 2nd statement
-declare(ticks=2) {
-    for ($x = 1; $x < 50; ++$x) {
-        echo similar_text(md5($x), md5($x*$x)), "<br />;";
-    }
+if ($a > 0) {
+    $a += 2;
+    print($a);
 }
 
-// Display the data stored in the profiler
-print_r(profile (TRUE));
 ?>
 ]]>
-     </programlisting>
-    </example>
-    这个例子评估“declare”中的 PHP
-    代码，每执行两条低级语句就记录一次时间。此信息可以用来找到一段特定代码中速度慢的部分。这个过程也可以用其它方法完成，但用
-    tick 更方便也更容易实现。
-   </para>
-   <simpara>
-    Ticks 很适合用来做调试，以及实现简单的多任务，后台 I/O 和很多其它任务。
-   </simpara>
-   <simpara>
-    参见 <function>register_tick_function</function> 和
-    <function>unregister_tick_function</function>。
-   </simpara>
-  </sect2>
-  <sect2 xml:id="control-structures.declare.encoding">
-    <title>Encoding</title>
-    <para>
-      A script's encoding can be specified per-script using the encoding directive.
-    <example>
-     <title>Declaring an encoding for the script.</title>
-      <programlisting role="php">
+   </programlisting>
+  </example>
+ </para>
+ <para>
+  <example>
+   <title>Ticks 的用法示例</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+
+function tick_handler()
+{
+  echo "tick_handler() called\n";
+}
+
+$a = 1;
+tick_handler();
+
+if ($a > 0) {
+    $a += 2;
+    tick_handler();
+    print($a);
+    tick_handler();
+}
+tick_handler();
+
+?>
+]]>
+   </programlisting>
+  </example>
+ </para>
+  <simpara>
+   参见 <function>register_tick_function</function> 和
+   <function>unregister_tick_function</function>。
+  </simpara>
+ </sect2>
+
+ <sect2 xml:id="control-structures.declare.encoding">
+  <title>Encoding</title>
+  <para>
+   可以用 encoding 指令来对每段脚本指定其编码方式。
+  <example>
+   <title>对脚本指定编码方式</title>
+    <programlisting role="php">
 <![CDATA[
 <?php
 declare(encoding='ISO-8859-1');
 // code here
 ?>
 ]]>
-      </programlisting>
-     </example>
-    </para>
+    </programlisting>
+   </example>
+  </para>
 
-    <caution>
-     <simpara>
-      When combined with namespaces, the only legal syntax for declare
-      is <literal>declare(encoding='...');</literal> where <literal>...</literal>
-      is the encoding value.  <literal>declare(encoding='...') {}</literal>
-      will result in a parse error when combined with namespaces.
-     </simpara>
-    </caution>
-    <para>
-     The encoding declare value is ignored in PHP 5.3 unless php is compiled with
-     <literal>--enable-zend-multibyte</literal>.  In PHP 6.0, the <literal>encoding</literal>
-     directive will be used to inform the scanner what encoding the file is created in.  Legal
-     values are encoding names such as <literal>UTF-8</literal>.
-    </para>
-  </sect2>
- </sect1>
+  <caution>
+   <simpara>
+    当和命名空间结合起来时 declare 的唯一合法语法是
+    <literal>declare(encoding='...');</literal>，其中 <literal>...</literal>
+    是编码的值。而 <literal>declare(encoding='...') {}</literal>
+	将在与命名空间结合时产生解析错误。
+   </simpara>
+  </caution>
+  <para>
+   在 PHP 5.3 中除非在编译时指定了
+   <literal>--enable-zend-multibyte</literal>，否则 declare 中的 encoding 值会被忽略。
+  </para>
+  <para>
+   注意除非用 <function>phpinfo</function>，否则 PHP
+   不会显示出是否在编译时指定了 <literal>--enable-zend-multibyte</literal>。
+  </para>
+  <para>
+   参见 <link linkend="ini.zend.script-encoding">zend.script_encoding</link>。
+  </para>
+   <!-- FIXME PHP_6 
+   In PHP 6.0, the <literal>encoding</literal>
+   directive will be used to inform the scanner what encoding the file is created in.  Legal
+   values are encoding names such as <literal>UTF-8</literal>.
+   -->
+ </sect2>
+</sect1>
 
 <!-- Keep this comment at the end of the file
 Local variables:
