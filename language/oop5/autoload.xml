@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
 <!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
+<!-- EN-Revision: 5b5ab43c78ecf2d9b8c678569afceff8b5e79c5f Maintainer: dallas Status: ready -->
 <sect1 xml:id="language.oop5.autoload" xmlns="http://docbook.org/ns/docbook">
  <title>自动加载对象</title>
  <para>
   很多开发者写面向对象的应用程序时对每个类的定义建立一个
-  PHP 源文件。一个很大的烦恼是不得不在每个脚本（每个类一个文件）开头写一个长长的包含文件列表。
+  PHP 源文件。一个很大的烦恼是不得不在每个脚本开头写一个长长的包含文件列表（每个类一个文件）。
  </para>
  <para>
   在 PHP 5 中，不再需要这样了。可以定义一个
-  __autoload 函数，它会在试图使用尚未被定义的类时自动调用。通过调用此函数，脚本引擎在
+  <function>__autoload</function> 函数，它会在试图使用尚未被定义的类时自动调用。通过调用此函数，脚本引擎在
   PHP 出错失败前有了最后一个机会加载所需的类。
  </para>
   <tip>
@@ -20,20 +20,21 @@
   </tip>
  <note>
   <para>
-    在 5.3.0 版之前，__autoload 函数抛出的异常不能被 <link linkend="language.exceptions">catch</link> 语句块捕获并会导致一个致命错误。从 5.3.0+ 之后，__autoload 函数抛出的异常可以被 <link linkend="language.exceptions">
-    catch</link> 语句块捕获，但需要遵循一个条件。如果抛出的是一个自定义异常，那么必须存在相应的自定义异常类。__autoload 函数可以递归的自动加载自定义异常类。
+    在 5.3.0 版之前，__autoload 函数抛出的异常不能被 <link linkend="language.exceptions">catch</link>
+    语句块捕获并会导致一个致命错误。从 5.3.0+ 之后，__autoload 函数抛出的异常可以被
+    <link linkend="language.exceptions">catch</link>
+    语句块捕获，但需要遵循一个条件。如果抛出的是一个自定义异常，那么必须存在相应的自定义异常类。__autoload
+    函数可以递归的自动加载自定义异常类。
   </para>
  </note>
  <note>
   <para>
-  如果使用 PHP 的 CLI 
-  <link linkend="features.commandline">交互模式</link>
-  时，Autoloading 是无效的。
+   自动加载不可用于 PHP 的 CLI <link linkend="features.commandline">交互模式</link>。
   </para>
  </note>
  <para>
   <example>
-   <title>Autoload 例子</title>
+   <title>自动加载示例</title>
    <para>
     本例尝试分别从 <filename>MyClass1.php</filename>
     和 <filename>MyClass2.php</filename> 文件中加载
@@ -53,7 +54,104 @@ $obj2 = new MyClass2();
 ]]>
    </programlisting>
   </example>
+  <example>
+   <title>另一个例子</title>
+   <para>
+    本例尝试加载接口 <literal>ITest</literal>。
+   </para>
+   <programlisting role="php">
+<![CDATA[
+<?php
+
+function __autoload($name) {
+    var_dump($name);
+}
+
+class Foo implements ITest {
+}
+
+/*
+string(5) "ITest"
+
+Fatal error: Interface 'ITest' not found in ...
+*/
+?>
+]]>
+   </programlisting>
+  </example>
+  <example>
+   <title>自动加载在 PHP 5.3.0+ 中的异常处理</title>
+   <para>
+    本例抛出一个异常并在 try/catch 语句块中演示。
+   </para>
+   <programlisting role="php">
+<![CDATA[
+<?php
+function __autoload($name) {
+    echo "Want to load $name.\n";
+    throw new Exception("Unable to load $name.");
+}
+
+try {
+    $obj = new NonLoadableClass();
+} catch (Exception $e) {
+    echo $e->getMessage(), "\n";
+}
+?>
+]]>
+   </programlisting>
+   &example.outputs;
+   <screen>
+<![CDATA[
+Want to load NonLoadableClass.
+Unable to load NonLoadableClass.
+]]>
+   </screen>
+  </example>
+  <example>
+   <title>自动加载在 PHP 5.3.0+ 中的异常处理 - 没有自定义异常机制</title>
+   <para>
+    本例将一个异常抛给不存在的自定义异常处理函数。
+   </para>
+   <programlisting role="php">
+<![CDATA[
+<?php
+function __autoload($name) {
+    echo "Want to load $name.\n";
+    throw new MissingException("Unable to load $name.");
+}
+
+try {
+    $obj = new NonLoadableClass();
+} catch (Exception $e) {
+    echo $e->getMessage(), "\n";
+}
+?>
+]]>
+   </programlisting>
+   &example.outputs;
+   <screen>
+<![CDATA[
+Want to load NonLoadableClass.
+Want to load MissingException.
+
+Fatal error: Class 'MissingException' not found in testMissingException.php on line 4
+]]>
+   </screen>
+  </example>
  </para>
+
+ <simplesect role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>unserialize</function></member>
+    <member><link linkend="unserialize-callback-func">unserialize_callback_func</link></member>
+    <member><function>spl_autoload</function></member>
+    <member><function>spl_autoload_register</function></member>
+   </simplelist>
+  </para>
+ </simplesect>
 
 </sect1>
 

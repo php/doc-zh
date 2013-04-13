@@ -1,20 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
 <!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
+<!-- EN-Revision: 3a8dc25d68cb882feae6163cf5384356f31647ea Maintainer: dallas Status: ready -->
 <sect1 xml:id="language.oop5.basic" xmlns="http://docbook.org/ns/docbook">
  <title>基本概念</title>
 
  <sect2 xml:id="language.oop5.basic.class">
   <title>class</title>
   <para>
-   每个类的定义都以关键字 class 开头，后面跟着类名，可以是任何非
-   PHP <link linkend="reserved">保留字</link>的名字。后面跟着一对花括号，里面包含有类成员和方法的定义。伪变量
-   <varname>$this</varname> 可以在当一个方法在对象内部调用时使用。<varname>$this</varname>
-   是一个到调用对象（通常是方法所属于的对象，但也可以是另一个对象，如果该方法是从第二个对象内<link
-   linkend="language.oop5.static">静态</link>调用的话）的引用。看下面例子：
-   <example>
-    <title>面向对象语言中的 <varname>$this</varname> 变量</title>
+   每个类的定义都以关键字 <literal>class</literal>
+   开头，后面跟着类名，后面跟着一对花括号，里面包含有类的属性与方法的定义。
+  </para>
+  <para>
+   类名可以是任何非 PHP
+   <link linkend="reserved">保留字</link>的合法标签。一个合法类名以字母或下划线开头，后面跟着若干字母，数字或下划线。以正则表达式表示为：<literal>[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*</literal>。
+  </para>
+  <para>
+   一个类可以包含有属于自己的<link
+   linkend="language.oop5.constants">常量</link>，<link
+   linkend="language.oop5.properties">变量</link>（称为“属性”）以及函数（称为“方法”）。
+  </para>
+  <example>
+   <title>简单的类定义</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+class SimpleClass
+{
+    // property declaration
+    public $var = 'a default value';
+
+    // method declaration
+    public function displayVar() {
+        echo $this->var;
+    }
+}
+?>
+]]>
+   </programlisting>
+  </example>
+  <para>
+   当一个方法在类定义内部被调用时，有一个可用的伪变量
+   <varname>$this</varname>。<varname>$this</varname>
+   是一个到主叫对象的引用（通常是该方法所从属的对象，但如果是从第二个对象<link
+   linkend="language.oop5.static">静态</link>调用时也可能是另一个对象）。
+  </para>
+  <para>
+   <example xml:id="language.oop5.basic.class.this">
+    <title><varname>$this</varname> 伪变量的示例</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -36,15 +69,20 @@ class B
 {
     function bar()
     {
+        // Note: the next line will issue a warning if E_STRICT is enabled.
         A::foo();
     }
 }
 
 $a = new A();
 $a->foo();
+
+// Note: the next line will issue a warning if E_STRICT is enabled.
 A::foo();
 $b = new B();
 $b->bar();
+
+// Note: the next line will issue a warning if E_STRICT is enabled.
 B::bar();
 ?>
 ]]>
@@ -52,76 +90,26 @@ B::bar();
     &example.outputs;
     <screen>
 <![CDATA[
-$this is defined (a)
+$this is defined (A)
 $this is not defined.
-$this is defined (b)
+$this is defined (B)
 $this is not defined.
 ]]>
     </screen>
    </example>
   </para>
-  <example>
-   <title>简单的类定义</title>
-   <programlisting role="php">
-<![CDATA[
-<?php
-class SimpleClass
-{
-    // 成员声明
-    public $var = 'a default value';
-
-    // 方法声明
-    public function displayVar() {
-        echo $this->var;
-    }
-}
-?>
-]]>
-   </programlisting>
-  </example>
-  <para>
-    <example>
-      <title>类成员的默认值</title>
-      <programlisting role="php">
-<![CDATA[
-<?php
-class SimpleClass
-{
-    // 无效的类成员定义：
-    public $var1 = 'hello '.'world';
-    public $var2 = <<<EOD
-hello world
-EOD;
-    public $var3 = 1+2;
-    public $var4 = self::myStaticMethod();
-    public $var5 = $myVar;
-
-    // 正确的类成员定义：
-    public $var6 = myConstant;
-    public $var7 = self::classConstant;
-    public $var8 = array(true, false);
-
-
-}
-?>
-]]>
-      </programlisting>
-    </example>
-  </para>
-  <note>
-    <para>
-    除此之外还有不少用于处理类与对象的函数，详情参见
-    <link linkend="ref.classobj">类 / 对象函数 </link>
-    </para>
-  </note>
  </sect2>
 
  <sect2 xml:id="language.oop5.basic.new">
   <title>new</title>
   <para>
-   要创建一个对象的实例，必须创建一个新对象并将其赋给一个变量。当创建新对象时该对象总是被赋值，除非该对象定义了<link
+   要创建一个类的实例，必须使用 <literal>new</literal>
+   关键字。当创建新对象时该对象总是被赋值，除非该对象定义了<link
    linkend="language.oop5.decon">构造函数</link>并且在出错时抛出了一个<link
-   linkend="language.exceptions">异常</link>。
+   linkend="language.exceptions">异常</link>。类应在被实例化之前定义（某些情况下则必须这样）。
+  </para>
+  <para>
+   如果在 <literal>new</literal> 之后跟着的是一个包含有类名的字符串，则该类的一个实例被创建。如果该类属于一个名字空间，则必须使用其完整名称。
   </para>
   <example>
    <title>创建一个实例</title>
@@ -129,19 +117,29 @@ EOD;
 <![CDATA[
 <?php
 $instance = new SimpleClass();
+
+// 也可以这样做：
+$className = 'Foo';
+$instance = new $className(); // Foo()
 ?>
 ]]>
    </programlisting>
   </example>
   <para>
+   在类定义内部，可以用 <literal>new self</literal> 和 <literal>new parent</literal> 创建新对象。
+  </para>
+  <para>
    当把一个对象已经创建的实例赋给一个新变量时，新变量会访问同一个实例，就和用该对象赋值一样。此行为和给函数传递入实例时一样。可以用<link
    linkend="language.oop5.cloning">克隆</link>给一个已创建的对象建立一个新实例。
   </para>
-  <example>
-   <title>对象赋值</title>
-   <programlisting role="php">
+   <example>
+    <title>对象赋值</title>
+    <programlisting role="php">
 <![CDATA[
 <?php
+
+$instance = new SimpleClass();
+
 $assigned   =  $instance;
 $reference  =& $instance;
 
@@ -154,9 +152,9 @@ var_dump($reference);
 var_dump($assigned);
 ?>
 ]]>
-   </programlisting>
-   &example.outputs;
-   <screen>
+    </programlisting>
+    &example.outputs;
+    <screen>
 <![CDATA[
 NULL
 NULL
@@ -165,6 +163,46 @@ object(SimpleClass)#1 (1) {
      string(30) "$assigned will have this value"
 }
 ]]>
+    </screen>
+   </example>
+  <para>
+   PHP 5.3.0 引进了两个新方法来创建一个对象的实例：
+  </para>
+  <example>
+   <title>创建新对象</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+class Test
+{
+    static public function getNew()
+    {
+        return new static;
+    }
+}
+
+class Child extends Test
+{}
+
+$obj1 = new Test();
+$obj2 = new $obj1;
+var_dump($obj1 !== $obj2);
+
+$obj3 = Test::getNew();
+var_dump($obj3 instanceof Test);
+
+$obj4 = Child::getNew();
+var_dump($obj4 instanceof Child);
+?>
+]]>
+   </programlisting>
+   &example.outputs;
+   <screen>
+<![CDATA[
+bool(true)
+bool(true)
+bool(true)
+]]>
    </screen>
   </example>
  </sect2>
@@ -172,18 +210,22 @@ object(SimpleClass)#1 (1) {
  <sect2 xml:id="language.oop5.basic.extends">
   <title>extends</title>
   <para>
-   一个类可以在声明中用 extends
-   关键字继承另一个类的方法和成员。PHP不支持多重继承，一个类只能继承一个基类。
+   一个类可以在声明中用 <literal>extends</literal>
+   关键字继承另一个类的方法和属性。PHP不支持多重继承，一个类只能继承一个基类。
   </para>
   <para>
-   被继承的方法和成员可以通过用同样的名字重新声明被覆盖，除非父类定义方法时使用了
-   <link linkend="language.oop5.final">final</link> 关键字。可以通过
+   被继承的方法和属性可以通过用同样的名字重新声明被覆盖。但是如果父类定义方法时使用了
+   <link linkend="language.oop5.final">final</link>，则该方法不可被覆盖。可以通过
    <link linkend="language.oop5.paamayim-nekudotayim">parent::</link>
-   来访问被覆盖的方法或成员。
+   来访问被覆盖的方法或属性。
+  </para>
+  <para>
+   当覆盖方法时，参数必须保持一致否则 PHP 将发出 <constant>E_STRICT</constant>
+   级别的错误信息。但构造函数例外，构造函数可在被覆盖时使用不同的参数。
   </para>
   <example>
    <title>简单的类继承</title>
-   <programlisting role="php">
+    <programlisting role="php">
 <![CDATA[
 <?php
 class ExtendClass extends SimpleClass
@@ -200,15 +242,15 @@ $extended = new ExtendClass();
 $extended->displayVar();
 ?>
 ]]>
-   </programlisting>
-   &example.outputs;
-   <screen>
+    </programlisting>
+    &example.outputs;
+    <screen>
 <![CDATA[
 Extending class
 a default value
 ]]>
-   </screen>
-  </example>
+    </screen>
+   </example>
  </sect2>
 
 </sect1>
