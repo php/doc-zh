@@ -1,0 +1,234 @@
+﻿/*  $Id$  */
+
+FreeBSD 9.1-Release 下进行 PHP 文档工作
+
+1.下载安装 FreeBSD
+
+  首先需要选择合适的版本，FreeBSD 目前最新版是 9.1。鉴于如今大部分电脑已经运行 64
+位系统，因此建议用 amd64 体系（不论是 Intel 还是 AMD 的 CPU 都适用）。选择该体系的
+ISO 文件下载，由于只需要最小命令行功能，只需下载一个大小为 153MB 的 bootonly
+文件，具体地址为：
+
+ftp://ftp.freebsd.org/pub/FreeBSD/releases/amd64/amd64/ISO-IMAGES/9.1/FreeBSD-9.1-RELEASE-amd64-bootonly.iso
+
+  至于安装则建议使用虚拟机，VMWare 或其它虚拟机软件等。对于当前主流为 8G 内存，1TB
+硬盘，3GHz 以上 64 位四核 CPU 的主机来说，占用资源很小。虚拟机建议 2G 内存，20GB
+硬盘。
+
+  安装时只需最小的 base 和 kernal 即可。所需任何软件包都可以在之后即用即装。当然，
+安装好的系统需要连上网络。
+
+  仅为 PHP 文档工作而言，就使用 root 用户并无不妥。添加别的用户当然也可以。可以使用小巧的
+PuTTY 软件通过 SSH 远程登录上去。为了使 root 用户能够远程登录，可以编辑 /etc/ssh/sshd_config
+文件，在其中的大约 46 行找到“#PermitRootLogin no”，去掉 #
+号，改成“PermitRootLogin yes”。然后重新启动 sshd 进程：“/etc/rc.d/sshd reload”。
+
+2.安装所需软件包
+
+  首先要指出 FreeBSD 因为一些漏洞的原因，把官方默认的 9.1 软件包拿掉了。这就导致用
+pkg_add 命令无法远程安装软件包。所需要做的是设定环境变量指定一个远程路径：
+
+# setenv PACKAGESITE ftp://ftp.freebsd.org/pub/FreeBSD/ports/amd64/packages-9.1-release/Latest/
+
+其中路径根据自己需要选择相应体系以及镜像站点。然后就可以用 pkg_add 安装软件了首先是
+subversion：
+
+# pkg_add -r subversion
+
+这个命令可以自动从上述路径下载最新版本的 subversion 及其所依赖的软件包并安装。完成后可以用
+
+# svn --version 
+
+查看版本信息，目前是 1.7.7 版。接着当然是安装 PHP。
+
+# pkg_add -r php5
+
+同样会自动下载所有依赖的包并安装，之后同样可以查看版本信息：
+
+# php -v
+
+当前安装的是 5.4.7。还需要一个 DOM 库：
+
+# pkg_add -r php5-dom
+
+然后设定所需要的 php.ini 文件：
+
+# cd /usr/local/etc
+# cp php.ini-development php.ini
+
+由于 PHP 5.3 版之后就要求必须设定时区，否则要发出警告，所以还必须在 php.ini
+中设定 date.timezone 指令，将其设定为自己所在的时区。所支持的时区列表见：
+
+http://www.php.net/manual/zh/timezones.php
+
+如果身处中国大陆可以使用 Asia/Shanghai。
+
+这样就完成一个最基本的文档系统了。可以用 pkg_info 命令查看此时都安装了哪些软件包：
+
+root@doc:/root # pkg_info
+apr-1.4.6.1.4.1_1   Apache Portability Library
+db42-4.2.52_5       The Berkeley DB package, revision 4.2
+expat-2.0.1_2       XML 1.0 parser written in C
+gdbm-1.9.1          The GNU database manager
+gettext-0.18.1.1    GNU gettext package
+libiconv-1.14       A character set conversion library
+libxml2-2.7.8_5     XML parser library for GNOME
+neon29-0.29.6_4     An HTTP and WebDAV client library for Unix systems
+pcre-8.31_1         Perl Compatible Regular Expressions library
+php5-5.4.7          PHP Scripting Language
+php5-dom-5.4.7      The dom shared extension for php
+pkgconf-0.8.9       Utility to help to configure compiler and linker flags
+sqlite3-3.7.14.1    An SQL database engine in a C library
+subversion-1.7.7    Version control system
+
+3.取得 PHPDOC 文档
+
+  对于中文文档系统，运行如下命令：
+
+% svn checkout https://svn.php.net/repository/phpdoc/modules/doc-zh phpdoc-zh
+
+这样就在当前目录下建立了一个名为 phpdoc-zh 的目录，其中包含有所有英文和中文文档。
+里面有三个子目录：doc-base，en 和 zh。只需要修改 zh 目录下的文件。然后进行一下验证：
+
+% cd phpdoc-zh
+% php doc-base/configure.php –with-lang=zh
+
+如果最后的结果是 All good 并有美洲虎图案的话，就说明文档没有问题，可以编译。
+
+4.安装 PhD
+
+  还需要安装 PhD 才能编译文档。要安装 PhD，先要安装 PEAR：
+
+# pkg_add -r pear
+
+这样就安装了 pear 和 php5-xml。然后用 pear 来安装 PhD。不过在此之前还需要一些
+PHP 的组件才能成功安装 PhD：
+
+# pkg_add -r php5-xmlreader
+# pkg_add -r php5-sqlite3
+# pkg_add -r php5-zlib
+
+然后就可以安装 PhD 了，由于会自动安装依赖的组件，所以直接安装 PhD_PHP 即可：
+
+# pear install doc.php.net/PhD_PHP
+
+此时可以列出 PhD 所支持的包：
+
+ # phd -l
+Supported packages:
+        Generic
+                xhtml
+                bigxhtml
+                manpage
+        PHP
+                xhtml
+                bigxhtml
+                php
+                howto
+                manpage
+                pdf
+                bigpdf
+                kdevelop
+                chm
+                tocfeed
+                epub
+                enhancedchm
+
+5.编译文档
+
+  要编译 xhtml 格式还需要再安装一个所需的库：
+
+# pkg_add -r php5-json
+
+  此时只需用以下命令就可以编译文档了（当前目录为 phpdoc-zh）：
+
+% phd -d ./doc-base/.manual.xml -P PHP -f xhtml -o /wwwroot
+
+此命令编译的格式是多个 html 小文件的格式，大约 12000 多个文件。并且输出目录是
+/wwwroot，因为不想输出到当前目录以免搞乱了 svn 的目录结构。在 Unix 下的运行速度
+要比在 Windows 下快很多。
+
+如果要编译其它格式的文档，那 php.ini 中默认设置的内存限制（128M）可能就不够了，需要增加。
+要编译 chm 格式还需要几个扩展库：
+
+# pkg_add -r php5-bz2
+# pkg_add -r php5-iconv
+
+% phd -d ./doc-base/.manual.xml -P PHP -f chm -o /wwwroot
+
+此时会报出一大堆 E_NOTICE，不用去理会，总之最后编译完成了。至此 FreeBSD 下的文档系统
+已经完全可用。此时再看 FreeBSD 所安装的软件包：
+
+root@doc:/root # pkg_info
+apr-1.4.6.1.4.1_1   Apache Portability Library
+db42-4.2.52_5       The Berkeley DB package, revision 4.2
+expat-2.0.1_2       XML 1.0 parser written in C
+gdbm-1.9.1          The GNU database manager
+gettext-0.18.1.1    GNU gettext package
+libiconv-1.14       A character set conversion library
+libxml2-2.7.8_5     XML parser library for GNOME
+neon29-0.29.6_4     An HTTP and WebDAV client library for Unix systems
+pcre-8.31_1         Perl Compatible Regular Expressions library
+pear-1.9.4_1        PEAR framework for PHP
+php5-5.4.7          PHP Scripting Language
+php5-bz2-5.4.7      The bz2 shared extension for php
+php5-dom-5.4.7      The dom shared extension for php
+php5-iconv-5.4.7    The iconv shared extension for php
+php5-json-5.4.7     The json shared extension for php
+php5-sqlite3-5.4.7  The sqlite3 shared extension for php
+php5-xml-5.4.7      The xml shared extension for php
+php5-xmlreader-5.4.7 The xmlreader shared extension for php
+php5-zlib-5.4.7     The zlib shared extension for php
+pkgconf-0.8.9       Utility to help to configure compiler and linker flags
+sqlite3-3.7.14.1    An SQL database engine in a C library
+subversion-1.7.7    Version control system
+
+6.后续工作之一：安装 Apache
+
+  不妨安装一个 web 服务器，至少可以浏览自己编译出来的文档：
+
+# pkg_add -r apache22
+
+这将同时安装 perl。然后要让 Apache 在系统启动时同时启动，编辑 /etc/rc.conf，添加一行：
+
+apache22_enable="YES"
+
+然后再编辑 /usr/local/etc/apache22/httpd.conf，在里面设定一个 ServerName，并将 DocumentRoot 设定为 /wwwroot。
+通常还需要在 /etc/hosts 中加上 ServerName 设定的主机名称的解析，否则 Apache 启动时可能会有问题。
+现在可以启动 Apache 了：
+
+# /usr/local/etc/rc.d/apache22 start
+
+现在只要在浏览器中输入 FreeBSD 的主机名（如果能解析的话）或者 IP 地址，就可以看到浏览器显示
+了目录结构，其中有 php-chunked-xhtml，点进去就显示手册了。
+
+7.后续工作之二：安装 Samba
+
+  可以安装 Samba 以使 Windows 可以使用 FreeBSD 的共享目录。
+
+# pkg_add -r samba36
+
+同样，又安装了一堆其所依赖的软件包。此时需要修改的是 /usr/local/etc/smb.conf，其中大约第 26
+行修改为：
+
+workgroup = WORKGROUP
+
+大约第 29 行修改为：
+
+server string = HOSTNAME
+
+这里的 HOSTNAME 是网络上要显示的主机名。然后运行以下命令：
+
+# smbpasswd -a dallas
+
+这里的 dallas 是 FreeBSD 系统中已有的普通用户名，这里输入的密码和 FreeBSD 用户的密码无关，
+只是通过网络共享访问时要输入的密码。这样就给该用户赋予了通过 Windows 网络共享的权力，并且
+可以直接访问并修改该用户在 FreeBSD 系统中的用户主目录。同样不要忘记在 /etc/rc.conf 中加入
+系统启动时自动启动 Samba 的选项：
+
+samba_enable="YES"
+
+然后再运行以下命令启动 Samba：
+
+# /usr/local/etc/rc.d/samba start
+
