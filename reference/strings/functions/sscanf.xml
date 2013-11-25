@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision$ -->
+<!-- EN-Revision: 5e6e91b7dc20a1872c553d49ebb2144d22396177 Maintainer: Szopen Xiao Status: ready -->
+<!-- Reviewed: no -->
+
+<refentry xmlns="http://docbook.org/ns/docbook" xml:id="function.sscanf" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <refnamediv>
+  <refname>sscanf</refname>
+  <refpurpose>根据指定格式解析输入的字符</refpurpose>
+ </refnamediv>
+ 
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <type>mixed</type><methodname>sscanf</methodname>
+   <methodparam><type>string</type><parameter>str</parameter></methodparam>
+   <methodparam><type>string</type><parameter>format</parameter></methodparam>
+   <methodparam choice="opt"><type>mixed</type><parameter role="reference">...</parameter></methodparam>
+  </methodsynopsis>
+  <para>
+   这个函数 <function>sscanf</function> 输入类似
+   <function>printf</function>. <function>sscanf</function>
+   读取字符串<parameter>str</parameter> 然后根据指定格式<parameter>format</parameter>解析, 格式的描述文档见 <function>sprintf</function>. 
+  </para>
+  <para>
+   指定的格式字符串中的任意空白匹配输入字符串的任意空白.也就是说即使是格式字符串中的一个制表符 \t 也能匹配输入
+   字符串中的一个单一空格字符
+  </para>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>str</parameter></term>
+     <listitem>
+      <para>
+       将要被解析的 <type>字符串</type>.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>format</parameter></term>
+     <listitem>
+      <para>
+       The interpreted format for 解析<parameter>str</parameter>的格式, 除了以下不同外，其余的见
+       <function>sprintf</function>的描述文档:
+       <simplelist>
+        <member>
+         函数不区分语言地区
+        </member>
+        <member>
+         <literal>F</literal>, <literal>g</literal>, <literal>G</literal> 和
+         <literal>b</literal> 不被支持.
+        </member>
+        <member>
+         <literal>D</literal> 表示十进制数字.
+        </member>
+        <member>
+         <literal>i</literal> stands for integer with base detection.
+        </member>
+        <member>
+         <literal>n</literal> stands for number of characters processed so far.
+        </member>
+       </simplelist>
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>...</parameter></term>
+     <listitem>
+      <para>
+       可以选参数将以引用方式传入，它们的值将被设置为解析匹配的值
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+ 
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   如果仅传入了两个参数给这个函数，解析后将返回一个数组，否则，如果可选参数被传入，这个函数将返回被设置了值的个数
+  </para>
+  <para>
+   如果<parameter>format</parameter>存在的子字符串比
+   <parameter>str</parameter>内可用的多,
+   <literal>-1</literal> 将被返回.
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title><function>sscanf</function> Example</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+// getting the serial number
+list($serial) = sscanf("SN/2350001", "SN/%d");
+// and the date of manufacturing
+$mandate = "January 01 2000";
+list($month, $day, $year) = sscanf($mandate, "%s %d %d");
+echo "Item $serial was manufactured on: $year-" . substr($month, 0, 3) . "-$day\n";
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   If optional parameters are passed, the function will return the
+   number of assigned values.
+  </para>
+  <para>
+   <example>
+    <title><function>sscanf</function> - using optional parameters</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+// get author info and generate DocBook entry
+$auth = "24\tLewis Carroll";
+$n = sscanf($auth, "%d\t%s %s", $id, $first, $last);
+echo "<author id='$id'>
+    <firstname>$first</firstname>
+    <surname>$last</surname>
+</author>\n";
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>fscanf</function></member>
+    <member><function>printf</function></member>
+    <member><function>sprintf</function></member>
+   </simplelist>
+  </para>
+ </refsect1>
+
+</refentry>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
