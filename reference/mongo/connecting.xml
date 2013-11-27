@@ -1,0 +1,475 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision$ -->
+<!-- EN-Revision: e3fe415ffd4671f253b503bb36e65f4132c2f327 Maintainer: anonymous #29387 Status: partial -->
+<!-- Reviewed: no -->
+<!-- CREDITS: GongT --> 
+
+<chapter xml:id="mongo.connecting" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <title>链接服务器</title>
+
+ <para>
+  链接到 mongo 服务器非常简单，只需要 <literal>new MongoClient</literal>，但是还可以改变更多的选项设置。
+  <function>MongoClient::__construct</function> 方法的文档中包括了所有的 API 参数。这个页面给出了一些详细说明，和一些实用的案例。
+ </para>
+
+ <section xml:id="mongo.connecting.auth">
+  <title>认证</title>
+  <para>
+   如果 MongoDB 服务器启动时使用了 <literal>--auth</literal> 或
+   <literal>--keyFile</literal> 参数，你就必须在进行任何操作前进行认证。
+   你可以在连接时进行认证。方法是在链接字符串中指定用户名密码，或者在
+   <function>MongoClient::__construct</function> 构造函数中指定
+   <literal>"username"</literal> 和 <literal>"password"</literal>。
+  </para>
+  <example xml:id="mongo.connecting.auth-example">
+   <title>针对“admin”数据库的认证</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+// Specifying the username and password in the connection URI (preferred)
+$m = new MongoClient("mongodb://${username}:${password}@localhost");
+
+// Specifying the username and password via the options array (alternative)
+$m = new MongoClient("mongodb://localhost", array("username" => $username, "password" => $password));
+?>
+]]>
+   </programlisting>
+  </example>
+  <para>
+   默认状态下，驱动会针对 <literal>admin</literal> 数据库进行认证。认证也可以对其他数据库进行。方法是在连接字符串中指定数据库名，或者
+   <function>MongoClient::__construct</function> 构造函数中指定
+   <literal>"db"</literal>。
+  </para>
+  <example xml:id="mongo.connecting.auth-db-example">
+   <title>针对一般数据库的认证</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+// Specifying the authentication database in the connection URI (preferred)
+$m = new MongoClient("mongodb://${username}:${password}@localhost/myDatabase");
+
+// Specifying the authentication database via the options array (alternative)
+$m = new MongoClient("mongodb://${username}:${password}@localhost", array("db" => "myDatabase"));
+?>
+]]>
+   </programlisting>
+  </example>
+  <para>
+   如果链接中断，驱动会重新尝试链接并会自动重新认证。
+  </para>
+ </section>
+
+ <section xml:id="mongo.connecting.rs">
+  <title>复制集合</title>
+  <para>
+   要链接到一个复制，需要指定复制中的一个或多个成员，并使用
+   <literal>"replicaSet"</literal> 选项指定复制的名字。多个服务器用逗号分割。
+  </para>
+  <example xml:id="mongo.connecting.rs-example">
+   <title>链接到一个复制</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+// Using multiple servers as the seed list (prefered)
+$m = new MongoClient("mongodb://rs1.example.com:27017,rs2.example.com:27017/?replicaSet=myReplSetName"));
+
+// Using one server as the seed list
+$m = new MongoClient("mongodb://rs1.example.com:27017", array("replicaSet" => "myReplSetName"));
+
+// Using multiple servers as the seed list
+$m = new MongoClient("mongodb://rs1.example.com:27017,rs2.example.com:27017", array("replicaSet" => "myReplSetName"));
+?>
+]]>
+   </programlisting>
+  </example>
+  <para>
+   驱动会查询数据库服务器列表，然后找出主服务器。如果可以成功的链接到指定的服务器至少一个，并且可以找到主服务器，链接就会成功。如果它无法链接指定的任何一个服务器，或者找不到主服务器，会抛出一个
+   <classname>MongoConnectionException</classname> 类型的异常
+  </para>
+  <tip>
+   <para>
+    你应该始终指定多个复制中的服务器。为了达到最大的可用性，你指定的服务器列表应该包含每一个数据中心的服务器至少一台。
+   </para>
+  </tip>
+  <para>
+   如果主服务器变为不可用，会有一台次要服务器通过投票算法自动提升为主服务器（除非“投票”无法选出主服务器）。在一段时间里
+   （<link xlink:href="&url.mongodb.replica.failover;">20-60 秒</link>），链接无法进行写操作，此时写入会导致一个异常。
+   到次要服务器的链接仍然可以提供读取功能。
+  </para>
+  <note>
+   <para>
+    默认的 <link linkend="mongo.readpreferences">读取偏好</link>
+    是只从主服务器读取。在自动选择新的主服务器的时间里，读取操作也会失败。
+   </para>
+   <para>
+    对于要求很高的读取可用性的应用，推荐使用 <constant>MongoClient::RP_PRIMARY_PREFERRED</constant>
+    读取偏好来确保主服务器出现问题的时候能正确的从次要服务器中读取。
+   </para>
+  </note>
+  <para>
+   当新的主服务器被选出后，尝试读写操作时，驱动会检测新的主服务器。然后链接到它，继续提供正常的功能。
+  </para>
+  <para>
+   次要服务器的健康状态每5秒（可以通过 <link linkend="ini.mongo.ping-interval">mongo.ping_interval</link>
+   调整），或5秒后的下一个操作执行时检查一次。驱动会在连接服务器出现错误时重新检查配置。
+  </para>
+  <para>
+   复制集会每60秒（可以通过 <link linkend="ini.mongo.is-master-interval">mongo.is_master_interval</link>
+   调整），或在w=1的写入操作发生错误的时候检查故障并尝试恢复。
+  </para>
+
+  <caution>
+   <para>
+    次要服务器中的操作相比主服务器有一定延迟，因此如果使用
+    <constant>MongoClient::RP_PRIMARY</constant>
+    之外的读取偏好，你的程序就必须能够正确处理过时的数据。
+   </para>
+  </caution>
+
+  <para>
+   要了解更多关于复制集的信息，参考
+   <link xlink:href="&url.mongodb.replica;">core documentation</link>.
+  </para>
+
+  <simplesect role="seealso">
+   &reftitle.seealso;
+   <simplelist>
+    <member><xref linkend="mongo.readpreferences" /></member>
+    <member><xref linkend="mongo.writeconcerns" /></member>
+   </simplelist>
+  </simplesect>
+
+  <simplesect role="changelog">
+   &reftitle.changelog;
+   <informaltable>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>&Version;</entry>
+       <entry>&Description;</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>1.0.9</entry>
+       <entry>
+        添加了复制集支持，和自动错误恢复。
+       </entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </informaltable>
+  </simplesect>
+
+ </section>
+
+ <section xml:id="mongo.connecting.mongos">
+  <title>Sharding</title>
+  <para>
+   To connect to a shard cluster, specify the address of one or more
+   <literal>mongos</literal> instances in the connection string. Multiple
+   servers may be delimited by a comma.
+  </para>
+  <example xml:id="mongo.connecting.mongos-example">
+   <programlisting role="php">
+<![CDATA[
+<?php
+// Using one server as the seed list
+$m = new MongoClient("mongodb://mongos1.example.com:27017");
+
+// Using multiple servers as the seed list
+$m = new MongoClient("mongodb://mongos1.example.com:27017,mongos2.example.com:27017"));
+?>
+]]>
+   </programlisting>
+  </example>
+  <para>
+   Regardless of whether each shard is a stand-alone <literal>mongod</literal>
+   server or a full replica set, the driver's connection process is the same.
+   All database communication will be routed through <literal>mongos</literal>.
+  </para>
+  <para>
+   For more information on sharding with MongoDB, see the
+   <link xlink:href="&url.mongodb.docs.sharding;">sharding documentation</link>.
+  </para>
+ </section>
+
+ <section xml:id="mongo.connecting.uds">
+  <title>Unix Domain Socket支持</title>
+
+  <para>
+   MongoDB 服务程序内置支持通过 Unix Sockets 链接，并且会在启动时建立socket，默认位置在
+   <filename>/tmp/mongodb-&lt;port&gt;.sock.</filename>.
+  </para>
+
+  <para>
+   要通过socket链接，需要在连接字符串中指定socket路径，如：
+  </para>
+
+  <example xml:id="mongo.connecting.uds-example">
+   <programlisting role="php">
+<![CDATA[
+<?php
+$m = new MongoClient("mongodb:///tmp/mongo-27017.sock");
+?>
+]]>
+   </programlisting>
+  </example>
+
+  <para>
+   如果要在通过socket的链接中对数据库进行认证（如上文所述），你需要指定一个端口号
+   <literal>0</literal> 让链接字符串解析时可以找到 socket路径 的结尾。另外，你可以在链接的时候使用options参数。
+  </para>
+
+   <example xml:id="mongo.connecting.uds-auth-example">
+    <programlisting role="php">
+<![CDATA[
+<?php
+$m = new MongoClient("mongodb://username:password@/tmp/mongo-27017.sock:0/foo");
+?>
+]]>
+   </programlisting>
+  </example>
+
+  <simplesect role="changelog">
+   &reftitle.changelog;
+   <informaltable>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>&Version;</entry>
+       <entry>&Description;</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>1.0.9</entry>
+       <entry>
+        添加 Unix Sockets 的支持。
+       </entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </informaltable>
+  </simplesect>
+
+ </section>
+
+ <section xml:id="mongo.connecting.pools">
+  <title>Connection Pooling (version 1.2.0-1.2.12 *only*)</title>
+  <note>
+   <para>
+    This section is no longer relevant as of the 1.3.0 release of the driver
+    and only serves as a historical information on how the pooling used to
+    work.
+   </para>
+   <para>
+    The latest versions of the driver have no concept of pooling anymore and
+    will maintain only one connection per process, for each connection type
+    (ReplicaSet/standalone/mongos), for each credentials combination.
+    </para>
+   </note>
+  <para>
+   Creating connections is one of the most heavyweight things that the driver
+   does. It can take hundreds of milliseconds to set up a connection correctly,
+   even on a fast network. Thus, the driver tries to minimize the number of new
+   connections created by reusing connections from a pool.
+  </para>
+  <para>
+   When a user creates a new instance of <classname>MongoClient</classname>, all
+   necessary connections will be taken from their pools (replica sets may
+   require multiple connections, one for each member of the set). When the
+   <classname>MongoClient</classname> instance goes out of scope, the
+   connections will be returned to the pool. When the PHP process exits, all
+   connections in the pools will be closed.
+  </para>
+  <section>
+   <title>"Why do I have so many open connections?"</title>
+   <para>
+    Connection pools can generate a large number of connections. This is
+    expected and, using a little arithmetic, you can figure out how many
+    connections will be created. There are three factors in determining the
+    total number of connections:
+   </para>
+   <itemizedlist>
+    <listitem>
+     <para>
+      <literal>
+       connections_per_pool
+      </literal>
+     </para>
+     <para>
+      Each connection pool will create, by default, an unlimited number of
+      connections. One might assume that this is a problem: if it can create an
+      unlimited number of connections, couldn't it create thousands and the
+      server would run out of file descriptors? In practice, this is unlikely,
+      as unused connections are returned to the pool to be used later, so future
+      connections will use the same connection instead of creating a new one.
+      Unless you create thousands of connections at once without letting any go
+      out of scope, the number of connections open should stay at a reasonable
+      number.
+     </para>
+     <para>
+      You can see how many connections you have in a pool using the
+      <function>MongoPool::info</function> function. Add up the "in use" and
+      "in pool" fields for a given server. That is the total number of
+      connections for that pool.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      <literal>
+       pools_per_process
+      </literal>
+     </para>
+     <para>
+      Each MongoDB server address you're connecting to gets its own connection
+      pool. For example, if your local hostname is "example.net", connecting
+      to "example.net:27017", "localhost:27017", and "/tmp/mongodb-27017.sock"
+      will create three connection pools. You can see how many connection pools
+      you have open using <function>MongoPool::info</function>.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      <literal>
+       processes
+      </literal>
+     </para>
+     <para>
+      Each PHP process has a separate set of pools. PHP-FPM and Apache
+      generally create between 6 and a couple of dozen PHP worker children.
+      Check your settings to see what the max number of PHP processes is that
+      can be spawned.
+     </para>
+     <para>
+      If you are using PHP-FPM, estimating the number of connections can be
+      tricky because it will spawn more PHP-FPM workers under heavy load. To be
+      on the safe side, look at the <literal>max_children</literal> parameter or
+      add up <literal>spare_servers</literal> + <literal>start_servers</literal>
+      (choose whichever number is higher). That will indicate how many PHP
+      processes (i.e. sets of pools) you should plan for.
+     </para>
+    </listitem>
+   </itemizedlist>
+   <para>
+    The three variables above can be multiplied together to give the max
+    number of connections expected:
+    <literal>connections_per_pool</literal> *
+    <literal>pools_per_process</literal> *
+    <literal>processes</literal>. Note that
+    <literal>connections_per_pool</literal> can be different for different
+    pools, so <literal>connections_per_pool</literal> should be the max.
+   </para>
+   <para>
+    For example, suppose we're getting 30 connections per pool, 10 pools per PHP
+    process, and 128 PHP processes. Then we can expect 38400 connections from
+    this machine. Thus, we should set this machine's file descriptor limit to
+    be high enough to handle all of these connections or it may run out of file
+    descriptors.
+   </para>
+   <para>
+    See <classname>MongoPool</classname> for more information on connection
+    pooling.
+   </para>
+  </section>
+ </section>
+
+ <section xml:id="mongo.connecting.persistent">
+  <title>Persistent Connections (version up to 1.1.4 *only*)</title>
+  <note>
+   <para>
+    This section is not relevant for 1.2.0+. In 1.2.0+, connections are always
+    persistent and managed automatically by the driver. If you are using a
+    1.2.x release (but not 1.3.x or later), see
+    <classname>MongoPool</classname> for more information on pooling.
+   </para>
+  </note>
+
+  <para>
+   Creating new connection to the database is very slow. To minimize the number
+   of connections that you need to make, you can use persistent connections. A
+   persistent connection is saved by PHP, so you can use the same connection for
+   multiple requests.
+  </para>
+
+  <para>
+   For example, this simple program connects to the database 1000 times:
+  </para>
+
+  <example xml:id="mongo.connecting.no-persistent-example">
+   <programlisting role="php">
+<![CDATA[
+<?php
+
+for ($i=0; $i<1000; $i++) {
+  $m = new MongoClient();
+}
+
+?>
+]]>
+   </programlisting>
+  </example>
+
+  <para>
+   It takes approximately 18 seconds to execute. If we change it to use a
+   persistent connection:
+  </para>
+
+  <example xml:id="mongo.connecting.persistent-example">
+   <programlisting role="php">
+<![CDATA[
+<?php
+
+for ($i=0; $i<1000; $i++) {
+  $m = new MongoClient("localhost:27017", array("persist" => "x"));
+}
+
+?>
+]]>
+   </programlisting>
+  </example>
+
+  <para>
+   ...it takes less than .02 seconds to execute, as it only makes one database
+   connection.
+  </para>
+
+  <para>
+   Persistent connections need an identifier string (which is "x" in the above
+   example) to uniquely identify them. For a persistent connection to be used,
+   the hostname, port, persist string, and authentication credentials (username,
+   password and database, if given) must match an existing persistent
+   connection. Otherwise, a new connection will be created with this identifying
+   information.
+  </para>
+  <para>
+   Persistent connections are <emphasis>highly recommended</emphasis> and should
+   always be used in production unless there is a compelling reason not to.
+   Most of the reasons that they are not recommended for relational databases
+   are irrelevant to MongoDB.
+  </para>
+ </section>
+
+</chapter>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->

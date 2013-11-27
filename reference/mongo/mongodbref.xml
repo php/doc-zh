@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision$ -->
+<!-- EN-Revision: fb8f8617efe7ef5c3488038bfcab2e8b8f9bb430 Maintainer: anonymous #29387 Status: ready -->
+<!-- Reviewed: no -->
+<!-- CREDITS: GongT --> 
+
+<phpdoc:classref xml:id="class.mongodbref" xmlns:phpdoc="http://php.net/ns/phpdoc" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude">
+
+ <title>MongoDBRef 类</title>
+ <titleabbrev>MongoDBRef</titleabbrev>
+
+ <partintro>
+
+<!-- {{{ MongoGridfsCursor intro -->
+  <section xml:id="mongodbref.intro">
+   &reftitle.intro;
+   <para>
+    这个类可以用于创建不同集合中对象间的轻量级的链接。
+   </para>
+   <para>
+    <emphasis>Motivation</emphasis>：如果我们需要引用其他集合中的文档。最简单的方法是在当前文档中创建一个字段。比如，有
+    "people" 集合和 "addresses" 集合，我们需要“关联”每个 person 和对应的 address ，可以：
+    <example>
+     <title>链接文档</title>
+     <programlisting role="php">
+<![CDATA[
+<?php
+
+$people = $db->people;
+$addresses = $db->addresses;
+
+$myAddress = array("line 1" => "123 Main Street", 
+    "line 2" => null,
+    "city" => "Springfield",
+    "state" => "Vermont",
+    "country" => "USA");
+
+// save the address 保存address文档
+$addresses->insert($myAddress);
+
+// save a person with a reference to the address 保存一个people，关联刚才的address
+$me = array("name" => "Fred", "address" => $myAddress['_id']);
+$people->insert($me);
+
+?>
+]]>
+     </programlisting>
+    </example>
+   </para>
+   <para>
+    然后，我们可以：把保存在 "people" 集合中的
+    <classname>MongoId</classname> 作为条件，查询
+    "address" 集合，来获取一个人的地址。
+   </para>
+   <para>
+    如果我们现在有更加一般性的的情况，我们不知道哪个集合（甚至数据库）中包含我们要引用的文档。
+    <classname>MongoDBRef</classname> 就是个好选择，它是一个更加通用的格式，所有的驱动和数据库都可以处理它。
+   </para>
+   <para>
+    如果每个“人”有一系列关联到其他多个集合的信息，例如爱好、运动、书籍等，我们可以用数个
+    <classname>MongoDBRef</classname> 对象来跟踪每一个 爱好 来自哪个集合：
+    <example>
+     <title>Creating MongoDBRef links</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+
+$people = $db->selectCollection("people");
+
+// model trains are in the "hobbies" collection
+$trainRef = MongoDBRef::create("hobbies", $modelTrains['_id']);
+// soccer is in the "sports" collection
+$soccerRef = MongoDBRef::create("sports", $soccer['_id']);
+
+// now we'll know what collections the items in the "likes" array came from when
+// we retrieve this document
+//  # 现在当我们读取这个文档的时候，就可以知道“likes”字段里的数组元素分别来自哪个集合了。
+$people->insert(array("name" => "Fred", "likes" => array($trainRef, $soccerRef)));
+
+?>
+]]>
+     </programlisting>
+    </example>
+   </para>
+   <para>
+    数据库引用可以被理解为超链接：它们指定了一个文档的唯一地址，但不会自动读取或者跟踪引用、链接。、
+   </para>
+   <para>
+    一个数据库引用仅仅是一个普通关联数组，不是
+    <classname>MongoDBRef</classname> 的实例，所以这个类与其他数据类型有些不同。这个类只包含静态方法，用来操作引用。
+    译注：上面两段的意思概括为
+    1.一个数据库引用与超链接相似，复制、删除、修改等操作不会影响原来的文档。
+    2.读取这个引用可以得知指向的文档的位置，但不能知道文档的内容，要手动解引用。
+    3.这个“引用”保存到Mongo的时候就是普通数组
+   </para>
+  </section>
+<!-- }}} -->
+
+  <section xml:id="mongodbref.synopsis">
+   &reftitle.classsynopsis;
+
+<!-- {{{ Synopsis -->
+   <classsynopsis>
+    <ooclass><classname>MongoDBRef</classname></ooclass>
+
+<!-- {{{ Class synopsis -->
+    <classsynopsisinfo>
+     <ooclass>
+      <classname>MongoDBRef</classname>
+     </ooclass>
+    </classsynopsisinfo>
+<!-- }}} -->
+    
+    <classsynopsisinfo role="comment">&Methods;</classsynopsisinfo>
+    <xi:include xpointer="xmlns(db=http://docbook.org/ns/docbook) xpointer(id('class.mongodbref')/db:refentry/db:refsect1[@role='description']/descendant::db:methodsynopsis[1])" />
+   </classsynopsis>
+<!-- }}} -->
+
+  </section>
+
+  <section>
+   &reftitle.seealso;
+   <para>
+    MongoDB 官方核心文档 <link xlink:href="&url.mongodb.dochub.dbrefs;">databases references</link>.
+   </para>
+  </section>
+ </partintro>
+
+ &reference.mongo.entities.mongodbref;
+
+</phpdoc:classref>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
+
+<!--  LocalWords:  trainRef soccerRef MongoDBRef
+ -->
