@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision: 327525 $ -->
+
+<refentry xml:id="yaf-application.getconfig" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <refnamediv>
+  <refname>Yaf_Application::getConfig</refname>
+  <refpurpose>获取 Yaf_Config_Abstract 的实例</refpurpose>
+ </refnamediv>
+
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <modifier>public</modifier> <type>Yaf_Config_Abstract</type><methodname>Yaf_Application::getConfig</methodname>
+   <void />
+  </methodsynopsis>
+  <para>
+
+  </para>
+
+
+
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  &no.function.parameters;
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+    <classname>Yaf_Config_Abstract</classname> 的实例
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <example>
+   <title><function>Yaf_Application::getConfig</function>example</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+$config = array(
+    "application" => array(
+        "directory" => realpath(dirname(__FILE__)) . "/application",
+    ),
+);
+
+/** Yaf_Application */
+$application = new Yaf_Application($config);
+print_r($application->getConfig());
+?>
+]]>
+   </programlisting>
+   &example.outputs.similar;
+   <screen>
+<![CDATA[
+Yaf_Config_Simple Object
+(
+    [_config:protected] => Array
+        (
+            [application] => Array
+                (
+                    [directory] => /home/laruence/local/www/htdocs/application
+                )
+
+        )
+
+    [_readonly:protected] => 1
+)
+]]>
+   </screen>
+  </example>
+ </refsect1>
+
+
+</refentry>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->

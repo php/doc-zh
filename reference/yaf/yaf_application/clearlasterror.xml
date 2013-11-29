@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision: 327525 $ -->
+
+<refentry xml:id="yaf-application.clearlasterror" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <refnamediv>
+  <refname>Yaf_Application::clearLastError</refname>
+  <refpurpose>清除最后的错误信息</refpurpose>
+ </refnamediv>
+
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <modifier>public</modifier> <type>Yaf_Application</type><methodname>Yaf_Application::clearLastError</methodname>
+   <void />
+  </methodsynopsis>
+  <para>
+
+  </para>
+
+
+
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  &no.function.parameters;
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <example>
+   <title><function>Yaf_Application::clearLastError</function>example</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+function error_handler($errno, $errstr, $errfile, $errline) {
+   Yaf_Application::app()->clearLastError();
+   var_dump(Yaf_Application::app()->getLastErrorNo());
+}
+ 
+$config = array(                   
+ "application" => array(
+   "directory" => "/tmp/notexists",
+     "dispatcher" => array(
+       "throwException" => 0, //trigger error instead of throw exception when error occure
+      ),
+  ),
+);
+  
+$app = new Yaf_Application($config);
+$app->getDispatcher()->setErrorHandler("error_handler", E_RECOVERABLE_ERROR);
+$app->run();
+?>
+]]>
+   </programlisting>
+   &example.outputs.similar;
+   <screen>
+<![CDATA[
+int(0)
+]]>
+   </screen>
+  </example>
+ </refsect1>
+
+</refentry>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->

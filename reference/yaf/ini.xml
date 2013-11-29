@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision: 327652 $ -->
+
+<section xml:id="yaf.configuration" xmlns="http://docbook.org/ns/docbook">
+ &reftitle.runtime;
+ &extension.runtime;
+ <para>
+  <table>
+   <title>Yaf &ConfigureOptions;</title>
+   <tgroup cols="4">
+    <thead>
+     <row>
+      <entry>&Name;</entry>
+      <entry>&Default;</entry>
+      <entry>&Changeable;</entry>
+      <entry>&Changelog;</entry>
+     </row>
+    </thead>
+    <tbody>
+     <row>
+      <entry><link linkend="ini.yaf.library">yaf.library</link></entry>
+      <entry></entry>
+      <entry>its PHP_INI_ALL value</entry>
+      <entry><!-- leave empty, this will be filled by an automatic script --></entry>
+     </row>
+     <row>
+      <entry><link linkend="ini.yaf.action-prefer">yaf.action_prefer</link></entry>
+      <entry>0</entry>
+      <entry>its PHP_INI_ALL value</entry>
+      <entry><!-- leave empty, this will be filled by an automatic script --></entry>
+     </row>
+     <row>
+      <entry><link linkend="ini.yaf.lowcase-path">yaf.lowcase_path</link></entry>
+      <entry>0</entry>
+      <entry>its PHP_INI_ALL value</entry>
+      <entry><!-- leave empty, this will be filled by an automatic script --></entry>
+     </row>
+     <row>
+      <entry><link linkend="ini.yaf.use-spl-autoload">yaf.use_spl_autoload</link></entry>
+      <entry>0</entry>
+      <entry>its PHP_INI_ALL value</entry>
+      <entry><!-- leave empty, this will be filled by an automatic script --></entry>
+     </row>
+     <row>
+      <entry><link linkend="ini.yaf.forward-limit">yaf.forward_limit</link></entry>
+      <entry>5</entry>
+      <entry>its PHP_INI_ALL value</entry>
+      <entry><!-- leave empty, this will be filled by an automatic script --></entry>
+     </row>
+     <row>
+      <entry><link linkend="ini.yaf.name-suffix">yaf.name_suffix</link></entry>
+      <entry>1</entry>
+      <entry>its PHP_INI_ALL value</entry>
+      <entry><!-- leave empty, this will be filled by an automatic script --></entry>
+     </row>
+     <row>
+      <entry><link linkend="ini.yaf.name-separator">yaf.name_separator</link></entry>
+      <entry></entry>
+      <entry>its PHP_INI_ALL value</entry>
+      <entry><!-- leave empty, this will be filled by an automatic script --></entry>
+     </row>
+     <row>
+      <entry><link linkend="ini.yaf.cache-config">yaf.cache_config</link></entry>
+      <entry>0</entry>
+      <entry>its PHP_INI_SYSTEM value</entry>
+      <entry><!-- leave empty, this will be filled by an automatic script --></entry>
+     </row>
+     <row>
+      <entry><link linkend="ini.yaf.environ">yaf.environ</link></entry>
+      <entry>product</entry>
+      <entry>its PHP_INI_SYSTEM value</entry>
+      <entry><!-- leave empty, this will be filled by an automatic script --></entry>
+     </row>
+     <row>
+      <entry><link linkend="ini.yaf.use-namespace">yaf.use_namespace</link></entry>
+      <entry>0</entry>
+      <entry>its PHP_INI_ALL value</entry>
+      <entry><!-- leave empty, this will be filled by an automatic script --></entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </table>
+ </para>
+
+ &ini.descriptions.title;
+
+ <para>
+  <variablelist>
+   <varlistentry xml:id="ini.yaf.library">
+     <term>
+      <parameter>yaf.library</parameter>
+      <type>string</type>
+     </term>
+     <listitem>
+      <para>
+        The global library path, Yaf_loader will search global library in this
+        directory.      
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry xml:id="ini.yaf.action-prefer">
+     <term>
+      <parameter>yaf.action_prefer</parameter>
+      <type>integer</type>
+     </term>
+     <listitem>
+      <para>
+        If there is only one part in PATH_INFO, should it consider as a
+        controller or action.
+      </para>
+      <para>
+        If this configure On, it will be considered as a Action name.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry xml:id="ini.yaf.lowcase-path">
+     <term>
+      <parameter>yaf.lowcase_path</parameter>
+      <type>integer</type>
+     </term>
+     <listitem>
+      <para>
+       Whether lowercase all the path during the class autoloading.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry xml:id="ini.yaf.use-spl-autoload">
+     <term>
+      <parameter>yaf.use_spl_autoload</parameter>
+      <type>integer</type>
+     </term>
+     <listitem>
+      <para>
+        When this value is On, if <classname>Yaf_Loader</classname> can not
+        find a class, it will return FALSE, then give chance to other auto
+        load function to be called.      
+      </para>
+
+      <para>
+        When this value is Off(default),
+        <methodname>Yaf_Loader::autoload</methodname> will always return TRUE.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry xml:id="ini.yaf.forward-limit">
+     <term>
+      <parameter>yaf.forward_limit</parameter>
+      <type>integer</type>
+     </term>
+     <listitem>
+      <para>
+        The max forward count,  default is 5. that means you can have a max
+        value of 5 in the forward stack.
+       </para>
+      <para>
+       This is a protection for prevent recursive
+       <methodname>Yaf_Controller_Abstract::forward</methodname>.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry xml:id="ini.yaf.name-suffix">
+     <term>
+      <parameter>yaf.name_suffix</parameter>
+      <type>integer</type>
+     </term>
+     <listitem>
+      <para>
+       When this On, Yaf_Loader will identify a class by it's suffix to decide
+       whether it is a MVC Class.
+      </para>
+      <para>
+       When this Off, Yaf_Loader will look at the prefix of the class name.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry xml:id="ini.yaf.name-separator">
+     <term>
+      <parameter>yaf.name_separator</parameter>
+      <type>string</type>
+     </term>
+     <listitem>
+      <para>
+       When this is not empty, Yaf_Loader will identify the class suffix and
+       string value of this.
+      </para>
+      <para>
+       For example, when this value is "_", Yaf_Loader will take Index_Controller as
+       a Controller Class, IndexController as a normal class.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry xml:id="ini.yaf.cache-config">
+     <term>
+      <parameter>yaf.cache_config</parameter>
+      <type>integer</type>
+     </term>
+     <listitem>
+      <para>
+        If this is On, and in the meantime you are using ini config file as the
+        parameter of <methodname>Yaf_Application</methodname>, the
+        compiling result of the ini config file will be cached in the PHP
+        process.
+        <note>
+         <para>
+          Yaf examine the mtime of the ini file, if it was changed since
+          last compiling, Yaf will reload it.
+         </para>
+        </note>
+        <warning>
+         <para>
+          Yaf use the ini file path as the cache entry key, so do use the
+          absolute path in ini file path, otherwise there might be some
+          conflicts if two application use the same relative path of ini
+          config.
+         </para>
+        </warning>
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry xml:id="ini.yaf.environ">
+     <term>
+      <parameter>yaf.environ</parameter>
+      <type>string</type>
+     </term>
+     <listitem>
+      <para>
+        This value is "product" by default, used for Yaf to fetch the config
+        section of a ini config file.
+       </para>
+       <para>
+        That is, if this value is "product", Yaf will use the section named
+        "product" in the ini config file(the first parameter of the
+        <classname>Yaf_Application</classname>) as the final config of the
+        <classname>Yaf_Application</classname>.
+      </para>
+     </listitem>
+    </varlistentry>
+
+    <varlistentry xml:id="ini.yaf.use-namespace">
+     <term>
+      <parameter>yaf.use_namespace</parameter>
+      <type>integer</type>
+     </term>
+     <listitem>
+      <para>
+       Only works as of PHP 5.3, if this value is On, All class of Yaf will
+       named in namespace style.
+      </para>
+      <para>
+       For example, Yaf_Route_Rewrite => \Yaf\Route\Rewrite,
+       Yaf_Controller_Abstract => \Yaf\Controller_Abstract (Abstract is the
+       keyword, can not used as a class name)
+      </para>
+     </listitem>
+    </varlistentry>
+
+  </variablelist>
+ </para>
+</section>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->

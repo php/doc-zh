@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision: 320357 $ -->
+
+<phpdoc:classref xml:id="class.yaf-view-interface" xmlns:phpdoc="http://php.net/ns/phpdoc" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude">
+
+ <title>The Yaf_View_Interface class</title>
+ <titleabbrev>Yaf_View_Interface</titleabbrev>
+
+ <partintro>
+
+<!-- {{{ Yaf_View_Interface intro -->
+  <section xml:id="yaf-view-interface.intro">
+   &reftitle.intro;
+   <para>
+    Yaf给用户提供一个了一个可扩展的、可自定的视图引擎接口，用户可以使用自己的视图引擎来代替Yaf内置的<classname>Yaf_View_Simple</classname>。下面是一个关于怎么实现的例子，请看<methodname>Yaf_Dispatcher::setView</methodname>。
+   </para>
+  </section>
+<!-- }}} -->
+
+  <section xml:id="yaf-view-interface.synopsis">
+   &reftitle.classsynopsis;
+
+<!-- {{{ Synopsis -->
+   <classsynopsis>
+    <ooclass><classname>Yaf_View_Interface</classname></ooclass>
+
+<!-- {{{ Class synopsis -->
+    <classsynopsisinfo>
+     <ooclass>
+      <classname>Yaf_View_Interface</classname>
+     </ooclass>
+    </classsynopsisinfo>
+<!-- }}} -->
+    
+    <classsynopsisinfo role="comment">&Methods;</classsynopsisinfo>
+    <xi:include xpointer="xmlns(db=http://docbook.org/ns/docbook) xpointer(id('class.yaf-view-interface')/db:refentry/db:refsect1[@role='description']/descendant::db:methodsynopsis[1])" />
+   </classsynopsis>
+<!-- }}} -->
+
+  </section>
+
+ </partintro>
+
+ &reference.yaf.entities.yaf-view-interface;
+
+</phpdoc:classref>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->

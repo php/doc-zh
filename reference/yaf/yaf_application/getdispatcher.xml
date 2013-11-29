@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision: 327525 $ -->
+
+<refentry xml:id="yaf-application.getdispatcher" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <refnamediv>
+  <refname>Yaf_Application::getDispatcher</refname>
+  <refpurpose>获取 Yaf_Dispatcher 的实例</refpurpose>
+ </refnamediv>
+
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <modifier>public</modifier> <type>Yaf_Dispatcher</type><methodname>Yaf_Application::getDispatcher</methodname>
+   <void />
+  </methodsynopsis>
+  <para>
+
+  </para>
+
+
+
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  &no.function.parameters;
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <example>
+   <title><function>Yaf_Application::getDispatcher</function>example</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+$config = array(
+    "application" => array(
+        "directory" => realpath(dirname(__FILE__)) . "/application",
+    ),
+);
+
+/** Yaf_Application */
+$application = new Yaf_Application($config);
+print_r($application->getDispatcher());
+?>
+]]>
+   </programlisting>
+   &example.outputs.similar;
+   <screen>
+<![CDATA[
+Yaf_Dispatcher Object
+(
+    [_router:protected] => Yaf_Router Object
+        (
+            [_routes:protected] => Array
+                (
+                    [_default] => Yaf_Route_Static Object
+                        (
+                        )
+
+                )
+
+            [_current:protected] => 
+        )
+
+    [_view:protected] => 
+    [_request:protected] => Yaf_Request_Http Object
+        (
+            [module] => 
+            [controller] => 
+            [action] => 
+            [method] => Cli
+            [params:protected] => Array
+                (
+                )
+
+            [language:protected] => 
+            [_exception:protected] => 
+            [_base_uri:protected] => 
+            [uri:protected] => 
+            [dispatched:protected] => 
+            [routed:protected] => 
+        )
+
+    [_plugins:protected] => Array
+        (
+        )
+
+    [_auto_render:protected] => 1
+    [_return_response:protected] => 
+    [_instantly_flush:protected] => 
+    [_default_module:protected] => Index
+    [_default_controller:protected] => Index
+    [_default_action:protected] => index
+    [_response] => Yaf_Response_Cli Object
+        (
+            [_header:protected] => Array
+                (
+                )
+
+            [_body:protected] => 
+            [_sendheader:protected] => 
+        )
+
+)
+]]>
+   </screen>
+  </example>
+ </refsect1>
+
+
+</refentry>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->

@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision: 327529 $ -->
+
+<refentry xml:id="yaf-application.execute" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <refnamediv>
+  <refname>Yaf_Application::execute</refname>
+  <refpurpose>运行回调函数</refpurpose>
+ </refnamediv>
+
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <modifier>public</modifier> <type>void</type><methodname>Yaf_Application::execute</methodname>
+   <methodparam><type>callable</type><parameter>entry</parameter></methodparam>
+   <methodparam><type>string</type><parameter>...</parameter></methodparam>
+  </methodsynopsis>
+  <para>
+   这个方法通常用于在cron任务中运行Yaf_Application。
+   在cron任务中也可以使用autoloader和Bootstrap机制。
+  </para>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <variablelist>
+   <varlistentry>
+    <term><parameter>entry</parameter></term>
+    <listitem>
+     <para>  
+       一个有效的回调函数
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><parameter>...</parameter></term>
+    <listitem>
+     <para>
+      零个或者多个要传递给函数的参数。
+     </para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <example>
+   <title><function>Yaf_Application::execute</function>example</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+function main($argc, $argv) {
+}
+
+$config = array(
+    "application" => array(
+        "directory" => realpath(dirname(__FILE__)) . "/application",
+    ),
+);
+
+/** Yaf_Application */
+$application = new Yaf_Application($config);
+$application->execute("main", $argc,  $argv);
+?>
+]]>
+   </programlisting>
+   &example.outputs.similar;
+   <screen>
+<![CDATA[
+]]>
+   </screen>
+  </example>
+ </refsect1>
+
+</refentry>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->

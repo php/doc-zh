@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision: 319898 $ -->
+
+<phpdoc:classref xml:id="class.yaf-route-simple" xmlns:phpdoc="http://php.net/ns/phpdoc" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude">
+
+ <title>The Yaf_Route_Simple class</title>
+ <titleabbrev>Yaf_Route_Simple</titleabbrev>
+
+ <partintro>
+
+<!-- {{{ Yaf_Route_Simple intro -->
+  <section xml:id="yaf-route-simple.intro">
+   &reftitle.intro;
+   <para>
+    <classname>Yaf_Route_Simple</classname> 会匹配请求中的query string，然后找到路由信息。
+   </para>
+   <para>
+     你需要做的只是告诉 <classname>Yaf_Route_Simple</classname>，在$_GET中哪个是Module，哪个是Controller，哪个是Action。
+   </para>
+   <para>
+    <methodname>Yaf_Route_Simple::route</methodname> 总是会返回TRUE，所以把<classname>Yaf_Route_Simple</classname>放在路由堆栈前面是很重要的，否则其他所有的路由都可能不会被调用到。
+   </para>
+  </section>
+<!-- }}} -->
+
+  <section xml:id="yaf-route-simple.synopsis">
+   &reftitle.classsynopsis;
+
+<!-- {{{ Synopsis -->
+   <classsynopsis>
+    <ooclass><classname>Yaf_Route_Simple</classname></ooclass>
+
+<!-- {{{ Class synopsis -->
+    <classsynopsisinfo>
+     <ooclass>
+      <classname>Yaf_Route_Simple</classname>
+     </ooclass>
+     
+     <oointerface>
+      <interfacename>Yaf_Route_Interface</interfacename>
+     </oointerface>
+    </classsynopsisinfo>
+<!-- }}} -->
+    <classsynopsisinfo role="comment">&Properties;</classsynopsisinfo>
+    <fieldsynopsis>
+     <modifier>protected</modifier>
+     <varname linkend="yaf-route-simple.props.controller">controller</varname>
+    </fieldsynopsis>
+    <fieldsynopsis>
+     <modifier>protected</modifier>
+     <varname linkend="yaf-route-simple.props.module">module</varname>
+    </fieldsynopsis>
+    <fieldsynopsis>
+     <modifier>protected</modifier>
+     <varname linkend="yaf-route-simple.props.action">action</varname>
+    </fieldsynopsis>
+
+    
+    <classsynopsisinfo role="comment">&Methods;</classsynopsisinfo>
+    <xi:include xpointer="xmlns(db=http://docbook.org/ns/docbook) xpointer(id('class.yaf-route-simple')/db:refentry/db:refsect1[@role='description']/descendant::db:methodsynopsis[1])" />
+   </classsynopsis>
+<!-- }}} -->
+
+  </section>
+
+  
+<!-- {{{ Yaf_Route_Simple properties -->
+  <section xml:id="yaf-route-simple.props">
+   &reftitle.properties;
+   <variablelist>
+    <varlistentry xml:id="yaf-route-simple.props.controller">
+     <term><varname>controller</varname></term>
+     <listitem>
+      <para></para>
+     </listitem>
+    </varlistentry>
+    <varlistentry xml:id="yaf-route-simple.props.module">
+     <term><varname>module</varname></term>
+     <listitem>
+      <para></para>
+     </listitem>
+    </varlistentry>
+    <varlistentry xml:id="yaf-route-simple.props.action">
+     <term><varname>action</varname></term>
+     <listitem>
+      <para></para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </section>
+<!-- }}} -->
+
+
+ </partintro>
+
+ &reference.yaf.entities.yaf-route-simple;
+
+</phpdoc:classref>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->

@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision: 320137 $ -->
+
+<phpdoc:classref xml:id="class.yaf-action-abstract" xmlns:phpdoc="http://php.net/ns/phpdoc" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude">
+
+ <title>The Yaf_Action_Abstract class</title>
+ <titleabbrev>Yaf_Action_Abstract</titleabbrev>
+
+ <partintro>
+
+<!-- {{{ Yaf_Action_Abstract intro -->
+  <section xml:id="yaf-action-abstract.intro">
+   &reftitle.intro;
+   <para>
+    在Yaf中一个action可以采用单独定义<classname>Yaf_Action_Abstract</classname>来实现。
+    亦即，一个action方法也可以是一个<classname>Yaf_Action_Abstract</classname>的派生类
+   </para>
+   <para>
+    Yaf需要一个可以被它所调用的入口点（比如PHP 5.3，它有一个新的魔术方法__invoke，但是Yaf不只支持PHP 5.3+，
+    所以Yaf需要另一个魔术方法来执行完成这样的任务），所以在你自己的动作类里面必须要实现抽象方法 
+    <methodname>Yaf_Action_Abstract::execute</methodname>
+   </para>
+  </section>
+<!-- }}} -->
+
+  <section xml:id="yaf-action-abstract.synopsis">
+   &reftitle.classsynopsis;
+
+<!-- {{{ Synopsis -->
+   <classsynopsis>
+    <ooclass><classname>Yaf_Action_Abstract</classname></ooclass>
+
+<!-- {{{ Class synopsis -->
+    <classsynopsisinfo>
+     <ooclass>
+      <classname>Yaf_Action_Abstract</classname>
+     </ooclass>
+     
+     <ooclass>
+      <modifier>extends</modifier>
+      <classname>Yaf_Controller_Abstract</classname>
+     </ooclass>
+    </classsynopsisinfo>
+<!-- }}} -->
+    <classsynopsisinfo role="comment">&Properties;</classsynopsisinfo>
+    <fieldsynopsis>
+     <modifier>protected</modifier>
+     <varname linkend="yaf-action-abstract.props.controller">_controller</varname>
+    </fieldsynopsis>
+
+    
+    <classsynopsisinfo role="comment">&Methods;</classsynopsisinfo>
+    <xi:include xpointer="xmlns(db=http://docbook.org/ns/docbook) xpointer(id('class.yaf-action-abstract')/db:refentry/db:refsect1[@role='description']/descendant::db:methodsynopsis[1])" />
+    
+    <classsynopsisinfo role="comment">&InheritedMethods;</classsynopsisinfo>
+    <xi:include xpointer="xmlns(db=http://docbook.org/ns/docbook) xpointer(id('class.yaf-controller-abstract')/db:refentry/db:refsect1[@role='description']/descendant::db:methodsynopsis[1])" />
+
+   </classsynopsis>
+<!-- }}} -->
+
+  </section>
+
+  
+<!-- {{{ Yaf_Action_Abstract properties -->
+  <section xml:id="yaf-action-abstract.props">
+   &reftitle.properties;
+   <variablelist>
+    <varlistentry xml:id="yaf-action-abstract.props.module">
+     <term><varname>_module</varname></term>
+     <listitem>
+      <para></para>
+     </listitem>
+    </varlistentry>
+    <varlistentry xml:id="yaf-action-abstract.props.name">
+     <term><varname>_name</varname></term>
+     <listitem>
+      <para></para>
+     </listitem>
+    </varlistentry>
+    <varlistentry xml:id="yaf-action-abstract.props.request">
+     <term><varname>_request</varname></term>
+     <listitem>
+      <para></para>
+     </listitem>
+    </varlistentry>
+    <varlistentry xml:id="yaf-action-abstract.props.response">
+     <term><varname>_response</varname></term>
+     <listitem>
+      <para></para>
+     </listitem>
+    </varlistentry>
+    <varlistentry xml:id="yaf-action-abstract.props.invoke-args">
+     <term><varname>_invoke_args</varname></term>
+     <listitem>
+      <para></para>
+     </listitem>
+    </varlistentry>
+    <varlistentry xml:id="yaf-action-abstract.props.view">
+     <term><varname>_view</varname></term>
+     <listitem>
+      <para></para>
+     </listitem>
+    </varlistentry>
+    <varlistentry xml:id="yaf-action-abstract.props.controller">
+     <term><varname>_controller</varname></term>
+     <listitem>
+      <para></para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </section>
+<!-- }}} -->
+
+
+ </partintro>
+
+ &reference.yaf.entities.yaf-action-abstract;
+
+</phpdoc:classref>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->

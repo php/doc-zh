@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision: 319958 $ -->
+
+<phpdoc:classref xml:id="class.yaf-router" xmlns:phpdoc="http://php.net/ns/phpdoc" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude">
+
+ <title>The Yaf_Router class</title>
+ <titleabbrev>Yaf_Router</titleabbrev>
+
+ <partintro>
+
+<!-- {{{ Yaf_Router intro -->
+  <section xml:id="yaf-router.intro">
+   &reftitle.intro;
+   <para>
+   <classname>Yaf_Router</classname>是标准的框架路由.路由是一个拿到URI端点（URL中的URI的一部分）然后分解参数得到哪一个module, controller, 和action需要接受请求。module, controller, 和action，还有一些其他的参数是打包在一个<classname>Yaf_Request_Abstract</classname>的对象中，然后通过<classname>Yaf_Dispatcher</classname>来处理的。路由只发生一次:最初接到请求并且在第一个controller分发之前。
+   <classname>Yaf_Router</classname> 是设计来允许使用纯PHP结构的类似功能模块的跳转。它非常松散的基于Ruby on Rails的路由，并且不需要你提前就知道webserver URL跳转的相关知识。它是设计来处理一个Apache 跳转模块的规则（一个）
+   <classname>Yaf_Router</classname>是设计来允许mod_rewrite
+   <example>
+    <title>Apache的跳转规则</title>
+   <programlisting role="conf">
+<![CDATA[
+RewriteEngine on
+RewriteRule !\.(js|ico|gif|jpg|png|css|html)$ index.php
+]]>
+   </programlisting>
+   </example>
+   or (preferred):
+   <example>
+   <title>Apache的跳转规则</title>
+   <programlisting role="conf">
+<![CDATA[
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} -s [OR]
+RewriteCond %{REQUEST_FILENAME} -l [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^.*$ - [NC,L]
+RewriteRule ^.*$ index.php [NC,L]
+]]>
+   </programlisting>
+  </example>
+   如果使用Lighttpd，下面的跳转规则是有效的：
+   <example>
+    <title>Lighttpd的跳转规则</title>
+   <programlisting role="conf">
+<![CDATA[
+url.rewrite-once = (
+  ".*\?(.*)$" => "/index.php?$1",
+  ".*\.(js|ico|gif|jpg|png|css|html)$" => "$0",
+  "" => "/index.php"
+)
+]]>
+   </programlisting>
+  </example>
+   如果使用Nginx，下面的跳转规则是有效的：
+   <example>
+    <title>Nginx的跳转规则</title>
+   <programlisting role="conf">
+<![CDATA[
+server {
+  listen ****;
+  server_name  yourdomain.com;
+  root   document_root;
+  index  index.php index.html;
+
+  if (!-e $request_filename) {
+    rewrite ^/(.*)  /index.php/$1 last;
+  }
+}
+]]>
+   </programlisting>
+  </example>
+   </para>
+  </section>
+<!-- }}} -->
+
+  <section xml:id="yaf-router.default">
+   <title>默认路由</title>
+   <para>
+   Yaf_Router预设了一个默认路由，它将以controller/action的形式匹配URIs。此外，一个module的名字可以被指定为第一路径元素，允许URIs设置为module/controller/action的形式。最后，它也会匹配一些URI中额外附加的参数，默认形式是controller/action/var1/value1/var2/value2。
+    <note>
+     <para>
+      Module的名字必须要定义在配置中，就application.module="Index,Foo,Bar"而言，在这种情况下，仅仅index, foo 和 bar能被考虑作为为一个module的名称。如果没有在配置文件中定义，那么Yaf使用默认的module名字“Index”。
+     </para>
+    </note>
+   </para>
+
+   <para>
+   如何匹配这些路由的一些例子：
+   <example>
+    <title><classname>Yaf_Route_Static</classname>(default
+     route)example</title>
+   <programlisting role="conf">
+<![CDATA[
+// Assuming the following configure:
+$conf = array(
+   "application" => array(
+      "modules" => "Index,Blog",
+   ),
+);
+
+Controller only:
+http://example/news
+    controller == news
+Action only(when defined yaf.action_prefer=1 in php.ini)
+    action  == news
+ 
+Invalid module maps to controller name:
+http://example/foo
+    controller == foo
+ 
+Module + controller:
+http://example/blog/archive
+    module     == blog
+    controller == archive
+ 
+Module + controller + action:
+http://example/blog/archive/list
+    module     == blog
+    controller == archive
+    action     == list
+ 
+Module + controller + action + params:
+http://example/blog/archive/list/sort/alpha/date/desc
+    module     == blog
+    controller == archive
+    action     == list
+    sort       == alpha
+    date       == desc
+]]>
+   </programlisting>
+  </example>
+
+  </para>
+  </section>
+
+  <section xml:id="yaf-router.synopsis">
+   &reftitle.classsynopsis;
+
+<!-- {{{ Synopsis -->
+   <classsynopsis>
+    <ooclass><classname>Yaf_Router</classname></ooclass>
+
+<!-- {{{ Class synopsis -->
+    <classsynopsisinfo>
+     <ooclass>
+      <classname>Yaf_Router</classname>
+     </ooclass>
+    </classsynopsisinfo>
+<!-- }}} -->
+    <classsynopsisinfo role="comment">&Properties;</classsynopsisinfo>
+    <fieldsynopsis>
+     <modifier>protected</modifier>
+     <varname linkend="yaf-router.props.routes">_routes</varname>
+    </fieldsynopsis>
+    <fieldsynopsis>
+     <modifier>protected</modifier>
+     <varname linkend="yaf-router.props.current">_current</varname>
+    </fieldsynopsis>
+
+    
+    <classsynopsisinfo role="comment">&Methods;</classsynopsisinfo>
+    <xi:include xpointer="xmlns(db=http://docbook.org/ns/docbook) xpointer(id('class.yaf-router')/db:refentry/db:refsect1[@role='description']/descendant::db:methodsynopsis[1])" />
+   </classsynopsis>
+<!-- }}} -->
+
+  </section>
+
+  
+<!-- {{{ Yaf_Router properties -->
+  <section xml:id="yaf-router.props">
+   &reftitle.properties;
+   <variablelist>
+    <varlistentry xml:id="yaf-router.props.routes">
+     <term><varname>_routes</varname></term>
+     <listitem>
+      <para></para>
+     </listitem>
+    </varlistentry>
+    <varlistentry xml:id="yaf-router.props.current">
+     <term><varname>_current</varname></term>
+     <listitem>
+      <para></para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </section>
+<!-- }}} -->
+
+
+ </partintro>
+
+ &reference.yaf.entities.yaf-router;
+
+</phpdoc:classref>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->

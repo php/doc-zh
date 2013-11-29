@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision: 327652 $ -->
+
+<refentry xml:id="yaf-application.bootstrap" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <refnamediv>
+  <refname>Yaf_Application::bootstrap</refname>
+  <refpurpose>调用bootstrap</refpurpose>
+ </refnamediv>
+
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <modifier>public</modifier> <type>void</type><methodname>Yaf_Application::bootstrap</methodname>
+   <methodparam choice="opt"><type>Yaf_Bootstrap_Abstract</type><parameter>bootstrap</parameter></methodparam>
+  </methodsynopsis>
+  <para>
+    指示Yaf_Application去寻找Bootstrap，并按照声明的顺序，执行所有在Bootstrap类中定义的以_init开头的方法。
+    如果没有提供变量bootstrap，Yaf默认会去application.directory中寻找Bootstrap。
+  </para>
+
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <variablelist>
+   <varlistentry>
+    <term><parameter>bootstrap</parameter></term>
+    <listitem>
+     <para>
+      A <classname>Yaf_Bootstrap_Abstract</classname> instance      
+     </para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   <classname>Yaf_Application</classname> instance
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <example>
+   <title><function>A Bootstrap</function>example</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+/**
+ * This file should be under the APPLICATION_PATH . "/application/"(which was defined in the config passed to Yaf_Application).
+ * and named Bootstrap.php,  so the Yaf_Application can find it 
+ */
+class Bootstrap extends Yaf_Bootstrap_Abstract {
+    function _initConfig(Yaf_Dispatcher $dispatcher) {
+        echo "1st called\n";
+    }
+
+    function _initPlugin($dispatcher) {
+        echo "2nd called\n";
+    }
+}
+?>
+]]>
+   </programlisting>
+  </example>
+  <example>
+   <title><function>Yaf_Application::bootstrap</function>example</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+
+defined('APPLICATION_PATH')                  // APPLICATION_PATH will be used in the ini config file
+    || define('APPLICATION_PATH', __DIR__)); //__DIR__ was introduced after PHP 5.3
+
+$application = new Yaf_Application(APPLICATION_PATH.'/conf/application.ini');
+$application->bootstrap();
+?>
+]]>
+   </programlisting>
+   &example.outputs.similar;
+   <screen>
+<![CDATA[
+1st called
+2nd called
+]]>
+   </screen>
+  </example>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <simplelist>
+   <member><classname>Yaf_Bootstrap_Abstract</classname></member>
+  </simplelist>
+ </refsect1>
+
+</refentry>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->

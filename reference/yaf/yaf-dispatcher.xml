@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision: 320234 $ -->
+
+<phpdoc:classref xml:id="class.yaf-dispatcher" xmlns:phpdoc="http://php.net/ns/phpdoc" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude">
+
+ <title>Yaf_Dispatcher 类</title>
+ <titleabbrev>Yaf_Dispatcher</titleabbrev>
+
+ <partintro>
+
+<!-- {{{ Yaf_Dispatcher intro -->
+  <section xml:id="yaf-dispatcher.intro">
+   &reftitle.intro;
+   <para>
+    <classname>Yaf_Dispatcher</classname>用于初始化处理请求的运行环境, 
+    它协调路由来的请求, 并分发和执行发现的动作, 
+    然后收集动作产生的响应, 输出响应给请求者, 并在整个过程完成以后返回响应.
+   </para>
+   <para>
+    <classname>Yaf_Dispatcher</classname>是单例模式运行的, 
+    也就是说自始至终只生成一个<classname>Yaf_Dispatcher</classname>实例, 
+    因此, 可以把它看成是在分发过程中生成的对象的注册表, 可以从中获取到分发过程中产生的对象.
+   </para>
+  </section>
+<!-- }}} -->
+
+  <section xml:id="yaf-dispatcher.synopsis">
+   &reftitle.classsynopsis;
+
+<!-- {{{ Synopsis -->
+   <classsynopsis>
+    <ooclass><classname>Yaf_Dispatcher</classname></ooclass>
+
+<!-- {{{ Class synopsis -->
+    <classsynopsisinfo>
+     <ooclass>
+      <modifier>final</modifier>
+      <classname>Yaf_Dispatcher</classname>
+     </ooclass>
+    </classsynopsisinfo>
+<!-- }}} -->
+    <classsynopsisinfo role="comment">&Properties;</classsynopsisinfo>
+    <fieldsynopsis>
+     <modifier>protected</modifier>
+     <varname linkend="yaf-dispatcher.props.router">_router</varname>
+    </fieldsynopsis>
+    <fieldsynopsis>
+     <modifier>protected</modifier>
+     <varname linkend="yaf-dispatcher.props.view">_view</varname>
+    </fieldsynopsis>
+    <fieldsynopsis>
+     <modifier>protected</modifier>
+     <varname linkend="yaf-dispatcher.props.request">_request</varname>
+    </fieldsynopsis>
+    <fieldsynopsis>
+     <modifier>protected</modifier>
+     <varname linkend="yaf-dispatcher.props.plugins">_plugins</varname>
+    </fieldsynopsis>
+    <fieldsynopsis>
+     <modifier>protected</modifier>
+     <modifier>static</modifier>
+     <varname linkend="yaf-dispatcher.props.instance">_instance</varname>
+    </fieldsynopsis>
+    <fieldsynopsis>
+     <modifier>protected</modifier>
+     <varname linkend="yaf-dispatcher.props.auto-render">_auto_render</varname>
+    </fieldsynopsis>
+    <fieldsynopsis>
+     <modifier>protected</modifier>
+     <varname linkend="yaf-dispatcher.props.return-response">_return_response</varname>
+    </fieldsynopsis>
+    <fieldsynopsis>
+     <modifier>protected</modifier>
+     <varname linkend="yaf-dispatcher.props.instantly-flush">_instantly_flush</varname>
+    </fieldsynopsis>
+    <fieldsynopsis>
+     <modifier>protected</modifier>
+     <varname linkend="yaf-dispatcher.props.default-module">_default_module</varname>
+    </fieldsynopsis>
+    <fieldsynopsis>
+     <modifier>protected</modifier>
+     <varname linkend="yaf-dispatcher.props.default-controller">_default_controller</varname>
+    </fieldsynopsis>
+    <fieldsynopsis>
+     <modifier>protected</modifier>
+     <varname linkend="yaf-dispatcher.props.default-action">_default_action</varname>
+    </fieldsynopsis>
+
+    
+    <classsynopsisinfo role="comment">&Methods;</classsynopsisinfo>
+    <xi:include xpointer="xmlns(db=http://docbook.org/ns/docbook) xpointer(id('class.yaf-dispatcher')/db:refentry/db:refsect1[@role='description']/descendant::db:methodsynopsis[1])" />
+   </classsynopsis>
+<!-- }}} -->
+
+  </section>
+
+  
+<!-- {{{ Yaf_Dispatcher properties -->
+  <section xml:id="yaf-dispatcher.props">
+   &reftitle.properties;
+   <variablelist>
+    <varlistentry xml:id="yaf-dispatcher.props.router">
+     <term><varname>_router</varname></term>
+     <listitem>
+      <para></para>
+     </listitem>
+    </varlistentry>
+    <varlistentry xml:id="yaf-dispatcher.props.view">
+     <term><varname>_view</varname></term>
+     <listitem>
+      <para></para>
+     </listitem>
+    </varlistentry>
+    <varlistentry xml:id="yaf-dispatcher.props.request">
+     <term><varname>_request</varname></term>
+     <listitem>
+      <para></para>
+     </listitem>
+    </varlistentry>
+    <varlistentry xml:id="yaf-dispatcher.props.plugins">
+     <term><varname>_plugins</varname></term>
+     <listitem>
+      <para></para>
+     </listitem>
+    </varlistentry>
+    <varlistentry xml:id="yaf-dispatcher.props.instance">
+     <term><varname>_instance</varname></term>
+     <listitem>
+      <para></para>
+     </listitem>
+    </varlistentry>
+    <varlistentry xml:id="yaf-dispatcher.props.auto-render">
+     <term><varname>_auto_render</varname></term>
+     <listitem>
+      <para></para>
+     </listitem>
+    </varlistentry>
+    <varlistentry xml:id="yaf-dispatcher.props.return-response">
+     <term><varname>_return_response</varname></term>
+     <listitem>
+      <para></para>
+     </listitem>
+    </varlistentry>
+    <varlistentry xml:id="yaf-dispatcher.props.instantly-flush">
+     <term><varname>_instantly_flush</varname></term>
+     <listitem>
+      <para></para>
+     </listitem>
+    </varlistentry>
+    <varlistentry xml:id="yaf-dispatcher.props.default-module">
+     <term><varname>_default_module</varname></term>
+     <listitem>
+      <para></para>
+     </listitem>
+    </varlistentry>
+    <varlistentry xml:id="yaf-dispatcher.props.default-controller">
+     <term><varname>_default_controller</varname></term>
+     <listitem>
+      <para></para>
+     </listitem>
+    </varlistentry>
+    <varlistentry xml:id="yaf-dispatcher.props.default-action">
+     <term><varname>_default_action</varname></term>
+     <listitem>
+      <para></para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </section>
+<!-- }}} -->
+
+
+ </partintro>
+
+ &reference.yaf.entities.yaf-dispatcher;
+
+</phpdoc:classref>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->

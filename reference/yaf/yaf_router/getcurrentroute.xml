@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision: 320263 $ -->
+
+<refentry xml:id="yaf-router.getcurrentroute" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <refnamediv>
+  <refname>Yaf_Router::getCurrentRoute</refname>
+  <refpurpose>取得当前有效的路由名</refpurpose>
+ </refnamediv>
+
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <modifier>public</modifier> <type>string</type><methodname>Yaf_Router::getCurrentRoute</methodname>
+   <void />
+  </methodsynopsis>
+  <para>
+    获取当前路由进程中正在起作用的路由名
+   <note>
+    <para>
+      你需要在路由进程结束之后调用此方法，在这之前，这个方法会一直返回NULL
+    </para>
+   </note>
+  </para>
+
+  &warn.undocumented.func;
+
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  &no.function.parameters;
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   String，当前起效的路由的名字
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <example>
+   <title>注册一些路由到Bootstrap</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+class Bootstrap extends Yaf_Bootstrap_Abstract{
+    public function _initConfig() {
+        $config = Yaf_Application::app()->getConfig();
+        Yaf_Registry::set("config", $config);
+    }
+
+    public function _initRoute(Yaf_Dispatcher $dispatcher) {
+        $router = $dispatcher->getRouter();
+        $rewrite_route  = new Yaf_Route_Rewrite(
+            "/product/list/:page",
+            array(
+                "controller" => "product",
+                "action"     => "list",
+            )
+        ); 
+
+        $regex_route  = new Yaf_Route_Rewrite(
+            "#^/product/info/(\d+)",
+            array(
+                "controller" => "product",
+                "action"     => "info",
+            )
+        ); 
+        
+        $router->addRoute('rewrite', $rewrite_route)->addRoute('regex', $regex_route);
+    } 
+
+    /**
+     * register plugin 
+     */
+    public function __initPlugins(Yaf_Dispatcher $dispatcher) {
+        $dispatcher->registerPlugin(new DummyPlugin());
+    }
+?>
+]]>
+   </programlisting>
+  </example>
+  <example>
+   <title>plugin Dummy.php (under <link
+     linkend="configuration.yaf.directory">application.directory</link>/plugins)</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+class DummyPlugin extends Yaf_Plugin_Abstract {
+
+    public function routerShutdown(Yaf_Request_Abstract $request, Yaf_Response_Abstract $response) {
+         var_dump(Yaf_Dispatcher::getInstance()->getRouter()->getCurrentRoute());
+    }
+?>
+?>
+]]>
+   </programlisting>
+   &example.outputs.similar;
+   <screen>
+<![CDATA[
+/* for http://yourdomain.com/product/list/1
+ * DummyPlugin will output:
+ */
+string(7) "rewrite"
+
+/* for http://yourdomain.com/product/info/34
+ * DummyPlugin will output:
+ */
+string(5) "regex"
+
+/* for other request URI
+ * DummyPlugin will output:
+ */
+string(8) "_default"
+]]>
+   </screen>
+  </example>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <simplelist>
+   <member><classname>Yaf_Bootstrap_Abstract</classname></member>
+   <member><classname>Yaf_Plugin_Abstract</classname></member>
+   <member><methodname>Yaf_Router::addRoute</methodname></member>
+  </simplelist>                       
+ </refsect1>  
+
+</refentry>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->

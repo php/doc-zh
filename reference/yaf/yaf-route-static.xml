@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision: 319946 $ -->
+
+<phpdoc:classref xml:id="class.yaf-route-static" xmlns:phpdoc="http://php.net/ns/phpdoc" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude">
+
+ <title>The Yaf_Route_Static class</title>
+ <titleabbrev>Yaf_Route_Static</titleabbrev>
+
+ <partintro>
+
+<!-- {{{ Yaf_Route_Static intro -->
+  <section xml:id="yaf-route-static.intro">
+   &reftitle.intro;
+   <para>
+     默认的，<classname>Yaf_Router</classname> 只有一个<classname>Yaf_Route_Static</classname> 作为它默认的路由
+   </para>
+   <para>
+     <classname>Yaf_Route_Static</classname> 旨在处理80%的要求。
+   </para>
+   <para>
+     请注意：实例化 <classname>Yaf_Route_Static</classname> 是没有必要的，也没必要将它加入<classname>Yaf_Router</classname>的路由堆栈，因为在<classname>Yaf_Router</classname>的路由堆栈中总是存在它的一个实例，并且总是在最后被调用。
+   </para>
+  </section>
+<!-- }}} -->
+
+  <section xml:id="yaf-route-static.synopsis">
+   &reftitle.classsynopsis;
+
+<!-- {{{ Synopsis -->
+   <classsynopsis>
+    <ooclass><classname>Yaf_Route_Static</classname></ooclass>
+
+<!-- {{{ Class synopsis -->
+    <classsynopsisinfo>
+     <ooclass>
+      <classname>Yaf_Route_Static</classname>
+     </ooclass>
+     
+     <oointerface>
+      <interfacename>Yaf_Router</interfacename>
+     </oointerface>
+    </classsynopsisinfo>
+<!-- }}} -->
+    
+    <classsynopsisinfo role="comment">&Methods;</classsynopsisinfo>
+    <xi:include xpointer="xmlns(db=http://docbook.org/ns/docbook) xpointer(id('class.yaf-route-static')/db:refentry/db:refsect1[@role='description']/descendant::db:methodsynopsis[1])" />
+   </classsynopsis>
+<!-- }}} -->
+
+  </section>
+
+ </partintro>
+
+ &reference.yaf.entities.yaf-route-static;
+
+</phpdoc:classref>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->

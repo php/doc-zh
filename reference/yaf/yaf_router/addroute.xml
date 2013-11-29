@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision: 319898 $ -->
+
+<refentry xml:id="yaf-router.addroute" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <refnamediv>
+  <refname>Yaf_Router::addRoute</refname>
+  <refpurpose>往Router中添加新的路由</refpurpose>
+ </refnamediv>
+
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <modifier>public</modifier> <type>Yaf_Router</type><methodname>Yaf_Router::addRoute</methodname>
+   <methodparam><type>string</type><parameter>name</parameter></methodparam>
+   <methodparam><type>Yaf_Route_Abstract</type><parameter>route</parameter></methodparam>
+  </methodsynopsis>
+  <para>
+    默认地，Yaf_Router使用<classname>Yaf_Route_Static</classname>作为它的默认的路由。你可以通过调用这个方法往Router的堆栈中添加一个新的路由
+  </para>
+  <para>
+    在路由栈中，新的路由规则会比老的规则先调用，如果新路由规则返回TRUE，那么路由进程将会结束。否则，老的规则将会被调用。
+  </para>
+
+  &warn.undocumented.func;
+
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  &no.function.parameters;
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <example>
+   <title><function>Yaf_Dispatcher::autoRender</function>example</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+class Bootstrap extends Yaf_Bootstrap_Abstract{
+    public function _initConfig() {
+        $config = Yaf_Application::app()->getConfig();
+        Yaf_Registry::set("config", $config);
+    }
+
+    public function _initRoute(Yaf_Dispatcher $dispatcher) {
+        $router = $dispatcher->getRouter();
+        /**
+         * we can add some pre-defined routes in application.ini
+         */
+        $router->addConfig(Yaf_Registry::get("config")->routes);
+        /**
+         * add a Rewrite route, then for a request uri: 
+         * http://***/product/list/22/foo
+         * will be matched by this route, and result:
+         *
+         *  [module] => 
+         *  [controller] => product
+         *  [action] => info
+         *  [method] => GET
+         *  [params:protected] => Array
+         *      (
+         *          [id] => 22
+         *          [name] => foo
+         *      )
+         * 
+         */
+        $route  = new Yaf_Route_Rewrite(
+            "/product/list/:id/:name",
+            array(
+                "controller" => "product",
+                "action"     => "info",
+            )
+        ); 
+        
+        $router->addRoute('dummy', $route);
+    }
+?>
+]]>
+   </programlisting>
+  </example>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <simplelist>
+   <member><methodname>Yaf_Router::addConfig</methodname></member>
+   <member><classname>Yaf_Route_Static</classname></member>
+   <member><classname>Yaf_Route_Supervar</classname></member>
+   <member><classname>Yaf_Route_Simple</classname></member>
+   <member><classname>Yaf_Route_Regex</classname></member>
+   <member><classname>Yaf_Route_Rewrite</classname></member>
+   <member><classname>Yaf_Route_Map</classname></member>
+  </simplelist>                       
+ </refsect1>  
+
+</refentry>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->

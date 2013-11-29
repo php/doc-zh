@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision: 320263 $ -->
+
+<phpdoc:classref xml:id="class.yaf-loader" xmlns:phpdoc="http://php.net/ns/phpdoc" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude">
+
+ <title>The Yaf_Loader class</title>
+ <titleabbrev>Yaf_Loader</titleabbrev>
+
+ <partintro>
+
+<!-- {{{ Yaf_Loader intro -->
+  <section xml:id="yaf-loader.intro">
+   &reftitle.intro;
+   <para>
+    <classname>Yaf_Loader</classname> 类为Yaf提供了自动加载功能的全面解决方案。
+   </para>
+   <para>
+    在第一次使用的时候，将检索 <classname>Yaf_Application</classname> 的实例，
+    <classname>Yaf_Loader</classname> 实现了单利模式，并使用spl_autoload注册它自己。
+    通过 <methodname>Yaf_Loader::getInstance</methodname> 返回它的实例
+   </para>
+   <para>
+    <classname>Yaf_Loader</classname> 加载一个类时仅仅尝试一次，如果失败了，
+    后面的操作将取决于<link linkend="ini.yaf.use-spl-autoload">yaf.use_spl_auload</link>，
+    如果这个配置项为On，<methodname>Yaf_Loader::autoload</methodname> 将会返回FALSE，
+    从而把机会让给其他的自动加载功能。如果这个配置项为Off（默认），
+    <methodname>Yaf_Loader::autoload</methodname> 将会返回TRUE，
+    最重要的是将会抛出一个非常有用的警告（对于找出一个类加载失败非常有用）。
+    <note>
+     <para>
+      请保持yaf.use_spl_autoload保持关闭，除非有一些library有自己的autoload机制，并且是无法改写的。
+     </para>
+    </note>
+   </para>
+   <para>
+     默认情况下，<classname>Yaf_Loader</classname> 收集所有library(类定义的脚本)储存进在
+     php.ini(yaf.library)定义的<link linkend="ini.yaf.library">global library directory</link>之中。
+   </para>
+
+   <para>
+    如果你想使用 <classname>Yaf_Loader</classname> 搜索本地类（库）（定义在application.ini，
+    默认情况下，它是 <link linkend="configuration.yaf.directory">application.directory</link> . "/libraray"），
+    你需要使用 <methodname>Yaf_Loader::registerLocalNameSpace</methodname> 注册本地类前缀。
+   </para>
+
+   <para>
+     让我们来看看一些例子（假设 APPLICATION_PATH 是 <link linkend="configuration.yaf.directory">application.directory</link>）：
+    <example>
+     <title>Config example</title>
+      <programlisting role="shell">
+<![CDATA[
+// Assuming the following configure in php.ini:
+yaf.libraray = "/global_dir"
+
+//Assuming the following configure in application.ini
+application.libraray = APPLICATION_PATH "/library"
+]]>
+     </programlisting>
+    </example>
+    假设以下本地名称空间已被注册：
+    <example>
+     <title>注册本地命名空间</title>
+     <programlisting role="php">
+<![CDATA[
+<?php
+class Bootstrap extends Yaf_Bootstrap_Abstract{
+     public function _initLoader($dispatcher) {
+          Yaf_Loader::getInstance()->registerLocalNameSpace(array("Foo", "Bar"));
+     }
+?>
+]]>
+     </programlisting>
+    </example>
+    自动加载例子：
+    <example>
+     <title>加载类</title>
+      <programlisting role="shell">
+<![CDATA[
+class Foo_Bar_Test =>
+  // APPLICATION_PATH/library/Foo/Bar/Test.php
+  
+class GLO_Name  =>
+  // /global_dir/Glo/Name.php
+ 
+class BarNon_Test
+  // /global_dir/Barnon/Test.php
+]]>
+      </programlisting>
+    </example>
+   在PHP 5.3中，你可以使用命名空间：
+   <example>
+    <title>加载命名空间类</title>
+    <programlisting role="shell">
+<![CDATA[
+class \Foo\Bar\Dummy =>
+   // APPLICATION_PATH/library/Foo/Bar/Dummy.php
+
+class \FooBar\Bar\Dummy =>
+   // /global_dir/FooBar/Bar/Dummy.php
+]]>
+    </programlisting> 
+   </example>
+  </para>
+
+  <para>
+    你可能会注意到所有文件夹名字的首字母是大写的，你可以通过在php.ini中设置 <link linkend="ini.yaf.lowcase-path">yaf.lowcase_path</link> = On 来将它们小写。
+  </para>
+
+  <para>
+   <classname>Yaf_Loader</classname> 也是设计来加载MVC类，响应的规则如下：
+   <example>
+    <title>MVC类加载例子</title>
+    <programlisting role="shell">
+<![CDATA[
+Controller Classes =>
+// APPLICATION_PATH/controllers/
+
+Model Classes =>
+// APPLICATION_PATH/models/
+
+Plugin Classes =>
+// APPLICATION_PATH/plugins/
+]]>
+    </programlisting>
+   </example>
+   Yaf 通过识别一个类的后缀（这个是默认的，你也可以通过改变配置项 <link
+    linkend="ini.yaf.name-suffix">yaf.name_suffix</link> 来将它改为通过前缀识别）来决定它是否是一个MVC类：
+   <example>
+    <title>MVC 类区别</title>
+   <programlisting role="shell">
+<![CDATA[
+Controller Classes =>
+    // ***Controller
+
+Model Classes =>
+    // ***Model
+
+Plugin Classes =>
+    // ***Plugin
+]]>
+   </programlisting>
+  </example>
+
+   some examples:
+   <example>
+    <title>MVC loading example</title>
+    <programlisting role="shell">
+<![CDATA[
+class IndexController
+    // APPLICATION_PATH/controllers/Index.php
+
+class DataModel =>
+   // APPLICATION_PATH/models/Data.php
+
+class DummyPlugin =>
+  // APPLICATION_PATH/plugins/Dummy.php
+
+class A_B_TestModel =>
+  // APPLICATION_PATH/models/A/B/Test.php
+]]>
+    </programlisting>
+  </example>
+   该目录将受 <link linkend="ini.yaf.lowcase-path">yaf.lowcase_path</link> 的影响。
+  </para>
+  </section>
+<!-- }}} -->
+
+  <section xml:id="yaf-loader.synopsis">
+   &reftitle.classsynopsis;
+
+<!-- {{{ Synopsis -->
+   <classsynopsis>
+    <ooclass><classname>Yaf_Loader</classname></ooclass>
+
+<!-- {{{ Class synopsis -->
+    <classsynopsisinfo>
+     <ooclass>
+      <classname>Yaf_Loader</classname>
+     </ooclass>
+    </classsynopsisinfo>
+<!-- }}} -->
+    <classsynopsisinfo role="comment">&Properties;</classsynopsisinfo>
+    <fieldsynopsis>
+     <modifier>protected</modifier>
+     <varname linkend="yaf-loader.props.local-ns">_local_ns</varname>
+    </fieldsynopsis>
+    <fieldsynopsis>
+     <modifier>protected</modifier>
+     <varname linkend="yaf-loader.props.library">_library</varname>
+    </fieldsynopsis>
+    <fieldsynopsis>
+     <modifier>protected</modifier>
+     <varname linkend="yaf-loader.props.global-library">_global_library</varname>
+    </fieldsynopsis>
+    <fieldsynopsis>
+     <modifier>static</modifier>
+     <varname linkend="yaf-loader.props.instance">_instance</varname>
+    </fieldsynopsis>
+
+    
+    <classsynopsisinfo role="comment">&Methods;</classsynopsisinfo>
+    <xi:include xpointer="xmlns(db=http://docbook.org/ns/docbook) xpointer(id('class.yaf-loader')/db:refentry/db:refsect1[@role='description']/descendant::db:methodsynopsis[1])" />
+   </classsynopsis>
+<!-- }}} -->
+
+  </section>
+
+  
+<!-- {{{ Yaf_Loader properties -->
+  <section xml:id="yaf-loader.props">
+   &reftitle.properties;
+   <variablelist>
+    <varlistentry xml:id="yaf-loader.props.local-ns">
+     <term><varname>_local_ns</varname></term>
+     <listitem>
+      <para></para>
+     </listitem>
+    </varlistentry>
+    <varlistentry xml:id="yaf-loader.props.library">
+     <term><varname>_library</varname></term>
+     <listitem>
+      <para>
+      默认情况下，它的值是 <link linkend="configuration.yaf.directory">application.directory</link> . "/library"，
+      你可以通过修改application.ini(application.library)或者调用 <methodname>Yaf_Loader::setLibraryPath</methodname> 改变它。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry xml:id="yaf-loader.props.global-library">
+     <term><varname>_global_library</varname></term>
+     <listitem>
+      <para></para>
+     </listitem>
+    </varlistentry>
+    <varlistentry xml:id="yaf-loader.props.instance">
+     <term><varname>_instance</varname></term>
+     <listitem>
+      <para></para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </section>
+<!-- }}} -->
+
+
+ </partintro>
+ 
+
+ &reference.yaf.entities.yaf-loader;
+
+</phpdoc:classref>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->

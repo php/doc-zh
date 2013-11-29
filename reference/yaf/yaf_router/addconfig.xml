@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision: 324891 $ -->
+
+<refentry xml:id="yaf-router.addconfig" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <refnamediv>
+  <refname>Yaf_Router::addConfig</refname>
+  <refpurpose>向Router中添加配置文件中定义的路由</refpurpose>
+ </refnamediv>
+
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <modifier>public</modifier> <type>void</type><methodname>Yaf_Router::addConfig</methodname>
+   <methodparam><type>Yaf_Config_Abstract</type><parameter>config</parameter></methodparam>
+  </methodsynopsis>
+  <para>
+    将application.ini中定义的路由规则添加到<classname>Yaf_Router</classname>的路由栈中
+  </para>
+
+  &warn.undocumented.func;
+
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  &no.function.parameters;
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <example>
+   <title><function>application.ini</function>example</title>
+   <programlisting role="ini">
+    <![CDATA[
+;the order is very important, the prior one will be called first
+
+;a rewrite route match request /product/*/*
+routes.route_name.type="rewrite"
+routes.route_name.match="/product/:name/:value"
+routes.route_name.route.controller=product
+routes.route_name.route.action=info
+
+;a regex route match request /list/*/*
+routes.route_name1.type="regex"
+routes.route_name1.match="#^list/([^/]*)/([^/]*)#"
+routes.route_name1.route.controller=Index
+routes.route_name1.route.action=action
+routes.route_name1.map.1=name
+routes.route_name1.map.2=value
+
+;a simple route match /**?c=controller&a=action&m=module
+routes.route_name2.type="simple"
+routes.route_name2.controller=c
+routes.route_name2.module=m
+routes.route_name2.action=a
+
+;a simple router match /**?r=PATH_INFO
+routes.route_name3.type="supervar"
+routes.route_name3.varname=r
+
+;a map route match any request to controller
+routes.route_name4.type="map"
+routes.route_name4.controllerPrefer=TRUE
+routes.route_namer.delimiter="#!"
+]]>
+   </programlisting>
+  </example>
+  <example>
+   <title><function>Yaf_Dispatcher::autoConfig</function>example</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+class Bootstrap extends Yaf_Bootstrap_Abstract{
+    public function _initConfig() {
+        $config = Yaf_Application::app()->getConfig();
+        Yaf_Registry::set("config", $config);
+    }
+
+    public function _initRoute(Yaf_Dispatcher $dispatcher) {
+        $router = $dispatcher->getRouter();
+        /**
+         * we can add some pre-defined routes in application.ini
+         */
+        $router->addConfig(Yaf_Registry::get("config")->routes);
+    }
+?>
+]]>
+   </programlisting>
+  </example>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <simplelist>
+   <member><methodname>Yaf_Router::addRoute</methodname></member>
+   <member><classname>Yaf_Route_Static</classname></member>
+   <member><classname>Yaf_Route_Supervar</classname></member>
+   <member><classname>Yaf_Route_Simple</classname></member>
+   <member><classname>Yaf_Route_Regex</classname></member>
+   <member><classname>Yaf_Route_Rewrite</classname></member>
+   <member><classname>Yaf_Route_Map</classname></member>
+  </simplelist>                       
+ </refsect1>  
+
+</refentry>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->

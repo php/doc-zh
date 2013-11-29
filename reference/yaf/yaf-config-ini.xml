@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision: 317851 $ -->
+
+<phpdoc:classref xml:id="class.yaf-config-ini" xmlns:phpdoc="http://php.net/ns/phpdoc" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude">
+
+ <title>The Yaf_Config_Ini class</title>
+ <titleabbrev>Yaf_Config_Ini</titleabbrev>
+
+ <partintro>
+
+<!-- {{{ Yaf_Config_Ini intro -->
+  <section xml:id="yaf-config-ini.intro">
+   &reftitle.intro;
+   <para>
+   Yaf_Config_Ini允许开发者通过嵌套的对象属性语法在应用程序中用熟悉的INI格式存储和读取配置数据。
+   INI格式在提供拥有配置数据键的等级结构和配置数据节之间的继承能力方面具有专长。
+   配置数据等级结构通过用点或者句号(.)分离键值。
+   一个节可以扩展或者通过在节的名称之后带一个冒号(:)和被继承的配置数据的节的名称来从另一个节继承。
+  <note>
+   <para>
+   Yaf_Config_Ini利用PHP的函数parse_ini_file()来解析配置文件的。
+   请仔细查看这个函数的文档，注意它的一些特殊用途。以及它传递给Yaf_Config_Ini的一些比如
+   "TRUE", "FALSE","yes", "no", 和"NULL"的特殊值的处理方式
+   </para>
+  </note>
+  </para>
+  </section>
+<!-- }}} -->
+
+  <section xml:id="yaf-config-ini.synopsis">
+   &reftitle.classsynopsis;
+
+<!-- {{{ Synopsis -->
+   <classsynopsis>
+    <ooclass><classname>Yaf_Config_Ini</classname></ooclass>
+
+<!-- {{{ Class synopsis -->
+    <classsynopsisinfo>
+     <ooclass>
+      <classname>Yaf_Config_Ini</classname>
+     </ooclass>
+     
+     <ooclass>
+      <modifier>extends</modifier>
+      <classname>Yaf_Config_Abstract</classname>
+     </ooclass>
+     
+     <oointerface>
+      <interfacename>Iterator</interfacename>
+     </oointerface>
+
+     <oointerface>
+      <interfacename>Traversable</interfacename>
+     </oointerface>
+
+     <oointerface>
+      <interfacename>ArrayAccess</interfacename>
+     </oointerface>
+
+     <oointerface>
+      <interfacename>Countable</interfacename>
+     </oointerface>
+    </classsynopsisinfo>
+<!-- }}} -->
+    <classsynopsisinfo role="comment">&Properties;</classsynopsisinfo>
+
+    
+    <classsynopsisinfo role="comment">&Methods;</classsynopsisinfo>
+    <xi:include xpointer="xmlns(db=http://docbook.org/ns/docbook) xpointer(id('class.yaf-config-ini')/db:refentry/db:refsect1[@role='description']/descendant::db:methodsynopsis[1])" />
+    
+    <classsynopsisinfo role="comment">&InheritedMethods;</classsynopsisinfo>
+    <xi:include xpointer="xmlns(db=http://docbook.org/ns/docbook) xpointer(id('class.yaf-config-abstract')/db:refentry/db:refsect1[@role='description']/descendant::db:methodsynopsis[1])" />
+
+   </classsynopsis>
+<!-- }}} -->
+
+  </section>
+
+  
+<!-- {{{ Yaf_Config_Ini properties -->
+  <section xml:id="yaf-config-ini.props">
+   &reftitle.properties;
+   <variablelist>
+    <varlistentry xml:id="yaf-config-ini.props.config">
+     <term><varname>_config</varname></term>
+     <listitem>
+      <para></para>
+     </listitem>
+    </varlistentry>
+    <varlistentry xml:id="yaf-config-ini.props.readonly">
+     <term><varname>_readonly</varname></term>
+     <listitem>
+      <para></para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </section>
+<!-- }}} -->
+
+ <section role="examples">
+  &reftitle.examples;
+  <example>
+   <title><function>Yaf_Config_Ini</function>example</title>
+   <para>
+    这个例子说明了使用Yaf_Config_Ini从一个INI配置文件中获取配置数据的基本用法。
+    这个例子中既有生产环境的配置方法也有演示环境的配置方法。
+    因为演示环境的配置跟生产环境的非常类似，所以演示环境的配置继承了生产环境的配置。
+    在复杂的情况下，决定是任意的，也可以写成相反的。在更复杂的情况下，生产环境继承自演示环境不是不可能的。
+    假设，以下配置数据都包含在/path/to/config.ini中：
+   </para>
+   <programlisting role="ini">
+<![CDATA[
+; Production site configuration data
+[production]
+webhost                  = www.example.com
+database.adapter         = pdo_mysql
+database.params.host     = db.example.com
+database.params.username = dbuser
+database.params.password = secret
+database.params.dbname   = dbname
+ 
+; Staging site configuration data inherits from production and
+; overrides values as necessary
+[staging : production]
+database.params.host     = dev.example.com
+database.params.username = devuser
+database.params.password = devsecret
+]]>
+   </programlisting>
+   <programlisting role="php">
+<![CDATA[
+<?php
+$config = new Yaf_Config_Ini('/path/to/config.ini', 'staging');
+ 
+var_dump($config->database->params->host); 
+var_dump($config->database->params->dbname);
+var_dump($config->get("database.params.username"));
+?>
+]]>
+   </programlisting>
+   &example.outputs.similar;
+   <screen>
+<![CDATA[
+string(15) "dev.example.com"
+string(6) "dbname"
+string(7) "devuser
+]]>
+   </screen>
+  </example>
+  </section>
+
+ </partintro>
+
+ &reference.yaf.entities.yaf-config-ini;
+
+</phpdoc:classref>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->

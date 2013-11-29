@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision: 327525 $ -->
+
+<refentry xml:id="yaf-application.construct" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <refnamediv>
+  <refname>Yaf_Application::__construct</refname>
+  <refpurpose>Yaf_Application的构造函数</refpurpose>
+ </refnamediv>
+
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <modifier>public</modifier><methodname>Yaf_Application::__construct</methodname>
+   <methodparam><type>mixed</type><parameter>config</parameter></methodparam>
+   <methodparam choice="opt"><type>string</type><parameter>envrion</parameter></methodparam>
+  </methodsynopsis>
+  <para>
+   初始化一个 <classname>Yaf_Application</classname>.
+  </para>
+
+
+
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <variablelist>
+   <varlistentry>
+    <term><parameter>config</parameter></term>
+    <listitem>
+     <para>
+       关联数组的配置, 或者一个指向ini格式的配置文件的路径的字符串。
+     </para>
+     <para>
+       如果是一个ini配置文件，那配置文件中应该有一个定义了<link linkend="ini.yaf.environ">yaf.environ</link>
+       的配置节。这个在生产环境中是默认的。
+      <note>
+       <para>
+        如果你使用了ini配置文件作为你应用配置的容器，你需要打开<link linkend="ini.yaf.cache-config">yaf.cache_config</link>
+        来提升性能。
+       </para>
+      </note>
+     </para>
+     <para>
+       And the config entry(and there default value) list blow:
+      <example>
+       <title>A ini config file example</title>
+       <programlisting role="ini" xml:id="yaf.application.ini">
+<![CDATA[
+[product]
+;this one should alway be defined, and have no default value
+application.directory=APPLICATION_PATH
+
+;following configs have default value, you may no need to define them
+application.library = APPLICATION_PATH . "/library"
+application.dispatcher.throwException=1
+application.dispatcher.catchException=1
+
+application.baseUri=""
+
+;the php script ext name
+ap.ext=php
+
+;the view template ext name
+ap.view.ext=phtml
+
+ap.dispatcher.defaultModuel=Index
+ap.dispatcher.defaultController=Index
+ap.dispatcher.defaultAction=index
+
+;defined modules
+ap.modules=Index
+]]>
+       </programlisting>
+      </example>
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><parameter>envrion</parameter></term>
+    <listitem>
+     <para>
+      Which section will be loaded as the final config
+     </para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <example>
+   <title><function>Yaf_Application::__construct</function>example</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+defined('APPLICATION_PATH')                  // APPLICATION_PATH will be used in the ini config file
+    || define('APPLICATION_PATH', __DIR__)); //__DIR__ was introduced after PHP 5.3
+
+$application = new Yaf_Application(APPLICATION_PATH.'/conf/application.ini');
+$application->bootstrap()->run();
+?>
+]]>
+   </programlisting>
+   &example.outputs.similar;
+   <screen>
+<![CDATA[
+]]>
+   </screen>
+  </example>
+  <example>
+   <title><function>Yaf_Application::__construct</function>example</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+$config = array(
+    "application" => array(
+        "directory" => realpath(dirname(__FILE__)) . "/application",
+    ),
+);
+
+/** Yaf_Application */
+$application = new Yaf_Application($config);
+$application->bootstrap()->run();
+?>
+]]>
+   </programlisting>
+   &example.outputs.similar;
+   <screen>
+<![CDATA[
+]]>
+   </screen>
+  </example>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <simplelist>
+   <member><classname>Yaf_Config_Ini</classname></member>
+  </simplelist>
+ </refsect1>
+
+</refentry>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
