@@ -19,8 +19,6 @@
 
   </para>
 
-  &warn.undocumented.func;
-
  </refsect1>
 
  <refsect1 role="parameters">
@@ -30,7 +28,7 @@
     <term><parameter>match</parameter></term>
     <listitem>
      <para>
-       一个正则表达式，会被用来匹配一个请求的uri，如果匹配失败，<classname>Yaf_Route_Rewrite</classname> 会返回FALSE。
+       一个类似正则表达式，会被用来匹配一个请求的uri，如果匹配失败，<classname>Yaf_Route_Rewrite</classname> 会返回FALSE。
      </para>
     </listitem>
    </varlistentry>
@@ -134,6 +132,50 @@ array(
    <screen>
 <![CDATA[
 /* for http://yourdomain.com/user-list/22
+ * route will result in following values:
+ */
+array(
+  "controller" => "user",
+  "action"     => "list",
+  "module"     => "index", //(default)
+)
+
+/**
+ * and request parameters:
+ */
+array(
+  "id"   => 22,
+)
+]]>
+   </screen>
+  </example>
+  <example>
+   <title><function>Yaf_Route_Rewrite</function>example</title>
+   <programlisting role="php">
+<![CDATA[
+    <?php
+   /**
+    * 使用动态结果作为action名
+    */
+    $config = array(
+        "name" => array(
+           "type"  => "rewrite",        //Yaf_Route_Rewrite route
+           "match" => "/user-list/:a/:id", //match only /user-list/开头的
+           "route" => array(
+               'controller' => "user",  //route to user controller,
+               'action'     => ":a",  //使用动态的action
+           ),
+        ),
+    );
+    Yaf_Dispatcher::getInstance()->getRouter()->addConfig(
+        new Yaf_Config_Simple($config));
+?>
+]]>
+   </programlisting>
+   &example.outputs.similar;
+   <screen>
+<![CDATA[
+/* for http://yourdomain.com/user-list/list/22
  * route will result in following values:
  */
 array(
