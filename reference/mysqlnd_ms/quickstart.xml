@@ -1,0 +1,1780 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision$ -->
+<!-- EN-Revision: 0761e9d5e4a1130b2ed91b72fe661275f5ee6502 Maintainer: 谢毅斌 Status: ready -->
+<!-- Reviewed: no -->
+
+<chapter xml:id="mysqlnd-ms.quickstart" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <title>快速入门与例子</title>
+ <para>
+  mysqlnd 是非常容易使用的 MySQL 主从复制负载均衡插件.
+  这里可以给出一些标准的用户使用 DEMO， 和开始使用时的实用建议.
+ </para>
+ <para>
+  我们强烈建议您阅读相关在 Quickstart 中的相关章节. 这里可以避免再理论、
+  概念和限制等方便的混淆. 我们力劝您一定要阅读相关说明章节中的背景信息, 
+  以避免再实际使用过程中遇到严重的问题.
+ </para>
+ <para>
+  插件主要工作于异步 MySQL Cluster 使用 PECL mysqlnd_ms, 也就是 
+  MySQL replication (MySQL 主从复制). 一般来说，使用主从复制要比同步的 
+  MySQL Cluster 要复杂，难用. 所以这里能够为使用 MySQL Cluster 的用户提供更多的信息.
+ </para>
+ <section xml:id="mysqlnd-ms.quickstart.configuration">
+  <title>Setup</title>
+  <para>
+   插件是一个 PHP 的扩展, 可以查看 <link linend="mysqlnd-ms.installation">installation instructions</link> 
+   学习如何安装 <link xlink:href="&url.pecl.package;myqlnd_ms">PECL/mysqlnd_ms</link> 扩展.
+  </para>
+  <para>
+   插件是 <link linkend="book.mysqlnd">mysqlnd</link> 的一部分， 
+   <link linkend="book.mysqlnd">mysqlnd</link> 需要使用一些 PHP MySQL 扩展 (API) 
+   (<link linkend="ref.mysqli">mysqli</link>, 
+   <link linkend="ref.pdo-mysql">PDO_MYSQL</link>, 
+   <link linkend="ref.mysql">mysql</link>).
+  </para>
+  <para>
+   然后，在 PHP 配置文件中装载和激活插件的使用 <link linkend="ini.mysqlnd-ms.enable">mysqlnd_ms.enable</link>.
+  </para>
+  <para>
+   <example>
+    <title>Enabling the plugin (php.ini)</title>
+    <programlisting role="ini">
+<![CDATA[
+mysqlnd_ms.enable=1
+mysqlnd_ms.config_file=/path/to/mysqlnd_ms_plugin.ini
+]]>
+    </programlisting>
+    </example>
+  </para>
+  <para>
+   插件使用自己的配置文件，他在 
+   <link linkend="ini.mysqlnd-ms.config-file">mysqlnd_ms.config_file</link> 中定义, 
+   需要设定全路径指定到使用的配置文件. 请注意配置文件必须是 WEB 启动用户，
+   通过 PHP 能够读取的文件. 请注意, 从 1.4.0 版本开始配置文件变量使用 
+   <link linkend="ini.mysqlnd-ms.config-file">mysqlnd_ms.config_file</link>, 
+   以前的 <link linkend="ini.mysqlnd-ms.ini-file">mysqlnd_ms.ini_file</link> 不在使用. 
+  </para>
+  <para>
+   在 <link linend="inimysqlnd-ms.config-file">mysqlnd_ms.config_file</link> 
+   指定的目录中，创建保存插件的配置文件.
+  </para>
+  <para>
+   插件的配置文件采用 <link linkend="mysqlnd-ms.plugin-ini-json">configuration file</link> 格式,
+   配置写在一个或者多个章节中. 每个章节都包含一个名称, 例如: <literal>myapp</literal>. 
+   每个章节包含自己的配置信息.
+  </para>
+  <para>
+    一个章节的配置中，至少要包含 MySQL 主从复制中的 master 服务器和相关 slave 服务器,
+   每个章节只能使用一个 master 服务器. 目前还不能包含多 master 设定.
+   <link linkend="ini.mysqlnd-ms-plugin-config-v3.master">master</link> 用于设定 hostname,
+   port socket 用于设定 MySQL master 服务器信息. MySQL slave 服务器信息使用
+   <link linkend="ini.mysqlnd-ms-plugin-config-v2.slave">slave</link> 设定.
+  </para>
+  <para>
+   <example>
+    <title>最小化的插件配置文件 (mysqlnd_ms_plugin.ini)</title>
+    <programlisting role="ini">
+<![CDATA[
+{
+    "myapp": {
+        "master": {
+            "master_0": {
+                "host": "localhost"
+            }
+        },
+        "slave": [
+
+        ]
+    }
+}
+]]>
+    </programlisting>
+    </example>
+  </para>
+  <para>
+   配置 MySQL slave 服务器列表是必须的，当然他可以是一个空列表. 我们建议至少配置一个 slave 服务器.
+   译者注：请注意上面的方括号，在 JSON 中代表空内容，而不是语法错误。
+  </para>
+  <para>
+   服务器列表可以使用 <link linkend="mysqlnd-ms.plugin-ini-json.server-list-syntax">匿名或者命名语法</link>.
+   命名列表包含一个别名, 例如 <literal>master_0</literal> 可以用于上面的例子中的别名. 
+   在这里的帮助中, 将使用大量的命名语法.
+  </para>
+  <para>
+   <example>
+    <title>建议的插件配置文件 (mysqlnd_ms_plugin.ini)</title>
+    <programlisting role="ini">
+<![CDATA[
+{
+    "myapp": {
+        "master": {
+            "master_0": {
+                "host": "localhost",
+                "socket": "\/tmp\/mysql.sock"
+            }
+        },
+        "slave": {
+            "slave_0": {
+                "host": "192.168.2.27",
+                "port": "3306"
+            }
+        }
+    }
+}
+]]>
+    </programlisting>
+    </example>
+  </para>
+  <para>
+   如果这里至少有 2 个服务器, 插件可以进行负载均衡, 并且切换连接. 切换链接并不是透明化的,
+   并且可能引起必然的事件. 本参考中包含
+   <link linkend="mysqlnd-ms.pooling">connection pooling and switching</link>,
+   <link linkend="mysqlnd-ms.transaction">transaction handling</link>,
+   <link linkend="mysqlnd-ms.failover">fail over</link>
+   <link linkend="mysqlnd-ms.loadbalancing">load balancing</link> 和
+   <link linkend="mysqlnd-ms.rwsplit">read-write splitting</link> 可以提供更多的帮助信息.
+  </para>
+  <para>
+   设置至少一个 master 和一个 slave, 应用负责连接切换.
+  </para>
+  <para>
+   配置中的 master 和 slave 不一定是一个 MySQL 主从同步的一部分. 
+   为了测试, 你可以使用一个数据库服务器, 像如下的设定, 这样可以进行连接切换测试. 
+   然而, 这样的设定, 将不会受到真正主从同步的延迟影响.
+  </para>
+  <para>
+   <example>
+    <title>使用一个服务器同时作为 master 和 slave (testing only!)</title>
+    <programlisting role="ini">
+<![CDATA[
+{
+    "myapp": {
+        "master": {
+            "master_0": {
+                "host": "localhost",
+                "socket": "\/tmp\/mysql.sock"
+            }
+        },
+        "slave": {
+            "slave_0": {
+                "host": "127.0.0.1",
+                "port": "3306"
+            }
+        }
+    }
+}
+]]>
+    </programlisting>
+    </example>
+  </para>
+  <para>
+   插件将尝试通知你不合理的配置. 从 1.5.0 版本开始, 下列情况它抛出一个 PHP warning, 
+   配置文件不可读; 空配置或者 JSON 配置语法错误. 通过 PHP 本身的配置，可能这些报警信息
+   会被放置在某些错误 LOG 文件当中。在验证完毕后，通过配置文件中有效的章节，连接会被建立。
+   设置 <link linkend="ini.mysqlnd-ms.fore-config-usage">mysqlnd_ms.force_config_usage</link>
+   可以帮助你进行 DEBUG。可以参考 <link linkend="mysqlnd-ms.plugin-ini-json.debug_config">配置文件 DEBUG 说明</link>.
+  </para>
+
+ </section>
+
+ <section xml:id="mysqlnd-ms.quickstart.usage">
+  <title>Running statements</title>
+  <para>
+   这个插件可以配合
+   (<link linkend="ref.mysqli">mysqli</link>,
+   <link linkend="ref.mysql">mysql</link>, 和
+   <link linkend="ref.pdo-mysql">PDO_MYSQL</link>) 使用,
+   他们都是基于 <link linkend="book.mysqlnd">mysqlnd</link> library 工作的。
+   PECL/mysqlnd_ms 插件是 <link linkend="book.mysqlnd">mysqlnd</link> library 的一部分, 
+   他并不改变这些扩展的 API 或者行为。
+  </para>
+  <para>
+   当 MySQL 链接打开的时候，插件会在配置文件中根据章节设定匹配 host 参数。
+   例如，插件配置文件中指定 <literal>myapp</literal>，那么可以使用 <literal>myapp</literal> 作为 host 打开 MySQL 链接。
+  </para>
+  <para>
+   <example>
+    <title>插件指定的配置文件 (mysqlnd_ms_plugin.ini)</title>
+    <programlisting role="ini">
+<![CDATA[
+{
+    "myapp": {
+        "master": {
+            "master_0": {
+                "host": "localhost",
+                "socket": "\/tmp\/mysql.sock"
+            }
+        },
+        "slave": {
+            "slave_0": {
+                "host": "192.168.2.27",
+                "port": "3306"
+            }
+        }
+    }
+}
+]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   <example>
+    <title>开启一个负载均衡链接</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+/* 根据配置针对 myapp 开启一个负载均衡的链接 */
+$mysqli = new mysqli("myapp", "username", "password", "database");
+$pdo = new PDO('mysql:host=myapp;dbname=database', 'username', 'password');
+$mysql = mysql_connect("myapp", "username", "password");
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   上面的连接范例是负载均衡方式的。插件将发送只读查询给 <literal>192.168.2.27</literal>
+   端口 <literal>3306</literal>。其他的所有查询，将发送给 <literal>localhost</literal> 
+   指定的 master 服务器。在 Linux 设备中， <literal>/tmp/mysql.sock</literal> 
+   指定了本机的 MySQL 服务；在 Windows 系统中将使用默认的 TCP/IP 通讯。
+   插件将使用 <literal>username</literal> 和 <literal>password</literal> 连接任何一个
+   在 <literal>myapp</literal> 章节中指定的数据库。在连接以后，将选择 
+   <literal>database</literal> 设定的数据库作为当前操作数据库。
+  </para>
+  <para>
+   username, password 和默认数据库将在所有设定的数据库中做统一设定。
+   换句话说，就是所有的数据库必须使用同样的用户名口令登录。
+   从 1.1.0 版本以后，这个限制将不再存在，可以针对任何一个服务器通过
+   <link linkend="mysqlnd-ms.plugin-ini-json.server-config-keywords">username</link> 和
+   <link linkend="mysqlnd-ms.plugin-ini-json.server-config-keywords">password</link>
+   进行登录鉴权设定。
+  </para>
+  <para>
+   插件在不改变查询结构的基础上，提供 <link linkend="mysqlnd-ms.rwsplit">读写分离</link>。
+   下面的范例假定 master 和 slave 之间并没有很大的延迟。
+  </para>
+  <para>
+   <example>
+    <title>Executing statements</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+/* myapp 负载均衡设定 */
+$mysqli = new mysqli("myapp", "username", "password", "database");
+if (mysqli_connect_errno())
+  /* Of course, your error handling is nicer... */
+  die(sprintf("[%d] %s\n", mysqli_connect_errno(), mysqli_connect_error()));
+
+/* 查询将在 master 上运行 */
+if (!$mysqli->query("DROP TABLE IF EXISTS test")) {
+ printf("[%d] %s\n", $mysqli->errno, $mysqli->error);
+}
+if (!$mysqli->query("CREATE TABLE test(id INT)")) {
+ printf("[%d] %s\n", $mysqli->errno, $mysqli->error);
+}
+if (!$mysqli->query("INSERT INTO test(id) VALUES (1)")) {
+ printf("[%d] %s\n", $mysqli->errno, $mysqli->error);
+}
+
+/* 只读查询将在 slave 上运行 */
+if (!($res = $mysqli->query("SELECT id FROM test")) {
+ printf("[%d] %s\n", $mysqli->errno, $mysqli->error);
+} else {
+ $row = $res->fetch_assoc();
+ $res->close();
+ printf("Slave returns id = '%s'\n", $row['id'];
+}
+$mysqli->close();
+?>
+]]>
+    </programlisting>
+    &example.outputs.similar;
+    <screen>
+<![CDATA[
+Slave returns id = '1'
+]]>
+    </screen>
+   </example>
+  </para>
+ </section>
+
+ <section xml:id="mysqlnd-ms.quickstart.connectionpooling">
+  <title>连接状态</title>
+  <para>
+   插件改变了 PHP MySQL 连接的控制，新建连接会从一个连接池中获取，用于替代 client-server
+   的单一连接方式。连接池包含一组 master 连接，和可选数目的 slave 连接。
+  </para>
+  <para>
+   连接池中的每一个连接都有自己的状态，例如：SQL 用户变量、临时表、事物状态。
+   所有的链接状态可以参考 <link linkend="mysqlnd-ms.pooling">连接池与切换</link> 说明。
+   如果插件决定要为负载均衡切换连接，应用可能得到一个不同状态的链接。
+   应用必须能够处理这些问题。
+  </para>
+  <para>
+   <example>
+    <title>配置了一个 master 和一个 slave 的插件</title>
+    <programlisting role="ini">
+<![CDATA[
+{
+    "myapp": {
+        "master": {
+            "master_0": {
+                "host": "localhost",
+                "socket": "\/tmp\/mysql.sock"
+            }
+        },
+        "slave": {
+            "slave_0": {
+                "host": "192.168.2.27",
+                "port": "3306"
+            }
+        }
+    }
+}
+]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   <example>
+    <title>陷阱：连接状态和 SQL 用户变量</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$mysqli = new mysqli("myapp", "username", "password", "database");
+if (!$mysqli)
+  /* Of course, your error handling is nicer... */
+  die(sprintf("[%d] %s\n", mysqli_connect_errno(), mysqli_connect_error()));
+
+/* 链接 1：绑定 SQL 用户变量，因为没有 SELECT 所以在 master 上执行 */
+if (!$mysqli->query("SET @myrole='master'")) {
+ printf("[%d] %s\n", $mysqli->errno, $mysqli->error);
+}
+
+/* 连接 2：因为有 SELECT 所以在 slave 上执行 */
+if (!($res = $mysqli->query("SELECT @myrole AS _role"))) {
+ printf("[%d] %s\n", $mysqli->errno, $mysqli->error);
+} else {
+ $row = $res->fetch_assoc();
+ $res->close();
+ printf("@myrole = '%s'\n", $row['_role']);
+}
+$mysqli->close();
+?>
+]]>
+    </programlisting>
+&example.outputs;
+    <screen>
+<![CDATA[
+@myrole = ''
+]]>
+    </screen>
+   </example>
+  </para>
+  <para>
+   范例打开了负载均衡连接，并且执行两个查询。
+   第一个查询 <literal>SET @myrole='master'</literal> 没有以 <literal>SELECT</literal>
+   开头。然而并不能识别这是一个应该在 slave 中执行的查询，所以他被在 master 中执行。
+   所以这个变量被绑定在 master 连接中，master 连接设定被改变了。
+  </para>
+  <para>
+   然后执行 <literal>SELECT @myrole AS _role</literal> 查询，差将将其识别为只读查询，
+   并且发送给 slave 服务器。这样这个查询不会获得任何已经设定的 SQL 用户变量。
+   这个变量被设定在了第一次使用的 master 连接上面。所以范例将打印
+   <literal>@myrole = ''</literal>。
+  </para>
+  <para>
+   这是开发人员必须注意的问题，插件并不会监控所有连接的变化情况。
+   若要监控所有的变化，将消耗大量的 CPU 资源。
+  </para>
+  <para>
+   当然这种陷阱，可以通过 SQL hints 解决。
+  </para>
+  </section>
+
+ <section xml:id="mysqlnd-ms.quickstart.sqlhints">
+  <title>SQL Hints (SQL 优化器)</title>
+  <para>
+   SQL 优化器可以强行指定连接池中特定的链接。可以给定插件一个优化器去使用特定的服务器连接，
+   这样可以解决由于链接切换引起的链接状态变化问题。
+  </para>
+  <para>
+   SQL hints 是基于 SQL 语句的。因为 SQL 注释会被 SQL 执行器忽略，
+   他并不会妨碍 MySQL 服务器、MySQL proxy 或者任何防火墙的工作。
+  </para>
+  <para>
+   插件支持 SQL hints，<constant>MYSQLND_MS_MASTER_SWITCH</constant> hints
+   可以指定语句在 master 上运行，<constant>MYSQLND_MS_SLAVE_SWITCH</constant>
+   可以指定在 slave 上运行，<constant>MYSQLND_MS_LAST_USED_SWITCH</constant>
+   可以指定语句在上一条语句执行的 slave 上运行。
+  </para>
+  <para>
+   插件会扫描语句的内容，查询是否有 SQL hints。他只能在语句的开头被识别。
+  </para>
+   <para>
+   <example>
+    <title>配置一个 master 和一个 slave 的插件</title>
+    <programlisting role="ini">
+<![CDATA[
+{
+    "myapp": {
+        "master": {
+            "master_0": {
+                "host": "localhost",
+                "socket": "\/tmp\/mysql.sock"
+            }
+        },
+        "slave": {
+            "slave_0": {
+                "host": "192.168.2.27",
+                "port": "3306"
+            }
+        }
+    }
+}
+]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   <example>
+    <title>SQL hints 禁止连接切换</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$mysqli = new mysqli("myapp", "username", "password", "database");
+if (mysqli_connect_errno())
+  /* Of course, your error handling is nicer... */
+  die(sprintf("[%d] %s\n", mysqli_connect_errno(), mysqli_connect_error()));
+
+/* 连接 1：设置一个 SQL 用户变量，没有 SELECT 所以运行在 master 上 */
+if (!$mysqli->query("SET @myrole='master'")) {
+ printf("[%d] %s\n", $mysqli->errno, $mysqli->error);
+}
+
+/* 连接 1：因为指定了 SQL hint */
+if (!($res = $mysqli->query(sprintf("/*%s*/SELECT @myrole AS _role", MYSQLND_MS_LAST_USED_SWITCH)))) {
+ printf("[%d] %s\n", $mysqli->errno, $mysqli->error);
+} else {
+ $row = $res->fetch_assoc();
+ $res->close();
+ printf("@myrole = '%s'\n", $row['_role']);
+}
+$mysqli->close();
+?>
+]]>
+    </programlisting>
+&example.outputs;
+    <screen>
+<![CDATA[
+@myrole = 'master'
+]]>
+    </screen>
+   </example>
+  </para>
+  <para>
+   上面的范例使用 <constant>MYSQLND_MS_LASTER_USED_SWITCH</constant> 来防止在 master
+   和 slave 之间进行切换，即使运行了 <literal>SELECT</literal> 开头的语句。
+  </para>
+  <para>
+   SQL hints 也可以用于在 master 上运行 <literal>SELECT</literal> 语句。
+   这经常发生于 slave 中的数据落后于 master，但是希望获取当前数据的时候。
+  </para>
+  <para>
+   在 1.2.0 版本中，引入了服务级别的概念，用于处理即时数据获取的问题。
+   使用服务级别，可以降低对这个问题的关注，替代 SQL hints 的使用。
+   可以在服务级别和一致性的章节中找到更多的说明。
+  </para>
+  <para>
+   <example>
+    <title>与同步延迟斗争</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$mysqli = new mysqli("myapp", "username", "password", "database");
+if (!$mysqli)
+  /* Of course, your error handling is nicer... */
+  die(sprintf("[%d] %s\n", mysqli_connect_errno(), mysqli_connect_error()));
+
+/* Force use of master, master has always fresh and current data */
+if (!$mysqli->query(sprintf("/*%s*/SELECT critical_data FROM important_table", MYSQLND_MS_MASTER_SWITCH))) {
+ printf("[%d] %s\n", $mysqli->errno, $mysqli->error);
+}
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   在使用中，slave 中应该有同样的表单。当没有给定 SQL hints 的时候，插件在发送
+   <literal>CREATE</literal> <literal>INSERT</literal> 语句到 master 服务器。
+   可以通过设定 <constant>MYSQLND_MS_SLAVE_SWITCH</constant> 来让这些语句在 
+   slave 中运行。例如建立一个临时表单：
+  </para>
+  <para>
+   <example>
+    <title>Table creation on a slave</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$mysqli = new mysqli("myapp", "username", "password", "database");
+if (!$mysqli)
+  /* Of course, your error handling is nicer... */
+  die(sprintf("[%d] %s\n", mysqli_connect_errno(), mysqli_connect_error()));
+
+/* 强迫在 slave 运行 */
+if (!$mysqli->query(sprintf("/*%s*/CREATE TABLE slave_reporting(id INT)", MYSQLND_MS_SLAVE_SWITCH))) {
+ printf("[%d] %s\n", $mysqli->errno, $mysqli->error);
+}
+/* 使用刚刚使用的 slave 连接 */
+if (!$mysqli->query(sprintf("/*%s*/INSERT INTO slave_reporting(id) VALUES (1), (2), (3)", MYSQLND_MS_LAST_USED_SWITCH))) {
+ printf("[%d] %s\n", $mysqli->errno, $mysqli->error);
+}
+/* 不使用 MYSQLND_MS_SLAVE_SWITCH 将会切换到另外一台 slave */
+if ($res = $mysqli->query(sprintf("/*%s*/SELECT COUNT(*) AS _num FROM slave_reporting", MYSQLND_MS_LAST_USED_SWITCH))) {
+  $row = $res->fetch_assoc();
+  $res->close();
+  printf("There are %d rows in the table 'slave_reporting'", $row['_num']);
+} else {
+  printf("[%d] %s\n", $mysqli->errno, $mysqli->error);
+}
+$mysqli->close();
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   SQL hint <constant>MYSQLND_MS_LAST_USED</constant> 禁止切换连接，
+   他将使用上一次使用的链接。
+  </para>
+ </section>
+
+ <section xml:id="mysqlnd-ms.quickstart.transactions">
+  <title>事务</title>
+  <para>
+   当前版本的插件并不是事务安全的，因为他并没有识别全部的事务操作。
+   SQL 事务单元是在单一服务器中运行的。插件并不能有效的知道事务单元
+   何时开始，何时终止。所以，在事务单元中，可能数据库连接会被切换。
+  </para>
+  <para>
+   如果应用没有设定事务单元编辑，那么没有任何 MySQL 负载均衡能够检测他。
+  </para>
+  <para>
+   可以通过 SQL hints 来解除这个限制。可以选择性的调用事务 API 进行监控，
+   然后嗲用 API 执行控制事务。下面给出范例：
+  </para>
+  <para>
+   <example>
+    <title>配置一个 master 和一个 slave 的插件</title>
+    <programlisting role="ini">
+<![CDATA[
+[myapp]
+{
+    "myapp": {
+        "master": {
+            "master_0": {
+                "host": "localhost",
+                "socket": "\/tmp\/mysql.sock"
+            }
+        },
+        "slave": {
+            "slave_0": {
+                "host": "192.168.2.27",
+                "port": "3306"
+            }
+        }
+    }
+}
+]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   <example>
+    <title>在事务中使用 SQL hints</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$mysqli = new mysqli("myapp", "username", "password", "database");
+if (!$mysqli)
+  /* Of course, your error handling is nicer... */
+  die(sprintf("[%d] %s\n", mysqli_connect_errno(), mysqli_connect_error()));
+
+/* 不是 SELECT 开头，所以使用 master */
+if (!$mysqli->query("START TRANSACTION")) {
+ /* Please use better error handling in your code */
+ die(sprintf("[%d] %s\n", $mysqli->errno, $mysqli->error));
+}
+
+/* 禁止连接切换*/
+if (!$mysqli->query(sprintf("/*%s*/INSERT INTO test(id) VALUES (1)", MYSQLND_MS_LAST_USED_SWITCH)))) {
+ /* Please do proper ROLLBACK in your code, don't just die */
+ die(sprintf("[%d] %s\n", $mysqli->errno, $mysqli->error));
+}
+if ($res = $mysqli->query(sprintf("/*%s*/SELECT COUNT(*) AS _num FROM test", MYSQLND_MS_LAST_USED_SWITCH)))) {
+  $row = $res->fetch_assoc();
+  $res->close();
+  if ($row['_num'] > 1000) {
+   if (!$mysqli->query(sprintf("/*%s*/INSERT INTO events(task) VALUES ('cleanup')", MYSQLND_MS_LAST_USED_SWITCH)))) {
+     die(sprintf("[%d] %s\n", $mysqli->errno, $mysqli->error));
+   }
+  }
+} else {
+ die(sprintf("[%d] %s\n", $mysqli->errno, $mysqli->error));
+}
+if (!$mysqli->query(sprintf("/*%s*/UPDATE log SET last_update = NOW()", MYSQLND_MS_LAST_USED_SWITCH)))) {
+ die(sprintf("[%d] %s\n", $mysqli->errno, $mysqli->error));
+}
+if (!$mysqli->query(sprintf("/*%s*/COMMIT", MYSQLND_MS_LAST_USED_SWITCH)))) {
+ die(sprintf("[%d] %s\n", $mysqli->errno, $mysqli->error));
+}
+
+$mysqli->close();
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   自从 PHP 5.4.0 版本开始，<literal>mysqlnd</literal> library 允许插件监控
+   <literal>autocommit</literal> 模式下的状态，例如调用 <literal>SET AUTOCOMMIT=0</literal>
+   这样的语句，这将让插件开始关心事务处理。这样你就可以不用使用 SQl hints。
+  </para>
+  <para>
+   从 PHP 5.4.0 版本开始，调用 API <literal>autocommit</literal> 模式，插件设定中有
+   <link linkend="ini.mysqlnd-ms-plugin-config-v2.trx-stickiness">trx_stickiness=master</link>，
+   那么插件将在事务中自动禁止负载均衡和连接切换。在 <literal>autocommit</literal> 禁用的配置当中，
+   插件将在事务过程中将所有的语句发送给 master，禁用负载均衡。当 <literal>autocommit</literal>
+   重新启用以后，插件将重新开始负载均衡所有的语句。
+  </para>
+   <para>
+    在 PHP 5.5.0 和 PECL/mysqlnd_ms 1.5.0 版本后，这种检查将不仅仅检查
+    <function>mysqli_autocommit</function> 还会检查 <function>mysql_commit</function> 和
+    <function>mysql_rollback</function>。
+  </para>
+  <para>
+   <example>
+    <title>事务相关负载均衡下的 trx_stickiness 设置</title>
+    <programlisting role="ini">
+<![CDATA[
+{
+    "myapp": {
+        "master": {
+            "master_0": {
+                "host": "localhost",
+                "socket": "\/tmp\/mysql.sock"
+            }
+        },
+        "slave": {
+            "slave_0": {
+                "host": "127.0.0.1",
+                "port": "3306"
+            }
+        },
+        "trx_stickiness": "master"
+    }
+}
+]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   <example>
+    <title>Transaction aware</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$mysqli = new mysqli("myapp", "username", "password", "database");
+if (!$mysqli)
+  /* Of course, your error handling is nicer... */
+  die(sprintf("[%d] %s\n", mysqli_connect_errno(), mysqli_connect_error()));
+
+/* 禁用 autocommit，插件将所有语句发送给 master */
+$mysqli->autocommit(FALSE);
+
+if (!$mysqli->query("INSERT INTO test(id) VALUES (1)")) {
+ /* Please do proper ROLLBACK in your code, don't just die */
+ die(sprintf("[%d] %s\n", $mysqli->errno, $mysqli->error));
+}
+if ($res = $mysqli->query("SELECT COUNT(*) AS _num FROM test")) {
+  $row = $res->fetch_assoc();
+  $res->close();
+  if ($row['_num'] > 1000) {
+   if (!$mysqli->query("INSERT INTO events(task) VALUES ('cleanup')")) {
+     die(sprintf("[%d] %s\n", $mysqli->errno, $mysqli->error));
+   }
+  }
+} else {
+ die(sprintf("[%d] %s\n", $mysqli->errno, $mysqli->error));
+}
+if (!$mysqli->query("UPDATE log SET last_update = NOW()")) {
+ die(sprintf("[%d] %s\n", $mysqli->errno, $mysqli->error));
+}
+if (!$mysqli->commit()) {
+ die(sprintf("[%d] %s\n", $mysqli->errno, $mysqli->error));
+}
+
+/* 插件判定事务终止，重新启用负载均衡 */
+$mysqli->autocommit(TRUE);
+$mysqli->close();
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+  <note>
+   <title>版本需求</title>
+   <para>
+    <link linkend="ini.mysqlnd-ms-plugin-config-v2.trx-stickiness">trx_stickiness=master</link>
+    参数需要 PHP 5.4.0 以上版本。
+   </para>
+  </note>
+  <para>
+   可以参考相关限制在 
+   <link linkend="mysqlnd-ms.transaction">transaction handling</link> 章节中。
+  </para>
+ </section>
+ <section xml:id="mysqlnd-ms.quickstart.qos-consistency">
+  <title>服务级别和一致性</title>
+  <note>
+   <title>版本需求</title>
+   <para>
+    服务级别是从 1.2.0-alpha版本引入的，<function>mysqlnd_ms_set_qos</function>
+    从 PHP 5.4.0 版本开始可以使用。
+   </para>
+  </note>
+  <para>
+   不同类型的 MySQL 群组提供了，不同的服务和数据一致性级别。异步的 MySQL 主从同步
+   提供最终的数据一致性，一个读操作是否能够得到当前的数据、状态，一类与 slave
+   是否已经从 master 获取了最后的更新。
+  </para>
+  <para>
+   使用 MySQL 主从同步依赖于网络的有效性，最终会获得数据的一致性。然而，
+   状态数据是不能同步的。这样，只有指定的 slave 或者 master 连接才能得到所有内容。
+  </para>
+  <para>
+   从 1.2.0 版本开始，插件能够自动的进行 MySQL 主从同步的节点，来完成 session 一致性
+   或者完成很强的一致性要求。session 一致性是指一个客户端可以读取他的写入内容，
+   其他客户端可能不能看到他的写入内容。很强的一致性要求是指所有客户端都能够看到
+   其他所有客户端的写入内容。
+  </para>
+  <para>
+   <example>
+    <title>session 一致性：读取写入内容</title>
+    <programlisting role="ini">
+<![CDATA[
+{
+    "myapp": {
+        "master": {
+            "master_0": {
+                "host": "localhost",
+                "socket": "\/tmp\/mysql.sock"
+            }
+        },
+        "slave": {
+            "slave_0": {
+                "host": "127.0.0.1",
+                "port": "3306"
+            }
+        }
+    }
+}
+]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   <example>
+    <title>Requesting session consistency</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$mysqli = new mysqli("myapp", "username", "password", "database");
+if (!$mysqli)
+  /* Of course, your error handling is nicer... */
+  die(sprintf("[%d] %s\n", mysqli_connect_errno(), mysqli_connect_error()));
+
+/* 使用 master 完成读写分离 */
+if (!$mysqli->query("INSERT INTO orders(order_id, item) VALUES (1, 'christmas tree, 1.8m')")) {
+   /* Please use better error handling in your code */
+  die(sprintf("[%d] %s\n", $mysqli->errno, $mysqli->error));
+}
+
+/* 要求 session 一致性，读取写入内容 */
+if (!mysqlnd_ms_set_qos($mysqli, MYSQLND_MS_QOS_CONSISTENCY_SESSION))
+  die(sprintf("[%d] %s\n", $mysqli->errno, $mysqli->error));
+
+/* 插件选择一个改变数据的节点，这里是 master */
+if (!$res = $mysqli->query("SELECT item FROM orders WHERE order_id = 1"))
+  die(sprintf("[%d] %s\n", $mysqli->errno, $mysqli->error));
+
+var_dump($res->fetch_assoc());
+
+/* 返回到最终数据一致性状态，允许陈旧数据 */
+if (!mysqlnd_ms_set_qos($mysqli, MYSQLND_MS_QOS_CONSISTENCY_EVENTUAL))
+  die(sprintf("[%d] %s\n", $mysqli->errno, $mysqli->error));
+
+/* 插件选择任何一个 slaver 完成允许陈旧数据的读取 */
+if (!$res = $mysqli->query("SELECT item, price FROM specials"))
+  die(sprintf("[%d] %s\n", $mysqli->errno, $mysqli->error));
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   服务级别可以被写在插件的配置文件中，也可以在运行时使用 <function>mysqlnd_ms_set_qos</function> 设定。
+   在范例中，使用这个函数强制 session 一致性，直到再次通知改变。
+   <literal>orders</literal> 表单中的 <literal>SELECT</literal> 语句在前面写入使用的
+   连接中执行。读写分离逻辑被服务级别策略改变。
+  </para>
+  <para>
+   在从 <literal>orders</literal> 表单读取数据以后，恢复到默认的服务级别 (最终数据一致性)。
+   这时，语句执行选择的服务器将不再被限制，因而在 <literal>specials</literal> 表单上做的
+   <literal>SELECT</literal> 查询将在一个 slave 服务器中进行。
+  </para>
+  <para>
+   一个新的替代 SQL hint的功能，<literal>master_on_write</literal> 配置设定。
+   在绝大部分情况下 <function>mysqlnd_ms_set_qos</function> 更容易使用，
+   使用它移植性更好。
+  </para>
+  <para>
+   <example>
+    <title>Maximum age/slave lag</title>
+    <programlisting role="ini">
+<![CDATA[
+{
+    "myapp": {
+        "master": {
+            "master_0": {
+                "host": "localhost",
+                "socket": "\/tmp\/mysql.sock"
+            }
+        },
+        "slave": {
+            "slave_0": {
+                "host": "127.0.0.1",
+                "port": "3306"
+            }
+        },
+        "failover" : "master"
+    }
+}
+]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   <example>
+    <title>限制 slave 延迟</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$mysqli = new mysqli("myapp", "username", "password", "database");
+if (!$mysqli)
+  /* Of course, your error handling is nicer... */
+  die(sprintf("[%d] %s\n", mysqli_connect_errno(), mysqli_connect_error()));
+
+/* 若 slave 延迟不超过 4 秒，则从 Slave 读取 */
+$ret = mysqlnd_ms_set_qos($mysqli,
+         MYSQLND_MS_QOS_CONSISTENCY_EVENTUAL,
+         MYSQLND_MS_QOS_OPTION_AGE, 4);
+
+if (!$ret)
+  die(sprintf("[%d] %s\n", $mysqli->errno, $mysqli->error));
+
+/* 选择一个 slave，他可能没有改变 */
+if (!$res = $mysqli->query("SELECT item, price FROM daytrade"))
+  die(sprintf("[%d] %s\n", $mysqli->errno, $mysqli->error));
+
+
+/* 恢复默认状态，使用所有的 slave 和 master */
+if (!mysqlnd_ms_set_qos($mysqli, MYSQLND_MS_QOS_CONSISTENCY_EVENTUAL))
+  die(sprintf("[%d] %s\n", $mysqli->errno, $mysqli->error));
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   最终一致性服务级别可以使用一个可选的参数设定最大允许的延迟，用于选择 slave。
+   如果设定这个值，插件会检查所有 slave 的 <literal>SHOW SLAVE STATUS</literal>。
+   在范例中，只有满足 <literal>Slave_IO_Running=Yes</literal>,
+   <literal>Slave_SQL_Running=Yes</literal> 和
+   <literal>Seconds_Behind_Master &lt;= 4</literal> 的 slave
+   会被执行语句 <literal>SELECT item, price FROM daytrade</literal>。  
+  </para>
+  <para>
+   在应用运行时，会透明的执行 <literal>SHOW SLAVE STATUS</literal> 命令。
+   任何错误会以 warning 的方式报警，但是错误信息不会被保存在连接中。
+   即使所有的 <literal>SHOW SLAVE STATUS</literal> 都失败了，用户的执行请求也不会被终止，
+   给定的 master 作为最后的选择。然而应用不需要做任何调整。
+  </para>
+  <note>
+   <title>耗时和缓慢的操作</title>
+   <para>
+    在任何程序的开始，对所有的 slave 进行 <literal>SHOW SLAVE STATUS</literal> 
+    查询，是一个非常耗时和缓慢的操作。不要经常这样操作。MySQL 主从同步集群并没有
+    提供一个客户端从一个中心控制器获取备选方案的能力。
+    然而，没有更多有效的方式获取 slave 延迟。
+   </para>
+   <para>
+    请注意，关于 <literal>SHOW SLAVE STATUS</literal> 的各种限制和参数说明，
+    请参考 MySQl 的参考手册。
+   </para>
+  </note>
+  <para>
+   若要禁止插件，在没有找到满足延迟条件的 slave 时产生报警，需要在配置文件
+   当中设定 master 作为故障处理。如果没有 slave 满足条件，那么故障处理开始启动，
+   插件会使用 master 去执行语句。
+  </para>
+  <para>
+   如果没有 slave 满足条件，并且没有启动故障处理，插件将会报警。
+   这时，语句不会被执行，并且错误信息会被写入连接当中。
+  </para>
+  <para>
+   <example>
+    <title>不设置故障处理</title>
+    <programlisting role="ini">
+<![CDATA[
+{
+    "myapp": {
+        "master": {
+            "master_0": {
+                "host": "localhost",
+                "socket": "\/tmp\/mysql.sock"
+            }
+        },
+        "slave": {
+            "slave_0": {
+                "host": "127.0.0.1",
+                "port": "3306"
+            }
+        }
+    }
+}
+]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   <example>
+    <title>No slave within time limit</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$mysqli = new mysqli("myapp", "username", "password", "database");
+if (!$mysqli)
+  /* Of course, your error handling is nicer... */
+  die(sprintf("[%d] %s\n", mysqli_connect_errno(), mysqli_connect_error()));
+
+/* 若 slave 延迟不超过 4 秒，则从 slave 执行 */
+$ret = mysqlnd_ms_set_qos($mysqli,
+         MYSQLND_MS_QOS_CONSISTENCY_EVENTUAL,
+         MYSQLND_MS_QOS_OPTION_AGE, 4);
+
+if (!$ret)
+  die(sprintf("[%d] %s\n", $mysqli->errno, $mysqli->error));
+
+/* Plugin picks any slave, which may or may not have the changes */
+if (!$res = $mysqli->query("SELECT item, price FROM daytrade"))
+  die(sprintf("[%d] %s\n", $mysqli->errno, $mysqli->error));
+
+
+/* Back to default: use of all slaves and masters permitted */
+if (!mysqlnd_ms_set_qos($mysqli, MYSQLND_MS_QOS_CONSISTENCY_EVENTUAL))
+  die(sprintf("[%d] %s\n", $mysqli->errno, $mysqli->error));
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+PHP Warning:  mysqli::query(): (mysqlnd_ms) Couldn't find the appropriate slave connection. 0 slaves to choose from. Something is wrong in %s on line %d
+PHP Warning:  mysqli::query(): (mysqlnd_ms) No connection selected by the last filter in %s on line %d
+[2000] (mysqlnd_ms) No connection selected by the last filter
+]]>
+    </screen>
+   </example>
+  </para>
+ </section>
+ <section xml:id="mysqlnd-ms.quickstart.gtid">
+  <title>Global transaction IDs (GTID)</title>
+  <note>
+   <title>版本需求</title>
+   <para>
+    从 1.2.0-alpha 版本开始客户端 GTID 可以使用，这个功能并不需要在同步集群中使用，
+    例如 MySQL Cluster。他用于异步集群，例如 MySQL 主从同步。
+   </para>
+   <para>
+    从 MySQL 5.6.5-m8 版本开始，MySQL 使用内置的 GTID，这需要 1.3.0-alpha 以后版本支持。
+   </para>
+  </note>
+  <para>
+   PECL/mysqlnd_ms 可以使用自己的 GTID 仿真，或者使用 MySQL 内置的 GTID。无论使用哪种方式，
+   对于使用服务级别来说都是一样的。他们的区别，在 <link linkend="mysqlnd-ms.gtid">concepts section</link>
+   进行说明。
+  </para>
+  <para>
+   这里先使用插件内部的 GTID 模拟来展示如何使用服务端的副本。
+  </para>
+  <para>
+   <emphasis role="bold">概念和客户端模拟</emphasis>
+  </para>
+  <para>
+   GTID 是 slave 需要同步的 table 在 master 上基于这个 table 的一个计数器，每当事务提交他都会增加。
+   这个计数器有两个作用，如果 master 产生故障，他帮助数据库管理员确定使用最新的 slave 来
+   恢复新的 master。最新的 slave 就是那个数值最高的。应用可以使用 GTID 查询某一次写入，
+   是否已经在 slave 被同步。
+  </para>
+  <para>
+   插件可以在每次提交事务的时候，增加 GTID。当然这个 GTID 也可以让应用判断写操作是否同步。
+   这样就可以实现在 session 一致性服务级别中，不一定从 master 读取数据，也可以从已经同步
+   的 slave 中获取数据，从而减轻 master 的读负载。
+  </para>
+  <para>
+   客户端 GTID 模拟有一些限制，可以参考 <link linkend="mysqlnd-ms.gtid">concepts section</link>
+   说明。在生产换金钟使用前，请细致全面的理解他的工作原理和概念。相关背景的支持，
+   不在本参考中进行说明。
+  </para>
+  <para>
+   首先在 master 建立一个计数器表，并且插入一条记录。插件并不会帮助你建立这个表，
+   数据库管理员需要帮助你操作。如果表不存在或者有问题，基于错误报告机制，
+   你可能得不到任何错误信息。
+  </para>
+  <para>
+   <example>
+    <title>在 master 创建计数器表</title>
+    <programlisting role="sql">
+<![CDATA[
+CREATE TABLE `trx` (
+  `trx_id` int(11) DEFAULT NULL,
+  `last_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=latin1
+INSERT INTO `trx`(`trx_id`) VALUES (1);
+]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   在插件的配置文件中，需要在 <literal>global_transaction_id_injection</literal>
+   章节中设定 <literal>on_commit</literal> 参数。一定要确认在 
+   <literal>UPDATE</literal> 中使用的表明是可达的，例如：使用上一步创建的表，
+   <literal>test.trx</literal> 要比 <literal>trx</literal> 更合适。
+   这一点非常重要，因为不同的数据库连接，可能的默认数据库选择并不相同。
+   并且确认，使用连接的用户，有权限对这个表执行 <literal>UPDATE</literal>
+   命令。
+  </para>
+  <para>
+   当 GTID 更新时，打开错误报告。
+  </para>
+  <para>
+   <example>
+    <title>Plugin config: SQL for client-side GTID injection</title>
+    <programlisting role="ini">
+<![CDATA[
+{
+    "myapp": {
+        "master": {
+            "master_0": {
+                "host": "localhost",
+                "socket": "\/tmp\/mysql.sock"
+            }
+        },
+        "slave": {
+            "slave_0": {
+                "host": "127.0.0.1",
+                "port": "3306"
+            }
+        },
+        "global_transaction_id_injection":{
+            "on_commit":"UPDATE test.trx SET trx_id = trx_id + 1",
+            "report_error":true
+        }
+    }
+}
+]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   <example>
+    <title>Transparent global transaction ID injection</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$mysqli = new mysqli("myapp", "username", "password", "database");
+if (!$mysqli)
+  /* Of course, your error handling is nicer... */
+  die(sprintf("[%d] %s\n", mysqli_connect_errno(), mysqli_connect_error()));
+
+/* auto commit mode, transaction on master, GTID must be incremented */
+if (!$mysqli->query("DROP TABLE IF EXISTS test"))
+  die(sprintf("[%d] %s\n", $mysqli->errno, $mysqli->error));
+
+/* auto commit mode, transaction on master, GTID must be incremented */
+if (!$mysqli->query("CREATE TABLE test(id INT)"))
+  die(sprintf("[%d] %s\n", $mysqli->errno, $mysqli->error));
+
+/* auto commit mode, transaction on master, GTID must be incremented */
+if (!$mysqli->query("INSERT INTO test(id) VALUES (1)"))
+  die(sprintf("[%d] %s\n", $mysqli->errno, $mysqli->error));
+
+/* auto commit mode, read on slave, no increment */
+if (!($res = $mysqli->query("SELECT id FROM test")))
+  die(sprintf("[%d] %s\n", $mysqli->errno, $mysqli->error));
+
+var_dump($res->fetch_assoc());
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+array(1) {
+  ["id"]=>
+  string(1) "1"
+}
+]]>
+    </screen>
+   </example>
+  </para>
+  <para>
+   上面的范例运行 3 条语句在 master 上，他们都是在 autocommit 下执行，这样会引起
+   3 次 GTID 的增加。每次插件都会在执行语句以前，根据配置中的 <literal>UPDATE</literal> 设定
+   增加 GTID。
+  </para>
+  <para>
+   第四条语句，因为是 <literal>SELECT</literal> 语句，并不会在 master 上执行，
+   所以不会引发 master 增加 GTID。
+  </para>
+  <note>
+   <title>基于 SQL 的 GTID 如何有效率的工作</title>
+   <para>
+    在客户端通过 GTID 模拟在每个 SQL 执行的时候处理是很没有效率的做法。
+    这样做，是为了能够清楚的说明情况，而不是为了执行效率，不要在实际的
+    生产环境中这样使用。可以在本文中找到更有效率的做法。
+   </para>
+  </note>
+  <para>
+   <example>
+    <title>Plugin config: SQL for fetching GTID</title>
+    <programlisting role="ini">
+<![CDATA[
+{
+    "myapp": {
+        "master": {
+            "master_0": {
+                "host": "localhost",
+                "socket": "\/tmp\/mysql.sock"
+            }
+        },
+        "slave": {
+            "slave_0": {
+                "host": "127.0.0.1",
+                "port": "3306"
+            }
+        },
+        "global_transaction_id_injection":{
+            "on_commit":"UPDATE test.trx SET trx_id = trx_id + 1",
+            "fetch_last_gtid" : "SELECT MAX(trx_id) FROM test.trx",
+            "report_error":true
+        }
+    }
+}
+]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   <example>
+    <title>Obtaining GTID after injection</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$mysqli = new mysqli("myapp", "username", "password", "database");
+if (!$mysqli)
+  /* Of course, your error handling is nicer... */
+  die(sprintf("[%d] %s\n", mysqli_connect_errno(), mysqli_connect_error()));
+
+/* auto commit mode, transaction on master, GTID must be incremented */
+if (!$mysqli->query("DROP TABLE IF EXISTS test"))
+  die(sprintf("[%d] %s\n", $mysqli->errno, $mysqli->error));
+
+printf("GTID after transaction %s\n", mysqlnd_ms_get_last_gtid($mysqli));
+
+/* auto commit mode, transaction on master, GTID must be incremented */
+if (!$mysqli->query("CREATE TABLE test(id INT)"))
+  die(sprintf("[%d] %s\n", $mysqli->errno, $mysqli->error));
+
+printf("GTID after transaction %s\n", mysqlnd_ms_get_last_gtid($mysqli));
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+GTID after transaction 7
+GTID after transaction 8
+]]>
+    </screen>
+   </example>
+  </para>
+  <para>
+   应用可以通过插件获取最后一次写操作产生的 GTID。函数<function>mysqlnd_ms_get-last-gtid</function>
+   通过在配置文件中 <literal>global_transaction_id_injection</literal> 章节中
+   定义的 <literal>fetch_last-gtid</literal> 方法，返回最后一次
+   写操作产生的 GTID。函数应该在 GTID 增加后调用。
+  </para>
+  <para>
+   不建议应用运行自己运行哪些可能产生风险的 SQL 语句，从而增加 GTID。并且，使用函数
+   可以轻松的将查询 GTID 迁移到其他应用中。例如，使用任何 MySQL 内置的 GTID。
+  </para>
+  <para>
+   这里展现了一个 SQL 语句获得了他的 GTID 或者比实际执行得到的 GTID 更大的数据。
+   在 <literal>SELECT</literal> 和 查询 GTID 之间，可能有其他的客户端执行
+   SQL 语句，从而增加了 GTID，所以获得的 GTID 可能比实际数据大。
+  </para>
+  <para>
+   <example>
+    <title>Plugin config: Checking for a certain GTID</title>
+    <programlisting role="ini">
+<![CDATA[
+{
+    "myapp": {
+        "master": {
+            "master_0": {
+                "host": "localhost",
+                "socket": "\/tmp\/mysql.sock"
+            }
+        },
+        "slave": {
+            "slave_0": {
+                "host": "127.0.0.1",
+                "port": "3306"
+            }
+        },
+        "global_transaction_id_injection":{
+            "on_commit":"UPDATE test.trx SET trx_id = trx_id + 1",
+            "fetch_last_gtid" : "SELECT MAX(trx_id) FROM test.trx",
+            "check_for_gtid" : "SELECT trx_id FROM test.trx WHERE trx_id >= #GTID",
+            "report_error":true
+        }
+    }
+}
+]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   <example>
+    <title>Session consistency service level and GTID combined</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$mysqli = new mysqli("myapp", "username", "password", "database");
+if (!$mysqli)
+  /* Of course, your error handling is nicer... */
+  die(sprintf("[%d] %s\n", mysqli_connect_errno(), mysqli_connect_error()));
+
+/* autocommit 模式下，在 master 执行，用于增加 GTID */
+if (!$mysqli->query("DROP TABLE IF EXISTS test") ||
+    !$mysqli->query("CREATE TABLE test(id INT)") ||
+    !$mysqli->query("INSERT INTO test(id) VALUES (1)"))
+  die(sprintf("[%d] %s\n", $mysqli->errno, $mysqli->error));
+
+/* 获取最后一次写入的 GTID */
+$gtid = mysqlnd_ms_get_last_gtid($mysqli);
+
+/* Session 一致性，尝试从 slave 读取，而不只从 master 读取 */
+if (false == mysqlnd_ms_set_qos($mysqli, MYSQLND_MS_QOS_CONSISTENCY_SESSION, MYSQLND_MS_QOS_OPTION_GTID, $gtid)) {
+    die(sprintf("[006] [%d] %s\n", $mysqli->errno, $mysqli->error));
+}
+
+/* Either run on master or a slave which has replicated the INSERT */
+if (!($res = $mysqli->query("SELECT id FROM test"))) {
+    die(sprintf("[%d] %s\n", $mysqli->errno, $mysqli->error));
+}
+
+var_dump($res->fetch_assoc());
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   通过 <function>mysqlnd_ms_get_last_gtid</function> 获取的 GTID 可以被用于
+   Session 一致性服务级别。通过 <function>mysqlnd_ms_set_qos</function>
+   设定 Session 一致性服务级别，他决定从哪里读取写入的数据。在范例中，
+   通过判断 <literal>INSERT</literal> 是否已经被同步，来决定 
+   <literal>SELECT</literal> 从哪个服务器中读取数据，
+  </para>
+  <para>
+   插件检查配置中的所有 slave 服务器，通过查看 GTID 表中的值，判断是否
+   <literal>INSERT</literal> 已经被同步。检查的方法在
+   <literal>global_transaction_id_injection</literal> 章节中，使用
+   <literal>check_for_gtid</literal> 参数定义。
+   请注意，这是一种低效，浪费资源的方法。
+   在 master 的读取压力很大的时候，应用可以零星的采用这种方式，来降低读取压力。
+  </para>
+  <para>
+   <emphasis role="bold">使用服务器端的 GTID</emphasis>
+  </para>
+  <para>
+   自从 MySQL 5.6.5-m8 版本开始，MySQL 主从同步开始支持服务器端的 GTID。GTID 的
+   创建和增长由服务器控制，用户可以不再关心这些问题。这也就是说，不需要再添加任何
+   数据库表用于记录 GTID，也不用设置 <literal>on_commit</literal> 方法。客户端模拟
+   的 GTID 不再需要使用。
+  </para>
+  <para>
+   客户端可以顺畅使用 GTID 完成 Session 一致性服务，运算的方式与上面描述的 GTID 模拟
+   是一样的。不同的是 <literal>check_for_gtid</literal> 和 <literal>fetch_last_gtid</literal>
+   还是需要进行配置。
+   请注意，MySQL 5.6.5-m8 是一个研发版本，具体执行细节在实际的运行版本对于这些功能可能有改变。
+  </para>
+  <para>
+   使用下面的配置，可以上上面讨论过的任何一个脚本，能够利用服务器端的 GTID 正常工作。
+   函数 <function>mysqlnd_ms_get_last_gtid</function> 和
+   <function>mysqlnd_ms_set_qos</function> 工作也一样正常。不同点在于，
+   服务器并不采用简单的顺序序列，而是采用一个包含服务器标识号和序列数字的字符串。
+   所以，用户并不能简单的通过 <function>mysqlnd_ms_get_last_gtid</function>
+   得到的顺序判断 GTID。
+   译者注：从 MySQL 5.6.9 版本开始 GTID_DONE 已经被 GTID_EXECUTED 替代，所以下面的
+   范例中，应该做相应变更。
+  </para>
+  <para>
+   <example>
+    <title>使用 MySQL 5.6.5-m8 内置 GTID</title>
+    <programlisting role="ini">
+<![CDATA[
+{
+    "myapp": {
+        "master": {
+            "master_0": {
+                "host": "localhost",
+                "socket": "\/tmp\/mysql.sock"
+            }
+        },
+        "slave": {
+            "slave_0": {
+                "host": "127.0.0.1",
+                "port": "3306"
+            }
+        },
+        "global_transaction_id_injection":{
+            "fetch_last_gtid" : "SELECT @@GLOBAL.GTID_DONE AS trx_id FROM DUAL",
+            "check_for_gtid" : "SELECT GTID_SUBSET('#GTID', @@GLOBAL.GTID_DONE) AS trx_id FROM DUAL",
+            "report_error":true
+        }
+    }
+}
+]]>
+    </programlisting>
+   </example>
+  </para>
+ </section>
+ <section xml:id="mysqlnd-ms.quickstart.cache">
+  <title>Cache integration</title>
+  <note>
+   <title>版本需求、依赖性和状态</title>
+   <para>
+    可以从 <link linkend="mysqlnd-ms.concept_cache">concepts section</link> 获取更多的内容。
+   </para>
+  </note>
+  <para>
+   数据库群组可以设定不同的一致性级别。从 1.2.0 版本，我们建议插件仅仅从群组节点选择上
+   考虑使用的一致性级别。例如，如果使用异步的 MySQL 主从同步，他采用群组的最终一致性，
+   建议在任何时间通过 <function>mysqlnd_ms_set_quos</function> 使用 Session 一致性。
+   这可以参考 <link linkend="mysqlnd-ms.quickstart.qos-consistency">服务级别与一致性</link>
+  </para>
+  <para>
+   <example>
+    <title>Recap: quality of service to request read your writes</title>
+    <programlisting role="php">
+/* 设定采用 Session 一致性 */
+if (!mysqlnd_ms_set_qos($mysqli, MYSQLND_MS_QOS_CONSISTENCY_SESSION))
+  die(sprintf("[%d] %s\n", $mysqli->errno, $mysqli->error));
+     </programlisting>
+   </example>
+  </para>
+  <para>
+   假设插件使用最终一致性服务级别，而不采用其他更高要求的一致性策略。那么插件可能使用
+   通过 TTL 失效策略控制的缓存来替代从数据库节点读取数据。数据库节点和缓存都采用
+   最终一致性策略，他们可能保存的不是最新的数据。
+  </para>
+  <para>
+   通过本地缓存替代数据库操作，可以有效的提升性能，降低数据库压力。
+   如果其他客户端比创建这个缓存条目的客户端更频繁使用他，那么数据库的访问就被降低下来，
+   从而降低数据库压力。并且，由于本地缓存的速度快于数据库查询，那么整体计算性能就被提升。
+  </para>
+  <para>
+   <example>
+    <title>Plugin config: no special entries for caching</title>
+    <programlisting role="ini">
+<![CDATA[
+{
+    "myapp": {
+        "master": {
+            "master_0": {
+                "host": "localhost",
+                "socket": "\/tmp\/mysql.sock"
+            }
+        },
+        "slave": {
+            "slave_0": {
+                "host": "127.0.0.1",
+                "port": "3306"
+            }
+        },
+    }
+}
+]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   <example>
+    <title>Caching a slave request</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$mysqli = new mysqli("myapp", "username", "password", "database");
+if (!$mysqli)
+  /* Of course, your error handling is nicer... */
+  die(sprintf("[%d] %s\n", mysqli_connect_errno(), mysqli_connect_error()));
+
+if (!$mysqli->query("DROP TABLE IF EXISTS test") ||
+    !$mysqli->query("CREATE TABLE test(id INT)") ||
+    !$mysqli->query("INSERT INTO test(id) VALUES (1)"))
+  die(sprintf("[%d] %s\n", $mysqli->errno, $mysqli->error));
+
+/* 确认允许最终一致性，并且设定缓存有效期 (TTL <= 60 seconds) */
+if (false == mysqlnd_ms_set_qos($mysqli, MYSQLND_MS_QOS_CONSISTENCY_EVENTUAL, MYSQLND_MS_QOS_OPTION_CACHE, 60)) {
+    die(sprintf("[%d] %s\n", $mysqli->errno, $mysqli->error));
+}
+
+/* 为了让范例工作，我们采用强制性的循环捕捉 slave 操作 */
+$attempts = 0;
+do {
+  /* check if slave has the table */
+  if ($res = $mysqli->query("SELECT id FROM test")) {
+    break;
+  } else if ($mysqli->errno) {
+    die(sprintf("[%d] %s\n", $mysqli->errno, $mysqli->error));
+  }
+  /* wait for slave to catch up */
+  usleep(200000);
+} while ($attempts++ < 10);
+
+/* Query has been run on a slave, result is in the cache */
+assert($res);
+var_dump($res->fetch_assoc());
+
+/* Served from cache */
+$res = $mysqli->query("SELECT id FROM test");
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   上面的范例说明如何使用缓存功能。通过 <function>mysqlnd_ms_set_qos</function>
+   设定最终一致性服务器级别，并且允许使用缓存。然后任何只读的操作都会被放入
+   缓存中，存活时间通过 <function>mysqlnd_ms_set_qos</function> 指定。
+  </para>
+  <para>
+   实际的 TTL 要比通过 <function>mysqlnd_ms_set_qos</function> 设定的要小，设定值
+   是他的最大值。插件会在 TTL 上扣除 slave 同步延迟，用于计算实际的 TTL。在范例中，
+   如果 slave 的同步延迟是 10 秒，TTL 的最大值是 60 秒，那么计算的 TTL 值是 50 秒。
+   TTL 的计算，对于每一个缓存条目是独立的。
+  </para>
+  <para>
+   <example>
+    <title>Read your writes and caching combined</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$mysqli = new mysqli("myapp", "username", "password", "database");
+if (!$mysqli)
+  /* Of course, your error handling is nicer... */
+  die(sprintf("[%d] %s\n", mysqli_connect_errno(), mysqli_connect_error()));
+
+if (!$mysqli->query("DROP TABLE IF EXISTS test") ||
+    !$mysqli->query("CREATE TABLE test(id INT)") ||
+    !$mysqli->query("INSERT INTO test(id) VALUES (1)"))
+  die(sprintf("[%d] %s\n", $mysqli->errno, $mysqli->error));
+
+/* Explicitly allow eventual consistency and caching (TTL <= 60 seconds) */
+if (false == mysqlnd_ms_set_qos($mysqli, MYSQLND_MS_QOS_CONSISTENCY_EVENTUAL, MYSQLND_MS_QOS_OPTION_CACHE, 60)) {
+    die(sprintf("[%d] %s\n", $mysqli->errno, $mysqli->error));
+}
+
+/* To make this example work, we must wait for a slave to catch up. Brute force style. */
+$attempts = 0;
+do {
+  /* check if slave has the table */
+  if ($res = $mysqli->query("SELECT id FROM test")) {
+    break;
+  } else if ($mysqli->errno) {
+    die(sprintf("[%d] %s\n", $mysqli->errno, $mysqli->error));
+  }
+  /* wait for slave to catch up */
+  usleep(200000);
+} while ($attempts++ < 10);
+
+assert($res);
+
+/* Query has been run on a slave, result is in the cache */
+var_dump($res->fetch_assoc());
+
+/* Served from cache */
+if (!($res = $mysqli->query("SELECT id FROM test")))
+ die(sprintf("[%d] %s\n", $mysqli->errno, $mysqli->error));
+var_dump($res->fetch_assoc());
+
+/* Update on master */
+if (!$mysqli->query("UPDATE test SET id = 2"))
+ die(sprintf("[%d] %s\n", $mysqli->errno, $mysqli->error));
+
+/* Read your writes */
+if (false == mysqlnd_ms_set_qos($mysqli, MYSQLND_MS_QOS_CONSISTENCY_SESSION)) {
+    die(sprintf("[%d] %s\n", $mysqli->errno, $mysqli->error));
+}
+
+/* Fetch latest data */
+if (!($res = $mysqli->query("SELECT id FROM test")))
+ die(sprintf("[%d] %s\n", $mysqli->errno, $mysqli->error));
+var_dump($res->fetch_assoc());
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   服务设定可以随时改变，用于屏蔽缓存的使用。如果需要，你可以变更为 Session 一致性策略，
+   这时缓存将不会被使用，并且被更新为最新的数据结果。
+  </para>
+ </section>
+ <section xml:id="mysqlnd-ms.quickstart.failover">
+  <title>Failover</title>
+  <para>
+   默认情况下，插件并不会在连接一个服务器失败的时候进行故障处理。这是为了防止
+   <link linkend="mysqlnd-ms.quickstart.connectionpooling">connection state</link>。
+   这里建议手动的对连接错误进行处理，你可以捕获这个错误，重新建立连接，执行的你的查询，
+   如同下面展示的那样。
+  </para>
+  <para>
+   如果连接状态并不是由于你的操作引起的，你可以选择自动进行错误处理或者无视他。
+   通过配置可以实现，当 master 出现故障，可以在重新连接 master 之前，自动尝试连接
+   一台 slave 去自动处理故障，或者无视这个错误。因为 <link linkend="mysqlnd-ms.failover">automatic failover</link>
+   并不是一个十分安全的方式，这里就不做过多讨论了，在 concepts section 中会有更多的说明。
+  </para>
+  <para>
+   <example>
+    <title>Manual failover, automatic optional</title>
+    <programlisting role="ini">
+<![CDATA[
+  {
+    "myapp": {
+        "master": {
+            "master_0": {
+                "host": "localhost",
+                "socket": "\/tmp\/mysql.sock"
+            }
+        },
+        "slave": {
+            "slave_0": {
+                "host": "simulate_slave_failure",
+                "port": "0"
+            },
+            "slave_1": {
+                "host": "127.0.0.1",
+                "port": 3311
+            }
+        },
+       "filters": { "roundrobin": [] }
+    }
+ }
+]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   <example>
+    <title>Manual failover</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$mysqli = new mysqli("myapp", "username", "password", "database");
+if (!$mysqli)
+  /* Of course, your error handling is nicer... */
+  die(sprintf("[%d] %s\n", mysqli_connect_errno(), mysqli_connect_error()));
+
+$sql = "SELECT 1 FROM DUAL";
+
+/* error handling as it should be done regardless of the plugin */
+if (!($res = $link->query($sql))) {
+  /* plugin specific: check for connection error */
+  switch ($link->errno) {
+    case 2002:
+    case 2003:
+    case 2005:
+      printf("Connection error - trying next slave!\n");
+      /* load balancer will pick next slave */
+      $res = $link->query($sql);
+      break;
+    default:
+      /* no connection error, failover is unlikely to help */
+      die(sprintf("SQL error: [%d] %s", $link->errno, $link->error));
+      break;
+  }
+}
+if ($res) {
+  var_dump($res->fetch_assoc());
+}
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+ </section>
+ <section xml:id="mysqlnd-ms.quickstart.partitioning">
+  <title>Partitioning and Sharding</title>
+  <para>
+   数据库群组是由于各种各样的原因建立的，他可以提升处理能力、容忍错误，并且
+   提升大量服务器同时工作的的性能。群组有时会组合分区和共享功能，来将大量复杂的任务
+   分拆成更加简单的任务，更加可控的单元。
+  </para>
+  <para>
+   插件可以支持各种各样的 MySQL 群组，一些群组会内置一些分区和共享的方法，他们可以
+   被透明的使用。插件支持最常用的 MySQL 主从同步表过滤和共享 (应用级分区)。
+  </para>
+  <para>
+   MySQL 主从同步支持过滤方式的分区，他可以让你创建所有数据库同步，或者部分数据库同步。
+   这样就要求应用能够拥有同样的策略，你可以通过 
+   <literal><link linkend="ini.mysqlnd-ms-plugin-config-v2.filter-node-groiups">node_groups</link></literal>
+   手动的支持这个策略，或者使用实验性质的表过滤器。
+ </para>
+ <para>
+   从 1.5.0 版本开始，可以通过节点组过滤和 SQL hints 完成手动的分区和共享。
+   节点组过滤器可以让你将 master 和 slave 命名成一个符号。 范例中，
+  <literal>master_0</literal> 和 <literal>slave_0</literal> 
+  被放在一个命名为 <literal>Partition_A</literal> 的组中。他们能够完全的组成一个群组。
+  例如，你可以使用一个节点群组用于共享，并且使用使用群组名称作为一个地址共享，
+  就像 <literal>Shard_A_Range_0_100</literal>
+ </para>
+ <para>
+   <example>
+    <title>Cluster node groups</title>
+    <programlisting role="ini">
+<![CDATA[
+ {
+  "myapp": {
+       "master": {
+            "master_0": {
+                "host": "localhost",
+                "socket": "\/tmp\/mysql.sock"
+            }
+        },
+        "slave": {
+            "slave_0": {
+                "host": "simulate_slave_failure",
+                "port": "0"
+            },
+            "slave_1": {
+                "host": "127.0.0.1",
+                "port": 3311
+            }
+        },
+        "filters": {
+            "node_groups": {
+                "Partition_A" : {
+                    "master": ["master_0"],
+                    "slave": ["slave_0"]
+                }
+            },
+           "roundrobin": []
+        }
+    }
+}
+]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   <example>
+    <title>通过 SQL hints 完成手动分区</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+function select($mysqli, $msg, $hint = '') {
+  /* Note: weak test, two connections to two servers may have the same thread id */
+  $sql = sprintf("SELECT CONNECTION_ID() AS _thread, '%s' AS _hint FROM DUAL", $msg);
+  if ($hint) {
+    $sql = $hint . $sql;
+  }
+  if (!($res = $mysqli->query($sql))) {
+    printf("[%d] %s", $mysqli->errno, $mysqli->error);
+    return false;
+  }
+  $row =  $res->fetch_assoc();
+  printf("%d - %s - %s\n", $row['_thread'], $row['_hint'], $sql);
+  return true;
+}
+
+$mysqli = new mysqli("myapp", "user", "password", "database");
+if (!$mysqli)
+  /* Of course, your error handling is nicer... */
+  die(sprintf("[%d] %s\n", mysqli_connect_errno(), mysqli_connect_error()));
+
+/* All slaves allowed */
+select($mysqli, "slave_0");
+select($mysqli, "slave_1");
+
+/* only servers of node group "Partition_A" allowed */
+select($mysqli, "slave_1", "/*Partition_A*/");
+select($mysqli, "slave_1", "/*Partition_A*/");
+?>
+]]>
+    </programlisting>
+    <screen>
+<![CDATA[
+6804 - slave_0 - SELECT CONNECTION_ID() AS _thread, 'slave1' AS _hint FROM DUAL
+2442 - slave_1 - SELECT CONNECTION_ID() AS _thread, 'slave2' AS _hint FROM DUAL
+6804 - slave_0 - /*Partition_A*/SELECT CONNECTION_ID() AS _thread, 'slave1' AS _hint FROM DUAL
+6804 - slave_0 - /*Partition_A*/SELECT CONNECTION_ID() AS _thread, 'slave1' AS _hint FROM DUAL
+]]>
+    </screen>
+   </example>
+  </para>
+ <para>
+  默认的，插件使用所有配置的 master 和 slave 进行查询操作。但是如果一个查询，使用
+  <literal>/*node_group*/</literal> 的 SQL hint，那么插件将只使用在
+  <literal>node_group</literal> 列出的服务器进行查询操作。所以，<literal>SELECT</literal>
+  查询操作，只会在 <literal>/*Partition_A*/</literal> 列出的 <literal>slave_0</literal>
+  中进行。
+  </para>
+
+ </section>
+</chapter>
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->

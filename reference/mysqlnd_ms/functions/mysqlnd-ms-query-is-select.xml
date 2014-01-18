@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision$ -->
+<!-- EN-Revision: 9edc7d4114acdf02c57e4269ebd72e01c072e865 Maintainer: 谢毅斌 Status: ready -->
+<!-- Reviewed: no -->
+
+<refentry xml:id="function.mysqlnd-ms-query-is-select" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <refnamediv>
+  <refname>mysqlnd_ms_query_is_select</refname>
+  <refpurpose>查询给定的 SQL 会发送给 master、slave 还是最后使用的 MySQL server 执行。</refpurpose>
+ </refnamediv>
+
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <type>int</type>
+   <methodname>mysqlnd_ms_query_is_select</methodname>
+   <methodparam><type>string</type><parameter>query</parameter></methodparam>
+  </methodsynopsis>
+  <para>
+   查询给定的 SQL 会发送给 master、slave 还是最后使用的 MySQL server 执行。
+  </para>
+  <para>
+   插件内置的读写分离会分析 SQL，然后决定到底把他发送到哪里执行。这个读写分离器非常
+   的基本和简单。插件会将所有的查询发送给 master，除非他以 <literal>SELECT</literal>
+   开头，或者使用 SQL hints 指定要去 slave 执行。因为这个读写分离很简单，
+   所以会将一些只读查询发送给主从同步的 master，例如：<literal>SHOW TABLES</literal>。
+  </para>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <variablelist>
+   <varlistentry>
+    <term><parameter>query</parameter></term>
+    <listitem>
+     <para>
+      要测试的 SQL 字符串。
+     </para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   返回 <constant>MYSQLND_MS_QUERY_USE_MASTER</constant> 说明发送给 master。
+   返回 <constant>MYSQLND_MS_QUERY_USE_SLAVE</constant> 说明是一个只读语句，
+   将发送给 slave 执行。返回 <constant>MYSQLND_MS_QUERY_USE_LAST_USED</constant>
+   说明会在上一次执行的服务器连接中执行，这可能是 master 也可能是 slave。
+  </para>
+  <para>
+   如果通过设定 <literal>mysqlnd_ms.disable_rw_split</literal> 禁用了读写分离，
+   那么函数可能返回 <constant>MYSQLND_MS_QUERY_USE_MASTER</constant> 或者返回
+   <constant>MYSQLND_MS_QUERY_USE_LAST_USED</constant>。
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title><function>mysqlnd_ms_query_is_select</function> example</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+function is_select($query)
+{
+ switch (mysqlnd_ms_query_is_select($query))
+ {
+  case MYSQLND_MS_QUERY_USE_MASTER:
+   printf("'%s' should be run on the master.\n", $query);
+   break;
+  case MYSQLND_MS_QUERY_USE_SLAVE:
+   printf("'%s' should be run on a slave.\n", $query);
+   break;
+  case MYSQLND_MS_QUERY_USE_LAST_USED:
+   printf("'%s' should be run on the server that has run the previous query\n", $query);
+   break;
+  default:
+   printf("No suggestion where to run the '%s', fallback to master recommended\n", $query);
+   break;
+ }
+}
+
+is_select("INSERT INTO test(id) VALUES (1)");
+is_select("SELECT 1 FROM DUAL");
+is_select("/*" . MYSQLND_MS_LAST_USED_SWITCH . "*/SELECT 2 FROM DUAL");
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+INSERT INTO test(id) VALUES (1) should be run on the master.
+SELECT 1 FROM DUAL should be run on a slave.
+/*ms=last_used*/SELECT 2 FROM DUAL should be run on the server that has run the previous query
+]]>
+    </screen>
+   </example>
+  </para>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member>
+     <link linkend="mysqlnd-ms.constants">Predefined Constants</link>
+    </member>
+    <member>
+     <link linkend="ini.mysqlnd-ms-plugin-config-v2.filter-user"><literal>user</literal></link> filter
+    </member>
+   </simplelist>
+      <simplelist>
+    <member>
+     <link linkend="mysqlnd-ms.configuration">Runtime configuration</link>
+    </member>
+    <member>
+     <link linkend="ini.mysqlnd-ms.disable-rw-split">mysqlnd_ms.disable_rw_split</link>
+    </member>
+    <member>
+     <link linkend="ini.mysqlnd-ms.enable">mysqlnd_ms.enable</link>
+    </member>
+   </simplelist>
+
+  </para>
+ </refsect1>
+
+</refentry>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->

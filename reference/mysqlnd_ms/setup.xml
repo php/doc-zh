@@ -1,0 +1,3062 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision$ -->
+<!-- EN-Revision: 5a133dd1d92ee3b925227c0b91827b1499d07d60 Maintainer: 谢毅斌 Status: ready -->
+<!-- Reviewed: no -->
+
+<chapter xml:id="mysqlnd-ms.setup" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+ &reftitle.setup;
+
+ <section xml:id="mysqlnd-ms.requirements">
+  &reftitle.required;
+  <para>
+    <literal>PHP 5.3.6</literal> 或更高版本，一些建议使用的功能，需要 
+   <literal>PHP 5.4.0</literal> 或更高版本。
+  </para>
+  <para>
+   <literal>mysqlnd_ms</literal> 主从同步和负载均衡插件，可以支持所有的 PHP
+   应用程序，并且支持所有的 PHP MySQL 扩展
+   (<link linkend="ref.mysqli">mysqli</link>,
+   <link linkend="ref.mysql">mysql</link>,
+   <link linkend="ref.pdo-mysql">PDO_MYSQL</link>)。
+   所有的 PHP MySQL 扩展必须配置为使用
+   <link linkend="book.mysqlnd">mysqlnd</link> 并且在
+   <link linkend="book.mysqlnd">mysqlnd</link> 中使用
+   <literal>mysqlnd_ms</literal>。
+  </para>
+ </section>
+
+ &reference.mysqlnd-ms.configure;
+ &reference.mysqlnd-ms.ini;
+
+ <section xml:id="mysqlnd-ms.plugin-ini-json">
+  <title xmlns="http://docbook.org/ns/docbook">Plugin configuration file (&gt;=1.1.x)</title>
+  <note>
+   <title>Changelog: Feature was added in PECL/mysqlnd_ms 1.1.0-beta</title>
+   <para>
+    下面的描述信息仅仅适用于 PECL/mysqlnd_ms &gt;= 1.1.0-beta 即以上版本，
+    并不适用于这以前的版本。
+   </para>
+  </note>
+  <para>
+   插件使用自己的独立配置文件，其中包括 MySQL 主从同步的 master 服务器、
+   slave 服务器、负载均衡策略、错误处理策略和是否使用被动连接。
+  </para>
+  <para>
+   插件将在 WEB 被请求的时候装载他的配置文件，并且配置会被缓存在内存当中，为后续的
+   WEB 请求提供服务。这样，并不需要在更改配置以后，重新启动 PHP。对于配置文件的变更
+   将立即启用。
+  </para>
+  <para>
+   插件的配置文件通过 PHP 配置文件中使用
+   <link linkend="ini.mysqlnd-ms.config-file"><literal>mysqlnd_ms.config_file</literal></link>
+   指定。请注意，PHP 配置文件指令并不会针对每个 WEB 请求而加载。所以，配置插件的
+   配置文件名称和路径需要重新启动 PHP。但是不需要再已经读取的插件配置变更时，
+   重新启动 PHP。
+  </para>
+  <para>
+   使用和解析 <acronym>JSON</acronym> 是更有效率的，所以插件配置并没有采用类似于
+   <filename>php.ini</filename> 的文件格式。
+  </para>
+  <para>
+   <example>
+    <title>将 PHP 数组(hash) 转换为 JSON 格式</title>
+    <para>
+     可能，开发人员对于 PHP <type>array</type> 更加习惯，所以这个范例展示了如何将它
+     转化为 <acronym>JSON</acronym> 格式。
+    </para>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$config = array(
+  "myapp" => array(
+    "master" => array(
+      "master_0" => array(
+        "host"   => "localhost",
+        "socket" => "/tmp/mysql.sock",
+      ),
+    ),
+    "slave" => array(),
+  ),
+);
+
+file_put_contents("mysqlnd_ms.ini", json_encode($config, JSON_PRETTY_PRINT));
+printf("mysqlnd_ms.ini file created...\n");
+printf("Dumping file contents...\n");
+printf("%s\n", str_repeat("-", 80));
+echo file_get_contents("mysqlnd_ms.ini");
+printf("\n%s\n", str_repeat("-", 80));
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+mysqlnd_ms.ini file created...
+Dumping file contents...
+--------------------------------------------------------------------------------
+{
+    "myapp": {
+        "master": {
+            "master_0": {
+                "host": "localhost",
+                "socket": "\/tmp\/mysql.sock"
+            }
+        },
+        "slave": [
+
+        ]
+    }
+}
+--------------------------------------------------------------------------------
+]]>
+    </screen>
+   </example>
+  </para>
+  <para>
+   插件的配置文件，由一个或者多个章节组成。在 <acronym>JSON</acronym> 文件当中，
+   每个章节是一个最高级别的对象。章节也可以叫做 <emphasis>configuration names</emphasis>。
+  </para>
+  <para>
+   应用程序使用章节的名称，作为一个 host 名称传送给各种连接方法
+   <link linkend="ref.mysqli">mysqli</link>,
+   <link linkend="ref.mysql">mysql</link> 和
+   <link linkend="ref.pdo-mysql">PDO_MYSQL</link>。在连接时，
+   <link linkend="book.mysqlnd">mysqlnd</link> 插件，将根据配置文件转化这些
+   章节名称。如果找到匹配的内容，那么他将装载这个章节的所有设定。  </para>
+  <para xml:id="mysqlnd-ms.plugin-ini-json.using-section">
+   <example>
+    <title>使用章节名称的范例</title>
+    <programlisting role="ini">
+<![CDATA[
+{
+    "myapp": {
+        "master": {
+            "master_0": {
+                "host": "localhost"
+            }
+        },
+        "slave": {
+            "slave_0": {
+                "host": "192.168.2.27"
+            },
+            "slave_1": {
+                "host": "192.168.2.27",
+                "port": 3306
+            }
+        }
+    },
+    "localhost": {
+        "master": [
+            {
+                "host": "localhost",
+                "socket": "\/path\/to\/mysql.sock"
+            }
+        ],
+        "slave": [
+            {
+                "host": "192.168.3.24",
+                "port": "3305"
+            },
+            {
+                "host": "192.168.3.65",
+                "port": "3309"
+            }
+        ]
+    }
+}
+]]>
+    </programlisting>
+    <programlisting role="php">
+<![CDATA[
+<?php
+/* 下面所有的连接调用都将使用负载均衡 */
+$mysqli = new mysqli("myapp", "username", "password", "database");
+$pdo = new PDO('mysql:host=myapp;dbname=database', 'username', 'password');
+$mysql = mysql_connect("myapp", "username", "password");
+
+$mysqli = new mysqli("localhost", "username", "password", "database");
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   章节名称是一个字符串，他可以使用
+   <literal>192.168.2.1</literal>, <literal>127.0.0.1</literal> 或者
+   <literal>localhost</literal> 作为合法的值。例如，这里定义了
+   <literal>localhost</literal>，应用程序去连接 <literal>localhost</literal>
+   的时候，连接控制就被接管。应用程序将不直接在 <literal>localhost</literal>
+   运行，而是使用插件提供的连接池工作，相关操作将遵循 <literal>localhost</literal>
+   章节中的设定运行。这样可以在不改变应用程序代码的基础上使用插件进行负载均衡。
+   请注意，范例的配置可能并不适用于你实际的情况。使用章节名称可以看做是一种
+   替代 hostname 的手段。
+  </para>
+  <para xml:id="mysqlnd-ms.plugin-ini-json.server-list-syntax">
+   配置中每个章节至少要包含，master 列表和 slave 列表。master 列表使用
+   <literal>master</literal> 标记，slave 列表使用 <literal>slave</literal> 标记。
+   错误的 slave 列表，和空的 slave 列表将产生一个 <constant>E_ERROR</constant>
+   级别的错误。这里可以不设定 slave，当然仅仅建议在同步集群中使用。可以参考
+   <link linkend="mysqlnd-ms.supportedclusters">supported clusters</link>。
+   而本文档的主要目的是提供对异步的 MySQL 主从同步提供帮助。
+  </para>
+  <para>
+   master 和 slave 列表中的服务器，可以不定义每个服务器的名称。
+  </para>
+  <para>
+   <example>
+    <title>匿名 slave 列表</title>
+        <programlisting role="ini">
+<![CDATA[
+"slave": [
+    {
+        "host": "192.168.3.24",
+        "port": "3305"
+    },
+    {
+        "host": "192.168.3.65",
+        "port": "3309"
+    }
+]
+]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   上面是一个匿名列表的 <literal>JSON array</literal> 格式。当然也可以给每个列表中
+   的服务器起一个满足 <literal>JSON object</literal> 要求的别名。
+  </para>
+  <para>
+   <example>
+    <title>使用别名的 master 列表</title>
+        <programlisting role="ini">
+<![CDATA[
+"master": {
+    "master_0": {
+        "host": "localhost"
+    }
+}
+]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   我们建议使用命名的服务器列表，在错误信息中我们将看到这些服务器命名。
+  </para>
+  <para>
+   服务器列表，会按照顺序加载到 mysqlnd_ms 当中，这样如果采用 round robin 
+   负载均衡策略，那么第一个 <literal>SELECT</literal> 将在第一个定义的
+   slave 服务器中运行。
+  </para>
+  <para>
+   配置的服务器，可以使用 <literal>host</literal>,
+   <literal>port</literal>, <literal>socket</literal>, <literal>db</literal>,
+   <literal>user</literal>, <literal>password</literal> 和 <literal>connect_flags</literal>
+   进行设定。其中 <literal>host</literal> 是必须设定的内容，其他的是可选设定。
+  </para>
+  <para>
+   <example>
+    <title>Keywords to configure a server</title>
+    <programlisting role="ini">
+<![CDATA[
+{
+    "myapp": {
+        "master": {
+            "master_0": {
+                "host": "db_server_host",
+                "port": "db_server_port",
+                "socket": "db_server_socket",
+                "db": "database_resp_schema",
+                "user": "user",
+                "password": "password",
+                "connect_flags": 0
+            }
+        },
+        "slave": {
+            "slave_0": {
+                "host": "db_server_host",
+                "port": "db_server_port",
+                "socket": "db_server_socket"
+            }
+        }
+    }
+}
+]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   如果参数遗漏了，那么插件将使用用户打开连接设定的参数替代它。可以参考
+   <link linkend="mysqlnd-ms.plugin-ini-json.using-section">using section names example</link>
+   获得更多信息。
+  </para>
+  <para>
+   配置文件的格式在 1.1.0-beta 版本更改，为了适应过滤器的使用。过滤器负责过滤服务器列表
+   的服务器来执行相关的语句。使用 <literal>filter</literal> 定义过滤器。mysqlnd_ms 将
+   按照过滤器中的顺序执行。当然过滤器定义是可选的。
+  </para>
+  <para>
+   过滤器渠道以前版本中
+   <link linkend="ini.mysqlnd-ms-plugin-config.pick"><literal>pick[]</literal></link>
+   的使用，并且通过新的 <literal>random</literal> 和 <literal>roundrobin</literal>
+   来提供相同的功能。
+  </para>
+  <para>
+   <example>
+    <title>New <literal>roundrobin</literal> filter, old functionality</title>
+    <programlisting role="ini">
+<![CDATA[
+   {
+    "myapp": {
+        "master": {
+            "master_0": {
+                "host": "localhost"
+            }
+        },
+        "slave": {
+            "slave_0": {
+                "host": "192.168.78.136",
+                "port": "3306"
+            },
+            "slave_1": {
+                "host": "192.168.78.137",
+                "port": "3306"
+            }
+        },
+        "filters": {
+            "roundrobin": [
+
+            ]
+        }
+    }
+}
+]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   <function>mysqlnd_ms_set_user_pick_server</function> 函数已经不再使用。回调策略
+   设定使用 <literal>user</literal> 实现。一些过滤器需要设定参数，例如 <literal>user</literal>
+   需要设定回调函数的名称，他相当于以前版本中，在
+   <function>mysqlnd_ms_set_user_pick_server</function> 中的设定内容。
+   <example>
+    <title>The <literal>user</literal> filter replaces <function>mysqlnd_ms_set_user_pick_server</function></title>
+    <programlisting role="ini">
+<![CDATA[
+"filters": {
+    "user": {
+        "callback": "pick_server"
+    }
+}
+]]>
+    </programlisting>
+   </example>
+  </para>
+  <para xml:id="mysqlnd-ms.plugin-ini-json.debug_config">
+   The validity of the configuration file is checked both when reading the
+   configuration file and later when establishing a connection. The configuration
+   file is read during PHP request startup. At this early stage a PHP extension
+   may not display error messages properly. In the worst case, no error
+   is shown and a connection attempt fails without an adequate error message.
+   This problem has been cured in version 1.5.0.
+  </para>
+  <para>
+   <example>
+    <title>Common error message in case of configuration file issues (upto version 1.5.0)</title>
+     <programlisting role="php">
+<![CDATA[
+<?php
+$mysqli = new mysqli("myapp", "username", "password", "database");
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+Warning: mysqli::mysqli(): (mysqlnd_ms) (mysqlnd_ms) Failed to parse config file [s1.json]. Please, verify the JSON in Command line code
+
+Warning: mysqli::mysqli(): (HY000/2002): php_network_getaddresses: getaddrinfo failed: Name or service not known in Command line code on line 1
+
+Warning: mysqli::query(): Couldn't fetch mysqli in Command line code on line 1
+
+Fatal error: Call to a member function fetch_assoc() on a non-object in Command line code on line 1
+]]>
+    </screen>
+   </example>
+  </para>
+  <para>
+   Since version 1.5.0 startup errors are additionally buffered and emitted when
+   a connection attempt is made. Use the configuration directive
+   <link linkend="ini.mysqlnd-ms.force-config-usage"><literal>mysqlnd_ms.force_config_usage</literal></link>
+   to set the error type used to display buffered errors. By default an error
+   of type <literal>E_WARNING</literal> will be emitted.
+ </para>
+ <para>
+   <example>
+    <title>Improved configuration file validation since 1.5.0</title>
+     <programlisting role="php">
+<![CDATA[
+<?php
+$mysqli = new mysqli("myapp", "username", "password", "database");
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+Warning: mysqli::mysqli(): (mysqlnd_ms) (mysqlnd_ms) Failed to parse config file [s1.json]. Please, verify the JSON in Command line code on line 1
+]]>
+    </screen>
+   </example>
+  </para>
+  <para>
+   It can be useful to set <link linkend="ini.mysqlnd-ms.force-config-usage"><literal>mysqlnd_ms.force_config_usage = 1</literal></link>
+   when debugging potential configuration file errors. This will not only turn the
+   type of buffered startup errors into <literal>E_RECOVERABLE_ERROR</literal> but also
+   help detecting misspelled section names.
+  </para>
+  <para>
+   <example>
+    <title>Possibly more precise error due to <literal>mysqlnd_ms.force_config_usage=1</literal></title>
+    <programlisting role="ini">
+<![CDATA[
+mysqlnd_ms.force_config_usage=1
+]]>
+    </programlisting>
+     <programlisting role="php">
+<![CDATA[
+<?php
+$mysqli = new mysqli("invalid_section", "username", "password", "database");
+?>
+]]>
+    </programlisting>
+&example.outputs;
+    <screen>
+<![CDATA[
+Warning: mysqli::mysqli(): (mysqlnd_ms) Exclusive usage of configuration enforced but did not find the correct INI file section (invalid_section) in Command line code on line 1 line 1
+]]>
+    </screen>
+
+   </example>
+  </para>
+  <para>
+   Here is a short explanation of the configuration directives that can be used.
+  </para>
+  <para>
+  <variablelist>
+   <varlistentry xml:id="ini.mysqlnd-ms-plugin-config-v2.master">
+     <term>
+      <parameter>master</parameter>
+      <type>array or object</type>
+     </term>
+     <listitem>
+      <para>
+       List of MySQL replication master servers. The list of either
+       of the <literal>JSON type array</literal> to declare an anonymous list
+       of servers or of the <literal>JSON type object</literal>. Please,
+       see <link linkend="mysqlnd-ms.plugin-ini-json.server-list-syntax">above</link>
+       for examples.
+      </para>
+      <para>
+       Setting at least one master server is mandatory. The plugin will issue an
+       error of type <literal>E_ERROR</literal> if the user has failed to
+       provide a master server list for a configuration section.
+       The fatal error may read
+       <literal>(mysqlnd_ms) Section [master] doesn't exist for host
+       [name_of_a_config_section] in %s on line %d</literal>.
+      </para>
+      <para>
+       A server is described with
+       the <literal>host</literal>, <literal>port</literal>,
+       <literal>socket</literal>, <literal>db</literal>,
+       <literal>user</literal>, <literal>password</literal> and
+       <literal>connect_flags</literal>. It is mandatory to
+       provide at  a value for <literal>host</literal>. If any of the
+       other values is not given, it will be taken from the user
+       API connect call, please, see also:
+       <link linkend="mysqlnd-ms.plugin-ini-json.using-section">using section names example</link>.
+      </para>
+      <para xml:id="mysqlnd-ms.plugin-ini-json.server-config-keywords">
+       Table of server configuration keywords.
+      </para>
+      <informaltable>
+       <tgroup cols="3">
+        <colspec colwidth="1*"/>
+        <colspec colwidth="7*"/>
+        <colspec colwidth="2*"/>
+        <thead>
+         <row>
+          <entry>Keyword</entry>
+          <entry>Description</entry>
+          <entry>Version</entry>
+         </row>
+        </thead>
+        <tbody>
+         <row>
+           <entry>
+             <literal>host</literal>
+           </entry>
+           <entry>
+            <para>
+             Database server host. This is a mandatory setting.
+             Failing to provide, will cause an error of type <literal>E_RECOVERABLE_ERROR</literal>
+             when the plugin tries to connect to the server. The error message may
+             read <literal>(mysqlnd_ms) Cannot find [host] in
+             [%s] section in config in %s on line %d</literal>.
+            </para>
+          </entry>
+          <entry>Since 1.1.0.</entry>
+         </row>
+         <row>
+           <entry>
+             <literal>port</literal>
+           </entry>
+           <entry>
+            <para>
+              Database server TCP/IP port.
+            </para>
+          </entry>
+          <entry>Since 1.1.0.</entry>
+         </row>
+         <row>
+           <entry>
+             <literal>socket</literal>
+           </entry>
+           <entry>
+            <para>
+              Database server Unix domain socket.
+            </para>
+          </entry>
+          <entry>Since 1.1.0.</entry>
+         </row>
+         <row>
+           <entry>
+             <literal>db</literal>
+           </entry>
+           <entry>
+            <para>
+              Database (schemata).
+            </para>
+          </entry>
+          <entry>Since 1.1.0.</entry>
+         </row>
+         <row>
+           <entry>
+             <literal>user</literal>
+           </entry>
+           <entry>
+            <para>
+              MySQL database user.
+            </para>
+          </entry>
+          <entry>Since 1.1.0.</entry>
+         </row>
+         <row>
+           <entry>
+             <literal>password</literal>
+           </entry>
+           <entry>
+            <para>
+              MySQL database user password.
+            </para>
+          </entry>
+          <entry>Since 1.1.0.</entry>
+         </row>
+         <row>
+           <entry>
+             <literal>connect_flags</literal>
+           </entry>
+           <entry>
+            <para>
+              Connection flags.
+            </para>
+          </entry>
+          <entry>Since 1.1.0.</entry>
+         </row>
+        </tbody>
+       </tgroup>
+      </informaltable>
+      <para>
+       The plugin supports using only one master server. An experimental
+       setting exists to enable multi-master support. The details are
+       not documented. The setting is meant for development only.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry xml:id="ini.mysqlnd-ms-plugin-config-v2.slave">
+    <term>
+      <parameter>slave</parameter>
+      <type>array or object</type>
+     </term>
+     <listitem>
+      <para>
+       List of one or more MySQL replication slave servers. The syntax is
+       identical to setting master servers, please, see
+       <link linkend="ini.mysqlnd-ms-plugin-config-v2.master"><literal>master</literal></link>
+       above for details.
+      </para>
+      <para>
+       The plugin supports using one or more slave servers.
+      </para>
+      <para>
+       Setting a list of slave servers is mandatory. The plugin will report
+       an error of the type <literal>E_ERROR</literal> if <literal>slave</literal>
+       is not given for a configuration section. The fatal error message may read
+       <literal>(mysqlnd_ms) Section [slave] doesn't exist for host [%s] in %s on line %d</literal>.
+       Note, that it is valid to use an empty slave server list.
+       The error has been introduced to prevent accidently setting no slaves by
+       forgetting about the <literal>slave</literal> setting.
+       A master-only setup is still possible using an empty slave server list.
+      </para>
+      <para>
+       If an empty slave list is configured and an attempt is made to
+       execute a statement on a slave the plugin may emit a warning like
+       <literal>mysqlnd_ms) Couldn't find the appropriate slave connection.
+       0 slaves to choose from.</literal> upon statement execution.
+       It is possible that another warning follows such as
+       <literal>(mysqlnd_ms) No connection selected by the last filter</literal>.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry xml:id="ini.mysqlnd-ms-plugin-config-v2.gtid">
+     <term>
+      <parameter>global_transaction_id_injection</parameter>
+      <type>array or object</type>
+     </term>
+     <listitem>
+      <para>
+       全局同步标识，可以配置为使用服务器内置的 GTID，也可以使用客户端模拟的。
+      </para>
+      <informaltable>
+       <tgroup cols="3">
+        <colspec colwidth="1*"/>
+        <colspec colwidth="7*"/>
+        <colspec colwidth="2*"/>
+        <thead>
+         <row>
+          <entry>Keyword</entry>
+          <entry>Description</entry>
+          <entry>Version</entry>
+         </row>
+        </thead>
+        <tbody>
+         <row>
+          <entry>
+            <literal>fetch_last_gtid</literal>
+          </entry>
+          <entry>
+           <para>
+            用于查询最新 GTID 的 SQL 语句，当插件需要得到最新的 GTID 的时候会执行这个语句。
+            他也可以用于检查 MySQL 主从同步的 slave 状态。<function>mysqlnd_ms_get_laster_gtid</function>
+            也很会使用这个设定。
+           </para>
+          </entry>
+          <entry>Since 1.2.0.</entry>
+         </row>
+         <row>
+          <entry>
+            <literal>check_for_gtid</literal>
+          </entry>
+          <entry>
+           <para>
+            SQL 语句，他用于检查要查询的相关内容是否已经被同步。当使用比最终一致性
+            更高的服务一致性级别的时候会被使用。这个 SQL 语句中必须包含
+            <literal>#GTID</literal> 占位符，在执行的时候他将有插件替换成需要的 GTID。
+            可以参考 <link linkend="mysqlnd-ms.quickstart.gtid">quickstart</link>
+            查询相关范例。
+           </para>
+          </entry>
+          <entry>Since 1.2.0.</entry>
+         </row>
+         <row>
+          <entry>
+            <literal>report_errors</literal>
+          </entry>
+          <entry>
+           <para>
+            当执行相关配置的 SQL 语句的时候若发生错误是否进行报警。
+           </para>
+          </entry>
+          <entry>Since 1.2.0.</entry>
+         </row>
+         <row>
+          <entry>
+           <literal>on_commit</literal>
+          </entry>
+          <entry>
+           <para>
+            客户端 GTID 模拟使用的 SQL 语句，当 master 执行语句以后，会使用这个
+            SQL 语句更新模拟的 GTID，可以参考
+            <link linkend="mysqlnd-ms.quickstart.gtid">quickstart</link>
+            查看相关范例。
+           </para>
+          </entry>
+          <entry>Since 1.2.0.</entry>
+          </row>
+          <row>
+          <entry>
+           <literal>wait_for_gtid_timeout</literal>
+          </entry>
+          <entry>
+           <para>
+            插件等待 <literal>wait_for_gtid_timeout</literal> 秒，看 slave 是否能够
+            满足 Session 一致性的要求。这个参数限制了 slave 状态的轮循时间，如果轮循
+            的时间非常长，那么总体小号的时间会超过 <literal>wait_for_gtid_timeout</literal>。
+            在两次轮循之间，插件会调用 <literal>sleep(1)</literal> 去等待 1 秒。
+           </para>
+           <para>
+            这个参数可以在客户端模拟 GTID 或者在 MySQL 5.6 版本使用服务器端内置的
+            GTID 的时候使用。
+           </para>
+           <para>
+            等待 slave 能够同步到 Session 一致性要求的 GTID，意味着将调节客户端。
+            这种调节，可以在 master 上间接的降低写负载。基于复制的系统，例如 MySQL
+            主从同步会消耗大量的时间在一致性同步上，这种设置可以防止 master 过载。
+           </para>
+          </entry>
+          <entry>Since 1.4.0.</entry>
+          </row>
+         </tbody>
+        </tgroup>
+       </informaltable>
+     </listitem>
+    </varlistentry>
+    <varlistentry xml:id="ini.mysqlnd-ms-plugin-config-v2.filters">
+     <term>
+      <parameter>filters</parameter>
+      <type>object</type>
+     </term>
+     <listitem>
+      <para>
+       List of filters. A filter is responsible to filter the list of available
+       servers for executing a given statement. Filters can be chained.
+       The <literal>random</literal> and <literal>roundrobin</literal> filter
+       replace the
+       <link linkend="ini.mysqlnd-ms-plugin-config.pick"><literal>pick[]</literal></link>
+       directive used in prior version to select a load balancing policy.
+       The <literal>user</literal> filter replaces the
+       <function>mysqlnd_ms_set_user_pick_server</function> function.
+      </para>
+      <para>
+       Filters may accept parameters to refine their actions.
+      </para>
+      <para>
+       If no load balancing policy is set, the plugin will default to
+       <literal>random_once</literal>. The <literal>random_once</literal>
+       policy picks a random slave server when running the first read-only
+       statement. The slave server will be used for all read-only
+       statements until the PHP script execution ends. No load balancing
+       policy is set and thus, defaulting takes place,
+       if neither the <literal>random</literal> nor the
+       <literal>roundrobin</literal> are part of a configuration section.
+      </para>
+      <para>
+       If a filter chain is configured so that a filter which output no
+       more than once server is used as input for a filter which should be given
+       more than one server as input, the plugin may emit a warning upon
+       opening a connection. The warning may read: <literal>(mysqlnd_ms) Error while creating
+       filter '%s' . Non-multi filter '%s' already created.
+       Stopping in %s on line %d</literal>. Furthermore, an error of
+       the error code <literal>2000</literal>, the sql state <literal>HY000</literal>
+       and an error message similar to the warning may be set on the connection
+       handle.
+      </para>
+      <para>
+       <example>
+        <title>Invalid filter sequence</title>
+        <programlisting role="ini">
+<![CDATA[
+       {
+    "myapp": {
+        "master": {
+            "master_0": {
+                "host": "localhost"
+            }
+        },
+        "slave": {
+            "slave_0": {
+                "host": "192.168.78.136",
+                "port": "3306"
+            }
+        },
+        "filters": [
+            "roundrobin",
+            "random"
+        ]
+    }
+}
+]]>
+         </programlisting>
+         <programlisting role="php">
+<![CDATA[
+<?php
+$link = new mysqli("myapp", "root", "", "test");
+printf("[%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
+$link->query("SELECT 1 FROM DUAL");
+?>
+]]>
+         </programlisting>
+         &example.outputs;
+        <screen>
+<![CDATA[
+PHP Warning:  mysqli::mysqli(): (HY000/2000): (mysqlnd_ms) Error while creating filter 'random' . Non-multi filter 'roundrobin' already created. Stopping in filter_warning.php on line 1
+[2000] (mysqlnd_ms) Error while creating filter 'random' . Non-multi filter 'roundrobin' already created. Stopping
+PHP Warning:  mysqli::query(): Couldn't fetch mysqli in filter_warning.php on line 3
+]]>
+        </screen>
+       </example>
+      </para>
+    </listitem>
+    </varlistentry>
+    <varlistentry xml:id="ini.mysqlnd-ms-plugin-config-v2.filter-random">
+     <term>
+      Filter: <parameter>random</parameter>
+      <type>object</type>
+     </term>
+     <listitem>
+      <para>
+       <literal>random</literal> 过滤器提供 random 或者 random_once 负载均衡策略，
+       老版本的使用可以参考 
+       <link linkend="ini.mysqlnd-ms-plugin-config.pick"><literal>pick[]</literal></link>。
+      </para>
+      <para>
+       当执行只读语句的时候，随机策略会随机挑选一个服务器，random_once 会在页面第一次
+       请求的时候随机挑选一个服务器，然后在页面后续的访问中使用同一个服务器。random_once
+       是默认设置。
+      </para>
+      <para>
+       如果 <literal>random</literal> 过滤器没有设定任何参数，那么会使用随机负载均衡策略。
+      </para>
+      <para>
+       <example>
+        <title>Random load balancing with <literal>random</literal> filter</title>
+        <programlisting role="ini">
+<![CDATA[
+{
+    "myapp": {
+        "master": {
+            "master_0": {
+                "host": "localhost"
+            }
+        },
+        "slave": {
+            "slave_0": {
+                "host": "192.168.78.136",
+                "port": "3306"
+            },
+            "slave_1": {
+                "host": "192.168.78.137",
+                "port": "3306"
+            }
+        },
+        "filters": [
+            "random"
+        ]
+    }
+}
+
+]]>
+         </programlisting>
+       </example>
+      </para>
+      <para>
+       可以设置 <literal>sticky</literal> 参数，如果设置了这个参数 <literal>1</literal>
+       过滤器将采用 random_once 策略。
+      </para>
+      <para>
+       <example>
+        <title>Random once load balancing with <literal>random</literal> filter</title>
+        <programlisting role="ini">
+<![CDATA[
+{
+    "filters": {
+        "random": {
+            "sticky": "1"
+        }
+    }
+}
+]]>
+        </programlisting>
+       </example>
+      </para>
+      <para>
+       从 1.4.0 版本开始，<literal>random</literal> 和 <literal>roundrobin</literal>
+       过滤器都可以设定服务器权重 (优先级)。如果要使用权重，那么所有的服务器都需要
+       分配 <literal>weight</literal>。使用权重，那么 master 和 slave 都需要
+       使用命名设定。
+      </para>
+      <para>
+       <example>
+        <title>Referencing error</title>
+        <screen>
+<![CDATA[
+[E_RECOVERABLE_ERROR] mysqli_real_connect(): (mysqlnd_ms) Unknown server 'slave3' in 'random' filter configuration. Stopping in %s on line %d
+]]>
+        </screen>
+       </example>
+      </para>
+      <para>
+       如果对于一个非法的服务器命名设定 <literal>weight</literal>，那么会产生一个
+       类似于上面的错误信息。
+      </para>
+      <para>
+       如果遗漏了 <literal>weight</literal> 设定，所有服务器的权重是 1。
+      </para>
+      <para>
+       <example>
+        <title>Assigning a <literal>weight</literal> for load balancing</title>
+        <programlisting role="ini">
+<![CDATA[
+{
+   "myapp": {
+       "master": {
+           "master1":{
+               "host":"localhost",
+               "socket":"\/var\/run\/mysql\/mysql.sock"
+           }
+       },
+       "slave": {
+           "slave1": {
+               "host":"192.168.2.28",
+               "port":3306
+           },
+           "slave2": {
+               "host":"192.168.2.29",
+               "port":3306
+           },
+           "slave3": {
+               "host":"192.0.43.10",
+               "port":3306
+           },
+       },
+       "filters": {
+           "random": {
+               "weights": {
+                   "slave1":8,
+                   "slave2":4,
+                   "slave3":1,
+                   "master1":1
+               }
+           }
+       }
+   }
+}
+]]>
+        </programlisting>
+       </example>
+      </para>
+      <para>
+       如果服务器的权重设置为 2，那么他使用的次数将是那些权重为 1 的服务器的两倍。
+       不同的权重设定，可以基于不同的服务器性能、网络延迟、或者你更喜欢的原因。
+       基于网络延迟的原因，可以给服务器设置一个比较低的权重，例如上面的范例中，对于
+       <literal>slave3</literal> 只有 1/8 的使用权重，这样他比 <literal>slave1</literal>、
+       <literal>slave2</literal> 只有很少的使用几率。只有当其他两台设备都产生错误时，
+       <literal>slave3</literal> 使用率才会上升。在使用权重的时候，一定要查看错误处理
+       相关的说明。
+      </para>
+      <para>
+       可以设定 1 - 65535 之间的数字
+      </para>
+      <para>
+       非法的参数将会被忽略，而不会进行任何报警。
+      </para>
+      <para>
+       如果过滤器使用一个或者多个 master，一个 slave，那么使用 <literal>random</literal>、
+       <literal>roundrobin</literal> 执行语句，会产生一个报警或者错误信息。
+      </para>
+      <para>
+       过滤器的参数
+      </para>
+      <informaltable>
+       <tgroup cols="3">
+        <colspec colwidth="1*"/>
+        <colspec colwidth="7*"/>
+        <colspec colwidth="2*"/>
+        <thead>
+         <row>
+          <entry>Keyword</entry>
+          <entry>Description</entry>
+          <entry>Version</entry>
+         </row>
+        </thead>
+        <tbody>
+         <row>
+          <entry>
+            <literal>sticky</literal>
+          </entry>
+          <entry>
+           <para>
+            是否激活 random_once 负载均衡策略
+           </para>
+          </entry>
+          <entry>Since 1.2.0.</entry>
+         </row>
+         <row>
+          <entry>
+            <literal>weight</literal>
+          </entry>
+          <entry>
+           <para>
+            为服务器设置负载均衡权重 (优先级)
+           </para>
+          </entry>
+          <entry>Since 1.4.0.</entry>
+         </row>
+        </tbody>
+       </tgroup>
+      </informaltable>
+     </listitem>
+    </varlistentry>
+    <varlistentry xml:id="ini.mysqlnd-ms-plugin-config-v2.filter-roundrobin">
+     <term>
+      Filter: <parameter>roundrobin</parameter>
+      <type>object</type>
+     </term>
+     <listitem>
+      <para>
+       如果使用 <literal>roundrobin</literal> 过滤器，插件会轮循配置文件中
+       所有配置的 slaver。如果插件已经使用的 slave 列表的结尾，他会重新从列表
+       头开始使用 slave 服务器。
+      </para>
+      <para>
+       <example>
+        <title><literal>roundrobin</literal> filter</title>
+        <programlisting role="ini">
+<![CDATA[
+       {
+    "myapp": {
+        "master": {
+            "master_0": {
+                "host": "localhost"
+            }
+        },
+        "slave": {
+            "slave_0": {
+                "host": "192.168.78.136",
+                "port": "3306"
+            }
+        },
+        "filters": [
+            "roundrobin"
+        ]
+    }
+}
+]]>
+        </programlisting>
+       </example>
+      </para>
+      <para>
+        如果设定了一个或者多个 master，而只设置了一个 slave，那么采用
+       <literal>roundrobin</literal>, <literal>random</literal> 在执行语句的
+       时候，会在连接中产生一个报警或者错误信息。
+      </para>
+      <para>
+       过滤器使用的参数。
+      </para>
+      <informaltable>
+       <tgroup cols="3">
+        <colspec colwidth="1*"/>
+        <colspec colwidth="7*"/>
+        <colspec colwidth="2*"/>
+        <thead>
+         <row>
+          <entry>Keyword</entry>
+          <entry>Description</entry>
+          <entry>Version</entry>
+         </row>
+        </thead>
+        <tbody>
+         <row>
+          <entry>
+            <literal>weight</literal>
+          </entry>
+          <entry>
+           <para>
+            设置服务器的权重（优先级），可以参考
+            <link linkend="ini.mysqlnd-ms-plugin-config-v2.filter-random">above</link>
+            的说明。
+           </para>
+          </entry>
+          <entry>Since 1.4.0.</entry>
+         </row>
+        </tbody>
+       </tgroup>
+      </informaltable>
+     </listitem>
+    </varlistentry>
+    <varlistentry xml:id="ini.mysqlnd-ms-plugin-config-v2.filter-user">
+     <term>
+      Filter: <parameter>user</parameter>
+      <type>object</type>
+     </term>
+     <listitem>
+      <para>
+        The <literal>user</literal> replaces
+       <function>mysqlnd_ms_set_user_pick_server</function> function,
+       which was removed in 1.1.0-beta. The filter sets a callback for user-defined
+       read/write splitting and server selection.
+      </para>
+      <para>
+        The plugins built-in read/write query split mechanism decisions can be
+        overwritten in two ways. The easiest way is to prepend a query string
+        with the SQL hints <constant>MYSQLND_MS_MASTER_SWITCH</constant>,
+        <constant>MYSQLND_MS_SLAVE_SWITCH</constant> or
+        <constant>MYSQLND_MS_LAST_USED_SWITCH</constant>. Using SQL hints one can
+        control, for example, whether a query shall be send to the MySQL replication
+        master server or one of the slave servers. By help of SQL hints it is
+        not possible to pick a certain slave server for query execution.
+      </para>
+      <para>
+       Full control on server selection can be gained using a callback function.
+       Use of a callback is recommended to expert users only because the callback
+       has to cover all cases otherwise handled by the plugin.
+      </para>
+      <para>
+       The plugin will invoke the callback function for selecting a server from the
+       lists of configured master and slave servers. The callback function
+       inspects the query to run and picks a server for query execution by returning
+       the hosts URI, as found in the master and slave list.
+      </para>
+      <para>
+       If the lazy connections are enabled and the callback chooses a slave server for
+       which no connection has been established so far and establishing the connection
+       to the slave fails, the plugin will return an error upon the next action
+       on the failed connection, for example, when running a query. It is the
+       responsibility of the application developer to handle the error. For example,
+       the application can re-run the query to trigger a new server selection and
+       callback invocation. If so, the callback must make sure to select
+       a different slave, or check slave availability, before returning to
+       the plugin to prevent an endless loop.
+      </para>
+      <para>
+       <example>
+        <title>Setting a callback</title>
+        <programlisting role="ini">
+<![CDATA[
+{
+    "myapp": {
+        "master": {
+            "master_0": {
+                "host": "localhost"
+            }
+        },
+        "slave": {
+            "slave_0": {
+                "host": "192.168.78.136",
+                "port": "3306"
+            }
+        },
+        "filters": {
+            "user": {
+                "callback": "pick_server"
+            }
+        }
+    }
+}
+]]>
+         </programlisting>
+       </example>
+      </para>
+      <para>
+       The callback is supposed to return a host to run the query on.
+       The host URI is to be taken from the master and slave connection lists
+       passed to the callback function. If callback returns a value neither
+       found in the master nor in the slave connection lists the plugin
+       will emit an error of the type <literal>E_RECOVERABLE_ERROR</literal>
+       The error may read like
+       <literal>  (mysqlnd_ms) User filter callback has returned an unknown server.
+       The server 'server that is not in master or slave list' can neither be found
+       in the master list nor in the slave list</literal>.
+       If the application catches the error to ignore it, follow up errors
+       may be set on the connection handle, for example,
+       <literal>(mysqlnd_ms) No connection selected by the last filter</literal> with
+       the error code <literal>2000</literal> and the sqlstate <literal>HY000</literal>.
+       Furthermore a warning may be emitted.
+      </para>
+      <para>
+       Referencing a non-existing function as a callback will result
+       in any error of the type <literal>E_RECOVERABLE_ERROR</literal> whenever
+       the plugin tries to callback function. The error message may reads like:
+       <literal>(mysqlnd_ms) Specified callback (pick_server) is
+       not a valid callback</literal>. If the application catches the error to
+       ignore it, follow up errors may be set on the connection handle, for example,
+       <literal>(mysqlnd_ms) Specified callback (pick_server) is
+       not a valid callback</literal> with the error code <literal>2000</literal>
+       and the sqlstate <literal>HY000</literal>. Furthermore a warning
+       may be emitted.
+      </para>
+      <para>
+       The following parameters are passed from the plugin to the callback.
+      </para>
+      <informaltable>
+       <tgroup cols="3">
+        <colspec colwidth="1*"/>
+        <colspec colwidth="7*"/>
+        <colspec colwidth="2*"/>
+        <thead>
+         <row>
+          <entry>Parameter</entry>
+          <entry>Description</entry>
+          <entry>Version</entry>
+         </row>
+        </thead>
+        <tbody>
+         <row>
+           <entry>
+             <literal>connected_host</literal>
+           </entry>
+           <entry>
+            <para>
+             URI of the currently connected database server.
+            </para>
+          </entry>
+          <entry>Since 1.1.0.</entry>
+         </row>
+         <row>
+           <entry>
+             <literal>query</literal>
+           </entry>
+           <entry>
+            <para>
+             Query string of the statement for which a server needs
+             to be picked.
+            </para>
+          </entry>
+          <entry>Since 1.1.0.</entry>
+         </row>
+         <row>
+           <entry>
+             <literal>masters</literal>
+           </entry>
+           <entry>
+            <para>
+             List of master servers to choose from. Note, that the list of master
+             servers may not be identical to the list of configured master
+             servers if the filter is not the first in the filter chain.
+             Previously run filters may have reduced the master
+             list already.
+            </para>
+          </entry>
+          <entry>Since 1.1.0.</entry>
+         </row>
+         <row>
+           <entry>
+             <literal>slaves</literal>
+           </entry>
+           <entry>
+            <para>
+             List of slave servers to choose from. Note, that the list of master
+             servers may not be identical to the list of configured master
+             servers if the filter is not the first in the filter chain.
+             Previously run filters may have reduced the master
+             list already.
+            </para>
+          </entry>
+          <entry>Since 1.1.0.</entry>
+         </row>
+         <row>
+           <entry>
+             <literal>last_used_connection</literal>
+           </entry>
+           <entry>
+            <para>
+              URI of the server of the connection used to execute the previous
+              statement on.
+            </para>
+          </entry>
+          <entry>Since 1.1.0.</entry>
+         </row>
+         <row>
+           <entry>
+             <literal>in_transaction</literal>
+           </entry>
+           <entry>
+            <para>
+             Boolean flag indicating whether the statement is
+             part of an open transaction. If autocommit mode is turned
+             off, this will be set to &true;. Otherwise
+             it is set to &false;.
+            </para>
+            <para>
+             Transaction detection is based on monitoring the
+             mysqlnd library call <literal>set_autocommit</literal>.
+             Monitoring is not possible before PHP 5.4.0. Please, see
+             <link linkend="mysqlnd-ms.pooling">connection pooling and switching</link>
+             concepts discussion for further details.
+            </para>
+          </entry>
+          <entry>Since 1.1.0.</entry>
+         </row>
+        </tbody>
+       </tgroup>
+      </informaltable>
+     <para>
+      <example>
+        <title>Using a callback</title>
+        <programlisting role="ini">
+<![CDATA[
+{
+    "myapp": {
+        "master": {
+            "master_0": {
+                "host": "localhost"
+            }
+        },
+        "slave": {
+            "slave_0": {
+                "host": "192.168.2.27",
+                "port": "3306"
+            },
+            "slave_1": {
+                "host": "192.168.78.136",
+                "port": "3306"
+            }
+        },
+        "filters": {
+            "user": {
+                "callback": "pick_server"
+            }
+        }
+    }
+}
+]]>
+         </programlisting>
+         <programlisting role="php">
+<![CDATA[
+<?php
+function pick_server($connected, $query, $masters, $slaves, $last_used_connection, $in_transaction)
+{
+ static $slave_idx = 0;
+ static $num_slaves = NULL;
+ if (is_null($num_slaves))
+  $num_slaves = count($slaves);
+
+ /* default: fallback to the plugins build-in logic */
+ $ret = NULL;
+
+ printf("User has connected to '%s'...\n", $connected);
+ printf("... deciding where to run '%s'\n", $query);
+
+ $where = mysqlnd_ms_query_is_select($query);
+ switch ($where)
+ {
+  case MYSQLND_MS_QUERY_USE_MASTER:
+   printf("... using master\n");
+   $ret = $masters[0];
+   break;
+  case MYSQLND_MS_QUERY_USE_SLAVE:
+   /* SELECT or SQL hint for using slave */
+   if (stristr($query, "FROM table_on_slave_a_only"))
+   {
+    /* a table which is only on the first configured slave  */
+    printf("... access to table available only on slave A detected\n");
+    $ret = $slaves[0];
+   }
+   else
+   {
+    /* round robin */
+    printf("... some read-only query for a slave\n");
+    $ret = $slaves[$slave_idx++ % $num_slaves];
+   }
+   break;
+  case MYSQLND_MS_QUERY_LAST_USED:
+   printf("... using last used server\n");
+   $ret = $last_used_connection;
+   break;
+ }
+
+ printf("... ret = '%s'\n", $ret);
+ return $ret;
+}
+
+$mysqli = new mysqli("myapp", "root", "", "test");
+
+if (!($res = $mysqli->query("SELECT 1 FROM DUAL")))
+ printf("[%d] %s\n", $mysqli->errno, $mysqli->error);
+else
+ $res->close();
+
+if (!($res = $mysqli->query("SELECT 2 FROM DUAL")))
+ printf("[%d] %s\n", $mysqli->errno, $mysqli->error);
+else
+ $res->close();
+
+
+if (!($res = $mysqli->query("SELECT * FROM table_on_slave_a_only")))
+ printf("[%d] %s\n", $mysqli->errno, $mysqli->error);
+else
+ $res->close();
+
+$mysqli->close();
+?>
+]]>
+         </programlisting>
+         &example.outputs;
+         <screen>
+<![CDATA[
+User has connected to 'myapp'...
+... deciding where to run 'SELECT 1 FROM DUAL'
+... some read-only query for a slave
+... ret = 'tcp://192.168.2.27:3306'
+User has connected to 'myapp'...
+... deciding where to run 'SELECT 2 FROM DUAL'
+... some read-only query for a slave
+... ret = 'tcp://192.168.78.136:3306'
+User has connected to 'myapp'...
+... deciding where to run 'SELECT * FROM table_on_slave_a_only'
+... access to table available only on slave A detected
+... ret = 'tcp://192.168.2.27:3306'
+]]>
+         </screen>
+       </example>
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry xml:id="ini.mysqlnd-ms-plugin-config-v2.filter-user-multi">
+     <term>
+      Filter: <parameter>user_multi</parameter>
+      <type>object</type>
+     </term>
+     <listitem>
+      <para>
+       The <literal>user_multi</literal> differs from the <literal>user</literal>
+       only in one aspect. Otherwise, their syntax is identical.
+       The <literal>user</literal> filter must pick
+       and return exactly one node for statement execution. A filter chain
+       usually ends with a filter that emits only one node. The filter chain
+       shall reduce the list of candidates for statement execution down to
+       one. This, only one node left, is the case after the <literal>user</literal>
+       filter has been run.
+      </para>
+      <para>
+       The <literal>user_multi</literal> filter is a multi filter. It returns a
+       list of slave and a list of master servers. This list needs further filtering
+       to identify exactly one node for statement execution. A multi filter is typically
+       placed at the top of the filter chain. The <literal>quality_of_service</literal>
+       filter is another example of a multi filter.
+      </para>
+      <para>
+       The return value of the callback set for <literal>user_multi</literal> must
+       be an an array with two elements. The first element holds a list of selected master
+       servers. The second element contains a list of selected slave servers. The
+       lists shall contain the keys of the slave and master servers as found in
+       the slave and master lists passed to the callback. The below example returns
+       random master and slave lists extracted from the functions input.
+      </para>
+      <para>
+      <example>
+        <title>Returning random masters and slaves</title>
+        <programlisting role="php">
+<![CDATA[
+<?php
+function pick_server($connected, $query, $masters, $slaves, $last_used_connection, $in_transaction)
+{
+  $picked_masters = array()
+  foreach ($masters as $key => $value) {
+    if (mt_rand(0, 2) > 1)
+      $picked_masters[] = $key;
+  }
+  $picked_slaves = array()
+  foreach ($slaves as $key => $value) {
+    if (mt_rand(0, 2) > 1)
+      $picked_slaves[] = $key;
+  }
+  return array($picked_masters, $picked_slaves);
+}
+?>
+]]>
+         </programlisting>
+       </example>
+      </para>
+      <para>
+       The plugin will issue an
+       error of type <literal>E_RECOVERABLE</literal> if the callback fails to return
+       a server list. The error may read <literal>(mysqlnd_ms) User multi
+       filter callback has not returned a list of servers to use.
+       The callback must return an array in %s on line %d</literal>. In case the
+       server list is not empty but has invalid servers key/ids in it, an error
+       of type <literal>E_RECOVERABLE</literal> will the thrown with an
+       error message like <literal>(mysqlnd_ms) User multi filter callback
+       has returned an invalid list of servers to use.
+       Server id is negative in %s on line %d</literal>, or similar.
+      </para>
+      <para>
+       Whether an error is emitted in case of an empty slave or master list
+       depends on the configuration. If an empty master list is returned
+       for a write operation, it is likely that the plugin will emit a
+       warning that may read <literal>(mysqlnd_ms) Couldn't find the appropriate
+       master connection. 0 masters to choose from. Something is wrong in %s on line %d</literal>.
+       Typically a follow up error of type <literal>E_ERROR</literal> will happen.
+       In case of a read operation and an empty slave list the behavior depends
+       on the fail over configuration. If fail over to master is enabled, no
+       error should appear. If fail over to master is deactivated the plugin will
+       emit a warning that may read <literal>(mysqlnd_ms) Couldn't find the appropriate
+       slave connection. 0 slaves to choose from. Something is wrong in %s on line %d</literal>.
+      </para>
+     </listitem>
+    </varlistentry>
+
+
+    <varlistentry xml:id="ini.mysqlnd-ms-plugin-config-v2.filter-node-groups">
+     <term>
+      Filter: <parameter>node_groups</parameter>
+      <type>object</type>
+     </term>
+     <listitem>
+      <para>
+       The <literal>node_groups</literal> filter lets you group cluster nodes
+       and query selected groups, for example, to support data partitioning.
+       Data partitioning can be required for manual sharding, primary copy based
+       clusters running multiple masters, or to avoid hot spots in update everywhere
+       clusters that have no built-in partitioning. The filter is a multi filter
+       which returns zero, one or multiple of its input servers. Thus, it
+       must be followed by other filters to reduce the number of candidates
+       down to one for statement execution.
+      </para>
+       <informaltable>
+       <tgroup cols="3">
+        <colspec colwidth="1*"/>
+        <colspec colwidth="7*"/>
+        <colspec colwidth="2*"/>
+        <thead>
+         <row>
+          <entry>Keyword</entry>
+          <entry>Description</entry>
+          <entry>Version</entry>
+         </row>
+        </thead>
+        <tbody>
+         <row>
+           <entry>
+             <literal>user defined node group name</literal>
+           </entry>
+           <entry>
+            <para>
+             One or more node groups must be defined. A node group can have an
+             arbitrary user defined name. The name is used in combination with
+             a SQL hint to restrict query execution to the nodes listed for the
+             node group. To run a query on any of the servers of a node group,
+             the query must begin with the SQL hint
+             <literal>/*user defined node group name*/</literal>.
+             Please note, no white space is allowed around
+             <literal>user defined node group name</literal>. Because
+             <literal>user defined node group name</literal> is used as-is
+             as part of a SQL hint, you should choose the name that is compliant
+             with the SQL language.
+            </para>
+            <para>
+             Each node group entry must contain a list of <literal>master</literal>
+             servers. Additional <literal>slave</literal> servers are allowed.
+             Failing to provide a list of <literal>master</literal> for a node group
+             <literal>name_of_group</literal> may cause an
+             error of type <constant>E_RECOVERABLE_ERROR</constant> like
+             <literal>(mysqlnd_ms) No masters configured in node group 'name_of_group' for 'node_groups' filter</literal>.
+            </para>
+            <para>
+             The list of master and slave servers must reference corresponding
+             entries in the
+             <link linkend="ini.mysqlnd-ms-plugin-config-v2.master">global master</link>
+             respectively <link linkend="ini.mysqlnd-ms-plugin-config-v2.slave">slave</link>
+             server list. Referencing an unknown server in either of the both server
+             lists may cause an <constant>E_RECOVERABLE_ERROR</constant> error like
+             <literal>(mysqlnd_ms) Unknown master 'server_alias_name' (section 'name_of_group') in 'node_groups' filter configuration</literal>.
+            </para>
+            <para>
+             <example>
+               <title>Manual partitioning</title>
+                <programlisting role="ini">
+<![CDATA[
+ {
+  "myapp": {
+       "master": {
+            "master_0": {
+                "host": "localhost",
+                "socket": "\/tmp\/mysql.sock"
+            }
+        },
+        "slave": {
+            "slave_0": {
+                "host": "192.168.2.28",
+                "port": 3306
+            },
+            "slave_1": {
+                "host": "127.0.0.1",
+                "port": 3311
+            }
+        },
+        "filters": {
+            "node_groups": {
+                "Partition_A" : {
+                    "master": ["master_0"],
+                    "slave": ["slave_0"]
+                }
+            },
+           "roundrobin": []
+        }
+    }
+}
+]]>
+              </programlisting>
+             </example>
+            </para>
+            <para>
+              Please note, if a filter chain
+              generates an empty slave list and the PHP configuration directive
+              <literal>mysqlnd_ms.multi_master=0</literal> is used, the plugin may
+              emit a warning.
+            </para>
+          </entry>
+          <entry>Since 1.5.0.</entry>
+         </row>
+        </tbody>
+       </tgroup>
+      </informaltable>
+     </listitem>
+    </varlistentry>
+
+    <varlistentry xml:id="ini.mysqlnd-ms-plugin-config-v2.filter-qos">
+     <term>
+      Filter: <parameter>quality_of_service</parameter>
+      <type>object</type>
+     </term>
+     <listitem>
+      <para>
+       <literal>quality_of_service</literal> 用于设定群组的服务级别。
+       The <literal>quality_of_service</literal> identifies cluster nodes
+       capable of delivering a certain quality of service. It is a multi filter
+       which returns zero, one or multiple of its input servers. Thus, it
+       must be followed by other filters to reduce the number of candidates
+       down to one for statement execution.
+      </para>
+      <para>
+       The <literal>quality_of_service</literal> filter has been introduced in 1.2.0-alpha.
+       In the 1.2 series the filters focus is on the consistency aspect of
+       service quality. Different types of clusters offer different
+       default data consistencies. For example, an asynchronous MySQL
+       replication slave offers eventual consistency. The slave may not
+       be able to deliver requested data because it has not replicated the write,
+       it may serve stale database because its lagging behind or it may serve
+       current information. Often, this is acceptable. In some cases
+       higher consistency levels are needed for the application to work correct.
+       In those cases, the <literal>quality_of_service</literal> can filter out cluster nodes
+       which cannot deliver the necessary quality of service.
+      </para>
+      <para>
+       The <literal>quality_of_service</literal> filter can be replaced or created
+       at runtime. A successful call to
+       <function>mysqlnd_ms_set_qos</function>
+       removes all existing <literal>qos</literal> filter entries from the
+       filter list and installs a new one at the very beginning. All settings
+       that can be made through
+       <function>mysqlnd_ms_set_qos</function>
+       can also be in the plugins configuration file. However, use of the function
+       is by far the most common use case. Instead of setting session consistency and
+       strong consistency service levels in the plugins configuration file it is
+       recommended to define only masters and no slaves. Both service levels will
+       force the use of masters only. Using an empty slave list shortens the
+       configuration file, thus improving readability. The only service level for which
+       there is a case of defining in the plugins configuration file is the combination
+       of eventual consistency and maximum slave lag.
+      </para>
+      <informaltable>
+       <tgroup cols="3">
+        <colspec colwidth="1*"/>
+        <colspec colwidth="7*"/>
+        <colspec colwidth="2*"/>
+        <thead>
+         <row>
+          <entry>Keyword</entry>
+          <entry>Description</entry>
+          <entry>Version</entry>
+         </row>
+        </thead>
+        <tbody>
+         <row>
+           <entry>
+             <literal>eventual_consistency</literal>
+           </entry>
+           <entry>
+            <para>
+             Request eventual consistency. Allows the use of all
+             master and slave servers. Data returned may or may not be current.
+            </para>
+            <para>
+             Eventual consistency accepts an optional <literal>age</literal>
+             parameter. If <literal>age</literal> is given the plugin considers
+             only slaves for reading for which MySQL replication reports
+             a slave lag less or equal to <literal>age</literal>.
+             The replication lag is measure using <literal>SHOW SLAVE STATUS</literal>.
+             If the plugin fails to fetch the replication lag, the slave tested
+             is skipped. Implementation details and tips are given in the
+             <link linkend="mysqlnd-ms.qos-consistency">quality of service concepts section</link>.
+            </para>
+            <para>
+              Please note, if a filter chain
+              generates an empty slave list and the PHP configuration directive
+              <literal>mysqlnd_ms.multi_master=0</literal> is used, the plugin may
+              emit a warning.
+            </para>
+            <para>
+             <example>
+               <title>Global limit on slave lag</title>
+                <programlisting role="ini">
+<![CDATA[
+{
+    "myapp": {
+        "master": {
+            "master_0": {
+                "host": "localhost"
+            }
+        },
+        "slave": {
+            "slave_0": {
+                "host": "192.168.2.27",
+                "port": "3306"
+            },
+            "slave_1": {
+                "host": "192.168.78.136",
+                "port": "3306"
+            }
+        },
+        "filters": {
+            "quality_of_service": {
+                "eventual_consistency": {
+                    "age":123
+                }
+            }
+        }
+    }
+}
+]]>
+              </programlisting>
+             </example>
+            </para>
+          </entry>
+          <entry>Since 1.2.0.</entry>
+         </row>
+         <row>
+           <entry>
+             <literal>session_consistency</literal>
+           </entry>
+           <entry>
+            <para>
+              Request session consistency (read your writes). Allows use of all masters
+              and all slaves which are in sync with the master.
+              If no further parameters are given slaves are filtered out
+              as there is no reliable way to test if a slave has caught up
+              to the master or is lagging behind. Please note, if a filter chain
+              generates an empty slave list and the PHP configuration directive
+              <literal>mysqlnd_ms.multi_master=0</literal> is used, the plugin may
+              emit a warning.
+            </para>
+            <para>
+             Session consistency temporarily requested using
+             <function>mysqlnd_ms_set_qos</function> is a valuable alternative
+             to using <literal>master_on_write</literal>.
+             <literal>master_on_write</literal> is likely to send more statements
+             to the master than needed. The application may be able to continue
+             operation at a lower consistency level after it has done
+             some critical reads.
+            </para>
+          </entry>
+          <entry>Since 1.1.0.</entry>
+         </row>
+         <row>
+           <entry>
+             <literal>strong_consistency</literal>
+           </entry>
+           <entry>
+            <para>
+              Request strong consistency. Only masters will be used.
+            </para>
+          </entry>
+          <entry>Since 1.2.0.</entry>
+         </row>
+        </tbody>
+       </tgroup>
+      </informaltable>
+     </listitem>
+    </varlistentry>
+    <varlistentry xml:id="ini.mysqlnd-ms-plugin-config-v2.failover">
+     <term>
+      <parameter>failover</parameter>
+      1.3.x 版本以前(包含): <type>string</type>.
+      1.4.0 版本以后: <type>object</type>.
+     </term>
+     <listitem>
+      <para>
+       错误处理策略，支持：<literal>disabled</literal> (默认), 
+       <literal>master</literal>, <literal>loop_before_master</literal> (Since 1.4.0).
+      </para>
+      <para>
+       如果没有设定错误处理策略 (<literal>failover=disabled</literal>) 插件不会做
+       任何的自动错误处理。这样，只要插件连接服务器出现错误，他将抛出一个报警信息，
+       并且设定连接中的错误编号和信息。
+      </para>
+      <para>
+       请注意，自动错误处理只对已经打开的链接起作用。如果一个连接再没有自动处理前已经
+       打开，那么产生错误的时候他会重新被打开。例如，如果一个服务器的链接已经关闭，
+       用户尝试在这个链接上执行语句，那么在没有自动错误处理的时候，将不会被重试，而是
+       直接报告错误。
+      </para>
+      <para>
+       如果设置 <literal>failover=master</literal>，插件将自己到 master 进行尝试，
+       请参考概念文档查看鞥多关于错误处理和使用 <literal>failover=master</literal>
+       可能产生的风险。
+      </para>
+      <para>
+       <example>
+        <title>Optional master failover when failing to connect to slave (PECL/mysqlnd_ms &lt; 1.4.0)</title>
+        <programlisting role="ini">
+<![CDATA[
+{
+    "myapp": {
+        "master": {
+            "master_0": {
+                "host": "localhost"
+            }
+        },
+        "slave": {
+            "slave_0": {
+                "host": "192.168.78.136",
+                "port": "3306"
+            }
+        },
+        "failover": "master"
+    }
+}
+]]>
+        </programlisting>
+       </example>
+      </para>
+      <para>
+       从 1.4.0 版本开始，配置文件更改为对象定义方式。
+      </para>
+      <para>
+       <example>
+        <title>New syntax since 1.4.0</title>
+        <programlisting role="ini">
+<![CDATA[
+{
+    "myapp": {
+        "master": {
+            "master_0": {
+                "host": "localhost"
+            }
+        },
+        "slave": {
+            "slave_0": {
+                "host": "192.168.78.136",
+                "port": "3306"
+            }
+        },
+        "failover": {"strategy": "master" }
+    }
+}
+]]>
+        </programlisting>
+       </example>
+      </para>
+      <informaltable>
+       <tgroup cols="3">
+        <colspec colwidth="1*"/>
+        <colspec colwidth="7*"/>
+        <colspec colwidth="2*"/>
+        <thead>
+         <row>
+          <entry>Keyword</entry>
+          <entry>Description</entry>
+          <entry>Version</entry>
+         </row>
+        </thead>
+        <tbody>
+         <row>
+          <entry>
+           <literal>strategy</literal>
+          </entry>
+          <entry>
+           <para>
+            错误处理策略，可以使用
+            <literal>disabled</literal> (默认), <literal>master</literal>,
+            <literal>loop_before_master</literal>
+           </para>
+           <para>
+            <literal>disabled</literal> 将会禁用自动错误处理。
+           </para>
+           <para>
+            <literal>master</literal> 设置将会在连接 slave 出现错误的时候
+            尝试连接 master。如果 master 连接错误，插件将在错误处理循环中处理，
+            并且返回一个错误给用户。
+           </para>
+           <para>
+            如果 <literal>loop_before_master</literal> 设置，对于 slave 请求，
+            插件会在其他 slave 尝试，然后才在 master 尝试。如果设定了多个 master
+            并且启用了多 master 设定，那么插件也会在其他 master 进行尝试，都失败后
+            才会报告错误给用户。
+           </para>
+          </entry>
+          <entry>Since 1.4.0.</entry>
+         </row>
+         <row>
+          <entry>
+           <literal>remember_failed</literal>
+          </entry>
+          <entry>
+           <para>
+            在 WEB 请求期间记住产生错误的服务器，默认值 <literal>false</literal>。
+            </para>
+            <para>
+             如果设置为 <literal>true</literal>，当前 WEB 页面的请求期间，
+             插件将记住失败的主机，并且在后面的负载均衡过程中自动跳过这个出错的主机。
+            </para>
+          </entry>
+          <entry>
+           从 1.4.0 版本开始，这个功能只能与 <literal>random</literal> 和 
+           <literal>roundrobin</literal> 负载均衡策略同时使用，建议使用这个参数。
+          </entry>
+         </row>
+         <row>
+           <entry>
+            <literal>max_retries</literal>
+           </entry>
+           <entry>
+            <para>
+             在跳过一个主机前尝试的次数，默认值：<literal>0</literal> (不限制)
+            </para>
+            <para>
+             这个设定用于禁止在第一次产生错误的时候，就将这个主机从主机列表中剔除，
+             插件将在出现错误后继续在主机列表中保留这个主机。这个主机将不会在出现
+             第一次连接错误的时候被剔除，在负载均衡的使用过程中，出现
+             <literal>n</literal> 次错误以后，才会被剔除掉。
+            </para>
+          </entry>
+          <entry>
+           从 1.4.0 版本开始，这个设定只能与 <literal>random</literal> 和
+           <literal>roundrobin</literal> 负载均衡策略同时使用。
+          </entry>
+         </row>
+        </tbody>
+       </tgroup>
+      </informaltable>
+      <para>
+       如果设定 <literal>failover</literal> 的值不是 <literal>disabled</literal>、
+       <literal>master</literal> 或者 <literal>loop_before_master</literal>，那么
+       将产生一个报警信息或者是错误。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry xml:id="ini.mysqlnd-ms-plugin-config-v2.lazy-connections">
+     <term>
+      <parameter>lazy_connections</parameter>
+      <type>bool</type>
+     </term>
+     <listitem>
+      <para>
+       被动连接是默认的选项，他在第一次发送执行语句的时候才真正建立连接。
+      </para>
+      <para>
+       我们强烈建议使用被动连接模式，他可以有效的降低连接数。如果禁用了被动连接
+       模式，如果配置了一个 MySQL 主从同步 master 和两个 slave，那么即使应用程序
+       只使用了 master 执行了一条语句，也会建立 3 个链接。
+      </para>
+      <para>
+       使用被动连接会对用户更改连接状态信息产生风险。插件并不能分派所有的链接
+       状态信息到连接池中的每个连接上，只有少量的操作会被分发到已经打开的连接中，
+       处于被动连接模式中还没有打开的连接无法得到改变。只有部分的设置会被记住，
+       并且会在被动连接模式下的链接真正建立的时候设置。
+      </para>
+      <para>
+       <example>
+        <title>禁用被动连接模式</title>
+        <programlisting role="ini">
+<![CDATA[
+{
+    "myapp": {
+        "master": {
+            "master_0": {
+                "host": "localhost"
+            }
+        },
+        "slave": {
+            "slave_0": {
+                "host": "192.168.78.136",
+                "port": "3306"
+            }
+        },
+        "lazy_connections": 0
+    }
+}
+]]>
+        </programlisting>
+       </example>
+      </para>
+      <para>
+       请参考 <literal>server_charset</literal> 处理可能产生的服务器默认字符集
+       和使用的字符集产生的影响。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry xml:id="ini.mysqlnd-ms-plugin-config-v2.server-charset">
+     <term>
+      <parameter>server_charset</parameter>
+      <type>string</type>
+     </term>
+     <listitem>
+      <para>
+       这个设置从 1.4.0 版本开始使用，建议在被动连接的时候使用。
+      </para>
+      <para>
+       这个参数设定有两个目的，在连接建立完成以后设定返回的字符串的字符集，并且
+       当服务器采用不同的字符集时避免产生字符集转换的错误。
+      </para>
+      <para>
+       字符集转换是设定在连接上的，当连接没有打开或者字符集不合法的时候字符集转换
+       将不起作用。如果使用的是被动连接，那么在实际的语句没有发送以前，连接是不打开的。
+      </para>
+      <para>
+       应用程序在使用被动连接时，在没有发送任何执行语句以前尝试进行字符集转换，
+       会产生一个 <literal>E_WARNING</literal> 级别的错误，因为这时连接其实
+       并没有建立。会在错误处理中得到一个类似于 <literal>(mysqlnd_ms)
+       string escaping doesn't work without established connection.
+       Possible solution is to add server_charset to your configuration</literal>
+       的错误信息。
+      </para>
+      <para>
+       <literal>server_charset</literal> 设置可以在被动连接启动以前设置，这样当连接
+       建立以后，会使用这个字符集作为字符集转换的目标。
+      </para>
+      <para>
+       在配置中指定字符集，可以避免由于服务器字符集不同而导致出现的错误。这个设定
+       还有一个附加的好处，迫使所有的服务器采用同样的字符集设定。无论服务器本身的
+       字符集设定是什么，插件将统一按照配置中的设定作为默认字符集使用。
+      </para>
+      <para>
+       插件不会阻止任何时候用户通过调用 <function>set_charset</function> 或者在 SQL
+       语句中设定字符集。但是请注意，在 SQL 语句中设置字符集是不建议使用的，因为插件
+       无法监控到这种变化。在被动连接模式下，用户可以在连接建立以后，更改默认字符集。
+       在配置文件中设定的字符集，将在连接建立后使用，而不管服务器的字符集设定，也不管
+       用户之前的设定。在实际连接建立以前，<literal>set_charset</literal> 的设定没有
+       任何作用。
+      </para>
+      <para>
+       <example>
+        <title>在被动连接模式下，字符集转换控制</title>
+        <programlisting role="ini">
+<![CDATA[
+{
+    "myapp": {
+        "master": {
+            "master_0": {
+                "host": "localhost"
+            }
+        },
+        "slave": {
+            "slave_0": {
+                "host": "192.168.78.136",
+                "port": "3306"
+            }
+        },
+        "lazy_connections": 1,
+        "server_charset" : "utf8"
+    }
+}
+]]>
+        </programlisting>
+        <programlisting role="php">
+<![CDATA[
+<?php
+$mysqli = new mysqli("myapp", "username", "password", "database");
+/* 译者注：下面将被转换为 UTF8，因为配置中这样设定的 */
+$mysqli->real_escape("this will be escaped using the server_charset setting - utf8");
+/* 译者注：下面的语句么有任何作用 */
+$mysqli->set_charset("latin1");
+/* 译者注：下面由于 mysqli 对象自己的字符集被上一条语句改变，所以本地字符转换会遵循对象内的设定被转换为 latin1 */
+$mysqli->real_escape("this will be escaped using latin1");
+/* 执行语句，相当于实际连接建立，配置文件中的设定会导致 mysqli 对象中的字符集重新被设定位 UTF8 */
+$mysqli->query("SELECT 'This connection will be set to server_charset upon establishing' AS _msg FROM DUAL");
+/* 这时进行设定，后面的相关默认字符集针对实际连接才被转换为 latin1 */
+$mysqli->set_charset("latin1");
+?>
+]]>
+         </programlisting>
+       </example>
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry xml:id="ini.mysqlnd-ms-plugin-config-v2.master-on-write">
+     <term>
+      <parameter>master_on_write</parameter>
+      <type>bool</type>
+     </term>
+     <listitem>
+      <para>
+       如果设定这个参数，那么插件将从第一次在 master 执行语句以后，将后面
+       所有的语句发送给 master 执行。当然应用程序依然可以使用 SQL hints
+       来让插件自动判断是否从 slave 执行相关语句。
+      </para>
+      <para>
+       这个设置是为了解决同步延迟问题的。如果应用程序执行了一条
+       <literal>INSERT</literal> 语句，那么插件将默认将后面的所有操作，包括
+       <literal>SELECT</literal> 语句发送到 master 执行。这样将有助于解决
+       从 slave 服务器中查询没有完成 <literal>INSETER</literal> 同步的问题。
+      </para>
+      <para>
+       <example>
+        <title>Master on write for consistent reads</title>
+        <programlisting role="ini">
+<![CDATA[
+{
+    "myapp": {
+        "master": {
+            "master_0": {
+                "host": "localhost"
+            }
+        },
+        "slave": {
+            "slave_0": {
+                "host": "192.168.78.136",
+                "port": "3306"
+            }
+        },
+        "master_on_write": 1
+    }
+}
+]]>
+        </programlisting>
+       </example>
+      </para>
+      <para>
+       请注意，从 1.2.0-alpha 版本开始，<literal>quality_of_service</literal> 已经可以使用了。
+       如果希望更好的完成这种控制，可以使用 <link linkend="mysqlnd-ms.qos-consistency">服务级别</link>
+       来更好的控制。
+      </para>
+      <para>
+       所有的 <link linkend="ini.mysqlnd-ms-plugin-config-v2.trx-stickiness">transaction stickiness</link> 设置，
+       包括 <literal>trx_stickiness=on</literal> 将推翻 <literal>master_on_write=1</literal> 的设定。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry xml:id="ini.mysqlnd-ms-plugin-config-v2.trx-stickiness">
+     <term>
+      <parameter>trx_stickiness</parameter>
+      <type>string</type>
+     </term>
+     <listitem>
+      <para>
+       事务控制策略，支持 <literal>disabled</literal> (默认)，<literal>master</literal>。
+      </para>
+      <para>
+       这个设置需要使用 PHP 5.4.0 以上版本，如果再以前的版本使用，将会叨叨类似下面
+       <literal>(mysqlnd_ms) trx_stickiness strategy is not supported before PHP 5.3.99</literal>
+       的一条警告信息。
+      </para>
+      <para>
+       如果没有设定这个参数，或者设置 <literal>trx_stickiness=disabled</literal>
+       那么插件将不关心事务处理。这样在事务处理的中间，可能由于负载均衡而切换链接。
+       为了避免这个情况，就必须使用 SQL hints 来暂时屏蔽连接切换。
+      </para>
+      <para>
+       从 PHP 5.4.0 版本开始，mysqlnd 允许插件通过 <literal>set_autocommit()</literal>
+       函数监控 <literal>autocommit</literal> 的设定值。如果设置
+       <literal>set_stickiness=master</literal> 并且 <literal>autocommit</literal> 被
+       PHP MySQL 扩展通过 <literal>set_autocommit()</literal> 设置为禁用，插件就会认为
+       事务处理已经开始了。这时，插件会停止负载均衡，将所有的语句发送给 master，
+       直到 <literal>autocommit</literal> 被启用。当然整个过程中，不需要使用 SQL hints。
+      </para>
+      <para>
+       例如 <function>mysqli_autocommit</function> 会调用 <literal>mysqlnd</literal>
+       内的 <literal>set_autocommit()</literal> 方法，控制 <literal>autocommit</literal>
+       的状态。
+      </para>
+      <para>
+       当然，即使设定了 <literal>trx_stickiness=master</literal> 插件也无法监控到 SQL 语句
+       当中 <literal>SET AUTOCOMMIT=0</literal> 或者 <literal>BEGIN</literal> 的使用。
+      </para>
+      <para>
+       从 PHP 5.5.0 版本开始，mysqlnd 库增加了控制事务处理的 C API。控制级别可以匹配 SQL
+       语句中的的意图，<literal>mysqlid</literal> 使用这些嗲用的 API 被更改。这样，从
+       1.5.0 版本开始，插件不仅仅可以监控 <function>mysqli_autocommit</function>，也可以
+       监控<function>mysqli_begin</function>，<function>mysqli_commit</function> 和 
+       <function>mysqli_rollback</function>。这就可以识别事务处理的边界，并且在执行事务处理
+       过程中停止负载均衡。
+      </para>
+      <para>
+       <example>
+        <title>使用 master 执行事务处理</title>
+        <programlisting role="ini">
+<![CDATA[
+{
+    "myapp": {
+        "master": {
+            "master_0": {
+                "host": "localhost"
+            }
+        },
+        "slave": {
+            "slave_0": {
+                "host": "192.168.78.136",
+                "port": "3306"
+            }
+        },
+        "trx_stickiness": "master"
+    }
+}
+]]>
+        </programlisting>
+       </example>
+      </para>
+      <para>
+       从 1.5.0 版本开始，事务处理过程中自动的和沉默的错误处理被禁用。如果事务处理的边界
+       被识别，事务处理控制被启动，如果服务器产生错误，无论配置中如何设定的错误处理策略，
+       插件将不试图连接下一个服务器去处理故障，用户必须处理这种错误。根据配置文件的设定，
+       插件可能发出一个 <literal>E_WARNING</literal> 级别的错误信息，类似
+       <literal>(mysqlnd_ms) Automatic failover is not permitted in the middle of a transaction</literal>。
+       并且错误可能被重写成
+       <literal>(mysqlnd_ms) No connection selected by the last filter</literal>。
+       这些错误也可能是由于失败的查询函数产生。
+      </para>
+      <para>
+       <example>
+        <title>没有自动错误处理的错误处理</title>
+        <programlisting role="php">
+<![CDATA[
+<?php
+/* 假设：配置了自动错误处理 */
+$mysqli = new mysqli("myapp", "username", "password", "database");
+
+/* 设置插件内部状态 in_trx = 1 */
+$mysqli->autocommit(false);
+
+/* 假设：服务器错误 */
+if (!($res = $mysqli->query("SELECT 'Assume this query fails' AS _msg FROM DUAL"))) {
+ /* 处理事务错误，插件内部状态依然是 in_trx = 1 */
+ printf("[%d] %s", $mysqli->errno, $mysqli->error);
+ /*
+  如果使用 autocommit() 进行事务判断，那么必须调用 autocommit(true)，
+  否则插件将假设目前还在事务处理过程中，依然禁止负载均衡。
+ */
+ $mysqli->autocommit(true);
+ /* 当然，你还可以开始一个新的事务处理 */
+ $mysqli->autocommit(false);
+}
+/* latin1 used from now on */
+$mysqli->set_charset("latin1");
+?>
+]]>
+         </programlisting>
+       </example>
+      </para>
+      <para>
+       如果再一个事务处理执行的过程中产生了服务器错误，那么插件将继续禁止
+       连接切换，直到事务完成。应该重新调用 API 命令，让插件检测到事务处理边界。
+       例如，你必须开启 autocommit 状态，这样插件就就能够继续继续负载均衡和
+       连接切换。同样的，如果你如果还想执行一个新的事务，那么可以再次禁用
+       autocommit 状态。
+      </para>
+      <para>
+       如果不处理错误，不使用 API 调用停止一个失败的事务，可能会引起类似下面的
+       报警信息<literal>Commands out of sync; you can't run this command now</literal>。
+       错误处理是非常必要的。
+      </para>
+     </listitem>
+    </varlistentry>
+
+    <varlistentry xml:id="ini.mysqlnd-ms-plugin-config-v2.transient_error">
+     <term>
+       <parameter>transient_error</parameter>
+       <type>object</type>
+     </term>
+     <listitem>
+      <para>
+       The setting has been introduced in 1.6.0.
+      </para>
+      <para>
+       A database cluster node may reply a transient error to a client. The client
+       can then repeat the operation on the same node, fail over to a different node
+       or abort the operation. Per definition is it safe for a client to
+       retry the same operation on the same node before giving up.
+      </para>
+      <para>
+       <literal>PECL/mysqlnd_ms</literal> can perform the retry
+       loop on behalf of the application.
+       By configuring <literal>transient_error</literal> the plugin can be
+       instructed to repeat operations failing with a certain error code for
+       a certain maximum number of times with a pause between the retries.
+       If the transient error disappears during loop execution, it is
+       hidden from the application. Otherwise, the error is
+       forwarded to the application by the end of the loop.
+      </para>
+      <para>
+       <example>
+        <title>Retry loop for transient errors</title>
+        <programlisting role="ini">
+<![CDATA[
+{
+    "myapp": {
+        "master": {
+            "master_0": {
+                "host": "localhost"
+            }
+        },
+        "slave": {
+            "slave_0": {
+                "host": "192.168.78.136",
+                "port": "3306"
+            }
+       },
+       "transient_error": {
+          "mysql_error_codes": [
+            1297
+          ],
+          "max_retries": 2,
+          "usleep_retry": 100
+       }
+    }
+}
+]]>
+        </programlisting>
+      </example>
+     </para>
+      <informaltable>
+       <tgroup cols="3">
+        <colspec colwidth="1*"/>
+        <colspec colwidth="7*"/>
+        <colspec colwidth="2*"/>
+        <thead>
+         <row>
+          <entry>Keyword</entry>
+          <entry>Description</entry>
+          <entry>Version</entry>
+         </row>
+        </thead>
+        <tbody>
+         <row>
+          <entry>
+           <literal>mysql_error_codes</literal>
+          </entry>
+          <entry>
+           <para>
+            List of transient error codes. You may add any MySQL error code
+            to the list. It is possible to consider any error as transient
+            not only <literal>1297</literal>
+            (<literal>HY000 (ER_GET_TEMPORARY_ERRMSG),
+            Message: Got temporary error %d '%s' from %s</literal>).
+            Before adding other codes but <literal>1297</literal> to the list,
+            make sure your cluster supports a new attempt without impacting
+            the state of your application.
+           </para>
+          </entry>
+          <entry>Since 1.6.0.</entry>
+         </row>
+         <row>
+          <entry>
+           <literal>max_retries</literal>
+          </entry>
+          <entry>
+           <para>
+            How often to retry an operation which
+            fails with a transient error before forwarding the
+            failure to the user.
+           </para>
+           <para>
+             Default: <literal>1</literal>
+           </para>
+          </entry>
+          <entry>Since 1.6.0.</entry>
+         </row>
+         <row>
+          <entry>
+           <literal>usleep_retry</literal>
+          </entry>
+          <entry>
+           <para>
+            Milliseconds to sleep between transient error retries.
+            The value is passed to the C function <function>usleep</function>,
+            hence the name.
+           </para>
+           <para>
+             Default: <literal>100</literal>
+           </para>
+          </entry>
+          <entry>Since 1.6.0.</entry>
+         </row>
+        </tbody>
+       </tgroup>
+      </informaltable>
+     </listitem>
+    </varlistentry>
+
+   </variablelist>
+  </para>
+
+</section>
+
+ <section xml:id="mysqlnd-ms.plugin-ini-v1">
+  <title xmlns="http://docbook.org/ns/docbook">Plugin configuration file (&lt;= 1.0.x)</title>
+  <note>
+   <para>
+    The below description applies to PECL/mysqlnd_ms &lt; 1.1.0-beta.
+    It is not valid for later versions.
+   </para>
+  </note>
+  <para>
+   The plugin is using its own configuration file. The configuration file
+   holds information on the MySQL replication master server,
+   the MySQL replication slave servers, the server pick (load balancing) policy,
+   the failover strategy and the use of lazy connections.
+  </para>
+  <para>
+   The PHP configuration directive
+   <link linkend="ini.mysqlnd-ms.ini-file"><literal>mysqlnd_ms.ini_file</literal></link>
+   is used to set the plugins configuration file.
+  </para>
+  <para>
+   The configuration file mimics standard the <literal>php.ini</literal> format.
+   It consists of one or more sections. Every section defines its own unit
+   of settings. There is no global section for setting defaults.
+  </para>
+  <para>
+   Applications reference sections by their name. Applications use section names
+   as the host (server) parameter to the various connect methods of the
+   <link linkend="ref.mysqli">mysqli</link>,
+   <link linkend="ref.mysql">mysql</link> and
+   <link linkend="ref.pdo-mysql">PDO_MYSQL</link> extensions. Upon connect
+   the <link linkend="book.mysqlnd">mysqlnd</link> plugin compares the hostname
+   with all section names from the plugin configuration file. If hostname and
+   section name match, the plugin will load the sections settings.
+  </para>
+  <para>
+   <example>
+    <title>Using section names example</title>
+    <programlisting role="ini">
+<![CDATA[
+[myapp]
+master[] = localhost
+slave[] = 192.168.2.27
+slave[] = 192.168.2.28:3306
+[localhost]
+master[] = localhost:/tmp/mysql/mysql.sock
+slave[] = 192.168.3.24:3305
+slave[] = 192.168.3.65:3309
+]]>
+    </programlisting>
+    <programlisting role="php">
+<![CDATA[
+<?php
+/* All of the following connections will be load balanced */
+$mysqli = new mysqli("myapp", "username", "password", "database");
+$pdo = new PDO('mysql:host=myapp;dbname=database', 'username', 'password');
+$mysql = mysql_connect("myapp", "username", "password");
+
+$mysqli = new mysqli("localhost", "username", "password", "database");
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   Section names are strings. It is valid to use a section name such as
+   <literal>192.168.2.1</literal>, <literal>127.0.0.1</literal> or
+   <literal>localhost</literal>. If, for example, an application
+   connects to <literal>localhost</literal> and a plugin
+   configuration section <literal>[localhost]</literal> exists, the
+   semantics of the connect operation are changed. The application will
+   no longer only use the MySQL server running on the host
+   <literal>localhost</literal> but the plugin will start to load balance
+   MySQL queries following the rules from the <literal>[localhost]</literal>
+   configuration section. This way you can load balance queries from
+   an application without changing the applications source code.
+  </para>
+  <para>
+   The <literal>master[]</literal>, <literal>slave[]</literal>
+   and <literal>pick[]</literal> configuration directives use a list-like syntax.
+   Configuration directives supporting list-like syntax may appear multiple
+   times in a configuration section. The plugin maintains the order in
+   which entries appear when interpreting them. For example,
+   the below example shows two <literal>slave[]</literal> configuration
+   directives in the configuration section <literal>[myapp]</literal>.
+   If doing round-robin load balancing for read-only queries, the plugin
+   will send the first read-only query to the MySQL server
+   <literal>mysql_slave_1</literal> because it is the first in the list.
+   The second read-only query will be send to the MySQL server
+   <literal>mysql_slave_2</literal> because it is the second in the list.
+   Configuration directives supporting list-like syntax result are ordered
+   from top to bottom in accordance to their appearance within a configuration
+   section.
+  </para>
+  <para>
+   <example>
+    <title>List-like syntax</title>
+    <programlisting role="ini">
+<![CDATA[
+[myapp]
+master[] = mysql_master_server
+slave[] = mysql_slave_1
+slave[] = mysql_slave_2
+]]>
+    </programlisting>
+    </example>
+  </para>
+  <para>
+   Here is a short explanation of the configuration directives that can be used.
+  </para>
+  <para>
+  <variablelist>
+   <varlistentry xml:id="ini.mysqlnd-ms-plugin-config.master">
+     <term>
+      <parameter>master[]</parameter>
+      <type>string</type>
+     </term>
+     <listitem>
+      <para>
+       URI of a MySQL replication master server. The URI follows the syntax
+       <literal>hostname[:port|unix_domain_socket]</literal>.
+      </para>
+      <para>
+       The plugin supports using only one master server.
+      </para>
+      <para>
+       Setting a master server is mandatory. The plugin will report a
+       warning upon connect if the user has failed to provide a master
+       server for a configuration section.
+       The warning may read
+       <literal>(mysqlnd_ms) Cannot find master section in config</literal>.
+       Furthermore the plugin may set an error code for the connection handle such as
+       <literal>HY000/2000 (CR_UNKNOWN_ERROR)</literal>. The corresponding error
+       message depends on your language settings.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry xml:id="ini.mysqlnd-ms-plugin-config.slave">
+    <term>
+      <parameter>slave[]</parameter>
+      <type>string</type>
+     </term>
+     <listitem>
+      <para>
+       URI of one or more MySQL replication slave servers. The URI follows the syntax
+       <literal>hostname[:port|unix_domain_socket]</literal>.
+      </para>
+      <para>
+       The plugin supports using one or more slave servers.
+      </para>
+      <para>
+       Setting a slave server is mandatory. The plugin will report a
+       warning upon connect if the user has failed to provide at least one slave
+       server for a configuration section. The warning may read
+       <literal>(mysqlnd_ms) Cannot find slaves section in config</literal>.
+       Furthermore the plugin may set an error code for the connection handle such as
+       <literal>HY000/2000 (CR_UNKNOWN_ERROR)</literal>. The corresponding error
+       message depends on your language settings.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry xml:id="ini.mysqlnd-ms-plugin-config.pick">
+     <term>
+      <parameter>pick[]</parameter>
+      <type>string</type>
+     </term>
+     <listitem>
+      <para>
+       Load balancing (server picking) policy. Supported policies:
+       <literal>random</literal>, <literal>random_once</literal> (default),
+       <literal>roundrobin</literal>, <literal>user</literal>.
+      </para>
+      <para>
+       If no load balancing policy is set, the plugin will default to
+       <literal>random_once</literal>. The <literal>random_once</literal>
+       policy picks a random slave server when running the first read-only
+       statement. The slave server will be used for all read-only
+       statements until the PHP script execution ends.
+      </para>
+     <para>
+       The <literal>random</literal> policy will pick a random server whenever
+       a read-only statement is to be executed.
+     </para>
+     <para>
+       If using
+       <literal>roundrobin</literal> the plugin iterates over the list of
+       configured slave servers to pick a server for statement execution.
+       If the plugin reaches the end of the list, it wraps around to the beginning
+       of the list and picks the first configured slave server.
+      </para>
+      <para>
+       Setting more than one load balancing policy for a configuration
+       section makes only sense in conjunction with <literal>user</literal>
+       and <function>mysqlnd_ms_set_user_pick_server</function>. If the
+       user defined callback fails to pick a server, the plugin falls
+       back to the second configured load balancing policy.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry xml:id="ini.mysqlnd-ms-plugin-config.failover">
+     <term>
+      <parameter>failover</parameter>
+      <type>string</type>
+     </term>
+     <listitem>
+      <para>
+       Failover policy. Supported policies:
+       <literal>disabled</literal> (default), <literal>master</literal>.
+      </para>
+      <para>
+       If no failover policy is set, the plugin will not do any
+       automatic failover (<literal>failover=disabled</literal>). Whenever
+       the plugin fails to connect a server it will emit a warning and
+       set the connections error code and message. Thereafter it is up to
+       the application to handle the error and, for example, resent the
+       last statement to trigger the selection of another server.
+      </para>
+      <para>
+       If using <literal>failover=master</literal> the plugin will implicitly
+       failover to a slave, if available. Please check the
+       concepts documentation to learn about potential
+       pitfalls and risks of using <literal>failover=master</literal>.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry xml:id="ini.mysqlnd-ms-plugin-config.lazy-connections">
+     <term>
+      <parameter>lazy_connections</parameter>
+      <type>bool</type>
+     </term>
+     <listitem>
+      <para>
+       Controls the use of lazy connections. Lazy connections
+       are connections which are not opened before the client sends the first
+       connection.
+      </para>
+      <para>
+       It is strongly recommended to use lazy connections.
+       Lazy connections help to keep the number of open connections low.
+       If you disable lazy connections and, for example, configure one MySQL
+       replication master server and two MySQL replication slaves, the
+       plugin will open three connections upon the first call to a
+       connect function although the application might use the master
+       connection only.
+      </para>
+      <para>
+       Lazy connections bare a risk if you make heavy use of actions
+       which change the state of a connection. The plugin does not dispatch
+       all state changing actions to all connections from the connection pool.
+       The few dispatched actions are applied to already opened connections
+       only. Lazy connections opened in the future are not affected.
+       If, for example, the connection character set is changed using a
+       PHP MySQL API call, the plugin will change the character set of all
+       currently opened connection. It will not remember the character set
+       change to apply it on lazy connections opened in the future. As a
+       result the internal connection pool would hold connections using
+       different character sets. This is not desired. Remember that character
+       sets are taken into account for escaping.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry xml:id="ini.mysqlnd-ms-plugin-config.master-on-write">
+     <term>
+      <parameter>master_on_write</parameter>
+      <type>bool</type>
+     </term>
+     <listitem>
+      <para>
+       If set, the plugin will use the master server only after the
+       first statement has been executed on the master. Applications
+       can still send statements to the slaves using SQL hints to
+       overrule the automatic decision.
+      </para>
+      <para>
+       The setting may help with replication lag. If an application runs
+       an <literal>INSERT</literal> the plugin will, by default, use the
+       master to execute all following statements, including
+       <literal>SELECT</literal> statements. This helps to avoid problems
+       with reads from slaves which have not replicated the
+       <literal>INSERT</literal> yet.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry xml:id="ini.mysqlnd-ms-plugin-config.trx-stickiness">
+     <term>
+      <parameter>trx_stickiness</parameter>
+      <type>string</type>
+     </term>
+     <listitem>
+      <para>
+       Transaction stickiness policy. Supported policies:
+       <literal>disabled</literal> (default), <literal>master</literal>.
+      </para>
+      <para>
+       Experimental feature.
+      </para>
+      <para>
+       The setting requires 5.4.0 or newer. If used with PHP older than 5.4.0,
+       the plugin will emit a warning like
+       <literal>(mysqlnd_ms) trx_stickiness strategy is not supported before PHP 5.3.99</literal>.
+      </para>
+      <para>
+       If no transaction stickiness policy is set or,
+       if setting <literal>trx_stickiness=disabled</literal>,
+       the plugin is not transaction aware. Thus, the plugin may load balance
+       connections and switch connections in the middle of a transaction.
+       The plugin is not transaction safe. SQL hints must be used
+       avoid connection switches during a transaction.
+      </para>
+      <para>
+       As of PHP 5.4.0 the mysqlnd library allows the plugin to monitor
+       the <literal>autocommit</literal> mode set by calls to the
+       libraries <literal>trx_autocommit()</literal> function.
+       If setting <literal>trx_stickiness=master</literal> and
+       <literal>autocommit</literal> gets disabled by a PHP MySQL extension
+       invoking the <literal>mysqlnd</literal> library internal
+       function call <literal>trx_autocommit()</literal>, the plugin is made
+       aware of the begin of a transaction. Then, the plugin stops load balancing
+       and directs all statements to the master server until
+       <literal>autocommit</literal> is enabled. Thus, no SQL hints are required.
+      </para>
+      <para>
+       An example of a PHP MySQL API function calling the <literal>mysqlnd</literal>
+       library internal function call <literal>trx_autocommit()</literal> is
+       <function>mysqli_autocommit</function>.
+      </para>
+      <para>
+       Although setting <literal>trx_stickiness=master</literal>, the plugin
+       cannot be made aware of <literal>autocommit</literal> mode changes caused
+       by SQL statements such as <literal>SET AUTOCOMMIT=0</literal>.
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </section>
+
+ <section xml:id="mysqlnd-ms.testing">
+  <title xmlns="http://docbook.org/ns/docbook">Testing</title>
+  <note>
+   <para>
+    The section applies to mysqlnd_ms 1.1.0 or newer, not the 1.0 series.
+   </para>
+  </note>
+  <para>
+   The PECL/mysqlnd_ms test suite is in the <filename>tests/</filename>
+   directory of the source distribution. The test suite consists of standard
+   phpt tests, which are described on the PHP Quality Assurance Teams website.
+  </para>
+  <para>
+   Running the tests requires setting up one to four MySQL servers. Some tests don't
+   connect to MySQL at all. Others require one server for testing. Some require
+   two distinct servers. In some cases two servers are used to emulate a
+   replication setup. In other cases a master and a slave of an existing MySQL replication
+   setup are required for testing. The tests will try to detect how many servers
+   and what kind of servers are given. If the required servers are not found, the
+   test will be skipped automatically.
+  </para>
+  <para>
+   Before running the tests, edit <filename>tests/config.inc</filename> to
+   configure the MySQL servers to be used for testing.
+  </para>
+  <para>
+   The most basic configuration is as follows.
+   <programlisting>
+<![CDATA[
+ putenv("MYSQL_TEST_HOST=localhost");
+ putenv("MYSQL_TEST_PORT=3306");
+ putenv("MYSQL_TEST_USER=root");
+ putenv("MYSQL_TEST_PASSWD=");
+ putenv("MYSQL_TEST_DB=test");
+ putenv("MYSQL_TEST_ENGINE=MyISAM");
+ putenv("MYSQL_TEST_SOCKET=");
+
+ putenv("MYSQL_TEST_SKIP_CONNECT_FAILURE=1");
+ putenv("MYSQL_TEST_CONNECT_FLAGS=0");
+ putenv("MYSQL_TEST_EXPERIMENTAL=0");
+
+ /* replication cluster emulation */
+ putenv("MYSQL_TEST_EMULATED_MASTER_HOST=". getenv("MYSQL_TEST_HOST"));
+ putenv("MYSQL_TEST_EMULATED_SLAVE_HOST=". getenv("MYSQL_TEST_HOST"));
+
+ /* real replication cluster */
+ putenv("MYSQL_TEST_MASTER_HOST=". getenv("MYSQL_TEST_EMULATED_MASTER_HOST"));
+ putenv("MYSQL_TEST_SLAVE_HOST=". getenv("MYSQL_TEST_EMULATED_SLAVE_HOST"));
+]]>
+     </programlisting>
+   </para>
+   <para>
+    <literal>MYSQL_TEST_HOST</literal>, <literal>MYSQL_TEST_PORT</literal> and
+    <literal>MYSQL_TEST_SOCKET</literal> define the hostname,
+    TCP/IP port and Unix domain socket of the default database server.
+    <literal>MYSQL_TEST_USER</literal> and <literal>MYSQL_TEST_PASSWD</literal>
+    contain the user and password needed to connect to the database/schema
+    configured with <literal>MYSQL_TEST_DB</literal>. All configured
+    servers must  have the same database user configured to give access to
+    the test database.
+   </para>
+   <para>
+    Using <literal>host</literal>, <literal>host:port</literal> or <literal>host:/path/to/socket</literal>
+    syntax one can set an alternate  host, host and port or host and socket for any
+    of the servers.
+   <programlisting>
+<![CDATA[
+putenv("MYSQL_TEST_SLAVE_HOST=192.168.78.136:3307"));
+putenv("MYSQL_TEST_MASTER_HOST=myserver_hostname:/path/to/socket"));
+]]>
+     </programlisting>
+   </para>
+ </section>
+
+ <section xml:id="mysqlnd-ms.debugging">
+  <title xmlns="http://docbook.org/ns/docbook">Debugging and Tracing</title>
+  <para>
+   The mysqlnd debug log can be used to debug and trace the actitivities of
+   PECL/mysqlnd_ms. As a mysqlnd PECL/mysqlnd_ms adds trace information to the
+   mysqlnd library debug file. Please, see the
+   <link linkend="ini.mysqlnd.debug"><literal>mysqlnd.debug</literal></link>
+   PHP configuration directive documentation for a detailed description
+   on how to configure the debug log.
+  </para>
+  <para>
+  Configuration setting example to activate the debug log:
+  <programlisting>
+<![CDATA[
+mysqlnd.debug=d:t:x:O,/tmp/mysqlnd.trace
+]]>
+  </programlisting>
+  <note>
+    <para>
+     This feature is only available with a debug build of PHP. Works
+     on Microsoft Windows if using a debug build of PHP and PHP was
+     built using Microsoft Visual C version 9 and above.
+    </para>
+   </note>
+  </para>
+  <para>
+   The debug log shows mysqlnd library and PECL/mysqlnd_ms plugin function calls,
+   similar to a trace log. Mysqlnd library calls are usually prefixed with
+   <literal>mysqlnd_</literal>. PECL/mysqlnd internal calls begin with
+   <literal>mysqlnd_ms</literal>.
+  </para>
+  <para>
+   Example excerpt from the debug log (connect):
+   <programlisting>
+<![CDATA[
+[...]
+>mysqlnd_connect
+| info : host=myapp user=root db=test port=3306 flags=131072
+| >mysqlnd_ms::connect
+| | >mysqlnd_ms_config_json_section_exists
+| | | info : section=[myapp] len=[5]
+| | | >mysqlnd_ms_config_json_sub_section_exists
+| | | | info : section=[myapp] len=[5]
+| | | | info : ret=1
+| | | <mysqlnd_ms_config_json_sub_section_exists
+| | | info : ret=1
+| | <mysqlnd_ms_config_json_section_exists
+[...]
+]]>
+   </programlisting>
+  </para>
+  <para>
+   The debug log is not only useful for plugin developers but also to find the
+   cause of user errors. For example, if your application does not do proper
+   error handling and fails to record error messages, checking the debug
+   and trace log may help finding the cause. Use of the debug log
+   to debug application issues should be considered only if no other
+   option is available. Writing the debug log to disk is a slow
+   operation and may have negative impact on the application
+   performance.
+  </para>
+  <para>
+   Example excerpt from the debug log (connection failure):
+   <programlisting>
+<![CDATA[
+[...]
+| | | | | | | info : adding error [Access denied for user 'root'@'localhost' (using password: YES)] to the list
+| | | | | | | info : PACKET_FREE(0)
+| | | | | | | info : PACKET_FREE(0x7f3ef6323f50)
+| | | | | | | info : PACKET_FREE(0x7f3ef6324080)
+| | | | | | <mysqlnd_auth_handshake
+| | | | | | info : switch_to_auth_protocol=n/a
+| | | | | | info : conn->error_info.error_no = 1045
+| | | | | <mysqlnd_connect_run_authentication
+| | | | | info : PACKET_FREE(0x7f3ef63236d8)
+| | | | | >mysqlnd_conn::free_contents
+| | | | | | >mysqlnd_net::free_contents
+| | | | | | <mysqlnd_net::free_contents
+| | | | | | info : Freeing memory of members
+| | | | | | info : scheme=unix:///tmp/mysql.sock
+| | | | | | >mysqlnd_error_list_pdtor
+| | | | | | <mysqlnd_error_list_pdtor
+| | | | | <mysqlnd_conn::free_contents
+| | | | <mysqlnd_conn::connect
+[...]
+]]>
+   </programlisting>
+  </para>
+  <para>
+   The trace log can also be used to verify correct behaviour
+   of PECL/mysqlnd_ms itself, for example, to check which server has been
+   selected for query execution and why.
+  </para>
+  <para>
+   Example excerpt from the debug log (plugin decision):
+   <programlisting>
+<![CDATA[
+[...]
+>mysqlnd_ms::query
+| info : query=DROP TABLE IF EXISTS test
+| >_mysqlnd_plugin_get_plugin_connection_data
+| | info : plugin_id=5
+| <_mysqlnd_plugin_get_plugin_connection_data
+| >mysqlnd_ms_pick_server_ex
+| | info : conn_data=0x7fb6a7d3e5a0 *conn_data=0x7fb6a7d410d0
+| | >mysqlnd_ms_select_servers_all
+| | <mysqlnd_ms_select_servers_all
+| | >mysqlnd_ms_choose_connection_rr
+| | | >mysqlnd_ms_query_is_select
+[...]
+| | | <mysqlnd_ms_query_is_select
+[...]
+| | | info : Init the master context
+| | | info : list(0x7fb6a7d3f598) has 1
+| | | info : Using master connection
+| | | >mysqlnd_ms_advanced_connect
+| | | | >mysqlnd_conn::connect
+| | | | | info : host=localhost user=root db=test port=3306 flags=131072 persistent=0 state=0
+]]>
+   </programlisting>
+  </para>
+  <para>
+   In this case the statement <literal>DROP TABLE IF EXISTS test</literal> has been
+   executed. Note that the statement string is shown in the log file. You may want
+   to take measures to restrict access to the log for security considerations.
+  </para>
+  <para>
+    The statement has been load balanced using round robin policy,
+    as you can easily guess from the functions name <literal>>mysqlnd_ms_choose_connection_rr</literal>.
+    It has been sent to a master server running on
+    <literal>host=localhost user=root db=test port=3306 flags=131072 persistent=0 state=0</literal>.
+  </para>
+ </section>
+
+ <section xml:id="mysqlnd-ms.monitoring">
+  <title xmlns="http://docbook.org/ns/docbook">Monitoring</title>
+  <para>
+   Plugin activity can be monitored using the mysqlnd trace log,
+   mysqlnd statistics, mysqlnd_ms plugin statistics and external PHP debugging tools.
+   Use of the trace log should be limited to debugging. It is recommended
+   to use the plugins statistics for monitoring.
+  </para>
+  <para>
+   Writing a trace log is a slow operation. If using an external PHP debugging tool,
+   please refer to the vendors manual about its performance impact and the
+   type of information collected. In many cases, external debugging tools will
+   provide call stacks. Often, a call stack or a trace log is more difficult to interpret
+   than the statistics provided by the plugin.
+  </para>
+  <para>
+   Plugin statistics tell how often which kind of cluster node has been used (slave or master),
+   why the node was used, if lazy connections have been used and if global transaction
+   ID injection has been performed. The monitoring information provided enables
+   user to verify plugin decisions and to plan their cluster resources based on usage pattern.
+   The function <function>mysqlnd_ms_get_stats</function>
+   is used to access the statistics. Please, see the functions description for a list
+   of available statistics.
+  </para>
+  <para>
+   Statistics are collected on a per PHP process basis. Their scope is a PHP process.
+   Depending on the PHP deployment model a process may serve one or multiple web requests.
+   If using CGI model, a PHP process serves one web request. If using FastCGI or
+   pre-fork web server models, a PHP process usually serves multiple web requests.
+   The same is the case with a threaded web server. Please, note that threads running
+   in parallel can update the statistics in parallel. Thus, if using a threaded PHP
+   deployment model, statistics can be changed by more than one script at a time. A
+   script cannot rely on the fact that it sees only its own changes to statistics.
+  </para>
+  <para>
+   <example>
+    <title>Verify plugin activity in a non-threaded deployment model</title>
+    <programlisting role="ini">
+<![CDATA[
+mysqlnd_ms.enable=1
+mysqlnd_ms.collect_statistics=1
+]]>
+    </programlisting>
+    <programlisting role="php">
+<![CDATA[
+<?php
+/* Load balanced following "myapp" section rules from the plugins config file (not shown) */
+$mysqli = new mysqli("myapp", "username", "password", "database");
+if (mysqli_connect_errno())
+  /* Of course, your error handling is nicer... */
+  die(sprintf("[%d] %s\n", mysqli_connect_errno(), mysqli_connect_error()));
+
+$stats_before = mysqlnd_ms_get_stats();
+if ($res = $mysqli->query("SELECT 'Read request' FROM DUAL")) {
+  var_dump($res->fetch_all());
+}
+$stats_after = mysqlnd_ms_get_stats();
+if ($stats_after['use_slave'] <= $stats_before['use_slave']) {
+  echo "According to the statistics the read request has not been run on a slave!";
+}
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   Statistics are aggregated for all plugin activities and all connections handled by
+   the plugin. It is not possible to tell how much a certain connection handle has
+   contributed to the overall statistics.
+  </para>
+  <para>
+   Utilizing PHPs <function>register_shutdown_function</function> function or the
+   <literal>auto_append_file</literal> PHP configuration directive it is
+   easily possible to dump statistics into, for example, a log file when a script
+   finishes. Instead of using a log file it is also possible to send the statistics
+   to an external monitoring tool for recording and display.
+  </para>
+  <para>
+   <example>
+    <title>Recording statistics during shutdown</title>
+    <programlisting role="ini">
+<![CDATA[
+mysqlnd_ms.enable=1
+mysqlnd_ms.collect_statistics=1
+error_log=/tmp/php_errors.log
+]]>
+    </programlisting>
+    <programlisting role="php">
+<![CDATA[
+<?php
+function check_stats() {
+  $msg = str_repeat("-", 80) . "\n";
+  $msg .= var_export(mysqlnd_ms_get_stats(), true) . "\n";
+  $msg .= str_repeat("-", 80) . "\n";
+  error_log($msg);
+}
+register_shutdown_function("check_stats");
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+ </section>
+
+</chapter>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
