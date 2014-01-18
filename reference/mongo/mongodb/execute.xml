@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision$ -->
+<!-- EN-Revision: ad4ad5238528d87284f759e2cd21fb6b443c5f62 Maintainer: Ryo Kazama Status: ready -->
+<!-- Reviewed: no -->
+
+<refentry xml:id="mongodb.execute" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <refnamediv>
+  <refname>MongoDB::execute</refname>
+  <refpurpose>在数据库服务器上运行JavaScript</refpurpose>
+ </refnamediv>
+
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <modifier>public</modifier> <type>array</type><methodname>MongoDB::execute</methodname>
+   <methodparam><type>mixed</type><parameter>code</parameter></methodparam>
+   <methodparam choice="opt"><type>array</type><parameter>args</parameter><initializer>array()</initializer></methodparam>
+  </methodsynopsis>
+  <para>
+   MongoDB服务器运行着一个JavaScript引擎。这个方法允许在服务器上执行任意JavaScript代码。如果你想要利用较少资源处理大量集合，或者在服务器上处理一些结果集以减少网络传输，那么这个方法会游泳。
+  </para>
+  <para>
+   在服务器运行JavaScript代码会创建一个写锁定，这意味着它锁定了其他操作的执行。在运行一段耗时较长的代码之前，请考虑到这一点。
+  </para>
+  <para>
+   这是一个数据库指令的包装，它简单的说相当于：
+   <programlisting role="php">
+<![CDATA[
+<?php
+
+public function execute($code, $args) {
+    return $this->command(array('$eval' => $code, 'args' => $args));
+}
+
+?>
+]]>
+   </programlisting>
+  </para>
+  <para>
+   如果所执行的代码只有一个语句，且只有一行，MongoDB隐含一个return语句。这允许一些直观的行为，比如下面的例子返回"foo"：
+  </para>
+  <programlisting role="php">
+<![CDATA[
+<?php
+
+$db->execute('"foo";');
+
+?>
+]]>
+  </programlisting>
+  <para>
+   但是下面这两个例子返回&null;:
+  </para>
+  <programlisting role="php">
+<![CDATA[
+<?php
+
+$db->execute('"bar"; "foo";'); // 多个语句
+
+$db->execute('db.foo.count(
+);'); // 多行
+
+?>
+]]>
+  </programlisting>
+  <para>
+   为了防止意外的行为，最好不要依赖MongoDB决定你的返回值。而是明确的提供一个return语句。上面的例子中，可以把代码改为：
+  </para>
+  <programlisting role="php">
+<![CDATA[
+<?php
+
+$db->execute('"bar"; return "foo";');
+
+$db->execute('return db.foo.count(
+);');
+
+?>
+]]>
+  </programlisting>
+  <para>
+   这样第一个语句会返回"foo"，第二个语句会返回"foo"集合的长度。
+  </para>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term>
+      <parameter>code</parameter>
+     </term>
+     <listitem>
+      <para>
+       <classname>MongoCode</classname>或要执行的字符串
+      </para>
+     </listitem>
+    </varlistentry>   
+    <varlistentry>
+     <term>
+      <parameter>args</parameter>
+     </term>
+     <listitem>
+      <para>
+       给<literal>code</literal>的参数。
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   返回执行结果
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <example>
+   <title>简单的 <function>MongoDB::execute</function> 实例</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+
+$response = $db->execute("function() { return 'Hello, world!'; }");
+echo $response['retval'];
+
+?>
+]]>
+   </programlisting>
+   &example.outputs.similar;
+   <screen>
+Hello, world!
+   </screen>
+  </example>
+  <example>
+   <title>带参数的 <function>MongoDB::execute</function> 实例</title>
+   <para>
+    可选的参数将被传递给JavaScrip函数
+   </para>
+   <programlisting role="php">
+<![CDATA[
+<?php
+
+$response = $db->execute("function(greeting, name) { return greeting+', '+name+'!'; }", array("Good bye", "Joe"));
+echo $response['retval'];
+
+?>
+]]>
+   </programlisting>
+   &example.outputs.similar;
+   <screen>
+Good bye, Joe!
+   </screen>
+  </example>
+  <example>
+   <title>作用域实例</title>
+   <para>
+    如果使用
+    <classname>MongoCode</classname>
+    对象代替字符串作为第一个参数。可以传递一个作用域到将要执行的JavaScript中。
+   </para>
+   <programlisting role="php">
+<![CDATA[
+<?php
+
+$func = 
+    "function(greeting, name) { ".
+        "return greeting+', '+name+', says '+greeter;".
+    "}";
+$scope = array("greeter" => "Fred");
+
+$code = new MongoCode($func, $scope);
+
+$response = $db->execute($code, array("Goodbye", "Joe"));
+echo $response['retval'];
+
+?>
+]]>
+   </programlisting>
+   &example.outputs.similar;
+   <screen>
+Goodbye, Joe, says Fred 
+   </screen>
+  </example>
+ </refsect1>
+</refentry>
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+--> 
