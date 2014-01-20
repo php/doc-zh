@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
+<!-- EN-Revision: 0d66a6cf2c0cad946dd8b766ac6ea09b96989114 Maintainer: daijie Status: ready -->
 <refentry xml:id="function.eval" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>eval</refname>
@@ -8,20 +9,23 @@
  
  <refsect1 role="description">
   &reftitle.description;
-  <methodsynopsis>
+   <methodsynopsis>
    <type>mixed</type><methodname>eval</methodname>
-   <methodparam><type>string</type><parameter>code_str</parameter></methodparam>
+   <methodparam><type>string</type><parameter>code</parameter></methodparam>
   </methodsynopsis>
   <para>
-   把字符串 <parameter>code_str</parameter> 作为PHP代码执行。
-   除了其他，该函数能够执行储存于数据库文本字段内的PHP代码。
+   把字符串 <parameter>code</parameter> 作为PHP代码执行。
   </para>
+  
+  <caution>
   <para>
-   使用 <function>eval</function> 时需注意几个因素：注意字符必须是有效的PHP代码，包括结尾的分号，以不至于解释器在 <function>eval</function> 之后退出。并且正确地转义 <parameter>code_str</parameter> 中的东西。你可以使用一个PHP闭合标签来混合输出HTML和PHP代码。
+   The <function>eval</function> language construct is <emphasis>very dangerous</emphasis>
+    because it allows execution of arbitrary PHP code. <emphasis>Its use thus is
+    discouraged.</emphasis> If you have carefully verified that there is no other option
+    than to use this construct, pay special attention <emphasis>not to pass any user
+    provided data</emphasis> into it without properly validating it beforehand.
   </para>
-  <para>
-   同时需注意eval中的变量会被保留在之后的主脚本中。
-  </para>
+  </caution>
  </refsect1>
 
  <refsect1 role="parameters">
@@ -29,14 +33,31 @@
   <para>
    <variablelist>
     <varlistentry>
-     <term><parameter>code_str</parameter></term>
+     <term><parameter>code</parameter></term>
      <listitem>
       <para>
-      需要被执行的字符串 <parameter>code_str</parameter> 不能包含 <link
-       linkend="language.basic-syntax.phpmode">PHP Opening tags</link>。
+       需要被执行的字符串
+      </para>
+      <para>
+      代码不能包含打开/关闭 <link
+       linkend="language.basic-syntax.phpmode">PHP tags</link>。比如，<literal>'echo "Hi!";'</literal> must be passed instead of
+       <literal>'&lt;? echo "Hi!"; &gt;'</literal>. It is still possible to leave and
+       reenter PHP mode though using the appropriate PHP tags, e.g.
+       <literal>'echo "In PHP mode!"; ?&gt;In HTML mode!&lt;? echo "Back in PHP mode!";'</literal>.
+      </para>
+      <para>
+       Apart from that the passed code must be valid PHP. This includes that all statements
+       must be properly terminated using a semicolon.
+       <literal>'echo "Hi!"'</literal> for example will cause a parse error, whereas
+       <literal>'echo "Hi!";'</literal> will work.
       </para>
       <para>
        <literal>return</literal> 语句会立即中止当前字符串的执行。
+      </para>
+      <para>
+       The code will be executed in the scope of the code calling <function>eval</function>. Thus any
+       variables defined or changed in the <function>eval</function> call will remain visible after
+       it terminates.
       </para>
      </listitem>
     </varlistentry>
@@ -47,7 +68,7 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   <function>eval</function> 返回 &null;，除非在执行的代码中 <literal>return</literal> 了一个值，函数返回该值。
+   <function>eval</function> 返回 &null;，除非在执行的代码中 <literal>return</literal> 了一个值，函数返回传递给 <literal>return</literal> 的值。
    如果在执行的代码中有一个解析错误，<function>eval</function> 返回
    &false;，之后的代码将正常执行。无法使用 <function>set_error_handler</function> 捕获 <function>eval</function> 中的解析错误。
   </para>

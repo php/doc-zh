@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 2b587ab01f833234c6520e5f46e6a87919d23135 Maintainer: daijie Status: ready -->
+<!-- EN-Revision: c782d9acfdd59040513c4d38c857e41845a465fc Maintainer: daijie Status: ready -->
 <!-- Reviewed: no -->
 
 <refentry xml:id="function.mb-send-mail" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -11,7 +11,7 @@
    
  <refsect1 role="description">
   &reftitle.description;
-  <methodsynopsis>
+   <methodsynopsis>
    <type>bool</type><methodname>mb_send_mail</methodname>
    <methodparam><type>string</type><parameter>to</parameter></methodparam>
    <methodparam><type>string</type><parameter>subject</parameter></methodparam>
@@ -55,13 +55,41 @@
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>additional_headers</parameter></term>
+     <term><parameter>additional_headers</parameter>(可选)</term>
      <listitem>
       <para>
-       <parameter>additional_headers</parameter> 被插入到邮件头的末尾。
-       常用于增加额外的头。
-       使用换行符（"\n"）来分隔多行的头。
+       String to be inserted at the end of the email header.
       </para>
+      <para>
+       This is typically used to add extra headers (From, Cc, and Bcc).
+       Multiple extra headers should be separated with a CRLF (\r\n).
+       Validate parameter not to be injected unwanted headers by attackers.
+      </para>
+      <note>
+       <para>
+        When sending mail, the mail <emphasis>must</emphasis> contain
+        a <literal>From</literal> header. This can be set with the 
+        <parameter>additional_headers</parameter> parameter, or a default
+        can be set in &php.ini;.
+       </para>
+       <para>
+        Failing to do this will result in an error
+        message similar to <literal>Warning: mail(): "sendmail_from" not
+        set in php.ini or custom "From:" header missing</literal>.
+        The <literal>From</literal> header sets also
+        <literal>Return-Path</literal> under Windows.
+       </para>
+      </note>
+      <note>
+       <para>
+        If messages are not received, try using a LF (\n) only.
+        Some Unix mail transfer agents (most notably
+        <link xlink:href="&url.qmail;">qmail</link>) replace LF by CRLF
+        automatically (which leads to doubling CR if CRLF is used).
+        This should be a last resort, as it does not comply with
+        <link xlink:href="&url.rfc;2822">RFC 2822</link>.
+       </para>
+      </note>
      </listitem>
     </varlistentry>
     <varlistentry>
@@ -70,6 +98,23 @@
       <para>
        <parameter>additional_parameter</parameter> 是一个 MTA 命令行参数。
        在使用 sendmail 时对设置正确的返回路径头很有帮助。
+      </para>
+      <para>
+       This parameter is escaped by <function>escapeshellcmd</function> internally
+       to prevent command execution. <function>escapeshellcmd</function> prevents
+       command execution, but allows to add addtional parameters. For security reason,
+       this parameter should be validated.
+      </para>
+      <para>
+       Since <function>escapeshellcmd</function> is applied automatically, some characters
+       that are allowed as email addresses by internet RFCs cannot be used. Programs
+       that are required to use these characters <function>mail</function> cannot be used.
+      </para>
+      <para>
+       The user that the webserver runs as should be added as a trusted user to the
+       sendmail configuration to prevent a 'X-Warning' header from being added
+       to the message when the envelope sender (-f) is set using this method.
+       For sendmail users, this file is <filename>/etc/mail/trusted-users</filename>.
       </para>
      </listitem>
     </varlistentry>
