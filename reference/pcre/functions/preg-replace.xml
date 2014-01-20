@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 27440bfeeda2164b2061215172385e2d42afd084 Maintainer: daijie Status: ready -->
+<!-- EN-Revision: 00a507863ece069b2196102e593e4687ae6caefb Maintainer: daijie Status: ready -->
 <refentry xml:id="function.preg-replace" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>preg_replace</refname>
@@ -35,7 +35,7 @@
       </para>
       <para>
        可以使用一些<link linkend="reference.pcre.pattern.modifiers">PCRE修饰符</link>，
-       包括'<literal>e</literal>'(PREG_REPLACE_EVAL)，可以为这个函数指定。
+       包括被弃用的'<literal>e</literal>'(PREG_REPLACE_EVAL)，可以为这个函数指定。
       </para>
      </listitem>
     </varlistentry>
@@ -66,7 +66,7 @@
       这创建了一个独立的<literal>$1</literal>后向引用, 一个独立的原文<literal>1</literal>。
       </para>
       <para>
-      当使用<literal>e</literal>修饰符时, 这个函数会转义一些字符(即：<literal>'</literal>、<literal>"</literal>、
+      当使用被弃用的 <literal>e</literal> 修饰符时, 这个函数会转义一些字符(即：<literal>'</literal>、<literal>"</literal>、
        <literal>\</literal> 和 NULL) 然后进行后向引用替换。当这些完成后请确保后向引用解析完后没有单引号或
        双引号引起的语法错误(比如： <literal>'strlen(\'$1\')+strlen("$2")'</literal>)。确保符合PHP的
        <link linkend="language.types.string">字符串语法</link>，并且符合eval语法。因为在完成替换后，
@@ -119,6 +119,13 @@
   </para>
  </refsect1>
 
+  <refsect1 role="errors">
+  &reftitle.errors;
+  <para>
+   当传入 "\e" 修饰符的时候，会产生一个 <constant>E_DEPRECATED</constant> 级别的错误。
+  </para>
+ </refsect1>
+ 
  <refsect1 role="changelog">
   &reftitle.changelog;
   <para>
@@ -131,6 +138,13 @@
       </row>
      </thead>
      <tbody>
+      <row>
+       <entry>5.5.0</entry>
+       <entry>
+        <literal>/e</literal> 修饰符已经被弃用了。使用
+        <function>preg_replace_callback</function> 代替。参见文档中 <link linkend="reference.pcre.pattern.modifiers.eval">PREG_REPLACE_EVAL</link> 关于安全风险的更多信息。
+       </entry>
+      </row>
       <row>
        <entry>5.1.0</entry>
        <entry>
@@ -242,23 +256,6 @@ echo preg_replace($patterns, $replace, '{startDate} = 1999-5-27');
 $startDate = 5/27/1999
 ]]>
     </screen>
-   </example>
-  </para>
-  <para>
-   <example>
-    <title>使用修饰符'e'</title>
-    <programlisting role="php">
-<![CDATA[
-<?php
-preg_replace("/(<\/?)(\w+)([^>]*>)/e", 
-             "'\\1'.strtoupper('\\2').'\\3'", 
-             $html_body);
-?>
-]]>
-    </programlisting>
-    <para>
-    这可以捕获输入文本中所有的html标签
-    </para>
    </example>
   </para>
   <para>
