@@ -6,38 +6,38 @@
 <chapter xml:id="mysqlnd-ms.quickstart" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <title>快速入门与例子</title>
  <para>
-  mysqlnd 是非常容易使用的 MySQL 主从复制负载均衡插件.
-  这里可以给出一些标准的用户使用 DEMO， 和开始使用时的实用建议.
+  mysqlnd 是非常容易使用的 MySQL 主从复制负载均衡插件。
+  这里会给出用户使用的典型例子，并会提供开始使用的实用建议。
  </para>
  <para>
-  我们强烈建议您阅读相关在 Quickstart 中的相关章节. 这里可以避免再理论、
-  概念和限制等方便的混淆. 我们力劝您一定要阅读相关说明章节中的背景信息, 
-  以避免再实际使用过程中遇到严重的问题.
+  我们强烈建议您阅读相关在 Quickstart 中的相关章节。这里可以避免在理论、
+  概念和限制等方便的混淆。我们力劝您一定要阅读相关说明章节中的背景信息，
+  以避免在实际使用过程中遇到严重的问题。
  </para>
  <para>
-  插件主要工作于异步 MySQL Cluster 使用 PECL mysqlnd_ms, 也就是 
-  MySQL replication (MySQL 主从复制). 一般来说，使用主从复制要比同步的 
-  MySQL Cluster 要复杂，难用. 所以这里能够为使用 MySQL Cluster 的用户提供更多的信息.
+  焦点是将 PECL mysqlnd_ms 用于异步的 MySQL Cluster，也就是 
+  MySQL replication (MySQL 主从复制)。一般来说，使用主从复制要比同步的 
+  MySQL Cluster 要复杂，难用。所以这里能够为使用 MySQL Cluster 的用户提供更多的信息。
  </para>
  <section xml:id="mysqlnd-ms.quickstart.configuration">
   <title>Setup</title>
   <para>
    插件是一个 PHP 的扩展, 可以查看 <link linkend="mysqlnd-ms.installation">installation instructions</link> 
-   学习如何安装 <link xlink:href="&url.pecl.package;mysqlnd_ms">PECL/mysqlnd_ms</link> 扩展.
+   学习如何安装 <link xlink:href="&url.pecl.package;mysqlnd_ms">PECL/mysqlnd_ms</link> 扩展。
   </para>
   <para>
-   插件是 <link linkend="book.mysqlnd">mysqlnd</link> 的一部分， 
-   <link linkend="book.mysqlnd">mysqlnd</link> 需要使用一些 PHP MySQL 扩展 (API) 
-   (<link linkend="ref.mysqli">mysqli</link>, 
-   <link linkend="ref.pdo-mysql">PDO_MYSQL</link>, 
-   <link linkend="ref.mysql">mysql</link>).
+   编译或配置 PHP MySQL 扩展 (API) 
+   (<link linkend="ref.mysqli">mysqli</link>、 
+   <link linkend="ref.pdo-mysql">PDO_MYSQL</link>、 
+   <link linkend="ref.mysql">mysql</link>)，也就是你打算使用的、支持 <link linkend="book.mysqlnd">mysqlnd</link> 的库。 
+   PECL/mysqlnd_ms  是一个 mysqlnd 库的插件。使用任意 PHP MySQL 扩展时，要使用 mysqlnd 必须使用该插件。
   </para>
   <para>
-   然后，在 PHP 配置文件中装载和激活插件的使用 <link linkend="ini.mysqlnd-ms.enable">mysqlnd_ms.enable</link>.
+   然后，使用 <link linkend="ini.mysqlnd-ms.enable">mysqlnd_ms.enable</link> 在 PHP 配置文件中装载和激活插件。
   </para>
   <para>
    <example>
-    <title>Enabling the plugin (php.ini)</title>
+    <title>启用插件(php.ini)</title>
     <programlisting role="ini">
 <![CDATA[
 mysqlnd_ms.enable=1
@@ -47,32 +47,32 @@ mysqlnd_ms.config_file=/path/to/mysqlnd_ms_plugin.ini
     </example>
   </para>
   <para>
-   插件使用自己的配置文件，他在 
-   <link linkend="ini.mysqlnd-ms.config-file">mysqlnd_ms.config_file</link> 中定义, 
-   需要设定全路径指定到使用的配置文件. 请注意配置文件必须是 WEB 启动用户，
-   通过 PHP 能够读取的文件. 请注意, 从 1.4.0 版本开始配置文件变量使用 
+   插件使用他自己的配置文件。使用 PHP 指令
+   <link linkend="ini.mysqlnd-ms.config-file">mysqlnd_ms.config_file</link> 定义插件配置文件的完整路径。
+   该文件必须能被 PHP 读取(比如 web 服务器的用户)。
+   请注意，从 1.4.0 版本开始配置文件变量使用 
    <link linkend="ini.mysqlnd-ms.config-file">mysqlnd_ms.config_file</link>, 
-   以前的 <link linkend="ini.mysqlnd-ms.ini-file">mysqlnd_ms.ini_file</link> 不在使用. 
+   以前的 <link linkend="ini.mysqlnd-ms.ini-file">mysqlnd_ms.ini_file</link> 不再使用。
+   使用旧的、不再有效的指令是一个很常见的错误。
   </para>
   <para>
    在 <link linkend="ini.mysqlnd-ms.config-file">mysqlnd_ms.config_file</link> 
-   指定的目录中，创建保存插件的配置文件.
+   指定的目录中，创建保存插件的配置文件。
   </para>
   <para>
-   插件的配置文件采用 <link linkend="mysqlnd-ms.plugin-ini-json">configuration file</link> 格式,
-   配置写在一个或者多个章节中. 每个章节都包含一个名称, 例如: <literal>myapp</literal>. 
-   每个章节包含自己的配置信息.
+   插件的 <link linkend="mysqlnd-ms.plugin-ini-json">配置文件</link> 基于 <acronym>JSON</acronym> 格式。
+   配置写在一个或者多个章节中。每个章节都包含一个名称，例如： <literal>myapp</literal>。
+   每个章节包含自己的配置信息。
   </para>
   <para>
-    一个章节的配置中，至少要包含 MySQL 主从复制中的 master 服务器和相关 slave 服务器,
-   每个章节只能使用一个 master 服务器. 目前还不能包含多 master 设定.
-   <link linkend="ini.mysqlnd-ms-plugin-config-v2.master">master</link> 用于设定 hostname,
-   port socket 用于设定 MySQL master 服务器信息. MySQL slave 服务器信息使用
-   <link linkend="ini.mysqlnd-ms-plugin-config-v2.slave">slave</link> 设定.
+    一个章节的配置中，至少要包含 MySQL 主从复制中的 master 服务器和相关 slave 服务器。
+   每个章节只能使用一个 master 服务器。 目前还不能完全支持多 master(Multi-master)的设置。
+   <link linkend="ini.mysqlnd-ms-plugin-config-v2.master">master</link> 用于设定 MySQL master 服务器的 hostname、port 或 socket。 而 MySQL slave 服务器信息使用
+   <link linkend="ini.mysqlnd-ms-plugin-config-v2.slave">slave</link> 来设定。
   </para>
   <para>
    <example>
-    <title>最小化的插件配置文件 (mysqlnd_ms_plugin.ini)</title>
+    <title>最基本的插件配置文件 (mysqlnd_ms_plugin.ini)</title>
     <programlisting role="ini">
 <![CDATA[
 {
@@ -92,17 +92,16 @@ mysqlnd_ms.config_file=/path/to/mysqlnd_ms_plugin.ini
     </example>
   </para>
   <para>
-   配置 MySQL slave 服务器列表是必须的，当然他可以是一个空列表. 我们建议至少配置一个 slave 服务器.
-   译者注：请注意上面的方括号，在 <acronym>JSON</acronym> 中代表空内容，而不是语法错误。
+   必须配置 MySQL slave 服务器列表，当然它也可以是空的列表。我们建议至少配置一个 slave 服务器。
   </para>
   <para>
-   服务器列表可以使用 <link linkend="mysqlnd-ms.plugin-ini-json.server-list-syntax">匿名或者命名语法</link>.
-   命名列表包含一个别名, 例如 <literal>master_0</literal> 可以用于上面的例子中的别名. 
-   在这里的帮助中, 将使用大量的命名语法.
+   服务器列表可以使用 <link linkend="mysqlnd-ms.plugin-ini-json.server-list-syntax">匿名或者非匿名语法</link>。
+   非匿名列表包含一个别名，例如 <literal>master_0</literal> 可用于上面的例子。
+   在这里，将使用更详细的非匿名语法。
   </para>
   <para>
    <example>
-    <title>建议的插件配置文件 (mysqlnd_ms_plugin.ini)</title>
+    <title>建议最基本的插件配置文件 (mysqlnd_ms_plugin.ini)</title>
     <programlisting role="ini">
 <![CDATA[
 {
@@ -126,25 +125,24 @@ mysqlnd_ms.config_file=/path/to/mysqlnd_ms_plugin.ini
     </example>
   </para>
   <para>
-   如果这里至少有 2 个服务器, 插件可以进行负载均衡, 并且切换连接. 切换链接并不是透明化的,
-   并且可能引起必然的事件. 本参考中包含
-   <link linkend="mysqlnd-ms.pooling">connection pooling and switching</link>,
-   <link linkend="mysqlnd-ms.transaction">transaction handling</link>,
-   <link linkend="mysqlnd-ms.failover">fail over</link>
-   <link linkend="mysqlnd-ms.loadbalancing">load balancing</link> 和
-   <link linkend="mysqlnd-ms.rwsplit">read-write splitting</link> 可以提供更多的帮助信息.
+   如果这里至少有两个服务器，插件可以负载均衡、切换连接。切换链接并不总是透明的，在某些具体条件下会导致问题。本参考中包含
+   <link linkend="mysqlnd-ms.pooling">连接池和切换</link>，
+   <link linkend="mysqlnd-ms.transaction">事务处理</link>，
+   <link linkend="mysqlnd-ms.failover">故障转移</link>
+   <link linkend="mysqlnd-ms.loadbalancing">负载均衡</link> 和
+   <link linkend="mysqlnd-ms.rwsplit">读写分离</link>。稍后在本指南中将具体描述更多潜在的陷阱。
   </para>
   <para>
-   设置至少一个 master 和一个 slave, 应用负责连接切换.
+   应用需要处理连接切换过程中潜在的问题，配置一个 master 和至少一个 slave，这样就可以切换，因此能发现相关问题。
   </para>
   <para>
-   配置中的 master 和 slave 不一定是一个 MySQL 主从同步的一部分. 
-   为了测试, 你可以使用一个数据库服务器, 像如下的设定, 这样可以进行连接切换测试. 
-   然而, 这样的设定, 将不会受到真正主从同步的延迟影响.
+   MySQL 主从同步并不需要你配置 master 和 slave。
+   为了测试的目的，你可以使用单个 MySQL 服务器，让插件认为是 master 和 slave 服务器，就像以下的设置。这样可以帮助你在连接切换中检测到很多潜在问题。 
+   不过，这样的设置不容易发生因为主从同步延迟而导致的问题。
   </para>
   <para>
    <example>
-    <title>使用一个服务器同时作为 master 和 slave (testing only!)</title>
+    <title>使用一个服务器同时作为 master 和 slave（仅用于测试！）</title> 
     <programlisting role="ini">
 <![CDATA[
 {
@@ -1557,22 +1555,21 @@ var_dump($res->fetch_assoc());
   </para>
  </section>
  <section xml:id="mysqlnd-ms.quickstart.failover">
-  <title>Failover</title>
+  <title>故障转移</title>
   <para>
    默认情况下，插件并不会在连接一个服务器失败的时候进行故障处理。这是为了防止
-   <link linkend="mysqlnd-ms.quickstart.connectionpooling">connection state</link>。
-   这里建议手动的对连接错误进行处理，你可以捕获这个错误，重新建立连接，执行的你的查询，
-   如同下面展示的那样。
+   <link linkend="mysqlnd-ms.quickstart.connectionpooling">连接状态</link>中的陷阱。
+   这里建议手动的对连接错误进行处理，你可以捕获这个错误，重新建立连接，执行的你的查询，如同下面展示的那样。
   </para>
   <para>
    如果连接状态并不是由于你的操作引起的，你可以选择自动进行错误处理或者无视他。
    通过配置可以实现，当 master 出现故障，可以在重新连接 master 之前，自动尝试连接
-   一台 slave 去自动处理故障，或者无视这个错误。因为 <link linkend="mysqlnd-ms.failover">automatic failover</link>
+   一台 slave 去自动处理故障，或者无视这个错误。因为 <link linkend="mysqlnd-ms.failover">自动故障转移</link>
    并不是一个十分安全的方式，这里就不做过多讨论了，在 concepts section 中会有更多的说明。
   </para>
   <para>
    <example>
-    <title>Manual failover, automatic optional</title>
+    <title>手动故障转移，可选自动</title>
     <programlisting role="ini">
 <![CDATA[
   {
@@ -1602,7 +1599,7 @@ var_dump($res->fetch_assoc());
   </para>
   <para>
    <example>
-    <title>Manual failover</title>
+    <title>手动故障转移</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -1640,7 +1637,7 @@ if ($res) {
   </para>
  </section>
  <section xml:id="mysqlnd-ms.quickstart.partitioning">
-  <title>Partitioning and Sharding</title>
+  <title>分区和分片</title>
   <para>
    数据库群组是由于各种各样的原因建立的，他可以提升处理能力、容忍错误，并且
    提升大量服务器同时工作的的性能。群组有时会组合分区和共享功能，来将大量复杂的任务
