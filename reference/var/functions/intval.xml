@@ -1,41 +1,175 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: nio Status: ready -->
-<!-- splitted from ./en/functions/var.xml, last change in rev 1.2 -->
+<!-- EN-Revision: 5554e138cc713c534ba25ba9faf28cde3a648056 Maintainer: daijie Status: ready -->
   <refentry xml:id="function.intval" xmlns="http://docbook.org/ns/docbook">
    <refnamediv>
     <refname>intval</refname>
     <refpurpose>获取变量的整数值</refpurpose>
    </refnamediv>
-   <refsect1>
-    <title>描述</title>
+   
+ <refsect1 role="description">
+  &reftitle.description;
      <methodsynopsis>
-      <type>int</type><methodname>intval</methodname>
-      <methodparam><type>mixed</type><parameter>var</parameter></methodparam>
-      <methodparam choice="opt"><type>int</type><parameter>base</parameter></methodparam>
-     </methodsynopsis>
-    <simpara>
-     通过使用特定的进制转换（默认是十进制），返回变量 <parameter>var</parameter>
-     的 <type>integer</type> 数值。 
-    </simpara>
-    <simpara>
-     <parameter>var</parameter> 可以是任何标量类型。<function>intval</function>
-     不能用于 <type>array</type> 或 <type>object</type>。
-    </simpara>
-    <note>
-     <para>
-      除非 <parameter>var</parameter>
-      参数是字符串，否则 <function>intval</function>
-      的 <parameter>base</parameter>
-      参数不会有效果。
-     </para>
-    </note>
-    <simpara>
-     参见 <function>floatval</function>、<function>strval</function>、<function>settype</function>
-     和 <link linkend="language.types.type-juggling">类型戏法</link>。
-    </simpara>
-   </refsect1>
+   <type>int</type><methodname>intval</methodname>
+   <methodparam><type>mixed</type><parameter>var</parameter></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>base</parameter><initializer>10</initializer></methodparam>
+  </methodsynopsis>
+    <para>
+     通过使用指定的进制 <parameter>base</parameter> 转换（默认是十进制），返回变量 <parameter>var</parameter>
+     的 <type>integer</type> 数值。
+      <function>intval</function> 不能用于 object，否则会产生  <constant>E_NOTICE</constant> 错误并返回 1。
+    </para>
+ </refsect1>
+  
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>var</parameter></term>
+     <listitem>
+      <para>
+       要转换成 integer 的数量值
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>base</parameter></term>
+     <listitem>
+      <para>
+       转化所使用的进制
+      </para>
+      <note>
+       <para>
+        如果 <parameter>base</parameter> 是 0，通过检测 <parameter>var</parameter> 的格式来决定使用的进制：
+        <itemizedlist>
+         <listitem>
+          <simpara>
+           如果字符串包括了 "0x" (或 "0X") 的前缀，使用 16 进制 (hex)；否则，
+          </simpara>
+         </listitem>
+         <listitem>
+          <simpara>
+           如果字符串以 "0" 开始，使用 8  进制(octal)；否则，
+          </simpara>
+         </listitem>
+         <listitem>
+          <simpara>
+           将使用 10 进制 (decimal)。
+          </simpara>
+         </listitem>
+        </itemizedlist>
+       </para>
+      </note>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   成功时返回 <parameter>var</parameter> 的 integer 值，失败时返回 0。
+   空的 array 返回 0，非空的 array 返回 1。
+  </para>
+  <para>
+   最大的值取决于操作系统。 32 位系统最大带符号的 integer 范围是 -2147483648 到 2147483647。举例，在这样的系统上， <literal>intval('1000000000000')</literal> 会返回 
+   2147483647。64 位系统上，最大带符号的 integer 值是 
+   9223372036854775807。
+  </para>
+  <para>
+   字符串有可能返回 0，虽然取决于字符串最左侧的字符。   
+   使用
+   <link linkend="language.types.integer.casting">整型转换</link> 
+   的共同规则。
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title><function>intval</function> 例子</title>
+    <para>
+     下面的例子运行于 32 位系统上。
+    </para>
+    <programlisting role="php">
+<![CDATA[
+<?php
+echo intval(42);                      // 42
+echo intval(4.2);                     // 4
+echo intval('42');                    // 42
+echo intval('+42');                   // 42
+echo intval('-42');                   // -42
+echo intval(042);                     // 34
+echo intval('042');                   // 42
+echo intval(1e10);                    // 1410065408
+echo intval('1e10');                  // 1
+echo intval(0x1A);                    // 26
+echo intval(42000000);                // 42000000
+echo intval(420000000000000000000);   // 0
+echo intval('420000000000000000000'); // 2147483647
+echo intval(42, 8);                   // 42
+echo intval('42', 8);                 // 34
+echo intval(array());                 // 0
+echo intval(array('foo', 'bar'));     // 1
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+ </refsect1>
+
+ <refsect1 role="notes">
+  &reftitle.notes;
+  <note>
+   <para>
+    除非 <parameter>var</parameter> 是一个字符串，否则 <parameter>base</parameter> 不会起作用。
+   </para>
+  </note>
+ </refsect1>
+
+ <refsect1 role="changelog"><!-- {{{ -->
+  &reftitle.changelog;
+  <para>
+   <informaltable>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>&Version;</entry>
+       <entry>&Description;</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>5.1.0</entry>
+       <entry>
+        当传入的 <parameter>var</parameter> 是 object，将会抛出 <constant>E_NOTICE</constant> 并返回 1。
+       </entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </informaltable>
+  </para>
+ </refsect1><!-- }}} -->
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>boolval</function></member>
+    <member><function>floatval</function></member>
+    <member><function>strval</function></member>
+    <member><function>settype</function></member>
+    <member><function>is_numeric</function></member>
+    <member><link linkend="language.types.type-juggling">类型转换的判别</link></member>
+    <member><link linkend="ref.bc">BCMath 任意精度数学函数</link></member>
+   </simplelist>
+  </para>
+ </refsect1>
+   
+   
   </refentry>
 
 <!-- Keep this comment at the end of the file
