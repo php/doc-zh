@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 70642d85d00cb893efced8e6e1ddf1d31085dc3b Maintainer: HonestQiao Status: ready -->
+<!-- EN-Revision: 65e697ff671608989432a6e6bf8ae8128b2be2c7 Maintainer: HonestQiao Status: ready -->
 <!-- Reviewed: no Maintainer: HonestQiao -->
 <!-- CREDITS: dallas -->
 <refentry xml:id="function.mysql-affected-rows" xmlns="http://docbook.org/ns/docbook">
@@ -8,11 +8,23 @@
   <refname>mysql_affected_rows</refname>
   <refpurpose>取得前一次 MySQL 操作所影响的记录行数</refpurpose>
  </refnamediv>
+ 
+ 
+ <refsynopsisdiv>
+  <warning>
+   &mysql.alternative.note;
+   <simplelist role="alternatives">
+    <member><function>mysqli_affected_rows</function></member>
+    <member><methodname>PDOStatement::rowCount</methodname></member>
+   </simplelist>
+  </warning>
+ </refsynopsisdiv>
+ 
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
    <type>int</type><methodname>mysql_affected_rows</methodname>
-   <methodparam choice="opt"><type>resource</type><parameter>link_identifier</parameter></methodparam>
+   <methodparam choice="opt"><type>resource</type><parameter>link_identifier</parameter><initializer>NULL</initializer></methodparam>
   </methodsynopsis>
   <para>
    取得最近一次与 <parameter>link_identifier</parameter> 关联的
@@ -45,6 +57,9 @@
   </para>
   <para>
    REPLACE 语句首先删除具有相同主键的记录，然后插入一个新记录。本函数返回的是被删除的记录数加上被插入的记录数。
+  </para>
+  <para>
+   "INSERT ... ON DUPLICATE KEY UPDATE" 这种情况的查询，当执行了一次 INSERT 返回的值会是 <literal>1</literal>；如果是对已经存在的记录执行一次 UPDATE 将返回 <literal>2</literal>。 
   </para>
  </refsect1>
 
@@ -113,15 +128,6 @@ Updated Records: 10
  <refsect1 role="notes">
   &reftitle.notes;
   <note>
-   &mysql.alternative.note;
-   <para>
-    <simplelist>
-     <member><function>mysqli_affected_rows</function></member>
-     <member><methodname>PDOStatement::rowCount</methodname></member>
-    </simplelist>
-   </para>
-  </note>
-  <note>
    <title>事务处理</title>
    <para>
     如果使用事务处理（transactions），需要在 INSERT，UPDATE 或 DELETE 查询后调用
@@ -133,6 +139,14 @@ Updated Records: 10
    <para>
     要获取 SELECT 所返回的行数，可以用
     <function>mysql_num_rows</function>。
+   </para>
+  </note>
+  <note>
+   <title>Cascaded 外键</title>
+   <para>
+     <function>mysql_affected_rows</function> does not count rows affected
+     implicitly through the use of ON DELETE CASCADE and/or ON UPDATE CASCADE 
+     in foreign key constraints.
    </para>
   </note>
  </refsect1>

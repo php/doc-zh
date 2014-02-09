@@ -1,14 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 96c9d88bad9a7d7d44bfb7f26c226df7ee9ddf26 Maintainer: HonestQiao Status: ready -->
-<!-- Reviewed: no Maintainer: HonestQiao -->
-<refentry xml:id="function.mysql-fetch-assoc" xmlns="http://docbook.org/ns/docbook">
+<!-- EN-Revision: 65e697ff671608989432a6e6bf8ae8128b2be2c7 Maintainer: HonestQiao Status: ready -->
+<!-- Reviewed: yes Maintainer: daijie -->
+<refentry xml:id="function.mysql-fetch-assoc" xmlns="http://docbook.org/ns/docbook" xmlns:phd="http://www.php.net/ns/phd">
    <refnamediv>
     <refname>mysql_fetch_assoc</refname>
     <refpurpose>
      从结果集中取得一行作为关联数组
     </refpurpose>
    </refnamediv>
+ 
+ <refsynopsisdiv>
+  <warning>
+   &mysql.alternative.note;
+   <simplelist role="alternatives">
+    <member><function>mysqli_fetch_assoc</function></member>
+    <member><methodname phd:args="PDO::FETCH_ASSOC">PDOStatement::fetch</methodname></member>
+   </simplelist>
+  </warning>
+ </refsynopsisdiv>
+ 
  <refsect1 role="description">
   &reftitle.description;
      <methodsynopsis>
@@ -16,86 +27,10 @@
       <methodparam><type>resource</type><parameter>result</parameter></methodparam>
      </methodsynopsis>
     <para>
-     返回根据从结果集取得的行生成的关联数组，如果没有更多行则返回 &false;。
-    </para>
-    <para>
+     返回对应结果集的关联数组，并且继续移动内部数据指针。
      <function>mysql_fetch_assoc</function> 和用
-     <function>mysql_fetch_array</function> 加上第二个可选参数
-     MYSQL_ASSOC 完全相同。它仅仅返回关联数组。这也是
-     <function>mysql_fetch_array</function>
-     起初始的工作方式。如果在关联索引之外还需要数字索引，用
-     <function>mysql_fetch_array</function>。
-    </para>
-    <para>
-     如果结果中的两个或以上的列具有相同字段名，最后一列将优先。要访问同名的其它列，要么用
-     <function>mysql_fetch_row</function>
-     来取得数字索引或给该列起个别名。参见
-     <function>mysql_fetch_array</function> 例子中有关别名说明。
-    </para>
-    <para>
-     有一点很重要必须指出，用
-     <function>mysql_fetch_assoc</function>
-     并<emphasis>不明显</emphasis> 比用
-     <function>mysql_fetch_row</function>
-     慢，而且还提供了明显更多的值。
-    </para>
-    &database.field-case;
-    <para>
-     <example>
-      <title>扩展的 <function>mysql_fetch_assoc</function> 例子</title>
-      <programlisting role="php">
-<![CDATA[
-<?php
-
-    $conn = mysql_connect("localhost", "mysql_user", "mysql_password");
-
-    if (!$conn) {
-        echo "Unable to connect to DB: " . mysql_error();
-        exit;
-    }
-
-    if (!mysql_select_db("mydbname")) {
-        echo "Unable to select mydbname: " . mysql_error();
-        exit;
-    }
-
-    $sql = "SELECT id as userid, fullname, userstatus
-            FROM   sometable
-            WHERE  userstatus = 1";
-
-    $result = mysql_query($sql);
-
-    if (!$result) {
-        echo "Could not successfully run query ($sql) from DB: " . mysql_error();
-        exit;
-    }
-
-    if (mysql_num_rows($result) == 0) {
-        echo "No rows found, nothing to print so am exiting";
-        exit;
-    }
-
-    // While a row of data exists, put that row in $row as an associative array
-    // Note: If you're expecting just one row, no need to use a loop
-    // Note: If you put extract($row); inside the following loop, you'll
-    //       then create $userid, $fullname, and $userstatus
-    while ($row = mysql_fetch_assoc($result)) {
-        echo $row["userid"];
-        echo $row["fullname"];
-        echo $row["userstatus"];
-    }
-
-    mysql_free_result($result);
-
-?>
-]]>
-      </programlisting>
-     </example>
-    </para>
-    <para>
-     参见
-     <function>mysql_fetch_row</function>，<function>mysql_fetch_array</function>，<function>mysql_query</function> 和
-     <function>mysql_error</function>。
+     <function>mysql_fetch_array</function> 加上第二个可选参数 
+     MYSQL_ASSOC 完全相同。它仅仅返回关联数组。
     </para>
    </refsect1>
 
@@ -111,17 +46,14 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   Returns an associative array of strings that corresponds to the fetched row, or 
-   &false; if there are no more rows.
+    返回根据从结果集取得的行生成的关联数组；如果没有更多行则返回 &false;。
   </para>
   <para>
-   If two or more columns of the result have the same field names,
-   the last column will take precedence. To access the other
-   column(s) of the same name, you either need to access the
-   result with numeric indices by using
-   <function>mysql_fetch_row</function> or add alias names.
-   See the example at the <function>mysql_fetch_array</function>
-   description about aliases.
+   如果结果中的两个或以上的列具有相同字段名，最后一列将优先。要访问同名的其它列，要么用
+     <function>mysql_fetch_row</function>
+     来取得数字索引或给该列起个别名。
+     参见
+     <function>mysql_fetch_array</function> 例子中有关别名说明。
   </para>
  </refsect1>
 
@@ -129,7 +61,7 @@
   &reftitle.examples;
   <para>
    <example>
-    <title>An expanded <function>mysql_fetch_assoc</function> example</title>
+    <title>扩展的 <function>mysql_fetch_assoc</function> 例子</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -184,13 +116,13 @@ mysql_free_result($result);
  <refsect1 role="notes">
   &reftitle.notes;
   <note>
-   <title>Performance</title>
+   <title>性能</title>
    <para>
-    An important thing to note is that using 
-    <function>mysql_fetch_assoc</function> is <emphasis>not 
-    significantly</emphasis> slower than using
-    <function>mysql_fetch_row</function>, while it 
-    provides a significant added value.
+    必须指出一个要点：
+     <function>mysql_fetch_assoc</function> 比
+     <function>mysql_fetch_row</function>
+     并<emphasis>不明显</emphasis> 
+     慢，而且还提供了更多有用的值。
    </para>
   </note>
   &database.field-case;

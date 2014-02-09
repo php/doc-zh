@@ -1,83 +1,76 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
 <!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
+<!-- EN-Revision: 65e697ff671608989432a6e6bf8ae8128b2be2c7 Maintainer: dallas Status: ready -->
+<!-- Reviewed: yes Maintainer: daijie -->
   <refentry xml:id="function.mysql-query" xmlns="http://docbook.org/ns/docbook">
    <refnamediv>
     <refname>mysql_query</refname>
     <refpurpose>发送一条 MySQL 查询</refpurpose>
    </refnamediv>
-   <refsect1>
-    <title>说明</title>
-     <methodsynopsis>
-      <type>resource</type><methodname>mysql_query</methodname>
-      <methodparam><type>string</type><parameter>query</parameter></methodparam>
-      <methodparam choice="opt"><type>resource</type><parameter>link_identifier</parameter></methodparam>
-     </methodsynopsis>
+   
+ <refsynopsisdiv>
+  <warning>
+   &mysql.alternative.note;
+   <simplelist role="alternatives">
+    <member><function>mysqli_query</function></member>
+    <member><methodname>PDO::query</methodname></member>
+   </simplelist>
+  </warning>
+ </refsynopsisdiv>
+   
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <type>resource</type><methodname>mysql_query</methodname>
+   <methodparam><type>string</type><parameter>query</parameter></methodparam>
+   <methodparam choice="opt"><type>resource</type><parameter>link_identifier</parameter><initializer>NULL</initializer></methodparam>
+  </methodsynopsis>
     <para>
      <function>mysql_query</function>
-     向与指定的连接标识符关联的服务器中的当前活动数据库发送一条查询。如果没有指定
-     <parameter>link_identifier</parameter>，则使用上一个打开的连接。如果没有打开的连接，本函数会尝试无参数调用
-     <function>mysql_connect</function>
-     函数来建立一个连接并使用之。查询结果会被缓存。
+     向与指定的 <parameter>link_identifier</parameter> 关联的服务器中的当前活动数据库发送一条查询（不支持多条查询）。
     </para>
-    <note>
-     <para>
-      查询字符串不应以分号结束。
-     </para>
-    </note>
-    <para>
-     <function>mysql_query</function> 仅对
-     SELECT，SHOW，EXPLAIN 或 DESCRIBE
-     语句返回一个资源标识符，如果查询执行不正确则返回
-     &false;。对于其它类型的 SQL
-     语句，<function>mysql_query</function>
-     在执行成功时返回 &true;，出错时返回 &false;。非
-     &false; 的返回值意味着查询是合法的并能够被服务器执行。这并不说明任何有关影响到的或返回的行数。
-     很有可能一条查询执行成功了但并未影响到或并未返回任何行。
-    </para>
-    <para>
-     以下查询语法上有错，因此
-     <function>mysql_query</function>
-     失败并返回 &false;：
-     <example>
-      <title><function>mysql_query</function> 例子</title>
-      <programlisting role="php">
-<![CDATA[
-<php
-$result = mysql_query("SELECT * WHERE 1=1")
-    or die("Invalid query: " . mysql_error());
-?>
-]]>
-      </programlisting>
-     </example>
-    </para>
-    <para>
-     以下查询当
-     <literal>my_col</literal>
-     并不是表
-     <literal>my_tbl</literal>
-     中的列时语义上有错，因此
-     <function>mysql_query</function>
-     失败并返回 &false;：
-     <example>
-      <title><function>mysql_query</function></title>
-      <programlisting role="php">
-<![CDATA[
-<?php
-$result = mysql_query("SELECT my_col FROM my_tbl")
-    or die("Invalid query: " . mysql_error());
-?>
-]]>
-      </programlisting>
-     </example>
-    </para>
-    <para>
-     如果没有权限访问查询语句中引用的表时，<function>mysql_query</function>
-     也会返回 &false;。
-    </para>
-    <para>
-     假定查询成功，可以调用
+   </refsect1>
+   
+    <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>query</parameter></term>
+     <listitem>
+      <para>
+       SQL 查询语句
+      </para>
+      <para>
+       查询字符串不应以分号结束。
+       查询中被嵌入的数据应该<link
+       linkend="function.mysql-real-escape-string">正确地转义</link>。
+      </para>
+     </listitem>
+    </varlistentry>
+    &mysql.linkid.description;
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   <function>mysql_query</function> 仅对
+     SELECT，SHOW，DESCRIBE, EXPLAIN 和其他语句
+     语句返回一个 <type>resource</type>，如果查询出现错误则返回 &false;。
+  </para>
+  <para>
+   对于其它类型的 SQL
+     语句，比如INSERT, UPDATE, DELETE, DROP 之类， <function>mysql_query</function>
+     在执行成功时返回 &true;，出错时返回 &false;。
+  </para>
+  <para>
+   返回的结果资源应该传递给 <function>mysql_fetch_array</function> 和其他函数来处理结果表,取出返回的数据。
+  </para>
+  <para>
+   假定查询成功，可以调用
      <function>mysql_num_rows</function>
      来查看对应于 SELECT
      语句返回了多少行，或者调用
@@ -85,22 +78,104 @@ $result = mysql_query("SELECT my_col FROM my_tbl")
      来查看对应于
      DELETE，INSERT，REPLACE 或 UPDATE
      语句影响到了多少行。
-    </para>
+  </para>
+  <para>
+   如果没有权限访问查询语句中引用的表时，<function>mysql_query</function>
+     也会返回 &false;。
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title>无效的查询</title>
     <para>
-     仅对 SELECT，SHOW，DESCRIBE 或 EXPLAIN 语句
+     以下查询语法上有错，因此
      <function>mysql_query</function>
-     才会返回一个新的结果标识符，可以将其传递给
-     <function>mysql_fetch_array</function>
-     和其它处理结果表的函数。处理完结果集后可以通过调用
-     <function>mysql_free_result</function>
-     来释放与之关联的资源，尽管脚本执行完毕后会自动释放内存。
+     失败并返回 &false;。
     </para>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$result = mysql_query('SELECT * WHERE 1=1');
+if (!$result) {
+    die('Invalid query: ' . mysql_error());
+}
+
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   <example>
+    <title>有效的查询</title>
     <para>
-     参见
-     <function>mysql_num_rows</function>，<function>mysql_affected_rows</function>，<function>mysql_unbuffered_query</function>，<function>mysql_free_result</function>，<function>mysql_fetch_array</function>，<function>mysql_fetch_row</function>，<function>mysql_fetch_assoc</function>，<function>mysql_result</function>，<function>mysql_select_db</function> 和
-     <function>mysql_connect</function>。
+     以下查询语法正确，所以 <function>mysql_query</function>
+     返回了一个 <type>resource</type>。
     </para>
-   </refsect1>
+    <programlisting role="php">
+<![CDATA[
+<?php
+// 这应该由用户提供,下面是一个示例
+$firstname = 'fred';
+$lastname  = 'fox';
+
+// 构造查询
+// 这是执行 SQL 最好的方式
+// 更多例子参见 mysql_real_escape_string()
+$query = sprintf("SELECT firstname, lastname, address, age FROM friends 
+    WHERE firstname='%s' AND lastname='%s'",
+    mysql_real_escape_string($firstname),
+    mysql_real_escape_string($lastname));
+
+// 执行查询
+$result = mysql_query($query);
+
+// 检查结果
+// 下面显示了实际发送给 MySQL 的查询，以及出现的错误。这对调试很有帮助。
+if (!$result) {
+    $message  = 'Invalid query: ' . mysql_error() . "\n";
+    $message .= 'Whole query: ' . $query;
+    die($message);
+}
+
+// 结果的使用
+// 尝试 print $result 并不会取出结果资源中的信息
+// 所以必须至少使用其中一个 mysql 结果函数
+// 参见 mysql_result(), mysql_fetch_array(), mysql_fetch_row() 等。
+while ($row = mysql_fetch_assoc($result)) {
+    echo $row['firstname'];
+    echo $row['lastname'];
+    echo $row['address'];
+    echo $row['age'];
+}
+
+// 释放关联结果集的资源
+// 在脚本结束的时候会自动进行
+mysql_free_result($result);
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>mysql_connect</function></member>
+    <member><function>mysql_error</function></member>
+    <member><function>mysql_real_escape_string</function></member>
+    <member><function>mysql_result</function></member>
+    <member><function>mysql_fetch_assoc</function></member>
+    <member><function>mysql_unbuffered_query</function></member>
+   </simplelist>
+  </para>
+ </refsect1>
+   
   </refentry>
 
 <!-- Keep this comment at the end of the file
