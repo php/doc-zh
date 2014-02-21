@@ -17,8 +17,19 @@
    <methodparam choice="opt"><type>array</type><parameter>paramters</parameter></methodparam>
   </methodsynopsis>
   <para>
-
-  </para>
+    将当前的请求转交给另外的Action.
+   </para>
+   <note>
+    <para>
+     调用<methodname>Yaf_Controller_Abstract::forward</methodname>以后,
+     不会直接立即跳转到目的Action执行, 而是会在当前的Action执行完成后,
+     下一轮的DispatchLoop中, 交给目的Action.
+    </para>
+    <para>
+      所以, 如果你希望立即跳转到目的Action,
+      那么请使用return结束当前的执行流程.
+    </para>
+   </note>
  </refsect1>
 
  <refsect1 role="parameters">
@@ -28,7 +39,7 @@
     <term><parameter>module</parameter></term>
     <listitem>
      <para>
-      
+       要跳转的目的Action的Module, 如果是NULL, 则默认Module会被采用.
      </para>
     </listitem>
    </varlistentry>
@@ -36,7 +47,7 @@
     <term><parameter>controller</parameter></term>
     <listitem>
      <para>
-      
+       要跳转的目的Action的Controller, 如果是NULL, 则默认Controller会被采用.
      </para>
     </listitem>
    </varlistentry>
@@ -44,7 +55,7 @@
     <term><parameter>action</parameter></term>
     <listitem>
      <para>
-      
+      要跳转的目的Action.
      </para>
     </listitem>
    </varlistentry>
@@ -52,20 +63,64 @@
     <term><parameter>paramters</parameter></term>
     <listitem>
      <para>
-      
+      跳转参数,
+      可以在目的Action中通过<methodname>Yaf_Request_Abstrace::getParam</methodname>来获取.
      </para>
     </listitem>
    </varlistentry>
   </variablelist>
  </refsect1>
 
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <example>
+   <title><function>Yaf_Controller_Abstract::forward</function>例子</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+class IndexController extends Yaf_Controller_Abstract
+{
+    public function indexAction(){   
+         $logined = $_SESSION["login"];
+         if (!$logined) {
+             $this->forward("login", array("from" => "Index")); // 跳转到login Action
+             return FALSE;  // return立即结束当前的执行流程, 跳转到目的Action
+                            // 而这里的FALSE是告诉Yaf不要自动渲染这个Action的视图
+         }
+
+         // other processes
+    }
+
+    public function loginAction() {
+         echo "login, redirected from ", $this->_request->getParam("from") , " action";
+    }
+}
+?>
+]]>
+   </programlisting>
+   &example.outputs.similar;
+   <screen>
+<![CDATA[
+   login, redirected from Index action
+]]>
+   </screen>
+  </example>
+ </refsect1>
+
+
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-
+    return FALSE on failure
   </para>
  </refsect1>
 
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <simplelist>
+   <member><methodname>Yaf_Request_Abstrace::getParam</methodname></member>
+  </simplelist>
+ </refsect1>
 
 </refentry>
 
