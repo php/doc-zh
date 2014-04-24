@@ -1,0 +1,540 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision$ -->
+<!-- EN-Revision: 0 Maintainer: yuanyuqiang Status: ready -->
+<!-- Reviewed: no -->
+
+<chapter xml:id="features.dtrace" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <title>DTrace 动态跟踪</title>
+
+ <sect1 xml:id="features.dtrace.introduction">
+  <title>PHP 和 DTrace 介绍</title>
+
+  <para>
+   包括 Solaris，Mac OS X，Oracle Linux 和 BSD 在内的很多操作系统
+   都提供了 DTrace 跟踪调试框架，它永远可用，并且额外消耗极低。
+   DTrace 可以跟踪操作系统行为和用户程序的执行情况。
+   它可以显示参数值，也可以用来分析性能问题。
+   用户可以使用 DTrace D 脚本语言创建脚本文件来监控探针，进而高效分析数据指针。
+  </para>
+
+  <para>
+   除非用户使用 DTrace D 脚本激活并监控 PHP 探针，否则它并不会运行，所以不会给正常的应用执行带来任何性能损耗。
+   即使 PHP 探针被激活，它的消耗也是非常低的，甚至可以直接在生产系统中使用。
+  </para>
+
+  <para>
+   在运行时可以激活 PHP “用户级静态定义跟踪”（USDT）探针。
+   举例说明，如果 D 脚本正在监控 PHP <literal>function-entry</literal> 探针，
+   那么，每当 PHP 脚本函数被调用的时候，这个探针将被触发，同时 D 脚本中所关联的动作代码将被执行。
+   在脚本的动作代码中，可以打印出诸如函数所在源文件等信息的探针参数，
+   也可以记录诸如函数执行次数这样的聚合数据。
+  </para>
+
+  <para>
+   这里仅描述了 PHP USDT 探针。请参考各操作系统文档中关于 DTrace 的部分获取更多信息，
+   例如，如何使用 DTrace 跟踪函数调用，如何跟踪操作系统行为等。
+   需要注意的是，不同平台提供的 DTrace 功能并不完全相同。
+  </para>
+
+  <para>
+   从 PHP 5.4 开始加入 DTrace 静态探针，之前的版本需要使用
+   <link xmlns="http://docbook.org/ns/docbook"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xlink:href="&url.pecl;">PECL</link>
+   扩展来实现跟踪功能。这个扩展现在已经废弃。
+  </para>
+
+  <para>
+   在某些 Linux 发行版中，可以使用 SystemTap 工具来监控 PHP DTrace 静态探针。
+  </para>
+ </sect1>
+
+ <sect1 xml:id="features.dtrace.dtrace">
+  <title>使用 PHP 和 DTrace</title>
+  <para>
+   在支持 DTrace 动态跟踪的平台上，可以配置 PHP 打开 DTrace 静态探针。
+  </para>
+
+  <sect2 xml:id="features.dtrace.install">
+   <title>PHP DTrace 静态探针配置</title>
+
+   <para>
+    请参考操作系统文档获取启用操作系统 DTrace 支持的信息。
+    例如，在 Oracle Linux 系统上启动 UEK3 内核，并进行如下操作：
+     <informalexample>
+     <programlisting role="php">
+<![CDATA[
+# modprobe fasttrap
+# chmod 666 /dev/dtrace/helper
+]]>
+     </programlisting>
+    </informalexample>
+   </para>
+   <para>
+    除了 <literal>chmod</literal> 命令，您也可以使用 ACL 包规则来限制特定用户对于设备的访问权限。
+   </para>
+
+   <para>
+    使用 <literal>--enable-dtrace</literal> 配置参数构建 PHP：
+    <informalexample>
+     <programlisting role="php">
+<![CDATA[
+# ./configure --enable-dtrace ...
+# make
+# make install
+]]>
+     </programlisting>
+    </informalexample>
+   </para>
+   <para>
+    这样就启用了 PHP 核心的静态探针。对于提供了自有探针的 PHP 扩展需要分别构建。
+   </para>
+  </sect2>
+
+  <sect2 xml:id="features.dtrace.static-probes">
+  <title>PHP 核心的 DTrace 静态探针</title>
+  <table>
+   <title>PHP 中包括以下可用的静态探针</title>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>探针名称</entry>
+      <entry>探针描述</entry>
+      <entry>探针参数</entry>
+     </row>
+    </thead>
+    <tbody>
+     <row>
+      <entry><literal>request-startup</literal></entry>
+      <entry>请求开始时触发。</entry>
+      <entry>char *<varname>file</varname>, char *<varname>request_uri</varname>, char *<varname>request_method</varname></entry>
+     </row>
+     <row>
+      <entry><literal>request-shutdown</literal></entry>
+      <entry>请求关闭时触发。</entry>
+      <entry>char *<varname>file</varname>, char *<varname>request_uri</varname>, char *<varname>request_method</varname></entry>
+     </row>
+     <row>
+      <entry><literal>compile-file-entry</literal></entry>
+      <entry>脚本开始编译时触发。</entry>
+      <entry>char *<varname>compile_file</varname>, char *<varname>compile_file_translated</varname></entry>
+     </row>
+     <row>
+      <entry><literal>compile-file-return</literal></entry>
+      <entry>脚本完成编译时触发。</entry>
+      <entry>char *<varname>compile_file</varname>, char *<varname>compile_file_translated</varname></entry>
+     </row>
+     <row>
+      <entry><literal>execute-entry</literal></entry>
+      <entry>操作数数组开始执行时触发。例如：函数调用，文件包含以及生成器恢复时会被触发。</entry>
+      <entry>char *<varname>request_file</varname>, int <varname>lineno</varname></entry>
+     </row>
+     <row>
+      <entry><literal>execute-return</literal></entry>
+      <entry>操作数数组执行完毕之后触发。</entry>
+      <entry>char *<varname>request_file</varname>, int <varname>lineno</varname></entry>
+     </row>
+     <row>
+      <entry><literal>function-entry</literal></entry>
+      <entry>PHP 引擎进入 PHP 函数或者方法调用时触发。</entry>
+      <entry>char *<varname>function_name</varname>, char *<varname>request_file</varname>, int <varname>lineno</varname>, char *<varname>classname</varname>, char *<varname>scope</varname></entry>
+     </row>
+     <row>
+      <entry><literal>function-return</literal></entry>
+      <entry>PHP 引擎从 PHP 函数或者方法调用返回后触发。.</entry>
+      <entry>char *<varname>function_name</varname>, char *<varname>request_file</varname>, int <varname>lineno</varname>, char *<varname>classname</varname>, char *<varname>scope</varname></entry>
+     </row>
+     <row>
+      <entry><literal>exception-thrown</literal></entry>
+      <entry>有异常抛出时触发。</entry>
+      <entry>char *<varname>classname</varname></entry>
+     </row>
+     <row>
+      <entry><literal>exception-caught</literal></entry>
+      <entry>有异常被捕获时触发。</entry>
+      <entry>char *<varname>classname</varname></entry>
+     </row>
+     <row>
+      <entry><literal>error</literal></entry>
+      <entry>无论 <link linkend="ini.error-reporting">error_reporting</link> 的设定如何，在发生错误时都会触发。</entry>
+      <entry>char *<varname>errormsg</varname>, char *<varname>request_file</varname>, int <varname>lineno</varname></entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </table>
+  <para>
+   PHP 扩展可以拥有额外的静态探针。
+  </para>
+  </sect2>
+
+  <sect2 xml:id="features.dtrace.list-probes">
+   <title>列出 PHP 中可用的静态探针</title>
+   <para>
+    要列出 PHP 中可用的静态探针，开启一个 PHP 进程，然后运行：
+    <informalexample>
+     <programlisting>
+<![CDATA[
+# dtrace -l
+]]>
+     </programlisting>
+    </informalexample>
+   </para>
+
+   <para>
+    输出信息类似如下所示：
+    <informalexample>
+     <programlisting>
+<![CDATA[
+   ID   PROVIDER            MODULE                          FUNCTION NAME
+   [ . . . ]
+    4   php15271               php               dtrace_compile_file compile-file-entry
+    5   php15271               php               dtrace_compile_file compile-file-return
+    6   php15271               php                        zend_error error
+    7   php15271               php  ZEND_CATCH_SPEC_CONST_CV_HANDLER exception-caught
+    8   php15271               php     zend_throw_exception_internal exception-thrown
+    9   php15271               php                 dtrace_execute_ex execute-entry
+   10   php15271               php           dtrace_execute_internal execute-entry
+   11   php15271               php                 dtrace_execute_ex execute-return
+   12   php15271               php           dtrace_execute_internal execute-return
+   13   php15271               php                 dtrace_execute_ex function-entry
+   14   php15271               php                 dtrace_execute_ex function-return
+   15   php15271               php              php_request_shutdown request-shutdown
+   16   php15271               php               php_request_startup request-startup
+]]>
+     </programlisting>
+    </informalexample>
+   </para>
+
+   <para>
+    Provider 一列由 <literal>php</literal> 和当前进程 id 的组成。
+   </para>
+
+   <para>
+    如果运行的是 Apache web 服务器，那么模块名称可能是 <filename>libphp5.so</filename>，
+    并且可能会出现多块信息，每个运行中的 Apache 进程对应一个输出块。
+   </para>
+
+   <para>
+    Function Name 一列表示 Provider 对应的 PHP 内部 C 实现函数名称。
+   </para>
+
+   <para>
+    如果没有运行任何 PHP 进程，那么就不会显示任何 PHP 探针。
+   </para>
+  </sect2>
+
+  <sect2 xml:id="features.dtrace.examples">
+   <title>PHP DTrace 示例</title>
+   <para>
+    下例展示了基本的 DTrace D 脚本。
+    <example>
+     <title><filename>all_probes.d</filename> for tracing all PHP Static Probes with DTrace</title>
+     <programlisting>
+<![CDATA[
+#!/usr/sbin/dtrace -Zs
+
+#pragma D option quiet
+
+php*:::compile-file-entry
+{
+    printf("PHP compile-file-entry\n");
+    printf("  compile_file              %s\n", copyinstr(arg0));
+    printf("  compile_file_translated   %s\n", copyinstr(arg1));
+}
+
+php*:::compile-file-return
+{
+    printf("PHP compile-file-return\n");
+    printf("  compile_file              %s\n", copyinstr(arg0));
+    printf("  compile_file_translated   %s\n", copyinstr(arg1));
+}
+
+php*:::error
+{
+    printf("PHP error\n");
+    printf("  errormsg                  %s\n", copyinstr(arg0));
+    printf("  request_file              %s\n", copyinstr(arg1));
+    printf("  lineno                    %d\n", (int)arg2);
+}
+
+php*:::exception-caught
+{
+    printf("PHP exception-caught\n");
+    printf("  classname                 %s\n", copyinstr(arg0));
+}
+
+php*:::exception-thrown
+{
+    printf("PHP exception-thrown\n");
+    printf("  classname                 %s\n", copyinstr(arg0));
+}
+
+php*:::execute-entry
+{
+    printf("PHP execute-entry\n");
+    printf("  request_file              %s\n", copyinstr(arg0));
+    printf("  lineno                    %d\n", (int)arg1);
+}
+
+php*:::execute-return
+{
+    printf("PHP execute-return\n");
+    printf("  request_file              %s\n", copyinstr(arg0));
+    printf("  lineno                    %d\n", (int)arg1);
+}
+
+php*:::function-entry
+{
+    printf("PHP function-entry\n");
+    printf("  function_name             %s\n", copyinstr(arg0));
+    printf("  request_file              %s\n", copyinstr(arg1));
+    printf("  lineno                    %d\n", (int)arg2);
+    printf("  classname                 %s\n", copyinstr(arg3));
+    printf("  scope                     %s\n", copyinstr(arg4));
+}
+
+php*:::function-return
+{
+    printf("PHP function-return\n");
+    printf("  function_name             %s\n", copyinstr(arg0));
+    printf("  request_file              %s\n", copyinstr(arg1));
+    printf("  lineno                    %d\n", (int)arg2);
+    printf("  classname                 %s\n", copyinstr(arg3));
+    printf("  scope                     %s\n", copyinstr(arg4));
+}
+
+php*:::request-shutdown
+{
+    printf("PHP request-shutdown\n");
+    printf("  file                      %s\n", copyinstr(arg0));
+    printf("  request_uri               %s\n", copyinstr(arg1));
+    printf("  request_method            %s\n", copyinstr(arg2));
+}
+
+php*:::request-startup
+{
+    printf("PHP request-startup\n");
+    printf("  file                      %s\n", copyinstr(arg0));
+    printf("  request_uri               %s\n", copyinstr(arg1));
+    printf("  request_method            %s\n", copyinstr(arg2));
+}
+]]>
+     </programlisting>
+    </example>
+   </para>
+
+   <para>
+    此脚本在 <filename>dtrace</filename> 命令中使用了 <literal>-Z</literal> 选项。
+    此选项保证即使在没有任何 PHP 进程运行的时候脚本也能够正确执行。
+    如果省略了此选项，当没有任何探针可监控的时候，脚本会立即终止执行。
+   </para>
+
+   <para>
+    在运行此脚本的过程中，它将监控全部 PHP 核心静态探针。
+    运行 D 脚本：
+    <informalexample>
+     <programlisting>
+<![CDATA[
+# ./all_probes.d
+]]>
+     </programlisting>
+    </informalexample>
+   </para>
+
+   <para>
+    再运行一个 PHP 脚本或者 PHP 应用，用来进行监控的 D 脚本会输出每个探针被触发时所携带的参数。
+   </para>
+
+   <para>
+    监控完成之后，使用
+    <literal>^C</literal> 来终止 D 脚本的执行。
+   </para>
+
+   <para>
+    在多 CPU 的主机上，探针的显示顺序可能不是连续的，这取决于哪颗 CPU 执行探针以及多个 CPU 之间的线程迁移情况。
+    可以通过显示探针时间戳来减少混淆，例如：
+    <informalexample>
+     <programlisting>
+<![CDATA[
+php*:::function-entry
+{
+      printf("%lld: PHP function-entry ", walltimestamp);
+      [ . . .]
+}
+]]>
+     </programlisting>
+    </informalexample>
+   </para>
+  </sect2>
+
+  <sect2 xml:id="features.dtrace.references">
+   <title>参见</title>
+   <simplelist>
+    <member><link linkend="oci8.dtrace">OCI8 和 DTrace 动态跟踪</link></member>
+   </simplelist>
+  </sect2>
+ </sect1>
+
+ <sect1 xml:id="features.dtrace.systemtap">
+  <title>使用 SystemTap 监控 PHP DTrace 静态探针</title>
+  <para>
+   在某些 Linux 发行版上，可以使用 SystemTap 跟踪工具来跟踪 PHP 的静态 DTrace 探针。
+   此特性在 PHP 5.4.20 和 PHP 5.5 中具备。
+  </para>
+
+  <sect2 xml:id="features.dtrace.systemtap-install">
+   <title>安装支持 SystemTap 的 PHP </title>
+
+   <para>
+    安装 SystemTap SDT 开发包。
+    <informalexample>
+     <programlisting role="shell">
+<![CDATA[
+# yum install systemtap-sdt-devel
+]]>
+     </programlisting>
+    </informalexample>
+   </para>
+
+   <para>
+    安装 PHP 并启用 DTrace 探针：
+    <informalexample>
+     <programlisting role="shell">
+<![CDATA[
+# ./configure --enable-dtrace ...
+# make
+]]>
+     </programlisting>
+    </informalexample>
+   </para>
+  </sect2>
+
+  <sect2 xml:id="features.dtrace.systemtap-list-probes">
+   <title>使用 SystemTap 列出 PHP 静态探针</title>
+
+   <para>
+    使用 <filename>stap</filename> 命令列出 PHP 静态探针：
+    <informalexample>
+     <programlisting>
+<![CDATA[
+# stap -l 'process.provider("php").mark("*")' -c 'sapi/cli/php -i'
+]]>
+     </programlisting>
+    </informalexample>
+   </para>
+
+   <para>
+    输出如下：
+    <informalexample>
+     <programlisting>
+<![CDATA[
+process("sapi/cli/php").provider("php").mark("compile__file__entry")
+process("sapi/cli/php").provider("php").mark("compile__file__return")
+process("sapi/cli/php").provider("php").mark("error")
+process("sapi/cli/php").provider("php").mark("exception__caught")
+process("sapi/cli/php").provider("php").mark("exception__thrown")
+process("sapi/cli/php").provider("php").mark("execute__entry")
+process("sapi/cli/php").provider("php").mark("execute__return")
+process("sapi/cli/php").provider("php").mark("function__entry")
+process("sapi/cli/php").provider("php").mark("function__return")
+process("sapi/cli/php").provider("php").mark("request__shutdown")
+process("sapi/cli/php").provider("php").mark("request__startup")
+]]>
+     </programlisting>
+    </informalexample>
+   </para>
+  </sect2>
+
+  <sect2 xml:id="features.dtrace.systemtap-examples">
+   <title>SystemTap 示例</title>
+
+   <para>
+    <example>
+     <title><filename>all_probes.stp</filename> for tracing all PHP Static Probes with SystemTap</title>
+     <programlisting role="shell">
+<![CDATA[
+probe process("sapi/cli/php").provider("php").mark("compile__file__entry") {
+    printf("Probe compile__file__entry\n");
+    printf("  compile_file %s\n", user_string($arg1));
+    printf("  compile_file_translated %s\n", user_string($arg2));
+}
+probe process("sapi/cli/php").provider("php").mark("compile__file__return") {
+    printf("Probe compile__file__return\n");
+    printf("  compile_file %s\n", user_string($arg1));
+    printf("  compile_file_translated %s\n", user_string($arg2));
+}
+probe process("sapi/cli/php").provider("php").mark("error") {
+    printf("Probe error\n");
+    printf("  errormsg %s\n", user_string($arg1));
+    printf("  request_file %s\n", user_string($arg2));
+    printf("  lineno %d\n", $arg3);
+}
+probe process("sapi/cli/php").provider("php").mark("exception__caught") {
+    printf("Probe exception__caught\n");
+    printf("  classname %s\n", user_string($arg1));
+}
+probe process("sapi/cli/php").provider("php").mark("exception__thrown") {
+    printf("Probe exception__thrown\n");
+    printf("  classname %s\n", user_string($arg1));
+}
+probe process("sapi/cli/php").provider("php").mark("execute__entry") {
+    printf("Probe execute__entry\n");
+    printf("  request_file %s\n", user_string($arg1));
+    printf("  lineno %d\n", $arg2);
+}
+probe process("sapi/cli/php").provider("php").mark("execute__return") {
+    printf("Probe execute__return\n");
+    printf("  request_file %s\n", user_string($arg1));
+    printf("  lineno %d\n", $arg2);
+}
+probe process("sapi/cli/php").provider("php").mark("function__entry") {
+    printf("Probe function__entry\n");
+    printf("  function_name %s\n", user_string($arg1));
+    printf("  request_file %s\n", user_string($arg2));
+    printf("  lineno %d\n", $arg3);
+    printf("  classname %s\n", user_string($arg4));
+    printf("  scope %s\n", user_string($arg5));
+}
+probe process("sapi/cli/php").provider("php").mark("function__return") {
+    printf("Probe function__return: %s\n", user_string($arg1));
+    printf(" function_name %s\n", user_string($arg1));
+    printf("  request_file %s\n", user_string($arg2));
+    printf("  lineno %d\n", $arg3);
+    printf("  classname %s\n", user_string($arg4));
+    printf("  scope %s\n", user_string($arg5));
+}
+probe process("sapi/cli/php").provider("php").mark("request__shutdown") {
+    printf("Probe request__shutdown\n");
+    printf("  file %s\n", user_string($arg1));
+    printf("  request_uri %s\n", user_string($arg2));
+    printf("  request_method %s\n", user_string($arg3));
+}
+probe process("sapi/cli/php").provider("php").mark("request__startup") {
+    printf("Probe request__startup\n");
+    printf("  file %s\n", user_string($arg1));
+    printf("  request_uri %s\n", user_string($arg2));
+    printf("  request_method %s\n", user_string($arg3));
+}
+]]>
+     </programlisting>
+    </example>
+   </para>
+   <para>
+    在 PHP 脚本的执行过程中，上述脚本会跟踪所有的 PHP 核心静态探针：
+    <informalexample>
+     <programlisting>
+<![CDATA[
+# stap -c 'sapi/cli/php test.php' all_probes.stp
+]]>
+     </programlisting>
+    </informalexample>
+   </para>
+  </sect2>
+ </sect1>
+</chapter>
+
+<!-- Keep this comment at the end of the file
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->

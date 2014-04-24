@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision$ -->
+<!-- EN-Revision: 0 Maintainer: yuanyuqiang Status: ready -->
+<!-- Reviewed: no -->
+<sect1 xml:id="install.unix.nginx" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <title>Unix 系统下的 Nginx 1.4.x</title>
+
+ <para>
+  本文档包括使用 PHP-FPM 为 Nginx 1.4.x HTTP 服务器安装和配置 PHP 的说明和提示。
+ </para>
+
+ <para>
+  本指南假定您已经从源代码成功构建 Nginx，并且其二进制文件和配置文件都位于 <literal>/usr/local/nginx</literal>。
+  如果您使用其他方式获取的 Nginx，请参考 <link xlink:href="&url.nginx;">Nginx Wiki</link> 并对照本文档完成安装。
+ </para>
+
+ <para>
+  本文档仅包含 Nginx 服务器的基本配置，它将通过 80 端口提供 PHP 应用的处理能力。
+  如果您需要超出本文档范围的安装配置指导，建议您查阅 Nginx 和 PHP-FPM 的文档。
+ </para>
+
+ <para>
+  需要注意的是，本文档一律使用 'x' 来表示版本号，请根据实际情况将 'x' 替换为对应的版本号。
+ </para>
+
+ <orderedlist>
+  <listitem>
+   <para>
+    建议您访问 Nginx Wiki
+    <link xlink:href="&url.nginx.wiki.install;">安装</link> 页面以获取并在您的系统上安装 Nginx。 
+   </para>
+  </listitem>
+
+  <listitem>
+   <para>
+    获取并解压 PHP 源代码:
+   </para>
+
+   <example xml:id="install.unix.nginx.extract.php">
+    <screen>
+<![CDATA[
+tar zxf php-x.x.x
+]]>
+    </screen>
+   </example>
+  </listitem>
+
+  <listitem>
+   <para>
+    配置并构建 PHP。在此步骤您可以使用很多选项自定义 PHP，例如启用某些扩展等。
+    运行 ./configure --help 命令来获得完整的可用选项清单。
+    在本示例中，我们仅进行包含 PHP-FPM 和 MySQL 支持的简单配置。
+   </para>
+
+   <example xml:id="install.unix.nginx.build.php">
+    <screen>
+<![CDATA[
+cd ../php-x.x.x
+./configure --enable-fpm --with-mysql
+make
+sudo make install
+]]>
+    </screen>
+   </example>
+  </listitem>
+
+  <listitem>
+   <para>
+    创建配置文件，并将其复制到正确的位置。
+   </para>
+
+   <example xml:id="install.unix.nginx.configure.php">
+    <screen>
+<![CDATA[
+cp php.ini-development /usr/local/php/php.ini
+cp /usr/local/etc/php-fpm.conf.default /usr/local/etc/php-fpm.conf
+cp sapi/fpm/php-fpm /usr/local/bin
+]]>
+    </screen>
+   </example>
+  </listitem>
+
+  <listitem>
+   <para>
+    需要着重提醒的是，如果文件不存在，则阻止 Nginx 将请求发送到后端的 PHP-FPM 模块，
+    以避免遭受恶意脚本注入的攻击。
+   </para>
+   <para>
+    将 php.ini 文件中的配置项
+    <link linkend="ini.cgi.fix-pathinfo">cgi.fix_pathinfo</link>
+    设置为 <literal>0</literal> 。
+   </para>
+   <para>
+    打开 php.ini:
+   </para>
+
+   <example xml:id="install.unix.nginx.configure.ini">
+    <screen>
+<![CDATA[
+vim /usr/local/php/php.ini
+]]>
+    </screen>
+   </example>
+
+   <para>
+    定位到 <literal>cgi.fix_pathinfo=</literal> 并将其修改为如下所示：
+   </para>
+
+   <example xml:id="install.unix.nginx.configure.pathinfo">
+    <screen>
+<![CDATA[
+cgi.fix_pathinfo=0
+]]>
+    </screen>
+   </example>
+  </listitem>
+
+  <listitem>
+   <para>
+    在启动服务之前，需要修改 php-fpm.conf 配置文件，确保 php-fpm 模块使用
+    www-data 用户和 www-data 用户组的身份运行。
+   </para>
+
+   <example xml:id="install.unix.nginx.modify.phpfpm">
+    <screen>
+<![CDATA[
+vim /usr/local/etc/php-fpm.conf
+]]>
+    </screen>
+   </example>
+
+   <para>
+    找到以下内容并修改： 
+   </para>
+
+   <example xml:id="install.unix.nginx.modify.phpfpm.usergroup">
+    <screen>
+<![CDATA[
+; Unix user/group of processes
+; Note: The user is mandatory. If the group is not set, the default user's group
+;       will be used.
+user = www-data
+group = www-data
+]]>
+    </screen>
+   </example>
+
+   <para>
+    然后启动 php-fpm 服务：
+   </para>
+
+   <example xml:id="install.unix.nginx.start.phpfpm">
+    <screen>
+<![CDATA[
+/usr/local/bin/php-fpm
+]]>
+    </screen>
+   </example>
+
+   <para>
+    本文档未涵盖对 php-fpm 进行进一步配置的信息，如果您需要更多信息，请查阅相关文档。
+   </para>
+  </listitem>
+
+  <listitem>
+   <para>
+    配置 Nginx 使其支持 PHP 应用：
+   </para>
+
+   <example xml:id="install.unix.nginx.configure.nginx">
+    <programlisting>
+<![CDATA[
+vim /usr/local/nginx/conf/nginx.conf
+]]>
+    </programlisting>
+   </example>
+
+   <para>
+    修改默认的 location 块，使其支持 .php 文件：
+   </para>
+
+   <example xml:id="install.unix.nginx.configure.nginx.location">
+    <programlisting role="nginx-conf">
+<![CDATA[
+location / {
+    root   html;
+    index  index.php index.html index.htm;
+}
+]]>
+    </programlisting>
+   </example>
+
+   <para>
+    下一步配置来保证对于 .php 文件的请求将被传送到后端的 PHP-FPM 模块，
+    取消默认的 PHP 配置块的注释，并修改为下面的内容：
+   </para>
+
+   <example xml:id="install.unix.nginx.configure.nginx.php">
+    <programlisting role="nginx-conf">
+<![CDATA[
+location ~* \.php$ {
+    fastcgi_index   index.php;
+    fastcgi_pass    127.0.0.1:9000;
+    include         fastcgi_params;
+    fastcgi_param   SCRIPT_FILENAME    $document_root$fastcgi_script_name;
+    fastcgi_param   SCRIPT_NAME        $fastcgi_script_name;
+}
+]]>
+    </programlisting>
+   </example>
+
+   <para>
+    重启 Nginx。
+   </para>
+
+   <example xml:id="install.unix.nginx.restart.nginx">
+    <screen>
+<![CDATA[
+sudo /usr/local/nginx/sbin/nginx -s stop
+sudo /usr/local/nginx/sbin/nginx
+]]>
+    </screen>
+   </example>
+  </listitem>
+
+  <listitem>
+   <para>
+    创建测试文件。
+   </para>
+
+   <example xml:id="install.unix.nginx.test.nginx.php">
+    <screen>
+<![CDATA[
+rm /usr/local/nginx/html/index.html
+echo "<?php phpinfo(); ?>" >> /usr/local/nginx/html/index.php
+]]>
+    </screen>
+   </example>
+
+   <para>
+    打开浏览器，访问 http://localhost，将会显示 phpinfo() 。
+   </para>
+  </listitem>
+ </orderedlist>
+
+ <para>
+  通过以上步骤的配置，Nginx 服务器现在可以以 <literal>SAPI</literal> 模块的方式支持 PHP 应用了。
+  请在对应的源代码目录执行 <command>./configure --help</command> 来查阅更多配置选项。
+ </para>
+
+</sect1>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
