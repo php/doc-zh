@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision$ -->
+<!-- EN-Revision: 96c9d88bad9a7d7d44bfb7f26c226df7ee9ddf26 Maintainer: yuanyuqiang Status: ready -->
+<!-- Reviewed: no -->
+
+<refentry xmlns="http://docbook.org/ns/docbook" xml:id="function.session-destroy">
+ <refnamediv>
+  <refname>session_destroy</refname>
+  <refpurpose>销毁一个会话中的全部数据</refpurpose>
+ </refnamediv>
+ 
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <type>bool</type><methodname>session_destroy</methodname>
+   <void/>
+  </methodsynopsis>
+  <simpara>
+   <function>session_destroy</function> 销毁当前会话中的全部数据，
+   但是不会重置当前会话所关联的全局变量，
+   也不会重置会话 cookie。
+   如果需要再次使用会话变量，
+   必须重新调用 <function>session_start</function> 函数。
+  </simpara>
+  <para>
+   为了彻底销毁会话，比如在用户退出登录的时候，必须同时重置会话 ID。
+   如果是通过 cookie 方式传送会话 ID 的，那么同时也需要
+   调用 <function>setcookie</function> 函数来
+   删除客户端的会话 cookie。
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   &return.success;
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title>销毁会话数据以及 <varname>$_SESSION</varname></title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+// 初始化会话。
+// 如果要使用会话，别忘了现在就调用：
+session_start();
+
+// 重置会话中的所有变量
+$_SESSION = array();
+
+// 如果要清理的更彻底，那么同时删除会话 cookie
+// 注意：这样不但销毁了会话中的数据，还同时销毁了会话本身
+if (ini_get("session.use_cookies")) {
+    $params = session_get_cookie_params();
+    setcookie(session_name(), '', time() - 42000,
+        $params["path"], $params["domain"],
+        $params["secure"], $params["httponly"]
+    );
+}
+
+// 最后，销毁会话
+session_destroy();
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+ </refsect1>
+
+ <refsect1 role="notes">
+  &reftitle.notes;
+  <note>
+   <para>
+    对于旧版本中不使用 <varname>$_SESSION</varname> 的代码，
+    仅能使用 <function>session_unset</function> 来完成会话销毁工作。
+   </para>
+  </note>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>unset</function></member>
+    <member><function>setcookie</function></member>
+   </simplelist>
+  </para>
+ </refsect1>
+
+</refentry>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->

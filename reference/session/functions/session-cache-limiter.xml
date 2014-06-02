@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision$ -->
+<!-- EN-Revision: c36d6e4eafbca8864e1cc70b920699b4c0c6c10c Maintainer: yuanyuqiang Status: ready -->
+<!-- Reviewed: no -->
+
+<refentry xmlns="http://docbook.org/ns/docbook" xml:id="function.session-cache-limiter">
+ <refnamediv>
+  <refname>session_cache_limiter</refname>
+  <refpurpose>读取/设置缓存限制器</refpurpose>
+ </refnamediv>
+
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <type>string</type><methodname>session_cache_limiter</methodname>
+   <methodparam choice="opt"><type>string</type><parameter>cache_limiter</parameter></methodparam>
+  </methodsynopsis>
+  <para>
+   <function>session_cache_limiter</function> 返回当前缓存限制器的名称。
+  </para>
+  <para>
+    缓存限制器定义了向客户端发送的 HTTP 响应头中的缓存控制策略。
+    客户端或者代理服务器通过检测这个响应头信息来
+    确定对于页面内容的缓存规则。
+    设置缓存限制器为 <literal>nocache</literal> 会进制客户端或者代理服务器缓存内容，
+    <literal>public</literal> 表示允许客户端或代理服务器缓存内容，
+    <literal>private</literal> 表示允许客户端缓存，
+    但是不允许代理服务器缓存内容。
+  </para>
+  <para>
+   在 <literal>private</literal> 模式下， 包括 <productname>Mozilla</productname> 
+   在内的一些浏览器可能无法正确处理 Expire 响应头，
+   通过使用 <literal>private_no_expire</literal> 模式可以解决这个问题：在这种模式下，
+   不会向客户端发送 <literal>Expire</literal> 响应头。
+  </para>
+  <para>
+    设置为  <literal>''</literal> 可以关闭
+    自动发送缓存策略响应头的功能。
+  </para>
+  <para>
+    请求开始的时候，缓存限制器会被重置为默认值，并且存储在
+    <link linkend="ini.session.cache-limiter">session.cache_limiter</link> 
+    配置项中。
+    因此，如果要设置缓存限制器，对于每个请求，
+    都需要在调用 <function>session_start</function> 函数之前，
+    调用 <function>session_cache_limiter</function> 函数来进行设置。
+  </para>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>cache_limiter</parameter></term>
+     <listitem>
+      <para>
+       如果指定了 <parameter>cache_limiter</parameter> 参数，
+       将使用指定值作为缓存限制器的值。
+      </para>
+      <table>
+       <title>可选的值</title>
+       <tgroup cols="2">
+        <thead>
+         <row>
+          <entry>值</entry>
+          <entry>发送的响应头</entry>
+         </row>
+        </thead>
+        <tbody>
+         <row>
+          <entry><literal>public</literal></entry>
+          <entry>
+           <programlisting role="header">
+<![CDATA[
+Expires：（根据 session.cache_expire 的设定计算得出）
+Cache-Control： public, max-age=（根据 session.cache_expire 的设定计算得出）
+Last-Modified：（会话最后保存时间）
+]]>
+           </programlisting>
+          </entry>
+         </row>
+         <row>
+          <entry><literal>private_no_expire</literal></entry>
+          <entry>
+           <programlisting role="header">
+<![CDATA[
+Cache-Control: private, max-age=（根据 session.cache_expire 的设定计算得出）, pre-check=（根据 session.cache_expire 的设定计算得出）
+Last-Modified: （会话最后保存时间）
+]]>
+           </programlisting>
+          </entry>
+         </row>
+         <row>
+          <entry><literal>private</literal></entry>
+          <entry>
+           <programlisting role="header">
+<![CDATA[
+Expires: Thu, 19 Nov 1981 08:52:00 GMT
+Cache-Control: private, max-age=（根据 session.cache_expire 的设定计算得出）, pre-check=（根据 session.cache_expire 的设定计算得出）
+Last-Modified: （会话最后保存时间）
+]]>
+           </programlisting>
+          </entry>
+         </row>
+         <row>
+          <entry><literal>nocache</literal></entry>
+          <entry>
+           <programlisting role="header">
+<![CDATA[
+Expires: Thu, 19 Nov 1981 08:52:00 GMT
+Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0
+Pragma: no-cache
+]]>
+           </programlisting>
+          </entry>
+         </row>
+        </tbody>
+       </tgroup>
+      </table>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   返回当前所用的缓存限制器名称。
+  </para>
+ </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <para>
+   <informaltable>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>&Version;</entry>
+       <entry>&Description;</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>4.2.0</entry>
+       <entry>
+        新加 <literal>private_no_expire</literal> 限制器。
+       </entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </informaltable>
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title><function>session_cache_limiter</function> 示例</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+
+/* 设置缓存限制器为 'private' */
+
+session_cache_limiter('private');
+$cache_limiter = session_cache_limiter();
+
+echo "The cache limiter is now set to $cache_limiter<br />";
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><link linkend="ini.session.cache-limiter">session.cache_limiter</link></member>
+   </simplelist>
+  </para>
+ </refsect1>
+
+</refentry>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
