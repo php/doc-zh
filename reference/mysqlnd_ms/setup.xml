@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 5a133dd1d92ee3b925227c0b91827b1499d07d60 Maintainer: 谢毅斌 Status: ready -->
+<!-- EN-Revision: 8068de761facc5d887ddde880a33c3e45ad89854 Maintainer: 谢毅斌 Status: ready -->
 <!-- Reviewed: no -->
 
 <chapter xml:id="mysqlnd-ms.setup" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -30,39 +30,59 @@
 
  <section xml:id="mysqlnd-ms.plugin-ini-json">
   <title xmlns="http://docbook.org/ns/docbook">Plugin configuration file (&gt;=1.1.x)</title>
-  <note>
-   <title>Changelog: Feature was added in PECL/mysqlnd_ms 1.1.0-beta</title>
-   <para>
-    下面的描述信息仅仅适用于 PECL/mysqlnd_ms &gt;= 1.1.0-beta 即以上版本，
-    并不适用于这以前的版本。
-   </para>
-  </note>
+
   <para>
-   插件使用自己的独立配置文件，其中包括 MySQL 主从同步的 master 服务器、
-   slave 服务器、负载均衡策略、错误处理策略和是否使用被动连接。
+   The following documentation applies to PECL/mysqlnd_ms &gt;= 1.1.0-beta.
+   It is not valid for prior versions. For documentation covering earlier
+   versions, see the configuration documentation
+   for <link linkend="mysqlnd-ms.plugin-ini-v1">mysqlnd_ms 1.0.x and below</link>.
+  </para>
+
+  <section xml:id="mysqlnd-ms.plugin-ini-json-introduction">
+   <title>Introduction</title>
+
+
+   <note>
+    <title>Changelog: Feature was added in PECL/mysqlnd_ms 1.1.0-beta</title>
+    <para>
+     The below description applies to PECL/mysqlnd_ms &gt;= 1.1.0-beta.
+     It is not valid for prior versions.
+    </para>
+   </note>
+
+  <para>
+   The plugin uses its own configuration file. The configuration file
+   holds information about the MySQL replication master server,
+   the MySQL replication slave servers, the server pick (load balancing) policy,
+   the failover strategy, and the use of lazy connections.
   </para>
   <para>
-   插件将在 WEB 被请求的时候装载他的配置文件，并且配置会被缓存在内存当中，为后续的
-   WEB 请求提供服务。这样，并不需要在更改配置以后，重新启动 PHP。对于配置文件的变更
-   将立即启用。
+   The plugin loads its configuration file at the beginning of a web request.
+   It is then cached in memory and used for the duration of the web request.
+   This way, there is no need to restart PHP after deploying the configuration
+   file. Configuration file changes will become active almost instantly.
   </para>
   <para>
-   插件的配置文件通过 PHP 配置文件中使用
+   The PHP configuration directive
    <link linkend="ini.mysqlnd-ms.config-file"><literal>mysqlnd_ms.config_file</literal></link>
-   指定。请注意，PHP 配置文件指令并不会针对每个 WEB 请求而加载。所以，配置插件的
-   配置文件名称和路径需要重新启动 PHP。但是不需要再已经读取的插件配置变更时，
-   重新启动 PHP。
+   is used to set the plugins configuration file. Please note, that
+   the PHP configuration directive may not be evaluated for every web request.
+   Therefore, changing the plugins configuration file name or location may
+   require a PHP restart. However, no restart is required to read changes if
+   an already existing plugin configuration file is updated.
   </para>
   <para>
-   使用和解析 <acronym>JSON</acronym> 更有效率，并且使用 <acronym>JSON</acronym> 来表达层级的数据结构更容易，所以插件配置并没有采用类似于
-   <filename>php.ini</filename> 的文件格式。
+   Using and parsing <acronym>JSON</acronym> is efficient, and using <acronym>JSON</acronym>
+   makes it easier to express hierarchical data structures than the standard
+   <filename>php.ini</filename> format.
   </para>
   <para>
    <example>
-    <title>将 PHP 数组(hash) 转换为 JSON 格式</title>
+    <title>Converting a PHP array (hash) into JSON format</title>
     <para>
-     可能，开发人员对于 PHP <type>array</type> 更加习惯，所以这个范例展示了如何将它
-     转化为 <acronym>JSON</acronym> 格式。
+     Or alternatively, a developer may be more familiar with the PHP <type>array</type>
+     syntax, and prefer it. This example demonstrates how a developer might convert a
+     PHP array to <acronym>JSON</acronym>.
     </para>
     <programlisting role="php">
 <![CDATA[
@@ -113,19 +133,24 @@ Dumping file contents...
    </example>
   </para>
   <para>
-   插件的配置文件，由一个或者多个章节组成。在 <acronym>JSON</acronym> 文件当中，
-   每个章节是一个最高级别的对象。章节也可以叫做 <emphasis>configuration names</emphasis>。
+   A plugin configuration file consists of one or more sections. Sections
+   are represented by the top-level object properties of the
+   object encoded in the <acronym>JSON</acronym> file. Sections could also
+   be called <emphasis>configuration names</emphasis>.
   </para>
   <para>
-   应用程序使用章节的名称，作为一个 host 名称传送给各种连接方法
+   Applications reference sections by their name. Applications use section names
+   as the host (server) parameter to the various connect methods of the
    <link linkend="ref.mysqli">mysqli</link>,
-   <link linkend="ref.mysql">mysql</link> 和
-   <link linkend="ref.pdo-mysql">PDO_MYSQL</link>。在连接时，
-   <link linkend="book.mysqlnd">mysqlnd</link> 插件，将根据配置文件转化这些
-   章节名称。如果找到匹配的内容，那么他将装载这个章节的所有设定。  </para>
+   <link linkend="ref.mysql">mysql</link> and
+   <link linkend="ref.pdo-mysql">PDO_MYSQL</link> extensions. Upon connect,
+   the <link linkend="book.mysqlnd">mysqlnd</link> plugin compares the hostname
+   with all of the section names from the plugin configuration file. If the hostname and
+   section name match, then the plugin will load the settings for that section.
+  </para>
   <para xml:id="mysqlnd-ms.plugin-ini-json.using-section">
    <example>
-    <title>使用章节名称的范例</title>
+    <title>Using section names example</title>
     <programlisting role="ini">
 <![CDATA[
 {
@@ -169,7 +194,7 @@ Dumping file contents...
     <programlisting role="php">
 <![CDATA[
 <?php
-/* 下面所有的连接调用都将使用负载均衡 */
+/* All of the following connections will be load balanced */
 $mysqli = new mysqli("myapp", "username", "password", "database");
 $pdo = new PDO('mysql:host=myapp;dbname=database', 'username', 'password');
 $mysql = mysql_connect("myapp", "username", "password");
@@ -181,30 +206,41 @@ $mysqli = new mysqli("localhost", "username", "password", "database");
    </example>
   </para>
   <para>
-   章节名称是一个字符串，他可以使用
-   <literal>192.168.2.1</literal>, <literal>127.0.0.1</literal> 或者
-   <literal>localhost</literal> 作为合法的值。例如，这里定义了
-   <literal>localhost</literal>，应用程序去连接 <literal>localhost</literal>
-   的时候，连接控制就被接管。应用程序将不直接在 <literal>localhost</literal>
-   运行，而是使用插件提供的连接池工作，相关操作将遵循 <literal>localhost</literal>
-   章节中的设定运行。这样可以在不改变应用程序代码的基础上使用插件进行负载均衡。
-   请注意，范例的配置可能并不适用于你实际的情况。使用章节名称可以看做是一种
-   替代 hostname 的手段。
+   Section names are strings. It is valid to use a section name such as
+   <literal>192.168.2.1</literal>, <literal>127.0.0.1</literal> or
+   <literal>localhost</literal>. If, for example, an application
+   connects to <literal>localhost</literal> and a plugin
+   configuration section <literal>localhost</literal> exists, the
+   semantics of the connect operation are changed. The application will
+   no longer only use the MySQL server running on the host
+   <literal>localhost</literal>, but the plugin will start to load balance
+   MySQL queries following the rules from the <literal>localhost</literal>
+   configuration section. This way you can load balance queries from
+   an application without changing the applications source code.
+   Please keep in mind, that such a configuration may not contribute
+   to overall readability of your applications source code. Using section names
+   that can be mixed up with host names should be seen as a last resort.
   </para>
   <para xml:id="mysqlnd-ms.plugin-ini-json.server-list-syntax">
-   配置中每个章节至少要包含，master 列表和 slave 列表。master 列表使用
-   <literal>master</literal> 标记，slave 列表使用 <literal>slave</literal> 标记。
-   错误的 slave 列表，和空的 slave 列表将产生一个 <constant>E_ERROR</constant>
-   级别的错误。这里可以不设定 slave，当然仅仅建议在同步集群中使用。可以参考
-   <link linkend="mysqlnd-ms.supportedclusters">supported clusters</link>。
-   而本文档的主要目的是提供对异步的 MySQL 主从同步提供帮助。
+   Each configuration section contains, at a minimum, a list of master servers
+   and a list of slave servers. The master list is configured with the keyword
+   <literal>master</literal>, while the slave list is configured with the
+   <literal>slave</literal> keyword. Failing to provide a slave list will result
+   in a fatal <constant>E_ERROR</constant> level error, although a slave list
+   may be empty. It is possible to allow no slaves. However, this is only recommended
+   with synchronous clusters, please see also
+   <link linkend="mysqlnd-ms.supportedclusters">supported clusters</link>.
+   The main part of the documentation focusses on the use
+   of asynchronous MySQL replication clusters.
   </para>
   <para>
-   master 和 slave 列表中的服务器，可以不定义每个服务器的名称。
+   The master and slave server lists can be optionally indexed by symbolic
+   names for the servers they describe. Alternatively, an array of descriptions
+   for slave and master servers may be used.
   </para>
   <para>
    <example>
-    <title>匿名 slave 列表</title>
+    <title>List of anonymous slaves</title>
         <programlisting role="ini">
 <![CDATA[
 "slave": [
@@ -222,12 +258,13 @@ $mysqli = new mysqli("localhost", "username", "password", "database");
    </example>
   </para>
   <para>
-   上面是一个匿名列表的 <literal>JSON array</literal> 格式。当然也可以给每个列表中
-   的服务器起一个满足 <literal>JSON object</literal> 要求的别名。
+   An anonymous server list is encoded by the <literal>JSON array</literal> type.
+   Optionally, symbolic names may be used for indexing the slave or master servers
+   of a server list, and done so using the <literal>JSON object</literal> type.
   </para>
   <para>
    <example>
-    <title>使用别名的 master 列表</title>
+    <title>Master list using symbolic names</title>
         <programlisting role="ini">
 <![CDATA[
 "master": {
@@ -240,18 +277,21 @@ $mysqli = new mysqli("localhost", "username", "password", "database");
    </example>
   </para>
   <para>
-   我们建议使用命名的服务器列表，在错误信息中我们将看到这些服务器命名。
+   It is recommended to index the server lists with symbolic server names.
+   The alias names will be shown in error messages.
   </para>
   <para>
-   服务器列表，会按照顺序加载到 mysqlnd_ms 当中，这样如果采用 round robin 
-   负载均衡策略，那么第一个 <literal>SELECT</literal> 将在第一个定义的
-   slave 服务器中运行。
+   The order of servers is preserved and taken into account by mysqlnd_ms.
+   If, for example, you configure round robin load balancing strategy, the
+   first <literal>SELECT</literal> statement will be executed on the
+   slave that appears first in the slave server list.
   </para>
   <para>
-   配置的服务器，可以使用 <literal>host</literal>,
+   A configured server can be described with the <literal>host</literal>,
    <literal>port</literal>, <literal>socket</literal>, <literal>db</literal>,
-   <literal>user</literal>, <literal>password</literal> 和 <literal>connect_flags</literal>
-   进行设定。其中 <literal>host</literal> 是必须设定的内容，其他的是可选设定。
+   <literal>user</literal>, <literal>password</literal> and <literal>connect_flags</literal>.
+   It is mandatory to set the database server host using the <literal>host</literal>
+   keyword. All other settings are optional.
   </para>
   <para>
    <example>
@@ -285,20 +325,24 @@ $mysqli = new mysqli("localhost", "username", "password", "database");
    </example>
   </para>
   <para>
-   如果参数遗漏了，那么插件将使用用户打开连接设定的参数替代它。可以参考
-   <link linkend="mysqlnd-ms.plugin-ini-json.using-section">using section names example</link>
-   获得更多信息。
+   If a setting is omitted, the plugin will use the value provided by the user
+   API call used to open a connection. Please, see the
+   <link linkend="mysqlnd-ms.plugin-ini-json.using-section">using section names example</link> above.
   </para>
   <para>
-   配置文件的格式在 1.1.0-beta 版本更改，为了适应过滤器的使用。过滤器负责过滤服务器列表
-   的服务器来执行相关的语句。使用 <literal>filter</literal> 定义过滤器。mysqlnd_ms 将
-   按照过滤器中的顺序执行。当然过滤器定义是可选的。
+   The configuration file format has been changed in version 1.1.0-beta to allow for
+   chained filters. Filters are responsible for filtering the configured list of
+   servers to identify a server for execution of a given statement.
+   Filters are configured with the <literal>filter</literal> keyword. Filters
+   are executed by mysqlnd_ms in the order of their appearance.
+   Defining filters is optional. A configuration section in the plugins
+   configuration file does not need to have a <literal>filters</literal> entry.
   </para>
   <para>
-   过滤器渠道以前版本中
+   Filters replace the
    <link linkend="ini.mysqlnd-ms-plugin-config.pick"><literal>pick[]</literal></link>
-   的使用，并且通过新的 <literal>random</literal> 和 <literal>roundrobin</literal>
-   来提供相同的功能。
+   setting from prior versions. The new <literal>random</literal> and
+   <literal>roundrobin</literal> provide the same functionality.
   </para>
   <para>
    <example>
@@ -334,10 +378,12 @@ $mysqli = new mysqli("localhost", "username", "password", "database");
    </example>
   </para>
   <para>
-   <function>mysqlnd_ms_set_user_pick_server</function> 函数已经不再使用。回调策略
-   设定使用 <literal>user</literal> 实现。一些过滤器需要设定参数，例如 <literal>user</literal>
-   需要设定回调函数的名称，他相当于以前版本中，在
-   <function>mysqlnd_ms_set_user_pick_server</function> 中的设定内容。
+   The function
+   <function>mysqlnd_ms_set_user_pick_server</function>
+   has been removed. Setting a callback is now done with the <literal>user</literal>
+   filter. Some filters accept parameters. The <literal>user</literal> filter
+   requires and accepts a mandatory <literal>callback</literal> parameter
+   to set the callback previously set through the function <function>mysqlnd_ms_set_user_pick_server</function>.
    <example>
     <title>The <literal>user</literal> filter replaces <function>mysqlnd_ms_set_user_pick_server</function></title>
     <programlisting role="ini">
@@ -352,12 +398,16 @@ $mysqli = new mysqli("localhost", "username", "password", "database");
    </example>
   </para>
   <para xml:id="mysqlnd-ms.plugin-ini-json.debug_config">
-   配置文件的有效性，将在读取配置文件和稍后真正建立连接的时候进行检查。配置文件将在 PHP 开始获取请求的时候进行读取，在这个时候， PHP 可能还没有准备好显示错误信息。最坏的情况下，连接尝试失败了，但是没有任何错误信息系那是出来。
-   在 1.5.0 以后的版本中，这种问题被处理掉了。
+   The validity of the configuration file is checked both when reading the
+   configuration file and later when establishing a connection. The configuration
+   file is read during PHP request startup. At this early stage a PHP extension
+   may not display error messages properly. In the worst case, no error
+   is shown and a connection attempt fails without an adequate error message.
+   This problem has been cured in version 1.5.0.
   </para>
   <para>
    <example>
-    <title>由于配置文件错误显示错误信息 (从 1.5.0 版本开始)</title>
+    <title>Common error message in case of configuration file issues (upto version 1.5.0)</title>
      <programlisting role="php">
 <![CDATA[
 <?php
@@ -380,11 +430,15 @@ Fatal error: Call to a member function fetch_assoc() on a non-object in Command 
    </example>
   </para>
   <para>
-   从 1.5.0 版本开始，启动的错误信息将被缓冲起来，并且在实际的连接建立时抛出。可以使用 <link linkend="ini.mysqlnd-ms.force-config-usage"><literal>mysqlnd_ms.force_config_usage</literal></link> 配置文件参数来设置显示缓冲错误的类别。默认情况下，会抛出 <literal>E_WARNING</literal> 级别的错误。
+   Since version 1.5.0 startup errors are additionally buffered and emitted when
+   a connection attempt is made. Use the configuration directive
+   <link linkend="ini.mysqlnd-ms.force-config-usage"><literal>mysqlnd_ms.force_config_usage</literal></link>
+   to set the error type used to display buffered errors. By default an error
+   of type <literal>E_WARNING</literal> will be emitted.
  </para>
- <para>
+  <para>
    <example>
-    <title>从 1.5.0 版本引入配置文件有效性检查</title>
+    <title>Improved configuration file validation since 1.5.0</title>
      <programlisting role="php">
 <![CDATA[
 <?php
@@ -401,11 +455,14 @@ Warning: mysqli::mysqli(): (mysqlnd_ms) (mysqlnd_ms) Failed to parse config file
    </example>
   </para>
   <para>
-   通过 <link linkend="ini.mysqlnd-ms.force-config-usage"><literal>mysqlnd_ms.force_config_usage = 1</literal></link> 配置文件设定，能够提供检查配置文件错误的能力。他不仅仅能够将缓冲的启动错误使用 <literal>E-RECOVERABLE_ERROR</literal> 级别抛出，而且可以检查配置段中是否丢失了部分名称。
+   It can be useful to set <link linkend="ini.mysqlnd-ms.force-config-usage"><literal>mysqlnd_ms.force_config_usage = 1</literal></link>
+   when debugging potential configuration file errors. This will not only turn the
+   type of buffered startup errors into <literal>E_RECOVERABLE_ERROR</literal> but also
+   help detecting misspelled section names.
   </para>
   <para>
    <example>
-    <title>通过 <literal>mysqlnd_ms.force_config_usage=1</literal> 可能更精确的定位错误</title>
+    <title>Possibly more precise error due to <literal>mysqlnd_ms.force_config_usage=1</literal></title>
     <programlisting role="ini">
 <![CDATA[
 mysqlnd_ms.force_config_usage=1
@@ -427,8 +484,13 @@ Warning: mysqli::mysqli(): (mysqlnd_ms) Exclusive usage of configuration enforce
 
    </example>
   </para>
+  </section>
+
+  <section xml:id="mysqlnd-ms.plugin-ini-json-reference">
+   <title>Configuration Directives</title>
+
   <para>
-   这里有一个简短的对于配置文件可以使用的指令的说明
+   Here is a short explanation of the configuration directives that can be used.
   </para>
   <para>
   <variablelist>
@@ -613,7 +675,9 @@ Warning: mysqli::mysqli(): (mysqlnd_ms) Exclusive usage of configuration enforce
      </term>
      <listitem>
       <para>
-       全局同步标识，可以配置为使用服务器内置的 GTID，也可以使用客户端模拟的。
+       Global transaction identifier configuration related to both
+       the use of the server built-in global transaction ID feature and
+       the client-side emulation.
       </para>
       <informaltable>
        <tgroup cols="3">
@@ -634,9 +698,11 @@ Warning: mysqli::mysqli(): (mysqlnd_ms) Exclusive usage of configuration enforce
           </entry>
           <entry>
            <para>
-            用于查询最新 GTID 的 SQL 语句，当插件需要得到最新的 GTID 的时候会执行这个语句。
-            他也可以用于检查 MySQL 主从同步的 slave 状态。<function>mysqlnd_ms_get_laster_gtid</function>
-            也很会使用这个设定。
+            SQL statement for accessing the latest global transaction identifier.
+            The SQL statement is run if the plugin needs to know the most recent
+            global transaction identifier. This can be the case, for example, when checking
+            MySQL Replication slave status.
+            Also used with <function>mysqlnd_ms_get_last_gtid</function>.
            </para>
           </entry>
           <entry>Since 1.2.0.</entry>
@@ -647,11 +713,14 @@ Warning: mysqli::mysqli(): (mysqlnd_ms) Exclusive usage of configuration enforce
           </entry>
           <entry>
            <para>
-            SQL 语句，他用于检查要查询的相关内容是否已经被同步。当使用比最终一致性
-            更高的服务一致性级别的时候会被使用。这个 SQL 语句中必须包含
-            <literal>#GTID</literal> 占位符，在执行的时候他将有插件替换成需要的 GTID。
-            可以参考 <link linkend="mysqlnd-ms.quickstart.gtid">quickstart</link>
-            查询相关范例。
+            SQL statement for checking if a replica has replicated
+            all transactions up to and including ones searched for. The
+            SQL statement is run when searching for replicas which can offer
+            a higher level of consistency than eventual consistency.
+            The statement must contain a placeholder <literal>#GTID</literal>
+            which is to be replaced with the global transaction identifier searched
+            for by the plugin. Please, check the
+            <link linkend="mysqlnd-ms.quickstart.gtid">quickstart</link> for examples.
            </para>
           </entry>
           <entry>Since 1.2.0.</entry>
@@ -662,7 +731,8 @@ Warning: mysqli::mysqli(): (mysqlnd_ms) Exclusive usage of configuration enforce
           </entry>
           <entry>
            <para>
-            当执行相关配置的 SQL 语句的时候若发生错误是否进行报警。
+            Whether to emit an error of type warning if an issue occurs while
+            executing any of the configured SQL statements.
            </para>
           </entry>
           <entry>Since 1.2.0.</entry>
@@ -673,33 +743,41 @@ Warning: mysqli::mysqli(): (mysqlnd_ms) Exclusive usage of configuration enforce
           </entry>
           <entry>
            <para>
-            客户端 GTID 模拟使用的 SQL 语句，当 master 执行语句以后，会使用这个
-            SQL 语句更新模拟的 GTID，可以参考
-            <link linkend="mysqlnd-ms.quickstart.gtid">quickstart</link>
-            查看相关范例。
+            Client-side global transaction ID emulation only. SQL statement
+            to run when a transaction finished to update the global transaction
+            identifier sequence number on the master. Please, see the
+            <link linkend="mysqlnd-ms.quickstart.gtid">quickstart</link> for examples.
            </para>
           </entry>
           <entry>Since 1.2.0.</entry>
           </row>
-          <row>
+         <row>
           <entry>
            <literal>wait_for_gtid_timeout</literal>
           </entry>
           <entry>
            <para>
-            插件等待 <literal>wait_for_gtid_timeout</literal> 秒，看 slave 是否能够
-            满足 Session 一致性的要求。这个参数限制了 slave 状态的轮循时间，如果轮循
-            的时间非常长，那么总体小号的时间会超过 <literal>wait_for_gtid_timeout</literal>。
-            在两次轮循之间，插件会调用 <literal>sleep(1)</literal> 去等待 1 秒。
+            Instructs the plugin to wait up to <literal>wait_for_gtid_timeout</literal>
+            seconds for a slave to catch up when searching for slaves that can
+            deliver session consistency. The setting limits the time spend for
+            polling the slave status. If polling the status takes very long, the total
+            clock time spend waiting may exceed <literal>wait_for_gtid_timeout</literal>.
+            The plugin calls <literal>sleep(1)</literal> to sleep one second between
+            each two polls.
            </para>
            <para>
-            这个参数可以在客户端模拟 GTID 或者在 MySQL 5.6 版本使用服务器端内置的
-            GTID 的时候使用。
+            The setting can be used both with the plugins client-side emulation
+            and the server-side global transaction identifier feature of MySQL 5.6.
            </para>
            <para>
-            等待 slave 能够同步到 Session 一致性要求的 GTID，意味着将调节客户端。
-            这种调节，可以在 master 上间接的降低写负载。基于复制的系统，例如 MySQL
-            主从同步会消耗大量的时间在一致性同步上，这种设置可以防止 master 过载。
+            Waiting for a slave to replicate a certain GTID needed for session
+            consistency also means throttling the client. By throttling the
+            client the write load on the master is reduced indirectly. A
+            primary copy based replication system, such as MySQL Replication,
+            is given more time to reach a consistent state. This can be desired,
+            for example, to increase the number of data copies for
+            high availability considerations or to prevent the master from being
+            overloaded.
            </para>
           </entry>
           <entry>Since 1.4.0.</entry>
@@ -707,6 +785,205 @@ Warning: mysqli::mysqli(): (mysqlnd_ms) Exclusive usage of configuration enforce
          </tbody>
         </tgroup>
        </informaltable>
+     </listitem>
+    </varlistentry>
+    <varlistentry xml:id="ini.mysqlnd-ms-plugin-config-v2.fabric">
+     <term>
+      <parameter>fabric</parameter>
+      <type>object</type>
+     </term>
+     <listitem>
+      <para>
+        MySQL Fabric related settings. If the plugin is used together with MySQL
+        Fabric, then the plugins configuration file no longer contains lists of MySQL servers.
+        Instead, the plugin will ask MySQL Fabric which list of servers to use to
+        perform a certain task.
+      </para>
+      <para>
+        A minimum plugin configuration for use with MySQL Fabric contains a list
+        of one or more MySQL Fabric hosts that the plugin can query. If more
+        than one MySQL Fabric host is  configured, the plugin will use a roundrobin
+        strategy to choose among them. Other strategies are currently not available.
+      </para>
+      <para>
+       <example>
+        <title>Minimum pluging configuration for use with MySQL Fabric</title>
+        <programlisting role="ini">
+<![CDATA[
+{
+    "myapp": {
+        "fabric": {
+            "hosts": [
+                {
+                    "host" : "127.0.0.1",
+                    "port" : 8080
+                }
+            ]
+        }
+    }
+}
+]]>
+        </programlisting>
+       </example>
+      </para>
+      <para>
+       Each MySQL Fabric host is described using a JSON object with the following
+       members.
+      </para>
+      <informaltable>
+       <tgroup cols="3">
+        <colspec colwidth="1*"/>
+        <colspec colwidth="7*"/>
+        <colspec colwidth="2*"/>
+        <thead>
+         <row>
+          <entry>Keyword</entry>
+          <entry>Description</entry>
+          <entry>Version</entry>
+         </row>
+        </thead>
+        <tbody>
+         <row>
+          <entry>
+            <literal>host</literal>
+          </entry>
+          <entry>
+           <para>
+            Host name of the MySQL Fabric host.
+           </para>
+          </entry>
+          <entry>Since 1.6.0.</entry>
+         </row>
+         <row>
+          <entry>
+            <literal>port</literal>
+          </entry>
+          <entry>
+           <para>
+            The TCP/IP port on which the MySQL Fabric host listens
+            for remote procedure calls sent by clients such as
+            the plugin.
+           </para>
+          </entry>
+          <entry>Since 1.6.0.</entry>
+         </row>
+        </tbody>
+       </tgroup>
+      </informaltable>
+      <para>
+       The plugin is using PHP streams to communicate with MySQL Fabric
+       through XML RPC over HTTP. By default no timeouts are set
+       for the network communication. Thus, the plugin defaults to PHP
+       stream default timeouts. Those defaults are out of control of
+       the plugin itself.
+      </para>
+      <para>
+        An optional timeout value can be set to overrule the PHP streams
+        default timeout setting. Setting the timeout in the plugins
+        configuration file has the same effect as
+        setting a timeout for a PHP user space HTTP connection established
+        through PHP streams.
+      </para>
+      <para>
+       The plugins Fabric timeout value unit is seconds. The allowed value
+       range is from 0 to 65535. The setting exists since version 1.6.
+      </para>
+      <para>
+       <example>
+        <title>Optional timeout for communication with Fabric</title>
+        <programlisting role="ini">
+<![CDATA[
+{
+    "myapp": {
+        "fabric": {
+            "hosts": [
+                {
+                    "host" : "127.0.0.1",
+                    "port" : 8080
+                }
+            ],
+            "timeout": 2
+        }
+    }
+}
+]]>
+        </programlisting>
+       </example>
+      </para>
+      <para>
+       <link linkend="ini.mysqlnd-ms-plugin-config-v2.trx-stickiness">Transaction stickiness</link>
+       and MySQL Fabric logic can collide. The stickiness option disables switching
+       between servers for the duration of a transaction. When using Fabric and
+       sharding the user may (erroneously) start a local transaction on one share and
+       then attempt to switch to a different shard using either
+       <link linkend="function.mysqlnd-ms-fabric-select-shard">
+       <function>mysqlnd_ms_fabric_select_shard</function></link> or
+       <link linkend="function.mysqlnd-ms-fabric-select-global">
+       <function>mysqlnd_ms_fabric_select_global</function></link>. In this case, the
+       plugin will not reject the request to switch servers in the middle of a transaction
+       but allow the user to switch to another server regardless of the transaction
+       stickiness setting used. It is clearly a user error to write such code.
+      </para>
+      <para>
+       If transaction stickiness is enabled and you would like to get an error of type
+       warning when calling  <link linkend="function.mysqlnd-ms-fabric-select-shard">
+       <function>mysqlnd_ms_fabric_select_shard</function></link> or
+       <link linkend="function.mysqlnd-ms-fabric-select-global">
+       <function>mysqlnd_ms_fabric_select_global</function></link>,
+       set the boolean flag <literal>trx_warn_server_list_changes</literal>.
+      </para>
+      <para>
+       <example>
+        <title>Warnings about the violation of transaction boundaries</title>
+        <programlisting role="ini">
+<![CDATA[
+{
+    "myapp": {
+        "fabric": {
+            "hosts": [
+                {
+                    "host" : "127.0.0.1",
+                    "port" : 8080
+                }
+            ],
+            "trx_warn_serverlist_changes": 1
+        },
+        "trx_stickiness": "on"
+    }
+}
+]]>
+        </programlisting>
+        <programlisting role="php">
+<![CDATA[
+<?php
+$link = new mysqli("myapp", "root", "", "test");
+/*
+  For the demo the call may fail.
+  Failed or not we get into the state
+  needed for the example.
+*/
+@mysqlnd_ms_fabric_select_global($link, 1);
+$link->begin_transaction();
+@$link->query("DROP TABLE IF EXISTS test");
+/*
+  Switching servers/shards is a mistake due to open
+  local transaction!
+*/
+mysqlnd_ms_select_global($link, 1);
+?>
+]]>
+         </programlisting>
+         &example.outputs;
+        <screen>
+<![CDATA[
+PHP Warning: mysqlnd_ms_fabric_select_global(): (mysqlnd_ms) Fabric server exchange in the middle of a transaction in %s on line %d
+]]>
+        </screen>
+       </example>
+      </para>
+      <para>
+       Please, consider the feature experimental. Changes to syntax and semantics may  happen.
+      </para>
      </listitem>
     </varlistentry>
     <varlistentry xml:id="ini.mysqlnd-ms-plugin-config-v2.filters">
@@ -803,17 +1080,21 @@ PHP Warning:  mysqli::query(): Couldn't fetch mysqli in filter_warning.php on li
      </term>
      <listitem>
       <para>
-       <literal>random</literal> 过滤器提供 random 或者 random_once 负载均衡策略，
-       老版本的使用可以参考 
-       <link linkend="ini.mysqlnd-ms-plugin-config.pick"><literal>pick[]</literal></link>。
+        The <literal>random</literal> filter features the random and random once
+        load balancing policies, set through the
+        <link linkend="ini.mysqlnd-ms-plugin-config.pick"><literal>pick[]</literal></link>
+        directive in older versions.
       </para>
       <para>
-       当执行只读语句的时候，随机策略会随机挑选一个服务器，random_once 会在页面第一次
-       请求的时候随机挑选一个服务器，然后在页面后续的访问中使用同一个服务器。random_once
-       是默认设置。
+        The random policy will pick a random server whenever
+        a read-only statement is to be executed. The random once strategy
+        picks a random slave server once and continues using the slave for the
+        rest of the PHP web request. Random once is a default,
+        if load balancing is not configured through a filter.
       </para>
       <para>
-       如果 <literal>random</literal> 过滤器没有设定任何参数，那么会使用随机负载均衡策略。
+       If the <literal>random</literal> filter is not given any arguments, it
+       stands for random load balancing policy.
       </para>
       <para>
        <example>
@@ -848,8 +1129,10 @@ PHP Warning:  mysqli::query(): Couldn't fetch mysqli in filter_warning.php on li
        </example>
       </para>
       <para>
-       可以设置 <literal>sticky</literal> 参数，如果设置了这个参数 <literal>1</literal>
-       过滤器将采用 random_once 策略。
+       Optionally, the <literal>sticky</literal> argument can be passed to the
+       filter. If the parameter <literal>sticky</literal> is set to the string
+       <literal>1</literal>, the filter follows the random once
+       load balancing strategy.
       </para>
       <para>
        <example>
@@ -868,10 +1151,13 @@ PHP Warning:  mysqli::query(): Couldn't fetch mysqli in filter_warning.php on li
        </example>
       </para>
       <para>
-       从 1.4.0 版本开始，<literal>random</literal> 和 <literal>roundrobin</literal>
-       过滤器都可以设定服务器权重 (优先级)。如果要使用权重，那么所有的服务器都需要
-       分配 <literal>weight</literal>。使用权重，那么 master 和 slave 都需要
-       使用命名设定。
+       Both the <literal>random</literal> and <literal>roundrobin</literal>
+       filters support setting a priority, a weight for a server, since
+       PECL/mysqlnd_ms 1.4.0. If the <literal>weight</literal> argument is
+       passed to the filter, it must assign a weight for all servers. Servers
+       must be given an alias name in the <literal>slave</literal> respectively
+       <literal>master</literal> server lists. The alias must be used
+       to reference servers for assigning a priority with <literal>weight</literal>.
       </para>
       <para>
        <example>
@@ -884,11 +1170,12 @@ PHP Warning:  mysqli::query(): Couldn't fetch mysqli in filter_warning.php on li
        </example>
       </para>
       <para>
-       如果对于一个非法的服务器命名设定 <literal>weight</literal>，那么会产生一个
-       类似于上面的错误信息。
+       Using a wrong alias name with <literal>weight</literal> may result in
+       an error similar to the shown above.
       </para>
       <para>
-       如果遗漏了 <literal>weight</literal> 设定，所有服务器的权重是 1。
+       If <literal>weight</literal> is omitted, the default weight of
+       all servers is one.
       </para>
       <para>
        <example>
@@ -934,26 +1221,35 @@ PHP Warning:  mysqli::query(): Couldn't fetch mysqli in filter_warning.php on li
        </example>
       </para>
       <para>
-       如果服务器的权重设置为 2，那么他使用的次数将是那些权重为 1 的服务器的两倍。
-       不同的权重设定，可以基于不同的服务器性能、网络延迟、或者你更喜欢的原因。
-       基于网络延迟的原因，可以给服务器设置一个比较低的权重，例如上面的范例中，对于
-       <literal>slave3</literal> 只有 1/8 的使用权重，这样他比 <literal>slave1</literal>、
-       <literal>slave2</literal> 只有很少的使用几率。只有当其他两台设备都产生错误时，
-       <literal>slave3</literal> 使用率才会上升。在使用权重的时候，一定要查看错误处理
-       相关的说明。
+       At the average a server assigned a weight of two will be selected twice
+       as often as a server assigned a weight of one. Different weights can be
+       assigned to reflect differently sized machines, to prefer co-located slaves
+       which have a low network latency or, to configure a standby failover server.
+       In the latter case, you may want to assign the standby server a very low
+       weight in relation to the other servers. For example, given the
+       configuration above <literal>slave3</literal> will get only some eight
+       percent of the requests in the average. As long as <literal>slave1</literal>
+       and <literal>slave2</literal> are running, it will be used sparsely,
+       similar to a standby failover server. Upon failure of <literal>slave1</literal>
+       and <literal>slave2</literal>, the usage of <literal>slave3</literal>
+       increases. Please, check the notes on failover before using
+       <literal>weight</literal> this way.
       </para>
       <para>
-       可以设定 1 - 65535 之间的数字
+       Valid weight values range from 1 to 65535.
       </para>
       <para>
-       非法的参数将会被忽略，而不会进行任何报警。
+       Unknown arguments are ignored by the filter. No warning or error is given.
       </para>
       <para>
-       如果过滤器使用一个或者多个 master，一个 slave，那么使用 <literal>random</literal>、
-       <literal>roundrobin</literal> 执行语句，会产生一个报警或者错误信息。
+        The filter expects one or more servers as input. Outputs one server.
+        A filter sequence such as
+        <literal>random</literal>, <literal>roundrobin</literal> may
+        cause a warning and an error message to be set on the connection
+        handle when executing a statement.
       </para>
       <para>
-       过滤器的参数
+       List of filter arguments.
       </para>
       <informaltable>
        <tgroup cols="3">
@@ -974,7 +1270,8 @@ PHP Warning:  mysqli::query(): Couldn't fetch mysqli in filter_warning.php on li
           </entry>
           <entry>
            <para>
-            是否激活 random_once 负载均衡策略
+            Enables or disabled random once load
+            balancing policy. See above.
            </para>
           </entry>
           <entry>Since 1.2.0.</entry>
@@ -985,7 +1282,8 @@ PHP Warning:  mysqli::query(): Couldn't fetch mysqli in filter_warning.php on li
           </entry>
           <entry>
            <para>
-            为服务器设置负载均衡权重 (优先级)
+            Assigns a load balancing weight/priority to
+            a server. Please, see above for a description.
            </para>
           </entry>
           <entry>Since 1.4.0.</entry>
@@ -1002,9 +1300,11 @@ PHP Warning:  mysqli::query(): Couldn't fetch mysqli in filter_warning.php on li
      </term>
      <listitem>
       <para>
-       如果使用 <literal>roundrobin</literal> 过滤器，插件会轮循配置文件中
-       所有配置的 slaver。如果插件已经使用的 slave 列表的结尾，他会重新从列表
-       头开始使用 slave 服务器。
+       If using the <literal>roundrobin</literal> filter, the plugin
+       iterates over the list of  configured slave servers to pick a server
+       for statement execution. If the plugin reaches the end of the list,
+       it wraps around to the beginning of the list and picks the first
+       configured slave server.
       </para>
       <para>
        <example>
@@ -1034,12 +1334,14 @@ PHP Warning:  mysqli::query(): Couldn't fetch mysqli in filter_warning.php on li
        </example>
       </para>
       <para>
-        如果设定了一个或者多个 master，而只设置了一个 slave，那么采用
-       <literal>roundrobin</literal>, <literal>random</literal> 在执行语句的
-       时候，会在连接中产生一个报警或者错误信息。
+        Expects one or more servers as input. Outputs one server.
+        A filter sequence such as
+        <literal>roundrobin</literal>, <literal>random</literal> may
+        cause a warning and an error message to be set on the connection
+        handle when executing a statement.
       </para>
       <para>
-       过滤器使用的参数。
+       List of filter arguments.
       </para>
       <informaltable>
        <tgroup cols="3">
@@ -1060,9 +1362,9 @@ PHP Warning:  mysqli::query(): Couldn't fetch mysqli in filter_warning.php on li
           </entry>
           <entry>
            <para>
-            设置服务器的权重（优先级），可以参考
-            <link linkend="ini.mysqlnd-ms-plugin-config-v2.filter-random">above</link>
-            的说明。
+            Assigns a load balancing weight/priority to
+            a server. Please, find a description
+            <link linkend="ini.mysqlnd-ms-plugin-config-v2.filter-random">above</link>.
            </para>
           </entry>
           <entry>Since 1.4.0.</entry>
@@ -1278,8 +1580,8 @@ PHP Warning:  mysqli::query(): Couldn't fetch mysqli in filter_warning.php on li
         </tbody>
        </tgroup>
       </informaltable>
-     <para>
-      <example>
+      <para>
+       <example>
         <title>Using a callback</title>
         <programlisting role="ini">
 <![CDATA[
@@ -1425,7 +1727,7 @@ User has connected to 'myapp'...
       </para>
       <para>
        The return value of the callback set for <literal>user_multi</literal> must
-       be an an array with two elements. The first element holds a list of selected master
+       be an array with two elements. The first element holds a list of selected master
        servers. The second element contains a list of selected slave servers. The
        lists shall contain the keys of the slave and master servers as found in
        the slave and master lists passed to the callback. The below example returns
@@ -1484,7 +1786,6 @@ function pick_server($connected, $query, $masters, $slaves, $last_used_connectio
      </listitem>
     </varlistentry>
 
-
     <varlistentry xml:id="ini.mysqlnd-ms-plugin-config-v2.filter-node-groups">
      <term>
       Filter: <parameter>node_groups</parameter>
@@ -1501,7 +1802,7 @@ function pick_server($connected, $query, $masters, $slaves, $last_used_connectio
        must be followed by other filters to reduce the number of candidates
        down to one for statement execution.
       </para>
-       <informaltable>
+      <informaltable>
        <tgroup cols="3">
         <colspec colwidth="1*"/>
         <colspec colwidth="7*"/>
@@ -1515,10 +1816,10 @@ function pick_server($connected, $query, $masters, $slaves, $last_used_connectio
         </thead>
         <tbody>
          <row>
-           <entry>
-             <literal>user defined node group name</literal>
-           </entry>
-           <entry>
+          <entry>
+           <literal>user defined node group name</literal>
+          </entry>
+          <entry>
             <para>
              One or more node groups must be defined. A node group can have an
              arbitrary user defined name. The name is used in combination with
@@ -1609,7 +1910,6 @@ function pick_server($connected, $query, $masters, $slaves, $last_used_connectio
      </term>
      <listitem>
       <para>
-       <literal>quality_of_service</literal> 用于设定群组的服务级别。
        The <literal>quality_of_service</literal> identifies cluster nodes
        capable of delivering a certain quality of service. It is a multi filter
        which returns zero, one or multiple of its input servers. Thus, it
@@ -1765,32 +2065,40 @@ function pick_server($connected, $query, $masters, $slaves, $last_used_connectio
       </informaltable>
      </listitem>
     </varlistentry>
+
     <varlistentry xml:id="ini.mysqlnd-ms-plugin-config-v2.failover">
      <term>
       <parameter>failover</parameter>
-      1.3.x 版本以前(包含): <type>string</type>.
-      1.4.0 版本以后: <type>object</type>.
+      Up to and including 1.3.x: <type>string</type>.
+      Since 1.4.0: <type>object</type>.
      </term>
      <listitem>
       <para>
-       错误处理策略，支持：<literal>disabled</literal> (默认), 
-       <literal>master</literal>, <literal>loop_before_master</literal> (Since 1.4.0).
+       Failover policy. Supported policies:
+       <literal>disabled</literal> (default), <literal>master</literal>,
+       <literal>loop_before_master</literal> (Since 1.4.0).
       </para>
       <para>
-       如果没有设定错误处理策略 (<literal>failover=disabled</literal>) 插件不会做
-       任何的自动错误处理。这样，只要插件连接服务器出现错误，他将抛出一个报警信息，
-       并且设定连接中的错误编号和信息。
+       If no failover policy is set, the plugin will not do any
+       automatic failover (<literal>failover=disabled</literal>). Whenever
+       the plugin fails to connect a server it will emit a warning and
+       set the connections error code and message. Thereafter it is up to
+       the application to handle the error and, for example, resent the
+       last statement to trigger the selection of another server.
       </para>
       <para>
-       请注意，自动错误处理只对已经打开的链接起作用。如果一个连接再没有自动处理前已经
-       打开，那么产生错误的时候他会重新被打开。例如，如果一个服务器的链接已经关闭，
-       用户尝试在这个链接上执行语句，那么在没有自动错误处理的时候，将不会被重试，而是
-       直接报告错误。
+       Please note, the automatic failover logic is applied when opening
+       connections only. Once a connection has been opened no automatic attempts
+       are made to reopen it in case of an error. If, for example, the server
+       a connection is connected to is shut down and the  user attempts to
+       run a statement on the connection, no automatic failover
+       will be tried. Instead, an error will be reported.
       </para>
       <para>
-       如果设置 <literal>failover=master</literal>，插件将自己到 master 进行尝试，
-       请参考概念文档查看鞥多关于错误处理和使用 <literal>failover=master</literal>
-       可能产生的风险。
+       If using <literal>failover=master</literal> the plugin will implicitly
+       failover to a master, if available. Please check the
+       concepts documentation to learn about potential
+       pitfalls and risks of using <literal>failover=master</literal>.
       </para>
       <para>
        <example>
@@ -1818,7 +2126,8 @@ function pick_server($connected, $query, $masters, $slaves, $last_used_connectio
        </example>
       </para>
       <para>
-       从 1.4.0 版本开始，配置文件更改为对象定义方式。
+       Since PECL/mysqlnd_ms 1.4.0 the failover configuration keyword refers to an
+       object.
       </para>
       <para>
        <example>
@@ -1864,23 +2173,25 @@ function pick_server($connected, $query, $masters, $slaves, $last_used_connectio
           </entry>
           <entry>
            <para>
-            错误处理策略，可以使用
-            <literal>disabled</literal> (默认), <literal>master</literal>,
+            Failover policy. Possible values:
+            <literal>disabled</literal> (default), <literal>master</literal>,
             <literal>loop_before_master</literal>
            </para>
            <para>
-            <literal>disabled</literal> 将会禁用自动错误处理。
+            A value of <literal>disabled</literal> disables automatic failover.
            </para>
            <para>
-            <literal>master</literal> 设置将会在连接 slave 出现错误的时候
-            尝试连接 master。如果 master 连接错误，插件将在错误处理循环中处理，
-            并且返回一个错误给用户。
+            Setting <literal>master</literal> instructs the plugin to try
+            to connect to a master in case of a slave connection error. If the
+            master connection attempt fails, the plugin exists the failover
+            loop and returns an error to the user.
            </para>
            <para>
-            如果 <literal>loop_before_master</literal> 设置，对于 slave 请求，
-            插件会在其他 slave 尝试，然后才在 master 尝试。如果设定了多个 master
-            并且启用了多 master 设定，那么插件也会在其他 master 进行尝试，都失败后
-            才会报告错误给用户。
+             If using <literal>loop_before_master</literal> and a slave request
+             is made, the plugin tries to connect to other slaves before failing
+             over to a master. If multiple master are given and multi master is enabled,
+             the plugin also loops over the list of masters and attempts to connect
+             before returning an error to the user.
            </para>
           </entry>
           <entry>Since 1.4.0.</entry>
@@ -1891,16 +2202,19 @@ function pick_server($connected, $query, $masters, $slaves, $last_used_connectio
           </entry>
           <entry>
            <para>
-            在 WEB 请求期间记住产生错误的服务器，默认值 <literal>false</literal>。
+            Remember failures for the duration of a web request. Default:
+             <literal>false</literal>.
             </para>
             <para>
-             如果设置为 <literal>true</literal>，当前 WEB 页面的请求期间，
-             插件将记住失败的主机，并且在后面的负载均衡过程中自动跳过这个出错的主机。
+             If set to <literal>true</literal> the plugin will remember failed
+             hosts and skip the hosts in all future load balancing made for
+             the duration of the current web request.
             </para>
           </entry>
           <entry>
-           从 1.4.0 版本开始，这个功能只能与 <literal>random</literal> 和 
-           <literal>roundrobin</literal> 负载均衡策略同时使用，建议使用这个参数。
+           Since 1.4.0. The feature is only available together
+           with the <literal>random</literal> and <literal>roundrobin</literal>
+           load balancing filter. Use of the setting is recommended.
           </entry>
          </row>
          <row>
@@ -1909,30 +2223,37 @@ function pick_server($connected, $query, $masters, $slaves, $last_used_connectio
            </entry>
            <entry>
             <para>
-             在跳过一个主机前尝试的次数，默认值：<literal>0</literal> (不限制)
+             Maximum number of connection attempts before skipping host.
+             Default: <literal>0</literal> (no limit).
             </para>
             <para>
-             这个设定用于禁止在第一次产生错误的时候，就将这个主机从主机列表中剔除，
-             插件将在出现错误后继续在主机列表中保留这个主机。这个主机将不会在出现
-             第一次连接错误的时候被剔除，在负载均衡的使用过程中，出现
-             <literal>n</literal> 次错误以后，才会被剔除掉。
+             The setting is used to prevent hosts from being dropped of the
+             host list upon the first failure. If set to <literal>n > 0</literal>,
+             the plugin will keep the node in the node list even after a failed
+             connection attempt. The node will not be removed immediately from the slave respectively
+             master lists after the first connection failure but instead be tried to
+             connect to up to <literal>n</literal> times in future load balancing rounds
+             before being removed.
             </para>
           </entry>
           <entry>
-           从 1.4.0 版本开始，这个设定只能与 <literal>random</literal> 和
-           <literal>roundrobin</literal> 负载均衡策略同时使用。
+           Since 1.4.0. The feature is only available together
+           with the <literal>random</literal> and <literal>roundrobin</literal>
+           load balancing filter.
           </entry>
          </row>
         </tbody>
        </tgroup>
       </informaltable>
       <para>
-       如果设定 <literal>failover</literal> 的值不是 <literal>disabled</literal>、
-       <literal>master</literal> 或者 <literal>loop_before_master</literal>，那么
-       将产生一个报警信息或者是错误。
+       Setting <literal>failover</literal> to any other value but
+       <literal>disabled</literal>, <literal>master</literal> or
+       <literal>loop_before_master</literal>
+       will not emit any warning or error.
       </para>
      </listitem>
     </varlistentry>
+
     <varlistentry xml:id="ini.mysqlnd-ms-plugin-config-v2.lazy-connections">
      <term>
       <parameter>lazy_connections</parameter>
@@ -1940,22 +2261,31 @@ function pick_server($connected, $query, $masters, $slaves, $last_used_connectio
      </term>
      <listitem>
       <para>
-       被动连接是默认的选项，他在第一次发送执行语句的时候才真正建立连接。
+       Controls the use of lazy connections. Lazy connections
+       are connections which are not opened before the client sends the first
+       connection. Lazy connections are a default.
       </para>
       <para>
-       我们强烈建议使用被动连接模式，他可以有效的降低连接数。如果禁用了被动连接
-       模式，如果配置了一个 MySQL 主从同步 master 和两个 slave，那么即使应用程序
-       只使用了 master 执行了一条语句，也会建立 3 个链接。
+       It is strongly recommended to use lazy connections.
+       Lazy connections help to keep the number of open connections low.
+       If you disable lazy connections and, for example, configure one MySQL
+       replication master server and two MySQL replication slaves, the
+       plugin will open three connections upon the first call to a
+       connect function although the application might use the master
+       connection only.
       </para>
       <para>
-       使用被动连接会对用户更改连接状态信息产生风险。插件并不能分派所有的链接
-       状态信息到连接池中的每个连接上，只有少量的操作会被分发到已经打开的连接中，
-       处于被动连接模式中还没有打开的连接无法得到改变。只有部分的设置会被记住，
-       并且会在被动连接模式下的链接真正建立的时候设置。
+       Lazy connections bare a risk if you make heavy use of actions
+       which change the state of a connection. The plugin does not dispatch
+       all state changing actions to all connections from the connection pool.
+       The few dispatched actions are applied to already opened connections
+       only. Lazy connections opened in the future are not affected.
+       Only some settings are &quot;remembered&quot; and applied when lazy
+       connections are opened.
       </para>
       <para>
        <example>
-        <title>禁用被动连接模式</title>
+        <title>Disabling lazy connection</title>
         <programlisting role="ini">
 <![CDATA[
 {
@@ -1979,11 +2309,13 @@ function pick_server($connected, $query, $masters, $slaves, $last_used_connectio
        </example>
       </para>
       <para>
-       请参考 <literal>server_charset</literal> 处理可能产生的服务器默认字符集
-       和使用的字符集产生的影响。
+       Please, see also <literal>server_charset</literal> to overcome potential
+       problems with string escaping and servers using different default
+       charsets.
       </para>
      </listitem>
     </varlistentry>
+
     <varlistentry xml:id="ini.mysqlnd-ms-plugin-config-v2.server-charset">
      <term>
       <parameter>server_charset</parameter>
@@ -1991,44 +2323,62 @@ function pick_server($connected, $query, $masters, $slaves, $last_used_connectio
      </term>
      <listitem>
       <para>
-       这个设置从 1.4.0 版本开始使用，建议在被动连接的时候使用。
+       The setting has been introduced in 1.4.0. It is recommended to set it
+       if using lazy connections.
       </para>
       <para>
-       这个参数设定有两个目的，在连接建立完成以后设定返回的字符串的字符集，并且
-       当服务器采用不同的字符集时避免产生字符集转换的错误。
+       The <literal>server_charset</literal> setting serves two purposes. It
+       acts as a fallback charset to be used for string escaping done before
+       a connection has been established and it helps to avoid escaping pitfalls
+       in heterogeneous environments which servers using different default charsets.
       </para>
       <para>
-       字符集转换是设定在连接上的，当连接没有打开或者字符集不合法的时候字符集转换
-       将不起作用。如果使用的是被动连接，那么在实际的语句没有发送以前，连接是不打开的。
+       String escaping takes a connections charset into account. String escaping
+       is not possible before a connection has been opened and the connections
+       charset is known. The use of lazy connections delays the actual opening
+       of connections until a statement is send.
       </para>
       <para>
-       应用程序在使用被动连接时，在没有发送任何执行语句以前尝试进行字符集转换，
-       会产生一个 <literal>E_WARNING</literal> 级别的错误，因为这时连接其实
-       并没有建立。会在错误处理中得到一个类似于 <literal>(mysqlnd_ms)
+       An application using lazy connections may attempt to escape a string
+       before sending a statement. In fact, this should be a common case as
+       the statement string may contain the string that is to be escaped.
+       However, due to the lazy connection feature no connection has been opened
+       yet and escaping fails. The plugin may report an error of the type
+       <literal>E_WARNING</literal> and a message like <literal>(mysqlnd_ms)
        string escaping doesn't work without established connection.
        Possible solution is to add server_charset to your configuration</literal>
-       的错误信息。
+       to inform you of the pitfall.
       </para>
       <para>
-       <literal>server_charset</literal> 设置可以在被动连接启动以前设置，这样当连接
-       建立以后，会使用这个字符集作为字符集转换的目标。
+       Setting <literal>server_charset</literal> makes the plugin use
+       the given charset for string escaping done on lazy connection handles
+       before establishing a network connection to MySQL. Furthermore, the
+       plugin will enforce the use of the charset when the connection is
+       established.
       </para>
       <para>
-       在配置中指定字符集，可以避免由于服务器字符集不同而导致出现的错误。这个设定
-       还有一个附加的好处，迫使所有的服务器采用同样的字符集设定。无论服务器本身的
-       字符集设定是什么，插件将统一按照配置中的设定作为默认字符集使用。
+       Enforcing the use of the configured charset used for escaping is done
+       to prevent tapping into the pitfall of using a different charset for
+       escaping than used later for the connection. This has the additional
+       benefit of removing the need to align the charset configuration of all
+       servers used. No matter what the default charset on any of the servers is,
+       the plugin will set the configured one as a default.
       </para>
       <para>
-       插件不会阻止任何时候用户通过调用 <function>set_charset</function> 或者在 SQL
-       语句中设定字符集。但是请注意，在 SQL 语句中设置字符集是不建议使用的，因为插件
-       无法监控到这种变化。在被动连接模式下，用户可以在连接建立以后，更改默认字符集。
-       在配置文件中设定的字符集，将在连接建立后使用，而不管服务器的字符集设定，也不管
-       用户之前的设定。在实际连接建立以前，<literal>set_charset</literal> 的设定没有
-       任何作用。
+       The plugin does not stop the user from changing the charset at any time
+       using the <function>set_charset</function> call or corresponding SQL statements.
+       Please, note that the use of SQL is not recommended as it cannot be monitored
+       by the plugin. The user can, for example, change the charset on a
+       lazy connection handle after escaping a string and before the actual connection
+       is opened. The charset set by the user will be used for any subsequent escaping
+       before the connection is established. The connection will be established
+       using the configured charset, no matter what the server charset is or
+       what the user has set before. Once a connection has been opened,
+       <literal>set_charset</literal> is of no meaning anymore.
       </para>
       <para>
        <example>
-        <title>在被动连接模式下，字符集转换控制</title>
+        <title>String escaping on a lazy connection handle</title>
         <programlisting role="ini">
 <![CDATA[
 {
@@ -2054,15 +2404,12 @@ function pick_server($connected, $query, $masters, $slaves, $last_used_connectio
 <![CDATA[
 <?php
 $mysqli = new mysqli("myapp", "username", "password", "database");
-/* 译者注：下面将被转换为 UTF8，因为配置中这样设定的 */
 $mysqli->real_escape("this will be escaped using the server_charset setting - utf8");
-/* 译者注：下面的语句么有任何作用 */
 $mysqli->set_charset("latin1");
-/* 译者注：下面由于 mysqli 对象自己的字符集被上一条语句改变，所以本地字符转换会遵循对象内的设定被转换为 latin1 */
 $mysqli->real_escape("this will be escaped using latin1");
-/* 执行语句，相当于实际连接建立，配置文件中的设定会导致 mysqli 对象中的字符集重新被设定位 UTF8 */
+/* server_charset implicitly set - utf8 connection */
 $mysqli->query("SELECT 'This connection will be set to server_charset upon establishing' AS _msg FROM DUAL");
-/* 这时进行设定，后面的相关默认字符集针对实际连接才被转换为 latin1 */
+/* latin1 used from now on */
 $mysqli->set_charset("latin1");
 ?>
 ]]>
@@ -2071,6 +2418,7 @@ $mysqli->set_charset("latin1");
       </para>
      </listitem>
     </varlistentry>
+
     <varlistentry xml:id="ini.mysqlnd-ms-plugin-config-v2.master-on-write">
      <term>
       <parameter>master_on_write</parameter>
@@ -2078,15 +2426,18 @@ $mysqli->set_charset("latin1");
      </term>
      <listitem>
       <para>
-       如果设定这个参数，那么插件将从第一次在 master 执行语句以后，将后面
-       所有的语句发送给 master 执行。当然应用程序依然可以使用 SQL hints
-       来让插件自动判断是否从 slave 执行相关语句。
+       If set, the plugin will use the master server only after the
+       first statement has been executed on the master. Applications
+       can still send statements to the slaves using SQL hints to
+       overrule the automatic decision.
       </para>
       <para>
-       这个设置是为了解决同步延迟问题的。如果应用程序执行了一条
-       <literal>INSERT</literal> 语句，那么插件将默认将后面的所有操作，包括
-       <literal>SELECT</literal> 语句发送到 master 执行。这样将有助于解决
-       从 slave 服务器中查询没有完成 <literal>INSETER</literal> 同步的问题。
+       The setting may help with replication lag. If an application runs
+       an <literal>INSERT</literal> the plugin will, by default, use the
+       master to execute all following statements, including
+       <literal>SELECT</literal> statements. This helps to avoid problems
+       with reads from slaves which have not replicated the
+       <literal>INSERT</literal> yet.
       </para>
       <para>
        <example>
@@ -2114,16 +2465,18 @@ $mysqli->set_charset("latin1");
        </example>
       </para>
       <para>
-       请注意，从 1.2.0-alpha 版本开始，<literal>quality_of_service</literal> 已经可以使用了。
-       如果希望更好的完成这种控制，可以使用 <link linkend="mysqlnd-ms.qos-consistency">服务级别</link>
-       来更好的控制。
+       Please, note the <literal>quality_of_service</literal> filter introduced
+       in version 1.2.0-alpha. It gives finer control, for example, for achieving read-your-writes
+       and, it offers additional functionality introducing
+       <link linkend="mysqlnd-ms.qos-consistency">service levels</link>.
       </para>
       <para>
-       所有的 <link linkend="ini.mysqlnd-ms-plugin-config-v2.trx-stickiness">transaction stickiness</link> 设置，
-       包括 <literal>trx_stickiness=on</literal> 将推翻 <literal>master_on_write=1</literal> 的设定。
+       All <link linkend="ini.mysqlnd-ms-plugin-config-v2.trx-stickiness">transaction stickiness</link> settings,
+       including <literal>trx_stickiness=on</literal>, are overruled by <literal>master_on_write=1</literal>.
       </para>
      </listitem>
     </varlistentry>
+
     <varlistentry xml:id="ini.mysqlnd-ms-plugin-config-v2.trx-stickiness">
      <term>
       <parameter>trx_stickiness</parameter>
@@ -2131,46 +2484,57 @@ $mysqli->set_charset("latin1");
      </term>
      <listitem>
       <para>
-       事务控制策略，支持 <literal>disabled</literal> (默认)，<literal>master</literal>。
+       Transaction stickiness policy. Supported policies:
+       <literal>disabled</literal> (default), <literal>master</literal>.
       </para>
       <para>
-       这个设置需要使用 PHP 5.4.0 以上版本，如果再以前的版本使用，将会叨叨类似下面
-       <literal>(mysqlnd_ms) trx_stickiness strategy is not supported before PHP 5.3.99</literal>
-       的一条警告信息。
+       The setting requires 5.4.0 or newer. If used with PHP older than 5.4.0,
+       the plugin will emit a warning like
+       <literal>(mysqlnd_ms) trx_stickiness strategy is not supported before PHP 5.3.99</literal>.
       </para>
       <para>
-       如果没有设定这个参数，或者设置 <literal>trx_stickiness=disabled</literal>
-       那么插件将不关心事务处理。这样在事务处理的中间，可能由于负载均衡而切换链接。
-       为了避免这个情况，就必须使用 SQL hints 来暂时屏蔽连接切换。
+       If no transaction stickiness policy is set or,
+       if setting <literal>trx_stickiness=disabled</literal>,
+       the plugin is not transaction aware. Thus, the plugin may load balance
+       connections and switch connections in the middle of a transaction.
+       The plugin is not transaction safe. SQL hints must be used
+       avoid connection switches during a transaction.
       </para>
       <para>
-       从 PHP 5.4.0 版本开始，mysqlnd 允许插件通过 <literal>set_autocommit()</literal>
-       函数监控 <literal>autocommit</literal> 的设定值。如果设置
-       <literal>set_stickiness=master</literal> 并且 <literal>autocommit</literal> 被
-       PHP MySQL 扩展通过 <literal>set_autocommit()</literal> 设置为禁用，插件就会认为
-       事务处理已经开始了。这时，插件会停止负载均衡，将所有的语句发送给 master，
-       直到 <literal>autocommit</literal> 被启用。当然整个过程中，不需要使用 SQL hints。
+       As of PHP 5.4.0 the mysqlnd library allows the plugin to monitor
+       the <literal>autocommit</literal> mode set by calls to the
+       libraries <literal>set_autocommit()</literal> function.
+       If setting <literal>set_stickiness=master</literal> and
+       <literal>autocommit</literal> gets disabled by a PHP MySQL extension
+       invoking the <literal>mysqlnd</literal> library internal
+       function call <literal>set_autocommit()</literal>, the plugin is made
+       aware of the begin of a transaction. Then, the plugin stops load balancing
+       and directs all statements to the master server until
+       <literal>autocommit</literal> is enabled. Thus, no SQL hints are required.
       </para>
       <para>
-       例如 <function>mysqli_autocommit</function> 会调用 <literal>mysqlnd</literal>
-       内的 <literal>set_autocommit()</literal> 方法，控制 <literal>autocommit</literal>
-       的状态。
+       An example of a PHP MySQL API function calling the <literal>mysqlnd</literal>
+       library internal function call <literal>set_autocommit()</literal> is
+       <function>mysqli_autocommit</function>.
       </para>
       <para>
-       当然，即使设定了 <literal>trx_stickiness=master</literal> 插件也无法监控到 SQL 语句
-       当中 <literal>SET AUTOCOMMIT=0</literal> 或者 <literal>BEGIN</literal> 的使用。
+       Although setting <literal>trx_stickiness=master</literal>, the plugin
+       cannot be made aware of <literal>autocommit</literal> mode changes caused
+       by SQL statements such as <literal>SET AUTOCOMMIT=0</literal> or <literal>BEGIN</literal>.
       </para>
       <para>
-       从 PHP 5.5.0 版本开始，mysqlnd 库增加了控制事务处理的 C API。控制级别可以匹配 SQL
-       语句中的的意图，<literal>mysqlid</literal> 使用这些嗲用的 API 被更改。这样，从
-       1.5.0 版本开始，插件不仅仅可以监控 <function>mysqli_autocommit</function>，也可以
-       监控<function>mysqli_begin</function>，<function>mysqli_commit</function> 和 
-       <function>mysqli_rollback</function>。这就可以识别事务处理的边界，并且在执行事务处理
-       过程中停止负载均衡。
+       As of PHP 5.5.0, the mysqlnd library features additional C API calls to
+       control transactions. The level of control matches the one offered by SQL
+       statements. The <literal>mysqli</literal> API has been modified to use
+       these calls. Since version 1.5.0, PECL/mysqlnd_ms can monitor not only
+       <function>mysqli_autocommit</function>, but also <function>mysqli_begin</function>,
+       <function>mysqli_commit</function> and <function>mysqli_rollback</function> to
+       detect transaction boundaries and stop load balancing for the duration of
+       a transaction.
       </para>
       <para>
        <example>
-        <title>使用 master 执行事务处理</title>
+        <title>Using master to execute transactions</title>
         <programlisting role="ini">
 <![CDATA[
 {
@@ -2194,37 +2558,42 @@ $mysqli->set_charset("latin1");
        </example>
       </para>
       <para>
-       从 1.5.0 版本开始，事务处理过程中自动的和沉默的错误处理被禁用。如果事务处理的边界
-       被识别，事务处理控制被启动，如果服务器产生错误，无论配置中如何设定的错误处理策略，
-       插件将不试图连接下一个服务器去处理故障，用户必须处理这种错误。根据配置文件的设定，
-       插件可能发出一个 <literal>E_WARNING</literal> 级别的错误信息，类似
-       <literal>(mysqlnd_ms) Automatic failover is not permitted in the middle of a transaction</literal>。
-       并且错误可能被重写成
-       <literal>(mysqlnd_ms) No connection selected by the last filter</literal>。
-       这些错误也可能是由于失败的查询函数产生。
+       Since version 1.5.0 automatic and silent failover is disabled for the
+       duration of a transaction. If the boundaries of a transaction have been
+       properly detected, transaction stickiness is enabled and a server fails,
+       the plugin will not attempt to fail over to the next server, if any, regardless
+       of the failover policy configured. The user must handle the error
+       manually. Depending on the configuration, the plugin may emit
+       an error of type <literal>E_WARNING</literal> reading like
+       <literal>(mysqlnd_ms) Automatic failover is not permitted in the middle of a transaction</literal>.
+       This error may then be overwritten by follow up errors such as
+       <literal>(mysqlnd_ms) No connection selected by the last filter</literal>.
+       Those errors will be generated by the failing query function.
       </para>
       <para>
        <example>
-        <title>没有自动错误处理的错误处理</title>
+        <title>No automatic failover, error handling pitfall</title>
         <programlisting role="php">
 <![CDATA[
 <?php
-/* 假设：配置了自动错误处理 */
+/* assumption: automatic failover configured */
 $mysqli = new mysqli("myapp", "username", "password", "database");
 
-/* 设置插件内部状态 in_trx = 1 */
+/* sets plugin internal state in_trx = 1 */
 $mysqli->autocommit(false);
 
-/* 假设：服务器错误 */
+/* assumption: server fails */
 if (!($res = $mysqli->query("SELECT 'Assume this query fails' AS _msg FROM DUAL"))) {
- /* 处理事务错误，插件内部状态依然是 in_trx = 1 */
+ /* handle failure of transaction, plugin internal state is still in_trx = 1 */
  printf("[%d] %s", $mysqli->errno, $mysqli->error);
  /*
-  如果使用 autocommit() 进行事务判断，那么必须调用 autocommit(true)，
-  否则插件将假设目前还在事务处理过程中，依然禁止负载均衡。
+  If using autocommit() based transaction detection it is a
+  MUST to call autocommit(true). Otherwise the plugin assumes
+  the current transaction continues and connection
+  changes remain forbidden.
  */
  $mysqli->autocommit(true);
- /* 当然，你还可以开始一个新的事务处理 */
+ /* Likewise, you'll want to start a new transaction */
  $mysqli->autocommit(false);
 }
 /* latin1 used from now on */
@@ -2235,16 +2604,21 @@ $mysqli->set_charset("latin1");
        </example>
       </para>
       <para>
-       如果再一个事务处理执行的过程中产生了服务器错误，那么插件将继续禁止
-       连接切换，直到事务完成。应该重新调用 API 命令，让插件检测到事务处理边界。
-       例如，你必须开启 autocommit 状态，这样插件就就能够继续继续负载均衡和
-       连接切换。同样的，如果你如果还想执行一个新的事务，那么可以再次禁用
-       autocommit 状态。
+       If a server fails in the middle of a transaction the
+       plugin continues to refuse to switch connections until the
+       current transaction has been finished. Recall
+       that the plugin monitors API calls to detect transaction
+       boundaries. Thus, you have to, for example, enable
+       auto commit mode to end the current transaction before
+       the plugin continues load balancing and switches the server.
+       Likewise, you will want to start a new transaction
+       immediately thereafter and disable auto commit mode again.
       </para>
       <para>
-       如果不处理错误，不使用 API 调用停止一个失败的事务，可能会引起类似下面的
-       报警信息<literal>Commands out of sync; you can't run this command now</literal>。
-       错误处理是非常必要的。
+       Not handling failed queries and not ending a failed transaction
+       using API calls may cause all following commands emit errors
+       such as  <literal>Commands out of sync; you can't run this command now</literal>.
+       Thus, it is important to handle all errors.
       </para>
      </listitem>
     </varlistentry>
@@ -2373,7 +2747,8 @@ $mysqli->set_charset("latin1");
       </informaltable>
      </listitem>
     </varlistentry>
-     <varlistentry xml:id="ini.mysqlnd-ms-plugin-config-v2.xa">
+
+    <varlistentry xml:id="ini.mysqlnd-ms-plugin-config-v2.xa">
      <term>
        <parameter>xa</parameter>
        <type>object</type>
@@ -2391,114 +2766,76 @@ $mysqli->set_charset("latin1");
         </para>
        </note>
       </para>
-      <informaltable>
-       <tgroup cols="2">
-        <colspec colwidth="2*"/>
-        <colspec colwidth="8*"/>
-        <thead>
-         <row>
-          <entry>Keyword</entry>
-          <entry>Description</entry>
-         </row>
-        </thead>
-        <tbody>
-         <row>
-          <entry>
-           <literal>state_store</literal>
-          </entry>
-          <entry>
-	   <informaltable>
-            <tgroup cols="2">
-             <colspec colwidth="2*"/>
-             <colspec colwidth="8*"/>
-             <thead>
-              <row>
-               <entry>Keyword</entry>
-               <entry>Description</entry>
-              </row>
-             </thead>
-             <tbody>
-              <row>
-               <entry>
-                <literal>record_participant_credentials</literal>
-               </entry>
-               <entry>
-                <para>
-                 Whether to store the username and password of a global transaction
-                 participant in the participants table. If disabled, the garbage
-                 collection will use the default username and password when connecting
-                 to the participants. Unless you are using a different username and
-                 password for each of your MySQL servers, you can use the default
-                 and avoid storing the sensible information in state store.
-                </para>
-                <para>
-                 Please note, username and password are stored in clear text when using
-                 the MySQL state store, which is the only one available. It is in your
-                 responsibility to protect this sensible information.
-                </para>
-                <para>
-                 Default: <literal>false</literal>
-                </para>
-               </entry>
-              </row>
-              <row>
-               <entry>
-                <literal>participant_localhost_ip</literal>
-               </entry>
-               <entry>
-                <para>
-                 During XA garbage collection the plugin may find a participant server
-                 for which the host <literal>localhost</literal>
-                 has been recorded. If the garbage collection takes place on another host
-                 but the host that has written the participant record to the state store,
-                 the host name <literal>localhost</literal> now resolves to a different
-                 host. Therefore, when recording a participant servers host name
-                 in the state store, a value of <literal>localhost</literal> must
-                 be replaced with the actual IP address of <literal>localhost</literal>.
-                </para>
-                <para>
-                 Setting <literal>participant_localhost_ip</literal> should be considered
-                 only if using <literal>localhost</literal> cannot be avoided.
-                 From a garbage collection point of view only, it is preferrable not to
-                 configure any socket connection but to provide an IP address and port
-                 for a node.
-                </para>
-               </entry>
-              </row>
-              <row>
-               <entry>
-                <literal>mysql</literal>
-               </entry>
-               <entry>
-                <para>
-
-                 The MySQL state store is the only state store available.
-                </para>
-                <informaltable>
-                 <tgroup cols="2">
-                  <colspec colwidth="2*"/>
-                  <colspec colwidth="8*"/>
-                  <thead>
-                    <row>
-                     <entry>Keyword</entry>
-                     <entry>Description</entry>
-                    </row>
-                  </thead>
-                  <tbody>
-                   <row>
-                    <entry>
-                     <literal>global_trx_table</literal>
-                    </entry>
-                    <entry>
-                    <para>
-                     Name of the MySQL table used to store the state of an ongoing or aborted
-                     global transaction. Use the below SQL statement to create the table.
-                     Make sure to edit the table name to match your configuration.
-                    </para>
-                    <para>
-                     <example>
-                      <title>SQL definition for the MySQL state store transaction table</title>
-                      <programlisting role="sql">
+      <variablelist>
+       <varlistentry>
+        <term>state_store</term>
+        <listitem>
+           <variablelist xml:id="ini.mysqlnd-ms-plugin-config-v2.xa.state-store">
+            <varlistentry>
+             <term>record_participant_credentials</term>
+             <listitem>
+              <para>
+               Whether to store the username and password of a global transaction
+               participant in the participants table. If disabled, the garbage
+               collection will use the default username and password when connecting
+               to the participants. Unless you are using a different username and
+               password for each of your MySQL servers, you can use the default
+               and avoid storing the sensible information in state store.
+              </para>
+              <para>
+               Please note, username and password are stored in clear text when using
+               the MySQL state store, which is the only one available. It is in your
+               responsibility to protect this sensible information.
+              </para>
+              <para>
+               Default: <literal>false</literal>
+              </para>
+             </listitem>
+            </varlistentry>
+            <varlistentry>
+             <term>participant_localhost_ip</term>
+             <listitem>
+              <para>
+               During XA garbage collection the plugin may find a participant server
+               for which the host <literal>localhost</literal>
+               has been recorded. If the garbage collection takes place on another host
+               but the host that has written the participant record to the state store,
+               the host name <literal>localhost</literal> now resolves to a different
+               host. Therefore, when recording a participant servers host name
+               in the state store, a value of <literal>localhost</literal> must
+               be replaced with the actual IP address of <literal>localhost</literal>.
+              </para>
+              <para>
+               Setting <literal>participant_localhost_ip</literal> should be considered
+               only if using <literal>localhost</literal> cannot be avoided.
+               From a garbage collection point of view only, it is preferrable not to
+               configure any socket connection but to provide an IP address and port
+               for a node.
+              </para>
+             </listitem>
+            </varlistentry>
+            <varlistentry>
+             <term>mysql</term>
+             <listitem>
+              <para>
+               The MySQL state store is the only state store available.
+              </para>
+              <variablelist>
+               <varlistentry>
+                <term>global_trx_table</term>
+                <listitem>
+                 <para>
+                  Name of the MySQL table used to store the state of an ongoing or aborted
+                  global transaction. Use the below SQL statement to create the table.
+                  Make sure to edit the table name to match your configuration.
+                 </para>
+                 <para>
+                  Default: <literal>mysqlnd_ms_xa_trx</literal>
+                 </para>
+                 <para>
+                  <example>
+                   <title>SQL definition for the MySQL state store transaction table</title>
+                   <programlisting role="sql">
 <![CDATA[
 CREATE TABLE mysqlnd_ms_xa_trx (
   store_trx_id int(11) NOT NULL AUTO_INCREMENT,
@@ -2515,32 +2852,29 @@ CREATE TABLE mysqlnd_ms_xa_trx (
   KEY idx_state (state)
 ) ENGINE=InnoDB
 ]]>
-                       </programlisting>
-                     </example>
-                    </para>
-                    <para>
-                     Default: <literal>mysqlnd_ms_xa_trx</literal>
-                    </para>
-                   </entry>
-                   </row>
-                   <row>
-                    <entry>
-                     <literal>participant_table</literal>
-                    </entry>
-                    <entry>
-                     <para>
-                      Name of the MySQL table used to store participants of an ongoing or aborted
-                      global transaction. Use the below SQL statement to create the table.
-                      Make sure to edit the table name to match your configuration.
-                     </para>
-                     <para>
-                      Storing credentials can be enabled and disabled using
-                      <literal>record_participant_credentials</literal>
-                     </para>
-                     <para>
-                      <example>
-                       <title>SQL definition for the MySQL state store transaction table</title>
-                       <programlisting role="sql">
+                   </programlisting>
+                  </example>
+                 </para>
+                </listitem>
+               </varlistentry>
+                 <varlistentry>
+                  <term>participant_table</term>
+                  <listitem>
+                   <para>
+                    Name of the MySQL table used to store participants of an ongoing or aborted
+                    global transaction. Use the below SQL statement to create the table.
+                    Make sure to edit the table name to match your configuration.
+                   </para>
+                   <para>
+                    Storing credentials can be enabled and disabled using
+                    <literal>record_participant_credentials</literal>
+                   </para>
+                   <para>
+                    Default: <literal>mysqlnd_ms_xa_participants</literal>
+                   </para>
+                   <example>
+                    <title>SQL definition for the MySQL state store transaction table</title>
+                    <programlisting role="sql">
 <![CDATA[
 CREATE TABLE mysqlnd_ms_xa_participants (
   fk_store_trx_id int(11) NOT NULL,
@@ -2567,28 +2901,24 @@ CREATE TABLE mysqlnd_ms_xa_participants (
     REFERENCES mysqlnd_ms_xa_trx (store_trx_id) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB
 ]]>
-                       </programlisting>
-                      </example>
-                     </para>
-                     <para>
-                      Default: <literal>mysqlnd_ms_xa_participants</literal>
-                     </para>
-                    </entry>
-                   </row>
-                   <row>
-                    <entry>
-                     <literal>garbage_collection_table</literal>
-                    </entry>
-                    <entry>
-                     <para>
-                      Name of the MySQL table used to track and synchronize garbage collection runs.
-                      Use the below SQL statement to create the table.
-                      Make sure to edit the table name to match your configuration.
-                    </para>
-                     <para>
-                      <example>
-                       <title>SQL definition for the MySQL state store garbage collection table</title>
-                        <programlisting role="sql">
+                    </programlisting>
+                  </example>
+                 </listitem>
+                </varlistentry>
+                <varlistentry>
+                 <term>garbage_collection_table</term>
+                 <listitem>
+                  <para>
+                   Name of the MySQL table used to track and synchronize garbage collection runs.
+                   Use the below SQL statement to create the table.
+                   Make sure to edit the table name to match your configuration.
+                  </para>
+                  <para>
+                   Default: <literal>mysqlnd_ms_xa_gc</literal>
+                  </para>
+                  <example>
+                   <title>SQL definition for the MySQL state store garbage collection table</title>
+                   <programlisting role="sql">
 <![CDATA[
 CREATE TABLE mysqlnd_ms_xa_gc (
   gc_id int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -2601,175 +2931,183 @@ CREATE TABLE mysqlnd_ms_xa_gc (
   KEY idx_store_trx (gtrid,format_id,fk_store_trx_id)
 ) ENGINE=InnoDB
 ]]>
-                        </programlisting>
-                      </example>
-                     </para>
-                     <para>
-                      Default: <literal>mysqlnd_ms_xa_gc</literal>
-                     </para>
-                    </entry>
-                   </row>
-                   <row>
-                    <entry>
-                     <literal>host</literal>
-                    </entry>
-                    <entry>
-                      <para>
-                       Host name of the MySQL server.
-                      </para>
-                    </entry>
-                   </row>
-                   <row>
-                    <entry>
-                     <literal>user</literal>
-                    </entry>
-                    <entry>
-                      <para>
-                       Name of the user used to connect to the MySQL server.
-                      </para>
-                    </entry>
-                   </row>
-                   <row>
-                    <entry>
-                     <literal>password</literal>
-                    </entry>
-                    <entry>
-                     <para>
-                       Password for the MySQL server user.
-                      </para>
-                    </entry>
-                   </row>
-                   <row>
-                    <entry>
-                     <literal>db</literal>
-                    </entry>
-                    <entry>
-                      <para>
-                       Database that holds the garbage collection tables.
-                       Please note, you have to create the garbage collection
-                       tables prior to using the plugin. The tables will not be
-                       created implicitly during runtime but garbage collection
-                       will fail if the tables to not exist.
-                      </para>
-                    </entry>
-                   </row>
-                   <row>
-                    <entry>
-                     <literal>port</literal>
-                    </entry>
-                    <entry>
-                     <para>
-                      Port of the MySQL server.
-                     </para>
-                    </entry>
-                   </row>
-                   <row>
-                    <entry>
-                     <literal>socket</literal>
-                    </entry>
-                    <entry>
-                     <para>
-                      Unix domain socket of the MySQL server. Please note,
-                      if you have multiple PHP servers each of them will
-                      try to carry out garbage collection and need to be able
-                      to connect to the state store. In this case, you may
-                      prefer configuring an IP address and a port for
-                      the MySQL state store server to ensure all PHP servers
-                      can reach it.
-                     </para>
-                    </entry>
-                   </row>
-                  </tbody>
-                 </tgroup>
-                </informaltable>
-               </entry>
-              </row>
-             </tbody>
-            </tgroup>
-           </informaltable>
-          </entry>
-         </row>
-         <row>
-          <entry>
-           <literal>garbage_collection</literal>
-          </entry>
-          <entry>
-           <informaltable>
-            <tgroup cols="3">
-             <colspec colwidth="1*"/>
-             <colspec colwidth="7*"/>
-             <colspec colwidth="2*"/>
-             <thead>
-              <row>
-               <entry>Keyword</entry>
-               <entry>Description</entry>
-               <entry>Version</entry>
-              </row>
-             </thead>
-             <tbody>
-              <row>
-               <entry>
-                <literal>max_retries</literal>
-               </entry>
-               <entry>
-                <para>
-                 Maximum number of garbage collection runs before giving up.
-                 Allowed values are from <literal>0</literal> to <literal>100</literal>.
-                 A setting of <literal>0</literal> means no limit, unless
-                 the state store enforces a limit. Should the state store enforce a limit,
-                 it can be supposed to be significantly higher than <literal>100</literal>.
-                </para>
-                <para>
-                 Default: <literal>5</literal>
-                </para>
-               </entry>
-               <entry>Since 1.6.0.</entry>
-              </row>
-              <row>
-               <entry>
-                <literal>probability</literal>
-               </entry>
-               <entry>
-                <para>
-                 Garbage collection probability. Setting the value has not effect.
-                 The feature is under development.
-                </para>
-                <para>
-                 Default: <literal>5</literal>
-                </para>
-               </entry>
-               <entry>Since 1.6.0.</entry>
-              </row>
-             </tbody>
-            </tgroup>
-           </informaltable>
-          </entry>
-         </row>
-         <row>
-          <entry>
-           <literal>rollback_on_close</literal>
-          </entry>
-          <entry>
+                   </programlisting>
+                  </example>
+                 </listitem>
+                </varlistentry>
+               <varlistentry>
+                <term>host</term>
+                <listitem>
+                 <para>
+                  Host name of the MySQL server.
+                 </para>
+                </listitem>
+               </varlistentry>
+               <varlistentry>
+                <term>user</term>
+                <listitem>
+                 <para>
+                  Name of the user used to connect to the MySQL server.
+                 </para>
+                </listitem>
+               </varlistentry>
+               <varlistentry>
+                <term>password</term>
+                <listitem>
+                 <para>
+                  Password for the MySQL server user.
+                 </para>
+                </listitem>
+               </varlistentry>
+               <varlistentry>
+                <term>db</term>
+                <listitem>
+                 <para>
+                  Database that holds the garbage collection tables.
+                  Please note, you have to create the garbage collection
+                  tables prior to using the plugin. The tables will not be
+                  created implicitly during runtime but garbage collection
+                  will fail if the tables to not exist.
+                 </para>
+                </listitem>
+               </varlistentry>
+               <varlistentry>
+                <term>port</term>
+                <listitem>
+                 <para>
+                  Port of the MySQL server.
+                 </para>
+                </listitem>
+               </varlistentry>
+               <varlistentry>
+                <term>socket</term>
+                <listitem>
+                 <para>
+                  Unix domain socket of the MySQL server. Please note,
+                  if you have multiple PHP servers each of them will
+                  try to carry out garbage collection and need to be able
+                  to connect to the state store. In this case, you may
+                  prefer configuring an IP address and a port for
+                  the MySQL state store server to ensure all PHP servers
+                  can reach it.
+                 </para>
+                </listitem>
+               </varlistentry>
+              </variablelist>
+             </listitem>
+            </varlistentry>
+           </variablelist>
+          </listitem>
+         </varlistentry>
+         <varlistentry>
+          <term>rollback_on_close</term>
+          <listitem>
            <para>
-            Whether to automatically rollback an open global transaction is
-            a connection is closed.
+            Whether to automatically rollback an open global transaction when
+            a connection is closed. If enabled, it mimics the default behaviour
+            of local transactions. Should a client disconnect, the server rolls
+            back any open and unfinished transactions.
            </para>
            <para>
             Default: <literal>true</literal>
            </para>
-          </entry>
-         </row>
-        </tbody>
-       </tgroup>
-      </informaltable>
-     </listitem>
-    </varlistentry>
-
-
-   </variablelist>
-  </para>
-
-</section>
+          </listitem>
+         </varlistentry>
+         <varlistentry xml:id="ini.mysqlnd-ms-plugin-config-v2.xa.gc">
+          <term>garbage_collection</term>
+          <listitem>
+           <variablelist>
+            <varlistentry>
+             <term>max_retries</term>
+             <listitem>
+              <para>
+               Maximum number of garbage collection runs before giving up.
+               Allowed values are from <literal>0</literal> to <literal>100</literal>.
+               A setting of <literal>0</literal> means no limit, unless
+               the state store enforces a limit. Should the state store enforce a limit,
+               it can be supposed to be significantly higher than <literal>100</literal>.
+               Available since 1.6.0.
+              </para>
+              <para>
+               Please note, it is important to end failed XA
+               transactions within reasonable time to make participating servers
+               free resources bound to the transaction. The built-in garbage
+               collection is not expected to fail for a long period as
+               long as crashed servers become available again quickly.
+               Still, a situation may arise where a human is required to
+               act because the built-in garbage collection stopped or failed.
+               In this case, you may first want to check if the transaction still
+               cannot be fixed by forcing <function>mysqlnd_ms_xa_gc</function>
+               to ignore the setting, prior to handling it manually.
+              </para>
+              <para>
+               Default: <literal>5</literal>
+              </para>
+             </listitem>
+            </varlistentry>
+            <varlistentry>
+             <term>probability</term>
+             <listitem>
+              <para>
+               Garbage collection probability.
+               Allowed values are from <literal>0</literal> to <literal>1000</literal>.
+               A setting of <literal>0</literal> disables automatic background
+               garbage collection. Despite a setting of <literal>0</literal> it is
+               still possible to trigger garbage collection by calling
+               <function>mysqlnd_ms_gc</function>.
+               Available since 1.6.0.
+              </para>
+              <para>
+               The automatic garbage collection of stalled XA transaction is only
+               available if a state store have been configured. The state store
+               is responsible to keep track of XA transactions. Based on its recordings
+               it can find blocked XA transactions where the client has crashed,
+               connect to the participants and rollback the unfinished transactions.
+              </para>
+              <para>
+               The garbage collection is triggered as part of PHP's request shutdown
+               procedure at the end of a web request. That is after your PHP script
+               has finished working. Do decide whether to run the garbage collection
+               a random value between <literal>0</literal> and <literal>1000</literal>
+               is computed. If the <literal>probability</literal> value is higher
+               or equal to the random value, the state stores garbage collection routines
+               are invoked.
+              </para>
+              <para>
+               Default: <literal>5</literal>
+              </para>
+             </listitem>
+            </varlistentry>
+            <varlistentry>
+             <term>max_transactions_per_run</term>
+             <listitem>
+              <para>
+               Maximum number of unfinished XA transactions considered
+               by the garbage collection during one run.
+               Allowed values are from <literal>1</literal> to <literal>32768</literal>.
+               Available since 1.6.0.
+              </para>
+              <para>
+               Cleaning up an unfinished XA transaction takes considerable
+               amounts of time and resources. The garbage collection routine
+               may have to connect to several participants of a failed global
+               transaction to issue the SQL commands for rolling back
+               the unfinished tranaction.
+              </para>
+              <para>
+               Default: <literal>100</literal>
+              </para>
+             </listitem>
+            </varlistentry>
+           </variablelist>
+          </listitem>
+         </varlistentry>
+        </variablelist>
+       </listitem>
+      </varlistentry>
+     </variablelist>
+    </para>
+   </section>
 
  <section xml:id="mysqlnd-ms.plugin-ini-v1">
   <title xmlns="http://docbook.org/ns/docbook">Plugin configuration file (&lt;= 1.0.x)</title>
@@ -3182,12 +3520,17 @@ putenv("MYSQL_TEST_MASTER_HOST=myserver_hostname:/path/to/socket"));
  </section>
 
  <section xml:id="mysqlnd-ms.debugging">
-  <title xmlns="http://docbook.org/ns/docbook">调试与跟踪</title>
+  <title xmlns="http://docbook.org/ns/docbook">Debugging and Tracing</title>
   <para>
-   mysqlnd 的调试日志提供了调试和跟踪 PECL/mysqlnd_ms 的能力。 PECL/mysqlnd_ms 作为 mysqlnd 的一部分添加到调试文件当中。可以参考 <link linkend="ini.mysqlnd.debug"><literal>mysqlnd.debug</literal></link> PHP 配置执行文件获得更详细的关于如何配置调试文件的信息。
+   The mysqlnd debug log can be used to debug and trace the actitivities of
+   PECL/mysqlnd_ms. As a mysqlnd PECL/mysqlnd_ms adds trace information to the
+   mysqlnd library debug file. Please, see the
+   <link linkend="ini.mysqlnd.debug"><literal>mysqlnd.debug</literal></link>
+   PHP configuration directive documentation for a detailed description
+   on how to configure the debug log.
   </para>
   <para>
-  调试文件的范例配置设定:
+  Configuration setting example to activate the debug log:
   <programlisting>
 <![CDATA[
 mysqlnd.debug=d:t:x:O,/tmp/mysqlnd.trace
@@ -3409,9 +3752,10 @@ function check_stats() {
 register_shutdown_function("check_stats");
 ?>
 ]]>
-    </programlisting>
-   </example>
-  </para>
+     </programlisting>
+    </example>
+   </para>
+  </section>
  </section>
 
 </chapter>
