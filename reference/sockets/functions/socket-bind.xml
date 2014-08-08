@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision$ -->
+<!-- EN-Revision: 8e291b4d3798b4f54060b0b6cfb6500762a8b97a Maintainer: zhoumengkang Status: ready -->
+<refentry xmlns="http://docbook.org/ns/docbook" xml:id="function.socket-bind">
+ <refnamediv>
+  <refname>socket_bind</refname>
+  <refpurpose>给套接字绑定名字</refpurpose>
+ </refnamediv>
+
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <type>bool</type><methodname>socket_bind</methodname>
+   <methodparam><type>resource</type><parameter>socket</parameter></methodparam>
+   <methodparam><type>string</type><parameter>address</parameter></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>port</parameter><initializer>0</initializer></methodparam>
+  </methodsynopsis>
+  <para>
+   绑定 <parameter>address</parameter> 到 <parameter>socket</parameter>。
+   该操作必须是在使用 <function>socket_connect</function> 或者 <function>socket_listen</function>
+   建立一个连接之前。
+  </para>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>socket</parameter></term>
+     <listitem>
+      <para>
+       用 <function>socket_create</function> 创建的一个有效的套接字资源。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>address</parameter></term>
+     <listitem>
+      <para>
+       如果套接字是 <constant>AF_INET</constant> 族，那么
+       <parameter>address</parameter> 必须是一个四点分法的 IP 地址（例如 <literal>127.0.0.1</literal> ）。
+      </para>
+      <para>
+       <parameter>address</parameter> 是 Unix 套接字一部分（例如 <filename>/tmp/my.sock</filename> ）。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>port</parameter> （可选）</term>
+     <listitem>
+      <para>
+       参数 <parameter>port</parameter> 仅仅用于 <constant>AF_INET</constant>
+       套接字连接的时候，并且指定连接中需要监听的端口号。
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   &return.success;
+  </para>
+  <para>
+   错误代码会传入 <function>socket_last_error</function> ，如果将此参数传入 <function>socket_strerror</function>
+   则可以得到错误的文字说明。
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title>使用 <function>socket_bind</function> 来设置套接字资源地址</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+// Create a new socket
+$sock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
+
+// An example list of IP addresses owned by the computer
+$sourceips['kevin']    = '127.0.0.1';
+$sourceips['madcoder'] = '127.0.0.2';
+
+// Bind the source address
+socket_bind($sock, $sourceips['madcoder']);
+
+// Connect to destination address
+socket_connect($sock, '127.0.0.1', 80);
+
+// Write
+$request = 'GET / HTTP/1.1' . "\r\n" .
+           'Host: example.com' . "\r\n\r\n";
+socket_write($sock, $request);
+
+// Close
+socket_close($sock);
+
+?> 
+]]>
+    </programlisting>
+   </example>
+  </para>
+ </refsect1>
+
+ <refsect1 role="notes">
+  &reftitle.notes;
+  <note>
+   <para>
+    该函数必须在 <function>socket_connect</function> 之前使用。
+   </para>
+  </note>
+  <note>
+   <para>
+    Windows 9x/ME 兼容性注意点:
+    如果尝试绑定套接字资源到一个错误的地址，而这个地址不是本机的地址，那么 <function>socket_last_error</function> 可能会返回一个无效的错误代码。
+   </para>
+  </note>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>socket_connect</function></member>
+    <member><function>socket_listen</function></member>
+    <member><function>socket_create</function></member>
+    <member><function>socket_last_error</function></member>
+    <member><function>socket_strerror</function></member>
+   </simplelist>
+  </para>
+ </refsect1>
+
+</refentry>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
