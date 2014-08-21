@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision$ -->
+<!-- EN-Revision: d78c0a4f3335f668b36ae2309350649b45486f78 Maintainer: yuanyuqiang Status: ready -->
+<!-- Reviewed: no -->
+
+<refentry xml:id="function.ftp-ssl-connect" xmlns="http://docbook.org/ns/docbook">
+ <refnamediv>
+  <refname>ftp_ssl_connect</refname>
+  <refpurpose>打开 SSL-FTP 连接</refpurpose>
+ </refnamediv>
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <type>resource</type><methodname>ftp_ssl_connect</methodname>
+   <methodparam><type>string</type><parameter>host</parameter></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>port</parameter><initializer>21</initializer></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>timeout</parameter><initializer>90</initializer></methodparam>
+  </methodsynopsis>
+  <para>
+   <function>ftp_ssl_connect</function> 打开一个到
+   <parameter>host</parameter> 的安全 FTP 连接（SSL-FTP）。
+  </para>
+  <note>
+   <title>为何本函数有可能不存在？</title>
+   <para>
+    只有 PHP 构建时同时包含了 ftp 模块
+    和 <link linkend="ref.openssl">OpenSSL</link> 模块时，
+    <function>ftp_ssl_connect</function> 函数才可用。
+    也就是说，在 Windows 平台上，官方发布的 PHP 构建中本函数不可用。
+    如果需要在 Windows 平台使用本函数，需要自行编译 PHP。
+   </para>
+  </note>
+  <note>
+   <para>
+    <function>ftp_ssl_connect</function> 不是用来连接 sFTP 服务的。
+    要在 PHP 中使用 sFTP，请参见 <function>ssh2_sftp</function>。
+   </para>
+  </note>
+ </refsect1>
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>host</parameter></term>
+     <listitem>
+      <para>
+       FTP 服务器地址。
+       此参数末尾不可以有斜线，开头也不可以有 <literal>ftp://</literal>。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>port</parameter></term>
+     <listitem>
+      <para>
+       要连接的端口。如果省略此参数或设置为 0，将使用 FTP 默认端口 21。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>timeout</parameter></term>
+     <listitem>
+      <para>
+       此参数设置所有后续网络操作的超时时长。
+       如果省略，默认值为 90 秒。
+       可以使用 <function>ftp_set_option</function> 和
+       <function>ftp_get_option</function> 函数随时读取或设置超时时长。
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   操作成功返回 SSL-FTP 流，操作失败返回 &false; 。
+  </para>
+ </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <para>
+   <informaltable>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>&Version;</entry>
+       <entry>&Description;</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>5.2.2</entry>
+       <entry>
+        以前版本中，如果无法使用 SSL 连接，将会返回一个非 SSL 的连接，
+        在 5.2.2 版本中修改为返回 &false;
+       </entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </informaltable>
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title><function>ftp_ssl_connect</function> 函数例程</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+
+// 建立基础 SSL 连接
+$conn_id = ftp_ssl_connect($ftp_server);
+
+// 使用用户名和密码登录
+$login_result = ftp_login($conn_id, $ftp_user_name, $ftp_user_pass);
+
+echo ftp_pwd($conn_id); // /
+
+// 关闭 ssl 连接
+ftp_close($conn_id);
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+ </refsect1>
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>ftp_connect</function></member>
+   </simplelist>
+  </para>
+ </refsect1>
+</refentry>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
