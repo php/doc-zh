@@ -1,34 +1,275 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 96c9d88bad9a7d7d44bfb7f26c226df7ee9ddf26 Maintainer: yuanyuqiang Status: ready -->
+<!-- EN-Revision: ed9c01378f221478d0c4ec634cdb27003330c18b Maintainer: yuanyuqiang Status: ready -->
 <!-- Reviewed: no -->
-
 <chapter xml:id="session.security" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <title>会话和安全</title>
  <para>
   外部链接：<link xlink:href="&url.session-fixation;">会话固定</link>
  </para>
  <para>
+  HTTP 会话管理是 web 应用安全的核心内容，
+  要采用尽可能的手段来确保会话安全。
+  开发人员应该合理的启用或使用可接受的设置。
+ </para>
+
+ <itemizedlist>
+  <listitem>
+   <simpara>
+    <link linkend="ini.session.cookie-lifetime">session.cookie_lifetime</link>=0。
+    0 表示特殊含义，它告知浏览器不要持久化存储 cookie 数据。
+    也即，关闭浏览器的时候，会话 ID cookie 会被立即删除。
+    如果将此项设置为非 0 的值，可能会导致会话 ID 被其他用户使用。
+    大部分应用应该把此项设置为“0”。
+    如果应用中有自动登录的功能，请自行实现一种更加安全的方式，而不要使用会话 ID 来完成自动登录。
+   </simpara>
+  </listitem>
+
+  <listitem>
+   <simpara>
+    <link linkend="ini.session.use-cookies">session.use_cookies</link>=On 并且
+    <link linkend="ini.session.use-only-cookies">session.use_only_cookies</link>=On。
+    虽然 HTTP cookie 存在一些问题，
+    但是它确实是实现会话 ID 管理的优选方案。
+    尽可能的仅使用 cookie 来进行会话 ID 管理，
+    而且大部分应用也确实是只使用 cookie 来记录会话 ID 的。
+   </simpara>
+  </listitem>
+
+  <listitem>
+   <simpara>
+    <link linkend="ini.session.use-strict-mode">session.use_strict_mode</link>=On。
+    此设置防止会话模块使用未初始化的会话 ID。
+    也就是说，
+    会话模块仅接受由它自己创建的有效的会话 ID，
+    而拒绝由用户自己提供的会话 ID。
+    使用 JavaScript 对 cookie 进行注入
+    就可以实现对会话 ID 的注入，
+    甚至可以在 URL 的查询字符串中或者表单参数中实现会话 ID 的注入。
+    大部分应用没理由也不应该接受由用户提供的未经初始化的会话 ID。
+   </simpara>
+  </listitem>
+
+  <listitem>
+   <simpara>
+    <link linkend="ini.session.cookie-httponly">session.cookie_httponly</link>=On。
+    禁止 JavaScript 访问会话 cookie。
+    此设置项可以保护 cookie 不被 JavaScript 窃取。
+    虽然可以使用会话 ID 来作为防范跨站请求伪造（CSRF）的关键数据，
+    但是不建议你这么做。
+    例如，攻击者可以把 HTML 源代码保存下来并且发送给其他用户。
+    为了安全起见，
+    开发者不应该在 web 页面中显示会话 ID。
+    几乎所有的应用都应该对会话 ID cookie 设置 httponly 为 On。
+   </simpara>
+  </listitem>
+
+  <listitem>
+   <simpara>
+    <link linkend="ini.session.cookie-secure">session.cookie_secure</link>=On。
+    仅允许在 HTTPS 协议下访问会话 ID cookie。
+    如果你的 web 站点仅支持 HTTPS，那么必须将此选项设置为 On。
+    对于仅支持 HTTPS 的 web 站点建议考虑使用强制安全传输技术（HSTS）。
+   </simpara>
+  </listitem>
+
+  <listitem>
+   <simpara>
+    <link linkend="ini.session.gc-maxlifetime">session.gc_maxlifetime</link>=[尽可能的小]。
+    GC 的运行时机并不是精准的，带有一定的或然性，所以这个设置项并不能确保
+    旧的会话数据被删除。某些会话存储处理模块不使用此设置项。
+    更多的信息请参考会话存储模块的完整文档。
+    虽然开发人员不能完全依赖这个设置，但是还是建议将其设置的尽可能的小。
+    调整 <link
+    linkend="ini.session.gc-probability">session.gc_probability</link>
+    和 <link
+    linkend="ini.session.gc-divisor">session.gc_divisor</link> 设置项
+    可以使得过期的会话数据在适当的周期内被删除。
+    如果需要使用自动登录的功能，请使用其他更加安全的方式自行实现，
+    而不要通过使用长生命周期的会话 ID 来实现。
+   </simpara>
+  </listitem>
+
+  <listitem>
+   <simpara>
+    <link linkend="ini.session.use-trans-sid">session.use_trans_sid</link>=Off。
+    如果确实需要，
+    你也可以使用透明的会话 ID 管理。
+    禁用透明会话 ID 管理可以提高安全性，
+    规避会话 ID 注入和泄露的风险。
+   </simpara>
+  </listitem>
+
+  <listitem>
+   <simpara>
+    <link linkend="ini.session.referer-check">session.referer_check</link>=[你的源 URL]
+    当启用 <link
+    linkend="ini.session.use-trans-sid">session.use_trans_sid</link> 设置项时，
+    建议尽可能的联合使用此设置项来降低会话 ID 注入的风险。
+    假设你的站点是 http://example.com/，
+    请将此设置项置为 http://example.com/。
+    需要注意的，如果使用 HTTPS ，
+    浏览器将不会发送 referrer 请求头，
+    因此，从安全角度考虑，此设置项并不总是可信赖的。
+   </simpara>
+  </listitem>
+
+  <listitem>
+   <simpara>
+    <link linkend="ini.session.cache-limiter">session.cache_limiter</link>=nocache。
+    确保对于已经认证的会话，
+    其 HTTP 内容不被缓存。
+    你应仅允许缓存公开的内容，
+    否则将面临内容暴露的风险。
+    如果 HTTP 内容中不包含安全信息或敏感数据，可以使用“private”。
+    注意，“private”可能会导致客户端缓存私有数据。
+    仅在 HTTP 内容中不包含任何私有数据的时候，可以使用“public”。
+   </simpara>
+  </listitem>
+
+  <listitem>
+   <simpara>
+    <link linkend="ini.session.hash-function">session.hash_function</link>="sha256"。
+    高强度的散列函数可以产生高强度的会话 ID。
+    虽然即使是使用 MD5 散列算法，要找到相同的散列值也是非常不易的，
+    但是开发人员还是应该选择 SHA-2 或者更高的散列算法，
+    例如可以使用 sha384 或者 sha512。
+   </simpara>
+  </listitem>
+ </itemizedlist>
+ 
+ <para>
   会话模块无法保证存储到会话中的数据仅能被会话创建者可见。
-  如果要保护会话的完整性，你需要进行一些额外的工作。
+  如果要保护会话的完整性，
+  你需要进行一些额外的工作。
   至于如何保护会话，取决于你在会话中所存储的数据。
  </para>
+
  <para>
-  要保护会话中的数据，通常有额外的成本，并且有可能影响用户使用的便利性。
+  要保护会话中的数据，通常有额外的成本，
+  并且有可能影响用户使用的便利性。
   例如，要想防范简单的社会工程学方式的攻击，
   你需要启用 <literal>session.use_only_cookies</literal>。
-  这样一来，用户需要无条件的接受 cookie，否则会话功能将无法
-  正常工作。
+  这样一来，
+  用户需要无条件的接受 cookie，
+  否则会话功能将无法正常工作。
  </para>
+
  <para>
   有几种方式可以将会话 ID 泄露给第三方。
-  会话 ID 的泄露会导致第三方可以访问该会话 ID 所关联的所有资源。
-  如果从你的站点链接到外部站点，在 URL 中所携带的会话 ID 
+  会话 ID 的泄露会导致
+  第三方可以访问该会话 ID 所关联的所有资源。
+  如果从你的站点链接到外部站点，
+  在 URL 中所携带的会话 ID 
   可能会被外部站点的 “referrer”日志记录。
   其次，更加主动的攻击者会尝试监听你的网络通信，
   明文传输的会话 ID 可能会被攻击者从网络层面窃取。
   对于这种场景的解决方案是在服务器使用 SSL 通信，
   并且强制用户使用 SSL 方式访问你的服务。
+ </para>
+
+ <para>
+  自 PHP 5.5.2 开始，可以使用 <link
+  linkend="ini.session.use-strict-mode">session.use_strict_mode</link>
+  设置项。当启用该设置项，并且会话保存管理器能够支持此设置项的话，
+  它会拒绝未经初始化的会话 ID 并且返回一个新创建的会话 ID。
+  通过强制用户使用新的会话 ID，可以避免遭受攻击。
+  如果启用了 <link
+  linkend="ini.session.use-trans-sid">session.use_trans_sid</link>
+  设置项，攻击者可以发送包含会话 ID 的 URL 给受害者，
+  例如：http://example.com/page.php?PHPSESSID=123456789，
+  那么受害者将会使用攻击者提供的会话 ID 开始会话。
+  <link
+  linkend="ini.session.use-strict-mode">session.use_strict_mode</link>
+  设置项可以降低这样的风险。
+ </para>
+
+ <para>
+  虽然 <link
+  linkend="ini.session.use-strict-mode">session.use_strict_mode</link>
+  设置项可以降低风险，
+  攻击者依然可以使用自己创建的、已经经过初始化的会话 ID 来欺骗受害人。
+  只是攻击者需要在发起攻击之前初始化会话 ID 并且要保持这个会话处于活跃状态。
+ </para>
+
+ <para>
+  可以对会话 ID cookie 设置 domain，path，httponly，secure 等属性，
+  但是浏览器中有优先级定义，
+  攻击者可以利用这个特点设置可以永久使用的会话 ID。
+  使用 <link
+  linkend="ini.session.use-only-cookies">session.use_only_cookies</link>
+  设置项无法解决此问题。<link
+  linkend="ini.session.use-strict-mode">session.use_strict_mode</link>
+  设置项可以降低风险，当 <link
+  linkend="ini.session.use-strict-mode">session.use_strict_mode</link> 为
+  “On”时，服务器将拒绝未经初始化的会话 ID，
+  而是返回一个新创建的会话 ID。
+  这可能会导致受害者面临 DoS 攻击，但是总好过账号被盗取。
+  
+ </para>
+
+ <para>
+  <link
+  linkend="ini.session.use-strict-mode">session.use_strict_mode</link>
+  设置项可以缓解这种情况，
+  但是对于已经经过认证的会话，它就有些力不从心了。
+  开发人员必须使用 <function>session_regenerate_id</function> 来进行认证，
+  并且还需要在向 $_SESSION 中存储认证信息之前调用
+  <function>session_regenerate_id</function> 函数。
+  <function>session_regenerate_id</function> 
+  可以确保仅在新会话中存储认证后的信息。
+  例如，如果在认证过程中发生错误，
+  可能会在旧的会话中保存认证通过的标识。
+ </para>
+
+ <para>
+  和 use_strict_mode=On 类似，使用<function>session_regenerate_id</function> 函数
+  也可能导致 DoS 攻击（从个人角度来看），但是总好过账号被盗取。
+  至少应该在用户通过认证之后为其重新生成新的会话 ID。
+  重新生成会话 ID 可以降低被窃取的风险，
+  所以应该定期重新生成会话 ID。
+  开发人员不应依赖会话过期，
+  因为攻击者可以通过定期使用受害者会话 ID 发起访问以保持会话活跃。
+  开发人员必须自行实现针对过期会话的处理。
+ </para>
+
+ <para>
+  需要提醒的是，默认情况下，<function>session_regenerate_id</function> 
+  函数并不会删除旧的会话。
+  对用户而言，原有的已认证的会话可能仍然可用。
+  如果开发人员需要阻止其他人使用原有的已认证会话，
+  需要设置 <parameter>delete_old_session</parameter> 参数为 &true;。
+  但是立即删除旧的会话可能会带来其他影响，
+  比如在并发访问或者网络不稳定的情况下，
+  可能会导致会话无效。（译注：意指浏览器携带旧的会话 ID 发起了并发的请求，如果在第一个被服务器接受和处理的请求中删除了旧的会话数据，那么后续的请求将会产生会话无效的问题）
+  可以在 $_SESSION 中设置一个很短的过期时间来代替直接删除旧的会话，
+  并且拒绝用户访问旧的会话（过期的会话）。
+ </para>
+
+ <para>
+  <link
+  linkend="ini.session.use-only-cookies">session.use_only_cookies</link>
+  和 <function>session_regenerate_id</function> 联合使用，
+  在某些情况下可能导致针对个人的 DoS 攻击。
+  如果发生这种情况，
+  你可以告知用户清除浏览器的 cookie 并且警告用户可能存在安全隐患。
+  攻击者可以利用 web 应用的弱点（例如，JavaScript 注入）
+  或恶意的浏览器插件生成恶意的 cookie。
+ </para>
+
+ <para>
+  开发人员一定不要使用长生命周期会话 ID 来实现自动登录的功能，
+  因为这样会使会话很容易被窃取。
+  开发人员需要自行实现自动登录的功能，
+  可以使用比 SHA-2 更安全的散列算法，
+  例如 SHA-256 或者更高，
+  并且包含从 /dev/urandom 产生随机数据。
+  如果用户尚未认证通过，就检查一次性自动登录密钥是否有效。
+  如果密钥有效，那么对用户进行认证，并且设置新的、安全的散列值。
+  自动登录密钥的生存周期比认证密钥的更长，
+  所以要竭尽所能来保护自动登录密钥的安全。
+  至于 cookie，可以使用 path/httponly/secure 等属性来进行保护。
+  同时，开发人员还必须为用户提供禁用自动登录以及移除不再使用的自动登录密钥 cookie 的功能。
  </para>
 </chapter>
 
