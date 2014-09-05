@@ -1,0 +1,418 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision$ -->
+<!-- EN-Revision: 8c9fe5f17d79702d7e7a3405aa4a4a763ad22dc0 Maintainer: yuanyuqiang Status: ready -->
+<!-- Reviewed: no -->
+
+<sect1 xml:id="migration56.new-features" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <title>新特性</title>
+
+ <sect2 xml:id="migration56.new-features.const-scalar-exprs">
+  <title>使用数值表达式定义常量</title>
+
+  <para>
+   在之前的 PHP 版本中，
+   必须使用静态值来定义常量，声明属性以及指定函数参数默认值。
+   现在你可以使用包括数值、字符串字面量以及其他常量在内的数值表达式来
+   定义常量、声明属性以及设置函数参数默认值。
+  </para>
+
+  <informalexample>
+   <programlisting role="php">
+<![CDATA[
+<?php
+const ONE = 1;
+const TWO = ONE * 2;
+
+class C {
+    const THREE = TWO + 1;
+    const ONE_THIRD = ONE / self::THREE;
+    const SENTENCE = 'The value of THREE is '.self::THREE;
+
+    public function f($a = ONE + self::THREE) {
+        return $a;
+    }
+}
+
+echo (new C)->f()."\n";
+echo C::SENTENCE;
+?>
+]]>
+   </programlisting>
+   &example.outputs;
+   <screen>
+<![CDATA[
+4
+The value of THREE is 3
+]]>
+   </screen>
+  </informalexample>
+ </sect2>
+
+ <sect2 xml:id="migration56.new-features.variadics">
+  <title>使用 <literal>...</literal> 运算符定义变长参数函数</title>
+
+  <para>
+   现在可以不依赖 <function>func_get_args</function>，
+   使用 <literal>...</literal> 运算符
+   来实现 <link linkend="functions.variable-arg-list">变长参数函数</link>。
+  </para>
+
+  <informalexample>
+   <programlisting role="php">
+<![CDATA[
+<?php
+function f($req, $opt = null, ...$params) {
+    // $params 是一个包含了剩余参数的数组
+    printf('$req: %d; $opt: %d; number of params: %d'."\n",
+           $req, $opt, count($params));
+}
+
+f(1);
+f(1, 2);
+f(1, 2, 3);
+f(1, 2, 3, 4);
+f(1, 2, 3, 4, 5);
+?>
+]]>
+   </programlisting>
+   &example.outputs;
+   <screen>
+<![CDATA[
+$req: 1; $opt: 0; number of params: 0
+$req: 1; $opt: 2; number of params: 0
+$req: 1; $opt: 2; number of params: 1
+$req: 1; $opt: 2; number of params: 2
+$req: 1; $opt: 2; number of params: 3
+]]>
+   </screen>
+  </informalexample>
+ </sect2>
+
+ <sect2 xml:id="migration56.new-features.splat">
+  <title>使用 <literal>...</literal> 运算符进行参数展开</title>
+
+  <para>
+   在调用函数的时候，使用 <literal>...</literal> 运算符，
+   将 <link linkend="language.types.array">数组</link> 和 
+   <interfacename>可遍历</interfacename> 对象展开为函数参数。
+   在其他编程语言，比如 Ruby中，这被称为连接运算符，。
+  </para>
+
+  <informalexample>
+   <programlisting role="php">
+<![CDATA[
+<?php
+function add($a, $b, $c) {
+    return $a + $b + $c;
+}
+
+$operators = [2, 3];
+echo add(1, ...$operators);
+?>
+]]>
+   </programlisting>
+   &example.outputs;
+   <screen>
+<![CDATA[
+6
+]]>
+   </screen>
+  </informalexample>
+ </sect2>
+
+ <sect2 xml:id="migration56.new-features.exponentiation">
+  <title>使用 <literal>**</literal> 进行幂运算</title>
+
+  <para>
+   加入右连接运算符 <literal>**</literal> 来进行幂运算。
+   同时还支持简写的
+   <literal>**=</literal> 运算符，表示进行幂运算并赋值。
+  </para>
+
+  <informalexample>
+   <programlisting role="php">
+<![CDATA[
+<?php
+printf("2 ** 3 ==      %d\n", 2 ** 3);
+printf("2 ** 3 ** 2 == %d\n", 2 ** 3 ** 2);
+
+$a = 2;
+$a **= 3;
+printf("a ==           %d\n", $a);
+?>
+]]>
+   </programlisting>
+  &example.outputs;
+  <screen>
+<![CDATA[
+2 ** 3 ==      8
+2 ** 3 ** 2 == 512
+a ==           8
+]]>
+  </screen>
+  </informalexample>
+ </sect2>
+
+ <sect2 xml:id="migration56.new-features.use">
+  <title><literal>use function</literal> 以及 <literal>use const</literal></title>
+
+  <para>
+   <link linkend="language.namespaces.importing"><literal>use</literal></link> 运算符
+    被进行了扩展以支持在类中导入外部的函数和常量。
+    对应的结构为 <literal>use function</literal>
+    和 <literal>use const</literal>。
+  </para>
+
+  <informalexample>
+   <programlisting role="php">
+<![CDATA[
+<?php
+namespace Name\Space {
+    const FOO = 42;
+    function f() { echo __FUNCTION__."\n"; }
+}
+
+namespace {
+    use const Name\Space\FOO;
+    use function Name\Space\f;
+
+    echo FOO."\n";
+    f();
+}
+?>
+]]>
+   </programlisting>
+   &example.outputs;
+   <screen>
+<![CDATA[
+42
+Name\Space\f
+]]>
+   </screen>
+  </informalexample>
+ </sect2>
+
+ <sect2 xml:id="migration56.new-features.phpdbg">
+  <title>phpdbg</title>
+
+  <para>
+   PHP 的 SAPI 模块中实现了一个
+   交互式调试器，叫做 phpdbg。更多信息，请访问
+   <link xlink:href="&url.phpdbg.docs;">phpdbg 文档</link>。
+  </para>
+ </sect2>
+
+ <sect2 xml:id="migration56.new-features.default-encoding">
+  <title>默认字符编码</title>
+
+  <para>
+   对于一些字符编码相关的函数，例如 <function>htmlspecialchars</function>，
+   使用 <link linkend="ini.default-charset">default_charset</link> 
+   作为默认字符集。请注意，对于 iconv 和 mbstring 相关的函数，
+   如果分别设置了他们的编码，
+   那么这些对应设置的优先级高于 default_charset。
+  </para>
+
+  <para>
+   default_charset 的默认值是 <literal>UTF-8</literal>。
+  </para>
+ </sect2>
+
+ <sect2 xml:id="migration56.new-features.reusable-input">
+  <title><link linkend="wrappers.php.input"><literal>php://input</literal></link> 是可重用的了</title>
+
+  <para>
+   只要你需要，你可以多次打开并读取 
+   <link linkend="wrappers.php.input"><literal>php://input</literal></link>。
+   同时，这个特性使得在处理 POST 的数据的时候，
+   可以明显降低对于内存的需求量。
+  </para>
+ </sect2>
+
+ <sect2 xml:id="migration56.new-features.large-file">
+  <title>大文件上传</title>
+
+  <para>
+   现在可以支持大于 2GB 的文件上传。
+  </para>
+ </sect2>
+
+ <sect2 xml:id="migration56.new-features.gmp">
+  <title><link linkend="book.gmp">GMP</link> 支持运算符重载</title>
+
+  <para>
+   <link linkend="book.gmp">GMP</link> 支持运算符重载，
+   并且造型成数值类型。
+   这使得使用 GMP 的代码更加直观。
+  </para>
+
+  <informalexample>
+   <programlisting role="php">
+<![CDATA[
+<?php
+$a = gmp_init(42);
+$b = gmp_init(17);
+
+// 5.6 之前版本的代码
+var_dump(gmp_add($a, $b));
+var_dump(gmp_add($a, 17));
+var_dump(gmp_add(42, $b));
+
+// 新的代码
+var_dump($a + $b);
+var_dump($a + 17);
+var_dump(42 + $b);
+?>
+]]>
+   </programlisting>
+  </informalexample>
+ </sect2>
+
+ <sect2 xml:id="migration56.new-features.hash-equals">
+  <title>使用 <function>hash_equals</function> 比较字符串避免时序攻击</title>
+
+  <para>
+   加入 <function>hash_equals</function> 函数，
+   以恒定的时间消耗来进行字符串比较，
+   以避免时序攻击。
+   比如当比较 <function>crypt</function> 密码散列值的时候，就可以使用此函数。
+   （假定你不能使用 <function>password_hash</function> 和 <function>password_verify</function>，
+   这两个函数也可以抵抗时序攻击）
+  </para>
+
+  <!-- TODO: update crypt() examples -->
+
+  <informalexample>
+   <programlisting role="php">
+<![CDATA[
+<?php
+$expected  = crypt('12345', '$2a$07$usesomesillystringforsalt$');
+$correct   = crypt('12345', '$2a$07$usesomesillystringforsalt$');
+$incorrect = crypt('1234',  '$2a$07$usesomesillystringforsalt$');
+
+var_dump(hash_equals($expected, $correct));
+var_dump(hash_equals($expected, $incorrect));
+?>
+]]>
+   </programlisting>
+   &example.outputs;
+   <screen>
+<![CDATA[
+bool(true)
+bool(false)
+]]>
+   </screen>
+  </informalexample>
+ </sect2>
+
+ <sect2 xml:id="migration56.new-features.debuginfo">
+  <title><literal>__debugInfo()</literal></title>
+
+  <para>
+   加入 <link linkend="language.oop5.magic.debuginfo">__debugInfo()</link>，
+   当使用 <function>var_dump</function> 输出对象的时候，
+   可以用来控制要输出的属性和值。
+  </para>
+
+  <informalexample>
+   <programlisting role="php">
+<![CDATA[
+<?php
+class C {
+    private $prop;
+
+    public function __construct($val) {
+        $this->prop = $val;
+    }
+
+    public function __debugInfo() {
+        return [
+            'propSquared' => $this->prop ** 2,
+        ];
+    }
+}
+
+var_dump(new C(42));
+?>
+]]>
+   </programlisting>
+   &example.outputs;
+   <screen>
+<![CDATA[
+object(C)#1 (1) {
+  ["propSquared"]=>
+  int(1764)
+}
+]]>
+   </screen>
+  </informalexample>
+ </sect2>
+
+ <sect2 xml:id="migration56.new-features.gost">
+  <title>gost-crypto 散列算法</title>
+
+  <para>
+   加入 <literal>gost-crypto</literal> 散列算法。
+   它使用
+   <link xlink:href="&url.rfc;4357">RFC 4357, 11.2 小节</link> 定义的
+   CryptoPro S-box 表实现了 GOST 散列函数。
+  </para>
+ </sect2>
+
+ <sect2 xml:id="migration56.new-features.openssl">
+  <title>SSL/TLS 提升</title>
+
+  <para>
+   在 PHP 5.6 中对 SSL/TLS 的支持进行了大幅度的提升。
+   这其中包括
+   <link linkend="migration56.incompatible.peer-verification">默认启用端点验证</link>
+   选项来支持证书指纹比对，
+   以避免 TLS 重新协商攻击。
+   还增加了很多 <link linkend="context.ssl">SSL 上下文选项</link>，
+   以便在使用加密流的时候，
+   能够更好的控制协议和验证的相关设置。
+  </para>
+
+  <para>
+   这些变动在
+   <link linkend="migration56.openssl">PHP 5.6.x 中的 OpenSSL 变更</link>
+   中有详细描述。
+  </para>
+ </sect2>
+
+ <sect2 xml:id="migration56.new-features.postgresql">
+  <title><link linkend="book.pgsql">pgsql</link> 异步支持</title>
+
+  <para>
+   <link linkend="book.pgsql">pgsql</link> 扩展现在支持
+   异步方式连接数据库及执行查询，
+   也即可以使用非阻塞的方式和 PostgreSQL 数据库进行交互。
+   使用 <constant>PGSQL_CONNECT_ASYNC</constant> 常量可以
+   建立异步连接，<function>pg_connect_poll</function>，
+   <function>pg_socket</function>，
+   <function>pg_consume_input</function> 和 <function>pg_flush</function> 函数
+   可以用来处理异步连接和查询。   
+  </para>
+ </sect2>
+</sect1>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
