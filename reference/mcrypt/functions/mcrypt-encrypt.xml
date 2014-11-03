@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 6f4d3c927626cfdc6e94a6b251bbf510bd3738ee Maintainer: yuanyuqiang Status: ready -->
+<!-- EN-Revision: 1d391575445598c99175a17eb012f1c658febaa4 Maintainer: yuanyuqiang Status: ready -->
 <!-- Reviewed: no -->
 
 <refentry xml:id="function.mcrypt-encrypt" xmlns="http://docbook.org/ns/docbook">
@@ -39,12 +39,7 @@
      <listitem>
       <para>
        加密密钥。
-       如果其长度小于所需的长度，将在其后使用 '<literal>\0</literal>' 补齐。
-       建议不要使用 ASCII 字符作为密钥。
-      </para>
-      <para>
-       建议使用 mhash 函数
-       从一个字符串中创建密钥。
+       如果密钥长度不是该算法所能够支持的有效长度，则函数将会发出警告并返回 &false;
       </para>
      </listitem>
     </varlistentry>
@@ -71,7 +66,7 @@
     <varlistentry>
      <term><parameter>iv</parameter></term>
      <listitem>
-      &mcrypt.parameter.iv;
+      &mcrypt.parameter.iv.strict;
      </listitem>
     </varlistentry>
    </variablelist>
@@ -81,10 +76,35 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   以字符串方式返回密文。
+   以字符串方式返回密文，&return.falseforfailure;。
   </para>
  </refsect1>
-
+<refsect1 role="changelog">
+  &reftitle.changelog;
+  <para>
+   <informaltable>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>&Version;</entry>
+       <entry>&Description;</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>5.6.0</entry>
+       <entry>
+        不再接受无效长度的 <parameter>key</parameter> and <parameter>iv</parameter> 参数。
+        如果参数长度无效，则 <function>mcrypt_decrypt</function> 函数会产生警告并且返回 &false;。
+        之前版本中，对于长度不足的密钥和初始向量会在其后补齐 '<literal>\0</literal>' 
+        使其达到有效长度。
+       </entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </informaltable>
+  </para>
+ </refsect1>
  <refsect1 role="examples">
   &reftitle.examples;
   <para>
@@ -159,9 +179,14 @@ This string was AES-256 / CBC / ZeroBytePadding encrypted.
     </screen>
    </example>
   </para>
+ </refsect1>
+ <refsect1 role="seealso">
+  &reftitle.seealso;
   <para>
-   更高级的 API，
-   参见 <function>mcrypt_module_open</function>。
+   <simplelist>
+    <member><function>mcrypt_decrypt</function></member>
+    <member><function>mcrypt_module_open</function></member>
+   </simplelist>
   </para>
  </refsect1>
 </refentry>
