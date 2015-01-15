@@ -1,24 +1,32 @@
 <?xml version='1.0' encoding='utf-8'?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 5faa7a6747bca628b3bdcc9f93aec5603b65581f Maintainer: HonestQiao Status: ready -->
+<!-- EN-Revision: edffc3f9c473664ca9f105c51ecc640b104d4820 Maintainer: daijie Status: ready -->
 <!-- Reviewed: no Maintainer: HonestQiao -->
 <refentry xml:id="function.spl-autoload-register" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
-  <refname>spl_autoload_register</refname>
-  <refpurpose>注册__autoload()函数</refpurpose>
+ <refname>spl_autoload_register</refname>
+  <refpurpose>注册给定的函数作为 __autoload 的实现</refpurpose>
  </refnamediv>
- <refsect1 role="description">
+  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
    <type>bool</type><methodname>spl_autoload_register</methodname>
-   <methodparam choice="opt"><type>callback</type><parameter>autoload_function</parameter></methodparam>
+   <methodparam choice="opt"><type>callable</type><parameter>autoload_function</parameter></methodparam>
+   <methodparam choice="opt"><type>bool</type><parameter>throw</parameter><initializer>true</initializer></methodparam>
+   <methodparam choice="opt"><type>bool</type><parameter>prepend</parameter><initializer>false</initializer></methodparam>
   </methodsynopsis>
   <para>
-  将函数注册到SPL __autoload函数栈中。如果该栈中的函数尚未激活，则激活它们。
+  将函数注册到SPL __autoload函数队列中。如果该队列中的函数尚未激活，则激活它们。
   </para>
   <para>
-  如果在你的程序中已经实现了__autoload函数，它必须显式注册到__autoload栈中。因为
-  spl_autoload_register()函数会将Zend Engine中的__autoload函数取代为spl_autoload()或spl_autoload_call()。
+   如果在你的程序中已经实现了<function>__autoload</function>函数，它必须显式注册到<function>__autoload</function>队列中。因为
+  <function>spl_autoload_register</function>函数会将Zend Engine中的<function>__autoload</function>函数取代为<function>spl_autoload</function>或<function>spl_autoload_call</function>。
+  </para>
+  <para>
+   如果需要多条 autoload 函数，<function>spl_autoload_register</function> 
+    满足了此类需求。
+   它实际上创建了 autoload 函数的队列，按定义时的顺序逐个执行。相比之下，
+   <function>__autoload</function> 只可以定义一次。
   </para>
  </refsect1>
 
@@ -30,7 +38,24 @@
      <term><parameter>autoload_function</parameter></term>
      <listitem>
       <para>
-       欲注册的自动装载函数。如果没有提供任何参数，则自动注册autoload的默认实现函数<function>spl_autoload</function>。
+       欲注册的自动装载函数。如果没有提供任何参数，则自动注册 autoload 的默认实现函数<function>spl_autoload</function>。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>throw</parameter></term>
+     <listitem>
+      <para>
+       此参数设置了 <parameter>autoload_function</parameter> 无法成功注册时，
+       <function>spl_autoload_register</function>是否抛出异常。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>prepend</parameter></term>
+     <listitem>
+      <para>
+       如果是 true，<function>spl_autoload_register</function> 会添加函数到队列之首，而不是队列尾部。
       </para>
      </listitem>
     </varlistentry>
@@ -61,13 +86,13 @@
       <row>
        <entry>5.3.0</entry>
        <entry>
-        Namespaces support was introduced.
+        引入了命名空间的支持。
        </entry>
       </row>
       <row>
        <entry>5.3.0</entry>
        <entry>
-        The <parameter>prepend</parameter> parameter was added.
+        添加了 <parameter>prepend</parameter> 参数。
        </entry>
       </row>
      </tbody>
@@ -80,7 +105,32 @@
   &reftitle.examples;
   <para>
    <example>
-    <title><function>spl_autoload_register</function> example</title>
+    <title><function>spl_autoload_register</function> 作为 <function>__autoload</function> 函数的替代</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+
+// function __autoload($class) {
+//     include 'classes/' . $class . '.class.php';
+// }
+
+function my_autoloader($class) {
+    include 'classes/' . $class . '.class.php';
+}
+
+spl_autoload_register('my_autoloader');
+
+// 或者，自 PHP 5.3.0 起可以使用一个匿名函数
+spl_autoload_register(function ($class) {
+    include 'classes/' . $class . '.class.php';
+});
+
+?>
+]]>
+    </programlisting>
+   </example>
+   <example>
+    <title>class 未能加载的 <function>spl_autoload_register</function> 例子</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -93,7 +143,7 @@ class Foo {
     }
 }
 
-spl_autoload_register(__NAMESPACE__ .'::Foo::test'); // As of PHP 5.3.0
+spl_autoload_register(__NAMESPACE__ .'\Foo::test'); // 自 PHP 5.3.0 起
 
 new InexistentClass;
 
@@ -103,8 +153,8 @@ new InexistentClass;
     &example.outputs.similar;
     <screen>
 <![CDATA[
-[[Foobar::InexistentClass]]
-Fatal error: Class 'Foobar::InexistentClass' not found in ...
+[[Foobar\InexistentClass]]
+Fatal error: Class 'Foobar\InexistentClass' not found in ...
 ]]>
     </screen>
    </example>
@@ -119,7 +169,6 @@ Fatal error: Class 'Foobar::InexistentClass' not found in ...
    </simplelist>
   </para>
  </refsect1>
-
 </refentry>
 
 <!-- Keep this comment at the end of the file
