@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: f052ac1bd73549125c3fc3dc68a36d4b0608a16d Maintainer: HonestQiao Status: ready -->
+<!-- EN-Revision: 3ec11b4caeafba24c7547e2a9444c45686a0b081 Maintainer: HonestQiao Status: ready -->
 <!-- Reviewed: no Maintainer: HonestQiao -->
-<section xml:id="session.configuration" xmlns="http://docbook.org/ns/docbook">
+<section xml:id="session.configuration" xmlns="http://docbook.org/ns/docbook"> 
  &reftitle.runtime;
  &extension.runtime;
  <para>
@@ -256,15 +256,20 @@
      <function>session_save_path</function>。
     </simpara>
     <para>
-     此指令还有一个可选的 N 参数来决定会话文件分布的目录深度。例如，设定为
+     此指令还有一个可选的 <literal>N</literal> 参数来决定会话文件分布的目录深度。例如，设定为
      <literal>'5;/tmp'</literal> 将使创建的会话文件和路径类似于
      <literal>/tmp/4/b/1/e/3/sess_4b1e384ad74619bd212e236e52a5a174If</literal>。要使用
-     N 参数，必须在使用前先创建好这些目录。在 <filename>ext/session</filename>
-     目录下有个小的 shell 脚本名叫 <filename>mod_files.sh</filename>
-     可以用来做这件事。此外注意如果使用了 N 参数并且 N 大于
-     0，那么将不会执行自动垃圾回收，更多信息见 &php.ini;。另外如果用了 N
+     <literal>N</literal> 参数，必须在使用前先创建好这些目录。在 <filename>ext/session</filename>
+     目录下有个小的 shell 脚本名叫 <filename>mod_files.sh</filename>，windows 版本是 <filename>mod_files.bat</filename>
+     可以用来做这件事。此外注意如果使用了 <literal>N</literal> 参数并且大于
+     0，那么将不会执行自动垃圾回收，更多信息见 &php.ini;。另外如果用了 <literal>N</literal>
      参数，要确保将 <literal>session.save_path</literal> 的值用双引号 "quotes"
      括起来，因为分隔符分号（ <literal>;</literal>）在 &php.ini; 中也是注释符号。
+    </para>
+    <para>
+     文件储存模块默认使用 mode 600 创建文件。通过 修改可选参数 <literal>MODE</literal> 来改变这种默认行为：
+     <literal>N;MODE;/path</literal> ，其中 <literal>MODE</literal> 是 mode 的八进制表示。 
+      <literal>MODE</literal> 设置不影响进程的掩码(umask)。
     </para>
     <warning>
      <para>
@@ -272,6 +277,14 @@
       <filename>/tmp</filename>（默认值），服务器上的其他用户有可能通过该目录的文件列表破解会话。
      </para>
     </warning>
+     <caution>
+     <para>
+      使用以上描述的可选目录层级参数 <literal>N</literal> 时请注意，对于绝大多数站点，大于1或者2的值会不太合适——因为这需要创建大量的目录：例如，值设置为 3 需要在文件系统上创建 <literal>64^3</literal> 个目录，将浪费很多空间和 inode。
+     </para>
+     <para>
+      仅仅在绝对肯定站点足够大时，才可以设置 <literal>N</literal> 大于2。
+     </para>
+    </caution>
     <note>
      <simpara>
       在 PHP 4.3.6 之前，Windows 用户必须修改此选项以使用 PHP 的会话函数。必须指定一个合法路径，例如：<filename>c:/temp</filename>。
@@ -313,10 +326,24 @@
    </term>
    <listitem>
     <simpara>
-     <literal>session.serialize_handler</literal> 定义用来序列化／解序列化的处理器名字。当前支持
-     PHP 内部格式（名为 <literal>php</literal>）和
-     WDDX（名为 <literal>wddx</literal>）。如果 PHP 编译时加入了 <link linkend="ref.wddx">WDDX
-     支持</link>，则只能用 WDDX。默认为 <literal>php</literal>。
+     <literal>session.serialize_handler</literal> 定义用来序列化／解序列化的处理器名字。
+     当前支持 PHP 序列化格式 (名为 <literal>php_serialize</literal>)、 PHP
+      PHP 内部格式 (名为 <literal>php</literal> 及
+     <literal>php_binary</literal>) 和 WDDX  (名为
+     <literal>wddx</literal>)。
+     
+     如果 PHP 编译时加入了 <link linkend="ref.wddx">WDDX
+     支持</link>，则只能用 WDDX。
+     自 PHP 5.5.4 起可以使用 <literal>php_serialize</literal>。 <literal>php_serialize</literal> 在内部简单地直接使用 
+     serialize/unserialize 函数，并且不会有 <literal>php</literal>
+     和 <literal>php_binary</literal> 所具有的限制。
+     
+     使用较旧的序列化处理器导致 $_SESSION 的索引既不能是数字也不能包含特殊字符(<literal>|</literal> and <literal>!</literal>) 。
+     
+     使用 <literal>php_serialize</literal> 避免脚本退出时，数字及特殊字符索引导致出错。
+     
+     默认使用
+      <literal>php</literal>。
     </simpara>
    </listitem>
   </varlistentry>
@@ -361,6 +388,10 @@
    <listitem>
     <simpara>
      <literal>session.gc_maxlifetime</literal> 指定过了多少秒之后数据就会被视为“垃圾”并被清除。
+    垃圾搜集可能会在 session 启动的时候开始（
+     取决于<link
+     linkend="ini.session.gc-probability">session.gc_probability</link> 和
+     <link linkend="ini.session.gc-divisor">session.gc_divisor</link>）。
     </simpara>
     <note>
      <para>
@@ -406,6 +437,16 @@
      ID 创建进程中被用作附加的熵值资源。例如在许多 Unix 系统下都可以用
      <literal>/dev/random</literal> 或 <literal>/dev/urandom</literal>。
     </simpara>
+    <simpara>
+     在 Windows 上自 PHP 5.3.3 起加入了此功能。
+     设置  <literal>session.entropy_length</literal> 为非零的值将使 PHP 使用 Windows Random API 作为熵值源。
+    </simpara>
+    <note>
+     <simpara>
+      自 PHP 5.4.0 起，默认情况下， <literal>session.entropy_file</literal> 在 <literal>/dev/urandom</literal> 或 <literal>/dev/arandom</literal> 可用的时候使用它们。
+      在 PHP 5.3.0 中此指令默认留空。
+     </simpara>
+    </note>
    </listitem>
   </varlistentry>
 
@@ -421,6 +462,7 @@
     </simpara>
    </listitem>
   </varlistentry>
+  
  <varlistentry xml:id="ini.session.use-strict-mode">
    <term>
     <parameter>session.use_strict_mode</parameter>
@@ -481,6 +523,12 @@
      <function>session_get_cookie_params</function> 和
      <function>session_set_cookie_params</function>。
     </simpara>
+    <note>
+     <para> 
+      The expiration timestamp is set relative to the server time, which is
+      not necessarily the same as the time in the client's browser.
+     </para>
+    </note> 
    </listitem>
   </varlistentry>
 
@@ -586,11 +634,6 @@
     </simpara>
     <note>
      <simpara>
-      对于 PHP 4.1.2 或以下版本，可以通过加入
-      <link linkend="configure.enable-trans-sid"><literal>--enable-trans-sid</literal></link>
-      配置选项去编译来启用，从 PHP 4.2.0 起，trans-sid 特性总是被编译。
-     </simpara>
-     <simpara>
       基于 URL 的会话管理比基于 cookie 的会话管理有更多安全风险。例如用户有可能通过
       email 将一个包含有效的会话 ID 的 URL 发给他的朋友，或者用户总是有可能在收藏夹中存有一个包含会话
       ID 的 URL 来以同样的会话 ID 去访问站点。
@@ -644,6 +687,13 @@
      <literal>session.hash_function</literal> 允许用户指定生成会话
      ID 的散列算法。'0' 表示 MD5（128 位），'1' 表示 SHA-1（160 位）。
     </simpara>
+    <para>
+     Since PHP 5.3.0 it is also possible to specify any of the algorithms
+     provided by the <link linkend="ref.hash">hash extension</link> (if it is
+     available), like <literal>sha512</literal> or
+     <literal>whirlpool</literal>. A complete list of supported algorithms can
+     be obtained with the <function>hash_algos</function> function.
+    </para>
     <note>
      <para>
       这是 PHP 5 引进的。
@@ -769,7 +819,7 @@
    <listitem>
     <simpara>
      Defines how often the upload progress information should be updated.
-     This can be defined in bytes (i.e. "update progress information after every 100 bytes"), or in percentages (i.e. "update progress information after receiving every 1% of the whole filesize).
+     This can be defined in bytes (i.e. "update progress information after every 100 bytes"), or in percentages (i.e. "update progress information after receiving every 1% of the whole filesize").
     </simpara>
     <simpara>
      Defaults to "1%".
@@ -779,7 +829,7 @@
 
   <varlistentry xml:id="ini.session.upload-progress.min-freq">
    <term>
-    <parameter>session.upload_progress.min-freq</parameter>
+    <parameter>session.upload_progress.min_freq</parameter>
     <type>integer</type>
    </term>
    <listitem>
@@ -792,13 +842,9 @@
  </variablelist>
  </para>
 
- <para>
-  The <link
-  linkend="ini.track-vars"><literal>track_vars</literal></link> and
-  <link
+ <para><link
   linkend="ini.register-globals"><literal>register_globals</literal></link>
-  configuration settings influence how the session variables get
-  stored and restored.
+  配置选项影响到会话变量是怎样存储和恢复的。
  </para>
 
  <para>
@@ -808,20 +854,6 @@
   See <link linkend="session.upload-progress">Session Upload Progress</link> for mor details on this functionality.
  </para>
 
- <para>
-  <link
-  linkend="ini.track-vars"><literal>track_vars</literal></link> 和
-  <link
-  linkend="ini.register-globals"><literal>register_globals</literal></link>
-  配置选项影响到会话变量是怎样存储和恢复的。
- </para>
-
- <note>
-  <para>
-   自 PHP 4.0.3 起，<link
-   linkend="ini.track-vars"><literal>track_vars</literal></link> 总是打开的。
-  </para>
- </note>
 
 </section>
 
