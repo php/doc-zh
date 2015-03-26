@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
  <chapter xml:id="features.gc" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-<!-- Reviewed: no Maintainer:  -->
-<!-- Reviewed: no Maintainer:  -->
+<!-- Reviewed: no Maintainer: Haohappy  Status: ready -->
 <!-- Reviewed: no Maintainer:  -->
   <title>垃圾回收机制</title>
 
@@ -18,7 +17,7 @@
    <para>
     当一个变量被赋常量值时，就会生成一个zval变量容器，如下例这样：
     <example>
-     <title>Creating a new zval container</title>
+     <title>生成一个新的zval容器</title>
      <programlisting role="php">
 <![CDATA[
 <?php
@@ -33,7 +32,7 @@ $a = "new string";
    </para>
    <para>
     <example>
-     <title>Displaying zval information</title>
+     <title>显示zval信息</title>
      <programlisting role="php">
 <![CDATA[
 <?php
@@ -54,7 +53,7 @@ a: (refcount=1, is_ref=0)='new string'
    </para>
    <para>
     <example>
-     <title>Increasing refcount of a zval</title>
+     <title>增加一个zval的引用计数</title>
      <programlisting role="php">
 <![CDATA[
 <?php
@@ -77,7 +76,7 @@ a: (refcount=2, is_ref=0)='new string'
    </para>
    <para>
     <example>
-     <title>Decreasing zval refcount</title>
+     <title>减少引用计数</title>
      <programlisting role="php">
 <![CDATA[
 <?php
@@ -128,9 +127,9 @@ a: (refcount=1, is_ref=0)=array (
 )
 ]]>
       </screen>
-      <para>Or graphically</para>
+      <para>图示:</para>
       <mediaobject>
-       <alt>Zvals for a simple array</alt>
+       <alt>一个简单数组的zval</alt>
        <imageobject>
         <imagedata fileref="en/features/figures/simple-array.png" format="PNG"/>
        </imageobject>
@@ -142,7 +141,7 @@ a: (refcount=1, is_ref=0)=array (
     </para>
     <para>
      <example>
-      <title>Adding already existing element to an array</title>
+      <title>添加一个已经存在的元素到数组中</title>
       <programlisting role="php">
 <![CDATA[
 <?php
@@ -162,9 +161,9 @@ a: (refcount=1, is_ref=0)=array (
 )
 ]]>
       </screen>
-      <para>Or graphically</para>
+      <para>图示：</para>
       <mediaobject>
-       <alt>Zvals for a simple array with a reference</alt>
+       <alt>带有引用的简单数组的zval</alt>
        <imageobject>
         <imagedata fileref="en/features/figures/simple-array2.png" format="PNG"/>
        </imageobject>
@@ -179,7 +178,7 @@ a: (refcount=1, is_ref=0)=array (
     </para>
     <para>
      <example>
-      <title>Removing an element from an array</title>
+      <title>从数组中删除一个元素</title>
       <programlisting role="php">
 <![CDATA[
 <?php
@@ -205,7 +204,7 @@ a: (refcount=1, is_ref=0)=array (
     </para>
     <para>
      <example>
-      <title>Adding the array itself as an element of it self</title>
+      <title> 把数组作为一个元素添加到自己</title>
       <programlisting role="php">
 <![CDATA[
 <?php
@@ -224,9 +223,9 @@ a: (refcount=2, is_ref=1)=array (
 )
 ]]>
       </screen>
-      <para>Or graphically</para>
+      <para>图示：</para>
       <mediaobject>
-       <alt>Zvals for an array with a circular reference</alt>
+       <alt>自引用(curcular reference,自己是自己的一个元素)的数组的zval</alt>
        <imageobject>
         <imagedata fileref="en/features/figures/loop-array.png" format="PNG"/>
        </imageobject>
@@ -250,7 +249,7 @@ a: (refcount=2, is_ref=1)=array (
 )
 ]]>
       </screen>
-      <para>Or graphically</para>
+      <para>图示：</para>
       <mediaobject>
        <alt>Zvals after removal of array with a circular reference demonstrating the memory leak</alt>
        <imageobject>
@@ -264,10 +263,10 @@ a: (refcount=2, is_ref=1)=array (
    <sect2 xml:id="features.gc.cleanup-problems">
     <title>清理变量容器的问题(Cleanup Problems)</title>
     <para>
-     尽管不再有某个作用域中的任何符号指向这个结构(就是变量容器)，由于数组元素“1”仍然指向数组本身，所以这个容器不能被清除 。因为没有另外的符号指向它，用户没有办法清除这个结构，结果就会导致内存泄漏。庆幸的是，php将在请求结束时清除这个数据结构，但是在php清除之前，将耗费不少空间的内存。如果你要实现分析算法，或者要做其他像一个子元素指向它的父元素这样的事情，这种情况就会经常发生。当然，同样的情况也会发生在对象上，实际上对象更有可能出现这种情况，因为对象总是隐式的被引用。
+     尽管不再有某个作用域中的任何符号指向这个结构(就是变量容器)，由于数组元素“1”仍然指向数组本身，所以这个容器不能被清除 。因为没有另外的符号指向它，用户没有办法清除这个结构，结果就会导致内存泄漏。庆幸的是，php将在脚本执行结束时清除这个数据结构，但是在php清除之前，将耗费不少内存。如果你要实现分析算法，或者要做其他像一个子元素指向它的父元素这样的事情，这种情况就会经常发生。当然，同样的情况也会发生在对象上，实际上对象更有可能出现这种情况，因为对象总是隐式的被引用。
     </para>
     <para>
-     如果上面的情况发生仅仅一两次倒没什么，但是如果出现几千次，甚至几十万次的内存泄漏，这显然是个大问题。在长时间运行的脚本，比如请求基本上不会结束的守护进程(deamons)或者单元测试中的大的套件(sets)中，在给 eZ 组件库的模板组件做单元测试时，后者(指单元测试中的大的套件)就会出现问题.它将需要耗用2GB的内存，而一般的测试服务器没有这么大的内存空间。
+     如果上面的情况发生仅仅一两次倒没什么，但是如果出现几千次，甚至几十万次的内存泄漏，这显然是个大问题。这样的问题往往发生在长时间运行的脚本中，比如请求基本上不会结束的守护进程(deamons)或者单元测试中的大的套件(sets)中。后者的例子：在给巨大的eZ(一个知名的PHP Library) 组件库的模板组件做单元测试时，就可能会出现问题。有时测试可能需要耗用2GB的内存，而测试服务器很可能没有这么大的内存。
     </para>
    </sect2>
   </sect1>
@@ -282,7 +281,7 @@ a: (refcount=2, is_ref=1)=array (
    </para>
    <para>
      <mediaobject>
-      <alt>Garbage collection algorithm</alt>
+      <alt>垃圾回收算法</alt>
       <imageobject>
        <imagedata fileref="en/features/figures/gc-algorithm.png" format="PNG"/>
       </imageobject>
@@ -379,7 +378,7 @@ for ( $i = 0; $i <= 100000; $i++ )
     </para>
     <para>
      <example>
-      <title>GC performance influences</title>
+      <title>GC性能影响</title>
       <programlisting role="php">
 <![CDATA[
 <?php
@@ -405,7 +404,7 @@ echo memory_get_peak_usage(), "\n";
     </para>
     <para>
      <example>
-      <title>Running the above script</title>
+      <title>执行以上脚本</title>
       <programlisting role="shell">
 <![CDATA[
 time php -dzend.enable_gc=0 -dmemory_limit=-1 -n example2.php
@@ -427,7 +426,7 @@ time php -dzend.enable_gc=1 -dmemory_limit=-1 -n example2.php
     </para>
     <para>
      <example>
-      <title>Recompiling PHP to enable GC benchmarking</title>
+      <title>重新编译PHP以启用GC benchmarking</title>
       <programlisting role="shell">
 <![CDATA[
 export CFLAGS=-DGC_BENCH=1
@@ -443,7 +442,7 @@ make
     </para>
     <para>
      <example>
-      <title>GC statistics</title>
+      <title>GC 统计数据</title>
       <programlisting role="shell">
 <![CDATA[
 GC Statistics
