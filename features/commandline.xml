@@ -991,34 +991,26 @@ This is a command line PHP script with one option.
   <para>
    PHP 5.4.0起， &cli.sapi; 提供了一个内置的Web服务器。
   </para>
-
-  <para>
-   This web server is designed for developmental purposes only, and should not
-   be used in production.
+<para>   
+   这个内置的Web服务器主要用于本地开发使用，不可用于线上产品环境。
   </para>
 
   <para>
-    URI requests are served from the current working directory where
-    PHP was started, unless the -t option is used to specify an
-    explicit document root.
+     URI请求会被发送到PHP所在的的工作目录（Working Directory）进行处理，除非你使用了-t参数来自定义不同的目录。
   </para>
 
   <para>
-    If a URI request does not specify a file, then either index.php
-    or index.html in the given directory are returned.  If neither file
-    exists, then a 404 response code is returned.
+  
+   如果请求未指定执行哪个PHP文件，则默认执行目录内的index.php 或者 index.html。如果这两个文件都不存在，服务器会返回404错误。
   </para>
 
-  <para>
-    If a PHP file is given on the command line when the web server is
-    started it is treated as a "router" script for the web server.
-    The script is run at the start of each HTTP request.  If this
-    script returns &false;, then the requested resource is returned
-    as-is.  Otherwise the script's output is returned to the browser.
+  <para>  
+   
+   当你在命令行启动这个Web Server时，如果指定了一个PHP文件，则这个文件会作为一个“路由”脚本，意味着每次请求都会先执行这个脚本。如果这个脚本返回 &false; ，那么直接返回请求的文件（例如请求静态文件不作任何处理）。否则会把输出返回到浏览器。
   </para>
 
   <example>
-   <title>Starting the web server</title> 
+   <title>启动Web服务器</title> 
    <programlisting role="shell">
 <![CDATA[
 $ cd ~/public_html
@@ -1026,7 +1018,7 @@ $ php -S localhost:8000
 ]]>
    </programlisting>
    <para>
-     The terminal will show:
+     终端窗口会显示:
    </para>
    <screen>
 <![CDATA[
@@ -1036,10 +1028,9 @@ Document root is /home/me/public_html
 Press Ctrl-C to quit
 ]]>
    </screen>
-   <para>
-     After URI requests for http://localhost:8000/ and
-     http://localhost:8000/myscript.html the terminal will show
-     something similar to:
+   <para>   
+    
+    接着访问http://localhost:8000/和http://localhost:8000/myscript.html，窗口会显示：
    </para>
    <screen>
 <![CDATA[
@@ -1057,7 +1048,7 @@ Press Ctrl-C to quit.
   </example>
 
   <example>
-   <title>Starting with a specific document root directory</title> 
+   <title>启动时指定根目录</title> 
    <programlisting role="shell">
 <![CDATA[
 $ cd ~/public_html
@@ -1065,7 +1056,7 @@ $ php -S localhost:8000 -t foo/
 ]]>
    </programlisting>
    <para>
-     The terminal will show:
+     终端窗口显示：
    </para>
    <screen>
 <![CDATA[
@@ -1078,16 +1069,17 @@ Press Ctrl-C to quit
   </example>
 
   <example>
-   <title>Using a Router Script</title> 
+   <title>使用路由（Router）脚本</title> 
 <para>
-  Requests for images will display them, but requests for HTML files will display "Welcome to PHP"
+ 
+ 请求图片直接显示图片，请求HTML则显示“Welcome to PHP”
 </para>
    <programlisting role="php">
 <![CDATA[
 <?php
 // router.php
 if (preg_match('/\.(?:png|jpg|jpeg|gif)$/', $_SERVER["REQUEST_URI"]))
-    return false;    // serve the requested resource as-is.
+    return false;    // 直接返回请求的文件
 else { 
     echo "<p>Welcome to PHP</p>";
 }
@@ -1099,7 +1091,8 @@ $ php -S localhost:8000 router.php
 ]]>
    </programlisting>
    <para>
-     After several URI requests the terminal will show something similar to:
+    
+    执行之后终端显示：
    </para>
    <screen>
 <![CDATA[
@@ -1118,10 +1111,10 @@ Press Ctrl-C to quit.
  <!--}}}-->
 
   <section xml:id="features.commandline.ini">
-   <title>INI settings</title>
+   <title>INI 配置</title>
    <para>
     <table>
-     <title>CLI SAPI Configuration Options</title>
+     <title>CLI SAPI 配置选项</title>
      <tgroup cols="4">
       <thead>
        <row>
@@ -1136,7 +1129,7 @@ Press Ctrl-C to quit.
         <entry><link linkend="ini.cli-server.color">cli_server.color</link></entry>
         <entry>"0"</entry>
         <entry>PHP_INI_ALL</entry>
-        <entry>Available since PHP 5.4.0.</entry>
+        <entry>PHP 5.4.0. 起生效</entry>
        </row>
       </tbody>
      </tgroup>
@@ -1153,9 +1146,8 @@ Press Ctrl-C to quit.
        <type>boolean</type>
       </term>
       <listitem>
-       <para>
-        Enable the built-in development web server to use ANSI color coding 
-        in terminal output.
+       <para>        
+        控制 内置Web Server的终端输出有无颜色
        </para>
       </listitem>
      </varlistentry>
