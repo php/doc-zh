@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision$ -->
+<!-- EN-Revision: f0d05b38c3dd79b8a2368ec4ec03716c24766d90 Maintainer:  Status: ready -->
+<!-- Reviewed: no -->
+
+<refentry xml:id="function.filter-input-array" xmlns="http://docbook.org/ns/docbook">
+ <refnamediv>
+  <refname>filter_input_array</refname>
+  <refpurpose>获取一系列外部变量，并且可以通过过滤器处理它们</refpurpose>
+ </refnamediv>
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <type>mixed</type><methodname>filter_input_array</methodname>
+   <methodparam><type>int</type><parameter>type</parameter></methodparam>
+   <methodparam choice="opt"><type>mixed</type><parameter>definition</parameter></methodparam>
+   <methodparam choice="opt"><type>bool</type><parameter>add_empty</parameter><initializer>true</initializer></methodparam>
+  </methodsynopsis>
+  <para>
+   这个函数当需要获取很多变量却不想重复调用<function>filter_input</function>时很有用。
+  </para>
+ </refsect1>
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>type</parameter></term>
+     <listitem>
+      <para>
+       <constant>INPUT_GET</constant>, <constant>INPUT_POST</constant>,
+       <constant>INPUT_COOKIE</constant>, <constant>INPUT_SERVER</constant>, or
+       <constant>INPUT_ENV</constant>之一。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>definition</parameter></term>
+     <listitem>
+      <para>
+       一个定义参数的数组。一个有效的键必须是一个包含变量名的<type>string</type>，一个有效的值要么是一个<link
+       linkend="filter.filters">filter type</link>，或者是一个<type>array</type>
+       指明了过滤器、标示和选项。如果值是一个数组，那么它的有效的键可以是 <literal>filter</literal>，
+       用于指明 <link linkend="filter.filters">filter type</link>，<literal>flags</literal> 
+       用于指明任何想要用于过滤器的标示，或者 <literal>options</literal> 用于指明任何想要用于过滤器的选项。
+       参考下面的例子来更好的理解这段说明。
+      </para>
+      <para>
+       这个参数也可以是一个<link
+       linkend="filter.constants">filter constant</link>的整数。那么数组中的所有变量都会被这个过滤器所过滤。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>add_empty</parameter></term>
+     <listitem>
+      <para>
+       在返回值中添加 &null; 作为不存在的键。
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   如果成功的话返回一个所请求的变量的数组，如果失败的话返回 &false; 。对于数组的值，如果过滤失败则返回 &false; ，如果<parameter>variable_name</parameter> 不存在的话则返回 &null; 。
+   如果标示 <constant>FILTER_NULL_ON_FAILURE</constant> 被使用了，那么当变量不存在时返回 &false; ，当过滤失败时返回 &null; 。
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title>一个 <function>filter_input_array</function> 的例子</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+error_reporting(E_ALL | E_STRICT);
+/* data actually came from POST
+$_POST = array(
+    'product_id'    => 'libgd<script>',
+    'component'     => '10',
+    'versions'      => '2.0.33',
+    'testscalar'    => array('2', '23', '10', '12'),
+    'testarray'     => '2',
+);
+*/
+
+$args = array(
+    'product_id'   => FILTER_SANITIZE_ENCODED,
+    'component'    => array('filter'    => FILTER_VALIDATE_INT,
+                            'flags'     => FILTER_REQUIRE_ARRAY, 
+                            'options'   => array('min_range' => 1, 'max_range' => 10)
+                           ),
+    'versions'     => FILTER_SANITIZE_ENCODED,
+    'doesnotexist' => FILTER_VALIDATE_INT,
+    'testscalar'   => array(
+                            'filter' => FILTER_VALIDATE_INT,
+                            'flags'  => FILTER_REQUIRE_SCALAR,
+                           ),
+    'testarray'    => array(
+                            'filter' => FILTER_VALIDATE_INT,
+                            'flags'  => FILTER_REQUIRE_ARRAY,
+                           )
+
+);
+
+$myinputs = filter_input_array(INPUT_POST, $args);
+
+var_dump($myinputs);
+echo "\n";
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+array(6) {
+  ["product_id"]=>
+  array(1) {
+    [0]=>
+    string(17) "libgd%3Cscript%3E"
+  }
+  ["component"]=>
+  array(1) {
+    [0]=>
+    int(10)
+  }
+  ["versions"]=>
+  array(1) {
+    [0]=>
+    string(6) "2.0.33"
+  }
+  ["doesnotexist"]=>
+  NULL
+  ["testscalar"]=>
+  bool(false)
+  ["testarray"]=>
+  array(1) {
+    [0]=>
+    int(2)
+  }
+}
+]]>
+    </screen>
+   </example>
+  </para>
+ </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <para>
+   <informaltable>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>&Version;</entry>
+       <entry>&Description;</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>5.4.0</entry>
+       <entry>
+        添加 <parameter>add_empty</parameter> 参数.
+       </entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </informaltable>
+  </para>
+ </refsect1>
+
+ <refsect1 role="notes">
+  &reftitle.notes;
+  <note>
+   <para>
+    在 <constant>INPUT_SERVER</constant> 数组中并没有 <literal>REQUEST_TIME</literal> ，因为它是被稍后插入到<varname>$_SERVER</varname> 中的。
+   </para>
+  </note>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>filter_input</function></member>
+    <member><function>filter_var_array</function></member>
+    <member><xref linkend="filter.filters" /></member>
+   </simplelist>
+  </para>
+ </refsect1>
+
+</refentry>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
