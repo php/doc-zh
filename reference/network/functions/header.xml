@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 6cec4c40ff9129030eaa7dde6ffb1d742f039771 Maintainer: zhoumengkang Status: ready -->
+<!-- EN-Revision: 11c3ae8a2616b4c6e673a82d709ec235b53b9ba6 Maintainer: zhoumengkang Status: ready -->
 <!-- Reviewed: no -->
 
 <refentry xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://docbook.org/ns/docbook" xml:id="function.header">
  <refnamediv>
   <refname>header</refname>
-  <refpurpose>发送一个自定义的http报文</refpurpose>
+  <refpurpose>发送原生 HTTP 头</refpurpose>
  </refnamediv>
  
  <refsect1 role="description">
@@ -18,11 +18,12 @@
    <methodparam choice="opt"><type>int</type><parameter>http_response_code</parameter></methodparam>
   </methodsynopsis>
   <para>
-   <function>header</function> 被用来发送自定义的 <acronym>HTTP</acronym>
-   报文。关于<acronym>HTTP</acronym>报文的更多信息请参考<link xlink:href="&url.rfc;2616">HTTP/1.1 specification</link>。
+   <function>header</function> 用于发送原生的 <acronym>HTTP</acronym>
+   头。关于 <acronym>HTTP</acronym> 头的更多信息请参考 <link xlink:href="&url.rfc;2616">HTTP/1.1 specification</link>。
   </para>
   <para>
-   请注意一点<function>header</function>必须在任何实际输出之前调用，不管是普通的html标签，还是文件里面的空行，空格或者是PHP文件里的空行，空格。这是一个非常普遍的错误，在通过<function>include</function>，<function>require</function>，或者其访问其他文件里面的函数的时候，如果在<function>header</function>被调用之前，其中有空格或者空行。如果不是调用其他文件，仅仅是单独使用一个PHP或者HTML文件，在<function>header</function>被调用之前有输出也会出错。
+   请注意 <function>header</function> 必须在任何实际输出之前调用，不管是普通的 HTML 标签，还是文件或 PHP 输出的空行，空格。这是个常见的错误，在通过<function>include</function>，<function>require</function>，或者其访问其他文件里面的函数的时候，如果在<function>header</function>被调用之前，其中有空格或者空行。
+   同样的问题也存在于单独的 PHP/HTML 文件中。
    <informalexample>
     <programlisting role="php">
 <![CDATA[
@@ -47,11 +48,12 @@ exit;
      <term><parameter>string</parameter></term>
      <listitem>
       <para>
-       报文字符串。
+       头字符串。
       </para>
       <para>
-       有两种特别的报文请求。第一种以“<literal>HTTP/</literal>”开头的 (case is not
-       significant)，将会被用来计算出将要发送的HTTP状态码。 例如你在Apache服务器上做了用一个PHP脚本来处理对不存在文件的请求（使用错误文档指令）的配置， 那么你在向服务器发送的报文请求的时候可能更希望你的脚本生成正确的状态码。
+       有两种特别的头。第一种以“<literal>HTTP/</literal>”开头的 (case is not
+       significant)，将会被用来计算出将要发送的HTTP状态码。 
+       例如在 Apache 服务器上用 PHP 脚本来处理不存在文件的请求（使用 <literal>ErrorDocument</literal> 指令）， 就会希望脚本响应了正确的状态码。
       </para>
       <para>
        <informalexample>
@@ -65,7 +67,7 @@ header("HTTP/1.0 404 Not Found");
        </informalexample>
       </para>
       <para>
-       第二种特殊情况是“Location:”的头信息。它不仅把报文发送给浏览器，而且还将返回给浏览器一个<literal>重定向</literal>（302）的状态码，除非状态码已经事先被设置为了<literal>201</literal>或者<literal>3xx</literal>。
+       第二种特殊情况是“Location:”的头信息。它不仅把报文发送给浏览器，而且还将返回给浏览器一个 <literal>REDIRECT</literal>（302）的状态码，除非状态码已经事先被设置为了<literal>201</literal>或者<literal>3xx</literal>。
       </para>
       <para>
        <informalexample>
@@ -87,7 +89,9 @@ exit;
      <term><parameter>replace</parameter></term>
      <listitem>
       <para>
-       <parameter>replace</parameter>参数是可选参数，它表明否应该用后面一个相同类型的报文信息来取代前面一个相似的报文信息。默认情况下，是会发生取代的。但是如果你传入一个&false;，那么你可以强制使相同的报文信息并存。例如：
+       可选参数 <parameter>replace</parameter> 表明是否用后面的头替换前面相同类型的头。
+       
+       默认情况下会替换。如果传入 &false;，就可以强制使相同的头信息并存。例如：
       </para>
       <para>
        <informalexample>
@@ -135,21 +139,9 @@ header('WWW-Authenticate: NTLM', false);
      </thead>
      <tbody>
       <row>
-       <entry>4.4.2 and 5.1.2</entry>
+       <entry>5.1.2</entry>
        <entry>
-        这个函数现在可以一次性阻止多个报文信息的发送，从而作为对报文信息注入攻击的一种防护。
-       </entry>
-      </row>
-      <row>
-       <entry>4.3.0</entry>
-       <entry>
-        增加了参数<parameter>http_response_code</parameter>。
-       </entry>
-      </row>
-      <row>
-       <entry>4.0.4</entry>
-       <entry>
-        增加了参数<parameter>replace</parameter>。
+        这个函数现在可以一次性阻止多个报文信息的发送，从而作为对报文信息注入攻击的一种防护。 
        </entry>
       </row>
      </tbody>
@@ -216,7 +208,7 @@ header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
   &note.network.header.sapi;
   <note>
    <para>
-    你所有需要输出到浏览器的数据将会一直缓存在服务器端，直到你发送他们，这将造成比较打开的资源开销。你可以是用输出缓冲来避开这个问题。你可以通过在脚本里使用<function>ob_start</function>和<function>ob_end_flush</function>或者直接在你的&php.ini;文件里设置<literal>output_buffering</literal>，也可以直接在服务器的配置文件里设置。
+    你所有需要输出到浏览器的数据将会一直缓存在服务器端，直到你发送他们，这将造成比较大的资源开销。你可以是用输出缓冲来避开这个问题。你可以通过在脚本里使用<function>ob_start</function>和<function>ob_end_flush</function>或者直接在你的&php.ini;文件里设置<literal>output_buffering</literal>，也可以直接在服务器的配置文件里设置。
    </para>
   </note>
   <note>
