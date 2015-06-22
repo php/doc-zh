@@ -1,38 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
+<!-- EN-Revision: 336097 Maintainer: Huchengtian Status: ready -->
 <!-- EN-Revision: 19cac543b81673529396e78e20b189990b362d5a Maintainer: dallas Status: partial -->
 <chapter xml:id="language.generators" xmlns="http://docbook.org/ns/docbook">
  <title>生成器</title>
  <sect1 xml:id="language.generators.overview">
   <title>生成器</title>
   <?phpdoc print-version-for="generators"?>
-
+  
   <para>
    生成器提供了一种更容易的方法来实现简单的<link
    linkend="language.oop5.iterations">对象迭代</link>，相比较定义类实现
    <classname>Iterator</classname> 接口的方式，性能开销和复杂性大大降低。
   </para>
-
+  
   <para>
    生成器允许你在 &foreach;
    代码块中写代码来迭代一组数据而不需要在内存中创建一个数组, 那会使你的内存达到上限，或者会占据可观的处理时间。相反，你可以写一个生成器函数，就像一个普通的自定义<link
    linkend="functions.user-defined">函数</link>一样, 和普通函数只<link
    linkend="functions.returning-values">返回</link>一次不同的是, 生成器可以根据需要 &yield; 多次，以便生成需要迭代的值。
   </para>
-
+  
   <para>
    一个简单的例子就是使用生成器来重新实现 <function>range</function>
    函数。 标准的 <function>range</function>
    函数需要在内存中生成一个数组包含每一个在它范围内的值，然后返回该数组, 结果就是会产生多个很大的数组。 比如，调用
    <command>range(0, 1000000)</command> 将导致内存占用超过 100 MB。
   </para>
-
+  
   <para>
    做为一种替代方法, 我们可以实现一个 <literal>xrange()</literal>
    生成器, 只需要足够的内存来创建
    <classname>Iterator</classname> 对象并在内部跟踪生成器的当前状态，这样只需要不到1K字节的内存。
   </para>
-
+  
   <example>
    <title>将 <function>range</function> 实现为生成器</title>
    <programlisting role="php">
@@ -58,8 +59,9 @@ function xrange($start, $limit, $step = 1) {
     }
 }
 
-/* Note that both range() and xrange() result in the same
- * output below. */
+/* 
+ * 注意下面range()和xrange()输出的结果是一样的。
+ */
 
 echo 'Single digit odd numbers from range():  ';
 foreach (range(1, 9, 2) as $number) {
@@ -83,56 +85,43 @@ Single digit odd numbers from xrange(): 1 3 5 7 9
    </screen>
   </example>
  </sect1>
-
+ 
  <sect1 xml:id="language.generators.syntax">
-  <title>Generator syntax</title>
-
+  <title>生成器语法</title>
+  
   <para>
-   A generator function looks just like a normal function, except that instead
-   of returning a value, a generator &yield;s as many values as it needs to.
+   一个生成器函数看起来像一个普通的函数，不同的是普通函数返回一个值，而一个生成器可以&yield;生成许多它所需要的值。
   </para>
-
+  
   <para>
-   When a generator function is called, it returns an object that can be
-   iterated over. When you iterate over that object (for instance, via a
-   &foreach; loop), PHP will call the generator function each time it needs a
-   value, then saves the state of the generator when the generator yields a
-   value so that it can be resumed when the next value is required.
+   当一个生成器被调用的时候，它返回一个可以被遍历的对象.当你遍历这个对象的时候(例如通过一个&foreach;循环)，PHP  将会在每次需要值的时候调用生成器函数，并在产生一个值之后保存生成器的状态，这样它就可以在需要产生下一个值的时候恢复调用状态。
   </para>
-
+  
   <para>
-   Once there are no more values to be yielded, then the generator function
-   can simply exit, and the calling code continues just as if an array has run
-   out of values.
+   一旦不再需要产生更多的值，生成器函数可以简单退出，而调用生成器的代码还可以继续执行，就像一个数组已经被遍历完了。
   </para>
-
+  
   <note>
    <para>
-    A generator cannot return a value: doing so will result in a compile
-    error. An empty <command>return</command> statement is valid syntax within
-    a generator and it will terminate the generator.
+    一个生成器不可以返回值： 这样做会产生一个编译错误。然而<command>return</command>空是一个有效的语法并且它将会终止生成器继续执行。
    </para>
   </note>
-
+  
   <sect2 xml:id="control-structures.yield">
-   <title><command>yield</command> keyword</title>
-
+   <title><command>yield</command>关键字</title>
+   
    <para>
-    The heart of a generator function is the <command>yield</command> keyword.
-    In its simplest form, a yield statement looks much like a return
-    statement, except that instead of stopping execution of the function and
-    returning, yield instead provides a value to the code looping over the
-    generator and pauses execution of the generator function.
+    生成器函数的核心是<command>yield</command>关键字。它最简单的调用形式看起来像一个return申明，不同之处在于普通return会返回值并终止函数的执行，而yield会返回一个值给循环调用此生成器的代码并且只是暂停执行生成器函数。
    </para>
-
+   
    <example>
-    <title>A simple example of yielding values</title>
+    <title>一个简单的生成值的例子</title>
     <programlisting role="php">
 <![CDATA[
 <?php
 function gen_one_to_three() {
     for ($i = 1; $i <= 3; $i++) {
-        // Note that $i is preserved between yields.
+        //注意变量$i的值在不同的yield之间是保持传递的。
         yield $i;
     }
 }
@@ -153,21 +142,18 @@ foreach ($generator as $value) {
 ]]>
     </screen>
    </example>
-
+   
    <note>
     <para>
-     Internally, sequential integer keys will be paired with the yielded
-     values, just as with a non-associative array.
+     在内部会为生成的值配对连续的整型索引，就像一个非关联的数组。
     </para>
    </note>
-
+   
    <caution>
     <para>
-     If you use yield in an expression context (for example, on the right hand
-     side of an assignment), you must surround the yield statement with
-     parentheses. For example, this is valid:
+     如果在一个表达式上下文(例如在一个赋值表达式的右侧)中使用yield，你必须使用圆括号把yield申明包围起来。 例如这样是有效的：
     </para>
-
+    
     <informalexample>
      <programlisting role="php">
 <![CDATA[
@@ -175,11 +161,11 @@ foreach ($generator as $value) {
 ]]>
      </programlisting>
     </informalexample>
-
+    
     <para>
-     But this is not, and will result in a parse error:
+     而这样就不合法，并且会产生一个编译错误：
     </para>
-
+    
     <informalexample>
      <programlisting role="php">
 <![CDATA[
@@ -187,35 +173,31 @@ foreach ($generator as $value) {
 ]]>
      </programlisting>
     </informalexample>
-
+    
     <para>
-     This syntax may be used in conjunction with the
-     <link linkend="generator.send">send()</link> method on
-     Generator objects.
+     这个语法可以和生成器对象的<link linkend="generator.send">send()</link>方法配合使用。
     </para>
    </caution>
-
+   
    <sect3 xml:id="control-structures.yield.associative">
-    <title>Yielding values with keys</title>
-
+    <title>指定键名来生成值</title>
+    
     <para>
-     PHP also supports associative arrays, and generators are no different. In
-     addition to yielding simple values, as shown above, you can also yield a
-     key at the same time.
+     PHP的数组支持关联键值对数组，生成器也一样支持。所以除了生成简单的值，你也可以在生成值的时候指定键名。
     </para>
-
+    
     <para>
-     The syntax for yielding a key/value pair is very similar to that used to
-     define an associative array, as shown below.
+     如下所示，生成一个键值对与定义一个关联数组十分相似。
     </para>
-
+    
     <example>
-     <title>Yielding a key/value pair</title>
+     <title>生成一个键值对</title>
      <programlisting role="php">
 <![CDATA[
 <?php
-/* The input is semi-colon separated fields, with the first
- * field being an ID to use as a key. */
+/* 
+ * 下面每一行是用分号分割的字段组合，第一个字段将被用作键名。
+ */
 
 $input = <<<'EOF'
 1;PHP;Likes dollar signs
@@ -255,14 +237,12 @@ foreach (input_parser($input) as $id => $fields) {
 ]]>
      </screen>
     </example>
-
+    
     <caution>
      <para>
-      As with the simple value yields shown earlier, yielding a key/value pair
-      in an expression context requires the yield statement to be
-      parenthesised:
+      和之前生成简单值类型一样，在一个表达式上下文中生成键值对也需要使用圆括号进行包围：
      </para>
-
+     
      <informalexample>
       <programlisting role="php">
 <![CDATA[
@@ -272,17 +252,16 @@ foreach (input_parser($input) as $id => $fields) {
      </informalexample>
     </caution>
    </sect3>
-
+   
    <sect3 xml:id="control-structures.yield.null">
-    <title>Yielding null values</title>
-
+    <title>生成null值</title>
+    
     <para>
-     Yield can be called without an argument to yield a &null; value with an
-     automatic key.
+     Yield可以在没有参数传入的情况下被调用来生成一个 &null;值并配对一个自动的键名。
     </para>
-
+    
     <example>
-     <title>Yielding &null;s</title>
+     <title>生成&null;s</title>
      <programlisting role="php">
 <![CDATA[
 <?php
@@ -311,19 +290,16 @@ array(3) {
      </screen>
     </example>
    </sect3>
-
+   
    <sect3 xml:id="control-structures.yield.references">
-    <title>Yielding by reference</title>
-
+    <title>使用引用来生成值</title>
+    
     <para>
-     Generator functions are able to yield values by reference as well as by
-     value. This is done in the same way as
-     <link linkend="functions.returning-values">returning references from functions</link>: 
-     by prepending an ampersand to the function name.
+     生成函数可以像使用值一样来使用引用生成。这个和<link linkend="functions.returning-values">returning references from functions</link>（从函数返回一个引用）一样：通过在函数名前面加一个引用符号。
     </para>
-
+    
     <example>
-     <title>Yielding values by reference</title>
+     <title>使用引用来生成值</title>
      <programlisting role="php">
 <![CDATA[
 <?php
@@ -335,9 +311,9 @@ function &gen_reference() {
     }
 }
 
-/* Note that we can change $number within the loop, and
- * because the generator is yielding references, $value
- * within gen_reference() changes. */
+/* 
+ * 我们可以在循环中修改$number的值，而生成器是使用的引用值来生成，所以gen_reference()内部的$value值也会跟着变化。
+ */
 foreach (gen_reference() as &$number) {
     echo (--$number).'... ';
 }
@@ -354,78 +330,63 @@ foreach (gen_reference() as &$number) {
    </sect3>
   </sect2>
  </sect1>
-
+ 
  <sect1 xml:id="class.generator">
-  <title><classname>Generator</classname> objects</title>
-
+  <title><classname>生成器</classname> 对象</title>
+  
   <para>
-   When a generator function is called for the first time, an object of the
-   internal <classname>Generator</classname> class is returned. This object
-   implements the <classname>Iterator</classname> interface in much the same
-   way as a forward-only iterator object would.
+   当一个生成器函数第一次被调用的时候，会返回一个内部<classname>Generator</classname>类的对象。这个对象和一个只能向前的迭代器对象一样实现了<classname>Iterator</classname>接口。
   </para>
-
+  
   <para>
-   Most methods in the <classname>Generator</classname> class have the same
-   semantics as the methods in the <classname>Iterator</classname> interface,
-   but generator objects also have one additional method:
-   <command>send()</command>.
+   大部分 <classname>Generator</classname>类中的方法拥有和<classname>Iterator</classname>接口一样的语义，但是生成器对象有一个特殊的方法： <command>send()</command>。
   </para>
-
+  
   <caution>
    <para>
-    <classname>Generator</classname> objects cannot be instantiated via
-    <link linkend="language.oop5.basic.new">new</link>.
+    <classname>Generator</classname>不能通过<link linkend="language.oop5.basic.new">new</link>操作来实例化.
    </para>
   </caution>
-
+  
   <!-- TODO: I've nicked this from the exception documentation, but I don't
              actually like it very much. At some point, let's try to break
              this and Exception out into proper class/method documentation.
    -->
-
+  
   <example>
-   <title>The <classname>Generator</classname> class</title>
+   <title><classname>Generator</classname>类</title>
    <programlisting role="php">
 <![CDATA[
 <?php
 class Generator implements Iterator {
-    public function rewind();          // Rewinds the iterator. If
-                                       // iteration has already begun,
-                                       // this will throw an exception.
+    public function rewind();          // 返回到迭代器的第一个元素。
 
-    public function valid();           // Returns false if the
-                                       // iterator has been closed.
-                                       // Otherwise returns true.
+    public function valid();           // 返回false如果迭代器已经关闭，否则返回true
 
-    public function current();         // Returns the yielded value.
+    public function current();         // 返回当前yield值.
 
-    public function key();             // Returns the yielded key.
+    public function key();             // 返回当前yield键名.
 
-    public function next();            // Resumes execution of the
-                                       // generator.
+    public function next();            // 恢复生成器的执行。
     
-    public function send($value);      // Sends the given value to the
-                                       // generator as the result of
-                                       // the yield expression and
-                                       // resumes execution of the
-                                       // generator.
+    public function send($value);      // 将传入的值作为yield表达式的结果并且恢复发生器的执行。
+
 }
 ?>
 ]]>
    </programlisting>
   </example>
-
+  
   <sect2 xml:id="generator.send">
    <title><methodname>Generator::send</methodname></title>
-
+   
    <para>
     <methodname>Generator::send</methodname> allows values to be injected into
     generator functions while iterating over them. The injected value will be
     returned from the &yield; statement and can then be used like any other
     variable within the generator function.
    </para>
-
+   
    <example>
     <title>Using <methodname>Generator::send</methodname> to inject values</title>
     <programlisting role="php">
@@ -452,17 +413,17 @@ Hello world!
    </example>
   </sect2>
  </sect1>
-
+ 
  <sect1 xml:id="language.generators.comparison">
   <title>Comparing generators with <classname>Iterator</classname> objects</title>
-
+  
   <para>
    The primary advantage of generators is their simplicity. Much less
    boilerplate code has to be written compared to implementing an
    <classname>Iterator</classname> class, and the code is generally much more
    readable. For example, the following function and class are equivalent:
   </para>
-
+  
   <informalexample>
    <programlisting role="php">
 <![CDATA[
@@ -526,7 +487,7 @@ class LineIterator implements Iterator {
 ]]>
    </programlisting>
   </informalexample>
-
+  
   <para>
    This flexibility does come at a cost, however: generators are forward-only
    iterators, and cannot be rewound once iteration has started. This also
@@ -537,7 +498,7 @@ class LineIterator implements Iterator {
   </para>
  </sect1>
 </chapter>
- 
+
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
