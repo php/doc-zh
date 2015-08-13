@@ -17,6 +17,12 @@
    <function>crypt</function> 返回一个基于标准 UNIX <abbrev>DES</abbrev> 算法或系统上其他可用的替代算法的散列字符串。
   </para>
   <para>
+   <parameter>salt</parameter> 参数是可选的。然而，如果没有<parameter>salt</parameter>的话，<function>crype</function>创建出来的会是弱密码。 php 5.6及之后的版本会在没有它的情况下抛出一个 E_NOTICE 级别的错误。为了更好的安全性，请确保指定一个足够强度的盐值。
+  </para>
+  <para>
+   <function>password_hash</function>使用了一个强的哈希算法，来产生足够强的盐值，并且会自动进行合适的轮次。<function>password_hash</function>是<function>crypt</function>的一个简单封装，并且完全与现有的密码哈希兼容。推荐使用<function>password_hash</function>。
+  </para>
+  <para>
    有些系统支持不止一种散列类型。实际上，有时候，基于 MD5 的算法被用来替代基于标准 DES 的算法。这种散列类型由盐值参数触发。在 5.3 之前，PHP 在安装时根据系统的 crypt() 决定可用的算法。如果没有提供盐值，PHP 将自动生成一个 2 个字符（DES）或者 12 个字符（MD5）的盐值 ，这取决于 MD5 crypt() 的可用性。PHP 设置了一个名为 <constant>CRYPT_SALT_LENGTH</constant> 的常量，用来表示可用散列允许的最长可用盐值。
   </para>
   <para>
@@ -44,6 +50,7 @@
    <listitem>
     <simpara>
      <constant>CRYPT_BLOWFISH</constant> - Blowfish 算法使用如下盐值：“$2a$”，一个两位 cost 参数，“$” 以及 64 位由 “./0-9A-Za-z” 中的字符组合而成的字符串。在盐值中使用此范围之外的字符将导致 crypt() 返回一个空字符串。两位 cost 参数是循环次数以 2 为底的对数，它的范围是 04-31，超出这个范围将导致 crypt() 失败。
+     PHP 5.3.7 之前只支持 “$2a$” 作为盐值的前缀，PHP 5.3.7 开始引入了新的前缀来修正一个在Blowfish实现上的安全风险。可以参考<link xlink:href="&url.crypt.blowfish;">this document</link>来了解关于这个修复的更多信息。总而言之，开发者如果仅针对 PHP 5.3.7及之后版本进行开发，那应该使用 “$2y$” 而非 “$2a$”
     </simpara>
    </listitem>
    <listitem>
@@ -74,6 +81,11 @@
       <para>
        待散列的字符串。
       </para>
+      <caution>
+       <para>
+        使用 <constant>CRYPT_BLOWFISH</constant> 算法将导致<parameter>str</parameter>被裁剪为一个最长72个字符的字符串。
+       </para>
+      </caution>
      </listitem>
     </varlistentry>
     <varlistentry>
@@ -93,6 +105,11 @@
   <para>
    返回散列后的字符串或一个少于 13 字符的字符串，从而保证在失败时与盐值区分开来。
   </para>
+  <warning>
+   <simpara>
+    当校验密码时，应该使用一个不容易被时间攻击的字符串比较函数来比较<function>crypt</function>的输出与之前已知的哈希。出于这个目的，PHP5.6开始提供了<function>hash_equals</function>。
+   </simpara>
+  </warning>
  </refsect1>
  
  <refsect1 role="changelog">
@@ -107,6 +124,37 @@
       </row>
      </thead>
      <tbody>
+      <row>
+       <entry>5.6.5</entry>
+       <entry>
+        When the failure string "*0" is given as the
+        <parameter>salt</parameter>, "*1" will now be returned for consistency
+        with other crypt implementations. Prior to this version, PHP 5.6 would
+        incorrectly return a DES hash.
+       </entry>
+      </row>
+      <row>
+       <entry>5.6.0</entry>
+       <entry>
+        Raise E_NOTICE security warning if <parameter>salt</parameter> is omitted.
+       </entry>
+      </row>
+      <row>
+       <entry>5.5.21</entry>
+       <entry>
+        When the failure string "*0" is given as the
+        <parameter>salt</parameter>, "*1" will now be returned for consistency
+        with other crypt implementations. Prior to this version, PHP 5.5 (and
+        earlier branches) would incorrectly return a DES hash.
+       </entry>
+      </row>
+      <row>
+       <entry>5.3.7</entry>
+       <entry>
+        Added <literal>$2x$</literal> and <literal>$2y$</literal> Blowfish
+        modes to deal with potential high-bit attacks.
+       </entry>
+      </row>
       <row>
        <entry>5.3.2</entry>
        <entry>
@@ -226,6 +274,8 @@ SHA-512:      $6$rounds=5000$usesomesillystri$D4IrlXatmP7rx3P3InaxBeoomnAihCKRVQ
   &reftitle.seealso;
   <para>
    <simplelist>
+    <member><function>hash_equals</function></member>
+    <member><function>password_hash</function></member>
     <member><function>md5</function></member>
     <member><link linkend="ref.mcrypt">Mcrypt</link> 扩展</member>
     <member>更多关于 crypt 函数的信息，请阅读 Unix man 页面</member>
