@@ -2,31 +2,21 @@
 <!-- $Revision$ -->
 
 <chapter xml:id="session.upload-progress" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
- <title>Session Upload Progress</title>
+ <title>Session 上传进度</title>
 
  <para>
-  When the
+  当
   <link linkend="ini.session.upload-progress.enabled">session.upload_progress.enabled</link>
-  INI option is enabled, PHP will be able to track the upload progress of
-  individual files being uploaded.
-  This information isn't particularly useful for the actual upload request
-  itself, but during the file upload an application can send an POST request
-  to a separate endpoint (via <acronym>XHR</acronym> for example) to check the
-  status.
+  INI 选项开启时，PHP 能够在每一个文件上传时监测上传进度。
+  这个信息对上传请求自身并没有什么帮助，但在文件上传时应用可以发送一个POST请求到终端（例如通过<acronym>XHR</acronym>）来检查这个状态
  </para>
  <para>
-  The upload progress will be available in the <varname>$_SESSION</varname>
-  superglobal when an upload is in progress, and when POSTing a variable of
-  the same name as the
-  <link linkend="ini.session.upload-progress.name">session.upload_progress.name</link>
-  INI setting is set to.
-  When PHP detects such POST requests, it will populate an array in the
-  <varname>$_SESSION</varname>, where the index is a concatenated value of the
+  当一个上传在处理中，同时POST一个与INI中设置的<link linkend="ini.session.upload-progress.name">session.upload_progress.name</link>同名变量时，上传进度可以在<varname>$_SESSION</varname>中获得。
+  当PHP检测到这种POST请求时，它会在<varname>$_SESSION</varname>中添加一组数据, 索引是
   <link linkend="ini.session.upload-progress.prefix">session.upload_progress.prefix</link>
-  and
-  <link linkend="ini.session.upload-progress.name">session.upload_progress.name</link>
-  INI options.
-  The key is typically retrieved by reading these INI settings, i.e.
+  与
+  <link linkend="ini.session.upload-progress.name">session.upload_progress.name</link>连接在一起的值。
+  通常这些键值可以通过读取INI设置来获得，例如
   <informalexample>
    <programlisting role="php">
 <![CDATA[
@@ -39,31 +29,23 @@ var_dump($_SESSION[$key]);
   </informalexample>
  </para>
  <para>
-  It is also possible to <emphasis>cancel</emphasis> the currently in-progress file
-  upload, by setting the <literal>$_SESSION[$key]["cancel_upload"]</literal> key to
-  &true;.
-  When uploading multiple files in the same request, this will only cancel the
-  currently in-progress file upload, and pending file uploads, but will not
-  remove successfully completed uploads.
-  When a upload is cancelled like this, the <literal>error</literal> key in
-  <varname>$_FILES</varname> array will be set to
-  <constant>UPLOAD_ERR_EXTENSION</constant>.
+  通过将<literal>$_SESSION[$key]["cancel_upload"]</literal>设置为&true;，还可以取消一个正在处理中的文件上传。
+  当在同一个请求中上传多个文件，它仅会取消当前正在处理的文件上传和未处理的文件上传，但是不会移除那些已经完成的上传。
+  当一个上传请求被这么取消时，<varname>$_FILES</varname>中的<literal>error</literal>将会被设置为
+  <constant>UPLOAD_ERR_EXTENSION</constant>。
  </para>
  <para>
-  The
   <link linkend="ini.session.upload-progress.freq">session.upload_progress.freq</link>
-  and
+  和
   <link linkend="ini.session.upload-progress.min-freq">session.upload_progress.min_freq</link>
-  INI options control how frequent the upload progress information should be
-  recalculated.
-  With a reasonable amount for these two settings, the overhead of this
-  feature is almost non-existing
+  INI选项控制了上传进度信息应该多久被重新计算一次。
+  通过合理设置这两个选项的值，这个功能的开销几乎可以忽略不计。
  </para>
  <para>
   <example>
-   <title>Example information</title>
+   <title>样例信息</title>
    <para>
-    Example of the structure of progress upload array.
+    一个上传进度数组的结构的例子
    </para>
    <programlisting role="html" xml:id="session.upload-progress.example-form">
 <![CDATA[
@@ -76,7 +58,7 @@ var_dump($_SESSION[$key]);
 ]]>
    </programlisting>
    <para>
-    The data stored in the session will look like this:
+    在session中存放的数据看上去是这样子的：
    </para>
    <programlisting role="php" xml:id="session.upload-progress.example-array">
 <![CDATA[
