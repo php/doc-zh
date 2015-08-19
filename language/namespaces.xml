@@ -8,6 +8,7 @@
 
  <sect1 xml:id="language.namespaces.rationale">
   <title>命名空间概述</title>
+  <?phpdoc print-version-for="namespaces"?>
   <simpara>
    什么是命名空间？从广义上来说，命名空间是一种封装事物的方法。在很多地方都可以见到这种抽象概念。例如，在操作系统中目录用来将相关文件分组，对于目录中的文件来说，它就扮演了命名空间的角色。具体举个例子，文件
    <literal>foo.txt</literal> 可以同时在目录<literal>/home/greg</literal> 和
@@ -18,9 +19,6 @@
   </simpara>
   <simpara>
    在PHP中，命名空间用来解决在编写类库或应用程序时创建可重用的代码如类或函数时碰到的两类问题：
-   In the PHP world, namespaces are designed to solve two problems that authors
-   of libraries and applications encounter when creating re-usable code elements
-   such as classes or functions:
   </simpara>
   <para>
    <orderedlist>
@@ -64,19 +62,22 @@ echo constant($d); // 参考 "命名空间和动态语言特征" 小节
     ]]>
    </programlisting>
   </example>
-  <simpara>
-   PHP 在 5.3.0 以后的版本开始支持命名空间。
-  </simpara>
+  <note>
+   <para>
+    名为<literal>PHP</literal>或<literal>php</literal>的命名空间，以及以这些名字开头的命名空间（例如<literal>PHP\Classes</literal>）被保留用作语言内核使用，而不应该在用户空间的代码中使用。
+   </para>
+  </note>
  </sect1>
 
  <sect1 xml:id="language.namespaces.definition">
   <title>定义命名空间</title>
+  <?phpdoc print-version-for="namespaces"?>
   <para>
-   虽然任意合法的PHP代码都可以包含在命名空间中，但只有三种类型的代码受命名空间的影响，它们是：类，函数和常量。
+   虽然任意合法的PHP代码都可以包含在命名空间中，但只有以下类型的代码受命名空间的影响，它们是：类（包括抽象类和traits）、接口、函数和常量。
   </para>
   <para>
    命名空间通过关键字<literal>namespace</literal>
-   来声明。如果一个文件中包含命名空间，它必须在其它所有代码之前声明命名空间。
+   来声明。如果一个文件中包含命名空间，它必须在其它所有代码之前声明命名空间，除了一个以外：<xref linkend="control-structures.declare" />关键字。
    <example>
     <title>声明单个命名空间</title>
     <programlisting role="php">
@@ -113,6 +114,7 @@ namespace MyProject; // 致命错误 -　命名空间必须是程序脚本的第
  </sect1>
  <sect1 xml:id="language.namespaces.nested">
   <title>定义子命名空间</title>
+  <?phpdoc print-version-for="namespaces"?>
   <para>
    与目录和文件的关系很象，PHP
    命名空间也允许指定层次化的命名空间的名称。因此，命名空间的名字可以使用分层次的方式定义：
@@ -133,11 +135,12 @@ function connect() { /* ... */  }
    </example>
    上面的例子创建了常量<literal>MyProject\Sub\Level\CONNECT_OK</literal>，类
    <literal>MyProject\Sub\Level\Connection</literal>和函数
-   <literal>MyProject\Sub\Level\Connection</literal>。
+   <literal>MyProject\Sub\Level\connect</literal>。
   </para>
  </sect1>
  <sect1 xml:id="language.namespaces.definitionmultiple">
   <title>在同一个文件中定义多个命名空间</title>
+  <?phpdoc print-version-for="namespaces"?>
   <para>
    也可以在同一个文件中定义多个命名空间。在同一个文件中定义多个命名空间有两种语法形式。
   </para>
@@ -247,6 +250,7 @@ echo MyProject\Connection::start();
  </sect1>
  <sect1 xml:id="language.namespaces.basics">
   <title>使用命名空间：基础</title>
+  <?phpdoc print-version-for="namespaces"?>
   <para>
    在讨论如何使用命名空间之前，必须了解 PHP
    是如何知道要使用哪一个命名空间中的元素的。可以将 PHP 
@@ -389,6 +393,7 @@ $c = new \Exception('error'); // 实例化全局类 Exception
  </sect1>
  <sect1 xml:id="language.namespaces.dynamic">
   <title>命名空间和动态语言特征</title>
+  <?phpdoc print-version-for="namespaces"?>
   <para>
    PHP 命名空间的实现受到其语言自身的动态特征的影响。因此，如果要将下面的代码转换到命名空间中：
    <example>
@@ -469,6 +474,7 @@ echo constant('namespacename\constname'), "\n"; // also prints namespaced
  </sect1>
  <sect1 xml:id="language.namespaces.nsconstants">
   <title>namespace关键字和__NAMESPACE__常量</title>
+  <?phpdoc print-version-for="namespaces"?>
   <para>
    PHP支持两种抽象的访问当前命名空间内部元素的方法，<constant>__NAMESPACE__</constant>
    魔术常量和<literal>namespace</literal>关键字。
@@ -528,7 +534,7 @@ namespace MyProject;
 
 use blah\blah as mine; // see "Using namespaces: importing/aliasing"
 
-blah\mine(); // calls function MyProject\blah\mine()
+blah\mine(); // calls function blah\blah\mine()
 namespace\blah\mine(); // calls function MyProject\blah\mine()
 
 namespace\func(); // calls function MyProject\func()
@@ -559,16 +565,16 @@ $b = namespace\CONSTANT; // assigns value of constant CONSTANT to $b
  </sect1>
  <sect1 xml:id="language.namespaces.importing">
   <title>使用命名空间：别名/导入</title>
+  <?phpdoc print-version-for="namespaces"?>
   <para>
    允许通过别名引用或导入外部的完全限定名称，是命名空间的一个重要特征。这有点类似于在类
    unix 文件系统中可以创建对其它的文件或目录的符号连接。
   </para>
   <para>
-   PHP 命名空间支持
-   有两种使用别名或导入方式：为类名称使用别名，或为命名空间名称使用别名。注意PHP不支持导入函数或常量。
+   所有支持命名空间的PHP版本支持三种别名或导入方式：为类名称使用别名、为接口使用别名或为命名空间名称使用别名。PHP 5.6开始允许导入函数或常量或者为它们设置别名。
   </para>
   <para>
-   在PHP中，别名是通过操作符 <literal>use</literal> 来实现的.  下面是一个使用所有可能的三种导入方式的例子：
+   在PHP中，别名是通过操作符 <literal>use</literal> 来实现的.  下面是一个使用所有可能的五种导入方式的例子：
    <example>
     <title>使用use操作符导入/使用别名</title>
     <programlisting role="php">
@@ -581,25 +587,31 @@ use My\Full\Classname as Another;
 use My\Full\NSname;
 
 // 导入一个全局类
-use \ArrayObject;
+use ArrayObject;
+
+// importing a function (PHP 5.6+)
+use function My\Full\functionName;
+
+// aliasing a function (PHP 5.6+)
+use function My\Full\functionName as func;
+
+// importing a constant (PHP 5.6+)
+use const My\Full\CONSTANT;
 
 $obj = new namespace\Another; // 实例化 foo\Another 对象
 $obj = new Another; // 实例化 My\Full\Classname　对象
 NSname\subns\func(); // 调用函数 My\Full\NSname\subns\func
 $a = new ArrayObject(array(1)); // 实例化 ArrayObject 对象
 // 如果不使用 "use \ArrayObject" ，则实例化一个 foo\ArrayObject 对象
+func(); // calls function My\Full\functionName
+echo CONSTANT; // echoes the value of My\Full\CONSTANT
 ?>
 ]]>
     </programlisting>
    </example>
    注意对命名空间中的名称（包含命名空间分隔符的完全限定名称如 
    <literal>Foo\Bar</literal>以及相对的不包含命名空间分隔符的全局名称如 
-   <literal>FooBar</literal>）来说，前导的反斜杠是不必要的也不允许有反斜杠，因为导入的名称必须是完全限定的，不会根据当前的命名空间作相对解析。
-   Note that for namespaced names (fully qualified namespace names containing
-   namespace separator, such as <literal>Foo\Bar</literal> as opposed to global names that
-   do not, such as <literal>FooBar</literal>), the leading backslash is unnecessary and not
-   allowed, as import names
-   must be fully qualified, and are not processed relative to the current namespace.
+   <literal>FooBar</literal>）来说，前导的反斜杠是不必要的也不推荐的，因为导入的名称必须是完全限定的，不会根据当前的命名空间作相对解析。
   </para>
   <para>
    为了简化操作，PHP还支持在一行中使用多个use语句
@@ -619,8 +631,6 @@ NSname\subns\func(); // 调用函数 My\Full\NSname\subns\func
   </para>
   <para>
    导入操作是在编译执行的，但动态的类名称、函数名称或常量名称则不是。
-   Importing is performed at compile-time, and so does not affect dynamic class, function
-   or constant names.
    <example>
     <title>导入和动态名称</title>
     <programlisting role="php">
@@ -654,9 +664,46 @@ $obj = new \Another\thing; // instantiates object of class Another\thing
     </programlisting>
    </example>
   </para>
+  <sect2 xml:id="language.namespaces.importing.scope">
+   <title>Scoping rules for importing</title>
+   <para>
+    The <literal>use</literal> keyword must be declared in the 
+    outermost scope of a file (the global scope) or inside namespace 
+    declarations. This is because the importing is done at compile 
+    time and not runtime, so it cannot be block scoped. The following 
+    example will show an illegal use of the <literal>use</literal> 
+    keyword:
+   </para>
+   <para>
+    <example>
+     <title>Illegal importing rule</title>
+     <programlisting role="php">
+<![CDATA[
+<?php
+namespace Languages;
+
+class Greenlandic
+{
+    use Languages\Danish;
+
+    ...
+}
+?>
+]]>
+     </programlisting>
+    </example>
+   </para>
+   <note>
+    <para>
+     Importing rules are per file basis, meaning included files will 
+     <emphasis>NOT</emphasis> inherit the parent file's importing rules.
+    </para>
+   </note>
+  </sect2>
  </sect1>
  <sect1 xml:id="language.namespaces.global">
   <title>全局空间</title>
+  <?phpdoc print-version-for="namespaces"?>
   <para>
    如果没有定义任何命名空间，所有的类与函数的定义都是在全局空间，与 
    PHP 引入命名空间概念前一样。在名称前加上前缀 <literal>\</literal>
@@ -682,6 +729,7 @@ function fopen() {
  </sect1>
  <sect1 xml:id="language.namespaces.fallback">
   <title>使用命名空间：后备全局函数/常量</title>
+  <?phpdoc print-version-for="namespaces"?>
   <para>
    在一个命名空间中，当 PHP 
    遇到一个非限定的类、函数或常量名称时，它使用不同的优先策略来解析该名称。类名称总是解析到当前命名空间中的名称。因此在访问系统内部或不包含在命名空间中的类名称时，必须使用完全限定名称，例如：
@@ -738,6 +786,7 @@ if (is_array('hi')) { // 输出 "is not array"
 
  <sect1 xml:id="language.namespaces.rules">
   <title>名称解析规则</title>
+  <?phpdoc print-version-for="namespaces"?>
   <para>
    在说明名称解析规则之前，我们先看一些重要的定义：
    <variablelist>
@@ -925,6 +974,7 @@ A\B::foo();   // 调用命名空间 "A\A" 中定义的类 "B" 的 "foo" 方法
  </sect1>
  <sect1 xml:id="language.namespaces.faq">
   <title>FAQ: things you need to know about namespaces</title>
+  <?phpdoc print-version-for="namespaces"?>
   <para>
    This FAQ is split into two sections: common questions, and some specifics of
    implementation that are helpful to understand fully.
