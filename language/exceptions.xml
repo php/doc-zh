@@ -1,117 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: Altair Status: ready -->
-<!-- CREDITS: lm92 -->
  <chapter xml:id="language.exceptions" xmlns="http://docbook.org/ns/docbook">
   <title>异常处理</title>
-
-  <para>
-   PHP 5 添加了类似于其它语言的异常处理模块。在 PHP 代码中所产生的异常可被
-   <literal>throw</literal> 语句抛出并被 <literal>catch</literal>
-   语句捕获。需要进行异常处理的代码都必须放入 <literal>try</literal>
-   代码块内，以便捕获可能存在的异常。每一个 <literal>try</literal>
-   至少要有一个与之对应的 <literal>catch</literal>。使用多个
-   <literal>catch</literal> 可以捕获不同的类所产生的异常。当
-   <literal>try</literal> 代码块不再抛出异常或者找不到 <literal>catch</literal>
-   能匹配所抛出的异常时，PHP 代码就会在跳转到最后一个 catch
-   的后面继续执行。当然，PHP 允许在 <literal>catch</literal>
-   代码块内再次抛出（<literal>throw</literal>）异常。
-  </para>
-  <para>
-   当一个异常被抛出时，其后（译者注：指抛出异常时所在的代码块）的代码将不会继续执行，而 PHP
-   就会尝试查找第一个能与之匹配的 <literal>catch</literal>。如果一个异常没有被捕获，而且又没用使用
-   <function>set_exception_handler</function> 作相应的处理的话，那么 PHP
-   将会产生一个严重的错误，并且输出
-   <literal>Uncaught Exception ...</literal> （未捕获异常）的提示信息。
-  </para>
-  <note>
-   <para>
-    PHP 内部函数主要使用<link 
-    linkend="ini.error-reporting">错误报告</link>, 只有现代<link 
-    linkend="language.oop5">面向对象</link>的扩展才使用异常。但错误可以很容易的通过<link 
-    linkend="class.errorexception">ErrorException</link>转换为异常。
-   </para>
-  </note>
-  <tip>
-   <para>
-    <link linkend="intro.spl">PHP标准库 (SPL)</link> 提供了许多内建的异常类。
-   </para>
-  </tip>  
-   <example>
-    <title>抛出一个异常</title>
-    <programlisting role="php">
-<![CDATA[
-<![CDATA[
-<?php
-function inverse($x) {
-    if (!$x) {
-        throw new Exception('Division by zero.');
-    }
-    else return 1/$x;
-}
-
-try {
-    echo inverse(5) . "\n";
-    echo inverse(0) . "\n";
-} catch (Exception $e) {
-    echo 'Caught exception: ',  $e->getMessage(), "\n";
-}
-
-// Continue execution
-echo 'Hello World';
-?>
-]]>
-    </programlisting>
-    &example.outputs;
-    <screen>
-<![CDATA[
-0.2
-Caught exception: Division by zero.
-Hello World
-]]>
-    </screen>
-   </example>
-
-   <example>
-    <title>嵌套的异常</title>
-    <programlisting role="php">
-<![CDATA[
-<?php
-
-class MyException extends Exception { }
-
-class Test {
-    public function testing() {
-        try {
-            try {
-                throw new MyException('foo!');
-            } catch (MyException $e) {
-                /* rethrow it */
-                throw $e;
-            }
-        } catch (Exception $e) {
-            var_dump($e->getMessage());
-        }
-    }
-}
-
-$foo = new Test;
-$foo->testing();
-
-?>
-]]>
-    </programlisting>
-    &example.outputs;
-    <screen>
-<![CDATA[
-string(4) "foo!"
-]]>
-    </screen>
-   </example>
-
+   
   <sect1 xml:id="language.exceptions.extending">
-   <title>扩展 PHP 内置的异常处理类</title>
+   <title>扩展（extend） PHP 内置的异常处理类</title>
    <para>
     用户可以用自定义的异常处理类来扩展 PHP
     内置的异常处理类。以下的代码说明了在内置的异常处理类中，哪些属性和方法在子类中是可访问和可继承的。译者注：以下这段代码只为说明内置异常处理类的结构，它并不是一段有实际意义的可用代码。
@@ -124,21 +17,27 @@ string(4) "foo!"
 class Exception
 {
     protected $message = 'Unknown exception';   // 异常信息
+    private   $string;                          // __toString cache
     protected $code = 0;                        // 用户自定义异常代码
     protected $file;                            // 发生异常的文件名
     protected $line;                            // 发生异常的代码行号
+    private   $trace;                           // backtrace
+    private   $previous;                        // previous exception if nested exception
 
-    function __construct($message = null, $code = 0);
+    public function __construct($message = null, $code = 0, Exception $previous = null);
 
-    final function getMessage();                // 返回异常信息
-    final function getCode();                   // 返回异常代码
-    final function getFile();                   // 返回发生异常的文件名
-    final function getLine();                   // 返回发生异常的代码行号
-    final function getTrace();                  // backtrace() 数组
-    final function getTraceAsString();          // 已格成化成字符串的 getTrace() 信息
+    final private function __clone();           // Inhibits cloning of exceptions.
 
-    /* 可重载的方法 */
-    function __toString();                       // 可输出的字符串
+    final public  function getMessage();        // 返回异常信息
+    final public  function getCode();           // 返回异常代码
+    final public  function getFile();           // 返回发生异常的文件名
+    final public  function getLine();           // 返回发生异常的代码行号
+    final public  function getTrace();          // backtrace() 数组
+    final public  function getPrevious();       // 之前的 exception
+    final public  function getTraceAsString();  // 已格成化成字符串的 getTrace() 信息
+
+    // Overrideable
+    public function __toString();               // 可输出的字符串
 }
 ?>
 ]]>
@@ -151,8 +50,14 @@ class Exception
     来检查所有的变量是否已被赋值。当对象要输出字符串的时候，可以重载
     <link linkend="language.oop5.magic">__toString()</link> 并自定义输出的样式。
    </para>
+   <note>
+    <para>
+     Exception 对象不能被复制。尝试对 Exception <link
+     linkend="language.oop5.cloning">对象复制</link> 会导致一个 <constant>E_ERROR</constant> 级别的错误。
+    </para>
+   </note>
    <example>
-    <title>扩展 PHP 内置的异常处理类</title>
+    <title>扩展 PHP 内置的异常处理类 (PHP 5.3.0+)</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -162,11 +67,11 @@ class Exception
 class MyException extends Exception
 {
     // 重定义构造器使 message 变为必须被指定的属性
-    public function __construct($message, $code = 0) {
+    public function __construct($message, $code = 0, Exception $previous = null) {
         // 自定义的代码
 
         // 确保所有变量都被正确赋值
-        parent::__construct($message, $code);
+        parent::__construct($message, $code, $previous);
     }
 
     // 自定义字符串输出的样式
@@ -175,7 +80,7 @@ class MyException extends Exception
     }
 
     public function customFunction() {
-        echo "A Custom function for this type of exception\n";
+        echo "A custom function for this type of exception\n";
     }
 }
 
@@ -201,10 +106,10 @@ class TestException
 
             case self::THROW_DEFAULT:
                 // 抛出默认的异常
-                throw new Exception('2 isnt allowed as a parameter', 6);
+                throw new Exception('2 is not allowed as a parameter', 6);
                 break;
 
-            default:
+            default: 
                 // 没有异常的情况下，创建一个对象
                 $this->var = $avalue;
                 break;
@@ -223,15 +128,16 @@ try {
     echo "Caught Default Exception\n", $e;
 }
 
-// 执行后续代码
-var_dump($o);
+// Continue execution
+var_dump($o); // Null
 echo "\n\n";
 
 
 // 例子 2
 try {
     $o = new TestException(TestException::THROW_DEFAULT);
-} catch (MyException $e) {      // 不能匹配异常的种类，被忽略
+} catch (MyException $e) {      //  不能匹配异常的种类，被忽略
+
     echo "Caught my exception\n", $e;
     $e->customFunction();
 } catch (Exception $e) {        // 捕获异常
@@ -239,7 +145,7 @@ try {
 }
 
 // 执行后续代码
-var_dump($o);
+var_dump($o); // Null
 echo "\n\n";
 
 
@@ -251,7 +157,7 @@ try {
 }
 
 // 执行后续代码
-var_dump($o);
+var_dump($o); // Null
 echo "\n\n";
 
 
@@ -263,16 +169,234 @@ try {
 }
 
 // 执行后续代码
-var_dump($o);
+var_dump($o); // TestException
 echo "\n\n";
 ?>
 ]]>
     </programlisting>
+    <note>
+     <para>
+      Versions of PHP 5, prior to PHP 5.3.0 do not support nesting of exceptions.
+      The following code fragment can be used as a replacement MyException class
+      if you wish to run this example.
+     </para>
+     <programlisting role="php">
+<![CDATA[
+<?php
+/**
+ * Define a custom exception class
+ */
+class MyException extends Exception
+{
+    // Redefine the exception so message isn't optional
+    public function __construct($message, $code = 0) {
+        // some code
+    
+        // make sure everything is assigned properly
+        parent::__construct($message, $code);
+    }
+
+    // custom string representation of object
+    public function __toString() {
+        return __CLASS__ . ": [{$this->code}]: {$this->message}\n";
+    }
+
+    public function customFunction() {
+        echo "A custom function for this type of exception\n";
+    }
+}
+?>
+]]>
+     </programlisting>
+    </note>
    </example>
   </sect1>
 
- </chapter>
+  <simplesect xml:id="language.exceptions.introduction">
+   <para>
+    PHP 5 has an exception model similar to that of other programming
+    languages.  An exception can be &throw;n, and caught ("&catch;ed") within
+    PHP. Code may be surrounded in a &try; block, to facilitate the catching
+    of potential exceptions. Each &try; must have at least one corresponding
+    &catch; or &finally; block.
+   </para>
 
+   <para>
+    The thrown object must be an instance of the
+    <classname>Exception</classname> class or a subclass of
+    <classname>Exception</classname>. Trying to throw an object that is not
+    will result in a PHP Fatal Error.
+   </para>
+  </simplesect>
+
+  <simplesect xml:id="language.exceptions.catch">
+   <title><literal>catch</literal></title>
+   <para>
+    Multiple &catch; blocks can be used to catch different classes of
+    exceptions. Normal execution (when no exception is thrown within the &try;
+    block) will continue after that last &catch; block defined in sequence.
+    Exceptions can be &throw;n (or re-thrown) within a &catch; block.
+   </para>
+   <para>
+    When an exception is thrown, code following the statement will not be
+    executed, and PHP will attempt to find the first matching &catch; block.
+    If an exception is not caught, a PHP Fatal Error will be issued with an
+    "<literal>Uncaught Exception ...</literal>" message, unless a handler has
+    been defined with <function>set_exception_handler</function>.
+   </para>
+  </simplesect>
+
+  <simplesect xml:id="language.exceptions.finally">
+   <title><literal>finally</literal></title>
+   <para>
+    In PHP 5.5 and later, a &finally; block may also be specified after or
+    instead of &catch; blocks. Code within the &finally; block will always be
+    executed after the &try; and &catch; blocks, regardless of whether an
+    exception has been thrown, and before normal execution resumes.
+   </para>
+  </simplesect>
+
+  <simplesect xml:id="language.exceptions.notes">
+   &reftitle.notes;
+
+   <note>
+    <para>
+     Internal PHP functions mainly use
+     <link linkend="ini.error-reporting">Error reporting</link>, only modern
+     <link linkend="language.oop5">Object oriented</link>
+     extensions use exceptions. However, errors can be simply translated to
+     exceptions with <link linkend="class.errorexception">ErrorException</link>.
+    </para>
+   </note>
+   <tip>
+    <para>
+     The <link linkend="intro.spl">Standard PHP Library (SPL)</link> provides
+     a good number of <link linkend="spl.exceptions">built-in
+     exceptions</link>.
+    </para>
+   </tip>
+  </simplesect>
+
+  <simplesect xml:id="language.exceptions.examples">
+   &reftitle.examples;
+
+   <example>
+    <title>Throwing an Exception</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+function inverse($x) {
+    if (!$x) {
+        throw new Exception('Division by zero.');
+    }
+    return 1/$x;
+}
+
+try {
+    echo inverse(5) . "\n";
+    echo inverse(0) . "\n";
+} catch (Exception $e) {
+    echo 'Caught exception: ',  $e->getMessage(), "\n";
+}
+
+// Continue execution
+echo "Hello World\n";
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+0.2
+Caught exception: Division by zero.
+Hello World
+]]>
+    </screen>
+   </example>
+   <example>
+    <title>Exception handling with a <literal>finally</literal> block</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+function inverse($x) {
+    if (!$x) {
+        throw new Exception('Division by zero.');
+    }
+    return 1/$x;
+}
+
+try {
+    echo inverse(5) . "\n";
+} catch (Exception $e) {
+    echo 'Caught exception: ',  $e->getMessage(), "\n";
+} finally {
+    echo "First finally.\n";
+}
+
+try {
+    echo inverse(0) . "\n";
+} catch (Exception $e) {
+    echo 'Caught exception: ',  $e->getMessage(), "\n";
+} finally {
+    echo "Second finally.\n";
+}
+
+// Continue execution
+echo "Hello World\n";
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+0.2
+First finally.
+Caught exception: Division by zero.
+Second finally.
+Hello World
+]]>
+    </screen>
+   </example>
+   <example>
+    <title>Nested Exception</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+
+class MyException extends Exception { }
+
+class Test {
+    public function testing() {
+        try {
+            try {
+                throw new MyException('foo!');
+            } catch (MyException $e) {
+                // rethrow it
+                throw $e;
+            }
+        } catch (Exception $e) {
+            var_dump($e->getMessage());
+        }
+    }
+}
+
+$foo = new Test;
+$foo->testing();
+
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+string(4) "foo!"
+]]>
+    </screen>
+   </example>
+  </simplesect>
+
+ </chapter>
+ 
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
