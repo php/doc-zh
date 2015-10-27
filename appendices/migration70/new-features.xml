@@ -127,13 +127,10 @@ $username = $_GET['user'] ?? $_POST['user'] ?? 'nobody';
  </sect2>
 
  <sect2 xml:id="migration70.new-features.spaceship-op">
-  <title>Spaceship operator</title>
+  <title>太空船操作符（组合比较符）</title>
   <para>
-   The spaceship operator is used for comparing two expressions. It returns an
-   <type>integer</type> less than, equal to, or greater than zero when
-   <varname>$a</varname> is respectively less than, equal to, or greater than
-   <varname>$b</varname>. Comparisons are performed according to PHP's usual
-   <link linkend="types.comparisons">type comparison rules</link>.
+   太空船操作符用于比较两个表达式。当<varname>$a</varname>大于、等于或小于<varname>$b</varname>时它分别返回-1、0或1。
+   比较的原则是沿用 PHP 的<link linkend="types.comparisons">常规比较规则</link>进行的。
   </para>
   <informalexample>
    <programlisting role="php">
@@ -163,12 +160,11 @@ echo "b" <=> "a"; // 1
  </sect2>
 
  <sect2 xml:id="migration70.new-features.define-array">
-  <title>Constant arrays using <function>define</function></title>
+  <title>通过 <function>define</function> 定义常量数组 </title>
 
   <para>
-   <type>Array</type> constants can now be defined with
-   <function>define</function>. In PHP 5.6, they could only be defined with
-   &const;.
+   <type>Array</type> 类型的常量现在可以通过
+   define<function>define</function> 来定义。在 PHP5.6 中仅能通过 &const; 定义。
   </para>
 
   <informalexample>
@@ -189,12 +185,10 @@ echo ANIMALS[1]; // outputs "cat"
  </sect2>
 
  <sect2 xml:id="migration70.new-features.anonymous-classes">
-  <title>Anonymous classes</title>
+  <title>匿名类</title>
 
   <para>
-   Support for anonymous classes has been added via <literal>new
-   class</literal>. These can be used in place of full class definitions for
-   throwaway objects:
+   现在支持通过<literal>new class</literal> 来实例化一个匿名类，这可以用来替代一些“用后即焚”的完整类定义。
   </para>
 
   <informalexample>
@@ -238,18 +232,17 @@ object(class@anonymous)#2 (0) {
   </informalexample>
 
   <para>
-   Full documentation can be found in the 
-   <link linkend="language.oop5.anonymous">anonymous class reference</link>.
+   详细文档可以参考
+   <link linkend="language.oop5.anonymous">匿名类</link>.
   </para>
  </sect2>
 
  <sect2 xml:id="migration70.new-features.unicode-codepoint-escape-syntax">
-  <title>Unicode codepoint escape syntax</title>
+  <title>Unicode codepoint 转译语法</title>
 
   <para>
-   This takes a Unicode codepoint in hexadecimal form, and outputs that
-   codepoint in UTF-8 to a double-quoted string or a heredoc. Any valid
-   codepoint is accepted, with leading 0's being optional.
+   这接受一个以16进制形式的 Unicode codepoint，并打印出一个双引号或heredoc包围的 UTF-8 编码格式的字符串。
+   可以接受任何有效的 codepoint，并且开头的 0 是可以省略的。
   </para>
 
   <informalexample>
@@ -275,8 +268,7 @@ echo "\u{9999}";
   <title><methodname>Closure::call</methodname></title>
 
   <para>
-   <methodname>Closure::call</methodname> is a more performant, shorthand way
-   of temporarily binding an object scope to a closure and invoking it.
+   <methodname>Closure::call</methodname> 现在有着更好的性能，简短干练的暂时绑定一个方法到对象上闭包并调用它。
   </para>
 
   <informalexample>
@@ -305,12 +297,10 @@ echo $getX->call(new A);
   </informalexample>
  </sect2>
  <sect2 xml:id="migration70.new-features.filtered-unserialize">
-  <title>Filtered <function>unserialize</function></title>
+  <title>为<function>unserialize</function>提供过滤</title>
 
   <para>
-   This feature seeks to provide better security when unserializing objects on
-   untrusted data. It prevents possible code injections by enabling the
-   developer to whitelist classes that can be unserialized.
+   这个特性旨在提供更安全的方式解包不可靠的数据。它通过白名单的方式来防止潜在的代码注入。
   </para>
 
   <informalexample>
@@ -335,9 +325,7 @@ $data = unserialize($foo, ["allowed_classes" => true]);
   <title><classname>IntlChar</classname></title>
 
   <para>
-   The new <classname>IntlChar</classname> class seeks to expose additional
-   ICU functionality. The class itself defines a number of static methods and
-   constants that can be used to manipulate unicode characters.
+   新增加的 <classname>IntlChar</classname> 类旨在暴露出更多的 ICU 功能。这个类自身定义了许多静态方法用于操作多字符集的 unicode 字符。
   </para>
 
   <informalexample>
@@ -361,49 +349,32 @@ bool(true)
   </informalexample>
 
   <para>
-   In order to use this class, the <link linkend="book.intl">Intl</link> extension must be installed.
+   若要使用此类，请先安装<link linkend="book.intl">Intl</link>扩展
   </para>
  </sect2>
 
  <sect2 xml:id="migration70.new-features.expectations">
-  <title>Expectations</title>
+  <title>预期</title>
 
   <para>
-   Expectations are backwards compatible enhancement to the older
-   <function>assert</function> function. They enable for zero-cost assertions
-   in production code, and provide the ability to throw custom exceptions on
-   error.
+   <link linkend="function.assert.expectations">预期</link>是向后兼用并增强之前的 <function>assert</function> 的方法。
+   它使得在生产环境中启用断言为零成本，并且提供当断言失败时抛出特定异常的能力。
   </para>
 
-  <para>
-   <function>assert</function> has the following prototype:
-  </para>
-
-  <informalexample>
-   <programlisting>
-<![CDATA[
-void assert (mixed $expression [, mixed $message]);
-]]>
-   </programlisting>
-  </informalexample>
-
-  <para>
-   As with the old API, if <varname>$expression</varname> is a string, then it will be
-   evaluated. If the first argument is falsy, then the assertion fails. The
-   second argument can either be a plain string (causing an AssertionException
-   to be triggered), or a custom exception object containing an error message.
+   <para>
+    老版本的API出于兼容目的将继续被维护，<function>assert</function>现在是一个语言结构，它允许第一个参数是一个表达式，而不仅仅是一个待计算的 <type>string</type>或一个待测试的<type>boolean</type>。
   </para>
 
   <informalexample>
    <programlisting role="php">
 <![CDATA[
 <?php
-
 ini_set('assert.exception', 1);
 
 class CustomError extends AssertionError {}
 
 assert(false, new CustomError('Some error message'));
+?>
 ]]>
    </programlisting>
    &example.outputs;
@@ -415,32 +386,16 @@ Fatal error: Uncaught CustomError: Some error message
   </informalexample>
 
   <para>
-   With this feature comes two PHP.ini settings (along with their default values):
-    - zend.assertions = 1
-    - assert.exception = 0
-  </para>
-
-  <para>
-   zend.assertions has three values:
-    - 1 = generate and execute code (development mode)
-    - 0 = generate code and jump around at it at runtime
-    - -1 = don't generate any code (zero-cost, production mode)
-  </para>
-
-  <para>
-   assert.exception means that an exception is thrown when an assertion fails.
-   This is switched off by default to remain compatible with the old
-   <function>assert</function> function.
+   关于这个特性的完整说明，包括如何在开发和生产环境中配置它，可以在<function>assert</function>的
+   <link linkend="function.assert.expectations">expectations section</link>章节找到。
   </para>
  </sect2>
  <sect2 xml:id="migration70.new-features.group-use-declarations">
-  <title>Group <literal>use</literal> Declarations</title>
+  <title>Group <literal>use</literal> declarations</title>
 
   <para>
-   This gives the ability to group multiple <literal>use</literal> declarations
-   according to the parent namespace. This seeks to remove code verbosity when
-   importing multiple classes, functions, or constants that come under the same
-   namespace.
+  从同一 &namespace; 导入的类、函数和常量现在可以通过单个 &use.namespace; 语句
+  一次性导入了。
   </para>
 
   <informalexample>
@@ -465,6 +420,7 @@ use const some\namespace\ConstC;
 use some\namespace\{ClassA, ClassB, ClassC as C};
 use function some\namespace\{fn_a, fn_b, fn_c};
 use const some\namespace\{ConstA, ConstB, ConstC};
+?>
 ]]>
    </programlisting>
   </informalexample>
@@ -520,17 +476,13 @@ echo $gen->getReturn(), PHP_EOL;
   </para>
  </sect2>
  <sect2 xml:id="migration70.new-features.generator-delegation">
-  <title>Generator Delegation</title>
+  <title>Generator delegation</title>
 
   <para>
-   Generator delegation builds upon the ability of being able to return
-   expressions from generators. It does this by using an new syntax of
-   <literal>yield from &lt;expr&gt;</literal>, where &lt;expr&gt; can be any
-   <literal>Traversable</literal> <type>object</type> or <type>array</type>.
-   This &lt;expr&gt; will be advanced until no longer valid, and then execution
-   will continue in the calling generator. This feature enables
-   <literal>yield</literal> statements to be broken down into smaller
-   operations, thereby promoting cleaner code that has greater reusability.
+   Generators can now delegate to another generator,
+   <classname>Traversable</classname> object or <type>array</type>
+   automatically, without needing to write boilerplate in the outermost
+   generator by using the &yield.from; construct.
   </para>
 
   <informalexample>
@@ -543,24 +495,21 @@ function gen()
     yield 1;
     yield 2;
 
-    return yield from gen2();
+    yield from gen2();
 }
 
 function gen2()
 {
     yield 3;
-
-    return 4;
+    yield 4;
 }
 
-$gen = gen();
-
-foreach ($gen as $val)
+foreach (gen() as $val)
 {
     echo $val, PHP_EOL;
 }
 
-echo $gen->getReturn();
+?>
 ]]>
    </programlisting>
    &example.outputs;
@@ -575,11 +524,11 @@ echo $gen->getReturn();
   </informalexample>
  </sect2>
  <sect2 xml:id="migration70.new-features.intdiv">
-  <title>Integer Division with <function>intdiv</function></title>
+  <title>Integer division with <function>intdiv</function></title>
 
   <para>
-   The <function>intdiv</function> function has been introduced to handle
-   division where an integer is to be returned.
+   The new <function>intdiv</function> function performs an integer division
+   of its operands and returns it.
   </para>
 
   <informalexample>
@@ -588,6 +537,7 @@ echo $gen->getReturn();
 <?php
 
 var_dump(intdiv(10, 3));
+?>
 ]]>
    </programlisting>
    &example.outputs;
@@ -598,41 +548,56 @@ int(3)
    </screen>
   </informalexample>
  </sect2>
- <sect2 xml:id="migration70.new-features.session-start-options">
-  <title><function>session_start</function> Options</title>
+  <sect2 xml:id="migration70.new-features.session-options">
+  <title>Session options</title>
 
   <para>
-   This feature gives the ability to pass in an array of options to the
-   <function>session_start</function> function. This is used to set
-   session-based php.ini options:
+   <function>session_start</function> now accepts an <type>array</type> of
+   options that override the
+   <link linkend="session.configuration">session configuration directives</link>
+   normally set in php.ini.
+  </para>
+
+  <para>
+   These options have also been expanded to support
+   <link linkend="ini.session.lazy-write">session.lazy_write</link>, which is
+   on by default and causes PHP to only overwrite any session file if the
+   session data has changed, and <literal>read_and_close</literal>, which is
+   an option that can only be passed to <function>session_start</function> to
+   indicate that the session data should be read and then the session should
+   immediately be closed unchanged.
+  </para>
+
+  <para>
+   For example, to set
+   <link linkend="ini.session.cache-limiter">session.cache_limiter</link> to
+   <literal>private</literal> and immediately close the session after reading
+   it:
   </para>
 
   <informalexample>
    <programlisting role="php">
 <![CDATA[
 <?php
-
-session_start(['cache_limiter' => 'private']); // sets the session.cache_limiter option to private
+session_start([
+    'cache_limiter' => 'private',
+    'read_and_close' => true,
+]);
+?>
 ]]>
    </programlisting>
   </informalexample>
-
-  <para>
-   This feature also introduces a new php.ini setting (session.lazy_write)
-   that is, by default, set to true and means that session data is only
-   rewritten if it changes.
-  </para>
  </sect2>
+
  <sect2 xml:id="migration70.new-features.preg-repace-callback-array-function">
-  <title><function>preg_replace_callback_array</function> Function</title>
+  <title><function>preg_replace_callback_array</function></title>
 
   <para>
-   This new function enables code to be written more cleanly when using the
+   The new <function>preg_replace_callback_array</function> function enables
+   code to be written more cleanly when using the
    <function>preg_replace_callback</function> function. Prior to PHP 7,
    callbacks that needed to be executed per regular expression required the
-   callback function (second parameter of
-   <function>preg_replace_callback</function>) to be polluted with lots of
-   branching (a hacky method at best).
+   callback function to be polluted with lots of branching.
   </para>
 
   <para>
@@ -640,101 +605,15 @@ session_start(['cache_limiter' => 'private']); // sets the session.cache_limiter
    associative array, where the key is a regular expression and the value is a
    callback.
   </para>
-
-  <para>
-   Function Signature:
-  </para>
-
-  <programlisting>
-<![CDATA[
-string preg_replace_callback_array(array $regexesAndCallbacks, string $input);
-]]>
-  </programlisting>
-
-  <informalexample>
-   <programlisting role="php">
-<![CDATA[
-<?php
-
-$tokenStream = []; // [tokenName, lexeme] pairs
-
-$input = <<<'end'
-$a = 3; // variable initialisation
-end;
-
-// Pre PHP 7 code
-preg_replace_callback(
-    [
-        '~\$[a-z_][a-z\d_]*~i',
-        '~=~',
-        '~[\d]+~',
-        '~;~',
-        '~//.*~'
-    ],
-    function ($match) use (&$tokenStream) {
-        if (strpos($match[0], '$') === 0) {
-            $tokenStream[] = ['T_VARIABLE', $match[0]];
-        } elseif (strpos($match[0], '=') === 0) {
-            $tokenStream[] = ['T_ASSIGN', $match[0]];
-        } elseif (ctype_digit($match[0])) {
-            $tokenStream[] = ['T_NUM', $match[0]];
-        } elseif (strpos($match[0], ';') === 0) {
-            $tokenStream[] = ['T_TERMINATE_STMT', $match[0]];
-        } elseif (strpos($match[0], '//') === 0) {
-            $tokenStream[] = ['T_COMMENT', $match[0]];
-        }
-    },
-    $input
-);
-
-// PHP 7+ code
-preg_replace_callback_array(
-    [
-        '~\$[a-z_][a-z\d_]*~i' => function ($match) use (&$tokenStream) {
-            $tokenStream[] = ['T_VARIABLE', $match[0]];
-        },
-        '~=~' => function ($match) use (&$tokenStream) {
-            $tokenStream[] = ['T_ASSIGN', $match[0]];
-        },
-        '~[\d]+~' => function ($match) use (&$tokenStream) {
-            $tokenStream[] = ['T_NUM', $match[0]];
-        },
-        '~;~' => function ($match) use (&$tokenStream) {
-            $tokenStream[] = ['T_TERMINATE_STMT', $match[0]];
-        },
-        '~//.*~' => function ($match) use (&$tokenStream) {
-            $tokenStream[] = ['T_COMMENT', $match[0]];
-        }
-    ],
-    $input
-);
-]]>
-   </programlisting>
-  </informalexample>
  </sect2>
+
  <sect2 xml:id="migration70.new-features.csprng-functions">
   <title><link linkend="book.csprng">CSPRNG</link> Functions</title>
 
   <para>
-   This feature introduces two new functions for generating cryptographically
-   secure integers and strings. They expose simple APIs and are
-   platform-independent.
-  </para>
-
-  <para>
-   Function Signatures:
-  </para>
-
-  <programlisting>
-<![CDATA[
-string random_bytes(int length);
-int random_int(int min, int max);
-]]>
-  </programlisting>
-
-  <para>
-   Both functions will emit an E_WARNING and return <literal>false</literal> if
-   a source of sufficient randomness cannot be found.
+   Two new functions have been added to generate cryptographically secure
+   integers and strings in a cross platform way:
+   <function>random_bytes</function> and <function>random_int</function>.
   </para>
  </sect2>
 
@@ -745,6 +624,9 @@ int random_int(int min, int max);
   </title>
 
   <para>
+   Previously, <function>list</function> was not guaranteed to operate
+   correctly with objects implementing <classname>ArrayAccess</classname>.
+   This has been fixed.
   </para>
  </sect2>
 </sect1>
