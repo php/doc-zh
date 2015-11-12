@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 1d62341de374f80d87ff36c577d6bf6c5c7b4097 Maintainer: yuanyuqiang Status: ready -->
+<!-- EN-Revision: 22eec6c860e0e9c37334b14cd6aad2bb0199e011 Maintainer: yuanyuqiang Status: ready -->
 <!-- Reviewed: no -->
 
 <refentry xml:id="function.hash" xmlns="http://docbook.org/ns/docbook">
@@ -73,7 +73,7 @@
      <tbody>
       <row>
        <entry>5.4.0</entry>
-       <entry>tiger 算法使用大端（big-endian）字节序。</entry>
+       <entry>tiger 算法使用大端（big-endian）字节序。参见下面的示例。</entry>
       </row>
      </tbody>
     </tgroup>
@@ -97,6 +97,46 @@ echo hash('ripemd160', 'The quick brown fox jumped over the lazy dog.');
     <screen>
 <![CDATA[
 ec457d0a974c48d5685a7efa03d137dc8bbde7e3
+]]>
+    </screen>
+   </example>
+  </para>
+  <para>
+   <example>
+    <title>使用 PHP 5.4 或者更高版本计算 tiger 哈希值</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+function old_tiger($data = "", $width=192, $rounds = 3) {
+    return substr(
+        implode(
+            array_map(
+                function ($h) {
+                    return str_pad(bin2hex(strrev($h)), 16, "0");
+                },
+                str_split(hash("tiger192,$rounds", $data, true), 8)
+            )
+        ),
+        0, 48-(192-$width)/4
+    );
+}
+echo hash('tiger192,3', 'a-string'), PHP_EOL;
+echo old_tiger('a-string'), PHP_EOL;
+?>
+]]>
+    </programlisting>
+    &example.outputs.53;
+    <screen>
+<![CDATA[
+146a7492719b3564094efe7abbd40a7416fd900179d02773
+64359b7192746a14740ad4bb7afe4e097327d0790190fd16
+]]>
+    </screen>
+    &example.outputs.54;
+    <screen>
+<![CDATA[
+64359b7192746a14740ad4bb7afe4e097327d0790190fd16
+146a7492719b3564094efe7abbd40a7416fd900179d02773
 ]]>
     </screen>
    </example>
