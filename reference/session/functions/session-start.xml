@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: d53c79d392b1e9e9295ae33795b3f851983d12db Maintainer: yuanyuqiang Status: ready -->
+<!-- EN-Revision: d8849b5554a4b934cc8aacce047d8ec7b7cdec80 Maintainer: yuanyuqiang Status: ready -->
 <!-- Reviewed: no -->
 
 <refentry xmlns="http://docbook.org/ns/docbook" xml:id="function.session-start">
@@ -13,7 +13,7 @@
   &reftitle.description;
   <methodsynopsis>
    <type>bool</type><methodname>session_start</methodname>
-   <void/>
+   <methodparam choice="opt"><type>array</type><parameter>options</parameter><initializer>[]</initializer></methodparam>
   </methodsynopsis>
   <para>
    <function>session_start</function> 会创建新会话或者重用现有会话。
@@ -45,7 +45,28 @@
    例如，必须在开始会话之前调用 <literal>ob_gzhandler</literal> 函数完成注册。
   </para>
  </refsect1>
-
+ 
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <variablelist>
+   <varlistentry>
+    <term><parameter>options</parameter></term>
+    <listitem>
+     <para>
+      此参数是一个关联数组，如果提供，那么会用其中的项目覆盖 <link linkend="session.configuration">会话配置指示</link> 中的配置项。此数组中的键无需包含 <literal>session.</literal> 前缀。
+     </para>
+     <para>
+      除了常规的会话配置指示项，
+      还可以在此数组中包含 <literal>read_and_close</literal>
+      选项。如果将此选项的值设置为 &true;，
+      那么会话文件会在读取完毕之后马上关闭，
+      因此，可以在会话数据没有变动的时候，避免不必要的文件锁。
+     </para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+ </refsect1>
+ 
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
@@ -65,6 +86,12 @@
       </row>
      </thead>
      <tbody>
+      <row>
+       <entry>7.0.0</entry>
+       <entry>
+        新加 <parameter>options</parameter> 参数。
+       </entry>
+      </row>
       <row>
        <entry>5.3.0</entry>
        <entry>
@@ -89,9 +116,11 @@
 
  <refsect1 role="examples">
   &reftitle.examples;
+  <refsect2>
+  <title>基本的会话示例</title>
   <para>
    <example>
-    <title>会话示例： <filename>page1.php</filename></title>
+    <title><filename>page1.php</filename></title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -125,7 +154,7 @@ echo '<br /><a href="page2.php?' . SID . '">page 2</a>';
   </para>
   <para>
    <example>
-    <title>会话示例： <filename>page2.php</filename></title>
+    <title><filename>page2.php</filename></title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -146,6 +175,41 @@ echo '<br /><a href="page1.php">page 1</a>';
     </programlisting>
    </example>
   </para>
+ </refsect2>
+ <refsect2>
+   <title>调用 <function>session_start</function> 的时候指定选项</title>
+
+   <example>
+    <title>覆盖 Cookie 超时时间设定</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+// 设置 cookie 的有效时间为 1 天
+session_start([
+    'cookie_lifetime' => 86400,
+]);
+?>
+]]>
+    </programlisting>
+   </example>
+
+   <example>
+    <title>读取会话之后立即关闭会话存储文件</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+// 如果确定不修改会话中的数据，
+// 我们可以在会话文件读取完毕之后立即关闭它
+// 来避免由于给会话文件加锁导致其他页面阻塞
+session_start([
+    'cookie_lifetime' => 86400,
+    'read_and_close'  => true,
+]);
+]]>
+    </programlisting>
+   </example>
+  </refsect2>
+  
  </refsect1>
 
  <refsect1 role="notes">
