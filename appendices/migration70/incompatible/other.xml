@@ -1,0 +1,334 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision$ -->
+<!-- EN-Revision: e02324226c7b2445f1dab9475be4dc0d2c1026be Maintainer: yuanyuqiang Status: ready -->
+<!-- Reviewed: no -->
+
+<sect2 xml:id="migration70.incompatible.other">
+ <title>其他向后兼容相关的变更</title>
+
+ <sect3 xml:id="migration70.incompatible.other.new-by-ref">
+  <title>new 操作符创建的对象不能以引用方式赋值给变量</title>
+
+  <para>
+   &new; 语句创建的对象不能
+   以引用的方式赋值给变量。
+  </para>
+
+  <informalexample>
+   <programlisting role="php">
+<![CDATA[
+<?php
+class C {}
+$c =& new C;
+?>
+]]>
+   </programlisting>
+   &example.outputs.5;
+   <screen>
+<![CDATA[
+Deprecated: Assigning the return value of new by reference is deprecated in /tmp/test.php on line 3
+]]>
+   </screen>
+   &example.outputs.7;
+   <screen>
+<![CDATA[
+Parse error: syntax error, unexpected 'new' (T_NEW) in /tmp/test.php on line 3
+]]>
+   </screen>
+  </informalexample>
+ </sect3>
+
+ <sect3 xml:id="migration70.incompatible.other.classes">
+  <title>无效的类、接口以及 trait 命名</title>
+
+  <para>
+   不能以下列名字来命名类、接口以及 trait：
+  </para>
+
+  <itemizedlist>
+   <listitem>
+    <simpara><type>bool</type></simpara>
+   </listitem>
+   <listitem>
+    <simpara><type>int</type></simpara>
+   </listitem>
+   <listitem>
+    <simpara><type>float</type></simpara>
+   </listitem>
+   <listitem>
+    <simpara><type>string</type></simpara>
+   </listitem>
+   <listitem>
+    <simpara>&null;</simpara>
+   </listitem>
+   <listitem>
+    <simpara>&true;</simpara>
+   </listitem>
+   <listitem>
+    <simpara>&false;</simpara>
+   </listitem>
+  </itemizedlist>
+
+  <para>
+   此外，也不要使用下列的名字来命名类、接口以及 trait。虽然在 PHP 7.0 中，
+   这并不会引发错误，
+   但是这些名字是保留给将来使用的。
+  </para>
+
+  <itemizedlist>
+   <listitem>
+    <simpara><type>resource</type></simpara>
+   </listitem>
+   <listitem>
+    <simpara><type>object</type></simpara>
+   </listitem>
+   <listitem>
+    <simpara><type>mixed</type></simpara>
+   </listitem>
+   <listitem>
+    <simpara><type>numeric</type></simpara>
+   </listitem>
+  </itemizedlist>
+ </sect3>
+
+ <sect3 xml:id="migration70.incompatible.other.php-tags">
+  <title>移除了 ASP 和 script PHP 标签</title>
+
+  <para>
+   使用类似 ASP 的标签，以及 script 标签来区分 PHP 代码的方式被移除。
+   受到影响的标签有：
+  </para>
+
+  <table>
+   <title>被移除的 ASP 和 script 标签</title>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>开标签</entry>
+      <entry>闭标签</entry>
+     </row>
+    </thead>
+    <tbody>
+     <row>
+      <entry><code>&lt;%</code></entry>
+      <entry><code>%&gt;</code></entry>
+     </row>
+     <row>
+      <entry><code>&lt;%=</code></entry>
+      <entry><code>%&gt;</code></entry>
+     </row>
+     <row>
+      <entry><code>&lt;script language="php"&gt;</code></entry>
+      <entry><code>&lt;/script&gt;</code></entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </table>
+ </sect3>
+
+ <sect3 xml:id="migration70.incompatible.other.incompatible-this">
+  <title>从不匹配的上下文发起调用</title>
+
+  <para>
+   在不匹配的上下文中以静态方式调用非静态方法，
+   <link linkend="migration56.deprecated.incompatible-context">在 PHP 5.6 中已经废弃</link>，
+   但是在 PHP 7.0 中，
+   会导致被调用方法中未定义 <literal>$this</literal> 变量，以及此行为已经废弃的警告。
+  </para>
+
+  <informalexample>
+   <programlisting role="php">
+<![CDATA[
+<?php
+class A {
+    public function test() { var_dump($this); }
+}
+
+// 注意：并没有从类 A 继承
+class B {
+    public function callNonStaticMethodOfA() { A::test(); }
+}
+
+(new B)->callNonStaticMethodOfA();
+?>
+]]>
+   </programlisting>
+   &example.outputs.5;
+   <screen>
+<![CDATA[
+Deprecated: Non-static method A::test() should not be called statically, assuming $this from incompatible context in /tmp/test.php on line 8
+object(B)#1 (0) {
+}
+]]>
+   </screen>
+   &example.outputs.7;
+   <screen>
+<![CDATA[
+Deprecated: Non-static method A::test() should not be called statically in /tmp/test.php on line 8
+
+Notice: Undefined variable: this in /tmp/test.php on line 3
+NULL
+]]>
+   </screen>
+  </informalexample>
+ </sect3>
+
+ <sect3 xml:id="migration70.incompatible.other.yield">
+  <title>&yield; 变更为右联接运算符</title>
+
+  <para>
+   在使用 &yield; 关键字的时候，不再需要括号，
+   并且它变更为右联接操作符，其运算符优先级介于
+   <literal>print</literal> 和 <literal>=&gt;</literal> 之间。
+   这可能导致现有代码的行为发生改变：
+  </para>
+
+  <informalexample>
+   <programlisting role="php">
+<![CDATA[
+<?php
+echo yield -1;
+// 在之前版本中会被解释为：
+echo (yield) - 1;
+// 现在，它将被解释为：
+echo yield (-1);
+
+yield $foo or die;
+// 在之前版本中会被解释为：
+yield ($foo or die);
+// 现在，它将被解释为：
+(yield $foo) or die;
+?>
+]]>
+   </programlisting>
+  </informalexample>
+
+  <para>
+   可以通过使用括号来消除歧义。
+  </para>
+ </sect3>
+
+ <sect3 xml:id="migration70.incompatible.other.func-parameters">
+  <title>函数定义不可以包含多个同名参数</title>
+
+  <para>
+   在函数定义中，不可以包含两个或多个同名的参数。
+   例如，下面代码中的函数定义会触发
+   <constant>E_COMPILE_ERROR</constant> 错误：
+  </para>
+
+  <informalexample>
+   <programlisting role="php">
+<![CDATA[
+<?php
+function foo($a, $b, $unused, $unused) {
+    //
+}
+?>
+]]>
+   </programlisting>
+  </informalexample>
+ </sect3>
+
+ <sect3 xml:id="migration70.incompatible.other.multiple-default">
+  <title>Switch 语句不可以包含多个 default 块</title>
+
+  <para>
+   在 switch 语句中，两个或者多个 default 块的代码已经不再被支持。
+   例如，下面代码中的 switch 语句会触发
+   <constant>E_COMPILE_ERROR</constant> 错误：
+  </para>
+
+  <informalexample>
+   <programlisting role="php">
+<![CDATA[
+<?php
+switch (1) {
+    default:
+    break;
+    default:
+    break;
+}
+?>
+]]>
+   </programlisting>
+  </informalexample>
+ </sect3>
+
+ <sect3 xml:id="migration70.incompatible.other.http-raw-post-data">
+  <title><varname>$HTTP_RAW_POST_DATA</varname> 被移除</title>
+
+  <para>
+   不再提供 <varname>$HTTP_RAW_POST_DATA</varname> 变量。 请使用
+   <link linkend="wrappers.php.input"><literal>php://input</literal></link>
+   作为替代。
+  </para>
+ </sect3>
+
+ <sect3 xml:id="migration70.incompatible.other.ini-comments">
+  <title>INI 文件中 <literal>#</literal> 注释格式被移除</title>
+
+  <para>
+   在 INI 文件中，不再支持以 <literal>#</literal> 开始的注释行，
+   请使用 <literal>;</literal>（分号）来表示注释。
+   此变更适用于 &php.ini; 以及用 <function>parse_ini_file</function> 和 <function>parse_ini_string</function>
+   函数来处理的文件。
+  </para>
+ </sect3>
+
+ <sect3 xml:id="migration70.incompatible.other.json-to-jsond">
+  <title>JSON 扩展已经被 JSOND 取代</title>
+
+  <para>
+   JSON 扩展已经被 JSOND 扩展取代。
+   对于数值的处理，有以下两点需要注意的：
+   第一，数值不能以点号（.）结束
+   （例如，数值 <literal>34.</literal> 必须写作 
+   <literal>34.0</literal> 或 <literal>34</literal>）。
+   第二，如果使用科学计数法表示数值，<literal>e</literal> 前面必须不是点号（.）
+   （例如，<literal>3.e3</literal> 必须写作
+   <literal>3.0e3</literal> 或 <literal>3e3</literal>）。
+  </para>
+ </sect3>
+
+ <sect3 xml:id="migration70.incompatible.other.internal-function-failure-overflow">
+  <title>在数值溢出的时候，内部函数将会失败</title>
+
+  <para>
+   将浮点数转换为整数的时候，如果浮点数值太大，导致无法以整数表达的情况下，
+   在之前的版本中，内部函数会直接将整数截断，并不会引发错误。
+   在 PHP 7.0 中，如果发生这种情况，会引发 E_WARNING 错误，并且返回 &null;。
+  </para>
+ </sect3>
+
+ <sect3 xml:id="migration70.incompatible.other.fixes-custom-session-handler">
+  <title>自定义会话处理器的返回值修复</title>
+
+  <para>
+   在自定义会话处理器中，如果函数的返回值不是 &false;，也不是 <literal>-1</literal>，
+   会引发致命错误。现在，如果这些函数的返回值不是布尔值，也不是 <literal>-1</literal> 
+   或者 <literal>0</literal>，函数调用结果将被视为失败，并且引发 E_WARNING 错误。
+  </para>
+ </sect3>
+</sect2>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
