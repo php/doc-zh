@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
 <!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: lm92 Status: ready -->
+<!-- EN-Revision: f9254e756882a011921138392fa240189dcc3a8c Maintainer: daijie Status: ready -->
 <refentry xml:id="function.json-encode" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>json_encode</refname>
@@ -14,6 +14,7 @@
    <type>string</type><methodname>json_encode</methodname>
    <methodparam><type>mixed</type><parameter>value</parameter></methodparam>
    <methodparam choice="opt"><type>int</type><parameter>options</parameter><initializer>0</initializer></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>depth</parameter><initializer>512</initializer></methodparam>
   </methodsynopsis>
   <para>
    返回 <parameter>value</parameter> 值的 JSON 形式
@@ -34,6 +35,7 @@
       <para>
        该函数只能接受 UTF-8 编码的数据
       </para>
+      &json.implementation.superset;
      </listitem>
     </varlistentry>
     <varlistentry>
@@ -48,7 +50,18 @@
        <constant>JSON_PRETTY_PRINT</constant>,
        <constant>JSON_UNESCAPED_SLASHES</constant>,
        <constant>JSON_FORCE_OBJECT</constant>,
-       <constant>JSON_UNESCAPED_UNICODE</constant>.
+       <constant>JSON_PRESERVE_ZERO_FRACTION</constant>,
+       <constant>JSON_UNESCAPED_UNICODE</constant>,
+       <constant>JSON_PARTIAL_OUTPUT_ON_ERROR</constant>。
+       关于 JSON 常量详情参考<link linkend="json.constants">JSON 常量</link>页面。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>depth</parameter></term>
+     <listitem>
+      <para>
+       设置最大深度。 必须大于0。
       </para>
      </listitem>
     </varlistentry>
@@ -59,7 +72,7 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   编码成功则返回一个以 JSON 形式表示的 <type>string</type> &return.falseforfailure; 。
+   成功则返回 JSON 编码的 <type>string</type> &return.falseforfailure; 。
   </para>
  </refsect1>
 
@@ -76,6 +89,19 @@
       </row>
      </thead>
      <tbody>
+      <row>
+       <entry>5.6.6</entry>
+       <entry>
+        <parameter>options</parameter> 参数增加常量：
+        <constant>JSON_PRESERVE_ZERO_FRACTION</constant>
+       </entry>
+      </row>
+      <row>
+       <entry>5.5.0</entry>
+       <entry>
+        增加 <parameter>depth</parameter> 参数。
+       </entry>
+      </row>
       <row>
        <entry>5.4.0</entry>
        <entry>
@@ -104,7 +130,7 @@
   &reftitle.examples;
   <para>
    <example>
-    <title>A <function>json_encode</function> 的例子</title>
+    <title><function>json_encode</function> 例子</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -173,6 +199,52 @@ Non-associative array output as object: {"0":{"0":1,"1":2,"2":3}}
 
 Associative array always output as object: {"foo":"bar","baz":"long"}
 Associative array always output as object: {"foo":"bar","baz":"long"}
+]]>
+    </screen>
+   </example>
+   <example>
+    <title>选项 JSON_NUMERIC_CHECK 例子</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+echo "Strings representing numbers automatically turned into numbers".PHP_EOL;
+$numbers = array('+123123', '-123123', '1.2e3', '0.00001');
+var_dump(
+ $numbers,
+ json_encode($numbers, JSON_NUMERIC_CHECK)
+);
+echo "Strings containing improperly formatted numbers".PHP_EOL;
+$strings = array('+a33123456789', 'a123');
+var_dump(
+ $strings,
+ json_encode($strings, JSON_NUMERIC_CHECK)
+);
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+Strings representing numbers automatically turned into numbers
+array(4) {
+  [0]=>
+  string(7) "+123123"
+  [1]=>
+  string(7) "-123123"
+  [2]=>
+  string(5) "1.2e3"
+  [3]=>
+  string(7) "0.00001"
+}
+string(28) "[123123,-123123,1200,1.0e-5]"
+Strings containing improperly formatted numbers
+array(2) {
+  [0]=>
+  string(13) "+a33123456789"
+  [1]=>
+  string(4) "a123"
+}
+string(24) "["+a33123456789","a123"]"
 ]]>
     </screen>
    </example>
@@ -246,6 +318,24 @@ string(33) "{"0":"foo","2":"baz","3":"blong"}"
 ]]>
     </screen>
    </example>
+   <example>
+    <title><constant>选项 JSON_PRESERVE_ZERO_FRACTION</constant> 的例子</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+var_dump(json_encode(12.0, JSON_PRESERVE_ZERO_FRACTION));
+var_dump(json_encode(12.0));
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+string(4) "12.0"
+string(2) "12"
+]]>
+    </screen>
+   </example>
   </para>
  </refsect1>
 
@@ -262,6 +352,22 @@ string(33) "{"0":"foo","2":"baz","3":"blong"}"
     如果要编码的数组的键不是从0开始的数字，所有的键将会被当作字符串，并明确声明为 key-value 对。
    </para>
   </note>
+  
+  <note>
+   <para>
+    Like the reference JSON encoder, <function>json_encode</function> will
+    generate JSON that is a simple value (that is, neither an object nor an
+    array) if given a <type>string</type>, <type>integer</type>,
+    <type>float</type> or <type>boolean</type> as an input
+    <parameter>value</parameter>. While most decoders will accept these values
+    as valid JSON, some may not, as the specification is ambiguous on this
+    point.
+   </para>
+   <para>
+    To summarise, always test that your JSON decoder can handle the output you
+    generate from <function>json_encode</function>.
+   </para>
+  </note>
  </refsect1>
 
  <refsect1 role="seealso">
@@ -271,6 +377,7 @@ string(33) "{"0":"foo","2":"baz","3":"blong"}"
     <member><interfacename>JsonSerializable</interfacename></member>
     <member><function>json_decode</function></member>
     <member><function>json_last_error</function></member>
+    <member><function>serialize</function></member>
    </simplelist>
   </para>
  </refsect1>
