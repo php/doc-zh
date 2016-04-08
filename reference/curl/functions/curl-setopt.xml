@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
+<!-- EN-Revision: b3773f1a76de0f099c24458d51aec08ec995db7d Maintainer: daijie Status: ready -->
 <refentry xml:id="function.curl-setopt" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>curl_setopt</refname>
@@ -15,7 +16,7 @@
    <methodparam><type>mixed</type><parameter>value</parameter></methodparam>
   </methodsynopsis>
   <para>
-   为给定的cURL会话句柄设置一个选项。
+   为 cURL 会话句柄设置选项。
   </para>
  </refsect1>
  
@@ -39,13 +40,13 @@
        将设置在<parameter>option</parameter>选项上的值。
       </para>
       <para>
-       对于下面的这些<parameter>option</parameter>的可选参数，<parameter>value</parameter>应该被设置一个<type>bool</type>类型的值：
+       以下 <parameter>option</parameter> 参数的 <parameter>value</parameter>应该被设置成 <type>bool</type> 类型：
        <informaltable>
         <tgroup cols="3">
          <thead>
           <row>
            <entry valign="top">选项</entry>
-           <entry valign="top">可选<parameter>value</parameter>值</entry>
+           <entry valign="top">将 <parameter>value</parameter> 设置为</entry>
            <entry valign="top">备注</entry>
           </row>
          </thead>
@@ -53,7 +54,7 @@
           <row>
            <entry valign="top"><constant>CURLOPT_AUTOREFERER</constant></entry>
            <entry valign="top">
-            当根据<literal>Location:</literal>重定向时，自动设置header中的<literal>Referer:</literal>信息。
+            &true; 时将根据 <literal>Location:</literal> 重定向时，自动设置 header 中的<literal>Referer:</literal>信息。
            </entry>
            <entry valign="top">
            </entry>
@@ -61,17 +62,43 @@
           <row>
            <entry valign="top"><constant>CURLOPT_BINARYTRANSFER</constant></entry>
            <entry valign="top">
-            在启用<constant>CURLOPT_RETURNTRANSFER</constant>的时候，返回原生的（Raw）输出。
+            设为 &true; ，将在启用 <constant>CURLOPT_RETURNTRANSFER</constant> 时，返回原生的（Raw）输出。
            </entry>
            <entry valign="top">
+            From PHP 5.1.3, this option has no effect: the raw output will
+            always be returned when
+            <constant>CURLOPT_RETURNTRANSFER</constant> is used.
            </entry>
           </row>
           <row>
            <entry valign="top"><constant>CURLOPT_COOKIESESSION</constant></entry>
            <entry valign="top">
-            启用时curl会仅仅传递一个session cookie，忽略其他的cookie，默认状况下cURL会将所有的cookie返回给服务端。session cookie是指那些用来判断服务器端的session是否有效而存在的cookie。
+            设为 &true;  时将开启新的一次 cookie 会话。它将强制 libcurl 忽略之前会话时存的其他 cookie。
+            libcurl 在默认状况下无论是否为会话，都会储存、加载所有 cookie。会话 cookie 是指没有过期时间，只存活在会话之中。
            </entry>
            <entry valign="top">
+           </entry>
+          </row>
+          <row>
+           <entry valign="top"><constant>CURLOPT_CERTINFO</constant></entry>
+           <entry valign="top">
+            &true; 将在安全传输时输出 SSL 证书信息到 <literal>STDERR</literal>。
+           </entry>
+           <entry valign="top">
+            在 cURL 7.19.1 中添加。
+            PHP 5.3.2 后有效。
+            需要开启 <constant>CURLOPT_VERBOSE</constant> 才有效。
+           </entry>
+          </row>
+          <row>
+           <entry valign="top"><constant>CURLOPT_CONNECT_ONLY</constant></entry>
+           <entry valign="top">
+            &true; 将让库执行所有需要的代理、验证、连接过程，但不传输数据。此选项用于
+            HTTP、SMTP 和 POP3。
+           </entry>
+           <entry valign="top">
+            在 7.15.2 中添加。
+            PHP 5.5.0 起有效。
            </entry>
           </row>
           <row>
@@ -85,7 +112,7 @@
           <row>
            <entry valign="top"><constant>CURLOPT_DNS_USE_GLOBAL_CACHE</constant></entry>
            <entry valign="top">
-            启用时会启用一个全局的DNS缓存，此项为线程安全的，并且默认启用。
+            &true; 会启用一个全局的DNS缓存。此选项非线程安全的，默认已开启。
            </entry>
            <entry valign="top">
            </entry>
@@ -93,7 +120,7 @@
           <row>
            <entry valign="top"><constant>CURLOPT_FAILONERROR</constant></entry>
            <entry valign="top">
-            显示HTTP状态码，默认行为是忽略编号小于等于400的HTTP信息。
+           当 HTTP 状态码大于等于 400，&true; 将将显示错误详情。 默认情况下将返回页面，忽略 HTTP 代码。
            </entry>
            <entry valign="top">
            </entry>
@@ -101,8 +128,8 @@
           <row>
            <entry valign="top"><constant>CURLOPT_FILETIME</constant></entry>
            <entry valign="top">
-            启用时会尝试修改远程文档中的信息。结果信息会通过<function>curl_getinfo</function>函数的<parameter>CURLINFO_FILETIME</parameter>选项返回。
-            <function>curl_getinfo</function>.
+            &true;  时，会尝试获取远程文档中的修改时间信息。
+            信息可通过<function>curl_getinfo</function>函数的<parameter>CURLINFO_FILETIME</parameter> 选项获取。
            </entry>
            <entry valign="top">
            </entry>
@@ -110,7 +137,7 @@
           <row>
            <entry valign="top"><constant>CURLOPT_FOLLOWLOCATION</constant></entry>
            <entry valign="top">
-            启用时会将服务器服务器返回的<literal>"Location: "</literal>放在header中递归的返回给服务器，使用<constant>CURLOPT_MAXREDIRS</constant>可以限定递归返回的数量。
+            &true;  时将会根据服务器返回 HTTP 头中的 <literal>"Location: "</literal> 重定向。（注意：这是递归的，<literal>"Location: "</literal> 发送几次就重定向几次，除非设置了 <constant>CURLOPT_MAXREDIRS</constant>，限制最大重定向次数。）。
            </entry>
            <entry valign="top">
            </entry>
@@ -118,7 +145,7 @@
           <row>
            <entry valign="top"><constant>CURLOPT_FORBID_REUSE</constant></entry>
            <entry valign="top">
-            在完成交互以后强迫断开连接，不能重用。
+            &true; 在完成交互以后强制明确的断开连接，不能在连接池中重用。
            </entry>
            <entry valign="top">
            </entry>
@@ -126,7 +153,7 @@
           <row>
            <entry valign="top"><constant>CURLOPT_FRESH_CONNECT</constant></entry>
            <entry valign="top">
-            强制获取一个新的连接，替代缓存中的连接。
+            &true; 强制获取一个新的连接，而不是缓存中的连接。
            </entry>
            <entry valign="top">
            </entry>
@@ -134,8 +161,7 @@
           <row>
            <entry valign="top"><constant>CURLOPT_FTP_USE_EPRT</constant></entry>
            <entry valign="top">
-            启用时当FTP下载时，使用EPRT (或 LPRT)命令。设置为&false;时禁用EPRT和LPRT，使用PORT命令
-            only.
+            &true; 时，当 FTP 下载时，使用 EPRT (和 LPRT)命令。 设置为 &false; 时禁用 EPRT 和 LPRT，仅仅使用PORT 命令。
            </entry>
            <entry valign="top">
            </entry>
@@ -143,7 +169,15 @@
           <row>
            <entry valign="top"><constant>CURLOPT_FTP_USE_EPSV</constant></entry>
            <entry valign="top">
-            启用时，在FTP传输过程中回复到PASV模式前首先尝试EPSV命令。设置为&false;时禁用EPSV命令。
+            &true; 时，在FTP传输过程中，回到 PASV 模式前，先尝试 EPSV 命令。设置为 &false; 时禁用 EPSV。
+           </entry>
+           <entry valign="top">
+           </entry>
+          </row>
+          <row>
+           <entry valign="top"><constant>CURLOPT_FTP_CREATE_MISSING_DIRS</constant></entry>
+           <entry valign="top">
+            &true; 时，当 ftp 操作不存在的目录时将创建它。
            </entry>
            <entry valign="top">
            </entry>
@@ -151,15 +185,24 @@
           <row>
            <entry valign="top"><constant>CURLOPT_FTPAPPEND</constant></entry>
            <entry valign="top">
-            启用时追加写入文件而不是覆盖它。
+            &true; 为追加写入文件，而不是覆盖。
            </entry>
            <entry valign="top">
            </entry>
           </row>
           <row>
+           <entry valign="top"><constant>CURLOPT_TCP_NODELAY</constant></entry>
+           <entry valign="top">
+            &true; 时禁用 TCP 的 Nagle 算法，就是减少网络上的小包数量。
+           </entry>
+           <entry valign="top">
+             PHP 5.2.1 有效，编译时需要 libcurl 7.11.2 及以上。
+           </entry>
+          </row>
+          <row>
            <entry valign="top"><constant>CURLOPT_FTPASCII</constant></entry>
            <entry valign="top">
-            <constant>CURLOPT_TRANSFERTEXT</constant>的别名。
+            <constant>CURLOPT_TRANSFERTEXT</constant> 的别名。
            </entry>
            <entry valign="top">
            </entry>
@@ -167,7 +210,7 @@
           <row>
            <entry valign="top"><constant>CURLOPT_FTPLISTONLY</constant></entry>
            <entry valign="top">
-            启用时只列出FTP目录的名字。
+            &true; 时只列出 FTP 目录的名字。
            </entry>
            <entry valign="top">
            </entry>
@@ -183,16 +226,16 @@
           <row>
            <entry><constant>CURLINFO_HEADER_OUT</constant></entry>
            <entry valign="top">
-            启用时追踪句柄的请求字符串。
+            &true; 时追踪句柄的请求字符串。
            </entry>
            <entry valign="top">
-            从 PHP 5.1.3 开始可用。<constant>CURLINFO_</constant>前缀是故意的(intentional)。
+            从 PHP 5.1.3 开始可用。<constant>CURLINFO_</constant> 的前缀是有意的(intentional)。
            </entry>
           </row>
           <row>
            <entry valign="top"><constant>CURLOPT_HTTPGET</constant></entry>
            <entry valign="top">
-            启用时会设置HTTP的method为GET，因为GET是默认是，所以只在被修改的情况下使用。
+            &true;  时会设置 HTTP 的 method 为 GET，由于默认是 GET，所以只有 method 被修改时才需要这个选项。
            </entry>
            <entry valign="top">
            </entry>
@@ -200,7 +243,7 @@
           <row>
            <entry valign="top"><constant>CURLOPT_HTTPPROXYTUNNEL</constant></entry>
            <entry valign="top">
-            启用时会通过HTTP代理来传输。
+            &true;  会通过指定的 HTTP 代理来传输。
            </entry>
            <entry valign="top">
            </entry>
@@ -208,15 +251,16 @@
           <row>
            <entry valign="top"><constant>CURLOPT_MUTE</constant></entry>
            <entry valign="top">
-            启用时将cURL函数中所有修改过的参数恢复默认值。
+            &true;  时将完全静默，无论是何 cURL 函数。
            </entry>
            <entry valign="top">
+           在 cURL 7.15.5  中移出（可以使用 CURLOPT_RETURNTRANSFER 作为代替）
            </entry>
           </row>
           <row>
            <entry valign="top"><constant>CURLOPT_NETRC</constant></entry>
            <entry valign="top">
-            在连接建立以后，访问<filename>~/.netrc</filename>文件获取用户名和密码信息连接远程站点。
+            &true;  时，在连接建立时，访问<filename>~/.netrc</filename>文件获取用户名和密码来连接远程站点。
            </entry>
            <entry valign="top">
            </entry>
@@ -224,7 +268,7 @@
           <row>
            <entry valign="top"><constant>CURLOPT_NOBODY</constant></entry>
            <entry valign="top">
-           启用时将不对HTML中的BODY部分进行输出。
+           &true;  时将不输出 BODY 部分。同时 Mehtod 变成了 HEAD。修改为  &false; 时不会变成 GET。
            </entry>
            <entry valign="top">
            </entry>
@@ -232,10 +276,10 @@
           <row>
            <entry valign="top"><constant>CURLOPT_NOPROGRESS</constant></entry>
            <entry valign="top"><para>
-            启用时关闭curl传输的进度条，此项的默认设置为启用。
+            &true; 时关闭 cURL 的传输进度。
             <note>
              <para>
-              PHP自动地设置这个选项为&true;，这个选项仅仅应当在以调试为目的时被改变。
+              PHP 默认自动设置此选项为 &true;，只有为了调试才需要改变设置。
              </para>
             </note>
             </para></entry>
@@ -245,7 +289,7 @@
           <row>
            <entry valign="top"><constant>CURLOPT_NOSIGNAL</constant></entry>
            <entry valign="top">
-            启用时忽略所有的curl传递给php进行的信号。在SAPI多线程传输时此项被默认启用。
+            &true; 时忽略所有的 cURL 传递给 PHP 进行的信号。在 SAPI 多线程传输时此项被默认启用，所以超时选项仍能使用。
            </entry>
            <entry valign="top">
             cURL 7.10时被加入。
@@ -254,7 +298,7 @@
           <row>
            <entry valign="top"><constant>CURLOPT_POST</constant></entry>
            <entry valign="top">
-            启用时会发送一个常规的POST请求，类型为：<literal>application/x-www-form-urlencoded</literal>，就像表单提交的一样。
+            &true; 时会发送 POST 请求，类型为：<literal>application/x-www-form-urlencoded</literal>，是 HTML 表单提交时最常见的一种。
            </entry>
            <entry valign="top">
            </entry>
@@ -262,7 +306,7 @@
           <row>
            <entry valign="top"><constant>CURLOPT_PUT</constant></entry>
            <entry valign="top">
-            启用时允许HTTP发送文件，必须同时设置<constant>CURLOPT_INFILE</constant>和<constant>CURLOPT_INFILESIZE</constant>。
+            &true; 时允许 HTTP 发送文件。要被 PUT 的文件必须在 <constant>CURLOPT_INFILE</constant>和<constant>CURLOPT_INFILESIZE</constant> 中设置。
            </entry>
            <entry valign="top">
            </entry>
@@ -270,25 +314,74 @@
           <row>
            <entry valign="top"><constant>CURLOPT_RETURNTRANSFER</constant></entry>
            <entry valign="top">
-            将<function>curl_exec</function>获取的信息以文件流的形式返回，而不是直接输出。
+            &true;  将<function>curl_exec</function>获取的信息以字符串返回，而不是直接输出。
            </entry>
            <entry valign="top">
            </entry>
           </row>
           <row>
+           <entry valign="top"><constant>CURLOPT_SAFE_UPLOAD</constant></entry>
+           <entry valign="top">
+            &true; 禁用 <literal>@</literal> 前缀在 <constant>CURLOPT_POSTFIELDS</constant> 中发送文件。
+            
+            意味着 <literal>@</literal> 可以在字段中安全得使用了。 
+            可使用 <classname>CURLFile</classname> 作为上传的代替。
+           </entry>
+           
+           
+           
+           
+           <entry valign="top">
+            PHP 5.5.0 中添加，默认值 &false;。
+            PHP 5.6.0 改默认值为 &true;。
+           </entry>
+          </row>
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          <row>
            <entry valign="top"><constant>CURLOPT_SSL_VERIFYPEER</constant></entry>
            <entry valign="top">
-            禁用后cURL将终止从服务端进行验证。使用<constant>CURLOPT_CAINFO</constant>选项设置证书使用<constant>CURLOPT_CAPATH</constant>选项设置证书目录
-            如果<constant>CURLOPT_SSL_VERIFYPEER</constant>(默认值为2)被启用，<constant>CURLOPT_SSL_VERIFYHOST</constant>需要被设置成&true;否则设置为&false;。
+            &false;  禁止 cURL 验证对等证书（peer's
+            certificate）。要验证的交换证书可以在 <constant>CURLOPT_CAINFO</constant> 选项中设置，或在 <constant>CURLOPT_CAPATH</constant>中设置证书目录。
            </entry>
            <entry valign="top">
-            自cURL 7.10开始默认为&true;。从cURL 7.10开始默认绑定安装。
+            自cURL 7.10开始默认为 &true;。从 cURL 7.10开始默认绑定安装。
            </entry>
           </row>
           <row>
            <entry valign="top"><constant>CURLOPT_TRANSFERTEXT</constant></entry>
            <entry valign="top">
-            启用后对FTP传输使用ASCII模式。对于LDAP，它检索纯文本信息而非HTML。在Windows系统上，系统不会把<literal>STDOUT</literal>设置成binary模式。
+            &true;  对 FTP 传输使用 ASCII 模式。对于LDAP，它检索纯文本信息而非 HTML。在 Windows 系统上，系统不会把 <literal>STDOUT</literal> 设置成二进制 模式。
            </entry>
            <entry valign="top">
            </entry>
@@ -296,7 +389,7 @@
           <row>
            <entry valign="top"><constant>CURLOPT_UNRESTRICTED_AUTH</constant></entry>
            <entry valign="top">
-           在使用<constant>CURLOPT_FOLLOWLOCATION</constant>产生的header中的多个locations中持续追加用户名和密码信息，即使域名已发生改变。
+            &true; 在使用<constant>CURLOPT_FOLLOWLOCATION</constant>重定向 header 中的多个 location 时继续发送用户名和密码信息，哪怕主机名已改变。
            </entry>
            <entry valign="top">
            </entry>
@@ -304,15 +397,20 @@
           <row>
            <entry valign="top"><constant>CURLOPT_UPLOAD</constant></entry>
            <entry valign="top">
-            启用后允许文件上传。
+            &true;  准备上传。
            </entry>
            <entry valign="top">
            </entry>
           </row>
+          
+          
+          
+          
+          
           <row>
            <entry valign="top"><constant>CURLOPT_VERBOSE</constant></entry>
            <entry valign="top">
-            启用时会汇报所有的信息，存放在<literal>STDERR</literal>或指定的<constant>CURLOPT_STDERR</constant>中。
+            &true; 会输出所有的信息，写入到<literal>STDERR</literal>，或在<constant>CURLOPT_STDERR</constant>中指定的文件。
            </entry>
            <entry valign="top">
            </entry>
@@ -322,13 +420,13 @@
        </informaltable>
       </para>
       <para>
-       对于下面的这些<parameter>option</parameter>的可选参数，<parameter>value</parameter>应该被设置一个<type>integer</type>类型的值：
+       以下 <parameter>option</parameter>的<parameter>value</parameter>应该被设置成 <type>integer</type>：
        <informaltable>
         <tgroup cols="3">
          <thead>
           <row>
            <entry>选项</entry>
-           <entry>可选<parameter>value</parameter>值</entry>
+           <entry>设置<parameter>value</parameter>为</entry>
            <entry>备注</entry>
           </row>
          </thead>
@@ -336,7 +434,7 @@
           <row>
            <entry valign="top"><constant>CURLOPT_BUFFERSIZE</constant></entry>
            <entry valign="top">
-            每次获取的数据中读入缓存的大小，但是不保证这个值每次都会被填满。
+            每次读入的缓冲的尺寸。当然不保证每次都会完全填满这个尺寸。
            </entry>
            <entry valign="top">
             在cURL 7.10中被加入。
@@ -345,15 +443,21 @@
           <row>
            <entry valign="top"><constant>CURLOPT_CLOSEPOLICY</constant></entry>
            <entry valign="top">
-            不是<parameter>CURLCLOSEPOLICY_LEAST_RECENTLY_USED</parameter>就是<parameter>CURLCLOSEPOLICY_OLDEST</parameter>，还存在另外三个<literal>CURLCLOSEPOLICY_</literal>，但是cURL暂时还不支持。
+            <constant>CURLCLOSEPOLICY_*</constant> 中的一个。
+            <note>
+             <para>
+              此选项已被废弃，它不会被实现，永远不会有效果啦。
+             </para>
+            </note>
            </entry>
            <entry valign="top">
+            PHP 5.6.0 中移除。
            </entry>
           </row>
           <row>
            <entry><constant>CURLOPT_CONNECTTIMEOUT</constant></entry>
            <entry valign="top">
-            在发起连接前等待的时间，如果设置为0，则无限等待。
+            在尝试连接时等待的秒数。设置为0，则无限等待。
            </entry>
            <entry valign="top">
            </entry>
@@ -361,51 +465,66 @@
           <row>
            <entry valign="top"><constant>CURLOPT_CONNECTTIMEOUT_MS</constant></entry>
            <entry valign="top">
-            尝试连接等待的时间，以毫秒为单位。如果设置为0，则无限等待。
+            尝试连接等待的时间，以毫秒为单位。设置为0，则无限等待。 
+            <!-- http://curl.haxx.se/libcurl/c/curl_easy_setopt.html -->
+            如果 libcurl 编译时使用系统标准的名称解析器（ standard system name resolver），那部分的连接仍旧使用以秒计的超时解决方案，最小超时时间还是一秒钟。
            </entry>
            <entry valign="top">
-            在cURL 7.16.2中被加入。从PHP 5.2.3开始可用。
+            在 cURL 7.16.2 中被加入。从 PHP 5.2.3 开始可用。
            </entry>
           </row>
           <row>
            <entry valign="top"><constant>CURLOPT_DNS_CACHE_TIMEOUT</constant></entry>
            <entry valign="top">
-            设置在内存中保存DNS信息的时间，默认为120秒。
+            设置在内存中缓存 DNS 的时间，默认为120秒（两分钟）。
            </entry>
            <entry valign="top">
            </entry>
           </row>
+          
+          
+          
           <row>
            <entry valign="top"><constant>CURLOPT_FTPSSLAUTH</constant></entry>
            <entry valign="top">
-            FTP验证方式：<literal>CURLFTPAUTH_SSL</literal> (首先尝试SSL)，<literal>CURLFTPAUTH_TLS</literal> (首先尝试TLS)或<literal>CURLFTPAUTH_DEFAULT</literal> (让cURL自动决定)。
+            FTP验证方式（启用的时候）：<literal>CURLFTPAUTH_SSL</literal> (首先尝试SSL)，<literal>CURLFTPAUTH_TLS</literal> (首先尝试TLS)或<literal>CURLFTPAUTH_DEFAULT</literal> (让cURL 自个儿决定)。
            </entry>
            <entry valign="top">
-            在cURL 7.12.2中被加入。
+            在 cURL 7.12.2 中被加入。
            </entry>
           </row>
+          
+          
+          
+          
+          
           <row>
            <entry valign="top"><constant>CURLOPT_HTTP_VERSION</constant></entry>
            <entry valign="top">
-            <parameter>CURL_HTTP_VERSION_NONE</parameter> (默认值，让cURL自己判断使用哪个版本)，<parameter>CURL_HTTP_VERSION_1_0</parameter> (强制使用 HTTP/1.0)或<parameter>CURL_HTTP_VERSION_1_1</parameter> (强制使用 HTTP/1.1)。
+            <parameter>CURL_HTTP_VERSION_NONE</parameter> (默认值，让 cURL 自己判断使用哪个版本)，<parameter>CURL_HTTP_VERSION_1_0</parameter> (强制使用 HTTP/1.0)或<parameter>CURL_HTTP_VERSION_1_1</parameter> (强制使用 HTTP/1.1)。
            </entry>
            <entry valign="top">
            </entry>
           </row>
+          
+          
           <row>
            <entry valign="top"><constant>CURLOPT_HTTPAUTH</constant></entry>
            <entry valign="top">
             <para>
-             使用的HTTP验证方法，可选的值有：<parameter>CURLAUTH_BASIC</parameter>、<parameter>CURLAUTH_DIGEST</parameter>、<parameter>CURLAUTH_GSSNEGOTIATE</parameter>、<parameter>CURLAUTH_NTLM</parameter>、<parameter>CURLAUTH_ANY</parameter>和<parameter>CURLAUTH_ANYSAFE</parameter>。
+             使用的 HTTP 验证方法。选项有：<parameter>CURLAUTH_BASIC</parameter>、<parameter>CURLAUTH_DIGEST</parameter>、<parameter>CURLAUTH_GSSNEGOTIATE</parameter>、<parameter>CURLAUTH_NTLM</parameter>、<parameter>CURLAUTH_ANY</parameter>和<parameter>CURLAUTH_ANYSAFE</parameter>。
             </para>
             <para>
-             可以使用<literal>|</literal>位域(或)操作符分隔多个值，cURL让服务器选择一个支持最好的值。
+             可以使用 <literal>|</literal> 位域(OR)操作符结合多个值，cURL 会让服务器选择受支持的方法，并选择最好的那个。
             </para>
             <para>
-             <parameter>CURLAUTH_ANY</parameter>等价于<literal>CURLAUTH_BASIC | CURLAUTH_DIGEST | CURLAUTH_GSSNEGOTIATE | CURLAUTH_NTLM</literal>.
+             <parameter>CURLAUTH_ANY</parameter>是 <literal>CURLAUTH_BASIC | CURLAUTH_DIGEST | CURLAUTH_GSSNEGOTIATE | CURLAUTH_NTLM</literal> 的别名。
             </para>
+            
+            
+            
             <para>
-             <parameter>CURLAUTH_ANYSAFE</parameter>等价于<literal>CURLAUTH_DIGEST | CURLAUTH_GSSNEGOTIATE | CURLAUTH_NTLM</literal>.
+      <parameter>CURLAUTH_ANYSAFE</parameter> 是 <literal>CURLAUTH_DIGEST | CURLAUTH_GSSNEGOTIATE | CURLAUTH_NTLM</literal> 的别名。
             </para>
            </entry>
            <entry valign="top">
@@ -414,7 +533,8 @@
           <row>
            <entry valign="top"><constant>CURLOPT_INFILESIZE</constant></entry>
            <entry valign="top">
-            设定上传文件的大小限制，字节(byte)为单位。
+            希望传给远程站点的文件尺寸，字节(byte)为单位。
+            注意无法用这个选项阻止 libcurl 发送更多的数据，确切发送什么取决于 <constant>CURLOPT_READFUNCTION</constant>。
            </entry>
            <entry valign="top">
            </entry>
@@ -422,7 +542,7 @@
           <row>
            <entry valign="top"><constant>CURLOPT_LOW_SPEED_LIMIT</constant></entry>
            <entry valign="top">
-            当传输速度小于<constant>CURLOPT_LOW_SPEED_LIMIT</constant>时(bytes/sec)，PHP会根据<constant>CURLOPT_LOW_SPEED_TIME</constant>来判断是否因太慢而取消传输。
+            传输速度，每秒字节（bytes）数，根据<constant>CURLOPT_LOW_SPEED_TIME</constant>秒数统计是否因太慢而取消传输。
            </entry>
            <entry valign="top">
            </entry>
@@ -435,18 +555,30 @@
            <entry valign="top">
            </entry>
           </row>
+          
+          
+          
+          
+          
+          
+          
+          
+          
           <row>
            <entry valign="top"><constant>CURLOPT_MAXCONNECTS</constant></entry>
            <entry valign="top">
-            允许的最大连接数量，超过是会通过<constant>CURLOPT_CLOSEPOLICY</constant>决定应该停止哪些连接。
+            允许的最大连接数量。达到限制时，会通过<constant>CURLOPT_CLOSEPOLICY</constant>决定应该关闭哪些连接。
            </entry>
+           
+           
+           
            <entry valign="top">
            </entry>
           </row>
           <row>
            <entry valign="top"><constant>CURLOPT_MAXREDIRS</constant></entry>
            <entry valign="top">
-            指定最多的HTTP重定向的数量，这个选项是和<constant>CURLOPT_FOLLOWLOCATION</constant>一起使用的。
+            指定最多的 HTTP 重定向次数，这个选项是和<constant>CURLOPT_FOLLOWLOCATION</constant>一起使用的。
            </entry>
            <entry valign="top">
            </entry>
@@ -454,38 +586,55 @@
           <row>
            <entry valign="top"><constant>CURLOPT_PORT</constant></entry>
            <entry valign="top">
-            用来指定连接端口。（可选项）
+            用来指定连接端口。
            </entry>
            <entry valign="top">
            </entry>
           </row>
           <row>
+           <entry valign="top"><constant>CURLOPT_POSTREDIR</constant></entry>
+           <entry valign="top">
+            位掩码， 1 (301 永久重定向), 2 (302 Found)
+           和 4 (303 See Other) 
+            设置 <constant>CURLOPT_FOLLOWLOCATION</constant> 时，什么情况下需要再次  HTTP POST 到重定向网址。
+           </entry>
+           <entry valign="top">
+            cURL 7.19.1 中添加，PHP 5.3.2 开始可用。
+           </entry>
+          </row>
+          
+          
+          <row>
            <entry valign="top"><constant>CURLOPT_PROTOCOLS</constant></entry>
            <entry valign="top">
             <para>
-             <constant>CURLPROTO_*</constant>的位域指。如果被启用，位域值会限定libcurl在传输过程中有哪些可使用的协议。这将允许你在编译libcurl时支持众多协议，但是限制只是用它们中被允许使用的一个子集。默认libcurl将会使用全部它支持的协议。参见<constant>CURLOPT_REDIR_PROTOCOLS</constant>.
+             <constant>CURLPROTO_*</constant>的位掩码。
+             启用时，会限制 libcurl 在传输过程中可使用哪些协议。
+             这将允许你在编译libcurl时支持众多协议，但是限制只用允许的子集。默认 libcurl 将使用所有支持的协议。
+             参见<constant>CURLOPT_REDIR_PROTOCOLS</constant>。
             </para>
             <para>
              可用的协议选项为：<parameter>CURLPROTO_HTTP</parameter>、<parameter>CURLPROTO_HTTPS</parameter>、<parameter>CURLPROTO_FTP</parameter>、<parameter>CURLPROTO_FTPS</parameter>、<parameter>CURLPROTO_SCP</parameter>、<parameter>CURLPROTO_SFTP</parameter>、<parameter>CURLPROTO_TELNET</parameter>、<parameter>CURLPROTO_LDAP</parameter>、<parameter>CURLPROTO_LDAPS</parameter>、<parameter>CURLPROTO_DICT</parameter>、<parameter>CURLPROTO_FILE</parameter>、<parameter>CURLPROTO_TFTP</parameter>、<parameter>CURLPROTO_ALL</parameter>
             </para>
            </entry>
            <entry valign="top">
-            在cURL 7.19.4中被加入。
+            在 cURL 7.19.4 中被加入。
            </entry>
           </row>
           <row>
            <entry valign="top"><constant>CURLOPT_PROXYAUTH</constant></entry>
            <entry valign="top">
-            HTTP代理连接的验证方式。使用在<constant>CURLOPT_HTTPAUTH</constant>中的位域标志来设置相应选项。对于代理验证只有<parameter>CURLAUTH_BASIC</parameter>和<parameter>CURLAUTH_NTLM</parameter>当前被支持。
+            HTTP 代理连接的验证方式。使用在<constant>CURLOPT_HTTPAUTH</constant>中的位掩码。
+            当前仅仅支持 <parameter>CURLAUTH_BASIC</parameter>和<parameter>CURLAUTH_NTLM</parameter>。
            </entry>
            <entry valign="top">
-            在cURL 7.10.7中被加入。
+            在 cURL 7.10.7 中被加入。
            </entry>
           </row>
           <row>
            <entry valign="top"><constant>CURLOPT_PROXYPORT</constant></entry>
            <entry valign="top">
-            代理服务器的端口。端口也可以在<constant>CURLOPT_PROXY</constant>中进行设置。
+            代理服务器的端口。端口也可以在<constant>CURLOPT_PROXY</constant>中设置。
            </entry>
            <entry valign="top">
            </entry>
@@ -493,25 +642,36 @@
           <row>
            <entry valign="top"><constant>CURLOPT_PROXYTYPE</constant></entry>
            <entry valign="top">
-            不是<parameter>CURLPROXY_HTTP</parameter> (默认值) 就是<parameter>CURLPROXY_SOCKS5</parameter>。
+            可以是 <parameter>CURLPROXY_HTTP</parameter> (默认值) 
+         <constant>CURLPROXY_SOCKS4</constant>、
+            <constant>CURLPROXY_SOCKS5</constant>、
+  <constant>CURLPROXY_SOCKS4A</constant> 或
+            <constant>CURLPROXY_SOCKS5_HOSTNAME</constant>。
            </entry>
            <entry valign="top">
-            在cURL 7.10中被加入。
+            在 cURL 7.10 中被加入。
            </entry>
           </row>
           <row>
            <entry valign="top"><constant>CURLOPT_REDIR_PROTOCOLS</constant></entry>
            <entry valign="top">
-            <constant>CURLPROTO_*</constant>中的位域值。如果被启用，位域值将会限制传输线程在<constant>CURLOPT_FOLLOWLOCATION</constant>开启时跟随某个重定向时可使用的协议。这将使你对重定向时限制传输线程使用被允许的协议子集默认libcurl将会允许除FILE和SCP之外的全部协议。这个和7.19.4预发布版本种无条件地跟随所有支持的协议有一些不同。关于协议常量，请参照<constant>CURLOPT_PROTOCOLS</constant>。
+            <constant>CURLPROTO_*</constant> 值的位掩码。如果被启用，位掩码会限制 libcurl 在 <constant>CURLOPT_FOLLOWLOCATION</constant>开启时，使用的协议。
+            默认允许除 FILE 和 SCP 外所有协议。
+            这和 7.19.4 前的版本无条件支持所有支持的协议不同。关于协议常量，请参照<constant>CURLOPT_PROTOCOLS</constant>。
            </entry>
            <entry valign="top">
-            在cURL 7.19.4中被加入。
+            在 cURL 7.19.4 中被加入。
            </entry>
           </row>
+          
+          
+          
+          
+          
           <row>
            <entry valign="top"><constant>CURLOPT_RESUME_FROM</constant></entry>
            <entry valign="top">
-            在恢复传输时传递一个字节偏移量（用来断点续传）。
+            在恢复传输时，传递字节为单位的偏移量（用来断点续传）。
            </entry>
            <entry valign="top">
            </entry>
@@ -519,15 +679,30 @@
           <row>
            <entry valign="top"><constant>CURLOPT_SSL_VERIFYHOST</constant></entry>
            <entry valign="top">
-            1 检查服务器SSL证书中是否存在一个公用名(common name)。译者注：公用名(Common Name)一般来讲就是填写你将要申请SSL证书的域名 (domain)或子域名(sub domain)。2 检查公用名是否存在，并且是否与提供的主机名匹配。
+            设置为 1 是检查服务器SSL证书中是否存在一个公用名(common name)。译者注：公用名(Common Name)一般来讲就是填写你将要申请SSL证书的域名 (domain)或子域名(sub domain)。
+            设置成 2，会检查公用名是否存在，并且是否与提供的主机名匹配。
+            在生产环境中，这个值应该是 2（默认值）。
            </entry>
            <entry valign="top">
+           值 1 的支持在 cURL 7.28.1 中被删除了。
            </entry>
           </row>
           <row>
            <entry valign="top"><constant>CURLOPT_SSLVERSION</constant></entry>
            <entry valign="top">
-            使用的SSL版本(2 或 3)。默认情况下PHP会自己检测这个值，尽管有些情况下需要手动地进行设置。
+             <constant>CURL_SSLVERSION_DEFAULT</constant> (0),
+            <constant>CURL_SSLVERSION_TLSv1</constant> (1),
+            <constant>CURL_SSLVERSION_SSLv2</constant> (2),
+            <constant>CURL_SSLVERSION_SSLv3</constant> (3),
+            <constant>CURL_SSLVERSION_TLSv1_0</constant> (4),
+            <constant>CURL_SSLVERSION_TLSv1_1</constant> (5) ，
+            <constant>CURL_SSLVERSION_TLSv1_2</constant> (6)  中的其中一个。
+            <note>
+             <para>
+              你最好别设置这个值，让它使用默认值。
+设置为 2 或 3 比较危险，在 SSLv2 和 SSLv3 中有弱点存在。
+             </para>
+            </note>
            </entry>
            <entry valign="top">
            </entry>
@@ -535,7 +710,9 @@
           <row>
            <entry valign="top"><constant>CURLOPT_TIMECONDITION</constant></entry>
            <entry valign="top">
-            如果在<constant>CURLOPT_TIMEVALUE</constant>指定的某个时间以后被编辑过，则使用<parameter>CURL_TIMECOND_IFMODSINCE</parameter>返回页面，如果没有被修改过，并且<constant>CURLOPT_HEADER</constant>为true，则返回一个<literal>"304 Not Modified"</literal>的header，    <constant>CURLOPT_HEADER</constant>为false，则使用<parameter>CURL_TIMECOND_IFUNMODSINCE</parameter>，默认值为<parameter>CURL_TIMECOND_IFUNMODSINCE</parameter>。
+           设置如何对待 <constant>CURLOPT_TIMEVALUE</constant>。
+            使用 <parameter>CURL_TIMECOND_IFMODSINCE</parameter>，仅在页面 <constant>CURLOPT_TIMEVALUE</constant> 之后修改，才返回页面。没有修改则返回 <literal>"304 Not Modified"</literal> 头，假设设置了 <constant>CURLOPT_HEADER</constant> 为  &true;。<parameter>CURL_TIMECOND_IFUNMODSINCE</parameter>则起相反的效果。
+            默认为 <parameter>CURL_TIMECOND_IFMODSINCE</parameter>。
            </entry>
            <entry valign="top">
            </entry>
@@ -543,7 +720,7 @@
           <row>
            <entry valign="top"><constant>CURLOPT_TIMEOUT</constant></entry>
            <entry valign="top">
-            设置cURL允许执行的最长秒数。
+            允许 cURL 函数执行的最长秒数。
            </entry>
            <entry valign="top">
            </entry>
@@ -552,31 +729,91 @@
            <entry valign="top"><constant>CURLOPT_TIMEOUT_MS</constant></entry>
            <entry valign="top">
             设置cURL允许执行的最长毫秒数。
+             <!-- http://curl.haxx.se/libcurl/c/curl_easy_setopt.html -->
+            
+            如果 libcurl 编译时使用系统标准的名称解析器（ standard system name resolver），那部分的连接仍旧使用以秒计的超时解决方案，最小超时时间还是一秒钟。
            </entry>
            <entry valign="top">
-            在cURL 7.16.2中被加入。从PHP 5.2.3起可使用。
+            在 cURL 7.16.2 中被加入。从 PHP 5.2.3 起可使用。
            </entry>
           </row>
+          
+          
+          
           <row>
            <entry valign="top"><constant>CURLOPT_TIMEVALUE</constant></entry>
            <entry valign="top">
-            设置一个<constant>CURLOPT_TIMECONDITION</constant>使用的时间戳，在默认状态下使用的是<parameter>CURL_TIMECOND_IFMODSINCE</parameter>。
+            秒数，从 1970年1月1日开始。这个时间会被 <constant>CURLOPT_TIMECONDITION</constant>使。默认使用<parameter>CURL_TIMECOND_IFMODSINCE</parameter>。
            </entry>
            <entry valign="top">
            </entry>
           </row>
          </tbody>
+         
+          <row>
+           <entry valign="top"><constant>CURLOPT_MAX_RECV_SPEED_LARGE</constant></entry>
+           <entry valign="top">
+            If a download exceeds this speed (counted in bytes per second) on
+            cumulative average during the transfer, the transfer will pause to
+            keep the average rate less than or equal to the parameter value.
+            Defaults to unlimited speed.
+           </entry>
+           <entry valign="top">
+            Added in cURL 7.15.5. Available since PHP 5.4.0.
+           </entry>
+          </row>
+          <row>
+           <entry valign="top"><constant>CURLOPT_MAX_SEND_SPEED_LARGE</constant></entry>
+           <entry valign="top">
+            If an upload exceeds this speed (counted in bytes per second) on
+            cumulative average during the transfer, the transfer will pause to
+            keep the average rate less than or equal to the parameter value.
+            Defaults to unlimited speed.
+           </entry>
+           <entry valign="top">
+            Added in cURL 7.15.5. Available since PHP 5.4.0.
+           </entry>
+          </row>
+          <row>
+           <entry valign="top"><constant>CURLOPT_SSH_AUTH_TYPES</constant></entry>
+           <entry valign="top">
+            A bitmask consisting of one or more of 
+            <constant>CURLSSH_AUTH_PUBLICKEY</constant>, 
+            <constant>CURLSSH_AUTH_PASSWORD</constant>, 
+            <constant>CURLSSH_AUTH_HOST</constant>, 
+            <constant>CURLSSH_AUTH_KEYBOARD</constant>. Set to 
+            <constant>CURLSSH_AUTH_ANY</constant> to let libcurl pick one.
+           </entry>
+           <entry valign="top">
+            Added in cURL 7.16.1. 
+           </entry>
+          </row>
+          <row>
+           <entry valign="top"><constant>CURLOPT_IPRESOLVE</constant></entry>
+           <entry valign="top">
+            Allows an application to select what kind of IP addresses to use when
+            resolving host names. This is only interesting when using host names that
+            resolve addresses using more than one version of IP, possible values are
+            <constant>CURL_IPRESOLVE_WHATEVER</constant>, 
+            <constant>CURL_IPRESOLVE_V4</constant>, 
+            <constant>CURL_IPRESOLVE_V6</constant>, by default
+            <constant>CURL_IPRESOLVE_WHATEVER</constant>.
+           </entry>
+           <entry valign="top">
+            Added in cURL 7.10.8.
+           </entry>
+          </row>
         </tgroup>
        </informaltable>
       </para>
       <para>
-       对于下面的这些<parameter>option</parameter>的可选参数，<parameter>value</parameter>应该被设置一个<type>string</type>类型的值：
+       对于下面的这些<parameter>option</parameter>，<parameter>value</parameter>应该被设置成 <type>string</type>：
        <informaltable>
         <tgroup cols="3">
          <thead>
           <row>
            <entry>选项</entry>
-           <entry>可选<parameter>value</parameter>值</entry>
+           <entry>设置的<parameter>value</parameter></entry>
            <entry>备注</entry>
           </row>
          </thead>
@@ -587,6 +824,7 @@
             一个保存着1个或多个用来让服务端验证的证书的文件名。这个参数仅仅在和<constant>CURLOPT_SSL_VERIFYPEER</constant>一起使用时才有意义。            .
            </entry>
            <entry valign="top">
+            可能需要绝对路径。
            </entry>
           </row>
           <row>
@@ -600,7 +838,7 @@
           <row>
            <entry valign="top"><constant>CURLOPT_COOKIE</constant></entry>
            <entry valign="top">
-            设定HTTP请求中<literal>"Cookie: "</literal>部分的内容。多个cookie用分号分隔，分号后带一个空格(例如， "<literal>fruit=apple; colour=red</literal>")。
+            设定 HTTP 请求中<literal>"Cookie: "</literal>部分的内容。多个 cookie 用分号分隔，分号后带一个空格(例如， "<literal>fruit=apple; colour=red</literal>")。
            </entry>
            <entry valign="top">
            </entry>
@@ -608,7 +846,7 @@
           <row>
            <entry valign="top"><constant>CURLOPT_COOKIEFILE</constant></entry>
            <entry valign="top">
-            包含cookie数据的文件名，cookie文件的格式可以是Netscape格式，或者只是纯HTTP头部信息存入文件。
+            包含 cookie 数据的文件名，cookie 文件的格式可以是 Netscape 格式，或者只是纯 HTTP 头部风格，存入文件。如果文件名是空的，不会加载 cookie，但 cookie 的处理仍旧启用。
            </entry>
            <entry valign="top">
            </entry>
@@ -616,7 +854,7 @@
           <row>
            <entry valign="top"><constant>CURLOPT_COOKIEJAR</constant></entry>
            <entry valign="top">
-            连接结束后保存cookie信息的文件。
+            连接结束后，比如，调用 curl_close 后，保存 cookie 信息的文件。
            </entry>
            <entry valign="top">
            </entry>
@@ -624,13 +862,18 @@
           <row>
            <entry valign="top"><constant>CURLOPT_CUSTOMREQUEST</constant></entry>
            <entry valign="top"><para>
-            使用一个自定义的请求信息来代替<literal>"GET"</literal>或<literal>"HEAD"</literal>作为HTTP请求。这对于执行<literal>"DELETE"</literal> 或者其他更隐蔽的HTTP请求。有效值如<literal>"GET"</literal>，<literal>"POST"</literal>，<literal>"CONNECT"</literal>等等。也就是说，不要在这里输入整个HTTP请求。例如输入<literal>"GET /index.html HTTP/1.0\r\n\r\n"</literal>是不正确的。
+            HTTP 请求时，使用自定义的 Method 来代替<literal>"GET"</literal>或<literal>"HEAD"</literal>。对 <literal>"DELETE"</literal> 或者其他更隐蔽的 HTTP 请求有用。
+            有效值如 <literal>"GET"</literal>，<literal>"POST"</literal>，<literal>"CONNECT"</literal>等等；也就是说，不要在这里输入整行 HTTP 请求。例如输入<literal>"GET /index.html HTTP/1.0\r\n\r\n"</literal>是不正确的。
             <note>
              <para>
-              在确定服务器支持这个自定义请求的方法前不要使用。
+              不确定服务器支持这个自定义方法则不要使用它。
              </para>
             </note>
-            </para></entry>
+            </para>
+           </entry>
+           
+           
+           
            <entry valign="top">
            </entry>
           </row>
@@ -642,35 +885,61 @@
            <entry valign="top">
            </entry>
           </row>
+          
+          
+          
+          
+          
           <row>
            <entry valign="top"><constant>CURLOPT_ENCODING</constant></entry>
            <entry valign="top">
-            HTTP请求头中<literal>"Accept-Encoding: "</literal>的值。支持的编码有<literal>"identity"</literal>，<literal>"deflate"</literal>和<literal>"gzip"</literal>。如果为空字符串<literal>""</literal>，请求头会发送所有支持的编码类型。
+            HTTP请求头中<literal>"Accept-Encoding: "</literal>的值。
+            这使得能够解码响应的内容。
+            支持的编码有<literal>"identity"</literal>，<literal>"deflate"</literal>和<literal>"gzip"</literal>。如果为空字符串<literal>""</literal>，会发送所有支持的编码类型。
            </entry>
            <entry valign="top">
-            在cURL 7.10中被加入。
+            在 cURL 7.10 中被加入。
            </entry>
           </row>
           <row>
            <entry valign="top"><constant>CURLOPT_FTPPORT</constant></entry>
            <entry valign="top">
-            这个值将被用来获取供FTP"POST"指令所需要的IP地址。"POST"指令告诉远程服务器连接到我们指定的IP地址。这个字符串可以是纯文本的IP地址、主机名、一个网络接口名（UNIX下）或者只是一个'-'来使用默认的IP地址。
+            这个值将被用来获取供FTP"PORT"指令所需要的IP地址。
+            "PORT" 指令告诉远程服务器连接到我们指定的IP地址。这个字符串可以是纯文本的IP地址、主机名、一个网络接口名（UNIX下）或者只是一个'-'来使用默认的 IP 地址。
            </entry>
            <entry valign="top">
            </entry>
           </row>
+          
+          
           <row>
            <entry valign="top"><constant>CURLOPT_INTERFACE</constant></entry>
            <entry valign="top">
-            网络发送接口名，可以是一个接口名、IP地址或者是一个主机名。
+            发送的网络接口（interface），可以是一个接口名、IP 地址或者是一个主机名。
            </entry>
            <entry valign="top">
+           </entry>
+          </row>
+          
+          
+          
+          
+          
+          <row>
+           <entry valign="top"><constant>CURLOPT_KEYPASSWD</constant></entry>
+           <entry valign="top">
+            使用 <constant>CURLOPT_SSLKEY</constant> 
+            或 <constant>CURLOPT_SSH_PRIVATE_KEYFILE</constant> 私钥时候的密码。
+           </entry>
+           <entry valign="top">
+            在 cURL 7.16.1 中添加。
            </entry>
           </row>
           <row>
            <entry valign="top"><constant>CURLOPT_KRB4LEVEL</constant></entry>
            <entry valign="top">
-            KRB4 (Kerberos 4) 安全级别。下面的任何值都是有效的(从低到高的顺序)：<literal>"clear"</literal>、<literal>"safe"</literal>、<literal>"confidential"</literal>、<literal>"private".</literal>。如果字符串和这些都不匹配，将使用<literal>"private"</literal>。这个选项设置为&null;时将禁用KRB4 安全认证。目前KRB4 安全认证只能用于FTP传输。
+            KRB4 (Kerberos 4) 安全级别。下面的任何值都是有效的(从低到高的顺序)：<literal>"clear"</literal>、<literal>"safe"</literal>、<literal>"confidential"</literal>、<literal>"private".</literal>。如果字符串以上这些，将使用<literal>"private"</literal>。
+            这个选项设置为 &null; 时将禁用 KRB4 安全认证。目前 KRB4 安全认证只能用于 FTP 传输。
            </entry>
            <entry valign="top">
            </entry>
@@ -678,15 +947,31 @@
           <row>
            <entry valign="top"><constant>CURLOPT_POSTFIELDS</constant></entry>
            <entry valign="top">
-            全部数据使用HTTP协议中的"POST"操作来发送。要发送文件，在文件名前面加上<literal>@</literal>前缀并使用完整路径。这个参数可以通过urlencoded后的字符串类似'<literal>para1=val1&amp;para2=val2&amp;...</literal>'或使用一个以字段名为键值，字段数据为值的数组。如果<parameter>value</parameter>是一个数组，<literal>Content-Type</literal>头将会被设置成<literal>multipart/form-data</literal>。
+            <simpara>
+            全部数据使用HTTP协议中的 "POST" 操作来发送。
+            要发送文件，在文件名前面加上<literal>@</literal>前缀并使用完整路径。
+            文件类型可在文件名后以 '<literal>;type=mimetype</literal>' 的格式指定。
+            
+            这个参数可以是 urlencoded 后的字符串，类似'<literal>para1=val1&amp;para2=val2&amp;...</literal>'，也可以使用一个以字段名为键值，字段数据为值的数组。
+            如果<parameter>value</parameter>是一个数组，<literal>Content-Type</literal>头将会被设置成<literal>multipart/form-data</literal>。
+            </simpara>
+            <simpara>
+             从 PHP 5.2.0 开始，使用 <literal>@</literal>  前缀传递文件时，<parameter>value</parameter> 必须是个数组。
+            </simpara>
+            <simpara>
+             从 PHP 5.5.0 开始,  <literal>@</literal> 前缀已被废弃，文件可通过 <classname>CURLFile</classname> 发送。
+             设置 <constant>CURLOPT_SAFE_UPLOAD</constant> 为 &true; 可禁用  <literal>@</literal>  前缀发送文件，以增加安全性。
+            </simpara>
            </entry>
+           
+           
            <entry valign="top">
            </entry>
           </row>
           <row>
            <entry valign="top"><constant>CURLOPT_PROXY</constant></entry>
            <entry valign="top">
-            HTTP代理通道。
+            HTTP 代理通道。
            </entry>
            <entry valign="top">
            </entry>
@@ -702,16 +987,26 @@
           <row>
            <entry valign="top"><constant>CURLOPT_RANDOM_FILE</constant></entry>
            <entry valign="top">
-            一个被用来生成SSL随机数种子的文件名。
+            一个被用来生成 SSL 随机数种子的文件名。
            </entry>
            <entry valign="top">
            </entry>
           </row>
+          
+          
+          
+          
+          
+          
           <row>
            <entry valign="top"><constant>CURLOPT_RANGE</constant></entry>
            <entry valign="top">
             以<literal>"X-Y"</literal>的形式，其中X和Y都是可选项获取数据的范围，以字节计。HTTP传输线程也支持几个这样的重复项中间用逗号分隔如<literal>"X-Y,N-M"</literal>。
            </entry>
+           
+           
+           
+           
            <entry valign="top">
            </entry>
           </row>
@@ -721,6 +1016,41 @@
             在HTTP请求头中<literal>"Referer: "</literal>的内容。
            </entry>
            <entry valign="top">
+           </entry>
+          </row>
+          <row>
+           <entry valign="top"><constant>CURLOPT_SSH_HOST_PUBLIC_KEY_MD5</constant></entry>
+           <entry valign="top">
+            包含 32 位长的 16 进制数值。这个字符串应该是远程主机公钥（public key） 的 MD5 校验值。在不匹配的时候 libcurl 会拒绝连接。
+            此选项仅用于  SCP 和 SFTP 的传输。
+           </entry>
+           <entry valign="top">
+            cURL 7.17.1 中添加。
+           </entry>
+          </row>
+          
+          <row>
+           <entry valign="top"><constant>CURLOPT_SSH_PUBLIC_KEYFILE</constant></entry>
+           <entry valign="top">
+            The file name for your public key. If not used, libcurl defaults to 
+            $HOME/.ssh/id_dsa.pub if the HOME environment variable is set, 
+            and just "id_dsa.pub" in the current directory if HOME is not set.
+           </entry>
+           <entry valign="top">
+            Added in cURL 7.16.1. 
+           </entry>
+          </row>
+          <row>
+           <entry valign="top"><constant>CURLOPT_SSH_PRIVATE_KEYFILE</constant></entry>
+           <entry valign="top">
+            The file name for your private key. If not used, libcurl defaults to 
+            $HOME/.ssh/id_dsa if the HOME environment variable is set, 
+            and just "id_dsa" in the current directory if HOME is not set. 
+            If the file is password-protected, set the password with 
+            <constant>CURLOPT_KEYPASSWD</constant>.
+           </entry>
+           <entry valign="top">
+            Added in cURL 7.16.1. 
            </entry>
           </row>
           <row>
@@ -734,7 +1064,7 @@
           <row>
            <entry valign="top"><constant>CURLOPT_SSLCERT</constant></entry>
            <entry valign="top">
-            一个包含PEM格式证书的文件名。
+            一个包含 PEM 格式证书的文件名。
            </entry>
            <entry valign="top">
            </entry>
@@ -753,7 +1083,7 @@
             证书的类型。支持的格式有<literal>"PEM"</literal> (默认值), <literal>"DER"</literal>和<literal>"ENG"</literal>。
            </entry>
            <entry valign="top">
-            在cURL 7.9.3中被加入。
+            在 cURL 7.9.3中 被加入。
            </entry>
           </row>
           <row>
@@ -775,15 +1105,21 @@
           <row>
            <entry valign="top"><constant>CURLOPT_SSLKEY</constant></entry>
            <entry valign="top">
-            包含SSL私钥的文件名。
+            包含 SSL 私钥的文件名。
            </entry>
+           
+           
+           
+           
+           
+           
            <entry valign="top">
            </entry>
           </row>
           <row>
            <entry valign="top"><constant>CURLOPT_SSLKEYPASSWD</constant></entry>
            <entry valign="top"><para>
-            在<constant>CURLOPT_SSLKEY</constant>中指定了的SSL私钥的密码。
+            在 <constant>CURLOPT_SSLKEY</constant>中指定了的SSL私钥的密码。
             <note>
              <para>
               由于这个选项包含了敏感的密码信息，记得保证这个PHP脚本的安全。
@@ -804,11 +1140,16 @@
           <row>
            <entry valign="top"><constant>CURLOPT_URL</constant></entry>
            <entry valign="top">
-            需要获取的URL地址，也可以在<function>curl_init</function>函数中设置。
+            需要获取的 URL 地址，也可以在<function>curl_init</function> 初始化会话的时候。
            </entry>
            <entry valign="top">
            </entry>
           </row>
+          
+          
+          
+          
+          
           <row>
            <entry valign="top"><constant>CURLOPT_USERAGENT</constant></entry>
            <entry valign="top">
@@ -829,8 +1170,7 @@
         </tgroup>
        </informaltable>
       </para>
-      <para>
-        对于下面的这些<parameter>option</parameter>的可选参数，<parameter>value</parameter>应该被设置一个数组：
+      <para>以下<parameter>option</parameter>，<parameter>value</parameter>应该被设置成数组：
        <informaltable>
         <tgroup cols="3">
          <thead>
@@ -844,16 +1184,21 @@
           <row>
            <entry valign="top"><constant>CURLOPT_HTTP200ALIASES</constant></entry>
            <entry valign="top">
-            200响应码数组，数组中的响应吗被认为是正确的响应，否则被认为是错误的。
+            HTTP 200 响应码数组，数组中的响应码被认为是正确的响应，而非错误。
            </entry>
            <entry valign="top">
-            在cURL 7.10.3中被加入。
+            在 cURL 7.10.3 中被加入。
            </entry>
           </row>
+          
+          
+          
+          
+          
           <row>
            <entry valign="top"><constant>CURLOPT_HTTPHEADER</constant></entry>
            <entry valign="top">
-            一个用来设置HTTP头字段的数组。使用如下的形式的数组进行设置：
+            设置 HTTP 头字段的数组。格式：
             <code>
              array('Content-type: text/plain', 'Content-length: 100')
             </code>
@@ -864,7 +1209,7 @@
           <row>
            <entry valign="top"><constant>CURLOPT_POSTQUOTE</constant></entry>
            <entry valign="top">
-            在FTP请求执行完成后，在服务器上执行的一组FTP命令。
+            在 FTP 请求执行完成后，在服务器上执行的一组array格式的 FTP 命令。
            </entry>
            <entry valign="top">
            </entry>
@@ -872,7 +1217,7 @@
           <row>
            <entry valign="top"><constant>CURLOPT_QUOTE</constant></entry>
            <entry valign="top">
-            一组先于FTP请求的在服务器上执行的FTP命令。
+            一组先于 FTP 请求的在服务器上执行的FTP命令。
            </entry>
            <entry valign="top">
            </entry>
@@ -882,7 +1227,7 @@
        </informaltable>
       </para>
       <para>
-        对于下面的这些<parameter>option</parameter>的可选参数，<parameter>value</parameter>应该被设置一个流资源
+以下 <parameter>option</parameter>，<parameter>value</parameter>应该被设置成流资源
         （例如使用<function>fopen</function>）：
        <informaltable>
         <tgroup cols="3">
@@ -893,28 +1238,32 @@
           </row>
          </thead>
          <tbody>
+          
+          
+          
+          
           <row>
            <entry valign="top"><constant>CURLOPT_FILE</constant></entry>
            <entry valign="top">
-            设置输出文件的位置，值是一个资源类型，默认为<literal>STDOUT</literal> (浏览器)。
+            设置输出文件，默认为<literal>STDOUT</literal> (浏览器)。
            </entry>
           </row>
           <row>
            <entry valign="top"><constant>CURLOPT_INFILE</constant></entry>
            <entry valign="top">
-            在上传文件的时候需要读取的文件地址，值是一个资源类型。
+            上传文件时需要读取的文件。
            </entry>
           </row>
           <row>
            <entry valign="top"><constant>CURLOPT_STDERR</constant></entry>
            <entry valign="top">
-            设置一个错误输出地址，值是一个资源类型，取代默认的<literal>STDERR</literal>。
+            错误输出的地址，取代默认的<literal>STDERR</literal>。
            </entry>
           </row>
           <row>
            <entry valign="top"><constant>CURLOPT_WRITEHEADER</constant></entry>
            <entry valign="top">
-            设置header部分内容的写入的文件地址，值是一个资源类型。
+            设置 header 部分内容的写入的文件地址。
            </entry>
           </row>
          </tbody>
@@ -922,20 +1271,26 @@
        </informaltable>
       </para>
       <para>
-       对于下面的这些<parameter>option</parameter>的可选参数，<parameter>value</parameter>应该被设置为一个回调函数名：
+       以下<parameter>option</parameter> 的 <parameter>value</parameter>应该是有效的函数或者闭包：
        <informaltable>
         <tgroup cols="3">
          <thead>
           <row>
            <entry>选项</entry>
-           <entry>可选<parameter>value</parameter>值</entry>
+           <entry><parameter>value</parameter>值</entry>
           </row>
          </thead>
          <tbody>
+          
+          
+          
+          
+          
+          
           <row>
            <entry valign="top"><constant>CURLOPT_HEADERFUNCTION</constant></entry>
            <entry valign="top">
-            设置一个回调函数，这个函数有两个参数，第一个是cURL的资源句柄，第二个是输出的header数据。header数据的输出必须依赖这个函数，返回已写入的数据大小。
+            设置一个回调函数，这个函数有两个参数，第一个是cURL的资源句柄，第二个是输出的 header 数据。header数据的输出必须依赖这个函数，返回已写入的数据大小。
            </entry>
           </row>
           <row>
@@ -944,12 +1299,34 @@
             设置一个回调函数，有三个参数，第一个是cURL的资源句柄，第二个是一个密码提示符，第三个参数是密码长度允许的最大值。返回密码的值。
            </entry>
           </row>
+          
+          
+          
+          
+          
           <row>
            <entry valign="top"><constant>CURLOPT_PROGRESSFUNCTION</constant></entry>
            <entry valign="top">
-            设置一个回调函数，有三个参数，第一个是cURL的资源句柄，第二个是一个文件描述符资源，第三个是长度。返回包含的数据。
+            <para>
+            设置一个回调函数，有五个参数，第一个是cURL的资源句柄，第二个是预计要下载的总字节（bytes）数。第三个是目前下载的字节数，第四个是预计传输中总上传字节数，第五个是目前上传的字节数。
+            </para>
+            <note>
+             <para>
+              只有设置 <constant>CURLOPT_NOPROGRESS</constant>
+              选项为 &false; 时才会调用这个回调函数。
+             </para>
+            </note>
+              <para>
+               返回非零值将中断传输。
+               传输将设置 <constant>CURLE_ABORTED_BY_CALLBACK</constant> 错误。
+            </para>
            </entry>
           </row>
+          
+          
+          
+          
+          
           <row>
            <entry valign="top"><constant>CURLOPT_READFUNCTION</constant></entry>
            <entry valign="top">
@@ -959,12 +1336,37 @@
 resource 读取。返回空字符串作为 <literal>EOF</literal>（文件结束） 信号。
            </entry>
           </row>
+          
+          
+          
           <row>
            <entry valign="top"><constant>CURLOPT_WRITEFUNCTION</constant></entry>
            <entry valign="top">
             回调函数名。该函数应接受两个参数。第一个是 cURL resource；第二个是要写入的数据字符串。数
-据必须在函数中被保存。函数必须返回准确的传入的要写入数据的字节数，否则传输会被一个错误所中
+据必须在函数中被保存。
+            函数必须准确返回写入数据的字节数，否则传输会被一个错误所中
 断。
+           </entry>
+          </row>
+         </tbody>
+        </tgroup>
+       </informaltable>
+      </para>
+      <para>
+       其他值：
+       <informaltable>
+        <tgroup cols="3">
+         <thead>
+          <row>
+           <entry>Option</entry>
+           <entry>设置 <parameter>value</parameter> 为</entry>
+          </row>
+         </thead>
+         <tbody>
+          <row>
+           <entry valign="top"><constant>CURLOPT_SHARE</constant></entry>
+           <entry valign="top"> <function>curl_share_init</function> 返回的结果。
+            使 cURL 可以处理共享句柄里的数据。
            </entry>
           </row>
          </tbody>
@@ -996,6 +1398,37 @@ resource 读取。返回空字符串作为 <literal>EOF</literal>（文件结束
       </row>
      </thead>
      <tbody>
+      
+      <row>
+       <entry>5.6.0</entry>
+       <entry>
+       默认 <constant>CURLOPT_SAFE_UPLOAD</constant>为  &true; 。
+       </entry>
+      </row>
+      <row>
+       <entry>5.6.0</entry>
+       <entry>
+        移出 <constant>CURLOPT_CLOSEPOLICY</constant>和相关的值。
+       </entry>
+      </row>
+      <row>
+       <entry>5.5.0</entry>
+       <entry>
+        添加 cURL 资源作为 <constant>CURLOPT_PROGRESSFUNCTION</constant> 回调函数的第一个参数。
+       </entry>
+      </row>
+      <row>
+       <entry>5.5.0</entry>
+       <entry>
+        引入 <constant>CURLOPT_SHARE</constant>。
+       </entry>
+      </row>
+      <row>
+       <entry>5.3.0</entry>
+       <entry>
+        引入 <constant>CURLOPT_PROGRESSFUNCTION</constant>。
+       </entry>
+      </row>
       <row>
        <entry>5.2.10</entry>
        <entry>
@@ -1060,7 +1493,7 @@ curl_close($ch);
   </para>
   <para>
    <example>
-    <title>上传文件</title>
+    <title>上传文件 (PHP 5.5.0 后被废弃)</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -1076,6 +1509,7 @@ $data = array('name' => 'Foo', 'file' => '@/home/user/test.png');
 
 curl_setopt($ch, CURLOPT_URL, 'http://localhost/upload.php');
 curl_setopt($ch, CURLOPT_POST, 1);
+curl_setopt($ch, CURLOPT_SAFE_UPLOAD, false); //  PHP 5.6.0 后必须开启
 curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
 
 curl_exec($ch);
