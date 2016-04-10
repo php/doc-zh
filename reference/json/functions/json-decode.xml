@@ -34,6 +34,7 @@
       <para>
        这个函数仅能处理 UTF-8 编码的数据。
       </para>
+      &json.implementation.superset;
      </listitem>
     </varlistentry>
     <varlistentry>
@@ -71,10 +72,9 @@
   <para>
    Returns the value encoded in <parameter>json</parameter> in appropriate
    PHP type. Values <literal>true</literal>, <literal>false</literal> and
-   <literal>null</literal> (case-insensitive) are returned as &true;, &false;
-   and &null; respectively. &null; is returned if the
-   <parameter>json</parameter> cannot be decoded or if the encoded
-   data is deeper than the recursion limit.
+   <literal>null</literal> are returned as &true;, &false; and &null;
+   respectively. &null; is returned if the <parameter>json</parameter> cannot
+   be decoded or if the encoded data is deeper than the recursion limit.
   </para>
  </refsect1>
  
@@ -232,7 +232,7 @@ Last error: JSON_ERROR_DEPTH
     <programlisting role="php">
 <![CDATA[
 <?php
-$json = '12345678901234567890';
+$json = '{"number": 12345678901234567890}';
 
 var_dump(json_decode($json));
 var_dump(json_decode($json, false, 512, JSON_BIGINT_AS_STRING));
@@ -243,8 +243,14 @@ var_dump(json_decode($json, false, 512, JSON_BIGINT_AS_STRING));
     &example.outputs;
     <screen>
 <![CDATA[
-float(1.2345678901235E+19)
-string(20) "12345678901234567890"
+object(stdClass)#1 (1) {
+  ["number"]=>
+  float(1.2345678901235E+19)
+}
+object(stdClass)#1 (1) {
+  ["number"]=>
+  string(20) "12345678901234567890"
+}
 ]]>
     </screen>
    </example>
@@ -278,6 +284,14 @@ string(20) "12345678901234567890"
       </row>
      </thead>
      <tbody>
+     <row>
+       <entry>5.6.0</entry>
+       <entry>
+        Invalid non-lowercased variants of the <literal>true</literal>,
+        <literal>false</literal> and <literal>null</literal> literals are no
+        longer accepted as valid input, and will generate warnings.
+       </entry>
+      </row>
       <row>
        <entry>5.4.0</entry>
        <entry>
