@@ -1,254 +1,111 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
 <!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
+<!-- EN-Revision: 96c9d88bad9a7d7d44bfb7f26c226df7ee9ddf26 Maintainer: jhdxr Status: ready -->
   <refentry xml:id="function.stream-wrapper-register" xmlns="http://docbook.org/ns/docbook">
    <refnamediv>
-    <refname>stream_register_wrapper</refname>
+    <refname>stream_wrapper_register</refname>
     <refpurpose>注册一个用 PHP 类实现的 URL 封装协议</refpurpose>
    </refnamediv>
-   <refsect1>
-    <title>说明</title>
-    <methodsynopsis>
-     <type>boolean</type><methodname>stream_register_wrapper</methodname>
+   <refsect1 role="description"><!-- {{{ -->
+  &reftitle.description;
+  <methodsynopsis>
+     <type>bool</type><methodname>stream_wrapper_register</methodname>
      <methodparam><type>string</type><parameter>protocol</parameter></methodparam>
      <methodparam><type>string</type><parameter>classname</parameter></methodparam>
+     <methodparam choice="opt"><type>int</type><parameter>flags</parameter> <initializer>0</initializer></methodparam>
     </methodsynopsis>
     <para>
-     <function>stream_register_wrapper</function>
      允许用户实现自定义的协议处理器和流，用于所有其它的文件系统函数中（例如
      <function>fopen</function>，<function>fread</function> 等）。
     </para>
-    <para>
-     要实现一个封装协议，需要按照如下定义声明一个包含有一些函数的类。当有人对你的流使用
-     fopen 时，PHP 将创建一个 <parameter>classname</parameter>
-     的实例并调用该实例的方法。必须严格按照如下的描述实现方法 - 否则将导致不明确的行为。
-    </para>
-    <para>
-     如果 <parameter>protocol</parameter>
-     已经有了处理协议，则 <function>stream_register_wrapper</function>
-     将返回 &false;。
-    </para>
-
-    <methodsynopsis>
-     <type>boolean</type><methodname>stream_open</methodname>
-     <methodparam><type>string</type><parameter>path</parameter></methodparam>
-     <methodparam><type>string</type><parameter>mode</parameter></methodparam>
-     <methodparam><type>int</type><parameter>options</parameter></methodparam>
-     <methodparam><type>string</type><parameter>opened_path</parameter></methodparam>
-    </methodsynopsis>
-    <para>
-     当你的流对象被创建之后立即会调用此方法。<parameter>path</parameter>
-     指定了传入 <function>fopen</function> 以及此对象需要取回的 URL。可以用
-     <function>parse_url</function> 来将此 URL 分割成几部分。
-    </para>
-    <para>
-     <parameter>mode</parameter> 用来打开文件的模式，和
-     <function>fopen</function> 中的一样。你有责任检查
-     <parameter>mode</parameter> 对于所请求的
-     <parameter>path</parameter> 是否合法。
-    </para>
-    <para>
-     <parameter>options</parameter> 保存了通过流 API
-     设定的附加标志。可以保存以下一个值或者用 OR 合并的多个值。
-     <informaltable>
-      <tgroup cols="2">
-       <thead>
-        <row>
-         <entry>标志</entry>
-         <entry>说明</entry>
-        </row>
-       </thead>
-       <tbody>
-        <row>
-         <entry>STREAM_USE_PATH</entry>
-         <entry>如果 <parameter>path</parameter> 是相对路径，则用
-         include_path 搜索资源。
-         </entry>
-        </row>
-        <row>
-         <entry>STREAM_REPORT_ERRORS</entry>
-         <entry>如果设定了本标志，你有责任在打开流时用 <function>trigger_error</function>
-         来唤起错误。如果没有设定这个标志，那么你不需要唤起任何错误。
-         </entry>
-        </row>
-       </tbody>
-      </tgroup>
-     </informaltable>
-    </para>
-    <para>
-     如果成功打开了 <parameter>path</parameter>，并且在 <parameter>options</parameter>
-     中设定了 STREAM_USE_PATH，你需要将 <parameter>opened_path</parameter>
-     设定为实际被打开的文件／资源的完整路径。
-    </para>
-    <para>
-     如果成功打开了所请求的资源，应该返回
-     &true;，否则返回 &false;。
-    </para>
-
-    <methodsynopsis>
-     <type>void</type><methodname>stream_close</methodname>
-     <methodparam><type>void</type><parameter></parameter></methodparam>
-    </methodsynopsis>
-    <para>
-     本方法在流关闭时被调用，使用
-     <function>fclose</function>。必须释放被流锁定或分配的任何资源。
-    </para>
-
-    <methodsynopsis>
-     <type>string</type><methodname>stream_read</methodname>
-     <methodparam><type>int</type><parameter>count</parameter></methodparam>
-    </methodsynopsis>
-    <para>
-     当对流进行 <function>fread</function> 和 <function>fgets</function> 
-     操作时本方法被调用。必须从当前读写位置以字符串返回最多
-     <parameter>count</parameter> 字节的数据。如果可用数据少于 <parameter>count</parameter>
-     字节，则返回尽可能多的数据。如果没有可供返回的数据，返回 &false;
-     或者空字符串。必须用成功读取的字节数去更新流的读写位置。
-    </para>
-
-    <methodsynopsis>
-     <type>int</type><methodname>stream_write</methodname>
-     <methodparam><type>string</type><parameter>data</parameter></methodparam>
-    </methodsynopsis>
-    <para>
-     当对流进行 <function>fwrite</function>
-     操作时本方法被调用。必须将 <parameter>data</parameter>
-     储存到你的流使用的底层存储空间去。如果没有足够的空间了，则试着保存尽可能多的字节。应该返回成功被保存入流的字节数，或者没有保存时返回
-     0。必须用成功写入的字节数去更新流的读写位置。
-    </para>
+    </refsect1><!-- }}} -->
    
-    <methodsynopsis>
-     <type>boolean</type><methodname>stream_eof</methodname>
-     <methodparam><type>void</type><parameter></parameter></methodparam>
-    </methodsynopsis>
+   <refsect1 role="parameters">
+  &reftitle.parameters;
     <para>
-     当对流进行 <function>feof</function>
-     操作时本方法被调用。如果读写位置到了流的尽头或者没有更多数据可读时返回
-     &true;，否则返回 &false;。
-    </para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>protocol</parameter></term>
+     <listitem>
+      <para>
+       待注册的封装的名字。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>classname</parameter></term>
+     <listitem>
+      <para>
+       实现了<parameter>protocol</parameter>的类名。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>flags</parameter></term>
+     <listitem>
+      <para>
+       Should be set to <constant>STREAM_IS_URL</constant> if
+       <parameter>protocol</parameter> is a URL protocol. Default is 0, local
+       stream.
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+   
+   
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   &return.success;
+  </para>
+  <para>
+    当 <parameter>protocol</parameter> 已经有处理者时，<function>stream_wrapper_register</function> 将返回&false; 
+  </para>
+ </refsect1>
 
-    <methodsynopsis>
-     <type>int</type><methodname>stream_tell</methodname>
-     <methodparam><type>void</type><parameter></parameter></methodparam>
-    </methodsynopsis>
-    <para>
-     当对流进行 <function>ftell</function>
-     操作时本方法被调用。应该返回流的当前读写位置。
-    </para>
+ <refsect1 role="changelog"><!-- {{{ -->
+  &reftitle.changelog;
+  <para>
+   <informaltable>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>&Version;</entry>
+       <entry>&Description;</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>5.2.4</entry>
+       <entry>
+        添加 <parameter>flags</parameter> 参数.
+       </entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </informaltable>
+  </para>
+ </refsect1><!-- }}} -->
+ 
 
-    <methodsynopsis>
-     <type>boolean</type><methodname>stream_seek</methodname>
-     <methodparam><type>int</type><parameter>offset</parameter></methodparam>
-     <methodparam><type>int</type><parameter>whence</parameter></methodparam>
-    </methodsynopsis>
-    <para>
-     当对流进行 <function>fseek</function>
-     操作时本方法被调用。应该根据 <parameter>offset</parameter> 和
-     <parameter>whence</parameter> 来更新流的读写位置。这些参数的更多信息见
-     <function>fseek</function>。如果位置成功更新了则返回 &true;，否则返回 &false;。
-    </para>
-
-    <methodsynopsis>
-     <type>boolean</type><methodname>stream_flush</methodname>
-     <methodparam><type>void</type><parameter></parameter></methodparam>
-    </methodsynopsis>
-    <para>
-     当对流进行 <function>fflush</function>
-     操作时本方法被调用。如果你在流中缓存了数据还没有写入底层存储空间时，那现在应该做了。如果缓存数据被成功保存（或没有数据可供保存）时返回
-     &true;，当数据无法被保存时返回 &false;。
-    </para>
-
-    <para>
-     下面的例子实现了一个 var://
-     协议处理器，可以允许使用标准的文件系统流函数来对指定的全局变量进行读写操作，例如
-     <function>fread</function>。var:// 协议的实现如下，给出
-     url "var://foo" 将可以读写 $GLOBALS["foo"]。
-
-     <example> 
-      <title>读写全局变量的流</title>
-      <programlisting role="php">
+ <refsect1 role="examples"><!-- {{{ -->
+  &reftitle.examples;
+  <para>
+   <example>
+    <title>如何注册一个 stream wrapper</title>
+    <programlisting role="php">
 <![CDATA[
-class VariableStream {
-    var $position;
-    var $varname;
-   
-    function stream_open($path, $mode, $options, &$opened_path)
-    {
-        $url = parse_url($path);
-        $this->varname = $url["host"];
-        $this->position = 0;
-        
-        return true;
-    }
-
-    function stream_read($count)
-    {
-        $ret = substr($GLOBALS[$this->varname], $this->position, $count);
-        $this->position += strlen($ret);
-        return $ret;
-    }
-
-    function stream_write($data)
-    {
-        $left = substr($GLOBALS[$this->varname], 0, $this->position);
-        $right = substr($GLOBALS[$this->varname], $this->position + strlen($data));
-        $GLOBALS[$this->varname] = $left . $data . $right;
-        $this->position += strlen($data);
-        return strlen($data);
-    }
-
-    function stream_tell()
-    {
-        return $this->position;
-    }
-
-    function stream_eof()
-    {
-        return $this->position >= strlen($GLOBALS[$this->varname]);
-    }
-
-    function stream_seek($offset, $whence)
-    {
-        switch($whence) {
-            case SEEK_SET:
-                if ($offset < strlen($GLOBALS[$this->varname]) && $offset >= 0) {
-                     $this->position = $offset;
-                     return true;
-                } else {
-                     return false;
-                }
-                break;
-                
-            case SEEK_CUR:
-                if ($offset >= 0) {
-                     $this->position += $offset;
-                     return true;
-                } else {
-                     return false;
-                }
-                break;
-                
-            case SEEK_END:
-                if (strlen($GLOBALS[$this->varname]) + $offset >= 0) {
-                     $this->position = strlen($GLOBALS[$this->varname]) + $offset;
-                     return true;
-                } else {
-                     return false;
-                }
-                break;
-                
-            default:
-                return false;
-        }
-    }
+<?php
+$existed = in_array("var", stream_get_wrappers());
+if ($existed) {
+    stream_wrapper_unregister("var");
 }
-
-stream_register_wrapper("var", "VariableStream")
-    or die("Failed to register protocol");
-
+stream_wrapper_register("var", "VariableStream");
 $myvar = "";
-    
+
 $fp = fopen("var://myvar", "r+");
 
 fwrite($fp, "line1\n");
@@ -256,19 +113,50 @@ fwrite($fp, "line2\n");
 fwrite($fp, "line3\n");
 
 rewind($fp);
-while(!feof($fp)) {
-    echo fgets($fp)
+while (!feof($fp)) {
+    echo fgets($fp);
 }
 fclose($fp);
 var_dump($myvar);
 
+if ($existed) {
+    stream_wrapper_restore("var");
+}
+
+?>
 ]]>
-      </programlisting>
-     </example>
-    </para>
-  
-   </refsect1>
-  </refentry>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+line1
+line2
+line3
+string(18) "line1
+line2
+line3
+"
+]]>
+    </screen>
+   </example>
+  </para>
+ </refsect1><!-- }}} -->
+
+ <refsect1 role="seealso"><!-- {{{ -->
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member>The <xref linkend="class.streamwrapper" /> prototype class</member>
+    <member><xref linkend="stream.streamwrapper.example-1" /></member>
+    <member><function>stream_wrapper_unregister</function></member>
+    <member><function>stream_wrapper_restore</function></member>
+    <member><function>stream_get_wrappers</function></member>
+   </simplelist>
+  </para>
+ </refsect1><!-- }}} -->
+
+
+</refentry>
 
 
 <!-- Keep this comment at the end of the file
