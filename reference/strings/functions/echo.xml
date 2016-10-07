@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 34593e90612e01553a6a3f6f765698344be89c3b Maintainer: daijie Status: ready -->
+<!-- EN-Revision: 5acb71cfab3b71a44b752afaabdfa785f1776c20 Maintainer: daijie Status: ready -->
 <refentry xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://docbook.org/ns/docbook" xml:id="function.echo">
  <refnamediv>
   <refname>echo</refname>
@@ -15,7 +15,7 @@
    <methodparam choice="opt"><type>string</type><parameter>...</parameter></methodparam>
   </methodsynopsis>
   <simpara>
-   输出所有参数。
+   输出所有参数。不会换行。
   </simpara>
   <para>
    <function>echo</function> 不是一个函数（它是一个语言结构），
@@ -34,6 +34,10 @@ I have <?=$foo?> foo.
 ]]>
     </programlisting>
    </informalexample>
+  </para>
+  <para>
+   和 <literal>print</literal> 的唯一不同之处是，
+   <literal>echo</literal> 接受参数列表。
   </para>
  </refsect1>
 
@@ -103,7 +107,8 @@ echo 'foo is $foo'; // foo is $foo
 echo $foo;          // foobar
 echo $foo,$bar;     // foobarbarbaz
 
-// Some people prefer passing multiple parameters to echo over concatenation.
+// Strings can either be passed individually as multiple arguments or
+// concatenated together and passed as a single argument
 echo 'This ', 'string ', 'was ', 'made ', 'with multiple parameters.', chr(10);
 echo 'This ' . 'string ' . 'was ' . 'made ' . 'with concatenation.' . "\n";
 
@@ -132,6 +137,30 @@ echo $some_var ? 'true': 'false'; // changing the statement around
  <refsect1 role="notes">
   &reftitle.notes;
   &note.language-construct;
+  <tip>
+   <para>
+    相对 <function>echo</function> 中拼接字符串而言，传递多个参数比较好，考虑到了 PHP 中连接运算符（“.”）的优先级。
+    传入多个参数，不需要圆括号保证优先级：
+   </para>
+   <programlisting role="php">
+<![CDATA[
+<?php
+echo "Sum: ", 1 + 2;
+echo "Hello ", isset($name) ? $name : "John Doe", "!";
+]]>
+   </programlisting>
+
+   <para>
+    如果是拼接的，相对于加号和三目元算符，连接运算符（“.”）具有更高优先级。为了正确性，必须使用圆括号：
+   </para>
+   <programlisting role="php">
+<![CDATA[
+<?php
+echo 'Sum: ' . (1 + 2);
+echo 'Hello ' . (isset($name) ? $name : 'John Doe') . '!';
+]]>
+   </programlisting>
+  </tip>
  </refsect1>
 
   <refsect1 role="seealso">
