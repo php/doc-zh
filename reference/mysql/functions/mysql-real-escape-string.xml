@@ -9,12 +9,23 @@
      转义 SQL 语句中使用的字符串中的特殊字符，并考虑到连接的当前字符集
     </refpurpose>
    </refnamediv>
-   <refsect1>
-    <title>说明</title>
+   
+   <refsynopsisdiv>
+  <warning>
+   &mysql.alternative.note;
+   <simplelist role="alternatives">
+    <member><function>mysqli_real_escape_string</function></member>
+    <member><methodname>PDO::quote</methodname></member>
+   </simplelist>
+  </warning>
+ </refsynopsisdiv>
+   
+   <refsect1 role="description">
+  &reftitle.description;
      <methodsynopsis>
       <type>string</type><methodname>mysql_real_escape_string</methodname>
       <methodparam><type>string</type><parameter>unescaped_string</parameter></methodparam>
-      <methodparam choice="opt"><type>resource</type><parameter>link_identifier</parameter></methodparam>
+      <methodparam choice="opt"><type>resource</type><parameter>link_identifier</parameter><initializer>NULL</initializer></methodparam>
      </methodsynopsis>
     <para>
      本函数将
@@ -22,41 +33,201 @@
      中的特殊字符转义，并计及连接的当前字符集，因此可以安全用于
      <function>mysql_query</function>。
     </para>
-    <note>
-     <simpara>
-      <function>mysql_real_escape_string</function> 并不转义
-      <literal>%</literal> 和 <literal>_</literal>。
-     </simpara>
-    </note>
+
+    <para>
+   <function>mysql_real_escape_string</function> 调用mysql库的函数
+   mysql_real_escape_string, 在以下字符前添加反斜杠:
+   <literal>\x00</literal>, <literal>\n</literal>,
+   <literal>\r</literal>, <literal>\</literal>, <literal>'</literal>,
+   <literal>"</literal> 和 <literal>\x1a</literal>.
+  </para>
+  <para>
+   为了安全起见，在像MySQL传送查询前，必须调用这个函数（除了少数例外情况）。
+  </para>
+  
+  <caution>
+   <title>安全提示: 默认字符集</title>
+   <para>
+    The character set must be set either at the server level, or with
+    the API function <function>mysql_set_charset</function> for it to affect
+    <function>mysql_real_escape_string</function>. See the concepts section
+    on <link linkend="mysqlinfo.concepts.charset">character sets</link> for
+    more information.
+   </para>
+  </caution>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>unescaped_string</parameter></term>
+     <listitem>
+      <para>
+       The string that is to be escaped.
+      </para>
+     </listitem>
+    </varlistentry>
+    &mysql.linkid.description;
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   Returns the escaped string, or &false; on error.
+  </para>
+ </refsect1>
+
+ <refsect1 role="errors">
+  &reftitle.errors;
+  <para>
+   Executing this function without a MySQL connection present will
+   also emit <constant>E_WARNING</constant> level PHP errors. Only
+   execute this function with a valid MySQL connection present.
+  </para>
+ </refsect1>
+ 
+ <refsect1 role="examples">
+  &reftitle.examples;
+
     <para>
      <example>
       <title><function>mysql_real_escape_string</function> 例子</title>
       <programlisting role="php">
 <![CDATA[
 <?php
-$item = "Zak's and Derick's Laptop";
-$escaped_item = mysql_real_escape_string($item);
-printf ("Escaped string: %s\n", $escaped_item);
+// Connect
+$link = mysql_connect('mysql_host', 'mysql_user', 'mysql_password')
+    OR die(mysql_error());
+
+// Query
+$query = sprintf("SELECT * FROM users WHERE user='%s' AND password='%s'",
+            mysql_real_escape_string($user),
+            mysql_real_escape_string($password));
 ?>
 ]]>
-      </programlisting>
-      <para>
-       以上例子将产生如下输出：
-      </para>
-      <screen>
-<![CDATA[
-Escaped string: Zak\'s and Derick\'s Laptop
-]]>
-      </screen>
-     </example>
-    </para>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   <example>
+    <title><function>mysql_real_escape_string</function> requires a connection example</title>
     <para>
-     参见
-     <function>mysql_escape_string</function> 和
-     <function>mysql_character_set_name</function>。
+     This example demonstrates what happens if a MySQL connection is not
+     present when calling this function.
     </para>
-   </refsect1>
-  </refentry>
+    <programlisting role="php">
+<![CDATA[
+<?php
+// We have not connected to MySQL
+
+$lastname  = "O'Reilly";
+$_lastname = mysql_real_escape_string($lastname);
+
+$query = "SELECT * FROM actors WHERE last_name = '$_lastname'";
+
+var_dump($_lastname);
+var_dump($query);
+?>
+]]>
+    </programlisting>
+    &example.outputs.similar;
+    <screen>
+<![CDATA[
+Warning: mysql_real_escape_string(): No such file or directory in /this/test/script.php on line 5
+Warning: mysql_real_escape_string(): A link to the server could not be established in /this/test/script.php on line 5
+
+bool(false)
+string(41) "SELECT * FROM actors WHERE last_name = ''"
+]]>
+    </screen>
+   </example>
+  </para>
+  <para>
+   <example>
+    <title>An example SQL Injection Attack</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+// We didn't check $_POST['password'], it could be anything the user wanted! For example:
+$_POST['username'] = 'aidan';
+$_POST['password'] = "' OR ''='";
+
+// Query database to check if there are any matching users
+$query = "SELECT * FROM users WHERE user='{$_POST['username']}' AND password='{$_POST['password']}'";
+mysql_query($query);
+
+// This means the query sent to MySQL would be:
+echo $query;
+?>
+]]>
+    </programlisting>
+     <para>
+      The query sent to MySQL:
+     </para>
+    <screen>
+<![CDATA[
+SELECT * FROM users WHERE user='aidan' AND password='' OR ''=''
+]]>
+    </screen>
+    <para>
+     This would allow anyone to log in without a valid password.
+    </para>
+   </example>
+  </para>
+ </refsect1>
+
+ <refsect1 role="notes">
+  &reftitle.notes;
+  <note>
+   <para>
+    A MySQL connection is required before using 
+    <function>mysql_real_escape_string</function> otherwise an error of
+    level <constant>E_WARNING</constant> is generated, and &false; is 
+    returned. If <parameter>link_identifier</parameter> isn't defined, the
+    last MySQL connection is used.
+   </para>
+  </note>
+  <note>
+   <para>
+    If <link linkend="ini.magic-quotes-gpc">magic_quotes_gpc</link> is enabled,
+    first apply <function>stripslashes</function> to the data. Using this function
+    on data which has already been escaped will escape the data twice.
+   </para>
+  </note>
+  <note>
+   <para>
+    If this function is not used to escape data, the query is vulnerable to
+    <link linkend="security.database.sql-injection">SQL Injection Attacks</link>.
+   </para>
+  </note>
+  <note>
+   <simpara>
+    <function>mysql_real_escape_string</function> does not escape
+    <literal>%</literal> and <literal>_</literal>. These are wildcards in
+    MySQL if combined with <literal>LIKE</literal>, <literal>GRANT</literal>,
+    or <literal>REVOKE</literal>.
+   </simpara>
+  </note>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>mysql_set_charset</function></member>
+    <member><function>mysql_client_encoding</function></member>
+    <member><function>addslashes</function></member>
+    <member><function>stripslashes</function></member>
+    <member>The <link linkend="ini.magic-quotes-gpc">magic_quotes_gpc</link> directive</member>
+    <member>The <link linkend="ini.magic-quotes-runtime">magic_quotes_runtime</link> directive</member>
+   </simplelist>
+  </para>
+ </refsect1>
+</refentry>
 
 <!-- Keep this comment at the end of the file
 Local variables:
