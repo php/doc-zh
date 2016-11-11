@@ -1,31 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 5faa7a6747bca628b3bdcc9f93aec5603b65581f Maintainer: HonestQiao Status: ready -->
-<!-- Reviewed: no Maintainer: HonestQiao -->
-<refentry xml:id="function.array-map" xmlns="http://docbook.org/ns/docbook">
+<!-- EN-Revision: 9caf16a8ba22366befab30e1d4d5759a4cd406f3 Maintainer: daijie Status: ready -->
+<refentry xmlns="http://docbook.org/ns/docbook" xml:id="function.array-map">
    <refnamediv>
     <refname>array_map</refname>
     <refpurpose>
-     将回调函数作用到给定数组的单元上
+     为数组的每个元素应用回调函数
     </refpurpose>
    </refnamediv>
  <refsect1 role="description">
   &reftitle.description;
-    <methodsynopsis>
-     <type>array</type><methodname>array_map</methodname>
+  <methodsynopsis>
+   <type>array</type><methodname>array_map</methodname>
    <methodparam><type>callable</type><parameter>callback</parameter></methodparam>
-     <methodparam><type>array</type><parameter>arr1</parameter></methodparam>
-     <methodparam choice="opt"><type>array</type><parameter>...</parameter></methodparam>
-    </methodsynopsis>
-    <para>
-     <function>array_map</function> 返回一个数组，该数组包含了
-     <parameter>arr1</parameter> 中的所有单元经过
-     <parameter>callback</parameter> 作用过之后的单元。<parameter>callback</parameter>
-     接受的参数数目应该和传递给
-     <function>array_map</function> 函数的数组数目一致。
-    </para>
+   <methodparam><type>array</type><parameter>array1</parameter></methodparam>
+   <methodparam choice="opt"><type>array</type><parameter>...</parameter></methodparam>
+  </methodsynopsis>
+  <para>
+   <function>array_map</function>：返回数组，是为 <parameter>array1</parameter> 每个元素应用 <parameter>callback</parameter>函数之后的数组。
+   <parameter>callback</parameter> 函数形参的数量和传给 <function>array_map</function> 数组数量，两者必须一样。
+  </para>
    </refsect1>
-
+ 
  <refsect1 role="parameters">
   &reftitle.parameters;
   <para>
@@ -34,23 +30,23 @@
      <term><parameter>callback</parameter></term>
      <listitem>
       <para>
-       对每个数组的每个元素作用的回调函数。
+       回调函数，应用到每个数组里的每个元素。
       </para>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>arr1</parameter></term>
+     <term><parameter>array1</parameter></term>
      <listitem>
       <para>
-        将被回调函数（<parameter>callback</parameter>）执行的数组。
+       数组，遍历运行 <parameter>callback</parameter> 函数。
       </para>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>array</parameter></term>
+     <term><parameter>...</parameter></term>
      <listitem>
       <para>
-        将被回调函数（<parameter>callback</parameter>）执行的数组列表。
+       数组列表，每个都遍历运行 <parameter>callback</parameter> 函数。
       </para>
      </listitem>
     </varlistentry>
@@ -61,7 +57,7 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   返回一个数组，该数组的每个元素都数组（<parameter>arr1</parameter>）里面的每个元素经过回调函数（<parameter>callback</parameter>）处理了的。
+   返回数组，包含 <parameter>callback</parameter> 函数处理之后 <parameter>array1</parameter>  的所有元素。
   </para>
  </refsect1>
 
@@ -103,7 +99,7 @@ Array
   </para>
   <para>
    <example>
-    <title><function>array_map</function> using a lambda function (as of PHP 5.3.0)</title>
+    <title><function>array_map</function> 使用匿名函数 (PHP 5.3.0 起)</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -131,7 +127,7 @@ Array
   </para>
   <para>
    <example>
-    <title><function>array_map</function> - 使用更多的数组</title>
+    <title><function>array_map</function>：使用更多的数组</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -203,14 +199,15 @@ Array
    </example>
   </para>
   <para>
-   通常使用了两个或更多数组时，它们的长度应该相同，因为回调函数是平行作用于相应的单元上的。如果数组的长度不同，则最短的一个将被用空的单元扩充。
+   传入两个及以上的数组时，它们元素数量将会相同。因为回调函数会并行地处理相互对应的元素。
+   如果几个数组的元素数量不一致：空元素会扩展短那个数组，直到长度和最长的数组一样。
   </para>
   <para>
-     本函数一个有趣的用法是构造一个数组的数组，这可以很容易的通过用 &null; 作为回调函数名来实现。
+   此函数有个有趣的用法：传入 &null; 作为回调函数的名称，将创建多维数组（一个数组，内部包含数组。）
   </para>
   <para>
    <example>
-    <title>建立一个数组的数组</title>
+    <title>多维数组：创建数组，内部包含数组</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -269,12 +266,11 @@ Array
    </example>
   </para>
   <para>
-   如果数组参数里面有字符串的键，那么返回的数组就会包含字符串的键，仅且仅当只传入一个数组的时候（试了下，就是原数组返回，没变化啊，这不是蛋疼么？）。
-   如果不止一个数组被传入，那么返回的数组的的键都是整型。
+   如果仅传入一个数组，键（key）会保留；传入多个数组，键（key）是整型数字的序列。
   </para>
   <para>
    <example>
-    <title><function>array_map</function> - with string keys</title>
+    <title><function>array_map</function> 键（key）是 string</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -337,7 +333,6 @@ array(1) {
     <member><function>array_filter</function></member>
     <member><function>array_reduce</function></member>
     <member><function>array_walk</function></member>
-    <member><function>create_function</function></member>
     <member>&seealso.callback;</member>
    </simplelist>
   </para>
