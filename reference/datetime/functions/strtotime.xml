@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: eb169785f167d21344e5114f0ba379101ec8232d Maintainer: HonestQiao Status: ready -->
+<!-- EN-Revision: bbed905d26cedda922f38c72a07c19da9a7c383e Maintainer: HonestQiao Status: ready -->
 <!-- Reviewed: no Maintainer: HonestQiao -->
 <refentry xml:id="function.strtotime" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
   <refname>strtotime</refname>
-  <refpurpose>将任何英文文本的日期时间描述解析为 Unix 时间戳</refpurpose>
+  <refpurpose>将任何字符串的日期时间描述解析为 Unix 时间戳</refpurpose>
  </refnamediv>
  <refsect1 role="description">
   &reftitle.description;
@@ -78,6 +78,17 @@
       <row>
        <entry>5.3.0</entry>
        <entry>
+        Prior to PHP 5.3.0, relative time formats supplied to the
+        <parameter>time</parameter> argument of <function>strtotime</function>
+        such as <literal>this week</literal>, <literal>previous week</literal>,
+        <literal>last week</literal>, and <literal>next week</literal> were
+        interpreted to mean a 7 day period relative to the current date/time, rather
+        than a week period of <literal>Monday</literal> through <literal>Sunday</literal>.
+       </entry>
+      </row>
+      <row>
+       <entry>5.3.0</entry>
+       <entry>
         在 PHP 5.3.0 之前， <literal>24:00</literal> 不是一个有效的格式，并且 <function>strtotime</function> 会返回 &false;。
        </entry>
       </row>
@@ -111,12 +122,6 @@
        <entry>5.0.0</entry>
        <entry>
         Microseconds began to be allowed, but they are ignored.
-       </entry>
-      </row>
-      <row>
-       <entry>4.4.0</entry>
-       <entry>
-         在 PHP 4.4 之前，<literal>"next"</literal> 被错误计算为 +2。对此通常的解决方法是用 <literal>"+1"</literal>。
        </entry>
       </row>
      </tbody>
@@ -181,9 +186,11 @@ if (($timestamp = strtotime($str)) === false) {
    <para>
     有效的时间戳通常从 Fri, 13 Dec 1901 20:45:54 GMT 到
     Tue, 19 Jan 2038 03:14:07 GMT（对应于 32
-    位有符号整数的最小值和最大值）。不是所有的平台都支持负的时间戳，那么日记范围就被限制为不能早于
+    位有符号整数的最小值和最大值）。
+   </para>
+  <para>PHP 5.1.0 之前，不是所有的平台都支持负的时间戳，那么日记范围就被限制为不能早于
     Unix 纪元。这意味着在 1970 年 1 月 1 日之前的日期将不能用在 Windows，一些
-    Linux 版本，以及几个其它的操作系统中。不过 PHP 5.1.0 及更新的版本克服了此限制。
+    Linux 版本，以及几个其它的操作系统中。
    </para>
    <para>
     For 64-bit versions of PHP, the valid range of a timestamp is effectively
@@ -199,6 +206,9 @@ if (($timestamp = strtotime($str)) === false) {
     American <literal>m/d/y</literal> is assumed; whereas if the separator is a
     dash (<literal>-</literal>) or a dot (<literal>.</literal>), then the
     European <literal>d-m-y</literal> format is assumed.
+    If, however, the year is given in a two digit format and the separator is a
+    dash (<literal>-</literal>, the date string is parsed as
+    <literal>y-m-d</literal>.
    </para>
    <para>
     To avoid potential ambiguity, it's best to use ISO 8601
