@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 4ea29c3193ef4b71356cf7d200dd433f10e23875 Maintainer: daijie Status: ready -->
+<!-- EN-Revision: 379fa4cf1c5efda46b455d5fab4b76edf2321a91 Maintainer: daijie Status: ready -->
 <!-- Reviewed: no -->
 
 <refentry xmlns="http://docbook.org/ns/docbook" xml:id="function.getopt">
@@ -15,6 +15,7 @@
    <type>array</type><methodname>getopt</methodname>
    <methodparam><type>string</type><parameter>options</parameter></methodparam>
    <methodparam choice="opt"><type>array</type><parameter>longopts</parameter></methodparam>
+      <methodparam choice="opt"><type>int</type><parameter role="reference">optind</parameter></methodparam>
   </methodsynopsis>
   <para>
    解析传入脚本的选项。
@@ -50,6 +51,15 @@
       </simpara>
      </listitem>
     </varlistentry>
+    <varlistentry>
+     <term><parameter>optind</parameter></term>
+     <listitem>
+      <simpara>
+       If the <parameter>optind</parameter> parameter is present, then the
+       index where argument parsing stopped will be written to this variable.
+      </simpara>
+     </listitem>
+    </varlistentry>
    </variablelist>
   </para>
   <para>
@@ -59,7 +69,7 @@
     <member>后面跟随冒号的字符（此选项需要值）</member>
     <member>后面跟随两个冒号的字符（此选项的值可选）</member>
    </simplelist>
-   选项的值是字符串后的第一个参数。它不介意值之前是否有空格。
+   选项的值是字符串后的第一个参数。如果需要一个值，它不介意值之前是否有前置的空格，参见以下内容。
    <note>
     <simpara>
      选项的值不接受空格（<literal>" "</literal>）作为分隔符。
@@ -76,7 +86,7 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   此函数会返回选项/参数对，失败时返回 &false;。
+   此函数会返回选项/参数对，&return.falseforfailure;。
   </para>
   <note>
    <para>
@@ -97,6 +107,12 @@
       </row>
      </thead>
      <tbody>
+      <row>
+       <entry>7.1.0</entry>
+       <entry>
+        添加 <parameter>optind</parameter> 参数。
+       </entry>
+      </row>
       <row>
        <entry>5.3.0</entry>
        <entry>
@@ -131,18 +147,22 @@
   &reftitle.examples;
   <para>
    <example xml:id="getopt.examples-1">
-    <title><function>getopt</function> 例子</title>
+    <title><function>getopt</function> 例子：基本用法</title>
     <programlisting role="php">
 <![CDATA[
 <?php
+// Script example.php
 $options = getopt("f:hp:");
 var_dump($options);
 ?>
 ]]>
     </programlisting>
-    <para>
-     通过 <literal>php script.php -fvalue -h</literal> 运行以上脚本会输出：
-    </para>
+    <programlisting role="shell">
+<![CDATA[
+shell> php example.php -fvalue -h
+]]>
+    </programlisting>
+    &example.outputs;
     <screen>
 <![CDATA[
 array(2) {
@@ -157,10 +177,11 @@ array(2) {
   </para>
   <para>
    <example xml:id="getopt.examples-2">
-    <title><function>getopt</function> 例子#2</title>
+    <title><function>getopt</function> 例子：引入长选项</title>
     <programlisting role="php">
 <![CDATA[
 <?php
+// Script example.php
 $shortopts  = "";
 $shortopts .= "f:";  // Required value
 $shortopts .= "v::"; // Optional value
@@ -177,10 +198,12 @@ var_dump($options);
 ?>
 ]]>
     </programlisting>
-    <para>
-     通过 <literal>php script.php -f "value for f" -v
-     -a --required value --optional="optional value" --option</literal> 运行以上脚本会输出：
-    </para>
+    <programlisting role="shell">
+<![CDATA[
+shell> php example.php -f "value for f" -v -a --required value --optional="optional value" --option
+]]>
+    </programlisting>
+    &example.outputs;
     <screen>
 <![CDATA[
 array(6) {
@@ -203,19 +226,22 @@ array(6) {
   </para>
   <para>
    <example xml:id="getopt.examples-3">
-    <title><function>getopt</function> 例子#3</title>
-    <para>传递同一多个选项</para>
+    <title><function>getopt</function> 例子：传递同一多个选项</title>
     <programlisting role="php">
 <![CDATA[
 <?php
+// Script example.php
 $options = getopt("abc");
 var_dump($options);
 ?>
 ]]>
     </programlisting>
-    <para>
-     使用 <literal>php script.php -aaac</literal> 运行以上脚本会输出：
-    </para>
+    <programlisting role="shell">
+<![CDATA[
+shell> php example.php -aaac
+]]>
+    </programlisting>
+    &example.outputs;
     <screen>
 <![CDATA[
 array(2) {
@@ -230,6 +256,35 @@ array(2) {
   }
   ["c"]=>
   bool(false)
+}
+]]>
+    </screen>
+   </example>
+  </para>
+  <para>
+   <example xml:id="getopt.examples-4">
+    <title><function>getopt</function> 例子：使用 <parameter>optind</parameter></title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+// Script example.php
+$optind = null;
+$opts = getopt('a:b:', [], $optind);
+$pos_args = array_slice($argv, $optind);
+var_dump($pos_args);
+]]>
+    </programlisting>
+    <programlisting role="shell">
+<![CDATA[
+shell> php example.php -a 1 -b 2 -- test
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+array(1) {
+  [0]=>
+  string(4) "test"
 }
 ]]>
     </screen>
