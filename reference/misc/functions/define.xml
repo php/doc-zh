@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
+<!-- EN-Revision: ef362e88b393422e1962c48c825aa1c6e65b380b Maintainer: daijie Status: ready -->
 <refentry xml:id="function.define" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>define</refname>
@@ -35,10 +36,14 @@
      <term><parameter>value</parameter></term>
      <listitem>
       <para>
-      常量的值；仅允许标量和 <type>null</type>。标量的类型是 <type>integer</type>，
-       <type>float</type>，<type>string</type> 或者 <type>boolean</type>。
-       也能够定义常量值的类型为 <type>resource</type> ，但并不推荐这么做，可能会导致未知状况的发生。
+      常量的值；在 PHP 5 中，<parameter>value</parameter> 必须是标量( <type>integer</type>、
+       <type>float</type>、<type>string</type>、<type>boolean</type>、&null;）在 PHP 7 中还允许是个 <type>array</type> 的值。
       </para>
+      <warning>
+       <para>
+        常量还可以定义为 <type>resource</type> 类型，但并不推荐这样做，因为可能会有不可预知的行为发生。
+       </para>
+      </warning>
      </listitem>
     </varlistentry>
     <varlistentry>
@@ -66,6 +71,32 @@
   </para>
  </refsect1>
 
+ 
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <para>
+   <informaltable>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>&Version;</entry>
+       <entry>&Description;</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>7.0.0</entry>
+       <entry>
+        允许 <type>array</type> 的值。
+       </entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </informaltable>
+  </para>
+ </refsect1>
+ 
+ 
  <refsect1 role="examples">
   &reftitle.examples;
   <para>
@@ -75,12 +106,20 @@
 <![CDATA[
 <?php
 define("CONSTANT", "Hello world.");
-echo CONSTANT; // outputs "Hello world."
-echo Constant; // outputs "Constant" and issues a notice.
+echo CONSTANT; // 输出 "Hello world."
+echo Constant; // 输出 "Constant" 并导致 Notice
 
 define("GREETING", "Hello you.", true);
-echo GREETING; // outputs "Hello you."
-echo Greeting; // outputs "Hello you."
+echo GREETING; // 输出 "Hello you."
+echo Greeting; // 输出 "Hello you."
+
+//  PHP 7 起就可以运行了
+define('ANIMALS', array(
+    'dog',
+    'cat',
+    'bird'
+));
+echo ANIMALS[1]; // 输出 "cat"
 
 ?>
 ]]>
