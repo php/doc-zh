@@ -249,6 +249,313 @@ Warning: Cannot call func_num_args() dynamically in %s on line %d
    </listitem>
   </itemizedlist>
  </sect2>
+ 
+ <sect2 xml:id="migration71.incompatible.array-order">
+  <title>
+   Array ordering when elements are automatically created during by reference
+   assignments has changed
+  </title>
+
+  <para>
+   The order of the elements in an array has changed when those elements have
+   been automatically created by referencing them in a by reference
+   assignment. For example:
+  </para>
+
+  <informalexample>
+   <programlisting role="php">
+<![CDATA[
+<?php
+$array = [];
+$array["a"] =& $array["b"];
+$array["b"] = 1;
+var_dump($array);
+?>
+]]>
+   </programlisting>
+   &example.outputs.70;
+   <screen>
+<![CDATA[
+array(2) {
+  ["a"]=>
+  &int(1)
+  ["b"]=>
+  &int(1)
+}
+]]>
+   </screen>
+   &example.outputs.71;
+   <screen>
+<![CDATA[
+array(2) {
+  ["b"]=>
+  &int(1)
+  ["a"]=>
+  &int(1)
+}
+]]>
+   </screen>
+  </informalexample>
+ </sect2>
+
+ <sect2 xml:id="migration71.incompatible.sort-order">
+  <title>Sort order of equal elements</title>
+  <para>
+   The internal sorting algorithm has been improved, what may result in
+   different sort order of elements, which compare as equal, than before.
+  </para>
+  <note>
+   <para>
+    Don't rely on the order of elements which compare as equal; it might change
+    anytime.
+   </para>
+  </note>
+ </sect2>
+
+ <sect2 xml:id="migration71.incompatible.e-recoverable">
+  <title>Error message for E_RECOVERABLE errors</title>
+  <para>
+   The error message for E_RECOVERABLE errors has been changed from "Catchable
+   fatal error" to "Recoverable fatal error".
+  </para>
+ </sect2>
+
+ <sect2 xml:id="migration71.incompatible.unserialize">
+  <title>$options parameter of unserialize()</title>
+  <para>
+   The <literal>allowed_classes</literal> element of the $options parameter of
+   <function>unserialize</function> is now strictly typed, i.e. if anything
+   other than an <type>array</type> or a <type>boolean</type> is given,
+   unserialize() returns &false; and issues an <constant>E_WARNING</constant>.
+  </para>
+ </sect2>
+
+ <sect2 xml:id="migration71.incompatible.datetime-microseconds">
+  <title>DateTime constructor incorporates microseconds</title>
+  <para>
+   <classname>DateTime</classname> and <classname>DateTimeImmutable</classname>
+   now properly incorporate microseconds when constructed from the current time,
+   either explicitly or with a relative string (e.g. <literal>"first day of next
+   month"</literal>). This means that naive comparisons of two newly created
+   instances will now more likely return &false; instead of &true;:
+   <informalexample>
+    <programlisting role="php">
+<![CDATA[
+<?php
+new DateTime() == new DateTime();
+?>
+]]>
+    </programlisting>
+   </informalexample>
+  </para>
+ </sect2>
+
+ <sect2 xml:id="migration71.incompatible.fatal-errors-to-error-exceptions">
+  <title>Fatal errors to <classname>Error</classname> exceptions conversions</title>
+  <para>
+   In the Date extension, invalid serialization data for
+   <classname>DateTime</classname> or <classname>DatePeriod</classname> classes,
+   or timezone initialization failure from serialized data, will now throw an
+   <classname>Error</classname> exception from the
+   <methodname>__wakeup</methodname> or <methodname>__set_state</methodname>
+   methods, instead of resulting in a fatal error.
+  </para>
+
+  <para>
+   In the DBA extension, data modification functions (such as
+   <function>dba_insert</function>) will now throw an
+   <classname>Error</classname> exception instead of triggering a catchable
+   fatal error if the key does not contain exactly two elements.
+  </para>
+
+  <para>
+   In the DOM extension, invalid schema or RelaxNG validation contexts will now
+   throw an <classname>Error</classname> exception instead of resulting in a
+   fatal error. Similarly, attempting to register a node class that does not
+   extend the appropriate base class, or attempting to read an invalid property
+   or write to a readonly property, will also now throw an
+   <classname>Error</classname> exception.
+  </para>
+
+  <para>
+   In the IMAP extension, email addresses longer than 16385 bytes will throw an
+   <classname>Error</classname> exception instead of resulting in a fatal error.
+  </para>
+
+  <para>
+   In the Intl extension, failing to call the parent constructor in a class
+   extending <classname>Collator</classname> before invoking the parent methods
+   will now throw an <classname>Error</classname> instead of resulting in a
+   recoverable fatal error. Also, cloning a
+   <classname>Transliterator</classname> object will now throw an
+   <classname>Error</classname> exception on failure to clone the internal
+   transliterator instead of resulting in a fatal error.
+  </para>
+
+  <para>
+   In the LDAP extension, providing an unknown modification type to
+   <function>ldap_batch_modify</function> will now throw an
+   <classname>Error</classname> exception instead of resulting in a fatal error.
+  </para>
+
+  <para>
+   In the mbstring extension, the <function>mb_ereg</function> and
+   <function>mb_eregi</function> functions will now throw a
+   <classname>ParseError</classname> exception if an invalid PHP expression is
+   provided and the 'e' option is used.
+  </para>
+
+  <para>
+   In the Mcrypt extension, the <function>mcrypt_encrypt</function> and
+   <function>mcrypt_decrypt</function> will now throw an
+   <classname>Error</classname> exception instead of resulting in a fatal error
+   if mcrypt cannot be initialized.
+  </para>
+
+  <para>
+   In the mysqli extension, attempting to read an invalid property or write to
+   a readonly property will now throw an <classname>Error</classname> exception
+   instead of resulting in a fatal error.
+  </para>
+
+  <para>
+   In the Reflection extension, failing to retrieve a reflection object or
+   retrieve an object property will now throw an <classname>Error</classname>
+   exception instead of resulting in a fatal error.
+  </para>
+
+  <para>
+   In the Session extension, custom session handlers that do not return strings
+   for session IDs will now throw an <classname>Error</classname> exception
+   instead of resulting in a fatal error when a function is called that must
+   generate a session ID.
+  </para>
+
+  <para>
+   In the SimpleXML extension, creating an unnamed or duplicate attribute will
+   now throw an <classname>Error</classname> exception instead of resulting in
+   a fatal error.
+  </para>
+
+  <para>
+   In the SPL extension, attempting to clone an
+   <classname>SplDirectory</classname> object will now throw an
+   <classname>Error</classname> exception instead of resulting in a fatal
+   error. Similarly, calling <methodname>ArrayIterator::append</methodname> when
+   iterating over an object will also now throw an <classname>Error</classname>
+   exception.
+  </para>
+
+  <para>
+   In the standard extension, the <function>assert</function> function, when
+   provided with a string argument as its first parameter, will now throw a
+   <classname>ParseError</classname> exception instead of resulting in a
+   catchable fatal error if the PHP code is invalid. Similarly, calling
+   <function>forward_static_call</function> outside of a class scope will now
+   throw an <classname>Error</classname> exception.
+  </para>
+
+  <para>
+   In the Tidy extension, creating a <classname>tidyNode</classname> manually
+   will now throw an <classname>Error</classname> exception instead of
+   resulting in a fatal error.
+  </para>
+
+  <para>
+   In the WDDX extension, a circular reference when serializing will now throw
+   an <classname>Error</classname> exception instead of resulting in a fatal
+   error.
+  </para>
+
+  <para>
+   In the XML-RPC extension, a circular reference when serializing will now
+   throw an instance of <classname>Error</classname> exception instead of
+   resulting in a fatal error.
+  </para>
+
+  <para>
+   In the Zip extension, the <methodname>ZipArchive::addGlob</methodname>
+   method will now throw an <classname>Error</classname> exception instead of
+   resulting in a fatal error if glob support is not available.
+  </para>
+ </sect2>
+
+ <sect2 xml:id="migration71.incompatible.lexical-names">
+  <title>Lexically bound variables cannot reuse names</title>
+
+  <para>
+   Variables bound to a <link linkend="functions.anonymous">closure</link> via
+   the <literal>use</literal> construct cannot use the same name as any
+   &link.superglobals;, <varname>$this</varname>, or any parameter. For
+   example, all of these function definition will result in a fatal error:
+
+   <informalexample>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$f = function () use ($_SERVER) {};
+$f = function () use ($this) {};
+$f = function ($param) use ($param) {};
+]]>
+    </programlisting>
+   </informalexample>
+  </para>
+ </sect2>
+
+ <sect2 xml:id="migration71.incompatible.json">
+  <title>JSON encoding and decoding</title>
+  <para>
+   The <parameter>serialize_precision</parameter> ini setting now controls the
+   serialization precision when encoding doubles.
+  </para>
+  <para>
+   Decoding an empty key now results in an empty property name, rather than 
+   <literal>_empty_</literal> as a property name.
+
+   <informalexample>
+   <programlisting role="php">
+<![CDATA[
+<?php
+var_dump(json_decode(json_encode(['' => 1])));
+]]>
+   </programlisting>
+   &example.outputs.similar;
+   <screen>
+<![CDATA[
+object(stdClass)#1 (1) {
+  [""]=>
+  int(1)
+}
+]]>
+   </screen>
+  </informalexample>
+  </para>
+  <para>
+   When supplying the <constant>JSON_UNESCAPED_UNICODE</constant> flag to
+   <function>json_encode</function>, the sequences U+2028 and U+2029 are now
+   escaped.
+  </para>
+ </sect2>
+
+ <sect2 xml:id="migration71.incompatible.mbstring">
+  <title>
+   Changes to <function>mb_ereg</function> and <function>mb_eregi</function>
+   parameter semantics
+  </title>
+  <para>
+   The third paramter to the <function>mb_ereg</function> and
+   <function>mb_eregi</function> functions (<parameter>regs</parameter>) will now be
+   set to an empty array if nothing was matched. Formely, the parameter would
+   not have been modified.
+  </para>
+ </sect2>
+
+ <sect2 xml:id="migration71.incompatible.openssl">
+  <title>Drop support for the sslv2 stream</title>
+  <para>
+   The sslv2 stream has now been dropped in OpenSSL.
+  </para>
+ </sect2>
 </sect1>
 
 <!-- Keep this comment at the end of the file
