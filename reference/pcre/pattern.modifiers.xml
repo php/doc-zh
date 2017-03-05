@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 00a507863ece069b2196102e593e4687ae6caefb Maintainer: daijie Status: ready -->
-<!-- splitted from ./en/functions/pcre.xml, last change in rev 1.2 -->
+<!-- EN-Revision: 95bdd6883b5dde9504701777ba81b3c5f15df52b Maintainer: daijie Status: ready -->
+
 <article xml:id="reference.pcre.pattern.modifiers" xmlns="http://docbook.org/ns/docbook">
  <title>模式修饰符</title>
  <titleabbrev>正则表达式模式中可用的模式修饰符</titleabbrev>
@@ -61,7 +61,7 @@
      <varlistentry xml:id="reference.pcre.pattern.modifiers.eval">
       <term><emphasis>e</emphasis> (<literal>PREG_REPLACE_EVAL</literal>)</term>
       <listitem>
-       &warn.deprecated.feature-5-5-0;
+       &warn.deprecated.feature-5-5-0.removed-7-0-0;
        <simpara>
        如果设置了这个被弃用的修饰符， <function>preg_replace</function> 在进行了对替换字符串的
        后向引用替换之后, 将替换后的字符串作为php 代码评估执行(eval 函数方式)，并使用执行结果
@@ -86,8 +86,7 @@
        </caution>
               <caution>
         <para>
-         Use of this modifier is <emphasis>discouraged</emphasis>, as it can easily introduce
-         security vulnerabilites:
+         <emphasis>不建议</emphasis>使用此修饰符，它很容易产生安全漏洞：
         </para>
         <informalexample>
          <programlisting role="php">
@@ -105,14 +104,12 @@ $html = preg_replace(
          </programlisting>
         </informalexample>
         <para>
-         The above example code can be easily exploited by passing in a string such as
-         <literal>&lt;h1&gt;{${eval($_GET[php_code])}}&lt;/h1&gt;</literal>. This gives
-         the attacker the ability to execute arbitrary PHP code and as such gives him
-         nearly complete access to your server.
+         以上示例代码能够被这样的字符串利用：
+         <literal>&lt;h1&gt;{${eval($_GET[php_code])}}&lt;/h1&gt;</literal>。
+         这能让攻击者执行他们想要的 PHP 代码，几乎完全渗透进服务器。
         </para>
         <para>
-         To prevent this kind of remote code execution vulnerability the
-         <function>preg_replace_callback</function> function should be used instead:
+         为了阻止此类远程代码执行攻击，可以使用 <function>preg_replace_callback</function> 替代：
         </para>
         <informalexample>
          <programlisting role="php">
@@ -211,9 +208,11 @@ $html = preg_replace_callback(
       <term><emphasis>u</emphasis> (<literal>PCRE_UTF8</literal>)</term>
       <listitem>
        <simpara>
-       此修正符打开一个与 perl 不兼容的附加功能。 模式字符串被认为是utf-8的. 这个修饰符
-       从 unix 版php 4.1.0 或更高，win32版 php 4.2.3 开始可用。
-        php 4.3.5 开始检查模式的 utf-8 合法性。
+       此修正符打开一个与 perl 不兼容的附加功能。 模式和目标字符串都被认为是 utf-8 的。
+        无效的目标字符串会导致 preg_* 函数什么都匹配不到；
+        无效的模式字符串会导致 E_WARNING 级别的错误。
+        PHP 5.3.4 后，5字节和6字节的 UTF-8 字符序列被考虑为无效（resp. PCRE 7.3
+        2007-08-28）。 以前就被认为是无效的  UTF-8。
        </simpara>
       </listitem>
      </varlistentry>
