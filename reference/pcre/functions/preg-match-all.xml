@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: cfabc6b2edffeb96275084ab85ce216485361fc7 Maintainer: daijie Status: ready -->
+<!-- EN-Revision: f6b3cb343776c44d10ad79dc56278caef5ba5372 Maintainer: daijie Status: ready -->
 <refentry xml:id="function.preg-match-all" xmlns="http://docbook.org/ns/docbook">
 <!-- Reviewed: 314593 Maintainer: daijie -->
  <refnamediv>
@@ -95,6 +95,37 @@ example: , this is a test
             </para>
            </informalexample>
           </para>
+          <para>
+           如果正则表达式包含了带名称的子组，<varname>$matches</varname> 额外包含了带名称子组的键。
+          </para>
+          <para>
+           如果正则表达式里，子组名称重名了，则仅最右侧的自组储存在 <varname>$matches[NAME]</varname> 中。
+           <informalexample>
+            <programlisting role="php">
+<![CDATA[
+<?php
+preg_match_all(
+    '/(?J)(?<match>foo)|(?<match>bar)/',
+    'foo bar',
+    $matches,
+    PREG_PATTERN_ORDER
+);
+print_r($matches['match']);
+?>
+]]>
+            </programlisting>
+            &example.outputs;
+            <screen>
+<![CDATA[
+Array
+(
+    [0] => 
+    [1] => bar
+)
+]]>
+            </screen>
+           </informalexample>
+          </para>
          </listitem>
         </varlistentry>
         <varlistentry>
@@ -134,6 +165,65 @@ echo $out[1][0] . ", " . $out[1][1] . "\n";
           注意这会改变<parameter>matches</parameter>中的每一个匹配结果字符串元素，使其
           成为一个第<literal>0</literal>个元素为匹配结果字符串，第<literal>1</literal>个元素为
           匹配结果字符串在<parameter>subject</parameter>中的偏移量。
+           
+           <informalexample>
+            <programlisting role="php">
+<![CDATA[
+<?php
+preg_match_all('/(foo)(bar)(baz)/', 'foobarbaz', $matches, PREG_OFFSET_CAPTURE);
+print_r($matches);
+?>
+]]>
+            </programlisting>
+            &example.outputs;
+            <screen>
+<![CDATA[
+Array
+(
+    [0] => Array
+        (
+            [0] => Array
+                (
+                    [0] => foobarbaz
+                    [1] => 0
+                )
+
+        )
+
+    [1] => Array
+        (
+            [0] => Array
+                (
+                    [0] => foo
+                    [1] => 0
+                )
+
+        )
+
+    [2] => Array
+        (
+            [0] => Array
+                (
+                    [0] => bar
+                    [1] => 3
+                )
+
+        )
+
+    [3] => Array
+        (
+            [0] => Array
+                (
+                    [0] => baz
+                    [1] => 6
+                )
+
+        )
+
+)
+]]>
+            </screen>
+           </informalexample>
           </para>
          </listitem>
         </varlistentry>
@@ -203,18 +293,6 @@ echo $out[1][0] . ", " . $out[1][1] . "\n";
        <entry>
        子命名分组语法可以接受<literal>(?&lt;name&gt;)</literal>，<literal>(?'name')</literal>以及
        <literal>(?P&lt;name&gt;)</literal>了。 之前版本仅接受<literal>(?P&lt;name&gt;)</literal>方式。
-       </entry>
-      </row>
-      <row>
-       <entry>4.3.3</entry>
-       <entry>
-        增加了<parameter>offset</parameter>参数。
-       </entry>
-      </row>
-      <row>
-       <entry>4.3.0</entry>
-       <entry>
-        增加了<constant>PREG_OFFSET_CAPTURE</constant>标记。
        </entry>
       </row>
      </tbody>
@@ -354,6 +432,7 @@ Array
   <para>
    <simplelist>
     <member><link linkend="pcre.pattern">PCRE 匹配</link></member>
+    <member><function>preg_quote</function></member>
     <member><function>preg_match</function></member>
     <member><function>preg_replace</function></member>
     <member><function>preg_split</function></member>
