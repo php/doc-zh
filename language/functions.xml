@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 82d79c66531b3a08b781ac8c89c0c2f2fe4efb8f Maintainer: verdana Status: ready -->
+<!-- EN-Revision: b896533ae5029ca337205d171a73d3cc876bb735 Maintainer: verdana Status: ready -->
 <!-- CREDITS: Gregory, dallas -->
  <chapter xml:id="language.functions" xmlns="http://docbook.org/ns/docbook">
   <title>函数</title>
@@ -78,6 +78,13 @@ function bar()
      </programlisting>
     </example>
    </para>
+   
+   
+   
+   
+   
+   
+   
    <para>
     <example>
      <title>函数中的函数</title>
@@ -117,12 +124,20 @@ bar();
      函数名是大小写无关的，不过在调用函数的时候，使用其在定义时相同的形式是个好习惯。
     </simpara>
    </note>
+   
+   
+   
+   
+   
    <simpara>
     PHP 的函数支持<link linkend="functions.variable-arg-list">可变数量的参数</link>和<link 
     linkend="functions.arguments.default">默认参数</link>。参见
     <function>func_num_args</function>，<function>func_get_arg</function> 和 <function>func_get_args</function>。
    </simpara>
 
+   
+   
+   
    <para>
     在 PHP 中可以调用递归函数。
     <example>
@@ -157,6 +172,10 @@ function recursion($a)
    <simpara>
     通过参数列表可以传递信息到函数，即以逗号作为分隔符的表达式列表。参数是从左向右求值的。
    </simpara>
+   
+   
+   
+   
    <para>
     PHP 支持按值传递参数（默认），<link
     linkend="functions.arguments.by-reference">通过引用传递参数</link>以及<link
@@ -179,6 +198,7 @@ function takes_array($input)
     </example>
    </para>
 
+   
    <sect2 xml:id="functions.arguments.by-reference">
     <title>通过引用传递参数</title>
 
@@ -188,6 +208,9 @@ function takes_array($input)
     <para>
      如果想要函数的一个参数总是通过引用传递，可以在函数定义中该参数的前面加上符号 &amp;：
     </para>
+    
+    
+    
     <para>
      <example>
       <title>用引用传递函数参数</title>
@@ -269,6 +292,8 @@ echo makecoffee(array("cappuccino", "lavazza"), "teapot");
     <para>
      注意当使用默认参数时，任何默认参数必须放在任何非默认参数的右侧；否则，函数将不会按照预期的情况工作。考虑下面的代码片断：
     </para>
+    
+    
     <para>
      <example>
       <title>函数默认参数的不正确用法</title>
@@ -372,6 +397,15 @@ Making a bowl of acidophilus raspberry.
          <entry>PHP 5.0.0</entry>
         </row>
         <row>
+         <entry><literal>self</literal></entry>
+         <entry>
+          The parameter must be an &instanceof; the same class as the one the
+          method is defined on. This can only be used on class and instance
+          methods.
+         </entry>
+         <entry>PHP 5.0.0</entry>
+        </row>
+        <row>
          <entry><type>array</type></entry>
          <entry>
           The parameter must be an <type>array</type>.
@@ -416,6 +450,35 @@ Making a bowl of acidophilus raspberry.
        </tbody>
       </tgroup>
      </informaltable>
+     
+     <warning>
+      <para>
+       Aliases for the above scalar types are not supported. Instead, they are
+       treated as class or interface names. For example, using
+       <literal>boolean</literal> as a parameter or return type will require
+       an argument or return value that is an &instanceof; the class or
+       interface <literal>boolean</literal>, rather than of type
+       <type>bool</type>:
+      </para>
+      <para>
+       <example>
+        <programlisting role="php">
+ <![CDATA[
+ <?php
+ function test(boolean $param) {}
+ test(true);
+ ?>
+ ]]>
+        </programlisting>
+        &example.outputs;
+        <screen>
+ <![CDATA[
+ Fatal error: Uncaught TypeError: Argument 1 passed to test() must be an instance of boolean, boolean given, called in - on line 1 and defined in -:1
+ ]]>
+        </screen>
+       </example>
+      </para>
+     </warning>
     </sect3>
 
     <sect3 xml:id="functions.arguments.type-declaration.examples">
@@ -1013,6 +1076,14 @@ object(C)#1 (0) {
    </sect2> 
   </sect1>
 
+  
+  
+  
+  
+  
+  
+  
+  
   <sect1 xml:id="functions.variable-functions">
    <title>可变函数</title>
 
@@ -1114,13 +1185,72 @@ Foo::$variable();  // This calls $foo->Variable() reading $variable in this scop
      </programlisting>
     </example>
    </para>
+   <para>
+     As of PHP 5.4.0, you can call any <type>callable</type> stored in a variable.
+    <example>
+     <title>Complex callables</title>
+     <programlisting role="php">
+<![CDATA[
+<?php
+class Foo
+{
+    static function bar()
+    {
+        echo "bar\n";
+    }
+    function baz()
+    {
+        echo "baz\n";
+    }
+}
+
+$func = array("Foo", "bar");
+$func(); // prints "bar"
+$func = array(new Foo, "baz");
+$func(); // prints "baz"
+$func = "Foo::bar";
+$func(); // prints "bar" as of PHP 7.0.0; prior, it raised a fatal error
+?>
+]]>
+     </programlisting>
+    </example>
+   </para>
 
    <para>
     参见 <function>is_callable</function>，<function>call_user_func</function>，<link
     linkend="language.variables.variable">可变变量</link>和
     <function>function_exists</function>。
    </para>
-
+   
+   <sect2 role="changelog">
+    &reftitle.changelog;
+    <para>
+     <informaltable>
+      <tgroup cols="2">
+       <thead>
+        <row>
+         <entry>&Version;</entry>
+         <entry>&Description;</entry>
+        </row>
+       </thead>
+       <tbody>
+        <row>
+         <entry>7.0.0</entry>
+         <entry>
+          'ClassName::methodName' is allowed as variable function.
+         </entry>
+        </row>
+        <row>
+         <entry>5.4.0</entry>
+         <entry>
+          Arrays, which are valid callables, are allowed as variable functions.
+         </entry>
+        </row>
+       </tbody>
+      </tgroup>
+     </informaltable>
+    </para>
+   </sect2>
   </sect1>
 
   <sect1 xml:id="functions.internal">
@@ -1163,6 +1293,17 @@ Foo::$variable();  // This calls $foo->Variable() reading $variable in this scop
      </para>
     </sect1>
 
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
     <sect1 xml:id="functions.anonymous">
    <title>匿名函数</title>
 
@@ -1170,6 +1311,11 @@ Foo::$variable();  // This calls $foo->Variable() reading $variable in this scop
     匿名函数（Anonymous functions），也叫闭包函数（<literal>closures</literal>），允许
     临时创建一个没有指定名称的函数。最经常用作回调函数（<link
     linkend="language.types.callback">callback</link>）参数的值。当然，也有其它应用的情况。
+   </simpara>
+     
+   <simpara>
+    匿名函数目前是通过
+    <link linkend="class.closure"><classname>Closure</classname></link> 类来实现的。
    </simpara>
 
    <example>
@@ -1212,6 +1358,7 @@ $greet('PHP');
    <simpara>
     闭包可以从父作用域中继承变量。
    任何此类变量都应该用 <literal>use</literal> 语言结构传递进去。 
+    PHP 7.1 起，不能传入此类变量：  &link.superglobals;、 <varname>$this</varname> 或者和参数重名。
    </simpara>
 
    <example>
@@ -1339,12 +1486,119 @@ print $my_cart->getTotal(0.05) . "\n";
 ]]>
     </programlisting>
    </example>
+     
+     
+   <example>
+    <title>Automatic binding of <literal>$this</literal></title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+
+class Test
+{
+    public function testing()
+    {
+        return function() {
+            var_dump($this);
+        };
+    }
+}
+
+$object = new Test;
+$function = $object->testing();
+$function();
+    
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+object(Test)#1 (0) {
+}
+]]>
+    </screen>
+    &example.outputs.53;
+    <screen>
+<![CDATA[
+Notice: Undefined variable: this in script.php on line 8
+NULL]]>
+    </screen>
+   </example>
    
-   <simpara>
-    匿名函数目前是通过
-    <link linkend="class.closure"><classname>Closure</classname></link> 类来实现的。
-   </simpara>
-   
+   <para>
+    As of PHP 5.4.0, when declared in the context of a class, the current class is
+    automatically bound to it, making <literal>$this</literal> available
+    inside of the function's scope. If this automatic binding of the current
+    class is not wanted, then
+    <link linkend="functions.anonymous-functions.static">static anonymous
+    functions</link> may be used instead.
+   </para>
+     <sect2 xml:id="functions.anonymous-functions.static">
+    <title>Static anonymous functions</title>
+    <para>
+     As of PHP 5.4, anonymous functions may be declared statically. This
+     prevents them from having the current class automatically bound to
+     them. Objects may also not be bound to them at runtime.
+    </para>
+    <para>
+     <example>
+      <title>Attempting to use <literal>$this</literal> inside a static anonymous function</title>
+      <programlisting role="php">
+<![CDATA[
+<?php
+
+class Foo
+{
+    function __construct()
+    {
+        $func = static function() {
+            var_dump($this);
+        };
+        $func();
+    }
+};
+new Foo();
+
+?>
+]]>
+      </programlisting>
+      &example.outputs;
+      <screen>
+<![CDATA[
+Notice: Undefined variable: this in %s on line %d
+NULL
+]]>
+      </screen>
+     </example>
+    </para>
+
+    <para>
+     <example>
+      <title>Attempting to bind an object to a static anonymous function</title>
+      <programlisting role="php">
+<![CDATA[
+<?php
+
+$func = static function() {
+    // function body
+};
+$func = $func->bindTo(new StdClass);
+$func();
+
+?>
+]]>
+      </programlisting>
+      &example.outputs;
+      <screen>
+<![CDATA[
+Warning: Cannot bind an instance to a static closure in %s on line %d
+]]>
+      </screen>
+     </example>
+    </para>
+   </sect2>
+     
    <sect2 role="changelog">
     &reftitle.changelog;
     <para>
@@ -1357,6 +1611,14 @@ print $my_cart->getTotal(0.05) . "\n";
         </row>
        </thead>
        <tbody>
+        <row>
+         <entry>7.1.0</entry>
+         <entry>
+          Anonymous functions may not close over &link.superglobals;,
+          <varname>$this</varname>, or any variable with the same name as a
+          parameter.
+         </entry>
+        </row>
         <row>
          <entry>5.4.0</entry>
          <entry>
