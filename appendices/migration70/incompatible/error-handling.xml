@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: bc29c366012575b4fb2cccee8e85c62d42f16975 Maintainer: yuanyuqiang Status: ready -->
+<!-- EN-Revision: 44b298ee5daf7c79a8e63c7e80ffe65232822838 Maintainer: yuanyuqiang Status: ready -->
 <!-- Reviewed: no -->
 
 <sect2 xml:id="migration70.incompatible.error-handling">
@@ -25,6 +25,38 @@
   本迁移指导主要是列出对兼容性有影响的变更。
  </para>
 
+ <sect3 xml:id="migration70.incompatible.error-handling.set-exception-handler">
+  <title>
+   <function>set_exception_handler</function> 不再保证收到的一定是 <classname>Exception</classname> 对象
+  </title>
+
+  <para>
+   抛出 <classname>Error</classname> 对象时，如果 <function>set_exception_handler</function> 里的异常处理代码声明了类型 <classname>Exception</classname> ，将会导致 fatal error。
+  </para>
+
+  <para>
+   想要异常处理器同时支持 PHP5 和 PHP7，应该删掉异常处理器里的类型声明。如果代码仅仅是升级到 PHP7，则可以把类型 <classname>Exception</classname>  替换成 <classname>Throwable</classname>。
+  </para>
+
+  <informalexample>
+   <programlisting role="php">
+<![CDATA[
+<?php
+// PHP 5 时代的代码将会出现问题
+function handler(Exception $e) { ... }
+set_exception_handler('handler');
+
+// 兼容 PHP 5 和 7
+function handler($e) { ... }
+
+// 仅支持 PHP 7
+function handler(Throwable $e) { ... }
+?>
+]]>
+   </programlisting>
+  </informalexample>
+ </sect3>
+ 
  <sect3 xml:id="migration70.incompatible.error-handling.constructors">
   <title>当内部构造器失败的时候，总是抛出异常</title>
 
