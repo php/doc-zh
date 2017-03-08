@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 84b8fca68fc762fefe85acde180a38b2e77a28b9 Maintainer: daijie Status: ready -->
+<!-- EN-Revision: 0e2239fcf92bd1cf8655d3957a4c0a1b99e9610a Maintainer: daijie Status: ready -->
 <!-- Reviewed: no -->
 
 <refentry xml:id="function.set-error-handler" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>set_error_handler</refname>
-  <refpurpose>设置一个用户定义的错误处理函数</refpurpose>
+  <refpurpose>设置用户自定义的错误处理函数</refpurpose>
  </refnamediv>
 
  <refsect1 role="description">
@@ -17,7 +17,7 @@
    <methodparam choice="opt"><type>int</type><parameter>error_types</parameter><initializer>E_ALL | E_STRICT</initializer></methodparam>
   </methodsynopsis>
   <para>
-   设置一个用户的函数(<parameter>error_handler</parameter>)来处理脚本中出现的错误。
+   设置用户的函数 (<parameter>error_handler</parameter>) 来处理脚本中出现的错误。
   </para>
   <para>
    本函数可以用你自己定义的方式来处理运行中的错误，
@@ -59,14 +59,13 @@
      <term><parameter>error_handler</parameter></term>
      <listitem>
       <para>
-       用户的函数需要接受两个参数：错误码和描述错误的 string。
-       另外有可能提供三个可选参数：发生错误的文件名、发生错误的行号
-       以及发生错误的上下文(一个指向错误发生时活动符号表的 array)。
-       该函数可以表示为：
+       以下格式的回调（callback）：
+       可以传入 &null; 重置处理程序到默认状态。
+       除了可以传入函数名，还可以传入引用对象和对象方法名的数组。
       </para>
       <para>
        <methodsynopsis>
-        <methodname><replaceable>handler</replaceable></methodname>
+        <type>bool</type><methodname><replaceable>handler</replaceable></methodname>
         <methodparam><type>int</type><parameter>errno</parameter></methodparam>
         <methodparam><type>string</type><parameter>errstr</parameter></methodparam>
         <methodparam choice="opt"><type>string</type><parameter>errfile</parameter></methodparam>
@@ -167,30 +166,16 @@
      </thead>
      <tbody>
       <row>
+       <entry>5.5.0</entry>
+       <entry>
+        <parameter>error_handler</parameter> 可接收 &null;。
+       </entry>
+      </row>
+      <row>
        <entry>5.2.0</entry>
        <entry>
         错误处理器必须返回 &false; 来显示
         <varname>$php_errormsg</varname>。
-       </entry>
-      </row>
-      <row>
-       <entry>5.0.0</entry>
-       <entry>
-        引入 <parameter>error_types</parameter> 参数。
-       </entry>
-      </row>
-      <row>
-       <entry>4.3.0</entry>
-       <entry>
-        除了一个函数名，也可以使用一个包含对象引用和方法名的数组来作为
-        <parameter>error_handler</parameter>。
-       </entry>
-      </row>
-      <row>
-       <entry>4.0.2</entry>
-       <entry>
-        为用户的 <parameter>error_handler</parameter> 引入三个可选参数，
-        分别是文件名、行号和上下文(context)。
        </entry>
       </row>
      </tbody>
@@ -214,8 +199,9 @@
 function myErrorHandler($errno, $errstr, $errfile, $errline)
 {
     if (!(error_reporting() & $errno)) {
-        // This error code is not included in error_reporting
-        return;
+        // This error code is not included in error_reporting, so let it fall
+        // through to the standard PHP error handler
+        return false;
     }
 
     switch ($errno) {

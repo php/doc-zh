@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 5faa7a6747bca628b3bdcc9f93aec5603b65581f Maintainer: daijie Status: ready -->
+<!-- EN-Revision: 86da9d950137b26ef6a0fdabb052782fc9e5a1b9 Maintainer: daijie Status: ready -->
 <!-- Reviewed: no -->
 
 <refentry xml:id="function.set-exception-handler" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>set_exception_handler</refname>
   <refpurpose>
-   设置一个用户定义的异常处理函数。
+   设置用户自定义的异常处理函数
   </refpurpose>
  </refnamediv>
 
@@ -32,14 +32,36 @@
      <listitem>
       <para>
        当一个未捕获的异常发生时所调用函数的名称。
-       该函数必须在调用 <function>set_exception_handler</function> 之前已经定义。
        该处理函数需要接受一个参数，该参数是一个抛出的异常对象。
+       PHP 7 以前的异常处理程序签名：
       </para>
-      <note>
+      <para>
+       <methodsynopsis>
+        <type>void</type><methodname><replaceable>handler</replaceable></methodname>
+        <methodparam><type>Exception</type><parameter>ex</parameter></methodparam>
+       </methodsynopsis>
+      </para>
+      <para>
+       自 PHP 7 以来，大多数错误抛出  <classname>Error</classname> 异常，也能被捕获。
+       
+       <classname>Error</classname>
+       和 <classname>Exception</classname> 都实现了 <classname>Throwable</classname> 接口。
+       PHP 7 起，处理程序的签名：
+      </para>
+      <para>
+       <methodsynopsis>
+        <type>void</type><methodname><replaceable>handler</replaceable></methodname>
+        <methodparam><type>Throwable</type><parameter>ex</parameter></methodparam>
+       </methodsynopsis>
+      </para>
        <para>
-        也可以传递一个 &null; 值用于重置异常处理函数为默认值。
+        也可以传递 &null; 值用于重置异常处理函数为默认值。
        </para>
-      </note>
+      <caution>
+       <para>
+        注意，如果在用户回调里将 <parameter>ex</parameter> 参数的类型明确约束为<classname>Exception</classname>， PHP 7 中由于异常类型的变化，将会产生问题。
+       </para>
+      </caution>
      </listitem>
     </varlistentry>
    </variablelist>
@@ -50,11 +72,41 @@
   &reftitle.returnvalues;
   <para>
    返回之前定义的异常处理程序的名称，或者在错误时返回 &null;。
-   如果之前没有定义一个错误处理程序，也会返回 &null;。
-   如果参数使用了 &null;，重置处理程序为默认状态，并且会返回一个 &true;。
+   如果之前没有定义错误处理程序，也会返回 &null;。
   </para>
  </refsect1>
 
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <para>
+   <informaltable>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>&Version;</entry>
+       <entry>&Description;</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>7.0.0</entry>
+       <entry>
+        传入 <parameter>exception_handler</parameter> 的参数从 <classname>Exception</classname> 改为 <classname>Throwable</classname>
+       </entry>
+      </row>
+      <row>
+       <entry>5.5.0</entry>
+       <entry>
+        之前版本里，如果传入 &null; ，函数会返回 &true;。
+        自 PHP 5.5.0 后，会返回上一次的异常处理器。
+       </entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </informaltable>
+  </para>
+ </refsect1>
+ 
  <refsect1 role="examples">
   &reftitle.examples;
   <para>
@@ -86,7 +138,7 @@ echo "Not Executed\n";
     <member><function>restore_error_handler</function></member>
     <member><function>error_reporting</function></member>
     <member>&seealso.callback;</member>
-    <member><link linkend="language.exceptions">PHP 5 Exceptions</link></member>
+    <member><link linkend="language.exceptions">PHP 5 异常</link></member>
    </simplelist>
   </para>
  </refsect1><!-- }}} -->
