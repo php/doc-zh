@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 84b8fca68fc762fefe85acde180a38b2e77a28b9 Maintainer: dallas Status: ready -->
+<!-- EN-Revision: 95bdd6883b5dde9504701777ba81b3c5f15df52b Maintainer: dallas Status: ready -->
 <sect1 xml:id="language.types.callable">
- <title>Callback 回调类型</title>
+ <title>Callback / Callable 类型</title>
  
  <para>
   自 PHP 5.4 起可用 <type>callable</type> 类型指定回调类型
@@ -18,13 +18,14 @@
   <title>传递</title>
 
   <para>
-   一个 PHP 的函数以 <type>string</type>
-   类型传递其名称。可以使用任何内置或用户自定义函数，但除了语言结构例如：<function>array</function>，<function>echo</function>，<function>empty</function>，<function>eval</function>，<function>exit</function>，<function>isset</function>，<function>list</function>，<function>print</function>
+   PHP是将函数以<type>string</type>形式传递的。
+   可以使用任何内置或用户自定义函数，但除了语言结构例如：<function>array</function>，<function>echo</function>，<function>empty</function>，<function>eval</function>，<function>exit</function>，<function>isset</function>，<function>list</function>，<function>print</function>
    或 <function>unset</function>。
   </para>
 
   <para>
-   一个已实例化的对象的方法被作为数组传递，下标 0 包含该对象，下标 1 包含方法名。
+   一个已实例化的 <type>object</type> 的方法被作为 <type>array</type> 传递，下标 0 包含该 <type>object</type>，下标 1 包含方法名。
+   在同一个类里可以访问 protected 和 private 方法。
   </para>
 
   <para>
@@ -33,9 +34,8 @@
   </para>
 
   <para>
-   除了普通的用户自定义函数外，<function>create_function</function>
-   可以用来创建一个匿名回调函数。自 PHP 5.3.0 起也可传递
-   <link linkend="functions.anonymous">closure</link> 给回调参数。
+   除了普通的用户自定义函数外，也可传递
+   <link linkend="functions.anonymous">匿名函数</link> 给回调参数。
   </para>
 
   <para>
@@ -84,6 +84,16 @@ class B extends A {
 }
 
 call_user_func(array('B', 'parent::who')); // A
+
+// Type 6: Objects implementing __invoke can be used as callables (since PHP 5.3)
+class C {
+    public function __invoke($name) {
+        echo 'Hello ', $name, "\n";
+    }
+}
+
+$c = new C();
+call_user_func($c, 'PHP!');
 ?>
 ]]>
     </programlisting>
@@ -120,13 +130,6 @@ print implode(' ', $new_numbers);
     </screen>
    </example>
   </para>
-
-  <note>
-   <simpara>
-    在 PHP 4 中，需要使用一个引用来创建一个指向具体对象的回调函数，而不是一个拷贝。参见<link
-    linkend="language.references">引用的解释</link>。
-   </simpara>
-  </note>
 
   &note.func-callback-exceptions;
  </sect2>
