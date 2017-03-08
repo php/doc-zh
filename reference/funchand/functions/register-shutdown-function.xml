@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
+<!-- EN-Revision: 8b5940cadeb4f1c8492f4a7f70743a2be807cf39 Maintainer:  Status: ready -->
 <refentry xml:id="function.register-shutdown-function" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>register_shutdown_function</refname>
-  <refpurpose>Register a function for execution on shutdown</refpurpose>
+  <refpurpose>注册一个会在php中止时执行的函数</refpurpose>
  </refnamediv>
  
  <refsect1 role="description">
@@ -15,15 +16,11 @@
    <methodparam choice="opt"><type>mixed</type><parameter>...</parameter></methodparam>
   </methodsynopsis>
   <para>
-   Registers a <parameter>callback</parameter> to be executed after script
-   execution finishes or <function>exit</function> is called.
+  注册一个 <parameter>callback</parameter> ，它会在脚本执行完成或者 <function>exit</function> 后被调用。
   </para>
   <para>
-   Multiple calls to <function>register_shutdown_function</function> can be
-   made, and each will be called in the same order as they were registered.
-   If you call <function>exit</function> within one registered shutdown
-   function, processing will stop completely and no other registered
-   shutdown functions will be called.
+   可以多次调用 <function>register_shutdown_function</function> ，这些被注册的回调会按照他们注册时的顺序被依次调用。
+   如果你在注册的方法内部调用 <function>exit</function>， 那么所有处理会被中止，并且其他注册的中止回调也不会再被调用。
   </para>
  </refsect1>
 
@@ -35,11 +32,10 @@
      <term><parameter>callback</parameter></term>
      <listitem>
       <para>
-       The shutdown callback to register.
+       待注册的中止回调
       </para>
       <para>
-       The shutdown callbacks are executed as the part of the request, so
-       it's possible to send output from them and access output buffers.
+       中止回调是作为请求的一部分被执行的，因此可以在它们中进行输出或者读取输出缓冲区。
       </para>
      </listitem>
     </varlistentry>
@@ -47,8 +43,7 @@
      <term><parameter>parameter</parameter></term>
      <listitem>
       <para>
-       It is possible to pass parameters to the shutdown function by passing
-       additional parameters.
+       可以通过传入额外的参数来将参数传给中止函数
       </para>
      </listitem>
     </varlistentry>
@@ -73,39 +68,8 @@
  <refsect1 role="errors">
   &reftitle.errors;
   <para>
-   If the passed callback is not callable a <constant>E_WARNING</constant>
-   level error will be generated.
-  </para>
- </refsect1>
-
- <refsect1 role="changelog">
-  &reftitle.changelog;
-  <para>
-   <informaltable>
-    <tgroup cols="2">
-     <thead>
-      <row>
-       <entry>&Version;</entry>
-       <entry>&Description;</entry>
-      </row>
-     </thead>
-     <tbody>
-      <row>
-       <entry>4.1.0</entry>
-       <entry>
-        The shutdown functions are now called as a part of the request.
-        In earlier versions under Apache, the registered shutdown functions
-        were called after the request has been completed (including sending
-        any output buffers), so it was not possible to send output to the
-        browser using <function>echo</function> or
-        <function>print</function>, or retrieve the contents of any output
-        buffers using <function>ob_get_contents</function>.
-        Headers were also always already sent.
-       </entry>
-      </row>
-     </tbody>
-    </tgroup>
-   </informaltable>
+   如果传入的callback不是可调用的，那么将会产生一个 <constant>E_WARNING</constant>
+   级别的错误。
   </para>
  </refsect1>
 
@@ -113,7 +77,7 @@
   &reftitle.examples;
   <para>
    <example>
-    <title><function>register_shutdown_function</function> example</title>
+    <title><function>register_shutdown_function</function> 例子</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -138,16 +102,12 @@ register_shutdown_function('shutdown');
   &reftitle.notes;
   <note>
    <para>
-    Working directory of the script can change inside the shutdown function
-    under some web servers, e.g. Apache.
+    在某些web server（如Apache）上，可以在中止函数内对脚本的工作目录进行修改。
    </para>
   </note>
   <note>
    <para>
-    Shutdown functions will not be executed if the process is killed with a SIGTERM
-    or SIGKILL signal. While you cannot intercept a SIGKILL, you can use <function>pcntl_signal</function>
-    to install a handler for a SIGTERM which uses <function>exit</function> to
-    end cleanly.
+    如果进程被信号SIGTERM或SIGKILL杀死，那么中止函数将不会被调用。尽管你无法中断SIGKILL，但你可以通过<function>pcntl_signal</function> 来捕获SIGTERM，通过在其中调用<function>exit</function>来进行一个正常的中止。
    </para>
   </note>
  </refsect1>
@@ -158,8 +118,8 @@ register_shutdown_function('shutdown');
    <simplelist>
     <member><link linkend="ini.auto-append-file">auto_append_file</link></member>
     <member><function>exit</function></member>
-    <member>The section on <link
-    linkend="features.connection-handling">connection handling</link></member>
+    <member><link
+    linkend="features.connection-handling">连接处理</link> 章节</member>
    </simplelist>
   </para>
  </refsect1>
