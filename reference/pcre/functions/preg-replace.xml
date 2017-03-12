@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 00a507863ece069b2196102e593e4687ae6caefb Maintainer: daijie Status: ready -->
+<!-- EN-Revision: 95bdd6883b5dde9504701777ba81b3c5f15df52b Maintainer: daijie Status: ready -->
 <refentry xml:id="function.preg-replace" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>preg_replace</refname>
@@ -34,8 +34,7 @@
       要搜索的模式。可以使一个字符串或字符串数组。
       </para>
       <para>
-       可以使用一些<link linkend="reference.pcre.pattern.modifiers">PCRE修饰符</link>，
-       包括被弃用的'<literal>e</literal>'(PREG_REPLACE_EVAL)，可以为这个函数指定。
+       可以使用一些<link linkend="reference.pcre.pattern.modifiers">PCRE修饰符</link>。
       </para>
      </listitem>
     </varlistentry>
@@ -51,7 +50,7 @@
       </para>
       <para>
       <parameter>replacement</parameter>中可以包含后向引用<literal>\\<replaceable>n</replaceable></literal>
-      或(php 4.0.4以上可用)<literal>$<replaceable>n</replaceable></literal>，语法上首选后者。 每个
+      或<literal>$<replaceable>n</replaceable></literal>，语法上首选后者。 每个
       这样的引用将被匹配到的第<replaceable>n</replaceable>个捕获子组捕获到的文本替换。 <replaceable>n</replaceable>
       可以是0-99，<literal>\\0</literal>和<literal>$0</literal>代表完整的模式匹配文本。
       捕获子组的序号计数方式为：代表捕获子组的左括号从左到右， 从1开始数。如果要在<parameter>replacement</parameter>
@@ -62,7 +61,7 @@
       当在替换模式下工作并且后向引用后面紧跟着需要是另外一个数字(比如：在一个匹配模式后紧接着增加一个原文数字)，
       不能使用<literal>\\1</literal>这样的语法来描述后向引用。比如， <literal>\\11</literal>将会使<function>preg_replace</function>
       不能理解你希望的是一个<literal>\\1</literal>后向引用紧跟一个原文<literal>1</literal>，还是
-      一个<literal>\\11</literal>后向引用后面不跟任何东西。 这种情况下解决方案是使用<literal>\${1}1</literal>。
+      一个<literal>\\11</literal>后向引用后面不跟任何东西。 这种情况下解决方案是使用<literal>${1}1</literal>。
       这创建了一个独立的<literal>$1</literal>后向引用, 一个独立的原文<literal>1</literal>。
       </para>
       <para>
@@ -122,7 +121,7 @@
   <refsect1 role="errors">
   &reftitle.errors;
   <para>
-   当传入 "\e" 修饰符的时候，会产生一个 <constant>E_DEPRECATED</constant> 级别的错误。
+   PHP 5.5.0 起， 传入 "\e" 修饰符的时候，会产生一个 <constant>E_DEPRECATED</constant> 错误； PHP 7.0.0 起，会产生 <constant>E_WARNING</constant> 错误，同时  "\e" 也无法起效。
   </para>
  </refsect1>
  
@@ -139,6 +138,13 @@
      </thead>
      <tbody>
       <row>
+       <entry>7.0.0</entry>
+       <entry>
+        不再支持  <literal>/e</literal>修饰符。
+        请用 <function>preg_replace_callback</function> 代替。
+       </entry>
+      </row>
+      <row>
        <entry>5.5.0</entry>
        <entry>
         <literal>/e</literal> 修饰符已经被弃用了。使用
@@ -149,18 +155,6 @@
        <entry>5.1.0</entry>
        <entry>
         增加参数<parameter>count</parameter>.
-       </entry>
-      </row>
-      <row>
-       <entry>4.0.4</entry>
-       <entry>
-        增加<parameter>replacement</parameter>参数中的'$n'用法。
-       </entry>
-      </row>
-      <row>
-       <entry>4.0.2</entry>
-       <entry>
-        增加了参数<parameter>limit</parameter>
        </entry>
       </row>
      </tbody>
@@ -198,7 +192,7 @@ April1,2003
     <programlisting role="php">
 <![CDATA[
 <?php
-$string = 'The quick brown fox jumped over the lazy dog.';
+$string = 'The quick brown fox jumps over the lazy dog.';
 $patterns = array();
 $patterns[0] = '/quick/';
 $patterns[1] = '/brown/';
@@ -214,7 +208,7 @@ echo preg_replace($patterns, $replacements, $string);
     &example.outputs;
     <screen>
 <![CDATA[
-The bear black slow jumped over the lazy dog.
+The bear black slow jumps over the lazy dog.
 ]]>
     </screen>
     <para>
@@ -232,7 +226,7 @@ echo preg_replace($patterns, $replacements, $string);
     &example.outputs;
     <screen>
 <![CDATA[
-The slow black bear jumped over the lazy dog.
+The slow black bear jumps over the lazy dog.
 ]]>
     </screen>
    </example>
@@ -295,6 +289,13 @@ echo $count; //3
 xp***to
 3
 ]]>
+     
+     
+     
+     
+     
+     
+     
     </screen>
    </example>
   </para>
@@ -317,6 +318,7 @@ xp***to
   <para>
    <simplelist>
     <member><link linkend="pcre.pattern">PCRE 模式</link></member>
+    <member><function>preg_quote</function></member>
     <member><function>preg_filter</function></member>
     <member><function>preg_match</function></member>
     <member><function>preg_replace_callback</function></member>
