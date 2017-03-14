@@ -6,7 +6,7 @@
 <phpdoc:varentry xmlns:phpdoc="http://php.net/ns/phpdoc" xml:id="reserved.variables.server" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" role="noversion">
  <refnamediv>
   <refname>$_SERVER</refname>
-  <refname>$HTTP_SERVER_VARS [已弃用]</refname>
+  <refname>$HTTP_SERVER_VARS [已删除]</refname>
   <refpurpose>服务器和执行环境信息</refpurpose>
  </refnamediv>
  
@@ -15,11 +15,13 @@
   <para>
    <varname>$_SERVER</varname> 是一个包含了诸如头信息(header)、路径(path)、以及脚本位置(script locations)等等信息的数组。这个数组中的项目由 Web 服务器创建。不能保证每个服务器都提供全部项目；服务器可能会忽略一些，或者提供一些没有在这里列举出来的项目。这也就意味着大量的此类变量都会在<link xlink:href="&url.rfc;3875">CGI 1.1 规范</link>中说明，所以应该仔细研究一下。
   </para>
-
+  <note>
   <simpara>
-   <varname>$HTTP_SERVER_VARS</varname> 包含着相同的信息，但它不是一个<link linkend="language.variables.superglobals">超全局变量</link>。
+    PHP 5.4.0 之前，<varname>$HTTP_SERVER_VARS</varname> 包含着相同的信息，但它不是一个<link linkend="language.variables.superglobals">超全局变量</link>。
    (注意 <varname>$HTTP_SERVER_VARS</varname> 与 <varname>$_SERVER</varname> 是不同的变量，PHP处理它们的方式不同)
   </simpara>
+  </note>
+
  </refsect1>
 
  <refsect1 role="indices">
@@ -35,7 +37,7 @@
      <term>'<varname>PHP_SELF</varname>'</term>
      <listitem>
       <simpara>
-       当前执行脚本的文件名，与 document root 有关。例如，在地址为 <filename>http://example.com/test.php/foo.bar</filename> 的脚本中使用 <varname>$_SERVER['PHP_SELF']</varname> 将得到 <filename>/test.php/foo.bar</filename>。<link linkend="language.constants.predefined">__FILE__</link> 常量包含当前(例如包含)文件的完整路径和文件名。
+       当前执行脚本的文件名，与 document root 有关。例如，在地址为 <filename>http://example.com/foo/bar.php</filename> 的脚本中使用 <varname>$_SERVER['PHP_SELF']</varname> 将得到 <filename>/foo/bar.php</filename>。<link linkend="language.constants.predefined">__FILE__</link> 常量包含当前(例如包含)文件的完整路径和文件名。
       </simpara>
       <simpara>
        从 PHP 4.3.0 版本开始，如果 PHP 以命令行模式运行，这个变量将包含脚本名。之前的版本该变量不可用。
@@ -85,6 +87,14 @@
       <simpara>
        当前运行脚本所在的服务器的主机名。如果脚本运行于虚拟主机中，该名称是由那个虚拟主机所设置的值决定。
       </simpara>
+      <note>
+       <simpara>
+        在 Apache 2 里，必须设置 <literal>UseCanonicalName = On</literal>
+        和 <literal>ServerName</literal>。
+        否则该值会由客户端提供，就有可能被伪造。
+        上下文有安全性要求的环境里，不应该依赖此值。
+       </simpara>
+      </note>
      </listitem>
     </varlistentry>
 
@@ -321,6 +331,13 @@
       <simpara>
         Web 服务器使用的端口。默认值为 “<literal>80</literal>”。如果使用 SSL 安全连接，则这个值为用户设置的 HTTP 端口。
       </simpara>
+      <note>
+       <simpara>
+        在 Apache 2 里，为了获取真实物理端口，必须设置 <literal>UseCanonicalName = On</literal> 以及 <literal>UseCanonicalPhysicalPort = On</literal>。
+        否则此值可能被伪造，不一定会返回真实端口值。
+        上下文有安全性要求的环境里，不应该依赖此值。
+       </simpara>
+      </note>
      </listitem>
     </varlistentry>
 
@@ -438,6 +455,18 @@
       </row>
      </thead>
      <tbody>
+      <row>
+       <entry>5.4.0</entry>
+       <entry>
+        因为移除了 long array register 功能，<varname>$HTTP_SERVER_VARS</varname> 不再有效。
+       </entry>
+      </row>
+      <row>
+       <entry>5.3.0</entry>
+       <entry>
+        废弃了使 <varname>$HTTP_SERVER_VARS</varname> 生效的 <link linkend="ini.register-long-arrays">register_long_arrays</link> 指令。
+       </entry>
+      </row>
       <row>
        <entry>4.1.0</entry>
        <entry>
