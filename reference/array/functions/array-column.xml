@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: beb09db76bd516580d32b751c5cb3b8388774b85 Maintainer: 邹松 Status: ready -->
-<!-- Reviewed: no -->
+<!-- EN-Revision: 424e4bdde84f9b975515f6ce88b8d12662f5c87d Maintainer: 邹松 Status: ready -->
 
 <refentry xml:id="function.array-column" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
@@ -14,7 +13,7 @@
    <type>array</type><methodname>array_column</methodname>
    <methodparam><type>array</type><parameter>input</parameter></methodparam>
    <methodparam><type>mixed</type><parameter>column_key</parameter></methodparam>
-   <methodparam choice="opt"><type>mixed</type><parameter>index_key</parameter></methodparam>
+   <methodparam choice="opt"><type>mixed</type><parameter>index_key</parameter><initializer>null</initializer></methodparam>
   </methodsynopsis>
   <para>
    <function>array_column</function>
@@ -30,7 +29,10 @@
      <term><parameter>input</parameter></term>
      <listitem>
       <para>
-       需要取出数组列的多维数组（或结果集）
+       需要取出数组列的多维数组。
+       如果提供的是包含一组对象的数组，只有 public 属性会被直接取出。
+       为了也能取出 private 和 protected 属性，类必须实现
+       <function>__get</function> 和 <function>__isset</function> 魔术方法。
       </para>
      </listitem>
     </varlistentry>
@@ -38,7 +40,7 @@
      <term><parameter>column_key</parameter></term>
      <listitem>
       <para>
-       需要返回值的列，它可以是索引数组的列索引，或者是关联数组的列的键。
+       需要返回值的列，它可以是索引数组的列索引，或者是关联数组的列的键，也可以是属性名。
        也可以是&null;，此时将返回整个数组（配合<parameter>index_key</parameter>参数来重置数组键的时候，非常管用）
       </para>
      </listitem>
@@ -57,7 +59,30 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   从多维数组中返回单列数组
+   从多维数组中返回单列数组。
+  </para>
+ </refsect1>
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <para>
+   <informaltable>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>&Version;</entry>
+       <entry>&Description;</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>7.0.0</entry>
+       <entry>
+         <parameter>input</parameter> 参数现在可以是包含对象的数组。
+       </entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </informaltable>
   </para>
  </refsect1>
  <refsect1 role="examples">
@@ -138,6 +163,113 @@ Array
 ]]>
     </screen>
    </example>
+  </para>
+  <para>
+   <example>
+    <title>
+     username 列是从对象获取 public 的 "username" 属性
+    </title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+
+class User
+{
+    public $username;
+
+    public function __construct(string $username)
+    {
+        $this->username = $username;
+    }
+}
+
+$users = [
+    new User('user 1'),
+    new User('user 2'),
+    new User('user 3'),
+];
+
+print_r(array_column($users, 'username'));
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen role="php">
+<![CDATA[
+Array
+(
+    [0] => user 1
+    [1] => user 2
+    [2] => user 3
+)
+]]>
+    </screen>
+   </example>
+  </para>
+  <para>
+   <example>
+    <title>
+     获取  username 列，从对象通过魔术方法  <function>__get</function> 获取 private 的 "username" 属性。
+    </title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+
+class Person
+{
+    private $name;
+
+    public function __construct(string $name)
+    {
+        $this->name = $name;
+    }
+
+    public function __get($prop)
+    {
+        return $this->$prop;
+    }
+
+    public function __isset($prop) : bool
+    {
+        return isset($this->$prop);
+    }
+}
+
+$people = [
+    new Person('Fred'),
+    new Person('Jane'),
+    new Person('John'),
+];
+
+print_r(array_column($people, 'name'));
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen role="php">
+<![CDATA[
+Array
+(
+    [0] => Fred
+    [1] => Jane
+    [2] => John
+)
+]]>
+    </screen>
+   </example>
+   如果不提供<function>__isset</function>，会返回空数组。
+  </para>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member>
+     <link xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="&url.arraycolumn.compat;">Recommended
+     userland implementation for PHP lower than 5.5</link>
+    </member>
+   </simplelist>
   </para>
  </refsect1>
 </refentry>
