@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: ce8212a9d067d3871e97027c6e41f096151ee82e Maintainer: HonestQiao Status: ready -->
-<!-- Reviewed: no Maintainer: HonestQiao -->
+<!-- EN-Revision: fd99f26061b9ee73010383bcea5b671143df1387 Maintainer: HonestQiao Status: ready -->
 <refentry xml:id="function.extract" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>extract</refname>
@@ -11,8 +10,8 @@
   &reftitle.description;
   <methodsynopsis>
    <type>int</type><methodname>extract</methodname>
-   <methodparam><type>array</type><parameter role="reference">var_array</parameter></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter>extract_type</parameter><initializer>EXTR_OVERWRITE</initializer></methodparam>
+   <methodparam><type>array</type><parameter role="reference">array</parameter></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>flags</parameter><initializer>EXTR_OVERWRITE</initializer></methodparam>
    <methodparam choice="opt"><type>string</type><parameter>prefix</parameter><initializer>&null;</initializer></methodparam>
   </methodsynopsis>
   <para>
@@ -27,12 +26,12 @@
   <para>
    <variablelist>
     <varlistentry>
-     <term><parameter>var_array</parameter></term>
+     <term><parameter>array</parameter></term>
      <listitem>
       <para>
        一个关联数组。此函数会将键名当作变量名，值作为变量的值。
        对每个键／值对都会在当前的符号表中建立变量，并受到
-   <parameter>extract_type</parameter> 和 <parameter>prefix</parameter> 参数的影响。
+   <parameter>flags</parameter> 和 <parameter>prefix</parameter> 参数的影响。
       </para>
       <para>
         必须使用关联数组，数字索引的数组将不会产生结果，除非用了
@@ -41,11 +40,11 @@
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>extract_type</parameter></term>
+     <term><parameter>flags</parameter></term>
      <listitem>
       <para>
-        对待非法／数字和冲突的键名的方法将根据
-   <parameter>extract_type</parameter> 参数决定。可以是以下值之一：
+        对待非法／数字和冲突的键名的方法将根据取出标记
+   <parameter>flags</parameter> 参数决定。可以是以下值之一：
        <variablelist>
         <varlistentry>
          <term><constant>EXTR_OVERWRITE</constant></term>
@@ -109,15 +108,15 @@
          <listitem>
           <simpara>
            将变量作为引用提取。这有力地表明了导入的变量仍然引用了
-       <parameter>var_array</parameter> 参数的值。可以单独使用这个标志或者在
-       <parameter>extract_type</parameter> 中用 OR 与其它任何标志结合使用。
+       <parameter>array</parameter> 参数的值。可以单独使用这个标志或者在
+       <parameter>flags</parameter> 中用 OR 与其它任何标志结合使用。
           </simpara>
          </listitem>
         </varlistentry>
        </variablelist>
       </para>
       <para>
-       如果没有指定 <parameter>extract_type</parameter>，则被假定为 <constant>EXTR_OVERWRITE</constant>。
+       如果没有指定 <parameter>flags</parameter>，则被假定为 <constant>EXTR_OVERWRITE</constant>。
       </para>
      </listitem>
     </varlistentry>
@@ -126,7 +125,7 @@
      <listitem>
       <para>
        注意 <parameter>prefix</parameter> 仅在
-   <parameter>extract_type</parameter> 的值是
+   <parameter>flags</parameter> 的值是
    <constant>EXTR_PREFIX_SAME</constant>，<constant>EXTR_PREFIX_ALL</constant>，<constant>EXTR_PREFIX_INVALID</constant>
    或 <constant>EXTR_PREFIX_IF_EXISTS</constant>
    时需要。
@@ -141,43 +140,6 @@
   &reftitle.returnvalues;
   <para>
    返回成功导入到符号表中的变量数目。
-  </para>
- </refsect1>
- <refsect1 role="changelog">
-  &reftitle.changelog;
-  <para>
-   <informaltable>
-    <tgroup cols="2">
-     <thead>
-      <row>
-       <entry>&Version;</entry>
-       <entry>&Description;</entry>
-      </row>
-     </thead>
-     <tbody>
-      <row>
-       <entry>4.3.0</entry>
-       <entry>
-        增加了 <constant>EXTR_REFS</constant>。
-       </entry>
-      </row>
-      <row>
-       <entry>4.2.0</entry>
-       <entry>
-        引进 <constant>EXTR_IF_EXISTS</constant> 和 <constant>EXTR_PREFIX_IF_EXISTS</constant> 。
-       </entry>
-      </row>
-      <row>
-       <entry>4.0.5</entry>
-       <entry>
-        函数可以返回被提取的变量数目。
-        增加了 <constant>EXTR_PREFIX_INVALID</constant>。
-        从这时起 <constant>EXTR_PREFIX_ALL</constant> 也包括了对数字索引的处理。
-       </entry>
-      </row>
-     </tbody>
-    </tgroup>
-   </informaltable>
   </para>
  </refsect1>
  <refsect1 role="examples">
@@ -239,9 +201,9 @@ blue, large, sphere, medium
   </warning>
   <note>
    <para>
-    If you
+    If you still
     have <link linkend="security.globals">register_globals</link>
-    turned on and you use <function>extract</function>
+    and it is turned on, if you use <function>extract</function>
     on <varname>$_FILES</varname> and
     specify <constant>EXTR_SKIP</constant>, you may be surprised at
     the results.

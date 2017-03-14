@@ -1,28 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: 9190379067d4cfae59c5234321b6bbdb71214784 Maintainer: dallas Status: ready -->
+<!-- EN-Revision: 57daa6747150ce515ab8045c2a69ea857d88a202 Maintainer: daijie Status: ready -->
   <refentry xml:id="function.count" xmlns="http://docbook.org/ns/docbook">
    <refnamediv>
     <refname>count</refname>
-    <refpurpose>计算数组中的单元数目或对象中的属性个数</refpurpose>
+    <refpurpose>计算数组中的单元数目，或对象中的属性个数</refpurpose>
    </refnamediv>
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
    <type>int</type><methodname>count</methodname>
-   <methodparam><type>mixed</type><parameter>var</parameter></methodparam>
+   <methodparam><type>mixed</type><parameter>array_or_countable</parameter></methodparam>
    <methodparam choice="opt"><type>int</type><parameter>mode</parameter><initializer>COUNT_NORMAL</initializer></methodparam>
   </methodsynopsis>
   <para>
-   统计一个数组里的所有元素，或者一个对象里的东西。
+   统计出数组里的所有元素的数量，或者对象里的东西。
   </para>
     <para>
      对于对象，如果安装了 <link linkend="ref.spl">SPL</link>，可以通过实现
-     <literal>Countable</literal> 接口来调用
-     <function>count</function>。该接口只有一个方法
-     <methodname>Countable::count</methodname>，此方法返回 <function>count</function>
-     函数的返回值。
+     <literal>Countable</literal> 接口对 <function>count</function>挂钩（hook）
+     。该接口只有一个方法
+     <methodname>Countable::count</methodname>，此方法为 <function>count</function>
+     函数返回值。
     </para>
     <para>
      关于 PHP 中如何实现和使用数组可以参考手册中<link linkend="language.types.array">数组</link>章节中的详细描述。
@@ -33,10 +32,10 @@
   <para>
    <variablelist>
     <varlistentry>
-     <term><parameter>var</parameter></term>
+     <term><parameter>array_or_countable</parameter></term>
      <listitem>
       <para>
-       数组或者对象。
+       数组或者 <classname>Countable</classname>  对象。
       </para>
      </listitem>
     </varlistentry>
@@ -46,10 +45,14 @@
       <para>
        如果可选的 <parameter>mode</parameter> 参数设为
      <constant>COUNT_RECURSIVE</constant>（或 1），<function>count</function>
-     将递归地对数组计数。对计算多维数组的所有单元尤其有用。<parameter>mode</parameter>
-     的默认值是 <literal>0</literal>。<function>count</function>
-     识别不了无限递归。
+     将递归地对数组计数。对计算多维数组的所有单元尤其有用。
       </para>
+      <caution>
+       <para>
+        <function>count</function> 能检测递归来避免无限循环，但每次出现时会产生 <constant>E_WARNING</constant> 错误
+        （如果 array 不止一次包含了自身）并返回大于预期的统计数字。
+       </para>
+      </caution>
      </listitem>
     </varlistentry>
    </variablelist>
@@ -58,41 +61,19 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   返回 <parameter>var</parameter> 中的单元数目。
-   如果 <parameter>var</parameter> 不是数组类型或者实现了
+   返回 <parameter>array_or_countable</parameter> 中的单元数目。
+   如果 <parameter>array_or_countable</parameter> 不是数组类型或者没有实现
      <literal>Countable</literal> 接口的对象，将返回
-     <literal>1</literal>，有一个例外，如果
-     <parameter>var</parameter> 是 &null; 则结果是 <literal>0</literal>。
+     <literal>1</literal>。
+   有个例外：如果
+     <parameter>array_or_countable</parameter> 是 &null; 则结果是 <literal>0</literal>。
   </para>
   <caution>
    <para>
-     <function>count</function> 对没有初始化的变量返回 0，但对于空的数组也会返回 0。用
-      <function>isset</function> 来测试变量是否已经初始化。
+     <function>count</function> 对没有初始化的变量返回 0，但对于空的数组也会返回 0。
+    用 <function>isset</function> 来测试变量是否已经初始化。
    </para>
   </caution>
- </refsect1>
- <refsect1 role="changelog">
-  &reftitle.changelog;
-  <para>
-   <informaltable>
-    <tgroup cols="2">
-     <thead>
-      <row>
-       <entry>&Version;</entry>
-       <entry>&Description;</entry>
-      </row>
-     </thead>
-     <tbody>
-      <row>
-       <entry>4.2.0</entry>
-       <entry>
-        添加了可选的 <parameter>mode</parameter> 参数。
-       </entry>
-      </row>
-     </tbody>
-    </tgroup>
-   </informaltable>
-  </para>
  </refsect1>
  <refsect1 role="examples">
   &reftitle.examples;
@@ -145,17 +126,20 @@ echo count($food); // output 2
    </example>
   </para>
  </refsect1>
+  
  <refsect1 role="seealso">
   &reftitle.seealso;
   <para>
    <simplelist>
     <member><function>is_array</function></member>
     <member><function>isset</function></member>
+    <member><function>empty</function></member>
     <member><function>strlen</function></member>
    </simplelist>
   </para>
  </refsect1>
 </refentry>
+  
 
 <!-- Keep this comment at the end of the file
 Local variables:

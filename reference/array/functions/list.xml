@@ -1,32 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: 123babdf91f07356296ee7cf0c21579581438fe5 Maintainer: dallas Status: ready -->
+<!-- EN-Revision: ce007084b5edb7ff9b481ae5921bd9fe549b2d67 Maintainer: daijie Status: ready -->
   <refentry xml:id="function.list" xmlns="http://docbook.org/ns/docbook">
    <refnamediv>
     <refname>list</refname>
-    <refpurpose>
-      把数组中的值赋给一些变量
-    </refpurpose>
+    <refpurpose>把数组中的值赋给一组变量 </refpurpose>
    </refnamediv>
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
    <type>array</type><methodname>list</methodname>
-   <methodparam><type>mixed</type><parameter>varname</parameter></methodparam>
+   <methodparam><type>mixed</type><parameter>var1</parameter></methodparam>
    <methodparam rep="repeat" choice="opt"><type>mixed</type><parameter>...</parameter></methodparam>
   </methodsynopsis>
     <para>
-     像 <function>array</function> 一样，这不是真正的函数，而是语言结构。<function>list</function>
-     用一步操作给一组变量进行赋值。
+     像 <function>array</function> 一样，这不是真正的函数，而是语言结构。
+     <function>list</function>
+     可以在单次操作内就为一组变量赋值。
     </para>
+  <note>
+   <para>
+    <function>list</function> 仅能用于数字索引的数组，并假定数字索引从 0 开始。
+   </para>
+  </note>
+  <warning>
+   <para>
+    PHP 5 里，<function>list</function> 从最右边的参数开始赋值；
+    PHP 7 里，<function>list</function> 从最左边的参数开始赋值。
+   </para>
+   <para>
+    如果你用单纯的变量，不用担心这一点。
+    但是如果你用了具有索引的数组，通常你期望得到的结果和在
+       <function>list</function> 中写的一样是从左到右的，但在 PHP 5 里实际上不是，
+    它是以相反顺序赋值的。
+   </para>
+   <para>
+    通常而言，不建议依赖于操作的顺序，在未来可能会再次发生修改。
+   </para>
+  </warning>
+  <warning>
+   <para>
+    在 <function>list</function> 执行过程中修改数组（比如使用 <literal>list($a, $b) = $b</literal>）将会产生不可预知的结果。
+   </para>
+  </warning>
    </refsect1>
    <refsect1 role="parameters">
   &reftitle.parameters;
   <para>
    <variablelist>
     <varlistentry>
-     <term><parameter>varname</parameter></term>
+     <term><parameter>var1</parameter></term>
      <listitem>
       <para>
        一个变量。
@@ -40,6 +63,47 @@
   &reftitle.returnvalues;
   <para>
    返回指定的数组。
+  </para>
+ </refsect1>
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <para>
+   <informaltable>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>&Version;</entry>
+       <entry>&Description;</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>7.0.0</entry>
+       <entry>
+        <link linkend="migration70.incompatible.variable-handling.list.order">
+         赋值操作的顺序发生了变化。
+        </link>
+       </entry>
+      </row>
+      <row>
+       <entry>7.0.0</entry>
+       <entry>
+        <link linkend="migration70.incompatible.variable-handling.list.empty">
+         <function>list</function> 表达式不再可以完全为空。
+        </link>
+       </entry>
+      </row>
+      <row>
+       <entry>7.0.0</entry>
+       <entry>
+        <link linkend="migration70.incompatible.variable-handling.list.string">
+         字符串无法再被拆包（unpack）。
+        </link>
+       </entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </informaltable>
   </para>
  </refsect1>
  <refsect1 role="examples">
@@ -86,13 +150,14 @@ var_dump($bar); // NULL
 
 <?php
 
-$result = mysql_query("SELECT id, name, salary FROM employees", $conn);
-while (list($id, $name, $salary) = mysql_fetch_row($result)) {
+$result = $pdo->query("SELECT id, name, salary FROM employees");
+while (list($id, $name, $salary) = $result->fetch(PDO::FETCH_NUM)) {
     echo " <tr>\n" .
           "  <td><a href=\"info.php?id=$id\">$name</a></td>\n" .
           "  <td>$salary</td>\n" .
           " </tr>\n";
 }
+
 
 ?>
 
@@ -143,6 +208,20 @@ var_dump($a);
     <para>
      产生如下输出（注意单元顺序和 <function>list</function> 语法中所写的顺序的比较）：
     </para>
+    &example.outputs.7;
+    <screen>
+<![CDATA[
+array(3) {
+  [2]=>
+  string(8) "caffeine"
+  [1]=>
+  string(5) "brown"
+  [0]=>
+  string(6) "coffee"
+}
+]]>
+    </screen>
+    &example.outputs.5;
     <screen>
 <![CDATA[
 array(3) {
@@ -157,27 +236,43 @@ array(3) {
     </screen>
    </example>
   </para>
- </refsect1>
- <refsect1 role="notes">
-  &reftitle.notes;
-  <warning>
-   <para>
-    <function>list</function> 从最右边一个参数开始赋值。如果你用单纯的变量，不用担心这一点。
-    但是如果你用了具有索引的数组，通常你期望得到的结果和在
-       <function>list</function> 中写的一样是从左到右的，但实际上不是。 
-    它是以相反顺序赋值的。
-   </para>
-  </warning>
-  <warning>
-   <para>
-    在 <function>list</function> 执行过程中修改数组（比如使用 <literal>list($a, $b) = $b</literal>）将会产生不可预知的结果。
-   </para>
-  </warning>
-  <note>
-   <para>
-    <function>list</function> 仅能用于数字索引的数组并假定数字索引从 0 开始。
-   </para>
-  </note>
+  <para>
+   <example>
+    <title><function>list</function> 和索引顺序定义</title>
+    <simpara>
+     <function>list</function> 使用 array 索引的顺序和它何时定义无关。
+    </simpara>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$foo = array(2 => 'a', 'foo' => 'b', 0 => 'c');
+$foo[1] = 'd';
+list($x, $y, $z) = $foo;
+var_dump($foo, $x, $y, $z);
+]]>
+    </programlisting>
+    <para>
+     得到以下输出（注意比较 <function>list</function> 所写的元素顺序）：
+    </para>
+    <screen>
+<![CDATA[
+array(4) {
+  [2]=>
+  string(1) "a"
+  ["foo"]=>
+  string(1) "b"
+  [0]=>
+  string(1) "c"
+  [1]=>
+  string(1) "d"
+}
+string(1) "c"
+string(1) "d"
+string(1) "a"
+]]>
+    </screen>
+   </example>
+  </para>
  </refsect1>
  <refsect1 role="seealso">
   &reftitle.seealso;
