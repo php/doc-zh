@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 5faa7a6747bca628b3bdcc9f93aec5603b65581f Maintainer: HonestQiao Status: ready -->
-<!-- Reviewed: no Maintainer: HonestQiao -->
+<!-- EN-Revision: 27acde0b15f7131bbc5239a14073d63307770b18 Maintainer: HonestQiao Status: ready -->
 <refentry xml:id="function.array-filter" xmlns="http://docbook.org/ns/docbook">
    <refnamediv>
     <refname>array_filter</refname>
@@ -11,17 +10,17 @@
    </refnamediv>
  <refsect1 role="description">
   &reftitle.description;
-     <methodsynopsis>
-      <type>array</type><methodname>array_filter</methodname>
-      <methodparam><type>array</type><parameter>array</parameter></methodparam>
-      <methodparam choice="opt"><type>callable</type><parameter>callback</parameter></methodparam>
-      <methodparam choice="opt"><type>int</type><parameter>flag</parameter><initializer>0</initializer></methodparam>
-     </methodsynopsis>
+  <methodsynopsis>
+   <type>array</type><methodname>array_filter</methodname>
+   <methodparam><type>array</type><parameter>array</parameter></methodparam>
+   <methodparam choice="opt"><type>callable</type><parameter>callback</parameter></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>flag</parameter><initializer>0</initializer></methodparam>
+  </methodsynopsis>
     <para>
      依次将 <parameter>array</parameter> 数组中的每个值传递到
      <parameter>callback</parameter> 函数。如果
-     <parameter>callback</parameter> 函数返回 &true;，则
-     <parameter>input</parameter>
+     <parameter>callback</parameter> 函数返回 true，则
+     <parameter>array</parameter>
      数组的当前值会被包含在返回的结果数组中。数组的键名保留不变。
     </para>
    </refsect1>
@@ -49,7 +48,7 @@
       <para>
         如果没有提供 <parameter>callback</parameter>
      函数，
-     将删除 <parameter>input</parameter> 中所有等值为
+     将删除 <parameter>array</parameter> 中所有等值为
      &false; 的条目。更多信息见<link
      linkend="language.types.boolean.casting">转换为布尔值</link>。
       </para>
@@ -84,6 +83,31 @@
   </para>
  </refsect1>
 
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <informaltable>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>&Version;</entry>
+      <entry>&Description;</entry>
+     </row>
+    </thead>
+    <tbody>
+     <row>
+      <entry>5.6.0</entry>
+      <entry>
+       添加可选的参数 <parameter>flag</parameter>，以及常量
+       <constant>ARRAY_FILTER_USE_KEY</constant> 和 
+       <constant>ARRAY_FILTER_USE_BOTH</constant>。
+      </entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </informaltable>
+ </refsect1>
+ 
 <!--
  <refsect1 role="errors">
   &reftitle.errors;
@@ -143,8 +167,8 @@ Array
     </screen>
    </example>
    <example>
-    <title><function>array_filter</function> 无
-    <parameter>callback</parameter></title>
+    <title>不使用 <parameter>callback</parameter> 时的<function>array_filter</function>
+    </title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -169,6 +193,41 @@ Array
     [0] => foo
     [2] => -1
 )
+]]>
+    </screen>
+   </example>
+   <example>
+    <title>带 <parameter>flag</parameter> 标记的 <function>array_filter</function>
+    </title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+
+$arr = ['a' => 1, 'b' => 2, 'c' => 3, 'd' => 4];
+
+var_dump(array_filter($arr, function($k) {
+    return $k == 'b';
+}, ARRAY_FILTER_USE_KEY));
+
+var_dump(array_filter($arr, function($v, $k) {
+    return $k == 'b' || $v == 4;
+}, ARRAY_FILTER_USE_BOTH));
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+array(1) {
+  ["b"]=>
+  int(2)
+}
+array(2) {
+  ["b"]=>
+  int(2)
+  ["d"]=>
+  int(4)
+}
 ]]>
     </screen>
    </example>
