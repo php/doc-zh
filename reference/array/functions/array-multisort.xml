@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 96c9d88bad9a7d7d44bfb7f26c226df7ee9ddf26 Maintainer: HonestQiao Status: ready -->
-<!-- Reviewed: no Maintainer: HonestQiao -->
+<!-- EN-Revision: 5c65942664074e1a707e89fbc6887860287d60e9 Maintainer: HonestQiao Status: ready -->
 <refentry xml:id="function.array-multisort" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>array_multisort</refname>
@@ -11,9 +10,9 @@
   &reftitle.description;
   <methodsynopsis>
    <type>bool</type><methodname>array_multisort</methodname>
-   <methodparam><type>array</type><parameter role="reference">arr</parameter></methodparam>
-   <methodparam choice="opt"><type>mixed</type><parameter>arg</parameter><initializer>SORT_ASC</initializer></methodparam>
-   <methodparam choice="opt"><type>mixed</type><parameter>arg</parameter><initializer>SORT_REGULAR</initializer></methodparam>
+   <methodparam><type>array</type><parameter role="reference">array1</parameter></methodparam>
+   <methodparam choice="opt"><type>mixed</type><parameter>array1_sort_order</parameter><initializer>SORT_ASC</initializer></methodparam>
+   <methodparam choice="opt"><type>mixed</type><parameter>array1_sort_flags</parameter><initializer>SORT_REGULAR</initializer></methodparam>
    <methodparam choice="opt"><type>mixed</type><parameter>...</parameter></methodparam>
   </methodsynopsis>
   <para>
@@ -23,45 +22,7 @@
   <para>
    关联（<type>string</type>）键名保持不变，但数字键名会被重新索引。
   </para>
-  <!-- 以下 refsect1 段内是译者额外添加的信息，会导致错误。 -->  
-<para>
- 排序顺序标志：
- <itemizedlist>
-  <listitem>
-   <simpara><constant>SORT_ASC</constant> - 按照上升顺序排序</simpara>
-  </listitem>
-  <listitem>
-   <simpara><constant>SORT_DESC</constant> - 按照下降顺序排序</simpara>
-  </listitem>
- </itemizedlist>
-</para>
-<para>
- 排序类型标志：
- <itemizedlist>
-  <listitem>
-   <simpara><constant>SORT_REGULAR</constant> - 将项目按照通常方法比较</simpara>
-  </listitem>
-  <listitem>
-   <simpara><constant>SORT_NUMERIC</constant> - 将项目按照数值比较</simpara>
-  </listitem>
-  <listitem>
-   <simpara><constant>SORT_STRING</constant> - 将项目按照字符串比较</simpara>
-  </listitem>
- </itemizedlist>
-</para>
-<para>
- 每个数组之后不能指定两个同类的排序标志。每个数组后指定的排序标志仅对该数组有效 - 在此之前为默认值
- <constant>SORT_ASC</constant> 和 <constant>SORT_REGULAR</constant>。
-</para>
-  
-  <para>
-   输入数组被当成一个表的列并以行来排序——这类似于 SQL 的 ORDER BY
-   子句的功能。第一个数组是要排序的主要数组。数组中的行（值）比较为相同的话就按照下一个输入数组中相应值的大小来排序，依此类推。
-  </para>
-  <para>
-   本函数的参数结构有些不同寻常，但是非常灵活。第一个参数必须是一个数组。接下来的每个参数可以是数组或者是下面列出的排序标志。
-  </para>
-  
+  &note.sort-unstable;
  </refsect1>
  
  <refsect1 role="parameters">
@@ -69,23 +30,68 @@
   <para>
    <variablelist>
     <varlistentry>
-     <term><parameter>arr</parameter></term>
+     <term><parameter>array1</parameter></term>
      <listitem>
       <para>
-       要排序的一个 <type>array</type>。
+       要排序的 <type>array</type>。
       </para>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>arg</parameter></term>
+     <term><parameter>array1_sort_order</parameter></term>
      <listitem>
       <para>
-       接下来的每个参数可以是另一个 <type>array</type> 或者是为之前 <type>array</type> 排序标志选项参数：
-       <constant>SORT_ASC</constant>, 
-       <constant>SORT_DESC</constant>, 
-       <constant>SORT_REGULAR</constant>,
-       <constant>SORT_NUMERIC</constant>,
-       <constant>SORT_STRING</constant>.
+       之前 <type>array</type>  参数要排列的顺序。
+       <constant>SORT_ASC</constant> 按照上升顺序排序， <constant>SORT_DESC</constant> 按照下降顺序排序。
+      </para>
+      <para>
+       此参数可以和 <parameter>array1_sort_flags</parameter> 互换，也可以完全删除，默认是 <constant>SORT_ASC</constant> 。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>array1_sort_flags</parameter></term>
+     <listitem>
+      <para>
+       为 <type>array</type> 参数设定选项：
+      </para>
+      <para>
+       排序类型标志：
+       <itemizedlist>
+        <listitem>
+         <simpara><constant>SORT_REGULAR</constant> - 
+          将项目按照通常方法比较（不修改类型）
+         </simpara>
+        </listitem>
+        <listitem>
+         <simpara><constant>SORT_NUMERIC</constant> - 按照数字大小比较</simpara>
+        </listitem>
+        <listitem>
+         <simpara><constant>SORT_STRING</constant> -  按照字符串比较</simpara>
+        </listitem>
+        <listitem>
+         <simpara>
+          <constant>SORT_LOCALE_STRING</constant> -  根据当前的本地化设置，按照字符串比较。 
+          它会使用 locale 信息，可以通过 <function>setlocale</function> 修改此信息。
+         </simpara>
+        </listitem>
+        <listitem>
+         <simpara>
+          <constant>SORT_NATURAL</constant> - 以字符串的"自然排序"，类似 <function>natsort</function>
+         </simpara>
+        </listitem>
+        <listitem>
+         <simpara>
+          <constant>SORT_FLAG_CASE</constant> - 可以组合
+          (按位或 OR) 
+          <constant>SORT_STRING</constant> 或者
+          <constant>SORT_NATURAL</constant> 大小写不敏感的方式排序字符串。
+         </simpara>
+        </listitem>
+       </itemizedlist>
+      </para>
+      <para>
+       参数可以和 <parameter>array1_sort_order</parameter> 交换或者省略，默认情况下是 <constant>SORT_REGULAR</constant>。
       </para>
      </listitem>
     </varlistentry>
@@ -93,7 +99,9 @@
      <term><parameter>...</parameter></term>
      <listitem>
       <para>
-       Additional <parameter>arg</parameter>'s. 
+       可选的选项，可提供更多数组，跟随在 sort order 和 sort flag 之后。
+       提供的数组和之前的数组要有相同数量的元素。
+       换言之，排序是按字典顺序排列的。
       </para>
      </listitem>
     </varlistentry>
@@ -109,12 +117,42 @@
   </para>
  </refsect1>
   
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <para>
+   <informaltable>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>&Version;</entry>
+       <entry>&Description;</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>5.4.0</entry>
+       <entry>
+        <parameter>array1_sort_flags</parameter> 增加 <constant>SORT_NATURAL</constant> 和 <constant>SORT_FLAG_CASE</constant> 选项。
+       </entry>
+      </row>
+      <row>
+       <entry>5.3.0</entry>
+       <entry>
+        <parameter>array1_sort_flags</parameter> 增加选项 <constant>SORT_LOCALE_STRING</constant>。
+       </entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </informaltable>
+  </para>
+ </refsect1>
  
  <refsect1 role="examples">
   &reftitle.examples;
   <para>
    <example>
-    <title>Sorting multiple arrays</title>
+    <title>多个数组排序</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -128,10 +166,10 @@ var_dump($ar2);
 ]]>
     </programlisting>
     <para>
-     In this example, after sorting, the first array will contain 0,
-     10, 100, 100. The second array will contain 4, 1, 2, 3. The
-     entries in the second array corresponding to the identical
-     entries in the first array (100 and 100) were sorted as well.
+     这个例子里，排序后，第一个数组会包含  0、
+     10、 100、 100。
+     第二个数组会包含 4、1、 2、 3。
+     第二个数组里的项目对应第一个数组后也进行了排序（100 和 100）。
     </para>
     <screen>
 <![CDATA[
@@ -308,71 +346,6 @@ Array
 )
 ]]>
     </screen>
-   </example>
-  </para>
-  
-    <!-- 以下案例是译者额外添加的信息，会导致错误。 -->  
-  <para>
-   【译者注】本函数相当有用，为有助于理解，请再看下面这个例子：
-  </para>
-  <para>
-   <example>
-    <title>名次排列</title>
-    <programlisting role="php">
-<![CDATA[
-<?php
-$grade = array("score" => array(70, 95, 70.0, 60, "70"),
-               "name" => array("Zhang San", "Li Si", "Wang Wu",
-                               "Zhao Liu", "Liu Qi"));
-array_multisort($grade["score"], SORT_NUMERIC, SORT_DESC,
-                // 将分数作为数值，由高到低排序
-                $grade["name"], SORT_STRING, SORT_ASC);
-                // 将名字作为字符串，由小到大排序
-var_dump($grade);
-?>
-]]>
-    </programlisting>
-    &example.outputs;
-    <screen>
-<![CDATA[
-array(2) {
-  ["score"]=>
-  array(5) {
-    [0]=>
-    int(95)
-    [1]=>
-    string(2) "70"
-    [2]=>
-    float(70)
-    [3]=>
-    int(70)
-    [4]=>
-    int(60)
-  }
-  ["name"]=>
-  array(5) {
-    [0]=>
-    string(5) "Li Si"
-    [1]=>
-    string(6) "Liu Qi"
-    [2]=>
-    string(7) "Wang Wu"
-    [3]=>
-    string(9) "Zhang San"
-    [4]=>
-    string(8) "Zhao Liu"
-  }
-}
-]]>
-    </screen>
-    <para>
-     本例中对包含成绩的数组 <varname>$grade</varname>
-     按照分数（score）由高到低进行排序，分数相同的人则按照名字（name）由小到大排序。排序后李四
-     95 分为第一名，赵六 60 分为第五名没有异议。张三、王五和刘七都是
-     70 分，他们的名次则由其姓名的字母顺序排列，Liu 在前，Wang 在后而
-     Zhang 在最后。为了区别，三个 70
-     分分别用了整数，浮点数和字符串来表示，可以在程序输出中清楚地看到它们排序的结果。
-    </para>
    </example>
   </para>
  </refsect1>
