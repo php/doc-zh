@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 31e3e09380fd44e10fbf0bba347c1d5f4c9ffa73 Maintainer: daijie Status: ready -->
+<!-- EN-Revision: cc8ca605308635ac8d660b5be8c7edcd5fcf4ccc Maintainer: daijie Status: ready -->
 <!-- Reviewed: yes -->
 
  <sect1 xml:id="language.oop5.traits" xmlns="http://docbook.org/ns/docbook">
@@ -227,7 +227,14 @@ class Aliased_Talker {
 ]]>
     </programlisting>
    </example>
+   <note>
+    <para>
+     在 PHP 7.0 之前，在类里定义和 trait 同名的属性，哪怕是完全兼容的也会抛出 <constant>E_STRICT</constant>（完全兼容的意思：具有相同的访问可见性、初始默认值）。
+    </para>
+   </note>
   </sect2>
+  
+  
   
   <sect2 xml:id="language.oop5.traits.visibility">
    <title>修改方法的访问控制</title>
@@ -419,9 +426,9 @@ $example->x;
     </programlisting>
    </example>
    <para>
-    如果 trait 定义了一个属性，那类将不能定义同样名称的属性，否则会产生一个错误。如果该属性在类中的定义与在
-    trait 中的定义兼容（同样的可见性和初始值）则错误的级别是
-    <constant>E_STRICT</constant>，否则是一个致命错误。
+    Trait 定义了一个属性后，类就不能定义同样名称的属性，否则会产生 fatal error。
+    有种情况例外：属性是兼容的（同样的访问可见度、初始默认值）。
+    在 PHP 7.0 之前，属性是兼容的，则会有 E_STRICT 的提醒。
    </para>
    <example xml:id="language.oop5.traits.properties.conflicts">
     <title>解决冲突</title>
@@ -435,7 +442,7 @@ trait PropertiesTrait {
 
 class PropertiesExample {
     use PropertiesTrait;
-    public $same = true; // Strict Standards
+    public $same = true; // PHP 7.0.0 后没问题，之前版本是 E_STRICT 提醒
     public $different = true; // 致命错误
 }
 ?>

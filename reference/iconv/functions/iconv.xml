@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 14af302c9c0e561fa6f9cdd956268758ba9a89c5 Maintainer: daijie Status: ready -->
+<!-- EN-Revision: 9e5c6d9150a2fff81dae5d92880740d68f2913f8 Maintainer: daijie Status: ready -->
 <!-- Reviewed: no -->
 
 <refentry xml:id="function.iconv" xmlns="http://docbook.org/ns/docbook">
@@ -43,8 +43,14 @@
       <para>
        如果你在 <parameter>out_charset</parameter> 后添加了字符串 <literal>//TRANSLIT</literal>，将启用转写（transliteration）功能。这个意思是，当一个字符不能被目标字符集所表示时，它可以通过一个或多个形似的字符来近似表达。
        如果你添加了字符串 <literal>//IGNORE</literal>，不能以目标字符集表达的字符将被默默丢弃。
-       否则，<parameter>str</parameter> 从第一个无效字符开始截断并导致一个 <constant>E_NOTICE</constant>。
+       否则，会导致一个 <constant>E_NOTICE</constant>并返回 &false;。
       </para>
+      <caution>
+       <para>
+        <literal>//TRANSLIT</literal> 运行细节高度依赖于系统的  iconv() 实现（参见 <constant>ICONV_IMPL</constant>）。
+        据悉，某些系统上的实现会直接忽略 <literal>//TRANSLIT</literal>，所以转换也有可能失败，<parameter>out_charset</parameter> 会是不合格的。
+       </para>
+      </caution>
      </listitem>
     </varlistentry>
     <varlistentry>
@@ -65,6 +71,31 @@
    返回转换后的字符串，&return.falseforfailure;。
   </para>
  </refsect1>
+
+ <refsect1 role="changelog">
+   &reftitle.changelog;
+   <para>
+    <informaltable>
+     <tgroup cols="2">
+      <thead>
+       <row>
+        <entry>&Version;</entry>
+        <entry>&Description;</entry>
+       </row>
+      </thead>
+      <tbody>
+       <row>
+        <entry>5.4.0</entry>
+        <entry>
+         这个版本起，字符非法时候会返回  &false;，除非在输出字符里指定了 <literal>//IGNORE</literal> 。
+         在之前版本，它会返回一部分字符串。
+        </entry>
+       </row>
+    </tbody>
+   </tgroup>
+  </informaltable>
+ </para>
+</refsect1>
 
  <refsect1 role="examples">
   &reftitle.examples;
@@ -92,7 +123,6 @@ TRANSLIT : This is the Euro symbol 'EUR'.
 IGNORE   : This is the Euro symbol ''.
 Plain    :
 Notice: iconv(): Detected an illegal character in input string in .\iconv-example.php on line 7
-This is the Euro symbol '
 ]]>
     </screen>
    </example>
