@@ -22,13 +22,13 @@
    <methodparam choice="opt"><type>bool</type><parameter>httponly</parameter><initializer>false</initializer></methodparam>
   </methodsynopsis>
   <para>
-   <function>setcookie</function> 定义了 Cookie，会和剩下的 HTTP 首部一起发送给客户端。
-   和其他 HTTP 首部一样，Cookie 必须在脚本产生任意输出<emphasis>之前</emphasis>发送（由于协议的限制）。
-   需要在产生任何输出（包括 <literal>&lt;html&gt;</literal> 和 <literal>&lt;head&gt;</literal> 或者空格）之前调用本函数。
+   <function>setcookie</function> 定义了 Cookie，会和剩下的 HTTP 头一起发送给客户端。
+   和其他 HTTP 头一样，必须在脚本产生任意输出<emphasis>之前</emphasis>发送 Cookie（由于协议的限制）。
+   请在产生任何输出之前（包括 <literal>&lt;html&gt;</literal> 和 <literal>&lt;head&gt;</literal> 或者空格）调用本函数。
   </para>
   <para>
-   一旦 Cookie 被设置后，可以在下次打开页面时，使用 <varname>$_COOKIE</varname> 读取。
-   Cookie 的值也同样存在于 <varname>$_REQUEST</varname>。
+   一旦设置 Cookie 后，下次打开页面时可以使用 <varname>$_COOKIE</varname> 读取。
+   Cookie 值同样也存在于 <varname>$_REQUEST</varname>。
   </para>
  </refsect1>
 
@@ -49,11 +49,10 @@
      <term><parameter>value</parameter></term>
      <listitem>
       <para>
-       Cookie 的值。
+       Cookie 值。
        这个值储存于用户的电脑里，请勿储存敏感信息。
-       
        比如 <parameter>name</parameter> 是 <literal>'cookiename'</literal>，
-       这个值就可以通过 <varname>$_COOKIE['cookiename']</varname> 获取。
+       可通过 <varname>$_COOKIE['cookiename']</varname> 获取它的值。
       </para>
      </listitem>
     </varlistentry>
@@ -62,11 +61,10 @@
      <listitem>
       <para>
        Cookie 的过期时间。
-       这是个 Unix 时间戳，就是从 Unix 纪元以来（格林威治时间 1970 年 1 月 1 日 00:00:00）的秒数。
-       也就是说，基本可以用 <function>time</function> 函数返回的结果加上希望过期的秒数。
+       这是个 Unix 时间戳，即 Unix 纪元以来（格林威治时间 1970 年 1 月 1 日 00:00:00）的秒数。
+       也就是说，基本可以用 <function>time</function> 函数的结果加上希望过期的秒数。
        或者也可以用 <function>mktime</function>。
-       
-       设置 Cookie 在 30 天后过期：<literal>time()+60*60*24*30</literal>。
+       <literal>time()+60*60*24*30</literal> 就是设置 Cookie 30 天后过期。
        如果设置成零，或者忽略参数， Cookie 会在会话结束时过期（也就是关掉浏览器时）。
       </para>
       <para>
@@ -84,9 +82,9 @@
      <listitem>
       <para>
        Cookie 有效的服务器路径。
-       设置成 <literal>'/'</literal>，Cookie 对整个域名 <parameter>domain</parameter> 有效。
+       设置成 <literal>'/'</literal> 时，Cookie 对整个域名 <parameter>domain</parameter> 有效。
        
-       如果设置成 <literal>'/foo/'</literal>， Cookie 仅仅对 <parameter>domain</parameter> 中 <literal>/foo/</literal> 目录和子目录有效（比如 <literal>/foo/bar/</literal>）。
+       如果设置成 <literal>'/foo/'</literal>， Cookie 仅仅对 <parameter>domain</parameter> 中 <literal>/foo/</literal> 目录及其子目录有效（比如 <literal>/foo/bar/</literal>）。
        默认值是设置 Cookie 时的当前目录。
       </para>
      </listitem>
@@ -96,8 +94,8 @@
      <listitem>
       <para>
        Cookie 的有效域名/子域名。
-       设置成一个子域名（例如 <literal>'www.example.com'</literal>），会使 Cookie 对这个子域名和它的三级域名有效（例如 w2.www.example.com）。
-       要让 Cookie 对整个域名有效（包括它的全部子域名），只要把这个值设置成域名就可以了（这个例子里是 <literal>'example.com'</literal>）。
+       设置成子域名（例如 <literal>'www.example.com'</literal>），会使 Cookie 对这个子域名和它的三级域名有效（例如 w2.www.example.com）。
+       要让 Cookie 对整个域名有效（包括它的全部子域名），只要设置成域名就可以了（这个例子里是 <literal>'example.com'</literal>）。
       </para>
       <para>
        旧版浏览器仍然在使用废弃的 <link xlink:href="&url.rfc;2109">RFC 2109</link>，
@@ -109,9 +107,9 @@
      <term><parameter>secure</parameter></term>
      <listitem>
       <para>
-       设置这个 Cookie 是否需要仅仅通过安全的 HTTPS 连接传给客户端。
+       设置这个 Cookie 是否仅仅通过安全的 HTTPS 连接传给客户端。
        设置成 &true; 时，只有安全连接存在时才会设置 Cookie。
-       如果是在服务器端，程序员需要仅仅在安全连接上发送此类 Cookie
+       如果是在服务器端处理这个需求，程序员需要仅仅在安全连接上发送此类 Cookie
        （通过 <varname>$_SERVER["HTTPS"]</varname> 判断）。
       </para>
      </listitem>
@@ -122,7 +120,7 @@
       <para>
        设置成 &true;，Cookie 仅可通过 HTTP 协议访问。
        这意思就是 Cookie 无法通过类似 JavaScript 这样的脚本语言访问。
-       建议此设置，可有效减少 XSS 攻击时的身份窃取行为（虽然不是所有浏览器都支持），不过这个说法经常有争议。
+       要有效减少 XSS 攻击时的身份窃取行为，可建议用此设置（虽然不是所有浏览器都支持），不过这个说法经常有争议。
        PHP 5.2.0 中添加。
        &true; 或 &false;
       </para>
@@ -183,7 +181,7 @@ print_r($_COOKIE);
    <example>
     <title><function>setcookie</function> 删除例子</title>
     <para>
-     要删除一个 Cookie，应该设置过期时间为过去，触发浏览器的删除机制。
+     要删除一个 Cookie，应该设置过期时间为过去，以触发浏览器的删除机制。
      下面的例子展示了如何删除上个例子里的 Cookie：
     </para>
     <programlisting role="php">
@@ -251,7 +249,7 @@ one : cookieone
       <row>
        <entry>5.5.0</entry>
        <entry>
-        发送给客户端的 Set-Cookie 首部现在会包含 Max-Age 属性。
+        发送给客户端的 Set-Cookie 头现在会包含 Max-Age 属性。
        </entry>
       </row>
       <row>
@@ -270,7 +268,7 @@ one : cookieone
   &reftitle.notes;
   <note>
    <para>
-    为了在调用本函数前发送内容输出，可以使用输出缓冲：让输出的内容在服务器里缓冲起来，
+    要在调用本函数前输出内容，可以使用输出缓冲：让输出的内容在服务器里缓冲起来，
     直至真正发送给浏览器。
     可在脚本里调用 <function>ob_start</function> 和 <function>ob_end_flush</function>，
     或设置 <literal>output_buffering</literal> &php.ini; 或服务器配置文件里的配置指令。
@@ -290,23 +288,23 @@ one : cookieone
     <listitem>
      <simpara>
       在页面（ Cookie 可见的页面）下次刷新前，Cookie 不会生效。
-      测试 Cookie 是否已经成功设置，需要在下次页面加载时，Cookie 过期前检测。
+      测试 Cookie 是否已经成功设置，需要在下次页面加载时、Cookie 过期前检测。
       过期时间是通过 <parameter>expire</parameter> 参数设置的。
-      直接调用 <literal>print_r($_COOKIE);</literal> 调试检测 Cookie 是个不错的方式。
+      直接调用 <literal>print_r($_COOKIE);</literal> 调试检测 Cookie 是个很好的方式。
      </simpara>
     </listitem>
     <listitem>
      <simpara>
       为同一个参数再次设置 Cookie 前，必须先把它删掉。
-      如果值的参数是空字符串或 &false;，同时其他参数和上次调用 setcookie 一样，
+      如果参数的值是空 string 或 &false;，并且其他参数和上次调用 setcookie 仍旧一样，
       则指定的名称会被远程客户端删除。
-      这在内部的实现是，将值设置成 'deleted'，同时过期时间是一年前。
+      内部的实现是：将值设置成 'deleted'，并且过期时间是一年前。
      </simpara>
     </listitem>
     <listitem>
      <simpara>
-      因为设置值成 &false; 会导致 Cookie 被删除，所以应该避免使用布尔值。
-      作为代替，0 是 &false;，1 是 &true;。
+      因为设置值成 &false; 会导致 Cookie 被删除，所以要避免使用布尔值。
+      代替方式：0 是 &false;，1 是 &true;。
      </simpara>
     </listitem>
     <listitem>
