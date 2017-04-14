@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: e02324226c7b2445f1dab9475be4dc0d2c1026be Maintainer: yuanyuqiang Status: ready -->
+<!-- EN-Revision: b90505533de3950c34838bd3715e3e40088c9a05 Maintainer: yuanyuqiang Status: ready -->
 <!-- Reviewed: no -->
 
 <sect2 xml:id="migration70.incompatible.other">
@@ -153,7 +153,7 @@ class B {
 ?>
 ]]>
    </programlisting>
-   &example.outputs.5;
+   &example.outputs.56;
    <screen>
 <![CDATA[
 Deprecated: Non-static method A::test() should not be called statically, assuming $this from incompatible context in /tmp/test.php on line 8
@@ -254,7 +254,44 @@ switch (1) {
    </programlisting>
   </informalexample>
  </sect3>
+ 
+ <sect3 xml:id="migration70.incompatible.other.func-parameter-modified">
+  <title>在函数中检视参数值会返回 <emphasis>当前</emphasis> 的值</title>
 
+  <para>
+   当在函数代码中使用 <function>func_get_arg</function> 或 
+   <function>func_get_args</function> 函数来检视参数值，
+   或者使用 <function>debug_backtrace</function> 函数查看回溯跟踪，
+   以及在异常回溯中所报告的参数值是指参数当前的值（有可能是已经被函数内的代码改变过的值），
+   而不再是参数被传入函数时候的原始值了。
+  </para>
+
+  <informalexample>
+   <programlisting role="php">
+<![CDATA[
+<?php
+function foo($x) {
+    $x++;
+    var_dump(func_get_arg(0));
+}
+foo(1);?>
+]]>
+   </programlisting>
+   &example.outputs.5;
+   <screen>
+<![CDATA[
+1
+]]>
+   </screen>
+   &example.outputs.7;
+   <screen>
+<![CDATA[
+2
+]]>
+   </screen>
+  </informalexample>
+ </sect3>
+ 
  <sect3 xml:id="migration70.incompatible.other.http-raw-post-data">
   <title><varname>$HTTP_RAW_POST_DATA</varname> 被移除</title>
 
@@ -288,6 +325,7 @@ switch (1) {
    第二，如果使用科学计数法表示数值，<literal>e</literal> 前面必须不是点号（.）
    （例如，<literal>3.e3</literal> 必须写作
    <literal>3.0e3</literal> 或 <literal>3e3</literal>）。
+   另外，空字符串不再被视作有效的 JSON 字符串。
   </para>
  </sect3>
 
@@ -309,6 +347,20 @@ switch (1) {
    会引发致命错误。现在，如果这些函数的返回值不是布尔值，也不是 <literal>-1</literal> 
    或者 <literal>0</literal>，函数调用结果将被视为失败，并且引发 E_WARNING 错误。
   </para>
+ </sect3>
+ 
+ <sect3 xml:id="migration70.incompatible.other.sort-order">
+  <title>相等的元素在排序时的顺序问题</title>
+  <para>
+   由于内部排序算法进行了提升，
+   可能会导致对比时被视为相等的多个元素之间的顺序不稳定。
+  </para>
+  <note>
+   <para>
+    在对比时被视为相等的多个元素之间的排序顺序是不可信赖的，即使是相等的两个元素，
+    他们的位置也可能被排序算法所改变。
+   </para>
+  </note>
  </sect3>
 </sect2>
 

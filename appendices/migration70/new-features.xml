@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: XX Maintainer: Ernest Too Status: ready -->
-<!-- EN-Revision: 6400e08c91fa4fe66a5d1780fdb30746d2d7dd3f Maintainer: Ernest Too Status: ready -->
+<!-- EN-Revision: 2de9c1a37be1c0cba843cd4880ad1b27d25a8fcd Maintainer: Ernest Too Status: ready -->
 <!-- Reviewed: no -->
 
 <sect1 xml:id="migration70.new-features" xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -136,17 +135,17 @@ $username = $_GET['user'] ?? $_POST['user'] ?? 'nobody';
    <programlisting role="php">
 <![CDATA[
 <?php
-// Integers
+// 整数
 echo 1 <=> 1; // 0
 echo 1 <=> 2; // -1
 echo 2 <=> 1; // 1
 
-// Floats
+// 浮点数
 echo 1.5 <=> 1.5; // 0
 echo 1.5 <=> 2.5; // -1
 echo 2.5 <=> 1.5; // 1
  
-// Strings
+// 字符串
 echo "a" <=> "a"; // 0
 echo "a" <=> "b"; // -1
 echo "b" <=> "a"; // 1
@@ -164,7 +163,7 @@ echo "b" <=> "a"; // 1
 
   <para>
    <type>Array</type> 类型的常量现在可以通过
-   define<function>define</function> 来定义。在 PHP5.6 中仅能通过 &const; 定义。
+   <function>define</function> 来定义。在 PHP5.6 中仅能通过 &const; 定义。
   </para>
 
   <informalexample>
@@ -177,7 +176,7 @@ define('ANIMALS', [
     'bird'
 ]);
 
-echo ANIMALS[1]; // outputs "cat"
+echo ANIMALS[1]; // 输出 "cat"
 ?>
 ]]>
    </programlisting>
@@ -277,12 +276,12 @@ echo "\u{9999}";
 <?php
 class A {private $x = 1;}
 
-// Pre PHP 7 code
+// PHP 7 之前版本的代码
 $getXCB = function() {return $this->x;};
-$getX = $getXCB->bindTo(new A, 'A'); // intermediate closure
+$getX = $getXCB->bindTo(new A, 'A'); // 中间层闭包
 echo $getX();
 
-// PHP 7+ code
+// PHP 7+ 及更高版本的代码
 $getX = function() {return $this->x;};
 echo $getX->call(new A);
 ]]>
@@ -308,13 +307,13 @@ echo $getX->call(new A);
 <![CDATA[
 <?php
 
-// converts all objects into __PHP_Incomplete_Class object
+// 将所有的对象都转换为 __PHP_Incomplete_Class 对象
 $data = unserialize($foo, ["allowed_classes" => false]);
 
-// converts all objects into __PHP_Incomplete_Class object except those of MyClass and MyClass2
+// 将除 MyClass 和 MyClass2 之外的所有对象都转换为 __PHP_Incomplete_Class 对象
 $data = unserialize($foo, ["allowed_classes" => ["MyClass", "MyClass2"]);
 
-// default behaviour (same as omitting the second argument) that accepts all classes
+// 默认情况下所有的类都是可接受的，等同于省略第二个参数
 $data = unserialize($foo, ["allowed_classes" => true]);
 ]]>
    </programlisting>
@@ -403,7 +402,7 @@ Fatal error: Uncaught CustomError: Some error message
 <![CDATA[
 <?php
 
-// Pre PHP 7 code
+// PHP 7 之前的代码
 use some\namespace\ClassA;
 use some\namespace\ClassB;
 use some\namespace\ClassC as C;
@@ -416,7 +415,7 @@ use const some\namespace\ConstA;
 use const some\namespace\ConstB;
 use const some\namespace\ConstC;
 
-// PHP 7+ code
+// PHP 7+ 及更高版本的代码
 use some\namespace\{ClassA, ClassB, ClassC as C};
 use function some\namespace\{fn_a, fn_b, fn_c};
 use const some\namespace\{ConstA, ConstB, ConstC};
@@ -426,15 +425,14 @@ use const some\namespace\{ConstA, ConstB, ConstC};
   </informalexample>
  </sect2>
  <sect2 xml:id="migration70.new-features.generator-return-expressions">
-  <title>Generator Return Expressions</title>
+  <title>生成器可以返回表达式</title>
 
   <para>
-   This feature builds upon the generator functionality introduced into PHP 5.5.
-   It enables for a <literal>return</literal> statement to be used within a
-   generator to enable for a final expression to be returned (return by
-   reference is not allowed). This value can be fetched using the new 
-   <literal>Generator::getReturn()</literal> method, which may only be used
-   once the generator has finishing yielding values.
+   此特性基于 PHP 5.5 版本中引入的生成器特性构建的。
+   它允许在生成器函数中通过使用 <literal>return</literal> 语法来返回一个表达式
+   （但是不允许返回引用值），
+   可以通过调用 <literal>Generator::getReturn()</literal> 方法来获取生成器的返回值，
+   但是这个方法只能在生成器完成产生工作以后调用一次。
   </para>
 
   <informalexample>
@@ -467,22 +465,20 @@ echo $gen->getReturn(), PHP_EOL;
   </informalexample>
 
   <para>
-   Being able to explicitly return a final value from a generator is a handy
-   ability to have. This is because it enables for a final value to be returned
-   by a generator (from perhaps some form of coroutine computation) that can be
-   specifically handled by the client code executing the generator. This is far
-   simpler than forcing the client code to firstly check whether the final
-   value has been yielded, and then if so, to handle that value specifically.
+   在生成器中能够返回最终的值是一个非常便利的特性，
+   因为它使得调用生成器的客户端代码可以直接得到生成器（或者其他协同计算）的返回值，
+   相对于之前版本中客户端代码必须先检查生成器是否产生了最终的值然后再进行响应处理
+   来得方便多了。
   </para>
  </sect2>
  <sect2 xml:id="migration70.new-features.generator-delegation">
   <title>Generator delegation</title>
 
   <para>
-   Generators can now delegate to another generator,
-   <classname>Traversable</classname> object or <type>array</type>
-   automatically, without needing to write boilerplate in the outermost
-   generator by using the &yield.from; construct.
+   现在，只需在最外层生成其中使用 &yield.from;，
+   就可以把一个生成器自动委派给其他的生成器，
+   <classname>Traversable</classname> 对象或者
+   <type>array</type>。
   </para>
 
   <informalexample>
@@ -524,11 +520,11 @@ foreach (gen() as $val)
   </informalexample>
  </sect2>
  <sect2 xml:id="migration70.new-features.intdiv">
-  <title>Integer division with <function>intdiv</function></title>
+  <title>整数除法函数 <function>intdiv</function></title>
 
   <para>
-   The new <function>intdiv</function> function performs an integer division
-   of its operands and returns it.
+   新加的函数 <function>intdiv</function> 用来进行
+   整数的除法运算。
   </para>
 
   <informalexample>
@@ -549,30 +545,28 @@ int(3)
   </informalexample>
  </sect2>
   <sect2 xml:id="migration70.new-features.session-options">
-  <title>Session options</title>
+  <title>会话选项</title>
 
   <para>
-   <function>session_start</function> now accepts an <type>array</type> of
-   options that override the
-   <link linkend="session.configuration">session configuration directives</link>
-   normally set in php.ini.
+   <function>session_start</function> 可以接受一个 <type>array</type> 作为参数，
+   用来覆盖 php.ini 文件中设置的
+   <link linkend="session.configuration">会话配置选项</link>。
   </para>
 
   <para>
-   These options have also been expanded to support
-   <link linkend="ini.session.lazy-write">session.lazy_write</link>, which is
-   on by default and causes PHP to only overwrite any session file if the
-   session data has changed, and <literal>read_and_close</literal>, which is
-   an option that can only be passed to <function>session_start</function> to
-   indicate that the session data should be read and then the session should
-   immediately be closed unchanged.
+   在调用 <function>session_start</function> 的时候，
+   传入的选项参数中也支持 
+   <link linkend="ini.session.lazy-write">session.lazy_write</link> 行为，
+   默认情况下这个配置项是打开的。它的作用是控制 PHP 只有在会话中的数据发生变化的时候才
+   写入会话存储文件，如果会话中的数据没有发生改变，那么 PHP 会在读取完会话数据之后，
+   立即关闭会话存储文件，不做任何修改，可以通过设置 
+   <literal>read_and_close</literal> 来实现。
   </para>
 
   <para>
-   For example, to set
-   <link linkend="ini.session.cache-limiter">session.cache_limiter</link> to
-   <literal>private</literal> and immediately close the session after reading
-   it:
+   例如，下列代码设置 
+   <link linkend="ini.session.cache-limiter">session.cache_limiter</link> 为 
+   <literal>private</literal>，并且在读取完毕会话数据之后马上关闭会话存储文件。
   </para>
 
   <informalexample>
@@ -593,17 +587,16 @@ session_start([
   <title><function>preg_replace_callback_array</function></title>
 
   <para>
-   The new <function>preg_replace_callback_array</function> function enables
-   code to be written more cleanly when using the
-   <function>preg_replace_callback</function> function. Prior to PHP 7,
-   callbacks that needed to be executed per regular expression required the
-   callback function to be polluted with lots of branching.
+   在 PHP 7 之前，当使用 <function>preg_replace_callback</function> 函数的时候，
+   由于针对每个正则表达式都要执行回调函数，可能导致过多的分支代码。
+   而使用新加的 <function>preg_replace_callback_array</function> 函数，
+   可以使得代码更加简洁。
   </para>
 
   <para>
-   Now, callbacks can be registered to each regular expression using an
-   associative array, where the key is a regular expression and the value is a
-   callback.
+   现在，可以使用一个关联数组来对每个正则表达式注册回调函数，
+   正则表达式本身作为关联数组的键，
+   而对应的回调函数就是关联数组的值。
   </para>
  </sect2>
 
@@ -611,23 +604,35 @@ session_start([
   <title><link linkend="book.csprng">CSPRNG</link> Functions</title>
 
   <para>
-   Two new functions have been added to generate cryptographically secure
-   integers and strings in a cross platform way:
-   <function>random_bytes</function> and <function>random_int</function>.
+   新加入两个跨平台的函数：
+   <function>random_bytes</function> 和 <function>random_int</function>
+   用来产生高安全级别的随机字符串和随机整数。
   </para>
  </sect2>
 
  <sect2 xml:id="migration70.new-features.list-arrayaccess">
   <title>
-   <function>list</function> can always unpack objects implementing
-   <classname>ArrayAccess</classname>
+   可以使用 <function>list</function> 函数来展开实现了
+   <classname>ArrayAccess</classname> 接口的对象
   </title>
 
   <para>
-   Previously, <function>list</function> was not guaranteed to operate
-   correctly with objects implementing <classname>ArrayAccess</classname>.
-   This has been fixed.
+   在之前版本中，<function>list</function> 函数不能保证
+   正确的展开实现了 <classname>ArrayAccess</classname> 接口的对象，
+   现在这个问题已经被修复。
   </para>
+ </sect2>
+ 
+ <sect2 xml:id="migration70.new-features.others">
+  <title>其他特性</title>
+  <itemizedlist>
+   <listitem>
+    <simpara>
+     允许在克隆表达式上访问对象成员，例如：
+     <literal>(clone $foo)-&gt;bar()</literal>。
+    </simpara>
+   </listitem>
+  </itemizedlist>
  </sect2>
 </sect1>
 
