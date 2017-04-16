@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: ffd1b9c9a729f079ab7baea153c032873399cf69 Maintainer: yuanyuqiang Status: ready -->
+<!-- EN-Revision: c0def81f41e21c607a3000aa54ea3ca3d8646b78 Maintainer: yuanyuqiang Status: ready -->
 <!-- Reviewed: no -->
 
 <sect1 xml:id="opcache.configuration" xmlns="http://docbook.org/ns/docbook">
@@ -27,9 +27,9 @@
      </row>
      <row>
       <entry><link linkend="ini.opcache.enable-cli">opcache.enable_cli</link></entry>
-      <entry>"0"</entry>
+      <entry>"1"</entry>
       <entry>PHP_INI_SYSTEM</entry>
-      <entry></entry>
+      <entry>从 PHP 7.1.2 开始，默认启用</entry>
      </row>
      <row>
       <entry><link
@@ -182,6 +182,42 @@
       <entry>PHP_INI_SYSTEM</entry>
       <entry></entry>
      </row>
+     <row>
+      <entry><link linkend="ini.opcache.file-cache">opcache.file_cache</link></entry>
+      <entry>NULL</entry>
+      <entry>PHP_INI_SYSTEM</entry>
+      <entry>从 PHP 7.0.0 开始支持</entry>
+     </row>
+     <row>
+      <entry><link linkend="ini.opcache.file-cache-only">opcache.file_cache_only</link></entry>
+      <entry>"0"</entry>
+      <entry>PHP_INI_SYSTEM</entry>
+      <entry>从 PHP 7.0.0 开始支持</entry>
+     </row>
+     <row>
+      <entry><link linkend="ini.opcache.file-cache-consistency-checks">opcache.file_cache_consistency_checks</link></entry>
+      <entry>"1"</entry>
+      <entry>PHP_INI_SYSTEM</entry>
+      <entry>从 PHP 7.0.0 开始支持</entry>
+     </row>
+     <row>
+      <entry><link linkend="ini.opcache.file-cache-fallback">opcache.file_cache_fallback</link></entry>
+      <entry>"1"</entry>
+      <entry>PHP_INI_SYSTEM</entry>
+      <entry>从 PHP 7.0.0 开始支持</entry>
+     </row>
+     <row>
+      <entry><link linkend="ini.opcache.validate-permission">opcache.validate_permission</link></entry>
+      <entry>"0"</entry>
+      <entry>PHP_INI_SYSTEM</entry>
+      <entry>从 PHP 7.0.14 开始支持</entry>
+     </row>
+     <row>
+      <entry><link linkend="ini.opcache.validate-root">opcache.validate_root</link></entry>
+      <entry>"0"</entry>
+      <entry>PHP_INI_SYSTEM</entry>
+      <entry>从 PHP 7.0.14 开始支持</entry>
+     </row>
     </tbody>
    </tgroup>
   </table>
@@ -251,7 +287,7 @@
       OPcache 哈希表中可存储的脚本文件数量上限。
       真实的取值是在质数集合
       <literal>{ 223, 463, 983, 1979, 3907, 7963, 16229, 32531, 65407, 130987 }</literal>
-      中找到的第一个比设置值大的质数。
+      中找到的第一个大于等于设置值的质数。
       设置值取值范围最小值是 200，最大值在 PHP 5.5.6 之前是 100000，PHP 5.5.6 及之后是 1000000。
      </para>
     </listitem>
@@ -468,8 +504,7 @@
     <listitem>
      <para>
       以字节为单位的缓存的文件大小上限。设置为
-      <literal>0</literal>
-      表示缓存全部文件。
+      <literal>0</literal> 表示缓存全部文件。
      </para>
     </listitem>
    </varlistentry>
@@ -500,7 +535,7 @@
      <para>
       如果选项
       <link linkend="ini.opcache.log-verbosity-level">opcache.log_verbosity_level</link>
-      设置为 3 或者 3 以上的数值，当发生重启时将在日志中记录一条错误信息。
+      设置为 2 或者 2 以上的数值，当发生重启时将在日志中记录一条警告信息。
      </para>
     </listitem>
    </varlistentry>
@@ -581,6 +616,77 @@
      <para>
       仅允许路径是以指定字符串开始的 PHP 脚本调用 OPcache API 函数。
       默认值为空字符串 ""，表示不做限制。
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry xml:id="ini.opcache.file-cache">
+    <term>
+     <parameter>opcache.file_cache</parameter>
+     <type>string</type>
+    </term>
+    <listitem>
+     <para>
+      配置二级缓存目录并启用二级缓存。
+      启用二级缓存可以在 SHM 内存满了、服务器重启或者重置 SHM 的时候提高性能。
+      默认值为空字符串 ""，表示禁用基于文件的缓存。
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry xml:id="ini.opcache.file-cache-only">
+    <term>
+     <parameter>opcache.file_cache_only</parameter>
+     <type>boolean</type>
+    </term>
+    <listitem>
+     <para>
+      启用或禁用在共享内存中的 opcode 缓存。
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry xml:id="ini.opcache.file-cache-consistency-checks">
+    <term>
+     <parameter>opcache.file_cache_consistency_checks</parameter>
+     <type>boolean</type>
+    </term>
+    <listitem>
+     <para>
+      当从文件缓存中加载脚本的时候，是否对文件的校验和进行验证。
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry xml:id="ini.opcache.file-cache-fallback">
+    <term>
+     <parameter>opcache.file_cache_fallback</parameter>
+     <type>boolean</type>
+    </term>
+    <listitem>
+     <para>
+      在 Windows 平台上，当一个进程无法附加到共享内存的时候，
+      使用基于文件的缓存，也即：opcache.file_cache_only=1。
+      需要显示的启用文件缓存。
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry xml:id="ini.opcache.validate-permission">
+    <term>
+     <parameter>opcache.validate_permission</parameter>
+     <type>boolean</type>
+    </term>
+    <listitem>
+     <para>
+      针对当前用户，验证缓存文件的访问权限。
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry xml:id="ini.opcache.validate-root">
+    <term>
+     <parameter>opcache.validate_root</parameter>
+     <type>boolean</type>
+    </term>
+    <listitem>
+     <para>
+      在 chroot 的环境中避免命名冲突。
+      为了防止进程访问到 chroot 环境之外的文件，应该在 chroot 的情况下启用这个选项。
      </para>
     </listitem>
    </varlistentry>

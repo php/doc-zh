@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: d78c0a4f3335f668b36ae2309350649b45486f78 Maintainer: yuanyuqiang Status: ready -->
+<!-- EN-Revision: 221f0c17eeb602fdb40df87058658a5404c5badf Maintainer: yuanyuqiang Status: ready -->
 <!-- Reviewed: no -->
 
 <refentry xml:id="function.ftp-ssl-connect" xmlns="http://docbook.org/ns/docbook">
@@ -17,8 +17,12 @@
    <methodparam choice="opt"><type>int</type><parameter>timeout</parameter><initializer>90</initializer></methodparam>
   </methodsynopsis>
   <para>
-   <function>ftp_ssl_connect</function> 打开一个到
+   <function>ftp_ssl_connect</function> <emphasis>显式</emphasis>的打开一个到
    <parameter>host</parameter> 的安全 FTP 连接（SSL-FTP）。
+   即使服务器未配置 SSL-FTP，或者服务器的证书无效，<function>ftp_ssl_connect</function>
+   函数也会成功的建立到服务器的连接。直到调用 <function>ftp_login</function> 函数的时候，
+   客户端才会发送对应的 AUTH FTP 命令，此时，如果服务器未配置 SSL-FTP 或者整数无效，
+   <function>ftp_login</function> 函数会失败。
   </para>
   <note>
    <title>为何本函数有可能不存在？</title>
@@ -118,6 +122,11 @@ $conn_id = ftp_ssl_connect($ftp_server);
 
 // 使用用户名和密码登录
 $login_result = ftp_login($conn_id, $ftp_user_name, $ftp_user_pass);
+
+if (!$login_result) {
+    // 在这种情况下，PHP 会发生 E_WARNING 级别的告警消息
+    die("can't login");
+}
 
 echo ftp_pwd($conn_id); // /
 
