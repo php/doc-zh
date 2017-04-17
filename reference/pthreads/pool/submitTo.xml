@@ -1,23 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: cb2e7b70b1354e5468e538720d59c37e273bc98e Maintainer: yuanyuqiang Status: ready -->
+<!-- EN-Revision: b694084174d9bb9432d5ae0d405e43482e6cfb67 Maintainer: yuanyuqiang Status: ready -->
 <!-- Reviewed: no -->
 
 <refentry xml:id="pool.submitTo" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
   <refname>Pool::submitTo</refname>
-  <refpurpose>提交对象以执行</refpurpose>
+  <refpurpose>提交一个任务到特定的 Worker 以执行</refpurpose>
  </refnamediv>
 
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <modifier>public</modifier> <type>integer</type><methodname>Pool::submitTo</methodname>
-   <methodparam><type>integer</type><parameter>worker</parameter></methodparam>
+   <modifier>public</modifier> <type>int</type><methodname>Pool::submitTo</methodname>
+   <methodparam><type>int</type><parameter>worker</parameter></methodparam>
    <methodparam><type>Threaded</type><parameter>task</parameter></methodparam>
   </methodsynopsis>
   <para>
-   将对象提交到 Pool 中某个 Worker 对象来执行
+   将对象提交到 Pool 中某个特定的 Worker 对象来执行。Worker 的下标从 0 开始，
+   由于 Pool 中的线程是懒加载机制，
+   所以 Worker 对象仅在 Pool 需要执行任务的时候才会真正被创建。
   </para>
  </refsect1>
 
@@ -28,7 +30,7 @@
     <term><parameter>worker</parameter></term>
     <listitem>
      <para>
-      用来执行任务的 Worker 对象
+      用来执行任务的 Worker 对象，下标从 <literal>0</literal> 开始。
      </para>
     </listitem>
    </varlistentry>
@@ -54,72 +56,40 @@
   &reftitle.examples;
   <para>
    <example>
-    <title>提交任务</title>
+    <title>提交任务到特定的 Worker</title>
     <programlisting role="php">
 <![CDATA[
 <?php
-class MyWork extends Threaded {
-    
+class Task extends Threaded {
     public function run() {
-        /* ... */
+        var_dump(Thread::getCurrentThreadID());
     }
 }
 
-class MyWorker extends Worker {
-    
-    public function __construct(Something $something) {
-        $this->something = $something;
-    }
-    
-    public function run() {
-        /** ... **/
-    }
+$pool = new Pool(2);
+
+$pool->submit(new Task());
+
+for ($i = 0; $i < 5; ++$i) {
+    $pool->submitTo(0, new Task()); // 将所有的任务都入栈到下标为 0 的 Worker
 }
 
-$pool = new Pool(8, \MyWorker::class, [new Something()]);
-$pool->submit(new MyWork());
-var_dump($pool);
-?>
+$pool->submitTo(1, new Task()); // 由于第二个 Worker 尚未存在，所以不可以将任务入栈到第二个 Worker
+
+$pool->shutdown();
 ]]>
     </programlisting>
     &example.outputs;
     <screen>
 <![CDATA[
-object(Pool)#1 (6) {
-  ["size":protected]=>
-  int(8)
-  ["class":protected]=>
-  string(8) "MyWorker"
-  ["workers":protected]=>
-  array(1) {
-    [0]=>
-    object(MyWorker)#4 (1) {
-      ["something"]=>
-      object(Something)#5 (0) {
-      }
-    }
-  }
-  ["work":protected]=>
-  array(1) {
-    [0]=>
-    object(MyWork)#3 (1) {
-      ["worker"]=>
-      object(MyWorker)#5 (1) {
-        ["something"]=>
-        object(Something)#6 (0) {
-        }
-      }
-    }
-  }
-  ["ctor":protected]=>
-  array(1) {
-    [0]=>
-    object(Something)#2 (0) {
-    }
-  }
-  ["last":protected]=>
-  int(1)
-}
+int(4475011072)
+int(4475011072)
+int(4475011072)
+int(4475011072)
+int(4475011072)
+int(4475011072)
+
+Fatal error: Uncaught Exception: The selected worker (1) does not exist in %s:%d
 ]]>
     </screen>
    </example>

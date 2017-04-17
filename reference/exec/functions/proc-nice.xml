@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 96c9d88bad9a7d7d44bfb7f26c226df7ee9ddf26 Maintainer: yuanyuqiang Status: ready -->
+<!-- EN-Revision: d790375863dca4df7aa449786bb110c9cd80abdf Maintainer: yuanyuqiang Status: ready -->
 <!-- Reviewed: no -->
 <refentry xml:id='function.proc-nice' xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
@@ -34,8 +34,59 @@
      <term><parameter>increment</parameter></term>
      <listitem>
       <para>
-       优先级变化值。
+       新的优先级值，具体的设定取决于所运行的平台。
       </para>
+      <para>
+       在 Unix 系统上，较低的值表示较高的优先级，例如：<literal>-20</literal>，
+       而正数值表示更低的优先级。
+      </para>
+      <para>
+       在 Windows 平台上，<parameter>increment</parameter> 参数
+       的含义如下：
+      </para>
+      <informaltable>
+       <tgroup cols="3">
+        <thead>
+         <row>
+          <entry valign="top">优先级</entry>
+          <entry valign="top">可能的值</entry>
+         </row>
+        </thead>
+        <tbody>
+         <row>
+          <entry valign="top">高优先级</entry>
+          <entry valign="top">
+           <parameter>increment</parameter> <literal>&lt; -9</literal>
+          </entry>
+         </row>
+         <row>
+          <entry valign="top">较高优先级</entry>
+          <entry valign="top">
+           <parameter>increment</parameter> <literal>&lt; -4</literal>
+          </entry>
+         </row>
+         <row>
+          <entry valign="top">正常优先级</entry>
+          <entry valign="top">
+           <parameter>increment</parameter> <literal>&lt; 5</literal> &amp; 
+           <parameter>increment</parameter> <literal>&gt; -5</literal>
+          </entry>
+         </row>
+         <row>
+          <entry valign="top">较低优先级</entry>
+          <entry valign="top">
+           <parameter>increment</parameter> <literal>&gt; 5</literal>
+          </entry>
+         </row>
+         <row>
+          <entry valign="top">低优先级</entry>
+          <entry valign="top">
+           <parameter>increment</parameter> <literal>&gt; 9</literal>
+          </entry>
+         </row>
+        </tbody>
+       </tgroup>
+      </informaltable>
      </listitem>
     </varlistentry>
    </variablelist>
@@ -51,14 +102,62 @@
   </para>
  </refsect1>
 
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title>使用 <function>proc_open</function> 函数将进程设置为高优先级</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+// Highest priority
+proc_nice(-20);
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+
+ </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <para>
+   <informaltable>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>&Version;</entry>
+       <entry>&Description;</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>7.2.0</entry>
+       <entry>
+        在 Windows 平台上可用。
+       </entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </informaltable>
+  </para>
+ </refsect1>
+ 
  <refsect1 role="notes">
   &reftitle.notes;
   <note>
-   <title>Availability</title>
+   <title>可用性</title>
    <para>
     仅在具有 'nice' 能力的系统上才可以使用 <function>proc_nice</function> 函数。
     下列系统含有 'nice'：SVr4, SVID EXT, AT&amp;T, X/OPEN, BSD 4.3。
-    也就是说，此函数在 Windows 平台上不可用。
+   </para>
+  </note>
+  <note>
+   <title>Windows 平台</title>
+   <para>
+    <function>proc_nice</function> 函数会改变 <emphasis>当前</emphasis> 
+    进程优先级，即使 PHP 是使用线程安全模式编译的。
    </para>
   </note>
  </refsect1>

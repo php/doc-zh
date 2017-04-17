@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: cb2e7b70b1354e5468e538720d59c37e273bc98e Maintainer: yuanyuqiang Status: ready -->
+<!-- EN-Revision: b694084174d9bb9432d5ae0d405e43482e6cfb67 Maintainer: yuanyuqiang Status: ready -->
 <!-- Reviewed: no -->
 
 <refentry xml:id="pool.collect" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -12,8 +12,8 @@
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <modifier>public</modifier> <type>void</type><methodname>Pool::collect</methodname>
-   <methodparam><type>Callable</type><parameter>collector</parameter></methodparam>
+   <modifier>public</modifier> <type>int</type><methodname>Pool::collect</methodname>
+   <methodparam choice="opt"><type>Callable</type><parameter>collector</parameter></methodparam>
   </methodsynopsis>
   <para>
    对于视为垃圾的引用，使用给定的垃圾收集器进行收集
@@ -27,7 +27,8 @@
     <term><parameter>collector</parameter></term>
     <listitem>
      <para>
-      可调用的垃圾收集器
+      垃圾收集器，它返回一个布尔值表示这个任务是否可以被进行垃圾收集。
+      仅在极少的情况下需要一个自定义的垃圾收集器。
      </para>
     </listitem>
    </varlistentry>
@@ -37,92 +38,55 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
- void
+  池中剩余的待收集的任务数量。
   </para>
  </refsect1>
 
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <para>
+   <informaltable>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>&Version;</entry>
+       <entry>&Description;</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>v3</entry>
+       <entry>
+        <parameter>collector</parameter> 参数变为可选参数，
+        并且返回值改为整数。
+       </entry>
+      </row>
+     </tbody>
+    </tgroup> 
+   </informaltable>
+  </para>
+ </refsect1>
+
+ 
  <refsect1 role="examples">
   &reftitle.examples;
   <para>
    <example>
-    <title>创建 Pool 对象</title>
+    <title><methodname>Pool::collect</methodname> 基本用法示例</title>
     <programlisting role="php">
 <![CDATA[
 <?php
-class MyWork extends Stackable {
-    public function __construct() {
-        $this->complete = false;
-    }
+$pool = new Pool(4);
 
-    public function run() {
-        printf(
-            "Hello from %s in Thread #%lu\n", 
-            __CLASS__, $this->worker->getThreadId());
-        $this->complete = true;
-    }
-
-    public function isComplete() { 
-        return $this->complete; 
-    }
-
-    protected $complete;
+for ($i = 0; $i < 15; ++$i) {
+    $pool->submit(new class extends Threaded {});
 }
 
-class MyWorker extends Worker {
-    
-    public function __construct(Something $something) {
-        $this->something = $something;
-    }
-    
-    public function run() {
-        /** ... **/
-    }
-}
+while ($pool->collect()); // 直到全部的任务都完成执行之后才会继续下面的代码
 
-$pool = new Pool(8, \MyWorker::class, [new Something()]);
-$pool->submit(new MyWork());
-
-usleep(1000);
-
-$pool->collect(function($work){
-    return $work->isComplete();
-});
-var_dump($pool);
-?>
+$pool->shutdown();
 ]]>
     </programlisting>
-    &example.outputs;
-    <screen>
-<![CDATA[
-Hello from MyWork in Thread #140222468777728
-object(Pool)#1 (6) {
-  ["size":protected]=>
-  int(8)
-  ["class":protected]=>
-  string(8) "MyWorker"
-  ["workers":protected]=>
-  array(1) {
-    [0]=>
-    object(MyWorker)#4 (1) {
-      ["something"]=>
-      object(Something)#5 (0) {
-      }
-    }
-  }
-  ["work":protected]=>
-  array(0) {
-  }
-  ["ctor":protected]=>
-  array(1) {
-    [0]=>
-    object(Something)#2 (0) {
-    }
-  }
-  ["last":protected]=>
-  int(1)
-}
-]]>
-    </screen>
    </example>
   </para>
  </refsect1>

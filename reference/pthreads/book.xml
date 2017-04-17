@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 81c04e061207026462b35be7ccbeb9a0d6e16090 Maintainer: yuanyuqiang Status: ready -->
+<!-- EN-Revision: 2736c3b45f2b48d5dbf20f56dffcffa06c23b6bc Maintainer: yuanyuqiang Status: ready -->
 <!-- Reviewed: no -->
 
 <book xml:id="book.pthreads" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -11,45 +11,64 @@
   &reftitle.intro;
   <para>
    pthreads 是一组允许用户在 PHP 中使用多线程技术的面向对象的 API。
-   它提供了创建多线程应用所需的全套工具，无论是 Web 应用还是控制台应用。
+   它提供了创建多线程应用所需的全套工具。
    通过使用 Thread， Worker 以及 Threaded 对象，PHP 应用可以创建、读取、写入以及执行多线程应用，并可以在多个线程之间进行同步控制。
   </para>
+  <warning>
+   <para>
+    不可以在 web 服务器环境中使用 pthreads 扩展，
+    PHP 多线程开发仅限于命令行模式的应用。
+   </para>
+  </warning>
   <para>
    Threaded 对象：
-   Threaded 对象提供支持 pthreads 操作的基本功能，包括同步方法以及其他对程序员很有帮助的接口。
+   <classname>Threaded</classname> 对象提供支持 pthreads 操作的基本功能，包括同步方法以及其他对程序员很有帮助的接口。
   </para>
   <para>
    Thread 对象：
-   通过继承 pthreads 中提供的 Thread 对象并实现 run 方法，用户可以创建自己的 Thread 对象。
+   通过继承 pthreads 中提供的 <classname>Thread</classname> 对象并实现 <literal>run</literal> 方法，用户可以创建自己的 Thread 对象。
    只要线程上下文中持有某个 Thread 对象的引用，就可以读/写该对象的属性，也可以调用该对象的公有（public）或者受保护（protected）的方法。
-   当在创建 Thread 对象的进程或线程上下文中调用该对象的 start 方法时，pthreads 扩展会在另外的独立线程中执行该对象的 run 方法。
+   当在创建 Thread 对象的上下文中调用该对象的 <methodname>Thread::start</methodname> 方法时，pthreads 扩展会在另外的独立线程中执行该对象的 run 方法。
    仅有创建 Thread 对象的线程/进程方可开始（start）或者加入（join）这个 Thread 对象。
   </para>
   <para>
    Worker 对象：
-   Worker 是有状态的线程对象，它在线程开始之后就可用，除非代码中显式地关闭线程，否则该对象在线程对象超出作用范围之后才会失效。
-   持有 Worker 对象引用的线程上下文可以向 Worker 中入栈其他线程对象，Worker 对象将在独立线程中执行入栈对象的代码。
-   Woker 对象的 run 方法会在它的栈中入栈对象之前执行，这样就可以进行一些必需的资源初始化工作。
+   <classname>Worker</classname> 是有状态的线程对象，它在线程开始（通过调用 <methodname>Thread::start</methodname> 方法）之后就可用，
+   除非代码中显式地关闭线程（通过调用 <methodname>Worker::shutdown</methodname> 方法），
+   否则该对象在线程对象超出作用范围之后才会失效。
+   持有 Worker 对象引用的线程上下文可以向 Worker 中入栈（通过调用 <methodname>Worker::stack</methodname> 方法）其他线程对象，Worker 对象将在独立线程中执行入栈对象的代码。
+   Woker 对象的 <literal>run</literal> 方法会在它的栈中入栈对象之前执行，这样就可以进行一些必需的资源初始化工作。
   </para>
   <para>
    Pool 对象：
-   Pool 对象是 Worker 线程对象池，可以用来在多个 Worker 对象之间分发 Threaded 对象，它可以很好的处理对象应用。
-   Pool 对象从 1.0.0 版本开始引入，现在已经成为最易用且高效多线程编程方式。
+   <classname>Pool</classname> 对象是 Worker 线程对象池，可以用来在多个 Worker 对象之间分发 <classname>Threaded</classname> 对象，
+   这是最易用且高效的多线程编程方式。
   </para>
   <caution>
   <para>
-   Pool 是标准 PHP 对象，所以不可以在多个线程上下文中共享同一个 Pool 对象。
+   <classname>Pool</classname> 是标准的 PHP 对象，它并没有继承 <classname>Threaded</classname> 类，所以不可以在多个线程上下文中共享同一个 Pool 对象。
   </para>
   </caution>
   <para>
+   <classname>Volatile</classname> 类是在 pthreads v3 中新增加的，
+   用来表示可变的 <classname>Threaded</classname> 类中的
+   <classname>Threaded</classname> 属性（默认情况下是不可变的）。
+  </para>
+  <para>
    线程间同步：
-   由 pthreads 扩展创建的所有对象拥有内置的线程间同步机制，和 Java 语言很类似，使用 ::wait 和 :: notify 方法。
-   调用某一个对象的 ::wait 方法会导致当前线程上下文进入等待状态，等待另外一个线程上下文调用同一个对象的 ::notify 方法。
-   为 PHP Threaded 对象提供了强有力的线程间同步控制机制。
+   由 pthreads 扩展创建的所有对象拥有内置的线程间同步机制，
+   和 Java 语言很类似，
+   使用 <methodname>Threaded::wait</methodname> 
+   和 <methodname>Threaded::notify</methodname> 方法来实现线程间同步。
+   调用某一个对象的 <methodname>Threaded::wait</methodname> 方法
+   会导致当前线程上下文进入等待状态，
+   等待另外一个线程上下文调用同一个对象的 
+   <methodname>Threaded::notify</methodname> 方法。
+   为 PHP <classname>Threaded</classname> 对象提供了强有力的线程间同步控制机制。
   </para>
   <caution>
   <para>
-   应用中会用在多线程场景中的对象都应该从 Threaded 类继承。
+   应用中会用在多线程场景中的对象都应该从 <classname>Threaded</classname> 类继承。
   </para> 
   </caution>
   <para>
