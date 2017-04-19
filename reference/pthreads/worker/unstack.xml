@@ -1,43 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 6909677c129f4e08dcd93f9494489c4105096088 Maintainer: yuanyuqiang Status: ready -->
+<!-- EN-Revision: 99a05eca30d4789366893e5fd902c6c17d10fba1 Maintainer: yuanyuqiang Status: ready -->
 <!-- Reviewed: no -->
 
 <refentry xml:id="worker.unstack" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
   <refname>Worker::unstack</refname>
-  <refpurpose>栈操作</refpurpose>
+  <refpurpose>将要执行的任务出栈</refpurpose>
  </refnamediv>
 
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <modifier>public</modifier> <type>integer</type><methodname>Worker::unstack</methodname>
-   <methodparam choice="opt"><type>Threaded</type><parameter role="reference">work</parameter></methodparam>
+   <modifier>public</modifier> <type>int</type><methodname>Worker::unstack</methodname>
+   <void/>
   </methodsynopsis>
   <para>
-   从 Worker 栈中出栈对象，如果不提供参数，则表示移除 Worker 栈中全部对象
+   把 Worker 栈顶的（最老的那个）任务从栈中移除。
   </para>
  </refsect1>
 
  <refsect1 role="parameters">
   &reftitle.parameters;
-  <variablelist>
-   <varlistentry>
-    <term><parameter>work</parameter></term>
-    <listitem>
-     <para>
-      已经入栈的对象
-     </para>
-    </listitem>
-   </varlistentry>
-  </variablelist>
+  &no.function.parameters;
  </refsect1>
 
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-  Worker 对象栈长度
+  出栈之后，Worker 栈的大小。
+  </para>
+ </refsect1>
+ 
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <para>
+   <informaltable>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>&Version;</entry>
+       <entry>&Description;</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>v3</entry>
+       <entry>
+        移除了要出栈的任务参数。
+        现在只能移除栈顶元素。
+       </entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </informaltable>
   </para>
  </refsect1>
 
@@ -49,17 +65,11 @@
     <programlisting role="php">
 <![CDATA[
 <?php
-class Work extends Threaded {
-    public function run() {
-        
-    }
-}
-
 $my = new Worker();
-$work = new Work();
+$work = new class extends Threaded {};
+
 var_dump($my->stack($work));
-var_dump($my->unstack($work));
-?>
+var_dump($my->unstack());
 ]]>
     </programlisting>
     &example.outputs;

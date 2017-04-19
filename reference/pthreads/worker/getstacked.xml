@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 6909677c129f4e08dcd93f9494489c4105096088 Maintainer: yuanyuqiang Status: ready -->
+<!-- EN-Revision: 99a05eca30d4789366893e5fd902c6c17d10fba1 Maintainer: yuanyuqiang Status: ready -->
 <!-- Reviewed: no -->
 
 <refentry xml:id="worker.getstacked" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
   <refname>Worker::getStacked</refname>
-  <refpurpose>栈分析</refpurpose>
+  <refpurpose>获取剩余的栈大小</refpurpose>
  </refnamediv>
 
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <modifier>public</modifier> <type>integer</type><methodname>Worker::getStacked</methodname>
+   <modifier>public</modifier> <type>int</type><methodname>Worker::getStacked</methodname>
    <void />
   </methodsynopsis>
   <para>
-   返回等待被 Worker 对象执行的对象数量
+   返回栈中剩余的任务数量
   </para>
  </refsect1>
 
@@ -28,7 +28,7 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-  数值
+  返回 worker 中等待执行的任务数量
   </para>
  </refsect1>
 
@@ -36,31 +36,23 @@
   &reftitle.examples;
   <para>
    <example>
-    <title>返回等待 Worker 执行的对象数量</title>
+    <title><classname>Worker::getStacked</classname> 基本示例</title>
     <programlisting role="php">
 <![CDATA[
 <?php
-class Work extends Threaded {
-    /** ... **/
+$worker = new Worker();
 
-    public function run(){
-        /** ... **/
-    }
+for ($i = 0; $i < 5; ++$i) {
+    $worker->stack(new class extends Threaded {});
 }
-$my = new Worker();
-/** ... **/
-$work = new Work();
-$my->stack($work);
-/** ... **/
-printf("My worker has %d jobs remaining\n", $my->getStacked());
-/** ... **/
-?>
+
+echo "There are {$worker->getStacked()} stacked tasks\n";
 ]]>
     </programlisting>
     &example.outputs;
     <screen>
 <![CDATA[
-My worker has 5 jobs remaining
+There are 5 stacked tasks
 ]]>
     </screen>
    </example>
