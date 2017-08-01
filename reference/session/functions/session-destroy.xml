@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 96c9d88bad9a7d7d44bfb7f26c226df7ee9ddf26 Maintainer: yuanyuqiang Status: ready -->
+<!-- EN-Revision: 894b3c74d9a9e4c6100139cabaa7c97eb2e294c0 Maintainer: yuanyuqiang Status: ready -->
 <!-- Reviewed: no -->
 
 <refentry xmlns="http://docbook.org/ns/docbook" xml:id="function.session-destroy">
@@ -22,12 +22,44 @@
    如果需要再次使用会话变量，
    必须重新调用 <function>session_start</function> 函数。
   </simpara>
+  <note>
+   <simpara>
+    通常情况下，在你的代码中不必调用 <function>session_destroy</function> 函数，
+    可以直接清除 $_SESSION 数组中的数据来实现会话数据清理。
+   </simpara>
+  </note>
   <para>
-   为了彻底销毁会话，比如在用户退出登录的时候，必须同时重置会话 ID。
+   为了彻底销毁会话，必须同时重置会话 ID。
    如果是通过 cookie 方式传送会话 ID 的，那么同时也需要
    调用 <function>setcookie</function> 函数来
    删除客户端的会话 cookie。
   </para>
+  <para>
+   当启用了 <link linkend="ini.session.use-strict-mode">session.use_strict_mode</link> 配置项的时候，你不需要删除过期会话 ID 对应的 cookie，
+   因为会话模块已经不再接受携带过期会话 ID 的 cookie 了，
+   然后它会生成一个新的会话 ID cookie。
+   建议所有的站点都启用 <link linkend="ini.session.use-strict-mode">session.use_strict_mode</link> 配置项。
+  </para>
+  <warning>
+   <para>
+    过早的删除会话中的数据可能会导致不可预期的结果。
+    例如，当存在从 JavaScript 或者 URL 链接过来的并发请求的时候，
+    某一个请求删除了会话中的数据，会导致其他的并发请求无法使用会话数据。
+   </para>
+   <para>
+    虽然当前的会话处理模块不会接受为空的会话 ID，
+    但是由于客户端（浏览器）的处理方式，
+    立即删除会话中的数据可能会导致生成为空的会话 cookie，
+    进而导致客户端生成很多不必要的会话 ID cookie。
+   </para>
+   <para>
+    为了避免这种情况的发生，你需要在 $_SESSION 中设置一个时间戳，
+    在这个时间戳之后的对于会话的访问都将被拒绝。
+    或者，确保你的应用中不存在并发请求。
+    这个规则同样适用于 <function>session_regenerate_id</function>。
+<function>session_regenerate_id</function> also.
+   </para>
+  </warning>
  </refsect1>
 
  <refsect1 role="returnvalues">
@@ -85,6 +117,9 @@ session_destroy();
   &reftitle.seealso;
   <para>
    <simplelist>
+    <member><link linkend="ini.session.use-strict-mode">session.use_strict_mode</link></member>
+    <member><function>session_reset</function></member>
+    <member><function>session_regenerate_id</function></member>
     <member><function>unset</function></member>
     <member><function>setcookie</function></member>
    </simplelist>
