@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 73f204de3d42053aff3c10f5bc291023eb897942 Maintainer: yuanyuqiang Status: ready -->
+<!-- EN-Revision: f42f55617a2096a46697a9bd603cac0b24aeea5b Maintainer: yuanyuqiang Status: ready -->
 <!-- Reviewed: no -->
 
 <refentry xmlns="http://docbook.org/ns/docbook" xml:id="function.session-regenerate-id">
@@ -26,6 +26,21 @@
    那么必须在调用 <function>session_regenerate_id</function> 函数之后开始进行输出工作，
    否则会导致使用原有的会话 ID。
   </para>
+  <warning>
+   <para>
+    当前的 session_regenerate_id 并没有很好的处理在诸如移动数据网络和 WiFi 网络不稳定的场景。
+    因此，调用 session_regenerate_id 函数
+    可能会导致会话丢失。
+   </para>
+   <para>
+    你不应该直接销毁旧的会话所关联的数据，
+    而是应该使用时间戳机制来控制对于已经失效的会话 ID 的访问。
+    否则，可能会在并发访问的场景下导致会话数据不一致、
+    会话丢失等情况，甚至可能引发客户端（浏览器）创建很多无用的会话 ID。
+    但是，另外一方面来讲，立即删除会话中的数据
+    可以防止会话劫持攻击。
+   </para>
+  </warning>
  </refsect1>
 
  <refsect1 role="parameters">
@@ -37,6 +52,8 @@
       <listitem>
        <para>
         是否删除原 ID 所关联的会话存储文件。
+        如果你需要避免会话并发访问冲突，那么不应该立即删除会话中的数据。
+        如果你需要防止会话劫持攻击，那么可以立即删除会话数据。
        </para>
       </listitem>
      </varlistentry>
@@ -64,17 +81,23 @@
      </thead>
      <tbody>
       <row>
-       <entry>4.3.3</entry>
+       <entry>7.0.0</entry>
        <entry>
-        如果启用会话 cookie，
-        调用 <function>session_regenerate_id</function> 函数
-        会使用新的会话 ID 来生成 cookie 并发送给客户端。
+        <function>session_regenerate_id</function> 函数在关闭过期会话之前保存其中的数据。
        </entry>
       </row>
       <row>
        <entry>5.1.0</entry>
        <entry>
-        加入 <parameter>delete_old_session</parameter> 参数。
+        新加 <parameter>delete_old_session</parameter> 参数。
+       </entry>
+      </row>
+      <row>
+       <entry>4.3.3</entry>
+       <entry>
+        如果启用会话 cookie，
+        调用 <function>session_regenerate_id</function> 函数
+        会使用新的会话 ID 来生成 cookie 并发送给客户端。
        </entry>
       </row>
      </tbody>
@@ -91,11 +114,30 @@
     <programlisting role="php">
 <![CDATA[
 <?php
+// 注意：下列不是完整的代码，只是一个示例
+
 session_start();
+
+// 检查会话被销毁的时间戳
+if (isset($_SESSION['destroyed'])
+    && $_SESSION['destroyed'] < time() - 300) {
+    // 通常不会发生这种情况。如果发生，那么可能是由于不稳定的网络状况或者被攻击导致的
+    // 移除用户会话中的认证信息
+    remove_all_authentication_flag_from_active_sessions($_SESSION['userid']);
+    throw(new DestroyedSessionAccessException);
+}
 
 $old_sessionid = session_id();
 
+// 设置会话销毁时间戳
+$_SESSION['destroyed'] = time(); // 从 PHP 7.0.0 开始, session_regenerate_id() 会自动保存会话数据
+
+// 如果直接调用 session_regenerate_id() 函数可能会导致会话丢失的情况，
+// 参见下面的例程
 session_regenerate_id();
+
+// 新创建的会话不需要时间戳
+unset($_SESSION['destroyed']);
 
 $new_sessionid = session_id();
 
@@ -108,6 +150,73 @@ print_r($_SESSION);
     </programlisting>
    </example>
   </para>
+  
+  <para>
+   当前的会话模块未能很好的处理在网络不稳定的时候导致会话丢失的场景。
+   你需要自行管理会话 ID 避免调用 session_regenerate_id 导致会话丢失。
+  </para>
+  
+  <para>
+   <example>
+    <title>Avoiding lost session by <function>session_regenerate_id</function></title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+// 注意：下列不是完整的代码，只是一个示例
+// my_session_start() 和 my_session_regenerate_id()
+// 函数可以避免在网络不稳定的情况下导致会话丢失的问题。
+// 并且还可以避免用户会话被攻击者利用
+
+function my_session_start() {
+    session_start();
+    if (isset($_SESSION['destroyed'])) {
+       if ($_SESSION['destroyed'] < time()-300) {
+           // 通常不会发生这种情况。如果发生，那么可能是由于不稳定的网络状况或者被攻击导致的
+           // 移除用户会话中的认证信息
+           remove_all_authentication_flag_from_active_sessions($_SESSION['userid']);
+           throw(new DestroyedSessionAccessException);
+       }
+       if (isset($_SESSION['new_session_id'])) {
+           // 尚未完全过期，可能是由于网络不稳定引起的。
+           // 尝试再次设置正确的会话 ID cookie。
+           // 注意：如果你需要移除认证标记，那么不要尝试再次设置会话 ID。
+           session_commit();
+           session_id($_SESSION['new_session_id']);
+           // 现在有了新的会话 ID 了。
+           session_start();
+           return;
+       }
+   }
+}
+
+function my_session_regenerate_id() {
+    // 如果由于不稳定的网络导致没有创建会话 ID，
+    // 那么就创建一个
+    $new_session_id = session_create_id();
+    $_SESSION['new_session_id'] = $new_session_id;
+    
+    // 设置销毁时间戳
+    $_SESSION['destroyed'] = time();
+    
+    // 保存并关闭会话
+    session_commit();
+
+    // 使用新的会话 ID 开始会话
+    session_id($new_session_id);
+    ini_set('session.use_strict_mode', 0);
+    session_start();
+    ini_set('session.use_strict_mode', 1);
+    
+    // 新的会话不需要这 2 个数据了
+    unset($_SESSION['destroyed']);
+    unset($_SESSION['new_session_id']);
+}
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+  
  </refsect1>
 
  <refsect1 role="seealso">
@@ -115,7 +224,10 @@ print_r($_SESSION);
   <para>
    <simplelist>
     <member><function>session_id</function></member>
+    <member><function>session_create_id</function></member>
     <member><function>session_start</function></member>
+    <member><function>session_destroy</function></member>
+    <member><function>session_reset</function></member>
     <member><function>session_name</function></member>
    </simplelist>
   </para>
