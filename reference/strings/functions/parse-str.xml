@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: afc3f34c682418a582b0f9199db0bac4a087821f Maintainer: daijie Status: ready -->
+<!-- EN-Revision: 028513e94be0922956387803e75b575973539254 Maintainer: daijie Status: ready -->
 <refentry xmlns="http://docbook.org/ns/docbook" xml:id="function.parse-str">
  <refnamediv>
   <refname>parse_str</refname>
@@ -11,24 +11,12 @@
   &reftitle.description;
   <methodsynopsis>
    <type>void</type><methodname>parse_str</methodname>
-   <methodparam><type>string</type><parameter>str</parameter></methodparam>
-   <methodparam choice="opt"><type>array</type><parameter role="reference">arr</parameter></methodparam>
+   <methodparam><type>string</type><parameter>encoded_string</parameter></methodparam>
+   <methodparam choice="opt"><type>array</type><parameter role="reference">result</parameter></methodparam>
   </methodsynopsis>
   <para>
-   如果 <parameter>str</parameter> 是 URL 传递入的查询字符串（query string），则将它解析为变量并设置到当前作用域。
+   如果 <parameter>encoded_string</parameter> 是 URL 传递入的查询字符串（query string），则将它解析为变量并设置到当前作用域（如果提供了 <parameter>result</parameter> 则会设置到该数组里 ）。
   </para>
-  <note>
-   <para>
-    获取当前的 <literal>QUERY_STRING</literal>，你可以使用 <varname>$_SERVER['QUERY_STRING']</varname> 变量。
-    同时，你也许该阅读 <link linkend="language.variables.external">来自 PHP 之外的变量</link> 这一节。
-   </para>
-  </note>
-  <note>
-   <para>
-    <link linkend="ini.magic-quotes-gpc">magic_quotes_gpc</link> 影响到了 <function>parse_str</function> 这个函数的输出，和 PHP 用于填充 <varname>$_GET</varname>、
-    <varname>$_POST</varname> 及其他变量的机制一致。
-   </para>
-  </note>
  </refsect1>
 
  <refsect1 role="parameters">
@@ -36,7 +24,7 @@
   <para>
    <variablelist>
     <varlistentry>
-     <term><parameter>str</parameter></term>
+     <term><parameter>encoded_string</parameter></term>
      <listitem>
       <para>
        输入的字符串。
@@ -44,11 +32,24 @@
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>arr</parameter></term>
+     <term><parameter>result</parameter></term>
      <listitem>
       <para>
-       如果设置了第二个变量 <parameter>arr</parameter>，变量将会以数组元素的形式存入到这个数组，作为替代。
+       如果设置了第二个变量 <parameter>result</parameter>，
+       变量将会以数组元素的形式存入到这个数组，作为替代。
       </para>
+
+      <warning>
+       <para>
+        极度<emphasis>不建议</emphasis> 在没有 <parameter>result</parameter> 参数的情况下使用此函数，并且在  PHP 7.2 中将<emphasis>废弃</emphasis>不设置参数的行为。
+       </para>
+       <para>
+        在函数中动态设置变量会和 <link linkend="ini.magic-quotes-gpc">register_globals</link> 有同样的问题。
+       </para>
+       <para>
+        阅读「安全」中 <link linkend="security.globals">使用 Register Globals</link> 的章节，解释了它为什么是危险的。
+       </para>
+      </warning>
      </listitem>
     </varlistentry>
    </variablelist>
@@ -62,6 +63,31 @@
   </para>
  </refsect1>
 
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <para>
+   <informaltable>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>&Version;</entry>
+       <entry>&Description;</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>7.2.0</entry>
+       <entry>
+        不带第二个参数的情况下使用 <function>parse_str</function> 会产生 
+        <constant>E_DEPRECATED</constant> 警告。
+       </entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </informaltable>
+  </para>
+ </refsect1>
+
  <refsect1 role="examples">
   &reftitle.examples;
   <para>
@@ -71,21 +97,67 @@
 <![CDATA[
 <?php
 $str = "first=value&arr[]=foo+bar&arr[]=baz";
-parse_str($str);
-echo $first;  // value
-echo $arr[0]; // foo bar
-echo $arr[1]; // baz
 
+// 推荐用法
 parse_str($str, $output);
 echo $output['first'];  // value
 echo $output['arr'][0]; // foo bar
 echo $output['arr'][1]; // baz
 
+// 不建议这么用
+parse_str($str);
+echo $first;  // value
+echo $arr[0]; // foo bar
+echo $arr[1]; // baz
 ?>
 ]]>
     </programlisting>
    </example>
   </para>
+  <para>
+   由于 PHP 的变量名不能带「点」和「空格」，所以它们会被转化成下划线。
+   用本函数带 <parameter>result</parameter> 参数，也会应用同样规则到数组的键名。
+   <example>
+    <title><function>parse_str</function> 名称改写</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+parse_str($"My Value=Something");
+echo $My_Value; // Something
+
+parse_str($"My Value=Something", $output);
+echo $output['My_Value']; // Something
+?>
+]]>
+    </programlisting>
+   </example>
+  </para> 
+ </refsect1>
+ 
+ <refsect1 role="notes">
+  &reftitle.notes;
+
+  <note>
+   <para>
+    所有创建的变量(或者在设置第二个参数的情况下，返回数组里的值)，
+    都已经 <function>urldecode</function> 了。
+   </para>
+  </note>
+  <note>
+   <para>
+    要获取当前的 <literal>QUERY_STRING</literal>，可以使用
+    <varname>$_SERVER['QUERY_STRING']</varname> 变量。
+    所以你可能想要阅读
+    <link linkend="language.variables.external">来自 PHP 之外的变量</link>这个章节。
+   </para>
+  </note>
+  <note>
+   <para>
+    本函数受 <link linkend="ini.magic-quotes-gpc">magic_quotes_gpc</link> 设置的影响，
+    和 <varname>$_GET</varname>、
+    <varname>$_POST</varname> 在 PHP 中填充变量相似， <function>parse_str</function> 也使用了同样的机制。
+   </para>
+  </note>
  </refsect1>
 
  <refsect1 role="seealso">
@@ -95,7 +167,6 @@ echo $output['arr'][1]; // baz
     <member><function>parse_url</function></member>
     <member><function>pathinfo</function></member>
     <member><function>http_build_query</function></member>
-    <member><function>get_magic_quotes_gpc</function></member>
     <member><function>urldecode</function></member>
    </simplelist>
   </para>
