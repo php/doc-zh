@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision$ -->
+<!-- EN-Revision: 549423df613c7204d64f7c3a8290edd7d7ae6fc8 Maintainer: daijie Status: ready -->
+<!-- Reviewed: no -->
+
+<sect1 xml:id="migration72.deprecated">
+ <title>PHP 7.2.x 中废弃的功能</title>
+
+ <sect2 xml:id="migration72.deprecated.unquoted-strings">
+  <title>不带引号的字符串</title>
+
+  <para>
+   不带引号的字符串是不存在的全局常量，转化成他们自身的字符串。
+   在以前，该行为会产生
+   <constant>E_NOTICE</constant>，但现在会产生
+   <constant>E_WARNING</constant>。在下一个 PHP 主版本中，将抛出
+   <classname>Error</classname> 异常。
+  </para>
+
+  <informalexample>
+   <programlisting role="php">
+<![CDATA[
+<?php
+
+var_dump(NONEXISTENT);
+
+/* Output:
+Warning: Use of undefined constant NONEXISTENT - assumed 'NONEXISTENT' (this will throw an Error in a future version of PHP) in %s on line %d
+string(11) "NONEXISTENT"
+*/
+]]>
+   </programlisting>
+  </informalexample>
+ </sect2>
+
+ <sect2 xml:id="migration72.deprecated.png2wbmp-jpeg2wbmp">
+  <title><function>png2wbmp</function> 和 <function>jpeg2wbmp</function></title>
+
+  <para>
+   GD 扩展内的 <function>png2wbmp</function> 和 <function>jpeg2wbmp</function> 现已被废弃，将在下一个 PHP 主版本中移除。
+  </para>
+ </sect2>
+
+ <sect2 xml:id="migration72.deprecated.INTL_IDNA_VARIANT_2003-variant">
+  <title><constant>INTL_IDNA_VARIANT_2003</constant> 转化</title>
+
+  <para>
+   Intl 扩展废弃了
+   <constant>INTL_IDNA_VARIANT_2003</constant> 转化，为<function>idn_to_ascii</function> 和
+   <function>idn_to_utf8</function> 的默认选项。
+   PHP 7.4 会把默认值设置为
+   <constant>INTL_IDNA_VARIANT_UTS46</constant>，
+   并在下一个 PHP 主版本中完全移除 <constant>INTL_IDNA_VARIANT_2003</constant>。
+  </para>
+ </sect2>
+
+ <sect2 xml:id="migration72.deprecated.__autoload-method">
+  <title><function>__autoload</function> 方法</title>
+
+  <para>
+   <function>__autoload</function> 方法已被废弃，
+   因为和  <function>spl_autoload_register</function> 相比功能较差 (因为无法链式处理多个  autoloader)，
+   而且也无法在两种 autoloading 样式中配合使用。
+  </para>
+ </sect2>
+
+ <sect2 xml:id="migration72.deprecated.track_errors-and-php_errormsg">
+  <title><parameter>track_errors</parameter> ini 设置和 <literal>$php_errormsg</literal> 变量</title>
+
+  <para>
+   当开启了 <parameter>track_errors</parameter> ini 设置，出现非致命错误时，
+   会在本地作用域创建 <literal>$php_errormsg</literal> 变量。
+   由于提供了更好的方式： <function>error_get_last</function> 来获取此类错误信息，该功能被废弃。
+  </para>
+ </sect2>
+
+ <sect2 xml:id="migration72.deprecated.create_function-function">
+  <title><function>create_function</function> 函数</title>
+
+  <para>
+   考虑到此函数的安全隐患问题（它是 <function>eval</function> 的瘦包装器），该过时的函数现在已被废弃。
+   更好的选择是<link linkend="functions.anonymous">匿名函数</link>。
+  </para>
+ </sect2>
+
+ <sect2 xml:id="migration72.deprecated.mbstringfunc_overload-ini-setting">
+  <title><parameter>mbstring.func_overload</parameter> ini 设置</title>
+
+  <para>
+   由于此设置会影响环境中的字符串系列函数，带来相互操作中的问题，它现在已被废弃。
+  </para>
+ </sect2>
+
+ <sect2 xml:id="migration72.deprecated.unset-cast">
+  <title><literal>(unset)</literal> 类型强制转化</title>
+
+  <para>
+   转化任意表达式为此类型，结果总是 &null;，所以这个多余的类型转化现在也就被废弃了。
+  </para>
+ </sect2>
+
+ <sect2 xml:id="migration72.deprecated.parse_str-no-second-arg">
+  <title><function>parse_str</function> 不加第二个参数</title>
+
+  <para>
+   使用 <function>parse_str</function> 时，不加第二个参数会导致查询字符串参数导入当前符号表。
+   考虑到安全隐患问题，不加第二个参数使用
+   <function>parse_str</function> 的行为已被废弃。
+   此函数的第二个选项为必填项，它使查询字符串转为 Array。
+  </para>
+ </sect2>
+
+ <sect2 xml:id="migration72.deprecated.gmp_random-function">
+  <title><function>gmp_random</function> 函数</title>
+
+  <para>
+   此函数基于未知的、取决于平台的 limb 尺寸产生随机数。因此，该函数已被废弃。
+   使用更好的方式产生随机数： GMP 扩展中的
+   <function>gmp_random_bits</function> 和
+   <function>gmp_random_range</function>。
+  </para>
+ </sect2>
+
+ <sect2 xml:id="migration72.deprecated.each-function">
+  <title><function>each</function> 函数</title>
+
+  <para>
+   使用此函数遍历时，比普通的 <literal>foreach</literal> 更慢，
+   并且给新语法的变化带来实现问题。因此它被废弃了。
+  </para>
+ </sect2>
+
+ <sect2 xml:id="migration72.deprecated.assert-string-arg">
+  <title><function>assert</function> 一个字符串参数</title>
+
+  <para>
+   <function>assert</function> 字符串参数将要求它能被 <function>eval</function> 执行。
+   考虑到可能被执行远程代码，废弃了字符串的 <function>assert</function>，最好提供 bool 的表达式。
+  </para>
+ </sect2>
+
+ <sect2 xml:id="migration72.deprecated.errcontext-arg-of-error-handlers">
+  <title>错误处理器内的 <literal>$errcontext</literal> 参数</title>
+
+  <para>
+   <literal>$errcontext</literal> 参数包含了错误网站的所有本地变量。
+   考虑到它很少被用到，而且还会导致内部优化问题，它现在被废弃了。
+   代替用法：调试器应该自己取回错误站点的本地变量。
+  </para>
+ </sect2>
+
+ <sect2 xml:id="migration72.deprecated.read_exif_data-function">
+  <title><function>read_exif_data</function> 函数</title>
+
+  <para>
+   <function>read_exif_data</function> 别名已被废弃
+   使用 <function>exif_read_data</function> 函数代替。
+  </para>
+ </sect2>
+
+</sect1>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
