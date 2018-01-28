@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision$ -->
+<!-- EN-Revision: a8599f426e5178777f7256002979482d9a810387 Maintainer: daijie Status: ready -->
+<!-- Reviewed: no -->
+
+<sect1 xml:id="migration70.deprecated">
+ <title>PHP 7.0.x 弃用的功能</title>
+
+<!-- password_hash() salt option, PHP4-style constructors etc -->
+ 
+<!-- skeleton
+ <sect2 xml:id="migration70.deprecated.id">
+  <title>Title</title>
+
+  <para>
+   Content
+  </para>
+ </sect2>
+-->
+ <sect2 xml:id="migration70.deprecated.php4-constructors">
+  <title>PHP4 风格的构造函数</title>
+
+  <para>
+   PHP4 风格的构造函数（方法名和类名一样）将被弃用，并在将来移除。
+   如果在类中仅使用了 PHP4 风格的构造函数，PHP7 会产生 <constant>E_DEPRECATED</constant> 警告。
+   如果还定义了 <function>__construct</function> 方法则不受影响。
+  </para>
+
+  <informalexample>
+   <programlisting role="php">
+<![CDATA[
+<?php
+class foo {
+    function foo() {
+        echo 'I am the constructor';
+    }
+}
+?>
+]]>
+   </programlisting>
+   &example.outputs;
+   <screen>
+<![CDATA[
+Deprecated: Methods with the same name as their class will not be constructors in a future version of PHP; foo has a deprecated constructor in example.php on line 3
+]]>
+   </screen>
+  </informalexample>
+ </sect2>
+
+
+ <sect2 xml:id="migration70.deprecated.static-calls">
+  <title>静态调用非静态的方法</title>
+
+  <para>
+   废弃了 <link linkend="language.oop5.static">静态（Static）</link> 调用未声明成 <command>static</command> 的方法，未来可能会彻底移除该功能。
+  </para>
+
+  <informalexample>
+   <programlisting role="php">
+<![CDATA[
+<?php
+class foo {
+    function bar() {
+        echo 'I am not static!';
+    }
+}
+
+foo::bar();
+?>
+]]>
+   </programlisting>
+   &example.outputs;
+   <screen>
+<![CDATA[
+Deprecated: Non-static method foo::bar() should not be called statically in - on line 8
+I am not static!
+]]>
+   </screen>
+  </informalexample>
+ </sect2>
+ 
+ <sect2 xml:id="migration70.deprecated.pwshash-salt-option">
+  <title><function>password_hash</function> 盐值选项</title>
+
+  <para>
+   废弃了 <function>password_hash</function> 函数中的盐值选项，阻止开发者生成自己的盐值（通常更不安全）。
+   开发者不传该值时，该函数自己会生成密码学安全的盐值。因此再无必要传入自己自定义的盐值。
+  </para>
+ </sect2>
+ 
+ <sect2 xml:id="migration70.deprecated.capture-session-meta">
+  <title><literal>capture_session_meta</literal> SSL 上下文选项</title>
+
+  <para>
+   废弃了 <literal>capture_session_meta</literal> 内的 SSL 上下文选项。
+   现在可以通过 <function>stream_get_meta_data</function> 获取 SSL 元数据（metadata）。
+  </para>
+ </sect2>
+
+</sect1>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
