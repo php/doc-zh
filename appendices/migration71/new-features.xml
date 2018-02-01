@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: ed0816f0b0e500f668eb8e89e28cb034afb52c81 Maintainer: jhdxr Status: ready -->
+<!-- EN-Revision: 2518dcc566a599405251d1a08a664fc7dde356ac Maintainer: jhdxr Status: ready -->
 <!-- Reviewed: no -->
 
 <sect1 xml:id="migration71.new-features" xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -10,20 +10,36 @@
   <title>可为空（Nullable）类型</title>
 
   <para>
-   类型现在允许为空，当启用这个特性时，传入的参数或者函数返回的结果要么是给定的类型，要么是
-   <type>null</type> 。可以通过在类型前面加上一个问号来使之成为可为空的。
+   参数以及返回值的类型现在可以通过在类型前加上一个问号使之允许为空。
+   当启用这个特性时，传入的参数或者函数返回的结果要么是给定的类型，要么是
+   <type>null</type> 。
   </para>
 
   <informalexample>
    <programlisting role="php">
 <![CDATA[
 <?php
+
+function testReturn(): ?string
+{
+    return 'elePHPant';
+}
+
+var_dump(testReturn());
+
+function testReturn(): ?string
+{
+    return null;
+}
+
+var_dump(testReturn());
+
 function test(?string $name)
 {
     var_dump($name);
 }
 
-test('tpunt');
+test('elePHPant');
 test(null);
 test();
 ]]>
@@ -31,7 +47,9 @@ test();
    &example.outputs;
    <screen>
 <![CDATA[
-string(5) "tpunt"
+string(10) "elePHPant"
+NULL
+string(10) "elePHPant"
 NULL
 Uncaught Error: Too few arguments to function test(), 0 passed in...
 ]]>
@@ -43,9 +61,9 @@ Uncaught Error: Too few arguments to function test(), 0 passed in...
   <title>Void 函数</title>
 
   <para>
-   在PHP 7 中引入的其他返回值类型的基础上，一个新的返回值类型<type>void</type>被引入。
+   一个新的返回值类型<type>void</type>被引入。
    返回值声明为 void 类型的方法要么干脆省去 return 语句，要么使用一个空的 return 语句。 
-   对于 void 函数来说，null 不是一个合法的返回值。
+   对于 void 函数来说，&null; 不是一个合法的返回值。
   </para>
 
   <informalexample>
@@ -79,7 +97,7 @@ int(1)
   </informalexample>
 
   <para>
-   试图去获取一个 void 方法的返回值会得到 null ，并且不会产生任何警告。这么做的原因是不想影响更高层次的方法。
+   试图去获取一个 void 方法的返回值会得到 &null; ，并且不会产生任何警告。这么做的原因是不想影响更高层次的方法。
   </para>
  </sect2>
 
@@ -87,8 +105,7 @@ int(1)
   <title>Symmetric array destructuring</title>
 
   <para>
-   短数组语法（<literal>[]</literal>）现在可以用于将数组的值赋给一些变量（包括在<literal>foreach</literal>中）。
-   这种方式使从数组中提取值变得更为容易。
+   短数组语法（<literal>[]</literal>）现在作为<function>list</function>语法的一个备选项，可以用于将数组的值赋给一些变量（包括在<literal>foreach</literal>中）。
   </para>
 
   <informalexample>
@@ -96,11 +113,23 @@ int(1)
 <![CDATA[
 <?php
 $data = [
-    ['id' => 1, 'name' => 'Tom'],
-    ['id' => 2, 'name' => 'Fred'],
+    [1, 'Tom'],
+    [2, 'Fred'],
 ];
 
-while (['id' => $id, 'name' => $name] = $data) {
+// list() style
+list($id1, $name1) = $data[0];
+
+// [] style
+[$id1, $name1] = $data[0];
+
+// list() style
+foreach ($data as list($id, $name)) {
+    // logic here with $id and $name
+}
+
+// [] style
+foreach ($data as [$id, $name]) {
     // logic here with $id and $name
 }
 ]]>
@@ -183,7 +212,7 @@ try {
   <title><function>list</function>现在支持键名</title>
 
   <para>
-   现在<function>list</function>支持在它内部去指定键名。这意味着它可以将任意类型的数组
+   现在<function>list</function>和它的新的<literal>[]</literal>语法支持在它内部去指定键名。这意味着它可以将任意类型的数组
    都赋值给一些变量（与短数组语法类似）
   </para>
 
@@ -192,11 +221,23 @@ try {
 <![CDATA[
 <?php
 $data = [
-    ['id' => 1, 'name' => 'Tom'],
-    ['id' => 2, 'name' => 'Fred'],
+    ["id" => 1, "name" => 'Tom'],
+    ["id" => 2, "name" => 'Fred'],
 ];
 
-while (list('id' => $id, 'name' => $name) = $data) {
+// list() style
+list("id" => $id1, "name" => $name1) = $data[0];
+
+// [] style
+["id" => $id1, "name" => $name1] = $data[0];
+
+// list() style
+foreach ($data as list("id" => $id, "name" => $name)) {
+    // logic here with $id and $name
+}
+
+// [] style
+foreach ($data as ["id" => $id, "name" => $name]) {
     // logic here with $id and $name
 }
 ]]>
