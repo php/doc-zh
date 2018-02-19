@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 2026bba3354c17c14bb187707cae8f4df7f53624 Maintainer: HonestQiao Status: ready -->
-<!-- Reviewed: yes Maintainer: dallas -->
+<!-- EN-Revision: e5500093db0f51a35f5d962d04d9d3ebf5530e52 Maintainer: HonestQiao Status: ready -->
+
 <sect1 xml:id="install.fpm.configuration" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <title>配置</title>
  <para>
-  FPM 配置文件为 <filename>php-fpm.conf</filename>，其语法类似 &php.ini; 。
+  FPM 使用类似 &php.ini; 语法的 <filename>php-fpm.conf</filename> 和进程池配置文件。
  </para>
  <sect2> 
   <title><filename>php-fpm.conf</filename> 全局配置段</title>
@@ -17,7 +17,7 @@
     </term>
     <listitem>
      <para>
-      PID文件的位置。默认为空。
+      PID 文件的位置。默认为空。
      </para> 
     </listitem>
    </varlistentry>
@@ -28,7 +28,8 @@
     </term>
     <listitem>
      <para>
-      错误日志的位置。默认：<literal>安装路径 #INSTALL_PREFIX#/log/php-fpm.log</literal>。
+      错误日志的位置。默认：<literal>#INSTALL_PREFIX#/log/php-fpm.log</literal>。
+      如果设置为 "syslog"，日志将不会写入本地文件，而是发送到 syslogd。
      </para> 
     </listitem>
    </varlistentry>
@@ -43,6 +44,29 @@
      </para> 
     </listitem>
    </varlistentry>
+     <varlistentry xml:id="syslog-facility">
+      <term>
+       <parameter>syslog.facility</parameter>
+       <type>string</type>
+      </term>
+      <listitem>
+       <para>
+        设置何种程序记录消息，默认值：daemon。
+       </para>
+      </listitem>
+     </varlistentry>
+     <varlistentry xml:id="syslog-ident">
+      <term>
+       <parameter>syslog.ident</parameter>
+       <type>string</type>
+      </term>
+      <listitem>
+       <para>
+        为每条信息添加前缀。
+        如果在同一台服务器上运行了多个 FPM 实例，可以修改此默认值来满足需求。默认值：php-fpm。
+       </para>
+      </listitem>
+     </varlistentry>
    <varlistentry xml:id="emergency-restart-threshold">
     <term>
      <parameter>emergency_restart_threshold</parameter>
@@ -62,7 +86,7 @@
     </term>
     <listitem>
      <para>
-      emergency_restart_interval
+      <literal>emergency_restart_interval</literal>
       用于设定平滑重启的间隔时间。这么做有助于解决加速器中共享内存的使用问题。可用单位：s（秒），m（分），h（小时）或者
       d（天）。默认单位：s（秒）。默认值：0（关闭）。
      </para> 
@@ -80,6 +104,31 @@
      </para> 
     </listitem>
    </varlistentry>
+     <varlistentry xml:id="process-max">
+      <term>
+       <parameter>process.max</parameter>
+       <type>int</type>
+      </term>
+      <listitem>
+       <para>
+        Fork 的最大 FPM 进程数。使用动态管理进程数时，此设计可以控制在一个进程池内的全局进程数量。
+        使用需谨慎。默认值：0。
+       </para>
+      </listitem>
+     </varlistentry>
+     <varlistentry xml:id="process-priority">
+      <term>
+       <parameter>process.priority</parameter>
+       <type>int</type>
+      </term>
+      <listitem>
+       <para>
+        设置 master 进程的 nice(2) 优先级（如果设置了此值）。
+        可以是 -19（最高优先级）到 20 （更低优先级）。
+        默认值：不设置。
+       </para>
+      </listitem>
+     </varlistentry>
    <varlistentry xml:id="daemonize">
     <term>
      <parameter>daemonize</parameter>
@@ -92,6 +141,54 @@
     </listitem>
    </varlistentry>
   </variablelist>
+     <varlistentry xml:id="rlimit-files-master">
+      <term>
+       <parameter>rlimit_files</parameter>
+       <type>int</type>
+      </term>
+      <listitem>
+       <para>
+          设置 master 进程的打开文件描述符 rlimit 数。
+       </para>
+      </listitem>
+     </varlistentry>
+     <varlistentry xml:id="rlimit-core-master">
+      <term>
+       <parameter>rlimit_core</parameter>
+       <type>int</type>
+      </term>
+      <listitem>
+       <para>
+        设置 master 进程最大 core 的 rlimit 尺寸。
+        默认值：0。
+       </para>
+      </listitem>
+     </varlistentry>
+     <varlistentry xml:id="events-mechanism">
+      <term>
+       <parameter>events.mechanism</parameter>
+       <type>string</type>
+      </term>
+      <listitem>
+       <para>
+        设置 FPM 使用的事件机制。
+        可用以下选项：select、pool、epoll、kqueue (*BSD)、port (Solaris)。
+        默认值：不设置（自动检测）
+       </para>
+      </listitem>
+     </varlistentry>
+     <varlistentry xml:id="systemd-interval">
+      <term>
+       <parameter>systemd_interval</parameter>
+       <type>int</type>
+      </term>
+      <listitem>
+       <para>
+        使用 systemd 集成的 FPM 时，设置间歇秒数，报告健在通知给 systemd。
+        设置为 0 表示禁用。默认值：10。
+       </para>
+      </listitem>
+     </varlistentry>
  </sect2>
  
  <sect2> 
@@ -132,6 +229,7 @@
      <para>
       设置允许连接到 FastCGI 的服务器 IPV4 地址。等同于 PHP FastCGI (5.2.2+) 中的 FCGI_WEB_SERVER_ADDRS
       环境变量。仅对 TCP 监听起作用。每个地址是用逗号分隔，如果没有设置或者为空，则允许任何服务器请求连接。默认值：any。
+        PHP 5.5.20 和 5.6.4起，开始支持 IPv6 地址。
      </para> 
     </listitem>
    </varlistentry>
@@ -142,8 +240,10 @@
     </term>
     <listitem>
      <para>
-      如果使用，表示设置 Unix 套接字的权限。在Linux中，读写权限必须设置，以便用于
-      WEB 服务器连接。在很多 BSD 派生的系统中可以忽略权限允许自由连接。默认值：运行所使用的用户和组，权限为 0666。
+      如果使用了 Unix 套接字，表示它的权限。在 Linux 中必须设置读/写权限，以便用于
+      WEB 服务器连接。
+      在很多 BSD 派生的系统中可以忽略权限允许自由连接。
+      默认值：运行所使用的用户和组，权限为 0660。
      </para> 
     </listitem>
    </varlistentry>
@@ -169,6 +269,31 @@
      </para> 
     </listitem>
    </varlistentry>
+     <varlistentry xml:id="listen-acl-users">
+      <term>
+       <parameter>listen.acl_users</parameter>
+       <type>string</type>
+      </term>
+      <listitem>
+       <para>
+        当系统支持 POSIX ACL（Access Control Lists）时，可以设置使用此选项。
+        当设置了的时候，将会忽略 <literal>listen.owner</literal> 和 <literal>listen.group</literal>。
+        值是逗号分割的用户名列表。 PHP 5.6.5 起可用。
+       </para>
+      </listitem>
+     </varlistentry>
+     <varlistentry xml:id="listen-acl-groups">
+      <term>
+       <parameter>listen.acl_groups</parameter>
+       <type>string</type>
+      </term>
+      <listitem>
+       <para>
+        参见 <literal>listen.acl_users</literal>。
+        值是逗号分割的用户组名称列表。 PHP 5.6.5 起可用。
+       </para>
+      </listitem>
+     </varlistentry>
    <varlistentry xml:id="user">
     <term>
      <parameter>user</parameter>
@@ -187,7 +312,7 @@
     </term>
     <listitem>
      <para>
-      FPM 进程运行的 Unix 用户组。如果没有设置，则默认用户的组被使用。
+      FPM 进程运行的 Unix 用户组。如果不设置，就使用默认用户的用户组。
      </para> 
     </listitem>
    </varlistentry>
@@ -204,8 +329,8 @@
       <literal>static</literal> - 子进程的数量是固定的（<literal>pm.max_children</literal>）。
      </para>
      <para>
-      <literal>ondemand</literal> - 进程在有需求时才产生（当请求时，与
-      dynamic 相反，<literal>pm.start_servers</literal> 在服务启动时即启动。
+      <literal>ondemand</literal> - 进程在有需求时才产生（当请求时才启动。与
+      dynamic 相反，在服务启动时 <literal>pm.start_servers</literal> 就启动了。
      </para>
      <para>
       <literal>dynamic</literal> - 
@@ -265,6 +390,20 @@
      </para> 
     </listitem>
    </varlistentry>
+     <varlistentry xml:id="pm.process-idle-timeout">
+      <term>
+       <parameter>pm.process_idle_timeout</parameter>
+       <type>mixed</type>
+      </term>
+      <listitem>
+       <para>
+        秒数，多久之后结束空闲进程。
+        仅当设置 <literal>pm</literal> 为 <literal>ondemand</literal>。
+        可用单位：s（秒），m（分），h（小时）或者
+      d（天）。默认单位：10s。
+       </para>
+      </listitem>
+     </varlistentry>
    <varlistentry xml:id="pm.max-requests">
     <term>
      <parameter>pm.max_requests</parameter>
@@ -311,6 +450,30 @@
      </para> 
     </listitem>
    </varlistentry>
+     <varlistentry xml:id="worker-process-priority">
+      <term>
+       <parameter>process.priority</parameter>
+       <type>int</type>
+      </term>
+      <listitem>
+       <para>
+        设置 worker 的 nice(2)优先级（如果设置了的话）。
+        该值从 -19（最高优先级） 到 20（更低优先级）。
+        默认值：不设置
+       </para>
+      </listitem>
+     </varlistentry>
+     <varlistentry xml:id="prefix">
+      <term>
+       <parameter>prefix</parameter>
+       <type>string</type>
+      </term>
+      <listitem>
+       <para>
+        检测路径时使用的前缀。
+       </para>
+      </listitem>
+     </varlistentry>
    <varlistentry xml:id="request-terminate-timeout">
     <term>
      <parameter>request_terminate_timeout</parameter>
@@ -404,10 +567,63 @@
      </para> 
     </listitem>
    </varlistentry>
-  </variablelist>
+     <varlistentry xml:id="clear-env">
+      <term>
+       <parameter>clear_env</parameter>
+       <type>boolean</type>
+      </term>
+      <listitem>
+       <para>
+        为 FPM worker 进程清除环境变量。
+        在进程池配置文件里设置环境变量前，阻止任意系统的环境变量进入 FPM worker 进程。
+        自 PHP 5.4.27、 5.5.11 和 5.6.0 起。
+        默认值: Yes
+       </para>
+      </listitem>
+     </varlistentry>
+     <varlistentry xml:id="security-limit-extensions">
+      <term>
+       <parameter>security.limit_extensions</parameter>
+       <type>string</type>
+      </term>
+      <listitem>
+       <para>
+        限制 FPM 允许解析的脚本扩展名。
+        此设置可以预防 web 服务器配置的错误。
+        应当限制 FPM 仅仅解析 .php 扩展名，阻止恶意用户使用其他扩展名运行 php 代码。
+        默认值： .php .phar
+       </para>
+      </listitem>
+     </varlistentry>
+     <varlistentry xml:id="access-log">
+      <term>
+       <parameter>access.log</parameter>
+       <type>string</type>
+      </term>
+      <listitem>
+       <para>
+        Access log 文件。
+        默认值：不设置
+       </para>
+      </listitem>
+     </varlistentry>
+     <varlistentry xml:id="access-format">
+      <term>
+       <parameter>access.format</parameter>
+       <type>string</type>
+      </term>
+      <listitem>
+       <para>
+        access log 的格式。
+        默认值: "%R - %u %t \"%m %r\" %s"
+       </para>
+      </listitem>
+     </varlistentry>
+    </variablelist>
+  
   <para>
    还可以在为一个运行池传递附加的环境变量，或者更新 PHP
-   的配置值。可以在 <filename>php-fpm.conf</filename> 中如下面的配置参数来做到：
+   的配置值。可以在进程池配置文件中如下面的配置参数来做到：
    <example>
     <title>给运行池传递环境变量和设置 PHP 的配置值</title>
     <programlisting role="ini">
