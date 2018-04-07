@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision$ -->
+<!-- EN-Revision: 5d5a8ef9cbe225d53f1b66b6ae369511d0f6170a Maintainer: duanxiaoqiang Status: ready -->
+<!-- Reviewed: no -->
+
+<refentry xmlns="http://docbook.org/ns/docbook" xml:id="function.openssl-csr-new">
+ <refnamediv>
+  <refname>openssl_csr_new</refname>
+  <refpurpose>生成一个 CSR</refpurpose>
+ </refnamediv>
+ 
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <type>mixed</type><methodname>openssl_csr_new</methodname>
+   <methodparam><type>array</type><parameter>dn</parameter></methodparam>
+   <methodparam><type>resource</type><parameter role="reference">privkey</parameter></methodparam>
+   <methodparam choice="opt"><type>array</type><parameter>configargs</parameter></methodparam>
+   <methodparam choice="opt"><type>array</type><parameter>extraattribs</parameter></methodparam>
+  </methodsynopsis>
+  <para>
+   <function>openssl_csr_new</function> 根据<parameter>dn</parameter>提供的信息生成新的CSR（证书签名请求）。
+  </para>
+  &note.openssl.cnf;
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>dn</parameter></term>
+     <listitem>
+      <para>
+       在证书中使用的专有名称或主题字段。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>privkey</parameter></term>
+     <listitem>
+      &openssl.openssl_spki_new.privkey;
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>configargs</parameter></term>
+     <listitem>
+      <para>
+       默认的， 是通过你系统里的<literal>openssl.conf</literal>配置来初始化请求； 您可以通过设置<parameter>configargs</parameter>的<literal>config_section_section</literal>项来指定配置文件部分。
+       您还可以通过将config键的值设置为您想要使用的文件路径来指定另一个openssl配置文件。如果在<parameter>configargs</parameter>中存在下列键，它们的行为就像在<literal>openssl.conf</literal>中一样。如下表所示：
+       <table>
+        <title>配置覆盖</title>
+        <tgroup cols="3">
+         <thead>
+          <row>
+           <entry><parameter>configargs</parameter> 键</entry>
+           <entry>type</entry>
+           <entry>等同于 <literal>openssl.conf</literal></entry>
+           <entry>描述</entry>
+          </row>
+         </thead>
+         <tbody>
+          <row>
+           <entry>digest_alg</entry>
+           <entry><type>string</type></entry>
+           <entry>default_md</entry>
+           <entry>摘要算法或签名哈希算法，通常是 <function>openssl_get_md_methods</function></entry> 之一。
+          </row>
+          <row>
+           <entry>x509_extensions</entry>
+           <entry><type>string</type></entry>
+           <entry>x509_extensions</entry>
+           <entry>选择在创建x509证书时应该使用哪些扩展</entry>
+          </row>
+          <row>
+           <entry>req_extensions</entry>
+           <entry><type>string</type></entry>
+           <entry>req_extensions</entry>
+           <entry>Selects which extensions should be used when creating a CSR</entry>
+          </row>
+          <row>
+           <entry>private_key_bits</entry>
+           <entry><type>integer</type></entry>
+           <entry>default_bits</entry>
+           <entry>选择在创建CSR时应该使用哪些扩展</entry>
+          </row>
+          <row>
+           <entry>private_key_type</entry>
+           <entry><type>integer</type></entry>
+           <entry>none</entry>
+           <entry>指定应该使用多少位来生成私钥
+            <constant>OPENSSL_KEYTYPE_DSA</constant>,
+            <constant>OPENSSL_KEYTYPE_DH</constant>,
+            <constant>OPENSSL_KEYTYPE_RSA</constant> or
+            <constant>OPENSSL_KEYTYPE_EC</constant>.
+            默认值是 <constant>OPENSSL_KEYTYPE_RSA</constant>.
+           </entry>
+          </row>
+          <row>
+           <entry>encrypt_key</entry>
+           <entry><type>boolean</type></entry>
+           <entry>encrypt_key</entry>
+           <entry>是否应该对导出的密钥（带有密码短语）进行加密?</entry>
+          </row>
+          <row>
+           <entry>encrypt_key_cipher</entry>
+           <entry><type>integer</type></entry>
+           <entry>none</entry>
+           <entry>
+            <link linkend="openssl.ciphers">cipher constants</link>常量之一。
+           </entry>
+          </row>
+          <row>
+           <entry>curve_name</entry>
+           <entry><type>string</type></entry>
+           <entry>none</entry>
+           <entry>
+            要求PHP7.1+, <function>openssl_get_curve_names</function>之一。
+           </entry>
+          </row>
+          <row>
+           <entry>config</entry>
+           <entry><type>string</type></entry>
+           <entry>N/A</entry>
+           <entry>
+            自定义 openssl.conf 文件的路径。
+           </entry>
+          </row>
+         </tbody>
+        </tgroup>
+       </table>
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>extraattribs</parameter></term>
+     <listitem>
+      <para>
+       <parameter>extraattribs</parameter> 用于为CSR指定额外的配置选项。<parameter>dn</parameter> 和
+       <parameter>extraattribs</parameter> 都是关联数组它们的键被转换成OIDs，并应用到请求的相关部分。
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   成功，返回CSR&return.falseforfailure;.
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title>创建一个自签名的证书</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+// for SSL server certificates the commonName is the domain name to be secured
+// for S/MIME email certificates the commonName is the owner of the email address
+// location and identification fields refer to the owner of domain or email subject to be secured
+$dn = array(
+    "countryName" => "GB",
+    "stateOrProvinceName" => "Somerset",
+    "localityName" => "Glastonbury",
+    "organizationName" => "The Brain Room Limited",
+    "organizationalUnitName" => "PHP Documentation Team",
+    "commonName" => "Wez Furlong",
+    "emailAddress" => "wez@example.com"
+);
+
+// Generate a new private (and public) key pair
+$privkey = openssl_pkey_new(array(
+    "private_key_bits" => 2048,
+    "private_key_type" => OPENSSL_KEYTYPE_RSA,
+));
+
+// Generate a certificate signing request
+$csr = openssl_csr_new($dn, $privkey, array('digest_alg' => 'sha256'));
+
+// Generate a self-signed cert, valid for 365 days
+$x509 = openssl_csr_sign($csr, null, $privkey, $days=365, array('digest_alg' => 'sha256'));
+
+// Save your private key, CSR and self-signed cert for later use
+openssl_csr_export($csr, $csrout) and var_dump($csrout);
+openssl_x509_export($x509, $certout) and var_dump($certout);
+openssl_pkey_export($privkey, $pkeyout, "mypassword") and var_dump($pkeyout);
+
+// Show any errors that occurred here
+while (($e = openssl_error_string()) !== false) {
+    echo $e . "\n";
+}
+?>
+]]>
+    </programlisting>
+   </example>
+   
+   <example>
+    <title>在PHP 7.1+版本中创建一个自签名的ECC证书</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$subject = array(
+    "commonName" => "docs.php.net",
+);
+
+// Generate a new private (and public) key pair
+$private_key = openssl_pkey_new(array(
+    "private_key_type" => OPENSSL_KEYTYPE_EC,
+    "curve_name" => 'prime256v1',
+));
+
+// Generate a certificate signing request
+$csr = openssl_csr_new($subject, $private_key, array('digest_alg' => 'sha384'));
+
+// Generate self-signed EC cert
+$x509 = openssl_csr_sign($csr, null, $private_key, $days=365, array('digest_alg' => 'sha384'));
+openssl_x509_export_to_file($x509, 'ecc-cert.pem');
+openssl_pkey_export_to_file($private_key, 'ecc-private.key');
+?>
+]]>
+    </programlisting>
+   </example>
+   
+   
+  </para>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>openssl_csr_sign</function></member>
+   </simplelist>
+  </para>
+ </refsect1>
+
+</refentry>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->

@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision$ -->
+<!-- EN-Revision: 8fdb77c6032ddfd31031df8f1e1f080a66a11880 Maintainer: duanxiaoqiang Status: ready -->
+<!-- Reviewed: no -->
+
+<refentry xmlns="http://docbook.org/ns/docbook" xml:id="function.openssl-csr-sign">
+ <refnamediv>
+  <refname>openssl_csr_sign</refname>
+  <refpurpose>用另一个证书签署 CSR (或者本身) 并且生成一个证书</refpurpose>
+ </refnamediv>
+ 
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <type>resource</type><methodname>openssl_csr_sign</methodname>
+   <methodparam><type>mixed</type><parameter>csr</parameter></methodparam>
+   <methodparam><type>mixed</type><parameter>cacert</parameter></methodparam>
+   <methodparam><type>mixed</type><parameter>priv_key</parameter></methodparam>
+   <methodparam><type>int</type><parameter>days</parameter></methodparam>
+   <methodparam choice="opt"><type>array</type><parameter>configargs</parameter></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>serial</parameter><initializer>0</initializer></methodparam>
+  </methodsynopsis>
+  <para>
+   <function>openssl_csr_sign</function> 从给定的 CSR 生成一个x509证书资源
+  </para>
+  &note.openssl.cnf;
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>csr</parameter></term>
+     <listitem>
+      <para>
+       由<function>openssl_csr_new</function>函数生成的CSR.
+       也可以是由类似<filename>file://path/to/csr</filename>格式指定的指向PEM编码的CSR路径，或者是一个由<function>openssl_csr_export</function>函数生成的字符串。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>cacert</parameter></term>
+     <listitem>
+      <para>
+       生成的证书将由<parameter>cacert</parameter>签名。
+       如果<parameter>cacert</parameter> 为 &null;, 生成的证书将是自签名证书。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>priv_key</parameter></term>
+     <listitem>
+      <para>
+       <parameter>priv_key</parameter>是<parameter>cacert</parameter>证书对应的私钥。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>days</parameter></term>
+     <listitem>
+      <para>
+       <parameter>days</parameter> 指定生成的证书在几天内有效的时间长度。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>configargs</parameter></term>
+     <listitem>
+      <para>
+       你可以通过<parameter>configargs</parameter>确定CSR签名。
+       查看<function>openssl_csr_new</function> 方法获取
+       <parameter>configargs</parameter>的更多相关信息。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>serial</parameter></term>
+     <listitem>
+      <para>
+       可选的发行证书编号。如果没有指定默认值为0.
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   成功，返回一个 x509 证书资源，失败则返回 &false; .
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title><function>openssl_csr_sign</function> example - signing a
+     CSR (how to implement your own CA)</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+// Let's assume that this script is set to receive a CSR that has
+// been pasted into a textarea from another page
+$csrdata = $_POST["CSR"];
+
+// We will sign the request using our own "certificate authority"
+// certificate.  You can use any certificate to sign another, but
+// the process is worthless unless the signing certificate is trusted
+// by the software/users that will deal with the newly signed certificate
+
+// We need our CA cert and its private key
+$cacert = "file://path/to/ca.crt";
+$privkey = array("file://path/to/ca.key", "your_ca_key_passphrase");
+
+$usercert = openssl_csr_sign($csrdata, $cacert, $privkey, 365, array('digest_alg'=>'sha256') );
+
+// Now display the generated certificate so that the user can
+// copy and paste it into their local configuration (such as a file
+// to hold the certificate for their SSL server)
+openssl_x509_export($usercert, $certout);
+echo $certout;
+
+// Show any errors that occurred here
+while (($e = openssl_error_string()) !== false) {
+    echo $e . "\n";
+}
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+ </refsect1>
+
+</refentry>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->

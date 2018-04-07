@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision$ -->
+<!-- EN-Revision: 904d0aeccde44f12b8e87e326febc091bf3466f9 Maintainer: duanxiaoqiang Status: ready -->
+<!-- Reviewed: no -->
+
+<refentry xmlns="http://docbook.org/ns/docbook" xml:id="function.openssl-pkcs7-sign">
+ <refnamediv>
+  <refname>openssl_pkcs7_sign</refname>
+  <refpurpose>对一个 S/MIME 消息进行签名</refpurpose>
+ </refnamediv>
+ 
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <type>bool</type><methodname>openssl_pkcs7_sign</methodname>
+   <methodparam><type>string</type><parameter>infilename</parameter></methodparam>
+   <methodparam><type>string</type><parameter>outfilename</parameter></methodparam>
+   <methodparam><type>mixed</type><parameter>signcert</parameter></methodparam>
+   <methodparam><type>mixed</type><parameter>privkey</parameter></methodparam>
+   <methodparam><type>array</type><parameter>headers</parameter></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>flags</parameter><initializer>PKCS7_DETACHED</initializer></methodparam>
+   <methodparam choice="opt"><type>string</type><parameter>extracerts</parameter></methodparam>
+  </methodsynopsis>
+  <para>
+   <function>openssl_pkcs7_sign</function>获取名为<parameter>infilename</parameter>的文件内容，并使用由<parameter>signcert</parameter>和<parameter>privkey</parameter>指定的证书和与之匹配的是要对其进行加密
+  </para>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>infilename</parameter></term>
+     <listitem>
+      <para>
+        你打算用来进行数字签名的输入文件。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>outfilename</parameter></term>
+     <listitem>
+      <para>
+        将写入数字签名的文件。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>signcert</parameter></term>
+     <listitem>
+      <para>
+        用来对输入文件进行数字签名的 X.509 证书，参见 <link linkend="openssl.certparams">密钥/证书参数</link>获取可用列表。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>privkey</parameter></term>
+     <listitem>
+      <para>
+        <parameter>privkey</parameter>是对应signcert证书的私钥。
+        参见 <link linkend="openssl.certparams">公/私钥参数</link>获取可用列表。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>headers</parameter></term>
+     <listitem>
+      <para>
+       <parameter>headers</parameter>是一个包含头信息的数组，在它被签名后，它将被预先对数据进行预处理 (参见
+       <function>openssl_pkcs7_encrypt</function> 获取关于该参数格式的更多信息)。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>flags</parameter></term>
+     <listitem>
+      <para>
+       <parameter>flags</parameter> 可以用来改变输出 - 参见 <link
+       linkend="openssl.pkcs7.flags">PKCS7常量</link>。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>extracerts</parameter></term>
+     <listitem>
+      <para>
+       <parameter>extracerts</parameter> 指定一个文件的名称，其中包含一组含有签名的额外的证书，这些证书可以用来帮助接收者验证您使用的证书。
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   &return.success;
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title><function>openssl_pkcs7_sign</function> 范例</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+// the message you want to sign so that recipient can be sure it was you that
+// sent it
+$data = <<<EOD
+
+You have my authorization to spend $10,000 on dinner expenses.
+
+The CEO
+EOD;
+// save message to file
+$fp = fopen("msg.txt", "w");
+fwrite($fp, $data);
+fclose($fp);
+// encrypt it
+if (openssl_pkcs7_sign("msg.txt", "signed.txt", "file://mycert.pem",
+    array("file://mycert.pem", "mypassphrase"),
+    array("To" => "joes@example.com", // keyed syntax
+          "From: HQ <ceo@example.com>", // indexed syntax
+          "Subject" => "Eyes only")
+    )) {
+    // message signed - send it!
+    exec(ini_get("sendmail_path") . " < signed.txt");
+}
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+ </refsect1>
+
+</refentry>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
