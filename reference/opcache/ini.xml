@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: c0def81f41e21c607a3000aa54ea3ca3d8646b78 Maintainer: yuanyuqiang Status: ready -->
+<!-- EN-Revision: e6cc6e33e9315ec093ad3be8e04698287dd3389c Maintainer: yuanyuqiang Status: ready -->
 <!-- Reviewed: no -->
 
 <sect1 xml:id="opcache.configuration" xmlns="http://docbook.org/ns/docbook">
@@ -27,9 +27,9 @@
      </row>
      <row>
       <entry><link linkend="ini.opcache.enable-cli">opcache.enable_cli</link></entry>
-      <entry>"1"</entry>
+      <entry>"0"</entry>
       <entry>PHP_INI_SYSTEM</entry>
-      <entry>从 PHP 7.1.2 开始，默认启用</entry>
+      <entry></entry>
      </row>
      <row>
       <entry><link
@@ -90,13 +90,13 @@
       <entry><link linkend="ini.opcache.load-comments">opcache.load_comments</link></entry>
       <entry>"1"</entry>
       <entry>PHP_INI_ALL</entry>
-      <entry></entry>
+      <entry>从 PHP 7.0.0 开始被移除</entry>
      </row>
      <row>
       <entry><link linkend="ini.opcache.fast-shutdown">opcache.fast_shutdown</link></entry>
       <entry>"0"</entry>
       <entry>PHP_INI_SYSTEM</entry>
-      <entry></entry>
+      <entry>从 PHP 7.2.0 开始被移除</entry>
      </row>
      <row>
       <entry><link linkend="ini.opcache.enable-file-override">opcache.enable_file_override</link></entry>
@@ -106,9 +106,9 @@
      </row>
      <row>
       <entry><link linkend="ini.opcache.optimization-level">opcache.optimization_level</link></entry>
-      <entry>"0xffffffff"</entry>
+      <entry>"0x7FFFBFFF"</entry>
       <entry>PHP_INI_SYSTEM</entry>
-      <entry></entry>
+      <entry>从 PHP 5.6.18 开始，默认值从 0xFFFFBFFF 修改为 0x7FFFBFFF</entry>
      </row>
      <row>
       <entry><link linkend="ini.opcache.inherited-hack">opcache.inherited_hack</link></entry>
@@ -179,6 +179,30 @@
      <row>
       <entry><link linkend="ini.opcache.restrict-api">opcache.restrict_api</link></entry>
       <entry>""</entry>
+      <entry>PHP_INI_SYSTEM</entry>
+      <entry></entry>
+     </row>
+     <row>
+      <entry><link linkend="ini.opcache.file_update_protection">opcache.file_update_protection</link></entry>
+      <entry>"2"</entry>
+      <entry>PHP_INI_ALL</entry>
+      <entry></entry>
+     </row>
+     <row>
+      <entry><link linkend="ini.opcache.huge_code_pages">opcache.huge_code_pages</link></entry>
+      <entry>"0"</entry>
+      <entry>PHP_INI_SYSTEM</entry>
+      <entry></entry>
+     </row>
+     <row>
+      <entry><link linkend="ini.opcache.lockfile_path">opcache.lockfile_path</link></entry>
+      <entry>"/tmp"</entry>
+      <entry>PHP_INI_SYSTEM</entry>
+      <entry></entry>
+     </row>
+     <row>
+      <entry><link linkend="ini.opcache.opt_debug_level">opcache.opt_debug_level</link></entry>
+      <entry>"0"</entry>
       <entry>PHP_INI_SYSTEM</entry>
       <entry></entry>
      </row>
@@ -401,6 +425,11 @@
       所谓快速停止续发事件是指依赖 Zend 引擎的内存管理模块
       一次释放全部请求变量的内存，而不是依次释放每一个已分配的内存块。
      </para>
+     <para>
+      从 PHP 7.2.0 开始，此配置指令被移除。
+      快速停止的续发事件的处理已经集成到 PHP 中，
+      只要有可能，PHP 会自动处理这些续发事件。
+     </para>
     </listitem>
    </varlistentry>
    <varlistentry xml:id="ini.opcache.enable-file-override">
@@ -616,6 +645,55 @@
      <para>
       仅允许路径是以指定字符串开始的 PHP 脚本调用 OPcache API 函数。
       默认值为空字符串 ""，表示不做限制。
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry xml:id="ini.opcache.file_update_protection">
+    <term>
+     <parameter>opcache.file_update_protection</parameter>
+     <type>string</type>
+    </term>
+    <listitem>
+     <para>
+      如果文件的最后修改时间距现在不足此项配置指令所设定的秒数，那么这个文件不会进入到缓存中。
+      这是为了防止尚未完全修改完毕的文件进入到缓存。
+      如果你的应用中不存在部分修改文件的情况，把此项设置为 0 可以提高性能。
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry xml:id="ini.opcache.huge_code_pages">
+    <term>
+     <parameter>opcache.huge_code_pages</parameter>
+     <type>string</type>
+    </term>
+    <listitem>
+     <para>
+      启用或者禁用将 PHP 代码（文本段）拷贝到 HUGE PAGES 中。
+      此项配置指令可以提高性能，但是需要在 OS 层面进行对应的配置。
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry xml:id="ini.opcache.lockfile_path">
+    <term>
+     <parameter>opcache.lockfile_path</parameter>
+     <type>string</type>
+    </term>
+    <listitem>
+     <para>
+      用来存储共享锁文件的绝对路径（仅适用于 *nix 操作系统）。
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry xml:id="ini.opcache.opt_debug_level">
+    <term>
+     <parameter>opcache.opt_debug_level</parameter>
+     <type>string</type>
+    </term>
+    <listitem>
+     <para>
+      出于对不同阶段的优化情况进行调试的目的，生成操作码转储。
+      设置为 0x10000 会在进行优化之前输出编译器编译后的操作码，
+      设置为 0x20000 会输出优化后的操作码。
      </para>
     </listitem>
    </varlistentry>

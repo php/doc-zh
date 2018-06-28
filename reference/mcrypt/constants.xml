@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 074be37a4bbb095c1a63f41ad86bb2fa45b3a00f Maintainer: yuanyuqiang Status: ready -->
+<!-- EN-Revision: 1068e340ca35a3cd9c47656705c3746cdf622fa3 Maintainer: yuanyuqiang Status: ready -->
 <!-- Reviewed: no -->
 
 <appendix xml:id="mcrypt.constants" xmlns="http://docbook.org/ns/docbook">
@@ -12,46 +12,44 @@
   <literal>ECB</literal>。
   如果使用 libmcrypt-2.4.x 或更高版本链接，
   还可以支持 <literal>nOFB</literal> 分组模式
-  和 <literal>流</literal> 模式。
+  和 <literal>STREAM</literal> 模式。
   下列是所支持的加密模式以及其对应的预定义常量。
   完整的参考见：&book.applied.cryptography;。
   <itemizedlist>
    <listitem>
     <simpara>
      <constant>MCRYPT_MODE_ECB</constant> (<literal>electronic
-     codebook</literal>) 适用于随机数据，
-     比如可以用这种模式来加密其他密钥。
-     由于要加密的数据很短，并且是随机的，所以这种模式的缺点反而起到了积极的作用。
+     codebook</literal>) 是一种分组加密模式，但是它无法适用于大部分场景，
+     所以不建议使用这种模式进行分组加密。
     </simpara>
    </listitem>
    <listitem>
     <simpara>
      <constant>MCRYPT_MODE_CBC</constant> (<literal>cipher block
-     chaining</literal>) 特别适用于对文件进行加密。
-     相比 <literal>ECB</literal>，
-     它的安全性有明显提升。
+     chaining</literal>) 也是一种分组加密方式，
+     相对 <literal>ECB</literal> 模式，它更加安全。
     </simpara>
    </listitem>
    <listitem>
     <simpara>
-     <constant>MCRYPT_MODE_CFB</constant> (<literal>cipher
-     feedback</literal>) 对于每个单独的字节都进行加密，
-     所以非常适用于针对字节流的加密。
+     <constant>MCRYPT_MODE_CFB</constant> (<literal>8 比特模式的 cipher
+     feedback</literal>) 是一种流式加密模式。
+     相对于 <literal>CFB</literal> 而言，
+     推荐使用 <literal>NCFB</literal> 模式。
     </simpara>
    </listitem>
    <listitem>
     <simpara>
      <constant>MCRYPT_MODE_OFB</constant> (<literal>output feedback, in
-     8bit</literal>) 和 <literal>CFB</literal> 类似。
-     它可以用在无法容忍加密错误传播的应用中。
-     因为它是按照 8 个比特位进行加密的，
-     所以安全系数较低，不建议使用。
+     8bit</literal>) 和 <literal>CFB</literal> 类似，
+     也是一种流式加密模式，它可以用在无法容忍加密错误传播的应用中。
+     推荐使用 <literal>NOFB</literal> 模式，而不是 <literal>OFB</literal> 模式。
     </simpara>
    </listitem>
    <listitem>
     <simpara>
      <constant>MCRYPT_MODE_NOFB</constant> (<literal>output feedback,
-     in nbit</literal>) 和 OFB 类似，但是更加安全，
+     in nbit</literal>) 和 <literal>OFB</literal> 类似，但是更加安全，
      因为它可以按照算法指定的分组大小来对数据进行加密。
     </simpara>
    </listitem> 
@@ -64,6 +62,25 @@
   </itemizedlist>
  </para>
 
+ <para>
+  Mcrypt 还支持一些尚未预定义常量的加密模式。
+  可以通过传入一个字符串来使用使用未预定义常量的加密模式。
+  <itemizedlist>
+   <listitem>
+    <simpara>
+     <constant>"ctr"</constant> (<literal>counter mode</literal>) 是一种流式加密模式。
+    </simpara>
+   </listitem>
+   <listitem>
+    <simpara>
+     <constant>"ncfb"</constant> (<literal>cipher feedback,
+     in n-bit mode</literal>)，类似于 <literal>CFB</literal> 模式，
+     但是它会对于算法设定的整块数据进行操作。
+    </simpara>
+   </listitem>
+  </itemizedlist>
+ </para>
+ 
  <para>
   其他模式以及随机设备常量：
   <variablelist>
