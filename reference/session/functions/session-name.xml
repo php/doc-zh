@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 93edd6c0cc2861808afb845e5744e0c3321609a8 Maintainer: yuanyuqiang Status: ready -->
+<!-- EN-Revision: eb8197347b4d8ab1cbb700dc064e1a741bd22056 Maintainer: yuanyuqiang Status: ready -->
 <!-- Reviewed: no -->
 
 <refentry xmlns="http://docbook.org/ns/docbook" xml:id="function.session-name">
@@ -22,10 +22,19 @@
    并返回 <emphasis>原来的</emphasis> 会话名称。
   </para>
   <para>
+   如果使用 <parameter>name</parameter> 指定了新字符串作为会话 cookie 的名字，
+   <function>session_name</function> 函数会修改 HTTP 响应中的 cookie
+   （如果启用了 <literal>session.transid</literal>，还会输出会话 cookie 的内容）。
+   一旦在 HTTP 响应中发送了 cookie 的内容之后，
+   调用 <function>session_name</function> 函数会产生错误。
+   所以，一定要在调用 <function>session_start</function> 函数之前
+   调用此函数。
+  </para>
+  <para>
    请求开始的时候，会话名称会被重置并且存储到
    <literal>session.name</literal> 配置项。
    因此，要想设置会话名称，那么对于每个请求，都需要在
-   调用 <function>session_start</function> 或者 <function>session_register</function> 函数
+   调用 <function>session_start</function> 函数
    之前调用 <function>session_name</function> 函数。
   </para>
  </refsect1>
@@ -85,6 +94,34 @@ echo "The previous session name was $previous_name<br />";
 ]]>
     </programlisting>
    </example>
+  </para>
+ </refsect1>
+ 
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <para>
+   <informaltable>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>&Version;</entry>
+       <entry>&Description;</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>7.2.0</entry>
+       <entry>
+        <function>session_name</function> 函数会检查会话状态，
+        之前的版本仅仅检查 cookie 状态。
+        所以，旧版本的 PHP 允许你在调用 <function>session_start</function>
+        函数之后再调用 <function>session_name</function> 函数，
+        新版本的 PHP 不再允许这样做了。
+       </entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </informaltable>
   </para>
  </refsect1>
 
