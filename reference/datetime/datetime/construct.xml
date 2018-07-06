@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision$ -->
+<!-- EN-Revision: 2446428ef35c2d2f5016203cc1221d61b53b5eee Maintainer: yuanyuqiang Status: ready -->
+<!-- Reviewed: no -->
+
+<refentry xml:id="datetime.construct" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <refnamediv>
+  <refname>DateTime::__construct</refname>
+  <refname>date_create</refname>
+  <refpurpose>返回一个新的 DateTime 对象</refpurpose>
+ </refnamediv>
+
+ <refsect1 role="description">
+  &reftitle.description;
+  <para>&style.oop;</para>
+  <constructorsynopsis role="oop">
+   <modifier>public</modifier> <methodname>DateTime::__construct</methodname>
+   <methodparam choice="opt"><type>string</type><parameter>time</parameter><initializer>"now"</initializer></methodparam>
+   <methodparam choice="opt"><type>DateTimeZone</type><parameter>timezone</parameter><initializer>&null;</initializer></methodparam>
+  </constructorsynopsis>
+  <para>&style.procedural;</para>
+  <methodsynopsis role="procedural">
+   <type>DateTime</type><methodname>date_create</methodname>
+   <methodparam choice="opt"><type>string</type><parameter>time</parameter><initializer>"now"</initializer></methodparam>
+   <methodparam choice="opt"><type>DateTimeZone</type><parameter>timezone</parameter><initializer>&null;</initializer></methodparam>
+  </methodsynopsis>
+  <para>
+   返回一个新的 DateTime 对象。
+  </para>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <variablelist>
+   <varlistentry>
+    <term><parameter>time</parameter></term>
+    <listitem>
+     <para>&date.formats.parameter;</para>
+     <para>
+      如果这个参数为字符串 <literal>"now"</literal> 表示获取当前时间。
+      如果同时指定了 <parameter>$timezone</parameter> 参数，那么获取指定时区的当前时间。
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><parameter>timezone</parameter></term>
+    <listitem>
+     <para>
+      <classname>DateTimeZone</classname> 对象，
+      表示要获取哪个时区的 <parameter>$time</parameter>。
+     </para>
+     <para>
+      如果省略了 <parameter>$timezone</parameter> 参数，
+      那么会使用当前时区。
+     </para>
+     <note>
+      <para>
+       当 <parameter>$time</parameter> 参数是 UNIX 时间戳
+       （例如 <literal>@946684800</literal>），
+       或者已经包含时区信息
+       （例如 <literal>2010-01-28T15:00:00+02:00</literal>）的时候，
+       <parameter>$timezone</parameter> 参数
+       和当前时区都将被忽略。
+      </para>
+     </note>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   返回一个新的 DateTime 对象实例，或者在发生错误的时候返回
+   &return.falseforfailure.style.procedural;。
+  </para>
+ </refsect1>
+
+ <refsect1 role="errors">
+  &reftitle.errors;
+  <para>
+   如果发生错误，会抛出 <classname>Exception</classname>。
+  </para>
+ </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <para>
+   <informaltable>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>&Version;</entry>
+       <entry>&Description;</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>7.1</entry>
+       <entry>微秒部分不再是 '00000' 了，而是真实的微秒数据。</entry>
+      </row>
+      <row>
+       <entry>5.3.0</entry>
+       <entry>
+        如果 <parameter>time</parameter> 参数不是一个有效的
+        <link linkend="datetime.formats">日期/时间格式</link>，
+        会抛出异常。
+        在之前的版本中是会发出一个错误。
+       </entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </informaltable>
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <example>
+   <title><function>DateTime::__construct</function> 例程</title>
+   <para>&style.oop;</para>
+   <programlisting role="php">
+<![CDATA[
+<?php
+try {
+    $date = new DateTime('2000-01-01');
+} catch (Exception $e) {
+    echo $e->getMessage();
+    exit(1);
+}
+
+echo $date->format('Y-m-d');
+?>
+]]>
+   </programlisting>
+   <para>&style.procedural;</para>
+   <programlisting role="php">
+<![CDATA[
+<?php
+$date = date_create('2000-01-01');
+if (!$date) {
+    $e = date_get_last_errors();
+    foreach ($e['errors'] as $error) {
+        echo "$error\n";
+    }
+    exit(1);
+}
+
+echo date_format($date, 'Y-m-d');
+?>
+]]>
+   </programlisting>
+   &examples.outputs;
+   <screen>
+<![CDATA[
+2000-01-01
+]]>
+   </screen>
+  </example>
+  <example>
+   <title><function>DateTime::__construct</function> 的复杂用法</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+// 指定时间，但是使用电脑的时区
+$date = new DateTime('2000-01-01');
+echo $date->format('Y-m-d H:i:sP') . "\n";
+
+// 指定时间和时区
+$date = new DateTime('2000-01-01', new DateTimeZone('Pacific/Nauru'));
+echo $date->format('Y-m-d H:i:sP') . "\n";
+
+// 使用当前时间以及电脑的时区
+$date = new DateTime();
+echo $date->format('Y-m-d H:i:sP') . "\n";
+
+// 使用当前时间和指定的时区
+$date = new DateTime(null, new DateTimeZone('Pacific/Nauru'));
+echo $date->format('Y-m-d H:i:sP') . "\n";
+
+// 使用 UNIX 时间戳作为时间，请注意这里的生成的 DateTime 对象对应的是 UTC 时区
+$date = new DateTime('@946684800');
+echo $date->format('Y-m-d H:i:sP') . "\n";
+
+// 指定一个无效的时间，会自动对应到有效的时间
+$date = new DateTime('2000-02-30');
+echo $date->format('Y-m-d H:i:sP') . "\n";
+?>
+]]>
+   </programlisting>
+   &example.outputs.similar;
+   <screen>
+<![CDATA[
+2000-01-01 00:00:00-05:00
+2000-01-01 00:00:00+12:00
+2010-04-24 10:24:16-04:00
+2010-04-25 02:24:16+12:00
+2000-01-01 00:00:00+00:00
+2000-03-01 00:00:00-05:00
+]]>
+   </screen>
+  </example>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <simplelist>
+   <member><function>DateTime::createFromFormat</function></member>
+   <member><function>DateTimeZone::__construct</function></member>
+   <member><link linkend="datetime.formats">日期时间格式</link></member>
+   <member><link linkend="ini.date.timezone">date.timezone</link> ini 设置</member>
+   <member><function>date_default_timezone_set</function></member>
+   <member><function>DateTime::getLastErrors</function></member>
+   <member><function>checkdate</function></member>
+  </simplelist>
+ </refsect1>
+
+</refentry>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
