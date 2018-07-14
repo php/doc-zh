@@ -1,36 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
+<!-- EN-Revision: 28e9242331900e9ac4353d9c5d34fa22ab1b50f7 Maintainer: yuanyuqiang Status: ready -->
 <chapter xml:id="mysqli.persistconns" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
 
- <title>mysqli扩展和持久化连接</title>
-
+ <title>mysqli 扩展和持久化连接</title>
  <para>
- <literal>mysqli</literal>扩展的持久化连接在PHP5.3中被引入。支持已经存在于PDO MYSQL
- 和ext/mysql中。持久化连接背后的思想是客户端进程和数据库之间的连接可以通过一个客户端进程来保持重用，
- 而不是多次的创建和销毁。这降低了每次需要创建一个新连接的开销，未使用的连接被缓存起来并且准备随时被重用。
+  从 PHP 5.3 <literal>mysqli</literal> 
+  扩展开始支持持久化连接。
+  持久化连接已经在 PDO MYSQL 和 ext/mysql 中提供支持。
+  持久化连接的目的在于重用客户端到服务器之间的连接，
+  而不是每次在需要的时候都重新建立一个连接。
+  由于持久化连接可以将已经建立的连接缓存起来，以备后续的使用，
+  所以省去了建立新的连接的开销，
+  因此可以带来性能上的提升。
  </para>
  
  <para>
- 不像mysql扩展，mysqli没有提供一个特殊的方法用于打开持久化连接。需要打开一个持久化连接时，你必须在
- 连接时在主机名前增加<literal>p:</literal>。
+  不像 mysql 扩展，mysqli 没有提供一个特殊的方法用于打开持久化连接。
+  需要打开一个持久化连接时，你必须在
+  连接时在主机名前增加<literal>p:</literal>。
  </para>
 
  <para>
- 使用持久化连接的问题在于它们可能在客户端处于不可预知的状态。比如，一个表锁可能在客户端意外终止之前被激活。
- 一个新的客户端进程重用这个持久化连接就会<quote>按照原样</quote>得到这个连接。这样，一个新的客户端进程
- 为了更好的使用持久化连接，就需要做任何可能的清理工作，这样就增加了对程序员的负担。
+  使用持久化连接也会存在一些风险，
+  因为在缓存中的连接可能处于一种不可预测的状态。
+  例如，如果客户端未能正常关闭连接，
+  可能在这个连接上残留了对库表的锁，
+  那么当这个连接被其他请求重用的时候，这个连接还是处于 <quote>有锁的状态</quote>。
+  所以，如果要很好的使用持久化连接，那么要求代码在和数据库进行交互的时候，
+  确保做好清理工作，保证被缓存的连接是一个干净的，没有残留的状态。
  </para>
 
  <para>
- <literal>mysqli</literal>扩展的持久化连接提供了内建的清理处理代码。<literal>mysqli</literal>
- 所做的清理工作包括：
+    <literal>mysqli</literal> 扩展的持久化连接提供了内建的清理处理代码。
+    <literal>mysqli</literal>
+    所做的清理工作包括：
  </para>
 
  <itemizedlist>
 
   <listitem>
    <para>
-   回滚活动的事务
+   回滚处于活动状态的事务
    </para>
   </listitem>
 
@@ -42,7 +53,7 @@
 
   <listitem>
    <para>
-   对表解锁、
+   对表解锁
    </para>
   </listitem>
 
@@ -54,7 +65,7 @@
 
   <listitem>
    <para>
-   关闭prepared语句（在PHP中经常发生）
+   关闭预编译 SQL 语句（在PHP中经常发生）
    </para>
   </listitem>
 
@@ -66,34 +77,46 @@
 
   <listitem>
    <para>
-   释放通过<function>GET_LOCK</function>获得的锁
+   释放通过 <function>GET_LOCK</function> 获得的锁
    </para>
   </listitem>
 
  </itemizedlist>
 
  <para>
- 这确保了从连接池返回的持久化连接在客户端进程使用它之前处于干净的状态。
+    这确保了将连接返回到连接池的时候，
+    它处于一种“干净”的状态，可以被其他客户端进程所使用。
  </para>
 
  <para>
- <literal>mysqli</literal>扩展通过自动的调用C-API函数<literal>mysql_change_user()</literal>
- 来完成这个清理工作。
+   <literal>mysqli</literal> 扩展
+   通过自动调用 C-API 函数
+   <literal>mysql_change_user()</literal> 来完成这个清理工作。
  </para>
 
  <para>
- 自动清理的特性有优点也有缺点。优点是程序员不再需要担心附加的清理代码，因为它们会自动调用。然而缺点就是
- 代码可能会<emphasis>潜在的</emphasis>慢一点，因为每次从连接池返回一个连接都需要执行这些清理代码。
+   自动清理的特性有优点也有缺点。
+   优点是程序员不再需要担心附加的清理代码，
+   因为它们会自动调用。
+   然而缺点就是
+   性能 <emphasis>可能会</emphasis> 慢一点，
+   因为每次从连接池返回一个连接都需要执行这些清理代码。
  </para>
 
  <para>
- 这个自动清理的代码可以通过在编译php时定义<constant>MYSQLI_NO_CHANGE_USER_ON_PCONNECT</constant>
- 来关闭。
+    这个自动清理的代码可以通过在编译 php 时定义
+  
+    <constant>MYSQLI_NO_CHANGE_USER_ON_PCONNECT</constant>
+  
+  
+    来关闭。
  </para>
 
  <note>
   <para>
-  <literal>mysqli</literal>扩展在使用Mysql Native Driver或Mysql Client Library（libmysql）时都支持持久化连接。
+  <literal>mysqli</literal> 扩展在使用 
+   MySQL Native Driver 或 
+   Mysql Client Library（libmysql）时都支持持久化连接。
   </para>
  </note>
 
