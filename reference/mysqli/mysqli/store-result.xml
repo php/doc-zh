@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision$ -->
+<!-- EN-Revision: a580ffe749ec1a1d2fe225d588f57962da570ebd Maintainer: yuanyuqiang Status: ready -->
+<!-- Reviewed: no -->
+
+<refentry xml:id="mysqli.store-result" xmlns="http://docbook.org/ns/docbook">
+ <refnamediv>
+  <refname>mysqli::store_result</refname>
+  <refname>mysqli_store_result</refname>
+  <refpurpose>转移上一次查询返回的结果集</refpurpose>
+ </refnamediv>
+
+ <refsect1 role="description">
+  &reftitle.description;
+  <para>&style.oop;</para>
+  <methodsynopsis role="oop">
+   <type>mysqli_result</type><methodname>mysqli::store_result</methodname>
+   <methodparam choice="opt"><type>int</type><parameter>option</parameter></methodparam>
+  </methodsynopsis>
+  <para>&style.procedural;</para>
+  <methodsynopsis>
+   <type>mysqli_result</type><methodname>mysqli_store_result</methodname>
+   <methodparam><type>mysqli</type><parameter>link</parameter></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>option</parameter></methodparam>
+  </methodsynopsis>
+  <para>
+   迁移 <parameter>link</parameter> 参数所指定的连接上的上一次查询返回的结果集，
+   迁移之后的结果集可以
+   在 <function>mysqli_data_seek</function> 函数中使用。
+  </para>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+   &mysqli.link.description;
+   <varlistentry>
+     <term><parameter>option</parameter></term>
+     <listitem>
+      <para>
+       指定的选项，可以是下列中的某一值：
+       <table>
+        <title>Valid options</title>
+        <tgroup cols="2">
+         <thead>
+          <row>
+           <entry>Name</entry>
+           <entry>Description</entry>
+          </row>
+         </thead>
+         <tbody>
+          <row>
+           <entry><constant>MYSQLI_STORE_RESULT_COPY_DATA</constant></entry>
+           <entry>将结果集从 mysqlnd 的内部缓冲区复制到 PHP 变量中。
+            默认情况下，mysqlnd 采取一种引用策略尽量避免在内容中复制多份同样的结果集。
+            例如，对于一个包含了很多行的结果集，每个行中的内容又不是很大，那么复制结果集的过程会导致内存使用率下降，
+            因为用来保存结果集数据的 PHP 变量可能提前被释放掉。
+            （此选项仅在使用 mysqlnd 驱动且 PHP 5.6.0 之后可用）。</entry>
+          </row>
+         </tbody>
+        </tgroup>
+       </table>
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   成功则返回一个缓冲的结果集对象，失败则返回 &false;。
+  </para>
+  <note>
+   <para>
+    如果上一查询并不产生结果集（例如，执行了一个 INSERT 语句），
+    那么 <function>mysqli_store_result</function> 会返回 &false;。
+    如果读取结果集失败了，也会返回 &false;。
+    如何区分是上面哪种情况导致此函数的调用返回了 &false;？
+    你可以通过下面的方法来检测：
+    <function>mysqli_error</function> 返回了非空的字符串，
+    <function>mysqli_errno</function> 返回了非零值，
+    或者 <function>mysqli_field_count</function> 返回了非零值，
+    都表示发生错误了。
+    还有一种可能的情况会导致此函数的调用返回 &false;：上一次查询 <function>mysqli_query</function> 本身是成功的，
+    但是由于返回的结果集太大，无法为其分配足够的内存来进行结果集转移。
+    如果 <function>mysqli_field_count</function> 函数返回了一个非零值，那么表示 SQL 语句产生了一个非空的结果集。
+   </para>
+  </note>
+ </refsect1>
+
+ <refsect1 role="notes">
+  &reftitle.notes;
+  <note>
+   <para>
+    执行查询之后，
+    使用 <function>mysqli_free_result</function> 函数来释放结果集所占用的内存，
+    是一个很有用的实战经验。
+    尤其是当使用 <function>mysqli_store_result</function> 函数来转移数量较大的结果集的时候，
+    释放结果集内存的操作尤为重要。
+   </para>
+  </note>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   See <function>mysqli_multi_query</function>.
+  </para>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>mysqli_real_query</function></member>
+    <member><function>mysqli_use_result</function></member>
+   </simplelist>
+  </para>
+ </refsect1>
+
+</refentry>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
