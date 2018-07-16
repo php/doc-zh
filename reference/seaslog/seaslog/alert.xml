@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision$ -->
+<!-- EN-Revision: 336015 Maintainer: Panda Status: ready -->
+<!-- Reviewed: no -->
+
+<refentry xml:id="seaslog.alert" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <refnamediv>
+  <refname>SeasLog::alert</refname>
+  <refpurpose>记录 alert 日志</refpurpose>
+ </refnamediv>
+
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <modifier>public</modifier> <modifier>static</modifier> <type>bool</type><methodname>SeasLog::alert</methodname>
+   <methodparam><type>string</type><parameter>message</parameter></methodparam>
+   <methodparam choice="opt"><type>array</type><parameter>content</parameter></methodparam>
+   <methodparam choice="opt"><type>string</type><parameter>logger</parameter></methodparam>
+  </methodsynopsis>
+  <para>
+    记录 alert 日志
+    <note>
+      <para>
+        "ALERT" -必须立即采取行动的紧急事件
+       需要立即通知相关人员紧急修复。
+      </para>
+    </note>
+  </para>
+
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <variablelist>
+    <varlistentry>
+    <term><parameter>message</parameter></term>
+    <listitem>
+     <para>
+      日志的消息
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><parameter>content</parameter></term>
+    <listitem>
+     <para>
+      "消息"包含占位符，实现用 content 数组中的值替换这些占位符。
+       例如'消息'是 `log info from {NAME}`, '内容'是 `array('NAME' => neeke)`，
+       日志信息是 `log info from neeke`
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><parameter>logger</parameter></term>
+    <listitem>
+     <para>
+      当函数调用 SeasLog::setLogger() 时，就像临时 logger 一样，在第三个参数中使用这个"logger"。
+      如果 `logger` 为NULL 或 ""，那么 SeasLog 将使用由<methodname>SeasLog::setLogger</methodname>设置的最新日志记录程序。
+     </para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   记录日志信息成功返回 TRUE，失败返回 FALSE。
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <example>
+   <title><function>SeasLog::alert</function>例子</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+
+var_dump(SeasLog::alert('log message'));
+
+//with content
+var_dump(SeasLog::alert('log message from {NAME}',array('NAME' => 'neeke')));
+
+//with tmp logger
+var_dump(SeasLog::alert('log message from {NAME}',array('NAME' => 'neeke'),'tmp_logger'));
+
+var_dump(SeasLog::getBuffer());
+
+?>
+]]>
+   </programlisting>
+   &example.outputs.similar;
+   <screen>
+<![CDATA[
+bool(true)
+bool(true)
+bool(true)
+array(2) {
+  ["/var/log/www/default/20180707.log"]=>
+  array(2) {
+    [0]=>
+    string(81) "2018-07-07 11:45:49 | ALERT | 73263 | 5b40376d1067c | 1530935149.68 | log message
+"
+    [1]=>
+    string(92) "2018-07-07 11:45:49 | ALERT | 73263 | 5b40376d1067c | 1530935149.68 | log message from neeke
+"
+  }
+  ["/var/log/www/tmp_logger/20180707.log"]=>
+  array(1) {
+    [0]=>
+    string(92) "2018-07-07 11:45:49 | ALERT | 73263 | 5b40376d1067c | 1530935149.68 | log message from neeke
+"
+  }
+}
+]]>
+   </screen>
+  </example>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <simplelist>
+   <member><link linkend="ini.seaslog.default-template">seaslog.default_template</link></member>
+   <member><methodname>SeasLog::debug</methodname></member>
+   <member><methodname>SeasLog::info</methodname></member>
+   <member><methodname>SeasLog::notice</methodname></member>
+   <member><methodname>SeasLog::warning</methodname></member>
+   <member><methodname>SeasLog::error</methodname></member>
+   <member><methodname>SeasLog::critical</methodname></member>
+   <member><methodname>SeasLog::emergency</methodname></member>
+   <member><methodname>SeasLog::log</methodname></member>
+  </simplelist>
+ </refsect1>
+
+
+</refentry>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
