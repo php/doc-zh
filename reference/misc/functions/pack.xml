@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision$ -->
+<!-- EN-Revision: 26b781ca3848275ed2326339c322770241e0a785 Maintainer: duanxiaoqiang Status: ready -->
+<!-- Reviewed: no -->
+
+<refentry xml:id="function.pack" xmlns="http://docbook.org/ns/docbook">
+ <refnamediv>
+  <refname>pack</refname>
+  <refpurpose>将数据打包成二进制字符串</refpurpose>
+ </refnamediv>
+ 
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <type>string</type><methodname>pack</methodname>
+   <methodparam><type>string</type><parameter>format</parameter></methodparam>
+   <methodparam choice="opt"><type>mixed</type><parameter>args</parameter></methodparam>
+   <methodparam choice="opt"><type>mixed</type><parameter>...</parameter></methodparam>
+  </methodsynopsis>
+  <para>
+   根据<parameter>format</parameter>将给地的参数打包成二进制字符串。
+  </para>
+  <para>
+   这个函数的思想来自Perl，所有格式化代码（<parameter>format</parameter>）的工作原理都与Perl相同。 但是，缺少了部分格式代码，比如Perl的“u”。
+  </para>
+  <para>
+   注意，有符号值和无符号值之间的区别只影响函数<function>unpack</function>, 在那些使用有符号和无符号格式代码的地方<function>pack</function>函数产生相同的结果。
+  </para>
+ </refsect1>
+ 
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>format</parameter></term>
+     <listitem>
+      <para>
+       <parameter>format</parameter>字符串由格式代码组成，后面跟着一个可选的重复参数。 重复参数可以是一个整数值或者<literal>*</literal>值来重复到输入数据的末尾。对于a, A, h, H格式化代码，其后的重复参数指定了给定数据将会被使用几个字符串，对于@,其后的数字表示放置剩余数据的绝对定位（之前的数据将会被空字符串填充），对于其他所有内容，重复数量指定消耗多少数据并将其打包到生成的二进制字符串中。
+      </para>
+      <para>
+       目前已实现的格式如下：
+       <table>
+        <title><function>pack</function> 格式字符</title>
+        <tgroup cols="2">
+         <thead>
+          <row>
+           <entry>代码</entry>
+           <entry>描述</entry>
+          </row>
+         </thead>
+         <tbody>
+          <row>
+           <entry>a</entry>
+           <entry>以NUL字节填充字符串</entry>
+          </row>
+          <row>
+           <entry>A</entry>
+           <entry>以SPACE(空格)填充字符串</entry></row>
+          <row>
+           <entry>h</entry>
+           <entry>十六进制字符串，低位在前</entry></row>
+          <row>
+           <entry>H</entry>
+           <entry>十六进制字符串，高位在前</entry></row>
+          <row><entry>c</entry><entry>有符号字符</entry></row>
+          <row>
+           <entry>C</entry>
+           <entry>无符号字符</entry></row>
+          <row>
+           <entry>s</entry>
+           <entry>有符号短整型(16位，主机字节序)</entry>
+          </row>
+          <row>
+           <entry>S</entry>
+           <entry>无符号短整型(16位，主机字节序)</entry>
+          </row>
+          <row>
+           <entry>n</entry>
+           <entry>无符号短整型(16位，大端字节序)</entry>
+          </row>
+          <row>
+           <entry>v</entry>
+           <entry>无符号短整型(16位，小端字节序)</entry>
+          </row>
+          <row>
+           <entry>i</entry>
+           <entry>有符号整型(机器相关大小字节序)</entry>
+          </row>
+          <row>
+           <entry>I</entry>
+           <entry>无符号整型(机器相关大小字节序)</entry>
+          </row>
+          <row>
+           <entry>l</entry>
+           <entry>有符号长整型(32位，主机字节序)</entry>
+          </row>
+          <row>
+           <entry>L</entry>
+           <entry>无符号长整型(32位，主机字节序)</entry>
+          </row>
+          <row>
+           <entry>N</entry>
+           <entry>无符号长整型(32位，大端字节序)</entry>
+          </row>
+          <row>
+           <entry>V</entry>
+           <entry>无符号长整型(32位，小端字节序)</entry>
+          </row>
+          <row>
+           <entry>q</entry>
+           <entry>有符号长长整型(64位，主机字节序)</entry>
+          </row>
+          <row>
+           <entry>Q</entry>
+           <entry>无符号长长整型(64位，主机字节序)</entry>
+          </row>
+          <row>
+           <entry>J</entry>
+           <entry>无符号长长整型(64位，大端字节序)</entry>
+          </row>
+          <row>
+           <entry>P</entry>
+           <entry>无符号长长整型(64位，小端字节序)</entry>
+          </row>
+          <row>
+           <entry>f</entry>
+           <entry>单精度浮点型(机器相关大小)</entry>
+          </row>
+          <row>
+           <entry>g</entry>
+           <entry>单精度浮点型(机器相关大小，小端字节序)</entry>
+          </row>
+          <row>
+           <entry>G</entry>
+           <entry>单精度浮点型(机器相关大小，大端字节序)</entry>
+          </row>
+          <row>
+           <entry>d</entry>
+           <entry>双精度浮点型(机器相关大小)</entry>
+          </row>
+          <row>
+           <entry>e</entry>
+           <entry>双精度浮点型(机器相关大小，小端字节序)</entry>
+          </row>
+          <row>
+           <entry>E</entry>
+           <entry>双精度浮点型(机器相关大小，大端字节序)</entry>
+          </row>
+          <row>
+           <entry>x</entry>
+           <entry>NUL字节</entry>
+          </row>
+          <row>
+           <entry>X</entry>
+           <entry>回退已字节</entry>
+          </row>
+          <row>
+           <entry>Z</entry>
+           <entry>以NUL字节填充字符串空白(PHP 5.5中新加入的)</entry>
+          </row>
+          <row>
+           <entry>@</entry>
+           <entry>NUL填充到绝对位置</entry>
+          </row>
+         </tbody>
+        </tgroup>
+       </table>
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>args</parameter></term>
+     <listitem>
+      <para>
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+ 
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   返回包含数据的二进制字符串。
+  </para>
+ </refsect1>
+ 
+ <refsect1 role="changelog"><!-- {{{ -->
+  &reftitle.changelog;
+  <para>
+   <informaltable>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>&Version;</entry>
+       <entry>&Description;</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>7.2.0</entry>
+       <entry>
+        <type>float</type> 和 <type>double</type> 类型支持打断和小端。
+       </entry>
+      </row>
+      <row>
+       <entry>7.0.15,7.1.1</entry>
+       <entry>
+        添加了"e","E","g"和"G"代码以启用float和double的字节顺序支持。
+       </entry>
+      </row>
+      <row>
+       <entry>5.6.3</entry>
+       <entry>
+        添加了“q”、“q”、“J”和“P”代码以支持处理64位数字。
+       </entry>
+      </row>
+      <row>
+       <entry>5.5.0</entry>
+       <entry>
+        “Z”代码添加了与“a”等效的功能，以实现Perl兼容性。
+       </entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </informaltable>
+  </para>
+ </refsect1><!-- }}} -->
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title><function>pack</function> 范例</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$binarydata = pack("nvc*", 0x1234, 0x5678, 65, 66);
+?>
+]]>
+    </programlisting>
+    <para>
+     The resulting binary string will be 6 bytes long and contain
+     the byte sequence 0x12, 0x34, 0x78, 0x56, 0x41, 0x42.
+    </para>
+   </example>
+  </para>
+ </refsect1>
+ 
+ <refsect1 role="notes">
+  &reftitle.notes;
+  <caution>
+   <para>Note that PHP internally stores <type>integer</type> values as
+    signed values of a machine-dependent size (C type <literal>long</literal>).   
+    Integer literals and operations that yield numbers outside the bounds of the  
+    <type>integer</type> type will be stored as <type>float</type>.
+    When packing these floats as integers, they are first cast into the integer   
+    type. This may or may not result in the desired byte pattern.
+   </para>
+   <para>The most relevant case is when packing unsigned numbers that would
+    be representable with the <type>integer</type> type if it were unsigned.
+    In systems where the <type>integer</type> type has a 32-bit size, the cast
+    usually results in the same byte pattern as if the <type>integer</type> were
+    unsigned (although this relies on implementation-defined unsigned to signed
+    conversions, as per the C standard). In systems where the
+    <type>integer</type> type has 64-bit size, the <type>float</type> most
+    likely does not have a mantissa large enough to hold the value without
+    loss of precision. If those systems also have a native 64-bit C
+    <literal>int</literal> type (most UNIX-like systems don't), the only way to  
+    use the <literal>I</literal> pack format in the upper range is to create
+    <type>integer</type> negative values with the same byte representation
+    as the desired unsigned value.
+   </para>
+  </caution>
+ </refsect1>
+ 
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>unpack</function></member>
+   </simplelist>
+  </para>
+ </refsect1>
+ 
+</refentry>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
