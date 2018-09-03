@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision$ -->
+<!-- EN-Revision: 2cbeef3874cacf583fa186daa5b7d0a2d4784ca2 Maintainer: daijie Status: ready -->
+<!-- Reviewed: no -->
+
+<refentry xml:id="pdo.query" xmlns="http://docbook.org/ns/docbook">
+ <refnamediv>
+  <refname>PDO::query</refname>
+  <refpurpose>
+    执行 SQL 语句，以 PDOStatement 对象形式返回结果集
+  </refpurpose>
+ </refnamediv>
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <modifier>public</modifier> <type>PDOStatement</type><methodname>PDO::query</methodname>
+   <methodparam><type>string</type><parameter>statement</parameter></methodparam>
+  </methodsynopsis>
+
+  <methodsynopsis>
+   <modifier>public</modifier> <type>PDOStatement</type><methodname>PDO::query</methodname>
+   <methodparam><type>string</type><parameter>statement</parameter></methodparam>
+   <methodparam><type>int</type><parameter>PDO::FETCH_COLUMN</parameter></methodparam>
+   <methodparam><type>int</type><parameter>colno</parameter></methodparam>
+  </methodsynopsis>
+
+  <methodsynopsis>
+   <modifier>public</modifier> <type>PDOStatement</type><methodname>PDO::query</methodname>
+   <methodparam><type>string</type><parameter>statement</parameter></methodparam>
+   <methodparam><type>int</type><parameter>PDO::FETCH_CLASS</parameter></methodparam>
+   <methodparam><type>string</type><parameter>classname</parameter></methodparam>
+   <methodparam><type>array</type><parameter>ctorargs</parameter></methodparam>
+  </methodsynopsis>
+
+  <methodsynopsis>
+   <modifier>public</modifier> <type>PDOStatement</type><methodname>PDO::query</methodname>
+   <methodparam><type>string</type><parameter>statement</parameter></methodparam>
+   <methodparam><type>int</type><parameter>PDO::FETCH_INTO</parameter></methodparam>
+   <methodparam><type>object</type><parameter>object</parameter></methodparam>
+  </methodsynopsis>
+
+  <para>
+   <function>PDO::query</function> 在单次函数调用内执行 SQL 语句，以 PDOStatement 对象形式返回结果集（如果有数据的话）。
+   
+  </para>
+  <para>
+   如果反复调用同一个查询，用 <function>PDO::prepare</function> 准备 PDOStatement 对象，并用 <function>PDOStatement::execute</function> 执行语句，将具有更好的性能。
+  </para>
+  <para>
+    如果没有完整获取结果集内的数据，就调用下一个 <function>PDO::query</function>，将可能调用失败。
+   应当在执行下一个 <function>PDO::query</function> 前，先用 <function>PDOStatement::closeCursor</function> 释放数据库PDOStatement 关联的资源。
+  </para>
+
+  <note>
+   <para>
+     如果传入函数的参数数量超过一个，多余的参数将相当于调用结果对象 <function>PDOStatement::setFetchMode</function> 方法。
+   </para>
+  </note>
+
+ </refsect1>
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>statement</parameter></term>
+      <listitem>
+       <para>
+         需要准备、执行的 SQL 语句。
+       </para>
+       <para>
+         查询里的数据应该用<link
+        linkend="pdo.quote">恰当的形式转义</link>。
+       </para>
+      </listitem>
+     </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+    <function>PDO::query</function> 返回 PDOStatement 对象，或在失败时返回 &false;。
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title>展示 PDO::query 的使用</title>
+    <para>
+      <function>PDO::query</function> 一个不错的功能是：执行 SELECT 语句，并能够循环遍历结果集。
+    </para>
+    <programlisting role="php">
+<![CDATA[
+<?php
+function getFruit($conn) {
+    $sql = 'SELECT name, color, calories FROM fruit ORDER BY name';
+    foreach ($conn->query($sql) as $row) {
+        print $row['name'] . "\t";
+        print $row['color'] . "\t";
+        print $row['calories'] . "\n";
+    }
+}
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+apple   red     150
+banana  yellow  250
+kiwi    brown   75
+lemon   yellow  25
+orange  orange  300
+pear    green   150
+watermelon      pink    90
+]]>
+    </screen>
+   </example>
+  </para>
+ </refsect1>
+
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>PDO::exec</function></member>
+    <member><function>PDO::prepare</function></member>
+    <member><function>PDOStatement::execute</function></member>
+   </simplelist>
+  </para>
+ </refsect1>
+
+
+</refentry>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
