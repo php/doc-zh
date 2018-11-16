@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
 <!-- $Author$ -->
-<!-- EN-Revision: 3a8dc25d68cb882feae6163cf5384356f31647ea Maintainer: dallas Status: ready -->
+<!-- EN-Revision: 0fe00e3574f5267948a29692e8daddaaeb275cee Maintainer: dallas Status: ready -->
 <sect1 xml:id="language.oop5.basic" xmlns="http://docbook.org/ns/docbook">
  <title>基本概念</title>
 
@@ -27,10 +27,10 @@
 <?php
 class SimpleClass
 {
-    // property declaration
+    // 声明属性
     public $var = 'a default value';
 
-    // method declaration
+    // 声明方法
     public function displayVar() {
         echo $this->var;
     }
@@ -48,6 +48,11 @@ class SimpleClass
   <para>
    <example xml:id="language.oop5.basic.class.this">
     <title><varname>$this</varname> 伪变量的示例</title>
+     <simpara>
+      We're assuming that error_reporting is disabled for this example;
+      otherwise the following code would trigger deprecated and strict notices,
+      respectively, depending on the PHP version.
+     </simpara>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -69,7 +74,6 @@ class B
 {
     function bar()
     {
-        // Note: the next line will issue a warning if E_STRICT is enabled.
         A::foo();
     }
 }
@@ -77,25 +81,33 @@ class B
 $a = new A();
 $a->foo();
 
-// Note: the next line will issue a warning if E_STRICT is enabled.
 A::foo();
+
 $b = new B();
 $b->bar();
 
-// Note: the next line will issue a warning if E_STRICT is enabled.
 B::bar();
 ?>
 ]]>
     </programlisting>
-    &example.outputs;
-    <screen>
+     &example.outputs.5;
+     <screen>
 <![CDATA[
 $this is defined (A)
 $this is not defined.
 $this is defined (B)
 $this is not defined.
 ]]>
-    </screen>
+     </screen>
+     &example.outputs.7;
+     <screen>
+<![CDATA[
+$this is defined (A)
+$this is not defined.
+$this is not defined.
+$this is not defined.
+]]>
+     </screen>
    </example>
   </para>
  </sect2>
@@ -109,10 +121,10 @@ $this is not defined.
    linkend="language.exceptions">异常</link>。类应在被实例化之前定义（某些情况下则必须这样）。
   </para>
   <para>
-   如果在 <literal>new</literal> 之后跟着的是一个包含有类名的字符串，则该类的一个实例被创建。如果该类属于一个名字空间，则必须使用其完整名称。
+   如果在 <literal>new</literal> 之后跟着的是一个包含有类名的字符串 <type>string</type>，则该类的一个实例被创建。如果该类属于一个命名空间，则必须使用其完整名称。
   </para>
   <example>
-   <title>创建一个实例</title>
+   <title>创建实例</title>
    <programlisting role="php">
 <![CDATA[
 <?php
@@ -205,7 +217,104 @@ bool(true)
 ]]>
    </screen>
   </example>
+  
+   <para>
+    PHP 5.4.0 起，可以通过一个表达式来访问新创建对象的成员：
+   </para>
+   <example>
+    <title>访问新创建对象的成员</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+echo (new DateTime())->format('Y');
+?>
+]]>
+    </programlisting>
+    &example.outputs.similar;
+    <screen>
+<![CDATA[
+2016
+]]>
+    </screen>
+   </example>
  </sect2>
+  
+  <sect2 xml:id="language.oop5.basic.properties-methods">
+   <title>Properties and methods</title>
+   <para>
+    Class properties and methods live in separate "namespaces", so it is
+    possible to have a property and a method with the same name. Referring to
+    both a property and a method has the same notation, and whether a property
+    will be accessed or a method will be called, solely depends on the context,
+    i.e. whether the usage is a variable access or a function call.
+   </para>
+   <example>
+    <title>Property access vs. method call</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+class Foo
+{
+    public $bar = 'property';
+    
+    public function bar() {
+        return 'method';
+    }
+}
+
+$obj = new Foo();
+echo $obj->bar, PHP_EOL, $obj->bar(), PHP_EOL;
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+property
+method
+]]>
+    </screen>
+   </example>
+   <para>
+    That means that calling an <link linkend="functions.anonymous">anonymous
+    function</link> which has been assigned to a property is not directly
+    possible. Instead the property has to be assigned to a variable first, for
+    instance. As of PHP 7.0.0 it is possible to call such a property directly
+    by enclosing it in parentheses.
+   </para>
+   <example>
+    <title>Calling an anonymous function stored in a property</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+class Foo
+{
+    public $bar;
+    
+    public function __construct() {
+        $this->bar = function() {
+            return 42;
+        };
+    }
+}
+
+$obj = new Foo();
+
+// as of PHP 5.3.0:
+$func = $obj->bar;
+echo $func(), PHP_EOL;
+
+// alternatively, as of PHP 7.0.0:
+echo ($obj->bar)(), PHP_EOL;
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+42
+]]>
+    </screen>
+   </example>
+  </sect2>
 
  <sect2 xml:id="language.oop5.basic.extends">
   <title>extends</title>
@@ -283,6 +392,14 @@ NS\ClassName
      </screen>
     </example>
    </para>
+   <note>
+    <para>The class name resolution using <literal>::class</literal> is a
+     compile time transformation. That means at the time the class name string
+     is created no autoloading has happened yet. As a consequence, class names
+     are expanded even if the class does not exist. No error is issued in
+     that case.
+    </para>
+   </note>
   </sect2>
 </sect1>
 
