@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: f2049e4661c2459f631534e1bb1d5acce65d416f Maintainer: daijie Status: ready -->
+<!-- EN-Revision: 4fa631348e0ed69ffefe7481ca7591ce98d6c498 Maintainer: daijie Status: ready -->
 <!-- Reviewed: no -->
 
 <refentry xml:id="function.getenv" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -14,6 +14,11 @@
   <methodsynopsis>
    <type>string</type><methodname>getenv</methodname>
    <methodparam><type>string</type><parameter>varname</parameter></methodparam>
+   <methodparam choice="opt"><type>bool</type><parameter>local_only</parameter><initializer>&false;</initializer></methodparam>
+  </methodsynopsis>
+  <methodsynopsis>
+   <type>array</type><methodname>getenv</methodname>
+   <void/>
   </methodsynopsis>
   <para>
    获取一个环境变量的值。
@@ -37,6 +42,14 @@
       </para>
      </listitem>
     </varlistentry>
+    <varlistentry>
+     <term><parameter>local_only</parameter></term>
+     <listitem>
+      <para>
+       设置为 true 以仅返回本地环境变量（由操作系统或 <function>putenv</function> 设置）。
+      </para>
+     </listitem>
+    </varlistentry>
    </variablelist>
   </para>
  </refsect1>
@@ -46,7 +59,45 @@
   <para>
    返回环境变量 <parameter>varname</parameter> 的值，
    如果环境变量 <parameter>varname</parameter> 不存在则返回 &false;。
+   如果省略 <parameter>varname</parameter>，则所有环境变量都将作为关联数组 <type>array</type> 返回。
   </para>
+ </refsect1>
+ 
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <informaltable>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>&Version;</entry>
+      <entry>&Description;</entry>
+     </row>
+    </thead>
+    <tbody>
+     <row>
+      <entry>7.1.0</entry>
+      <entry>
+       现在可以省略 <parameter>varname</parameter> 来检索所有环境变量的关联数组 <type>array</type>。
+      </entry>
+     </row>
+     <row>
+      <entry>5.5.38, 5.6.24, 7.0.9</entry>
+      <entry>
+       添加 <parameter>local_only</parameter> 参数。
+      </entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </informaltable>
+ </refsect1>
+ 
+ <refsect1 role="notes">
+  &reftitle.notes;
+  <warning>
+   <para>
+    如果 PHP 在诸如 Fast CGI 之类的 SAPI 中运行，则此函数将始终返回由 SAPI 设置的环境变量的值，即使已使用 <function>putenv</function> 来设置同名的本地环境变量。使用 <parameter>local_only</parameter> 参数返回本地设置的环境变量的值。
+   </para>
+  </warning>
  </refsect1>
 
  <refsect1 role="examples">
@@ -62,6 +113,9 @@ $ip = getenv('REMOTE_ADDR');
 
 // 或简单仅使用全局变量（$_SERVER 或 $_ENV）
 $ip = $_SERVER['REMOTE_ADDR'];
+
+// 安全地获取环境变量，忽略通过 SAPI 或 putenv 修改的值
+$ip = getenv('REMOTE_ADDR', true) ?: getenv('REMOTE_ADDR')
 ?>
 ]]>
     </programlisting>
