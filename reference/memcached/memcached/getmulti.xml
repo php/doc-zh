@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
+<!-- EN-Revision: 7e2f7b05e2fcb759e22e98bd5033a4baf5fb6789 Maintainer: daijie Status: ready -->
 
 <refentry xml:id="memcached.getmulti" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
@@ -12,22 +13,24 @@
   <methodsynopsis>
    <modifier>public</modifier> <type>mixed</type><methodname>Memcached::getMulti</methodname>
    <methodparam><type>array</type><parameter>keys</parameter></methodparam>
-   <methodparam choice="opt"><type>array</type><parameter role="reference">cas_tokens</parameter></methodparam>
    <methodparam choice="opt"><type>int</type><parameter>flags</parameter></methodparam>
   </methodsynopsis>
   <para>
-   <function>Memcached::getMulti</function>与<methodname>Memcached::get</methodname>类似，但是这个方法用来检索
-   <parameter>keys</parameter>数组指定的多个key对应的元素。如果提供了参数<parameter>cas_tokens</parameter>，对于检索到的元素会为其添加CAS标记值。
+   <function>Memcached::getMulti</function> 与 <methodname>Memcached::get</methodname> 类似，但是这个方法用来检索
+    <parameter>keys</parameter> 数组指定的多个 key 对应的元素。
    <note>
     <para>
-     与<methodname>Memcached::get</methodname>不同的是，不能为<function>Memcached::getMulti</function>指定通读回调函数，因为memcache协议
-     不能提供多个key检索时没有查找到的key的信息。
+     在 v3.0 之前，使用的第二个参数是 <parameter role="reference">cas_tokens</parameter>。
+     它会填充进元素的 CAS token 值。
+     在本扩展里，<parameter role="reference">cas_tokens</parameter> 参数在 v3.0 中已经移除。
+     它被新的附加选项（flag） <constant>Memcached::GET_EXTENDED</constant> 代替，需要在 <parameter>flags</parameter> 值里使用。
     </para>
    </note>
   </para>
   <para>
    <parameter>flags</parameter>参数可以用做指定<function>Memcached::getMulti</function>的附加选项。
    当前，仅可以指定为<constant>Memcached::GET_PRESERVE_ORDER</constant>以保证返回的key的顺序和请求时一致。
+   <constant>Memcached::GET_EXTENDED</constant> 可以确保同时返回了 CAS token 信息。
   </para>
  </refsect1>
 
@@ -44,18 +47,10 @@
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>cas_tokens</parameter></term>
-     <listitem>
-      <para>
-       用来存储检索到的元素的CAS标记。
-      </para>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
      <term><parameter>flags</parameter></term>
      <listitem>
       <para>
-       get操作的附加选项。
+       Get 操作的附加选项。
       </para>
      </listitem>
     </varlistentry>
@@ -75,10 +70,48 @@
   &reftitle.examples;
   <para>
    <example>
-    <title><function>Memcached::getMulti</function> 示例</title>
+    <title><function>Memcached::getMulti</function> 的 Memcached v3 示例</title>
     <programlisting role="php">
 <![CDATA[
 <?php
+// 扩展版本 v3 有效
+
+$m = new Memcached();
+$m->addServer('localhost', 11211);
+
+$items = array(
+    'key1' => 'value1',
+    'key2' => 'value2',
+    'key3' => 'value3'
+);
+$m->setMulti($items);
+$result = $m->getMulti(array('key1', 'key3', 'badkey'));
+var_dump($result);
+?>
+]]>
+    </programlisting>
+    &example.outputs.similar;
+    <screen>
+<![CDATA[
+array(2) {
+  ["key1"]=>
+  string(6) "value1"
+  ["key3"]=>
+  string(6) "value3"
+}
+]]>
+    </screen>
+   </example>
+  </para>
+  
+  <para>
+   <example>
+    <title><function>Memcached::getMulti</function> 的 Memcached v1 和 v2 示例</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+// 仅在扩展版本 v1 和 v2 中有效
+
 $m = new Memcached();
 $m->addServer('localhost', 11211);
 
@@ -112,12 +145,62 @@ array(2) {
     </screen>
    </example>
   </para>
+
+
+ 
   <para>
    <example>
-    <title><constant>Memcached::GET_PRESERVE_ORDER</constant> 示例</title>
+    <title><constant>Memcached::GET_PRESERVE_ORDER</constant> 的 Memcached v3 示例</title>
     <programlisting role="php">
 <![CDATA[
 <?php
+//  v3 扩展有效
+
+$m = new Memcached();
+$m->addServer('localhost', 11211);
+
+$data = array(
+    'foo' => 'foo-data',
+    'bar' => 'bar-data',
+    'baz' => 'baz-data',
+    'lol' => 'lol-data',
+    'kek' => 'kek-data',
+);
+
+$m->setMulti($data, 3600);
+
+$keys = array_keys($data);
+$keys[] = 'zoo';
+$got = $m->getMulti($keys, Memcached::GET_PRESERVE_ORDER);
+
+foreach ($got as $k => $v) {
+    echo "$k $v\n";
+}
+?>
+]]>
+    </programlisting>
+    &example.outputs.similar;
+    <screen>
+<![CDATA[
+foo foo-data
+bar bar-data
+baz baz-data
+lol lol-data
+kek kek-data
+zoo 
+]]>
+    </screen>
+   </example>
+  </para>
+
+  <para>
+   <example>
+    <title><constant>Memcached::GET_PRESERVE_ORDER</constant> 的 Memcached v1 和 v2 示例</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+// 在扩展版本 v1 和 v2  中有效
+
 $m = new Memcached();
 $m->addServer('localhost', 11211);
 
@@ -155,6 +238,29 @@ zoo
     </screen>
    </example>
   </para>
+ </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <informaltable>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>&Version;</entry>
+      <entry>&Description;</entry>
+     </row>
+    </thead>
+    <tbody>
+     <row>
+      <entry>3.0.0</entry>
+      <entry>
+       移出参数 <parameter role="reference">cas_tokens</parameter>。
+       添加 <constant>Memcached::GET_EXTENDED</constant>，当需要获取 CAS token 信息时，传入 flag 中。
+      </entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </informaltable>
  </refsect1>
 
  <refsect1 role="seealso">
