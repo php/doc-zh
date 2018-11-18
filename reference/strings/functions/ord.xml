@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 96c9d88bad9a7d7d44bfb7f26c226df7ee9ddf26 Maintainer: daijie Status: ready -->
+<!-- EN-Revision: 79ebd89049d45ef5cf8fa93ee6bc8fac871a8e63 Maintainer: daijie Status: ready -->
 <refentry xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://docbook.org/ns/docbook" xml:id="function.ord">
  <refnamediv>
   <refname>ord</refname>
-  <refpurpose>返回字符的 ASCII 码值</refpurpose>
+  <refpurpose>转换字符串第一个字节为 0-255 之间的值</refpurpose>
  </refnamediv>
  
  <refsect1 role="description">
@@ -14,7 +14,11 @@
    <methodparam><type>string</type><parameter>string</parameter></methodparam>
   </methodsynopsis>
   <para>
-   返回字符串 <parameter>string</parameter> 第一个字符的 ASCII 码值。
+   解析 <parameter>string</parameter> 二进制值第一个字节为 0 到 255 范围的无符号整型类型。
+  </para>
+  <para>
+   如果字符串是 ASCII、 ISO-8859、Windows 1252之类单字节编码，就等于返回该字符在字符集编码表中的位置。
+   但请注意，本函数不会去检测字符串的编码，尤其是不会识别类似 UTF-8 或 UTF-16 这种多字节字符的 Unicode 代码点（code point）。
   </para>
   <para>
    该函数是 <function>chr</function> 的互补函数。
@@ -40,7 +44,7 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   返回整型的 ASCII 码值。
+   返回 0 - 255 的整型值。
   </para>
  </refsect1>
 
@@ -59,7 +63,31 @@ if (ord($str) == 10) {
 ?>
 ]]>
     </programlisting>
-   </example>   
+   </example>
+ </para>
+ <para> 
+   <example>
+    <title>检查 UTF-8 字符串的每一个字节</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+declare(encoding='UTF-8');
+$str = "🐘";
+for ( $pos=0; $pos < strlen($str); $pos ++ ) {
+ $byte = substr($str, $pos);
+ echo 'Byte ' . $pos . ' of $str has value ' . ord($byte) . PHP_EOL;
+}
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+Byte 0 of $str has value 240
+Byte 1 of $str has value 159
+Byte 2 of $str has value 144
+Byte 3 of $str has value 152
+    </screen>
+   </example>
   </para>
  </refsect1>
 
