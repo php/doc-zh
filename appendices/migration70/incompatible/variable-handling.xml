@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 31a36e13fab32a3f15b5100b43625bb8c20d504e Maintainer: jhdxr Status: ready -->
+<!-- EN-Revision: 35511ebc54edd56f1653a6a956210b4728570316 Maintainer: jhdxr Status: ready -->
 <!-- Reviewed: no -->
 
 <sect2 xml:id="migration70.incompatible.variable-handling">
  <title>关于变量处理的变化</title>
 
  <para>
-  PHP 7 现在使用了抽象语法树来解析源代码。这为语言带来了许多改进，由于之前的PHP的解释器的限制所不可能实现的，
+  PHP 7 现在使用了抽象语法树来解析源代码。这使得许多由于之前的PHP的解释器的限制所不可能实现的改进得以实现。
   但出于一致性的原因导致了一些特殊例子的变动，而这些变动打破了向后兼容。
   在这一章中将详细介绍这些例子。
  </para>
@@ -84,9 +84,29 @@
   </para>
 
   <para>
-   使用了旧的从右到左的解析顺序的代码必须被重写，明确的使用圆括号来表明顺序（参见上表）。
+   使用了旧的从右到左的解析顺序的代码必须被重写，明确的使用大括号来表明顺序（参见上表中间一列）。
    这样使得代码既保持了与PHP 7.x的前向兼容性，又保持了与PHP 5.x的后向兼容性。
   </para>
+  
+  <para>
+   这同样影响了 &global; 关键字。如果需要的话可以使用大括号来模拟之前的行为。
+  </para>
+  
+  <informalexample>
+   <programlisting role="php">
+<![CDATA[
+<?php
+function f() {
+    // Valid in PHP 5 only.
+    global $$foo->bar;
+
+    // Valid in PHP 5 and 7.
+    global ${$foo->bar};
+}
+?>
+]]>
+   </programlisting>
+  </informalexample>
  </sect3>
 
  <sect3 xml:id="migration70.incompatible.variable-handling.list">
@@ -222,44 +242,14 @@ array(2) {
   </informalexample>
  </sect3>
 
- <sect3 xml:id="migration70.incompatible.variable-handling.global">
-  <title>&global; 只接受简单变量</title>
-
-  <para>
-   <link linkend="language.variables.variable">可变变量</link>不再能够与 &global; 关键字一起使用。
-   如果需要的话可以使用圆括号来模拟之前的行为。
-  </para>
-
-  <informalexample>
-   <programlisting role="php">
-<![CDATA[
-<?php
-function f() {
-    // Valid in PHP 5 only.
-    global $$foo->bar;
-
-    // Valid in PHP 5 and 7.
-    global ${$foo->bar};
-}
-?>
-]]>
-   </programlisting>
-  </informalexample>
-
-  <para>
-   作为一个通用的准则，&global; 一个除了裸的变量以外的任何东西都是不被推荐的。
-  </para>
- </sect3>
-
  <sect3 xml:id="migration70.incompatible.variable-handling.parentheses">
   <title>
    函数参数附近的括号不再影响行为
   </title>
 
   <para>
-   In PHP 5, using redundant parentheses around a function argument could
-   quiet strict standards warnings when the function argument was passed by
-   reference. The warning will now always be issued.
+   在 PHP 5中，在以引用方式传递函数参数时，使用冗余的括号对可以隐匿严格标准
+   的警告。现在，这个警告总会触发。
   </para>
 
   <informalexample>
