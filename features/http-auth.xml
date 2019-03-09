@@ -1,37 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: Gregory Status: ready -->
+<!-- EN-Revision: 744111cf061120a5e82033a50ca0031902e102d4 Maintainer: jhdxr Status: ready -->
 <!-- CREDITS: dallas -->
 <chapter xml:id="features.http-auth" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <title>用 PHP 进行 HTTP 认证</title>
 
  <simpara>
-  PHP 的 <acronym>HTTP</acronym> 认证机制仅在 PHP 以 Apache
-  模块方式运行时才有效，因此该功能不适用于 CGI 版本。在
-  Apache 模块的 PHP 脚本中，可以用
-  <function>header</function>
-  函数来向客户端浏览器发送“Authentication
-  Required”信息，使其弹出一个用户名／密码输入窗口。当用户输入用户名和密码后，包含有
+  可以用 <function>header</function> 
+  函数来向客户端浏览器发送“<literal>Authentication
+  Required</literal>”信息，使其弹出一个用户名／密码输入窗口。当用户输入用户名和密码后，包含有
   URL 的 PHP 脚本将会加上<link linkend="reserved.variables">预定义变量</link>
   <varname>PHP_AUTH_USER</varname>，<varname>PHP_AUTH_PW</varname> 和
   <varname>AUTH_TYPE</varname>
   被再次调用，这三个变量分别被设定为用户名，密码和认证类型。预定义变量保存在
-  <link linkend="reserved.variables.server">$_SERVER</link> 或者
-  <varname>$HTTP_SERVER_VARS</varname> 数组中。支持“Basic”和“Digest”（自
+  <varname>$_SERVER</varname> 数组中。支持“Basic”和“Digest”（自
   PHP 5.1.0 起）认证方法。请参阅 <function>header</function> 函数以获取更多信息。
  </simpara>
 
- <note>
-  <title>PHP 版本问题</title>
-  <para>
-   <link linkend="language.variables.superglobals">Autoglobals</link> 全局变量，包括
-   <link linkend="reserved.variables.server">$_SERVER</link>等，自
-   PHP <link xlink:href="&url.php.release4.1.0;">4.1.0</link>
-   起有效，<varname>$HTTP_SERVER_VARS</varname> 从 PHP 3 开始有效。
-  </para>
- </note>
-
+ 
  <para>
   以下是在页面上强迫客户端认证的脚本范例：
  </para>
@@ -75,7 +61,7 @@ $users = array('admin' => 'mypass', 'guest' => 'guest');
 if (empty($_SERVER['PHP_AUTH_DIGEST'])) {
     header('HTTP/1.1 401 Unauthorized');
     header('WWW-Authenticate: Digest realm="'.$realm.
-           '" qop="auth" nonce="'.uniqid().'" opaque="'.md5($realm).'"');
+           '",qop="auth",nonce="'.uniqid().'",opaque="'.md5($realm).'"');
 
     die('Text to send if user hits Cancel button');
 }
@@ -96,7 +82,7 @@ if ($data['response'] != $valid_response)
     die('Wrong Credentials!');
 
 // ok, valid username & password
-echo 'Your are logged in as: ' . $data['username'];
+echo 'You are logged in as: ' . $data['username'];
 
 
 // function to parse the http auth header
@@ -105,11 +91,12 @@ function http_digest_parse($txt)
     // protect against missing data
     $needed_parts = array('nonce'=>1, 'nc'=>1, 'cnonce'=>1, 'qop'=>1, 'username'=>1, 'uri'=>1, 'response'=>1);
     $data = array();
+    $keys = implode('|', array_keys($needed_parts));
 
-    preg_match_all('@(\w+)=([\'"]?)([a-zA-Z0-9=./\_-]+)\2@', $txt, $matches, PREG_SET_ORDER);
+    preg_match_all('@(' . $keys . ')=(?:([\'"])([^\2]+?)\2|([^\s,]+))@', $txt, $matches, PREG_SET_ORDER);
 
     foreach ($matches as $m) {
-        $data[$m[1]] = $m[3];
+        $data[$m[1]] = $m[3] ? $m[3] : $m[4];
         unset($needed_parts[$m[1]]);
     }
 
@@ -144,8 +131,7 @@ function http_digest_parse($txt)
  </para>
 
  <simpara>
-  自 PHP 4.3.0
-  起，为了防止有人通过编写脚本来从用传统外部机制认证的页面上获取密码，当外部认证对特定页面有效，并且&safemode;被开启时，PHP_AUTH
+  为了防止有人通过编写脚本来从用传统外部机制认证的页面上获取密码，当外部认证对特定页面有效，并且&safemode;被开启时，PHP_AUTH
   变量将不会被设置。但无论如何，<varname>REMOTE_USER</varname>
   可以被用来辨认外部认证的用户，因此可以用
   <varname>$_SERVER['REMOTE_USER']</varname> 变量。
@@ -202,25 +188,16 @@ function http_digest_parse($txt)
   的服务端返回信息时不会清空认证文件，因此只要对认证文件的检查要求没有变化，只要用户点击“后退”按钮，再点击“前进”按钮，其原有资源仍然能够被访问。不过，用户可以通过按“_”键来清空他们的认证信息。
  </simpara>
  <simpara>
-  同时请注意，在 PHP 4.3.3 之前，由于微软 IIS 的限制，HTTP
-  认证无法工作在 IIS 服务器的 CGI 模式下。为了能够使其在 PHP 4.3.3
-  以上版本能够工作，需要编辑 IIS
-  的设置“目录安全”。点击“编辑”并且只选择“匿名访问”，其它所有的复选框都应该留空。
+  为了能够使HTTP工作在 IIS 服务器的 CGI 模式下。
+  你需要编辑 IIS的设置“<literal>目录安全</literal>”。点击“<literal>编辑</literal>”并且只选择“<literal>匿名访问</literal>”，其它所有的复选框都应该留空。
  </simpara>
- <simpara>
-  另一个限制是在 IIS 的 ISAPI 模式下使用 PHP 4 的时候，无法使用
-  <literal>PHP_AUTH_*</literal> 变量，而只能使用
-  <literal>HTTP_AUTHORIZATION</literal>。例如，考虑如下代码：<literal>list($user, $pw)
-  = explode(':', base64_decode(substr($_SERVER['HTTP_AUTHORIZATION'], 6)));</literal>。
- </simpara>
-
  <note>
   <title>IIS 注意事项</title>
   <simpara>
    要 HTTP 认证能够在 IIS 下工作，PHP 配置选项
    <link linkend="ini.cgi.rfc2616-headers">cgi.rfc2616_headers</link>
    必须设置成 <literal>0</literal>（默认值）。
-  </simpara>
+  </simpara> 
  </note>
 
  <note>
