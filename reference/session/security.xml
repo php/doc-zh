@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: e1bb07c9e393a756e199390df983344a647c7124 Maintainer: yuanyuqiang Status: ready -->
+<!-- EN-Revision: a77a1425f1a8b20a03463ab7ccb5f31866f20a4f Maintainer: yuanyuqiang Status: ready -->
 <!-- Reviewed: no -->
 <chapter xml:id="session.security" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <title>会话和安全</title>
@@ -20,12 +20,13 @@
   
    <para>
      会话模块无法保证你存储在会话中的信息只能被创建会话的用户本人可见。
-     你需要采取额外的手段来确保会话中的机密信息，
+     你需要采取额外的手段来保护会话中的机密信息，
      至于采取何种方式来保护机密信息，
-     取决于你在会话中存储的数据。
+     取决于你在会话中存储的数据的机密程度。
     </para>
    
-  <para>
+  
+   <para>
      评估会话中存储的数据的重要性，
      以及为此增加额外的保护机制，
      通常需要付出一定的代价，同时会降低便利性。
@@ -52,7 +53,7 @@
    
   <note>
     <simpara>
-     即使使用 HTTPS 协议，也无法永远保证机密数据不被泄漏。
+     即使使用 HTTPS 协议，也无法百分百保证机密数据不被泄漏。
      例如，CRIME 和 BEAST 漏洞可以使得攻击者读取到你的数据。
      另外，出于网络通信审计目的，很多网络中都存在 HTTPS MITM 代理，
      可以读取 HTTPS 协议下的通信数据。
@@ -73,7 +74,7 @@
    <para>
     从 PHP 5.5.2 开始，新增加了一个配置项：
     <link linkend="ini.session.use-strict-mode">session.use_strict_mode</link>。
-    当启用这个配置项，并且你所用的会话存储器支持的话，未经初始化的会话 ID 会被拒绝，
+    当启用这个配置项，并且你所用的会话存储处理器支持的话，未经初始化的会话 ID 会被拒绝，
     并为其生成一个全新的会话，这可以避免攻击者使用一个已知的会话 ID 来进行攻击。
     例如，攻击者可以通过邮件给受害者发送一个包含会话 ID 的链接：
     http://example.com/page.php?PHPSESSID=123456789。
@@ -83,7 +84,9 @@
     如果启用了 <link linkend="ini.session.use-strict-mode">session.use_strict_mode</link> 选项，就可以降低风险。
    </para>
 
-   <warning>
+   
+    
+    <warning>
     <simpara>
      用户自定义的会话存储器也可以通过实现会话 ID 验证来支持严格会话模式。
      建议用户在实现自己的会话存储器的时候，
@@ -93,7 +96,8 @@
 
    <para>
     在浏览器一侧，可以为用来保存会话 ID 的 cookie 设置域，路径，
-    仅允许 HTTP 访问，必须使用 HTTPS 访问等安全属性，
+    仅允许 HTTP 访问，必须使用 HTTPS 访问等安全属性。
+    如果使用的是 PHP 7.3. 版本，还可以对 cookie 设置 SameSite 属性。
     攻击者可以利用浏览器的这些特性来设置永久可用的会话 ID。
     仅仅设置 <link
     linkend="ini.session.use-only-cookies">session.use_only_cookies</link> 配置项
@@ -104,7 +108,8 @@
     来拒绝未经初始化的会话 ID。
    </para>
 
-   <note>
+  
+    <note>
     <simpara>
      虽然使用 <link
      linkend="ini.session.use-strict-mode">session.use_strict_mode</link> 配置项
@@ -136,7 +141,7 @@
     <simpara>
      对过期会话数据的访问并不总是意味着正在遭受攻击。
      不稳定的网络状况，或者不正确的会话删除行为，
-     都会导致合法的用户产生对过期会话数据访问行为。
+     都会导致合法的用户产生访问过期会话数据的情况。
     </simpara>
    </warning>
 
@@ -176,40 +181,39 @@
     所以，必须周期性的调用 <function>session_regenerate_id</function> 函数
     来重新生成会话 ID，
     例如，对于机密内容，每隔 15 分钟就重新生成会话 ID。
-    这样一来，即使会话 ID 被窃取，那么攻击者所得到的会话 ID 也会很快的过期，
+    这样一来，即使会话 ID 被窃取，
+    那么攻击者所得到的会话 ID 也会很快的过期，
     如果他们进一步访问，就会产生对过期会话数据访问的错误。
    </para>
 
    <para>
-    当用户成功通过认证之后，必须为其重新生成会话 ID。
+    当用户成功通过认证之后，<emphasis>必须</emphasis>为其重新生成会话 ID。
     并且，必须在向 $_SESSION 中保存用户认证信息之前
     调用 <function>session_regenerate_id</function> 函数（
-    从 PHP 7.0.0 开始，<function>session_regenerate_id</function> 函数
-    会自动保存当前会话数据，以便于保存时间戳等信息到当前会话）。
+    从 PHP 7.0.0 开始，
+    <function>session_regenerate_id</function> 函数
+    会自动将重生之前的会话数据保存到新生成的会话）。
     请确保只有新的会话包含用户认证信息。
    </para>
 
    <para>
-    开发者不要依赖 <link
+    开发者<emphasis>不可</emphasis>过分依赖 <link
     linkend="ini.session.gc-maxlifetime">session.gc_maxlifetime</link> 配置项。
-    因为攻击者可以在受害者的会话过期之前产生访问，
-    并且维持这个会话的活动，
-    以保证这个会话不会过期。
+    因为攻击者可以在受害者的会话过期之前访问系统，
+    并且维持这个会话的活动，以保证这个会话不会过期。
    </para>
 
    <para>
-    实际上，你需要自己实现基于时间戳的
-    会话数据管理机制。
+    实际上，你需要自己实现基于时间戳的会话数据管理机制。
    </para>
 
    <warning>
     <simpara>
-     虽然会话管理器可以透明的管理时间戳，
-     但是这个特性尚未完整的实现。
+     虽然会话管理器可以透明的管理时间戳，但是这个特性尚未完整的实现。
      在 GC 发生之前，旧的会话数据还得保存，
      同时，开发者还得保证过期的会话数据已经被移除。
      但是，开发者又不能立即移除活跃会话中的数据。
-     所以，不要在活跃会话上调用 <literal>session_regenerate_id(true);</literal> 
+     所以，不要同时在活跃会话上调用 <literal>session_regenerate_id(true);</literal> 
      和 <function>session_destroy</function> 函数。
      这听起来有点儿自相矛盾，但是事实上必须得这么做。
     </simpara>
@@ -217,7 +221,7 @@
 
    <para>
     默认情况下，<function>session_regenerate_id</function> 函数
-    不会删除旧的会话，
+    <emphasis>不会</emphasis>删除旧的会话，
     所以即使重生了会话 ID，旧的会话可能还是可用的。
     开发者需要使用时间戳等机制，
     来确保旧的会话数据不会再次被访问。
@@ -225,13 +229,12 @@
 
    <warning>
     <simpara>
-     立即删除活跃会话可能会带来非预期的一些影响。
+     删除活跃会话可能会带来非预期的一些影响。
      例如，在网络状态不稳定，或者有并发请求到达 Web 服务器的情况下，
      立即删除活跃会话可能导致个别请求会话失效的问题。
     </simpara>
     <simpara>
-     立即删除活跃会话也
-     无法检测可能存在的恶意访问。
+     立即删除活跃会话也无法检测可能存在的恶意访问。
     </simpara>
     <simpara>
      作为替代方案，
@@ -267,8 +270,7 @@
      建议所有的站点都启用 <literal>use_strict_mode=On</literal>。
     </simpara>
     <simpara>
-     只有当账号处于被攻击的时候，
-     才会发生拒绝服务的问题。
+     只有当账号处于被攻击的时候，才会发生拒绝服务的问题。
      通常都是由于应用中被注入了恶意的 JavaScript 才会导致这个问题。
     </simpara>
    </warning>
@@ -340,7 +342,8 @@
    </para>
 
    <para>
-    当会话不活跃的时候，当前的会话模块不会检测对于 $_SESSION 的修改。
+    当会话不活跃的时候，当前的会话模块<emphasis>不会检</emphasis>测对于 
+    $_SESSION 的修改。
     你需要自己来保证
     在会话处于不活跃状态的时候，不要去修改它。
    </para>
@@ -353,14 +356,16 @@
    <para>
     开发者需要自己来追踪每个用户的活跃会话，
     要知道每个用户创建了多少活跃会话，每个活跃会话来自那个 IP 地址，
-    活跃了多长时间等。PHP 不会自动完成这项工作，需要开发者来完成。
+    活跃了多长时间等。
+    PHP 不会自动完成这项工作，需要开发者来完成。
    </para>
 
    <para>
     有很多种方式可以做到追踪用户的活跃会话。
     你可以通过在数据库中存储会话信息来跟踪用户会话。
     由于会话是可以被垃圾收集器收集掉的，
-    所以你也需要处理被收集掉的会话数据，以保证数据库中的数据和真实的活跃会话数据的一致性。
+    所以你也需要处理被收集掉的会话数据，
+    以保证数据库中的数据和真实的活跃会话数据的一致性。
    </para>
 
    <para>
@@ -374,7 +379,8 @@
    <warning>
     <simpara>
      永远不要使用机密数据作为会话 ID 前缀！
-     如果用户 ID 属于机密数据，那么可以考虑使用 <function>hash_hmac</function> 函数对其进行摘要后再使用。
+     如果用户 ID 属于机密数据，那么可以考虑使用 
+     <function>hash_hmac</function> 函数对其进行摘要后再使用。
     </simpara>
    </warning>
 
@@ -408,14 +414,13 @@
     在使用 <function>setcookie</function> 的时候，传入安全的一次性摘要结果作为自动登录信息。
     建议使用比 SHA-2 更高强度的摘要算法（例如 SHA-256）
     对 <function>random_bytes</function> 随机生成的数据
-    （也可以读取 /dev/urandom 设别）进行摘要作为自动登录的信息。
+    （也可以读取 /dev/urandom 设备）进行摘要作为自动登录的信息。
    </para>
 
    <para>
     在用户访问的时候，如果发现用户尚未认证，
     那么就去检查请求中是否包含了有效的一次性登录信息。
-    如果包含有效的一次性登录信息，那么就去认证用户，
-    并且重新生成新的一次性登录信息。
+    如果包含有效的一次性登录信息，那么就去认证用户，并且重新生成新的一次性登录信息。
     自动登录的关键信息一定是只能使用一次，永远不要重复使用一次性登录信息。
   </para>
 
@@ -423,7 +428,7 @@
     自动登录信息是长生命周期的认证信息，
     所以必须要尽可能的妥善保护。
     可以对于自动登录信息对应的 cookie 设置路径、仅允许 HTTP 访问、仅允许安全访问
-    等属性来加以保护，并且尽在必要的时候才传送这个 cookie。
+    等属性来加以保护，并且仅在必需的时候才传送这个 cookie。
    </para>
 
    <para>
@@ -448,8 +453,8 @@
 
    <note>
     <simpara>
-      PHP prior to 7.2.0 uses the same output buffer and INI setting
-      as trans sid。 所以不建议在 PHP 7.2.0 之前使用
+     PHP 7.2.0 之前的版本，这个函数和会话 ID 使用了同样的输出缓冲以及 INI 设置项，
+     所以不建议在 PHP 7.2.0 之前使用
       <function>output_add_rewrite_var</function> 函数。
     </simpara>
    </note>
@@ -458,7 +463,11 @@
     大部分 Web 应用框架都提供了 CSRF 保护的特性。
     详细信息请参考你所用的 Web 框架的文档。
    </para>
-
+   
+   <para>
+    从 PHP 7.3 开始，对于会话 cookie 增加了 SameSite 属性，
+    这个属性可以有效的降低 CSRF 攻击的风险。
+   </para>
   </sect2>
  </sect1>
 
@@ -477,15 +486,17 @@
       <link linkend="ini.session.cookie-lifetime">session.cookie_lifetime</link>=0
      </para>
      <para>
-      0 表示特殊含义，它告知浏览器不要持久化存储 cookie 数据。
+      <literal>0</literal> 表示特殊含义，它告知浏览器不要持久化存储 cookie 数据。
       也即，关闭浏览器的时候，会话 ID cookie 会被立即删除。
       如果将此项设置为非 0 的值，
       可能会导致会话 ID 被其他用户使用。
-      大部分应用应该把此项设置为“0”。
+      大部分应用应该把此项设置为 "<literal>0</literal>"。
      </para>
      <para>
       如果应用中有自动登录的功能，
-      请自行实现一种更加安全的方式，而不要使用长生命周期的会话 ID 来完成自动登录。
+      请自行实现一种更加安全的方式，
+      而不要使用长生命周期的会话 ID 来完成自动登录。
+      至于如何实现安全的自动登录功能，请参考本文档前面的内容。
      </para>
     </listitem>
 
@@ -524,7 +535,8 @@
       而拒绝由用户自己提供的会话 ID。
      </para>
      <para>
-      攻击者可以自行设置 cookie 或者使用 JavaScript 注入的方式
+      攻击者可以自行设置 cookie 
+      或者使用 JavaScript 注入的方式
       来设置会话 ID 进行攻击。
       启用 <literal>session.use_strict_mode</literal> 配置项
       可以阻止使用未经会话模块初始化的会话 ID。
@@ -533,8 +545,7 @@
       <para>
        攻击者可以使用自己的设备产生会话 ID，也可以使用受害者的会话 ID。
        攻击者也可以通过一些后续操作保证会话活跃。
-       因此，
-       启用 <literal>session.use_strict_mode</literal> 配置项
+       因此，启用 <literal>session.use_strict_mode</literal> 配置项
        可以降低这种风险。
       </para>
      </note>
@@ -550,15 +561,13 @@
      </para>
      <para>
       虽然可以使用会话 ID 来作为防范跨站请求伪造（CSRF）的关键数据，
-      但是不建议你这么做。
-      例如，攻击者可以把 HTML 源代码保存下来并且发送给其他用户。
+      但是不建议你这么做。例如，攻击者可以把 HTML 源代码保存下来并且发送给其他用户。
       为了安全起见，开发者不应该在 web 页面中显示会话 ID。
       几乎所有的应用都应该对会话 ID cookie 设置 httponly 为 On。
      </para>
      <note>
       <para>
-       类似会话 ID，
-       CSRF 保护串号也应该定期的更新。
+       类似会话 ID，CSRF 保护串号也应该定期的更新。
       </para>
      </note>
     </listitem>
@@ -569,22 +578,38 @@
      </para>
      <para>
       仅允许在 HTTPS 协议下访问会话 ID cookie。
-      如果你的 web 站点仅支持 HTTPS，
-      那么必须将此配置项设置为 On。
+      如果你的 web 站点仅支持 HTTPS，那么必须将此配置项设置为 On。
      </para>
      <para>
       对于仅支持 HTTPS 的 web 站点建议考虑使用强制安全传输技术（HSTS）。
      </para>
     </listitem>
 
-    <listitem>
+   <listitem>
+     <para>
+      <link linkend="ini.session.cookie-samesite">session.cookie_samesite</link>="Lax" 或者
+      <link linkend="ini.session.cookie-samesite">session.cookie_samesite</link>="Strict"
+     </para>
+     <para>
+      自 PHP 7.3 开始，可以为会话 cookie 设置 <literal>"SameSite"</literal> 属性。
+      这个属性可以有效的降低 CSRF 攻击的风险。
+     </para>
+     <para>
+      Lax 和 Strict 之间的区别是，
+      对于来自其他站点的并且携带了会话 cookie 的 GET 请求的处理方式不同。
+      设置为 Lax 会允许来自其他站点并且携带了会话 cookie 的请求，
+      设置为 Strict 则不会允许这种请求访问本站的会话数据。
+     </para>
+   </listitem>
+   
+   <listitem>
      <para>
       <link linkend="ini.session.gc-maxlifetime">session.gc_maxlifetime</link>=[选择一个尽可能小的时间段]
      </para>
      <para>
       <literal>session.gc_maxlifetime</literal>
       来设置删除过期会话数据的时间周期。
-      不建议依赖这个配置项来实现对于过期会话数据的删除，
+      <emphasis>来</emphasis>的删除，
       你需要自己来实现一套基于时间戳的会话数据生命周期管理机制。
      </para>
      <para>
@@ -593,7 +618,8 @@
       最好使用类似 cron 这样的定时任务来执行 <function>session_gc</function> 函数。
      </para>
      <para>
-      GC 的运行时机并不是精准的，带有一定的或然性，所以这个设置项并不能确保
+      GC 的运行时机并不是精准的，带有一定的或然性，
+      所以这个设置项并<emphasis>不能</emphasis>确保
       旧的会话数据被删除。某些会话存储处理模块不使用此设置项。
       更多的信息请参考会话存储模块的完整文档。
       虽然开发人员不能完全依赖这个设置，但是还是建议将其设置的尽可能的小。
@@ -602,12 +628,14 @@
       和 <link
       linkend="ini.session.gc-divisor">session.gc_divisor</link> 配置项
       可以使得过期的会话数据在适当的周期内被删除。
-      如果需要使用自动登录的功能，请使用其他更加安全的方式自行实现，而不要通过使用长生命周期的会话 ID 来实现。
+      如果需要使用自动登录的功能，
+      请使用其他更加安全的方式自行实现，
+      而不要通过使用长生命周期的会话 ID 来实现。
      </para>
      <note>
       <para>
-       类似于 memcached 或者 mecache 这样的会话存储器
-       不依赖这个配置项来进行过期会话数据的垃圾收集。
+       如果会话存储器将会话数据存储到 memcached 或者 mecache 这种自带超时机制的存储中，
+       就不依赖这个配置项来进行过期会话数据的垃圾收集。
        更多信息请参考对应的会话存储器文档。
       </para>
      </note>
@@ -625,37 +653,38 @@
      </para>
      <note>
       <para>
-       会话 ID 可能在浏览器书签或者保存下来的
-       HTML 源代码中被泄漏。
+       会话 ID 可能在浏览器书签或者保存下来的 HTML 源代码中被泄漏。
       </para>
      </note>
     </listitem>
 
     <listitem>
      <para>
-      <link linkend="ini.session.trans-sid-tags">session.trans_sid_tags</link>=[limited tags]
+      <link linkend="ini.session.trans-sid-tags">session.trans_sid_tags</link>=[限制标签]
      </para>
      <para>
       （PHP 7.1.0 及以上）一般情况下，默认值就可以，
       你无需重写不需要的标签。
-      之前版本的 PHP 请使用 <link linkend="ini.url-rewriter.tags">url_rewriter.tags</link> 配置项。
+      之前版本的 PHP 请使用 <link linkend="ini.url-rewriter.tags">url_rewriter.tags</link> 
+      配置项。
      </para>
     </listitem>
 
     <listitem>
      <para>
-      <link linkend="ini.session.trans-sid-hosts">session.trans_sid_hosts</link>=[limited hosts]
+      <link linkend="ini.session.trans-sid-hosts">session.trans_sid_hosts</link>=[限制的主机名]
      </para>
      <para>
        （PHP 7.1.0 及以上）这个配置项设定允许进行会话 ID 透传的主机白名单。
-      请勿在其中加入你不信任的主机。如果此配置项为空，
-      则仅允许 $_SERVER['HTTP_HOST'] 的站点进行会话 ID 透传。
+      请勿在其中加入你不信任的主机。
+      如果此配置项为空，
+      则仅允许 <literal>$_SERVER['HTTP_HOST']</literal> 的站点进行会话 ID 透传。
      </para>
     </listitem>
 
     <listitem>
      <para>
-      <link linkend="ini.session.referer-check">session.referer_check</link>=[your originating URL]
+      <link linkend="ini.session.referer-check">session.referer_check</link>=[原始 URL]
      </para>
      <para>
       当启用 <link
@@ -674,8 +703,7 @@
       <link linkend="ini.session.cache-limiter">session.cache_limiter</link>=nocache
      </para>
      <para>
-      确保对于已经认证的会话，
-      其 HTTP 内容不会被浏览器缓存。
+      确保对于已经认证的会话，其 HTTP 内容不会被浏览器缓存。
       应该仅针对公开内容允许缓存，
       否则将会面临内容泄露的风险。
       即使 HTTP 内容不包含敏感数据，
@@ -702,7 +730,8 @@
       <link linkend="ini.session.sid-bits-per-character">session.sid_bits_per_character</link>="6"
      </para>
      <para>
-     （PHP 7.1.0 及更高版本）即使会话 ID 的长度设定不变，
+     （PHP 7.1.0 及更高版本）
+      即使会话 ID 的长度设定不变，
      更高的会话 ID 比特位设置也会产生安全性更高的会话 ID。
      </para>
     </listitem>
@@ -746,4 +775,3 @@ vim600: syn=xml fen fdm=syntax fdl=2 si
 vim: et tw=78 syn=sgml
 vi: ts=1 sw=1
 -->
-
