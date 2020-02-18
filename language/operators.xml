@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: a8b24da312bc04d20f404f99c90d2705e850ec16 Maintainer: jhdxr Status: ready -->
+<!-- EN-Revision: 6ccb666358375c6815e5fadbf6386a496af1d794 Maintainer: jhdxr Status: ready -->
  <chapter xml:id="language.operators" xmlns="http://docbook.org/ns/docbook">
   <title>运算符</title>
   <simpara>
@@ -59,11 +59,6 @@
         <entry><link linkend="language.oop5.cloning">clone</link> 和 <link linkend="language.oop5.basic.new">new</link></entry>
        </row>
        <row>
-        <entry>左</entry>
-        <entry><literal>[</literal></entry>
-        <entry><function>array</function></entry>
-       </row>
-       <row>
         <entry>右</entry>
         <entry><literal>**</literal></entry>
         <entry><link linkend="language.operators.arithmetic">算术运算符</link></entry>
@@ -83,7 +78,7 @@
          <literal>@</literal>
         </entry>
         <entry>
-         <link linkend="language.types">类型</link>和<link linkend="language.operators.increment">递增／递减</link>
+         <link linkend="language.types">类型</link>、<link linkend="language.operators.increment">递增／递减</link>、<link linkend="language.operators.errorcontrol">错误控制</link>
         </entry>
        </row>
        <row>
@@ -119,7 +114,7 @@
          <literal>.</literal>
         </entry>
         <entry>
-         <link linkend="language.operators.arithmetic">算术运算符</link>和<link
+         <link linkend="language.operators.arithmetic">算术运算符</link>&listendand;<link
          linkend="language.operators.string">字符串运算符</link></entry>
        </row>
        <row>
@@ -162,7 +157,7 @@
         <entry>左</entry>
         <entry><literal>&amp;</literal></entry>
         <entry>
-         <link linkend="language.operators.bitwise">位运算符</link>和<link
+         <link linkend="language.operators.bitwise">位运算符</link>&listendand;<link
          linkend="language.references">引用</link></entry>
        </row>
        <row>
@@ -194,21 +189,21 @@
         </entry>
        </row>
        <row>
-        <entry>左</entry>
+        <entry>右</entry>
         <entry><literal>??</literal></entry>
         <entry>
-         <link linkend="language.operators.comparison">比较运算符</link>
+         <link linkend="language.operators.comparison.coalesce">null 合并运算符</link>
         </entry>
        </row>
        <row>
         <entry>左</entry>
         <entry><literal>? :</literal></entry>
         <entry>
-         <link linkend="language.operators.comparison.ternary">ternary</link>
+         <link linkend="language.operators.comparison.ternary">三元运算符</link>
         </entry>
        </row>
        <row>
-        <entry>right</entry>
+        <entry>右</entry>
         <entry>
          <literal>=</literal> 
          <literal>+=</literal> 
@@ -226,6 +221,20 @@
         </entry>
         <entry>
          <link linkend="language.operators.assignment">赋值运算符</link>
+        </entry>
+       </row>
+       <row>
+        <entry>右</entry>
+        <entry><literal>yield from</literal></entry>
+        <entry>
+         <link linkend="control-structures.yield.from">yield from</link>
+        </entry>
+       </row>
+       <row>
+        <entry>右</entry>
+        <entry><literal>yield</literal></entry>
+        <entry>
+         <link linkend="control-structures.yield">yield</link>
         </entry>
        </row>
        <row>
@@ -292,6 +301,30 @@ $array[$i] = $i++; // may set either index 1 or 2
 ]]>
      </programlisting>
     </example>
+    <example>
+     <title><literal>+</literal>、<literal>-</literal> 、<literal>.</literal> 具有相同的优先级</title>
+     <programlisting role="php">
+<![CDATA[
+<?php
+$x = 4;
+// this line might result in unexpected output:
+echo "x minus one equals " . $x-1 . ", or so I hope\n";
+// because it is evaluated like this line:
+echo (("x minus one equals " . $x) - 1) . ", or so I hope\n";
+// the desired precedence can be enforced by using parentheses:
+echo "x minus one equals " . ($x-1) . ", or so I hope\n";
+?>
+]]>
+     </programlisting>
+     &example.outputs;
+     <screen>
+<![CDATA[
+-1, or so I hope
+-1, or so I hope
+x minus one equals 3, or so I hope
+]]>
+     </screen>
+    </example>
    </para>
    <note>
     <para>
@@ -350,17 +383,19 @@ $array[$i] = $i++; // may set either index 1 or 2
       </row>
       <row>
        <entry>$a ** $b</entry>
-       <entry>Exponentiation</entry>
-       <entry>Result of raising <varname>$a</varname> to the <varname>$b</varname>'th power. Introduced in PHP 5.6.</entry>
+       <entry>求幂</entry>
+       <entry> <varname>$a</varname> 的 <varname>$b</varname>次方的值. PHP 5.6版本中引入.</entry>
       </row>
      </tbody>
     </tgroup>
    </table>
    <simpara>
     除法运算符总是返回浮点数。只有在下列情况例外：两个操作数都是整数（或字符串转换成的整数）并且正好能整除，这时它返回一个整数。
+    整数除法可参考 <function>intdiv</function>。
    </simpara>
    <simpara>
-    取模运算符的操作数在运算之前都会转换成整数（除去小数部分）。
+    取模运算符的操作数在运算之前都会转换成整数（除去小数部分）。 浮点数取模可参考
+    <function>fmod</function>。
    </simpara>
    <para>
     取模运算符 <literal>%</literal> 的结果和被除数的符号（正负号）相同。即
@@ -461,28 +496,43 @@ print "$b\n"; // 也输出 4，因为 $b 是 $a 的引用，因此也被改变
      </example>
     </para>
     <para>
-     自 PHP 5 起，<link linkend="language.oop5.basic.new">new</link>
-     运算符自动返回一个引用，因此再对
-     <link linkend="language.oop5.basic.new">new</link>
-     的结果进行引用赋值在 PHP 5.3 以及以后版本中会发出一条
-     <constant>E_DEPRECATED</constant> 错误信息，在之前版本会发出一条
-     <constant>E_STRICT</constant> 错误信息。
+     The <link linkend="language.oop5.basic.new">new</link>
+     运算符自动返回一个引用，因此在 PHP 7.0.0及之后的版本中禁止对
+     <link linkend="language.oop5.basic.new">new</link> 的结果进行引用赋值；
+     PHP 5.3.0 及之后的版本则发出一条
+     <constant>E_DEPRECATED</constant> 错误信息；在更早的版本中发出的是
+     <constant>E_STRICT</constant>。
     </para>
     <para>
-     例如以下代码将产生警告：
+     例如以下代码将产生错误或警告：
      <informalexample>
-      <programlisting role="php">
+         <programlisting role="php">
 <![CDATA[
 <?php
 class C {}
 
-/* The following line generates the following error message:
- * Deprecated: Assigning the return value of new by reference is deprecated in...
- */
 $o = &new C;
 ?>
 ]]>
       </programlisting>
+      &example.outputs.7;
+      <screen>
+<![CDATA[
+Parse error: syntax error, unexpected 'new' (T_NEW) in …
+]]>
+      </screen>
+      &example.outputs.53;
+      <screen>
+<![CDATA[
+Deprecated: Assigning the return value of new by reference is deprecated in …
+]]>
+      </screen>
+      &example.outputs.5;
+      <screen>
+<![CDATA[
+Strict Standards: Assigning the return value of new by reference is deprecated in …
+]]>
+      </screen>
      </informalexample>
     </para>
     <para>
@@ -1116,11 +1166,12 @@ Expression: 0 = -4 << 62
    </para>
    <warning>
     <para>
-     Shifting integers by values greater than or equal to the system long
-     integer width results in undefined behavior. In other words, don't shift
-     more than 31 bits on a 32-bit system, and don't shift more than 63 bits on
-     a 64-bit system.
-</para>
+     Prior to PHP 7.0, shifting integers by values greater than or equal to the
+     system long integer width, or by negative numbers, results in undefined
+     behavior. In other words, if you're using PHP 5.x, don't shift more than 31
+     bits on a 32-bit system, and don't shift more than 63 bits on 64-bit
+     system. 
+    </para>
     <para>
      使用 <link linkend="book.gmp">gmp</link> 扩展对超出 <literal>PHP_INT_MAX</literal> 的数值来进行位操作。
     </para>
@@ -1201,18 +1252,11 @@ Expression: 0 = -4 << 62
       </row>
       <row>
        <entry>$a &lt;=&gt; $b</entry>
-       <entry>太空船运算符（组合比较符）</entry>
+       <entry>结合比较运算符</entry>
        <entry>
-        当<varname>$a</varname>小于、等于、大于<varname>$b</varname>时
+        当<varname>$a</varname>小于、等于、大于than <varname>$b</varname>时
         分别返回一个小于、等于、大于0的<type>integer</type> 值。
         PHP7开始提供.
-       </entry>
-      </row>
-      <row>
-       <entry>$a ?? $b ?? $c</entry>
-       <entry>NULL 合并操作符</entry>
-       <entry>
-        从左往右第一个存在且不为 &null; 的操作数。如果都没有定义且不为 &null;，则返回 &null;。PHP7开始提供。
        </entry>
       </row>
      </tbody>
@@ -1355,6 +1399,25 @@ echo $a <=> $b; // 1
      </tbody>
     </tgroup>
    </table>
+
+   <para>
+    <example>
+     <title>Boolean/null comparison</title>
+     <programlisting role="php">
+<![CDATA[
+<?php
+// Bool and null are compared as bool always
+var_dump(1 == TRUE);  // TRUE - same as (bool)1 == TRUE
+var_dump(0 == FALSE); // TRUE - same as (bool)0 == FALSE
+var_dump(100 < TRUE); // FALSE - same as (bool)100 < TRUE
+var_dump(-10 < FALSE);// FALSE - same as (bool)-10 < FALSE
+var_dump(min(-100, -10, NULL, 10, 100)); // NULL - (bool)NULL < (bool)-100 is FALSE < TRUE
+?>
+]]>
+     </programlisting>
+    </example>
+   </para>
+   
    <para>
     <example>
      <title>标准数组比较代码</title>
@@ -1385,39 +1448,7 @@ function standard_array_compare($op1, $op2)
      </programlisting>
     </example>
    </para>
-
-
-   <para>
-    <example>
-     <title>Transcription of standard array comparison</title>
-     <programlisting role="php">
-<![CDATA[
-<?php
-// Arrays are compared like this with standard comparison operators
-function standard_array_compare($op1, $op2)
-{
-    if (count($op1) < count($op2)) {
-        return -1; // $op1 < $op2
-    } elseif (count($op1) > count($op2)) {
-        return 1; // $op1 > $op2
-    }
-    foreach ($op1 as $key => $val) {
-        if (!array_key_exists($key, $op2)) {
-            return null; // uncomparable
-        } elseif ($val < $op2[$key]) {
-            return -1;
-        } elseif ($val > $op2[$key]) {
-            return 1;
-        }
-    }
-    return 0; // $op1 == $op2
-}
-?>
-]]>
-     </programlisting>
-    </example>
-   </para>
-
+   
    <para>
     参见 <function>strcasecmp</function>，<function>strcmp</function>，<link
     linkend="language.operators.array">数组运算符</link>和<link linkend="language.types">类型</link>章节。
@@ -1444,10 +1475,10 @@ function standard_array_compare($op1, $op2)
       <programlisting role="php">
 <![CDATA[
 <?php
-// Example usage for: Ternary Operator
+// 三元运算符的例子
 $action = (empty($_POST['action'])) ? 'default' : $_POST['action'];
 
-// The above is identical to this if/else statement
+// 以上等同于以下的  if/else 语句
 if (empty($_POST['action'])) {
     $action = 'default';
 } else {
@@ -1505,7 +1536,67 @@ echo ((true ? 'true' : 'false') ? 't' : 'f');
      </para>
     </note>
    </sect2>
+   
+   <sect2 xml:id="language.operators.comparison.coalesce">
+    <title>NULL 合并运算符</title>
+    <para>
+     PHP 7 开始存在 "??" （NULL 合并）运算符。
+     <example>
+      <title>设置默认值</title>
+      <programlisting role="php">
+<![CDATA[
+<?php
+// NULL 合并运算符的例子
+$action = $_POST['action'] ?? 'default';
 
+// 以上例子等同于于以下 if/else 语句
+if (isset($_POST['action'])) {
+    $action = $_POST['action'];
+} else {
+    $action = 'default';
+}
+
+?>
+]]>
+      </programlisting>
+     </example>
+     当 <replaceable>expr1</replaceable> 为  &null;，表达式 <literal>(expr1) ?? (expr2)</literal> 等同于
+     <replaceable>expr2</replaceable>，否则为 <replaceable>expr1</replaceable>。
+    </para>
+    <para>
+     尤其要注意，当不存在左侧的值时，此运算符也和 <function>isset</function> 一样不会产生警告。
+     对于 array 键尤其有用。
+    </para>
+    <note>
+     <simpara>
+      请注意：NULL 合并运算符是一个表达式，产生的也是表达式结果，而不是变量。
+      返回引用变量时需要强调这一点。 
+      因此，在返回引用的函数里就无法使用这样的语句：<literal>return $foo ?? $bar;</literal>，还会提示警告。
+     </simpara>
+    </note>
+    <note>
+     <para>
+      请注意，NULL 合并运算符支持简单的嵌套：
+      <example>
+       <title>嵌套 NULL 合并运算符</title>
+       <programlisting role="php">
+<![CDATA[
+<?php
+
+$foo = null;
+$bar = null;
+$baz = 1;
+$qux = 2;
+
+echo $foo ?? $bar ?? $baz ?? $qux; // 输出 1
+
+?>
+]]>
+       </programlisting>
+      </example>
+     </para>
+    </note>
+   </sect2> 
   </sect1>
 
   <sect1 xml:id="language.operators.errorcontrol">
@@ -1840,7 +1931,7 @@ bool(true)
   <sect1 xml:id="language.operators.string">
    <title>字符串运算符</title>
    <simpara>
-    有两个字符串（<type>string</type>）运算符。第一个是连接运算符（“.”），它返回其左右参数连接后的字符串。第二个是连接赋值运算符（“.=”），它将右边参数附加到左边的参数之后。更多信息见<link
+    有两个字符串（<type>string</type>）运算符。第一个是连接运算符（“.”），它返回其左右参数连接后的字符串。第二个是连接赋值运算符（“<literal>.=</literal>”），它将右边参数附加到左边的参数之后。更多信息见<link
     linkend="language.operators.assignment">赋值运算符</link>。
    </simpara>
 
