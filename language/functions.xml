@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: b896533ae5029ca337205d171a73d3cc876bb735 Maintainer: verdana Status: ready -->
+<!-- EN-Revision: 9268006bcf989f31baeaa9035e4ef7cfc7690c28 Maintainer: verdana Status: ready -->
 <!-- CREDITS: Gregory, dallas -->
  <chapter xml:id="language.functions" xmlns="http://docbook.org/ns/docbook">
   <title>函数</title>
@@ -33,7 +33,7 @@ function foo($arg_1, $arg_2, /* ..., */ $arg_n)
     linkend="language.oop5.basic.class">类</link>定义。
    </simpara>
    <para>
-    函数名和 PHP 中的其它标识符命名规则相同。有效的函数名以字母或下划线打头，后面跟字母，数字或下划线。可以用正则表达式表示为：<literal>[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*</literal>。
+    函数名和 PHP 中的其它标识符命名规则相同。有效的函数名以字母或下划线打头，后面跟字母，数字或下划线。可以用正则表达式表示为：<code>^[a-zA-Z_\x80-\xff][a-zA-Z0-9_\x80-\xff]*$</code>。
    </para>
    &tip.userlandnaming;
    <simpara>
@@ -121,7 +121,7 @@ bar();
    </simpara>
    <note>
     <simpara>
-     函数名是大小写无关的，不过在调用函数的时候，使用其在定义时相同的形式是个好习惯。
+     从 <literal>A</literal> 到 <literal>Z</literal> 的 ASCII 函数名是大小写无关的，不过在调用函数的时候，使用其在定义时相同的形式是个好习惯。
     </simpara>
    </note>
    
@@ -443,6 +443,20 @@ Making a bowl of acidophilus raspberry.
          </entry>
          <entry>PHP 7.0.0</entry>
         </row>
+        <row>
+         <entry><literal>iterable</literal></entry>
+         <entry>
+          The parameter must be either an <type>array</type> or an &instanceof; <classname>Traversable</classname>.
+         </entry>
+         <entry>PHP 7.1.0</entry>
+        </row>
+        <row>
+         <entry><literal>object</literal></entry>
+         <entry>
+          The parameter must be an <type>object</type>.
+         </entry>
+         <entry>PHP 7.2.0</entry>
+        </row>
        </tbody>
       </tgroup>
      </informaltable>
@@ -549,6 +563,36 @@ Stack trace:
       </screen>
      </example>
 
+     <example>
+      <title>Typed pass-by-reference Parameters</title>
+      <simpara>
+       Declared types of reference parameters are checked on function entry, but
+       not when the function returns, so after the function had returned, the
+       argument's type may have changed.
+      </simpara>
+      <programlisting role="php">
+<![CDATA[
+<?php
+function array_baz(array &$param)
+{
+    $param = 1;
+}
+$var = [];
+array_baz($var);
+var_dump($var);
+array_baz($var);
+?>
+]]>
+      </programlisting>
+      &example.outputs.similar;
+      <screen>
+<![CDATA[
+int(1)
+
+Fatal error: Uncaught TypeError: Argument 1 passed to array_baz() must be of the type array, int given, called in %s on line %d
+]]>
+      </screen>
+     </example>
      <example>
       <title>Nullable type declaration</title>
       <programlisting role="php">
@@ -964,6 +1008,13 @@ $newref =& returns_reference();
     也会影响返回值类型声明。在默认的弱模式中，如果返回值与返回值的类型不一致，则会被强制转换为返回值声明的类型。在强模式中，返回值的类型必须正确，否则将会抛出一个<classname>TypeError</classname>异常.
    </para>
 
+    
+   <para>
+    As of PHP 7.1.0, return values can be marked as nullable by prefixing the
+    type name with a question mark (<literal>?</literal>). This signifies that
+    the function returns either the specified type or &null;.
+   </para>
+    
    <note>
     <para>
      当覆盖一个父类方法时，子类方法的返回值类型声明必须与父类一致。如果父类方法没有定义返回类型，那么子类方法可以定义任意的返回值类型声明。
@@ -1047,6 +1098,23 @@ object(C)#1 (0) {
 }
 ]]>
       </screen>
+     </example>
+
+     <example>
+      <title>Nullable return type declaration (as of PHP 7.1.0)</title>
+      <programlisting role="php">
+<![CDATA[
+<?php
+function get_item(): ?string {
+    if (isset($_GET['item'])) {
+        return $_GET['item'];
+    } else {
+        return null;
+    }
+}
+?>
+]]>
+      </programlisting>
      </example>
     </sect3>
    </sect2> 
@@ -1238,8 +1306,8 @@ $func(); // prints "bar" as of PHP 7.0.0; prior, it raised a fatal error
       <link linkend="ref.image">image</link> 函数中的
       <function>imagecreatetruecolor</function>，需要在编译 PHP 的时候加上
       <productname>GD</productname> 的支持。或者，要使用
-      <function>mysql_connect</function> 函数，就需要在编译 PHP 的时候加上
-      <link linkend="ref.mysql">MySQL</link> 支持。有很多核心函数已包含在每个版本的
+      <function>mysqli_connect</function> 函数，就需要在编译 PHP 的时候加上
+      <link linkend="book.mysqli">MySQLi</link> 支持。有很多核心函数已包含在每个版本的
       PHP 中如<link linkend="ref.strings">字符串</link>和<link
       linkend="ref.var">变量</link>函数。调用
       <function>phpinfo</function> 或者 <function>get_loaded_extensions</function>
@@ -1626,6 +1694,170 @@ Warning: Cannot bind an instance to a static closure in %s on line %d
 
   </sect1>
 
+  <sect1 xml:id="functions.arrow">
+   <title>Arrow Functions</title>
+
+   <simpara>
+    Arrow functions were introduced in PHP 7.4 as a more concise syntax for 
+    <link linkend="functions.anonymous">anonymous functions</link>.
+   </simpara>
+   <simpara>
+    Both anonymous functions and arrow functions are implemented using the 
+    <link linkend="class.closure"><classname>Closure</classname></link> class.
+   </simpara>
+
+   <simpara>
+    Arrow functions have the basic form 
+    <code>fn (argument_list) =&gt; expr</code>.
+   </simpara>
+
+   <simpara>
+    Arrow functions support the same features as 
+    <link linkend="functions.anonymous">anonymous functions</link>, 
+    except that using variables from the parent scope is always automatic.
+   </simpara>
+
+   <simpara>
+    When a variable used in the expression is defined in the parent scope 
+    it will be implicitly captured by-value.
+    In the following example, the functions <varname>$fn1</varname> and 
+    <varname>$fn2</varname> behave the same way. 
+   </simpara>
+
+   <para>
+    <example>
+     <title>Arrow functions capture variables by value automatically</title>
+     <programlisting role="php">
+<![CDATA[
+<?php
+
+$y = 1;
+ 
+$fn1 = fn($x) => $x + $y;
+// equivalent to using $y by value:
+$fn2 = function ($x) use ($y) {
+    return $x + $y;
+};
+
+var_export($fn1(3));
+?>
+]]>
+     </programlisting>
+     &example.outputs;
+     <screen>
+<![CDATA[
+4
+]]>
+      </screen>
+    </example>
+   </para>
+   <simpara>
+    This also works if the arrow functions are nested: 
+   </simpara>
+   <para>
+    <example>
+     <title>Arrow functions capture variables by value automatically, even when nested</title>
+     <programlisting role="php">
+<![CDATA[
+<?php
+
+$z = 1;
+$fn = fn($x) => fn($y) => $x * $y + $z;
+// Outputs 51
+var_export($fn(5)(10));
+?>
+]]>
+     </programlisting>
+    </example>
+   </para>
+   <simpara>
+    Similarly to anonymous functions, 
+    the arrow function syntax allows arbitrary function signatures,
+    including parameter and return types, default values, variadics,
+    as well as by-reference passing and returning.
+    All of the following are valid examples of arrow functions: 
+   </simpara>
+   <para>
+    <example>
+     <title>Examples of arrow functions</title>
+     <programlisting role="php">
+<![CDATA[
+<?php
+
+fn(array $x) => $x;
+static fn(): int => $x;
+fn($x = 42) => $x;
+fn(&$x) => $x;
+fn&($x) => $x;
+fn($x, ...$rest) => $rest;
+
+?>
+]]>
+     </programlisting>
+    </example>
+   </para>
+   <simpara>
+    Arrow functions use by-value variable binding.
+    This is roughly equivalent to performing a <code>use($x)</code> for every 
+    variable <varname>$x</varname> used inside the arrow function.
+    A by-value binding means that it is not possible to modify any values 
+    from the outer scope. 
+    <link linkend="functions.anonymous">Anonymous functions</link> 
+    can be used instead for by-ref bindings.
+   </simpara>
+   <para>
+    <example>
+     <title>Values from the outer scope cannot be modified by arrow functions</title>
+     <programlisting role="php">
+<![CDATA[
+<?php
+
+$x = 1;
+$fn = fn() => $x++; // Has no effect
+$fn();
+var_export($x);  // Outputs 1
+
+?>
+]]>
+     </programlisting>
+    </example>
+   </para>
+   
+   <sect2 role="changelog">
+    &reftitle.changelog;
+    <para>
+     <informaltable>
+      <tgroup cols="2">
+       <thead>
+        <row>
+         <entry>&Version;</entry>
+         <entry>&Description;</entry>
+        </row>
+       </thead>
+       <tbody>
+        <row>
+         <entry>7.4.0</entry>
+         <entry>
+          Arrow functions became available.
+         </entry>
+        </row>
+       </tbody>
+      </tgroup>
+     </informaltable>
+    </para>
+   </sect2>
+
+   <sect2 role="notes">
+    &reftitle.notes;
+    <note>
+     <simpara>
+      It is possible to use <function>func_num_args</function>,
+      <function>func_get_arg</function>, and <function>func_get_args</function>
+      from within an arrow function.
+     </simpara>
+    </note>
+   </sect2>
+  </sect1>
  </chapter>
 
 <!-- Keep this comment at the end of the file
