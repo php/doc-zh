@@ -6,12 +6,12 @@
   <title>&php.ini; 核心配置选项说明</title>
   <para>
    该列表只包含核心的 &php.ini;
-   配置选项。扩展的配置选项在各个扩展的文档页面分别被描述。有关 session 的选项可以在
+   配置选项。扩展的配置选项在各个扩展的文档页面分别被描述。比如，有关 session 的选项可以在
    <link linkend="session.configuration">sessions 页面</link>找到。
   </para>
   <note>
    <para>
-    The defaults listed here are used when &php.ini; is not loaded; the values for the production and development &php.ini; may vary.
+    以下列出了未设置 &php.ini; 时的默认值；开发环境和生产环境的 &php.ini; 值可能会有所不同。
    </para>
   </note>
   
@@ -52,7 +52,10 @@
         <entry><link linkend="ini.serialize-precision">serialize_precision</link></entry>
         <entry>"17"</entry>
         <entry>PHP_INI_ALL</entry>
-        <entry>在 PHP 5.3.5以前，默认值为 100 </entry>
+        <entry>
+        在 PHP 5.3.5以前，默认值为 100 
+        在 PHP 7.1.0以前，默认值为 17 
+        </entry>
        </row>
        <row>
         <entry><link linkend="ini.y2k-compliance">y2k_compliance</link></entry>
@@ -95,6 +98,12 @@
         <entry>"2"</entry>
         <entry>PHP_INI_SYSTEM</entry>
         <entry> PHP 7.1.0 起可用</entry>
+       </row>
+       <row>
+        <entry><link linkend="ini.zend.exception-ignore-args">zend.exception_ignore_args</link></entry>
+        <entry>"0"</entry>
+        <entry>PHP_INI_ALL</entry>
+        <entry>PHP 7.4.0 起可用</entry>
        </row>
        <row>
         <entry><link linkend="ini.zend.multibyte">zend.multibyte</link></entry>
@@ -192,7 +201,7 @@
        </simpara>
        <para>
         <table>
-         <title>Changelog for <literal>asp_tags</literal></title>
+         <title><literal>asp_tags</literal> 变更历史</title>
          <tgroup cols="2">
           <thead>
            <row>
@@ -272,7 +281,7 @@
         </para>
        <para>
         <table>
-         <title>Changelog for <literal>allow_call_time_pass_reference</literal></title>
+         <title><literal>allow_call_time_pass_reference</literal> 变更历史</title>
          <tgroup cols="2">
           <thead>
            <row>
@@ -343,16 +352,14 @@
      </term>
      <listitem>
       <para>
-       本指令允许你基于<link linkend="security">安全</link>原因禁止某些函数。接受逗号分隔的函数名列表作为参数。
-       disable_functions 不受<link linkend="ini.safe-mode">安全模式</link>的影响。
+       本指令可用于禁止某些函数。接受逗号分隔的函数名列表作为参数。
       </para>
        <para>
-        Only <link linkend="functions.internal">internal functions</link> can
-        be disabled using this directive. <link linkend="functions.user-defined">User-defined functions</link>
-        are unaffected.
-       </para>
+        此指令仅能禁用 <link linkend="functions.internal">内置函数</link>。
+        不能影响<link linkend="functions.user-defined">用户自定义函数</link>。
+      </para>
       <para>
-       本指令只能设置在 &php.ini; 中。例如不能将其设置在 &httpd.conf;。
+       本指令只能设置在 &php.ini; 中。例如，无法在 &httpd.conf; 中设置。
       </para>
      </listitem>
     </varlistentry>
@@ -364,9 +371,7 @@
      </term>
      <listitem>
       <simpara>
-       本指令可以使你出于<link
-       linkend="security">安全</link>的理由禁用某些类。用逗号分隔类名。disable_classes
-       不受<link linkend="ini.safe-mode">安全模式</link>的影响。
+       本指令可以使你禁用某些类。用逗号分隔类名。
       </simpara>
       <simpara>
        本指令只能设置在 &php.ini; 中。例如不能将其设置在 &httpd.conf;。
@@ -432,6 +437,18 @@
       </term>
       <listitem>
        <para>
+       </para>
+      </listitem>
+     </varlistentry>
+     
+     <varlistentry xml:id="ini.zend.exception-ignore-args">
+      <term>
+       <parameter>zend.exception_ignore_args</parameter>
+       <type>boolean</type>
+      </term>
+      <listitem>
+       <para>
+        Excludes arguments from stack traces generated from exceptions.
        </para>
       </listitem>
      </varlistentry>
@@ -612,6 +629,12 @@
       </tbody>
      </tgroup>
     </table>
+    <note>
+     <para>
+      Using <link linkend="ini.open-basedir">open_basedir</link> will
+      <emphasis>disable</emphasis> the realpath cache.
+     </para>
+    </note>
    </para>
    &ini.descriptions.title;
    <para>
@@ -1412,9 +1435,9 @@
         PHP considers each entry in the include path separately when looking for
         files to include. It will check the first path, and if it doesn't find
         it, check the next path, until it either locates the included file or
-        returns with a 
-        <link linkend="errorfunc.constants.errorlevels.e-warning">warning</link>
-        or an <link linkend="errorfunc.constants.errorlevels.e-error">error</link>. 
+        returns with an
+        <constant>E_WARNING</constant>
+        or an <constant>E_ERROR</constant>. 
         You may modify or set your include path at runtime using
         <function>set_include_path</function>.
        </para>
@@ -1536,6 +1559,12 @@ include_path = ".:${USER}/pear/php"
          <function>ini_set</function>. When listing several directories, you
          can use the <constant>PATH_SEPARATOR</constant> constant as a separator
          regardless of the operating system.
+        </para>
+       </note>
+       <note>
+        <para>
+         Using open_basedir will set <link linkend="ini.realpath-cache-size">realpath_cache_size</link>
+         to <literal>0</literal> and thus <emphasis>disable</emphasis> the realpath cache.
         </para>
        </note>
       </listitem>
