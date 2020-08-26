@@ -1,119 +1,201 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: Avenger Status: ready -->
-  <refentry xml:id="function.ftp-nb-get" xmlns="http://docbook.org/ns/docbook">
-   <refnamediv>
-    <refname>ftp_nb_get</refname>
-    <refpurpose>从 FTP 服务器上获取文件并写入本地文件（non-blocking）</refpurpose>
-   </refnamediv>
-   <refsect1>
-    <title>说明</title>
-    <methodsynopsis>
-     <type>bool</type><methodname>ftp_nb_get</methodname>
-     <methodparam><type>resource</type><parameter>ftp_stream</parameter></methodparam>
-     <methodparam><type>string</type><parameter>local_file</parameter></methodparam>
-     <methodparam><type>string</type><parameter>remote_file</parameter></methodparam>
-     <methodparam><type>int</type><parameter>mode</parameter></methodparam>
-     <methodparam choice="opt"><type>int</type><parameter>resumepos</parameter></methodparam>
-    </methodsynopsis>
-    <para>
-     <function>ftp_nb_get</function> 函数用来获取参数 <parameter>remote_file</parameter>
-     指定的的远程文件，并保存到由参数 <parameter>local_file</parameter>
-     指定的本地文件。传输模式参数
-     <parameter>mode</parameter> 只能为 <constant>FTP_ASCII</constant> (文本模式) 或 <constant>FTP_BINARY</constant>
-     (二进制模式) 两种。与 <function>ftp_get</function>
-     函数不同的是，此函数上传文件的时候采用的是异步传输模式，也就意味着在文件传送的过程中，你的程序可以继续干其它的事情。
-    </para>
-    <para>
-     返回 <constant>FTP_FAILED</constant>，<constant>FTP_FINISHED</constant>
-     或 <constant>FTP_MOREDATA</constant>。
-    </para>
-    <para>
-     <example>
-      <title><function>ftp_nb_get</function> 实例</title>
-      <programlisting role="php">
+<!-- EN-Revision: ba38a95b6a5392bf8562b8148426864bdacd5ef1 Maintainer: Avenger Status: ready -->
+<refentry xml:id="function.ftp-nb-get" xmlns="http://docbook.org/ns/docbook">
+ <refnamediv>
+  <refname>ftp_nb_get</refname>
+  <refpurpose>从 FTP 服务器上获取文件并写入本地文件（non-blocking）</refpurpose>
+ </refnamediv>
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <type>int</type><methodname>ftp_nb_get</methodname>
+   <methodparam><type>resource</type><parameter>ftp_stream</parameter></methodparam>
+   <methodparam><type>string</type><parameter>local_file</parameter></methodparam>
+   <methodparam><type>string</type><parameter>remote_file</parameter></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>mode</parameter><initializer><constant>FTP_BINARY</constant></initializer></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>resumepos</parameter><initializer>0</initializer></methodparam>
+  </methodsynopsis>
+  <para>
+   <function>ftp_nb_get</function> 在 FTP 服务器上获取指定的远程文件，并保存到本地。
+  </para>
+  <para>
+    和 <function>ftp_get</function> 不同之处，在于此函数是通过异步的方式来获取文件，这意味着，你的程序可以在下载文件的同时，同步进行其它操作。
+  </para>
+ </refsect1>
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>ftp_stream</parameter></term>
+     <listitem>
+      <para>
+        FTP 连接句柄。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>local_file</parameter></term>
+     <listitem>
+      <para>
+        保存到的本地文件路径（如果文件已存在会被覆盖）。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>remote_file</parameter></term>
+     <listitem>
+      <para>
+        远程文件路径。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>mode</parameter></term>
+     <listitem>
+      <para>
+        指定传输模式。必须是 <constant>FTP_ASCII</constant> 或 <constant>FTP_BINARY</constant>。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>resumepos</parameter></term>
+     <listitem>
+      <para>开始下载文件的起始位置。</para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   返回 <constant>FTP_FAILED</constant> 或 <constant>FTP_FINISHED</constant>
+   或 <constant>FTP_MOREDATA</constant>。
+  </para>
+ </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <informaltable>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>&Version;</entry>
+      <entry>&Description;</entry>
+     </row>
+    </thead>
+    <tbody>
+     <row>
+      <entry>7.3.0</entry>
+      <entry>
+       <parameter>mode</parameter> 参数变为可选，之前是强制性的。
+      </entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </informaltable>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title><function>ftp_nb_get</function> 示例</title>
+    <programlisting role="php">
 <![CDATA[
 <?php
-// 开始下载
+
+// 初始化
 $ret = ftp_nb_get($my_connection, "test", "README", FTP_BINARY);
 while ($ret == FTP_MOREDATA) {
-
-   // 这里可以插入其它代码
+   
+   // 可以同步干其它事
    echo ".";
 
    // 继续下载...
-   $ret = ftp_nb_continue ($my_connection);
+   $ret = ftp_nb_continue($my_connection);
 }
 if ($ret != FTP_FINISHED) {
-   echo "下载中出错...";
+   echo "下载文件出错...";
    exit(1);
 }
 ?>
 ]]>
-      </programlisting>
-     </example>
-     <example>
-      <title>使用 <function>ftp_nb_get</function> 函数断线续传</title>
-      <programlisting role="php">
+    </programlisting>
+   </example>
+   <example>
+    <title>通过 <function>ftp_nb_get</function> 恢复下载一个文件</title>
+    <programlisting role="php">
 <![CDATA[
 <?php
-// 开始
-$ret = ftp_nb_get ($my_connection, "test", "README", FTP_BINARY,
+
+// 初始化 
+$ret = ftp_nb_get($my_connection, "test", "README", FTP_BINARY, 
                       filesize("test"));
-// 或: $ret = ftp_nb_get ($my_connection, "test", "README",
+// OR: $ret = ftp_nb_get($my_connection, "test", "README", 
 //                           FTP_BINARY, FTP_AUTORESUME);
 while ($ret == FTP_MOREDATA) {
-
-   // 可以插入其它代码
+   
+   // 做你爱做的事
    echo ".";
 
-   // 继续传送...
-   $ret = ftp_nb_continue ($my_connection);
+   // 继续下载Ing...
+   $ret = ftp_nb_continue($my_connection);
 }
 if ($ret != FTP_FINISHED) {
-   echo "下载出错...";
+   echo "下载文件出错...";
    exit(1);
 }
 ?>
 ]]>
-      </programlisting>
-     </example>
-     <example>
-      <title>
-       用 <function>ftp_nb_get</function> 在 100 的位置断线续传并存为 "newfile"
-      </title>
-      <programlisting role="php">
+    </programlisting>
+   </example>
+   <example>
+    <title>
+      使用 <function>ftp_nb_get</function> 从指定位置恢复下载文件
+    </title>
+    <programlisting role="php">
 <![CDATA[
-// 禁止自动搜寻
-ftp_set_option ($my_connection, FTP_AUTOSEEK, FALSE);
+<?php
 
-// 开始
-$ret = ftp_nb_get ($my_connection, "newfile", "README", FTP_BINARY, 100);
+// 禁止 Autoseek
+ftp_set_option($my_connection, FTP_AUTOSEEK, false);
+
+// 初始化
+$ret = ftp_nb_get($my_connection, "newfile", "README", FTP_BINARY, 100);
 while ($ret == FTP_MOREDATA) {
 
-   ...
-
+   /* ... */
+   
    // 继续下载...
-   $ret = ftp_nb_continue ($my_connection);
+   $ret = ftp_nb_continue($my_connection);
 }
+?>
 ]]>
-      </programlisting>
-     </example>
-    </para>
-    <para>
-     在上边的例子中，<filename>"newfile"</filename> 文件比服务器上的文件
-     <filename>"README"</filename> 要小 100 字节。这是因为我们是从文件的偏移量 100
-     处开始读取的，如果没有禁止 <constant>FTP_AUTOSEEK</constant>，则
-     <filename>"newfile"</filename> 的前 100
-     字节将会是 <literal>'\0'</literal>。
-    </para>
-    <para>
-     参见 <function>ftp_nb_fget</function>，<function>ftp_nb_continue</function>，<function>ftp_get</function>
-     和 <function>ftp_fget</function>。
-    </para>
-   </refsect1>
-  </refentry>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+    在上面的示例中，<filename>newfile</filename> 会比 FTP 服务器上的
+    <filename>README</filename> 文件小 100 bytes，因为开始下载的时候设置了偏移量为 100。如果我们不禁止
+    <constant>FTP_AUTOSEEK</constant>，则 <filename>newfile</filename> 文件前面的 100 bytes 会变成
+    <literal>'\0'</literal>。
+  </para>
+ </refsect1>
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>ftp_nb_fget</function></member>
+    <member><function>ftp_nb_continue</function></member>
+    <member><function>ftp_fget</function></member>
+    <member><function>ftp_get</function></member>
+   </simplelist>
+  </para>
+ </refsect1>
+</refentry>
 
 <!-- Keep this comment at the end of the file
 Local variables:
