@@ -1,0 +1,331 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision: 348018 $ -->
+<!-- EN-Revision: cd0727de733cbc3d49e9ee7a097020eebf6ff8b8 Maintainer: avenger Status: partial -->
+<!-- Reviewed: no -->
+
+<sect1 xml:id="migration74.incompatible" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <title>不向后兼容的变更</title>
+
+ <sect2 xml:id="migration74.incompatible.core">
+  <title>PHP 核心中不向后兼容的变更</title>
+
+  <sect3 xml:id="migration74.incompatible.core.non-array-access">
+   <title>以数组形式访问非数组</title>
+
+   <para>
+    尝试以数组方式访问 <type>null</type>，<type>bool</type>，
+    <type>int</type>，<type>float</type> 或 <type>resource</type>
+    （例如 <literal>$null["key"]</literal>）将会抛出 notice 通知。
+   </para>
+  </sect3>
+
+  <sect3 xml:id="migration74.incompatible.core.get-declared-classes">
+   <title><function>get_declared_classes</function> 函数</title>
+
+   <para>
+    <function>get_declared_classes</function>
+    函数将不再返回匿名的类，假如它们没有被实例化的话。
+   </para>
+  </sect3>
+
+  <sect3 xml:id="migration74.incompatible.core.fn">
+   <title><literal>fn</literal> 关键词</title>
+
+   <para>
+    <literal>fn</literal> 成为了保留关键词。需要特别注意，它不能再做为函数名或类名使用，但是仍然可以做为方法名和常量名存在。
+   </para>
+  </sect3>
+
+  <sect3 xml:id="migration74.incompatible.core.php-tag">
+   <title>文件尾部的 <literal>&lt;?php</literal> 标签</title>
+
+   <para>
+    文件尾部的 <literal>&lt;?php</literal>
+    标签（不包含空行）将会被解释成一个 PHP 头标签。Previously it was interpreted
+    either as a short opening tag followed by literal <literal>php</literal> and
+    resulted in a syntax error (with <literal>short_open_tag=1</literal>)
+    or was interpreted as a literal <literal>&lt;?php</literal> string
+    (with <literal>short_open_tag=0</literal>).
+   </para>
+  </sect3>
+
+  <sect3 xml:id="migration74.incompatible.core.stream-wrappers">
+   <title>Stream wrappers</title>
+
+   <para>
+    When using include/require on a stream,
+    <methodname>streamWrapper::stream_set_option</methodname>
+    will be invoked with the <constant>STREAM_OPTION_READ_BUFFER</constant> option.
+    Custom stream wrapper implementations may need to implement the
+    <methodname>streamWrapper::stream_set_option</methodname> method to
+    avoid a warning (always returning &false; is a sufficient implementation).
+   </para>
+  </sect3>
+
+  <sect3 xml:id="migration74.incompatible.core.serialization">
+   <title>Serialization 序列化</title>
+
+   <para>
+    序列化类型 <literal>o</literal> 被移除。因为它不是由 PHP
+    生成的，这可能会影响到之前项目中手动生成的序列化字符串。
+   </para>
+  </sect3>
+
+  <sect3 xml:id="migration74.incompatible.core.password-algorithm-constants">
+   <title>密码算法常量</title>
+
+   <para>
+    密码哈希算法标识符现在是可空字符串，而不再是整数。
+   </para>
+
+   <itemizedlist>
+    <listitem>
+     <simpara>
+      <constant>PASSWORD_DEFAULT</constant> 之前是 int 1; 现在是 &null;
+     </simpara>
+    </listitem>
+    <listitem>
+     <simpara>
+      <constant>PASSWORD_BCRYPT</constant> 之前是 int 1; 现在是 string '2y'
+     </simpara>
+    </listitem>
+    <listitem>
+     <simpara>
+      <constant>PASSWORD_ARGON2I</constant> 之前是 int 2; 现在是 string 'argon2i'
+     </simpara>
+    </listitem>
+    <listitem>
+     <simpara>
+      <constant>PASSWORD_ARGON2ID</constant> 之前是 int 3; 现在是 string 'argon2id'
+     </simpara>
+    </listitem>
+   </itemizedlist>
+
+   <para>
+    应用中如果正常使用了常量 PASSWORD_DEFAULT，PASSWORD_BCRYPT，PASSWORD_ARGON2I
+    和 PASSWORD_ARGON2ID 将不会受到影响。
+   </para>
+  </sect3>
+
+  <sect3 xml:id="migration74.incompatible.core.htmlentities">
+   <title><function>htmlentities</function> 函数</title>
+
+   <para>
+    <function>htmlentities</function> will now raise a notice
+    (instead of a strict standards warning) if it is used with
+    an encoding for which only basic entity substitution is supported,
+    in which case it is equivalent to <function>htmlspecialchars</function>.
+   </para>
+  </sect3>
+
+  <sect3 xml:id="migration74.incompatible.core.fread-fwrite">
+   <title><function>fread</function> and <function>fwrite</function> 函数</title>
+
+   <para>
+    <function>fread</function> 和 <function>fwrite</function>
+    在操作失败的时候会返回 &false;。之前的版本中会返回空字符串或 0。EAGAIN/EWOULDBLOCK 不视为故障。
+   </para>
+   <para>
+    这些函数现在也会在失败时发出 NOTICE 通知，例如当试图写入一个只读文件资源时。
+   </para>
+  </sect3>
+
+ </sect2>
+
+ <sect2 xml:id="migration74.incompatible.bcmath">
+  <title>BCMath Arbitrary Precision Mathematics</title>
+
+  <para>
+   BCMath functions will now warn if a non well-formed number is passed, such
+   as <literal>"32foo"</literal>. The argument will be interpreted as zero, as before.
+  </para>
+ </sect2>
+
+ <sect2 xml:id="migration74.incompatible.curl">
+  <title>CURL</title>
+
+  <para>
+   Attempting to serialize a <classname>CURLFile</classname> class will now
+   generate an exception. Previously the exception was only thrown on unserialization.
+  </para>
+  <para>
+   Using <constant>CURLPIPE_HTTP1</constant> is deprecated, and is no longer
+   supported as of cURL 7.62.0.
+  </para>
+  <para>
+   The <literal>$version</literal> parameter of <function>curl_version</function>
+   is deprecated. If any value not equal to the default <constant>CURLVERSION_NOW</constant>
+   is passed, a warning is raised and the parameter is ignored.
+  </para>
+ </sect2>
+
+ <sect2 xml:id="migration74.incompatible.datetime">
+  <title>Date and Time</title>
+
+  <para>
+   Calling <function>var_dump</function> or similar on a
+   <classname>DateTime</classname> or <classname>DateTimeImmutable</classname>
+   instance will no longer leave behind accessible properties on the object.
+  </para>
+  <para>
+   Comparison of <classname>DateInterval</classname> objects
+   (using <literal>==</literal>, <literal>&lt;</literal>, and so on) will now generate
+   a warning and always return &false;. Previously all <classname>DateInterval</classname>
+   objects were considered equal, unless they had properties.
+  </para>
+ </sect2>
+
+ <sect2 xml:id="migration74.incompatible.intl">
+  <title>Intl</title>
+
+  <para>
+   The default parameter value of <function>idn_to_ascii</function> and
+   <function>idn_to_utf8</function> is now <constant>INTL_IDNA_VARIANT_UTS46</constant>
+   instead of the deprecated <constant>INTL_IDNA_VARIANT_2003</constant>.
+  </para>
+ </sect2>
+
+ <sect2 xml:id="migration74.incompatible.mysqli">
+  <title>MySQLi</title>
+
+  <para>
+   The embedded server functionality has been removed. It was broken since
+   at least PHP 7.0.
+  </para>
+  <para>
+   The undocumented <literal>mysqli::$stat</literal> property has been removed
+   in favor of <methodname>mysqli::stat</methodname>.
+  </para>
+ </sect2>
+
+ <sect2 xml:id="migration74.incompatible.openssl">
+  <title>OpenSSL</title>
+
+  <para>
+   The <function>openssl_random_pseudo_bytes</function> function will now
+   throw an exception in error situations, similar to <function>random_bytes</function>.
+   In particular, an <classname>Error</classname> is thrown if the number of
+   requested bytes is less than or equal to zero, and an <classname>Exception</classname>
+   is thrown if sufficient randomness cannot be gathered.
+   The <literal>$crypto_strong output</literal> argument is guaranteed to always
+   be &true; if the function does not throw, so explicitly checking it is not necessary.
+  </para>
+ </sect2>
+
+ <sect2 xml:id="migration74.incompatible.pcre">
+  <title>Regular Expressions (Perl-Compatible)</title>
+
+  <para>
+   When <constant>PREG_UNMATCHED_AS_NULL</constant> mode is used, trailing
+   unmatched capturing groups will now also be set to &null; (or
+   <literal>[null, -1]</literal> if offset capture is enabled).
+   This means that the size of the <literal>$matches</literal> will always be the same.
+  </para>
+ </sect2>
+
+ <sect2 xml:id="migration74.incompatible.pdo">
+  <title>PHP Data Objects</title>
+
+  <para>
+   Attempting to serialize a <classname>PDO</classname> or
+   <classname>PDOStatement</classname> instance will now generate
+   an <classname>Exception</classname> rather than a <classname>PDOException</classname>,
+   consistent with other internal classes which do not support serialization.
+  </para>
+ </sect2>
+
+ <sect2 xml:id="migration74.incompatible.reflection">
+  <title>Reflection</title>
+
+  <para>
+   Reflection objects will now generate an exception if an attempt is made
+   to serialize them. Serialization for reflection objects was never
+   supported and resulted in corrupted reflection objects. It has been
+   explicitly prohibited now.
+  </para>
+ </sect2>
+
+ <sect2 xml:id="migration74.incompatible.spl">
+  <title>Standard PHP Library (SPL)</title>
+
+  <para>
+   Calling <function>get_object_vars</function> on an <classname>ArrayObject</classname>
+   instance will now always return the properties of the <classname>ArrayObject</classname>
+   itself (or a subclass). Previously it returned the values of the wrapped
+   array/object unless the <constant>ArrayObject::STD_PROP_LIST</constant>
+   flag was specified.
+  </para>
+  <para>
+   Other affected operations are:
+  </para>
+  <itemizedlist>
+   <listitem>
+    <simpara>
+     <methodname>ReflectionObject::getProperties</methodname>
+    </simpara>
+   </listitem>
+   <listitem>
+    <simpara>
+     <function>reset</function>, <function>current</function>, etc.
+     Use <interfacename>Iterator</interfacename> methods instead.
+    </simpara>
+   </listitem>
+   <listitem>
+    <simpara>
+     Potentially others working on object properties as a list.
+    </simpara>
+   </listitem>
+  </itemizedlist>
+  <para>
+   <literal>(array)</literal> casts are not affected. They will continue to
+   return either the wrapped array, or the <classname>ArrayObject</classname>
+   properties, depending on whether the <constant>ArrayObject::STD_PROP_LIST</constant>
+   flag is used.
+  </para>
+  <para>
+   <methodname>SplPriorityQueue::setExtractFlags</methodname> will throw
+   an exception if zero is passed. Previously this would generate a recoverable
+   fatal error on the next extraction operation.
+  </para>
+  <para>
+   <classname>ArrayObject</classname>, <classname>ArrayIterator</classname>,
+   <classname>SplDoublyLinkedList</classname> and <classname>SplObjectStorage</classname>
+   now support the <literal>__serialize()</literal> and <literal>__unserialize()</literal>
+   mechanism in addition to the <interfacename>Serializable</interfacename> interface.
+   This means that serialization payloads created on older PHP versions can still be
+   unserialized, but new payloads created by PHP 7.4 will not be understood by older versions.
+  </para>
+ </sect2>
+
+ <sect2 xml:id="migration74.incompatible.tokenizer">
+  <title>Tokenizer</title>
+
+  <para>
+   <function>token_get_all</function> will now emit a
+   <constant>T_BAD_CHARACTER</constant> token for unexpected
+   characters instead of leaving behind holes in the token stream.
+  </para>
+ </sect2>
+
+</sect1>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->

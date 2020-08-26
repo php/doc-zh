@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision: 348038 $ -->
+<!-- EN-Revision: 38f1ef412f5670f46cad5e601c74792b72fc91dc Maintainer: avenger Status: partial -->
+<!-- Reviewed: no -->
+
+<sect1 xml:id="migration74.deprecated">
+ <title>PHP 7.4.x 中废弃的功能</title>
+
+ <sect2 xml:id="migration74.deprecated.core">
+  <title>PHP 核心中废弃的功能</title>
+
+  <sect3 xml:id="migration74.deprecated.core.nested-ternary">
+   <title>没有显式括号的嵌套三元运算符</title>
+
+   <para>
+    嵌套的三元操作中，必须明确使用显式括号来决定操作的顺序。以前，如果不使用括号，在大多数情况下，左关联性不会导致预期的行为。
+    <informalexample>
+     <programlisting role="php">
+<![CDATA[
+<?php
+1 ? 2 : 3 ? 4 : 5;   // deprecated
+(1 ? 2 : 3) ? 4 : 5; // ok
+1 ? 2 : (3 ? 4 : 5); // ok
+?>
+]]>
+     </programlisting>
+    </informalexample>
+   </para>
+  </sect3>
+
+  <sect3 xml:id="migration74.deprecated.core.array-string-access-curly-brace">
+   <title>大括号访问数组和字符串索引</title>
+
+   <para>
+    使用大括号访问数组及字符串索引的方式已被废弃。请使用
+    <literal>$var[$idx]</literal> 的语法来替代
+    <literal>$var{$idx}</literal>。
+   </para>
+  </sect3>
+
+  <sect3 xml:id="migration74.deprecated.core.real">
+   <title>(real) 类型和 <function>is_real</function> 函数</title>
+
+   <para>
+    <literal>(real)</literal> 类型已被废弃，请使用
+    <literal>(float)</literal> 来替代。
+   </para>
+   <para>
+    同时被废弃的还有 <function>is_real</function>
+    函数，请使用 <function>is_float</function> 来替代。
+   </para>
+  </sect3>
+
+  <sect3 xml:id="migration74.deprecated.core.unbind-this">
+   <title>Unbinding <literal>$this</literal> when <literal>$this</literal> is used</title>
+
+   <para>
+    Unbinding <literal>$this</literal> of a non-static closure
+    that uses <literal>$this</literal> is deprecated.
+   </para>
+  </sect3>
+
+  <sect3 xml:id="migration74.deprecated.core.parent">
+   <title><literal>parent</literal> 关键词在没父类的类中使用</title>
+
+   <para>
+    在没有父类的类中使用 <literal>parent</literal>
+    关键词已被废弃，并且在将来的 PHP 版本中将会抛出一个编译错误。目前只在运行时访问父类时才会产生错误。
+   </para>
+  </sect3>
+
+  <sect3 xml:id="migration74.deprecated.core.allow-url-include">
+   <title>allow_url_include INI 选项</title>
+
+   <para>
+    配置文件中的 <link linkend="ini.allow-url-include">allow_url_include</link>
+    选项被废弃。如果启用了该选项，将会产生一个弃用通知。
+   </para>
+  </sect3>
+
+  <sect3 xml:id="migration74.deprecated.core.invalid-base-characters">
+   <title>基础转换函数中的无效字符处理</title>
+
+   <para>
+    在下面这些基础转换函数中，<function>base_convert</function>,
+    <function>bindec</function>, <function>octdec</function> 和
+    <function>hexdec</function>
+    如果传入了非法字符，将会抛出一个弃用通知。函数会忽略掉无效字符后正常返回结果。前导空格和尾部空格，以及类型为
+    0x (取决于基数) 被允许传入。
+   </para>
+  </sect3>
+
+  <sect3 xml:id="migration74.deprecated.core.array-key-exists-objects">
+   <title>在对象中使用 <function>array_key_exists</function></title>
+
+   <para>
+    在一个对象中使用 <function>array_key_exists</function>
+    已被废弃。请使用 <function>isset</function> 或 <function>property_exists</function>
+    来替代。
+   </para>
+  </sect3>
+
+  <sect3 xml:id="migration74.deprecated.core.magic-quotes-functions">
+   <title>魔术引号函数</title>
+
+   <para>
+    魔术引号函数 <function>get_magic_quotes_gpc</function> 和 <function>get_magic_quotes_runtime</function>
+    已被废弃。它们将永远返回 &false;。
+   </para>
+  </sect3>
+
+  <sect3 xml:id="migration74.deprecated.core.hebrevc">
+   <title><function>hebrevc</function> 函数</title>
+
+   <para>
+    <function>hebrevc</function> 函数已被废弃。
+    可以用 <literal>nl2br(hebrev($str))</literal> 来替代，更好的方法是启用 Unicode RTL 来支持。
+   </para>
+  </sect3>
+
+  <sect3 xml:id="migration74.deprecated.core.convert-cyr-string">
+   <title><function>convert_cyr_string</function> 函数</title>
+
+   <para>
+    <function>convert_cyr_string</function> 函数已被废弃。可以用 <function>mb_convert_string</function>，
+    <function>iconv</function> 或 <classname>UConverter</classname> 替代。
+   </para>
+  </sect3>
+
+  <sect3 xml:id="migration74.deprecated.core.money-format">
+   <title><function>money_format</function> 函数</title>
+
+   <para>
+    <function>money_format</function> 函数已被废弃。
+    可以用更国际化的 <classname>NumberFormatter</classname> 功能来替代。
+   </para>
+  </sect3>
+
+  <sect3 xml:id="migration74.deprecated.core.ezmlm-hash">
+   <title><function>ezmlm_hash</function> 函数</title>
+
+   <para>
+    <function>ezmlm_hash</function> 函数已被废弃。
+   </para>
+  </sect3>
+
+  <sect3 xml:id="migration74.deprecated.core.restore-include-path">
+   <title><function>restore_include_path</function> 函数</title>
+
+   <para>
+    <function>restore_include_path</function> 函数已被废弃。可以用 <literal>ini_restore('include_path')</literal> 替代。
+   </para>
+  </sect3>
+
+  <sect3 xml:id="migration74.deprecated.core.implode-reverse-parameters">
+   <title>Implode 函数的参数顺序</title>
+
+   <para>
+    <function>implode</function> 允许反转参数顺序的特性已被废弃，请使用 <literal>implode($glue, $parts)</literal>
+    来替代 <literal>implode($parts, $glue)</literal>。
+   </para>
+  </sect3>
+
+ </sect2>
+
+ <sect2 xml:id="migration74.deprecated.com">
+  <title>COM</title>
+
+  <para>
+   导入类型库的大小写不敏感的常量注册已被废弃。
+  </para>
+ </sect2>
+
+ <sect2 xml:id="migration74.deprecated.filter">
+  <title>Filter</title>
+
+  <para>
+   <constant>FILTER_SANITIZE_MAGIC_QUOTES</constant>
+   已被废弃，使用 <constant>FILTER_SANITIZE_ADD_SLASHES</constant> 来替代。
+  </para>
+ </sect2>
+
+ <sect2 xml:id="migration74.deprecated.mbstring">
+  <title>Multibyte String</title>
+
+  <para>
+   Passing a non-string pattern to <function>mb_ereg_replace</function>
+   is deprecated. Currently, non-string patterns are interpreted as
+   ASCII codepoints. In PHP 8, the pattern will be interpreted as a
+   string instead.
+  </para>
+  <para>
+   Passing the encoding as 3rd parameter to <function>mb_strrpos</function>
+   is deprecated. Instead pass a 0 offset, and encoding as 4th parameter.
+  </para>
+ </sect2>
+
+ <sect2 xml:id="migration74.deprecated.ldap">
+  <title>Lightweight Directory Access Protocol</title>
+
+  <para>
+   <function>ldap_control_paged_result_response</function> 和
+   <function>ldap_control_paged_result</function> 函数已被废弃。控制页面操作可以使用
+   <function>ldap_search</function> 替代。
+  </para>
+ </sect2>
+
+ <sect2 xml:id="migration74.deprecated.reflection">
+  <title>Reflection</title>
+
+  <para>
+   调用 <methodname>ReflectionType::__toString</methodname> 现在将会抛出一个弃用通知。
+   该方法从 PHP 7.1 开始，在
+   <methodname>ReflectionNamedType::getName</methodname>
+   的文档中已经被声明废弃，但是由于技术原因，并没有抛出弃用通知。
+  </para>
+  <para>
+   The <literal>export()</literal> methods on all <classname>Reflection</classname>
+   classes are deprecated. Construct a <classname>Reflection</classname> object and
+   convert it to string instead:
+   <informalexample>
+     <programlisting role="php">
+<![CDATA[
+<?php
+// ReflectionClass::export(Foo::class, false) is:
+echo new ReflectionClass(Foo::class), "\n";
+
+// $str = ReflectionClass::export(Foo::class, true) is:
+$str = (string) new ReflectionClass(Foo::class);
+?>
+]]>
+     </programlisting>
+    </informalexample>
+  </para>
+ </sect2>
+
+ <sect2 xml:id="migration74.deprecated.socket">
+  <title>Socket</title>
+
+  <para>
+   常量 <constant>AI_IDN_ALLOW_UNASSIGNED</constant> 和
+   <constant>AI_IDN_USE_STD3_ASCII_RULES</constant> 在
+   <function>socket_addrinfo_lookup</function> 中不再可用，因为该常量在 glibc 中已被废弃。
+  </para>
+ </sect2>
+
+</sect1>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
