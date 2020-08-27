@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: f453f7036c74f5f8ce5e15d3d5abbaf8dfd599e2 Maintainer: HonestQiao Status: ready -->
+<!-- EN-Revision: a48bfbee2a121bdf25ceee2946aa27728e611365 Maintainer: HonestQiao Status: ready -->
 <!-- Reviewed: no Maintainer: HonestQiao -->
 <!-- CREDITS: xuke, Gregory, dallas -->
 <refentry xml:id="function.oci-bind-by-name" xmlns="http://docbook.org/ns/docbook">
@@ -395,6 +395,12 @@ oci_execute($statement);
           with <function>oci_new_cursor</function>.
          </para>
         </listitem>
+        <listitem>
+         <para>
+          <constant>SQLT_BOL</constant> or <constant>OCI_B_BOL</constant>
+          - for PL/SQL BOOLEANs (Requires OCI8 2.0.7 and Oracle Database 12c)
+         </para>
+        </listitem>
        </itemizedlist>
       </para>
      </listitem>
@@ -534,16 +540,21 @@ if (!$conn) {
     trigger_error(htmlentities($m['message']), E_USER_ERROR);
 }
 
-$sql = 'SELECT last_name FROM employees WHERE employee_id = :eidbv';
+$sql = 'SELECT last_name FROM employees WHERE department_id = :didbv ORDER BY last_name';
 $stid = oci_parse($conn, $sql);
-$myeid = 101;
-oci_bind_by_name($stid, ':eidbv', $myeid);
+$didbv = 60;
+oci_bind_by_name($stid, ':didbv', $didbv);
 oci_execute($stid);
-$row = oci_fetch_array($stid, OCI_ASSOC);
-echo $row['LAST_NAME'] ."<br>\n";
+while (($row = oci_fetch_array($stid, OCI_ASSOC)) != false) {
+    echo $row['LAST_NAME'] ."<br>\n";
+}
 
 // Output is
-//    Kochhar
+//    Austin
+//    Ernst
+//    Hunold
+//    Lorentz
+//    Pataballa
 
 oci_free_statement($stid);
 oci_close($conn);
@@ -914,11 +925,44 @@ oci_bind_by_name($stid, ":mykey", $mykey, 5);
 oci_execute($stid);
 
 print '<table border="1">';
-while ($row = oci_fetch_array($stid, OCI_ASSOC)) {
-  $result = $row['MYCLOB']->load();
-  print '<tr><td>'.$result.'</td></tr>';
+while ($row = oci_fetch_array($stid, OCI_ASSOC+OCI_RETURN_LOBS)) {
+    print '<tr><td>'.$row['MYCLOB'].'</td></tr>';
+    // In a loop, freeing the large variable before the 2nd fetch reduces PHP's peak memory usage
+    unset($row);  
 }
 print '</table>';
+
+?>
+]]>
+   </programlisting>
+  </example>
+  </para>
+
+<para>
+  <example>
+   <title>Binding a PL/SQL BOOLEAN</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+
+$conn = oci_connect('hr', 'welcome', 'localhost/XE');
+if (!$conn) {
+    $e = oci_error();
+    trigger_error(htmlentities($e['message']), E_USER_ERROR);
+}
+
+$plsql = 
+  "begin
+    :output1 := true;
+    :output2 := false;
+   end;";
+
+$s = oci_parse($c, $plsql);
+oci_bind_by_name($s, ':output1', $output1, -1, OCI_B_BOL);
+oci_bind_by_name($s, ':output2', $output2, -1, OCI_B_BOL);
+oci_execute($s);
+var_dump($output1);  // true
+var_dump($output2);  // false
 
 ?>
 ]]>
@@ -992,13 +1036,7 @@ foreach ($myarray as $key => $value) {
      </programlisting>
    </informalexample>
   </note>
-  <note>
-   <para>
-    In PHP versions before 5.0.0 you must
-    use <function>ocibindbyname</function>
-    instead. 
-   </para>
-  </note>
+ </refsect1>
  </refsect1>
 
  <refsect1 role="seealso">
