@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
 <!-- $Author$ -->
-<!-- EN-Revision: 95bdd6883b5dde9504701777ba81b3c5f15df52b Maintainer: Altair Status: ready -->
-<!-- CREDITS: Gregory, dallas -->
+<!-- EN-Revision: 411c8ecee06f6b7861b2c114f1c8fb533e9b74fa Maintainer: Avenger Status: ready -->
+<!-- CREDITS: Gregory, dallas, Altair -->
 <sect1 xml:id="language.types.integer">
  <title>Integer 整型</title>
  
@@ -37,6 +37,8 @@
 
   <simpara>
    整型值可以使用十进制，十六进制，八进制或二进制表示，前面可以加上可选的符号（- 或者 +）。
+   可以用 <link linkend="language.operators.arithmetic">负运算符</link>
+   来表示一个负的<type>integer</type>。
   </simpara>
 
   <para>
@@ -49,41 +51,46 @@
    <literal>0b</literal>。
   </para>
 
+  <para>
+   从 PHP 7.4.0
+   开始，整型数值可能会包含下划线 (<literal>_</literal>)，为了更好的阅读体验，这些下划线在展示的时候，会被 PHP 过滤掉。
+  </para>
+
   <example>
    <title>整数文字表达</title>
    <programlisting role="php">
 <![CDATA[
 <?php
 $a = 1234; // 十进制数
-$a = -123; // 负数
 $a = 0123; // 八进制数 (等于十进制 83)
 $a = 0x1A; // 十六进制数 (等于十进制 26)
 $a = 0b11111111; // 二进制数字 (等于十进制 255)
+$a = 1_234_567; // 整型数值 (PHP 7.4.0 以后)
 ?>
 ]]>
    </programlisting>
   </example>
 
   <para>
-   <type>integer</type> 语法的结构形式是：
+   <type>integer</type> 语法的结构形式是（PHP 7.4.0 之前不支持下划线）：
   </para>
  
   <informalexample>
    <programlisting>
 <![CDATA[
-decimal     : [1-9][0-9]*
+decimal     : [1-9][0-9]*(_[0-9]+)*
             | 0
 
-hexadecimal : 0[xX][0-9a-fA-F]+
+hexadecimal : 0[xX][0-9a-fA-F]+(_[0-9a-fA-F]+)*
 
-octal       : 0[0-7]+
+octal       : 0[0-7]+(_[0-7]+)*
 
-binary      : 0b[01]+
+binary      : 0[bB][01]+(_[01]+)*
 
-integer     : [+-]?decimal
-            | [+-]?hexadecimal
-            | [+-]?octal
-            | [+-]?binary
+integer     : decimal
+            | hexadecimal
+            | octal
+            | binary
 ]]>
    </programlisting>
   </informalexample>
@@ -157,6 +164,12 @@ var_dump($large_number);                     // float(5.0E+19)
    值可以舍弃小数部分，强制转换为 <type>integer</type>，或者使用
    <function>round</function> 函数可以更好地进行四舍五入。
   </para>
+  <note>
+   <simpara>
+    从 PHP 7.0.0 开始，函数 <function>intdiv</function>
+    可以用于整数除法。
+   </simpara>
+  </note>
 
   <informalexample>
    <programlisting role="php">
@@ -210,7 +223,7 @@ var_dump(round(25/7));  // float(4)
     
    <para>
     如果浮点数超出了整数范围（32 位平台下通常为
-    <literal>+/- 2.15e+9 = 2^31</literal>，64 位平台下，除了 Windows，通常为
+    <literal>+/- 2.15e+9 = 2^31</literal>，64 位平台下，除了 Windows 且版本低于 PHP 7，通常为
     <literal>+/- 9.22e+18 = 2^63</literal>），则结果为未定义，因为没有足够的精度给出一个确切的整数结果。在此情况下没有警告，甚至没有任何通知！
    </para>
 
@@ -249,6 +262,14 @@ echo (int) ( (0.1+0.7) * 10 ); // 显示 7!
    </simpara>
   </sect3>
    
+  <sect3 xml:id="language.types.integer.casting-from-null">
+   <title>从 <type>NULL</type> 转换</title>
+
+   <simpara>
+    &null; 会转换为零 (<literal>0</literal>)。
+   </simpara>
+  </sect3>
+
   <sect3 xml:id="language.types.integer.casting.from-other">
    <title>从其它类型转换</title>
 
