@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: bf66db24167008a22b52eaaa1cfe06ae924f9ede Maintainer: dallas Status: ready -->
+<!-- EN-Revision: d0b7ec3571ca310cec64c79e115e1b475efd28cc Maintainer: dallas Status: ready -->
 <!-- Reviewed: yes -->
 <chapter xml:id="configuration" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <title>运行时配置</title>
@@ -34,11 +34,21 @@
     <listitem>
      <simpara>
       自 PHP 5.2.0 起，可以为不同版本的 PHP 指定不同的 <literal>php.ini</literal>
-      文件位置。将以下面的顺序检查注册表目录：<literal>[HKEY_LOCAL_MACHINE\SOFTWARE\PHP\x.y.z]</literal>，<literal>[HKEY_LOCAL_MACHINE\SOFTWARE\PHP\x.y]</literal> 和
+      文件位置。注册表目录所在的位置取决于你的系统是 32 位还是 64 位。32-bit
+      的 PHP 运行在 32-bit 的系统或 64-bit 的 PHP 运行在 64-bit 系统时使用 <literal>[(HKEY_LOCAL_MACHINE\SOFTWARE\PHP]</literal>
+      32-bit 的 PHP 运行在 64-bit 的系统上时，则使用 <literal>[HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\PHP]</literal>] 替代。
+      系统版本跟 PHP 版本架构一致时，会按以下顺序依次进行检查：
+      <literal>[HKEY_LOCAL_MACHINE\SOFTWARE\PHP\x.y.z]</literal>，
+      <literal>[HKEY_LOCAL_MACHINE\SOFTWARE\PHP\x.y]</literal> 和
       <literal>[HKEY_LOCAL_MACHINE\SOFTWARE\PHP\x]</literal>，其中的
+      x，y 和 z 指的是 PHP 主版本号，次版本号和发行批次。
+      对于 32 bit 版本的 PHP 运行在 64 bit 系统上的情况，则会按以下顺序依次进行检查：
+      <literal>[HKEY_LOCAL_MACHINE\SOFTWARE\WOW6421Node\PHP\x.y.z]</literal>，
+      <literal>[HKEY_LOCAL_MACHINE\SOFTWARE\WOW6421Node\PHP\x.y]</literal> 和
+      <literal>[HKEY_LOCAL_MACHINE\SOFTWARE\WOW6421Node\PHP\x]</literal>，其中的
       x，y 和 z 指的是 PHP 主版本号，次版本号和发行批次。如果在其中任何目录下的
       <literal>IniFilePath</literal> 有键值，则第一个值将被用作
-      <literal>php.ini</literal> 的位置（仅适用于 windows）。
+      <literal>php.ini</literal> 的位置（仅适用于 Windows）。
      </simpara>
     </listitem>
     <listitem>
@@ -77,11 +87,20 @@
     &php.ini;，如果存在的话。
    </para>
   </note>
-  <note>
-   <para>
-    在 &php.ini; 中可以使用环境变量。
-   </para>
-  </note>
+  <para>
+    在 &php.ini; 中可以使用环境变量，如下示例：
+  </para>
+  <para>
+   <example>
+    <title>&php.ini; 中的环境变量</title>
+     <programlisting role="ini">
+<![CDATA[
+; PHP_MEMORY_LIMIT 来自于环境变量的值
+memory_limit = ${PHP_MEMORY_LIMIT}
+]]>
+     </programlisting>
+    </example>
+  </para>
   <para>
    由扩展库处理的 &php.ini; 指令，其文档分别在各扩展库的页面。<link
    linkend="ini">内核配置选项</link>见附录。不过也许不是所有的 PHP
@@ -109,6 +128,13 @@ include_path = ".:/usr/local/lib/php"
 include_path = ".;c:\php\lib"
 ]]>
     </programlisting>
+
+
+
+
+
+
+
     <!-- TODO: add more details about values and expressions -->
    </example>
   </para>
@@ -117,18 +143,116 @@ include_path = ".;c:\php\lib"
    变量。例如：<literal>open_basedir = ${open_basedir}
    ":/new/dir"</literal>。
   </para>
+  <sect2 xml:id="configuration.file.scan">
+   <title>扫描路径配置</title>
+
+   <para>
+    可以通过配置，让 PHP 在读完 &php.ini; 后，扫描指定路径中的附加 .ini 配置文件。编译时通过
+    <option role="configure">--with-config-file-scan-dir</option>
+    参数来指定要扫描的目录。自
+    PHP 5.2.0 起，扫描路径也可以通过环境变量
+    <varname>PHP_INI_SCAN_DIR</varname> 来设置。
+   </para>
+
+   <para>
+    通过在扫描路径配置中加入特定系统的目录分隔符（Windows、NetWare
+    和 RISC OS 下是 <literal>;</literal>；其它操作系统下是 <literal>:</literal>；该值可以通过
+    PHP 常量 <constant>PATH_SEPARATOR</constant> 获取），还可以设置多个扫描路径。如果
+    <varname>PHP_INI_SCAN_DIR</varname> 为空，PHP 一样会扫描在编译时指定的
+    <option role="configure">--with-config-file-scan-dir</option> 此路径。
+   </para>
+
+
+
+   <para>
+    对于每个目录而言，PHP 会以首字符顺序为优先级，扫描该目录下所有的 <literal>.ini</literal> 结尾的配置文件。所有被截入的配置文件，可以通过
+    <function>php_ini_scanned_files</function> 函数来获取列表，也可以通过 PHP 命令行加入
+    <option>--ini</option> 参数来查看。
+   </para>
+
+   
+
+   <informalexample>
+    <screen>
+<![CDATA[
+以下假设 PHP 配置为 --with-config-file-scan-dir=/etc/php.d
+并且目录分隔符为 :
+
+$ php
+  PHP 会加载 /etc/php.d/*.ini 全部配置文件。
+
+$ PHP_INI_SCAN_DIR=/usr/local/etc/php.d php
+  PHP 会加载 /usr/local/etc/php.d/*.ini 全部配置文件。
+
+$ PHP_INI_SCAN_DIR=:/usr/local/etc/php.d php
+  PHP 会加载 /etc/php.d/*.ini 下的全部配置文件，然后加载
+  /usr/local/etc/php.d/*.ini 下的全部配置文件。
+
+$ PHP_INI_SCAN_DIR=/usr/local/etc/php.d: php
+  PHP 会加载 /usr/local/etc/php.d/*.ini 下的全部配置文件，然后加载
+  /etc/php.d/*.ini 下的全部配置文件。
+]]>
+    </screen>
+   </informalexample>
+  </sect2>
+  
+  <sect2 xml:id="configuration.file.changelog">
+   &reftitle.changelog;
+
+   <para>
+    <informaltable>
+     <tgroup cols="2">
+      <thead>
+       <row>
+        <entry>&Version;</entry>
+        <entry>&Description;</entry>
+       </row>
+      </thead>
+      <tbody>
+       <row>
+        <entry>7.0.0</entry>
+        <entry>
+         Hash 符号 (<literal>#</literal>) 不再被当做注释。
+        </entry>
+       </row>
+       <row>
+        <entry>5.3.0</entry>
+        <entry>
+         Hash 符号 (<literal>#</literal>) 不应该被用于注释用，如果使用的话会抛出一个
+         warning 提醒。
+        </entry>
+       </row>
+       <row>
+        <entry>5.2.0</entry>
+        <entry>
+         允许设置 <varname>PHP_INI_SCAN_DIR</varname>
+         系统变量，来覆盖编译时指定的 "扫描路径" 配置。
+        </entry>
+       </row>
+       <row>
+        <entry>5.1.0</entry>
+        <entry>
+         可以从 .ini 文件中引用现有的 .ini 变量。
+        </entry>
+       </row>
+      </tbody>
+     </tgroup>
+    </informaltable>
+   </para>
+  </sect2>
  </sect1>
  
  <sect1 xml:id="configuration.file.per-user">
   <title>.user.ini 文件</title>
   
   <simpara>
-   自 PHP 5.3.0 起，PHP 支持基于每个目录的 .htaccess
-   风格的 INI 文件。此类文件<emphasis>仅</emphasis>被
-   CGI／FastCGI SAPI 处理。此功能使得 PECL 的 htscanner
-   扩展作废。如果使用 Apache，则用 &htaccess; 文件有同样效果。
+   自 PHP 5.3.0 起，PHP 支持基于每个目录的 INI 文件配置。此类文件
+   <emphasis>仅</emphasis>被 CGI／FastCGI SAPI 处理。此功能使得 PECL 的 htscanner
+   扩展作废。如果你的 PHP 以模块化运行在 Apache 里，则用 &htaccess; 文件有同样效果。
   </simpara>
   
+  
+
   <simpara>
    除了主 &php.ini; 之外，PHP 还会在每个目录下扫描 INI
    文件，从被执行的 PHP 文件所在目录开始一直上升到 web
@@ -141,23 +265,23 @@ include_path = ".;c:\php\lib"
    设置可被识别。
   </simpara>
   
+  
+
   <simpara>
-   两个新的 INI 指令，<literal>user_ini.filename</literal> 和
-   <literal>user_ini.cache_ttl</literal> 控制着用户 INI 文件的使用。
-   <!--
-       <link linkend="ini.user-ini.filename">user_ini.filename</link> and
-       <link linkend="ini.user-ini.cache-ttl">user_ini.cache_ttl</link>
-   -->
+   两个新的 INI 指令，
+   <link linkend="ini.user-ini.filename">user_ini.filename</link> 和
+   <link linkend="ini.user-ini.cache-ttl">user_ini.cache_ttl</link>
+   控制着用户 INI 文件的使用。
   </simpara>
   
   <simpara>
-   <literal>user_ini.filename</literal> 设定了 PHP
+   <link linkend="ini.user-ini.filename">user_ini.filename</link> 设定了 PHP
    会在每个目录下搜寻的文件名；如果设定为空字符串则 PHP
    不会搜寻。默认值是 <literal>.user.ini</literal>。
   </simpara>
   
   <simpara>
-   <literal>user_ini.cache_ttl</literal> 控制着重新读取用户
+   <link linkend="ini.user-ini.cache-ttl">user_ini.cache_ttl</link> 控制着重新读取用户
    INI 文件的间隔时间。默认是 300 秒（5 分钟）。
   </simpara>
  </sect1>
@@ -220,6 +344,7 @@ include_path = ".;c:\php\lib"
    </table>
   </para>
  </sect1>
+ 
  
  
  <sect1 xml:id="configuration.changes">
@@ -340,6 +465,8 @@ include_path = ".;c:\php\lib"
    </caution>
   </sect2>
   
+  
+
   <sect2 xml:id="configuration.changes.windows">
    <title>通过 Windows 注册表修改 PHP 配置</title>
    <simpara>
@@ -352,10 +479,16 @@ include_path = ".;c:\php\lib"
     项下面。其中的设定对于任何位于此目录及其任何子目录的脚本都有效。项中的值的名称是
     PHP 配置指令的名字，值的数据是字符串格式的指令值。值中的 PHP
     常量不被解析。不过只有可修改范围是 <constant>PHP_INI_USER</constant>
-    的配置值可以用此方法设定，<constant>PHP_INI_PERDIR</constant> 的值就不行。
+    的配置值可以用此方法设定，<constant>PHP_INI_PERDIR</constant>
+    的值就不行。因为这些配置对于每次请求来说是只读的。
    </simpara>
   </sect2>
   
+  
+
+
+
+
   <sect2 xml:id="configuration.changes.other">
    <title>其它接口下的 PHP</title>
    <para>
@@ -372,6 +505,8 @@ include_path = ".;c:\php\lib"
   </sect2>
  </sect1>
  
+
+
 </chapter>
 
 <!-- Keep this comment at the end of the file
