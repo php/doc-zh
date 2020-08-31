@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: b7a780f8e762e290552b9f79d346f2bcbc272e0c Maintainer: 李大为 Status: ready -->
+<!-- EN-Revision: d6092a6ffcdea7eaf16d4f9141f6d1f434fc1d9e Maintainer: Avenger Status: ready -->
 <!-- Reviewed: no -->
 
 <sect2 xml:id="migration70.incompatible.integers">
@@ -54,6 +54,53 @@ Stack trace:
   <para>
    超出 <type>integer</type> 位宽的位移操作（无论哪个方向）将始终得到 0 作为结果。在从前，这一操作是结构依赖的。
   </para>
+ </sect3>
+
+
+ <sect3 xml:id="migration70.incompatible.integers.div-by-zero">
+  <title>除以零的变化</title>
+
+  <para>
+   之前的版本中，当 0 被做为除数时，无论是除数 (/) 或取模 (%) 操作，都会抛出一个 E_WARNING 错误并返回
+   <constant>false</constant>。现在，除法运算符 (/) 会返回一个由 IEEE 754 指定的浮点数：+INF, -INF 或 NAN。取模操作符
+   (%) 则会抛出一个 <classname>DivisionByZeroError</classname> 异常，并且不再产生 E_WARNING 错误。
+  </para>
+  <informalexample>
+   <programlisting role="php">
+<![CDATA[
+<?php
+var_dump(3/0);
+var_dump(0/0);
+var_dump(0%0);
+?>
+]]>
+   </programlisting>
+   &example.outputs.5;
+   <screen>
+<![CDATA[
+Warning: Division by zero in %s on line %d
+bool(false)
+
+Warning: Division by zero in %s on line %d
+bool(false)
+
+Warning: Division by zero in %s on line %d
+bool(false)
+]]>
+   </screen>
+   &example.outputs.7;
+   <screen>
+<![CDATA[
+Warning: Division by zero in %s on line %d
+float(INF)
+
+Warning: Division by zero in %s on line %d
+float(NAN)
+
+PHP Fatal error:  Uncaught DivisionByZeroError: Modulo by zero in %s line %d
+]]>
+   </screen>
+  </informalexample>
  </sect3>
 </sect2>
 

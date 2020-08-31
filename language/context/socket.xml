@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 0cc3ec82158dbc3a74069483994f99dd640b9350 Maintainer: Szopen Xiao Status: ready -->
+<!-- EN-Revision: 459c0e1de40c71062731abb431ec1c9f74b2aaf2 Maintainer: Szopen Xiao Status: ready -->
 <!-- Reviewed: no -->
 
 <refentry xml:id="context.socket" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" role="noversion">
@@ -14,7 +14,7 @@
   <para>
    套接字上下文选项可用于所有工作在套接字上的封装协议，像
    <literal>tcp</literal>, <literal>http</literal> 和
-   <literal>ftp</literal>.
+   <literal>ftp</literal>。
   </para>
  </refsect1><!-- }}} -->
  
@@ -26,7 +26,7 @@
      <term><parameter>bindto</parameter></term>
      <listitem>
       <para>
-       用户PHP访问网络的指定的IP地址（IPv4或IPv6其中的一个）和/或 端口号，这个语法是
+       用户 PHP 访问网络的指定的 IP 地址（IPv4 或 IPv6 其中的一个）和/或 端口号，这个语法是
        <literal>ip:port</literal>.
        Setting the IP or the port to <literal>0</literal> will let the system
        choose the IP and/or port.
@@ -53,6 +53,58 @@
       </note>
      </listitem>
     </varlistentry>
+    <varlistentry xml:id="context.socket.ipv6_v6only">
+     <term><parameter>ipv6_v6only</parameter></term>
+     <listitem>
+      <para>
+       Overrides the OS default regarding mapping IPv4 into IPv6.
+      </para>
+      <note>
+       <para>
+        This is important in particular when trying to listen on IPv4 addresses
+        separately while there exists a binding on <literal>[::]</literal>.
+       </para>
+       <para>
+        This is only applicable to <function>stream_socket_server</function>.
+       </para>
+      </note>
+     </listitem>
+    </varlistentry>
+    <varlistentry xml:id="context.socket.so_reuseport">
+     <term><parameter>so_reuseport</parameter></term>
+     <listitem>
+      <para>
+       Allows multiple bindings to a same ip:port pair, even from separate processes.
+      </para>
+      <note>
+       <para>
+        This is only applicable to <function>stream_socket_server</function>.
+       </para>
+      </note>
+     </listitem>
+    </varlistentry>
+    <varlistentry xml:id="context.socket.so_broadcast">
+     <term><parameter>so_broadcast</parameter></term>
+     <listitem>
+      <para>
+       Enables sending and receiving data to/from broadcast addresses.
+      </para>
+      <note>
+       <para>
+        This is only applicable to <function>stream_socket_server</function>.
+       </para>
+      </note>
+     </listitem>
+    </varlistentry>
+    <varlistentry xml:id="context.socket.tcp_nodelay">
+     <term><parameter>tcp_nodelay</parameter></term>
+     <listitem>
+      <para>
+       Setting this option to &true; will set <literal>SOL_TCP,NO_DELAY=1</literal>
+       appropriately, thus disabling the TCP Nagle algorithm.
+      </para>
+     </listitem>
+    </varlistentry>
    </variablelist>
   </para>
  </refsect1><!-- }}} -->
@@ -70,15 +122,39 @@
      </thead>
      <tbody>
       <row>
-       <entry>5.1.0</entry>
+       <entry>7.1.0</entry>
        <entry>
-        Added <literal>bindto</literal>.
+        Added <parameter>tcp_nodelay</parameter>.
+       </entry>
+      </row>
+      <row>
+       <entry>7.0.1</entry>
+       <entry>
+        Added <parameter>ipv6_v6only</parameter>.
+       </entry>
+      </row>
+      <row>
+       <entry>7.0.0</entry>
+       <entry>
+        Added <parameter>so_broadcast</parameter>.
+       </entry>
+      </row>
+      <row>
+       <entry>7.0.0</entry>
+       <entry>
+        Added <parameter>so_reuseport</parameter>.
        </entry>
       </row>
       <row>
        <entry>5.3.3</entry>
        <entry>
-        Added <literal>backlog</literal>.
+        Added <parameter>backlog</parameter>.
+       </entry>
+      </row>
+      <row>
+       <entry>5.1.0</entry>
+       <entry>
+        Added <literal>bindto</literal>.
        </entry>
       </row>
      </tbody>
@@ -107,6 +183,15 @@ $opts = array(
 $opts = array(
     'socket' => array(
         'bindto' => '192.168.0.100:7000',
+    ),
+);
+
+
+// connect to the internet using the '2001:db8::1' IPv6 address
+// and port '7000'
+$opts = array(
+    'socket' => array(
+        'bindto' => '[2001:db8::1]:7000',
     ),
 );
 
