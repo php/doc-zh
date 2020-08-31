@@ -1,14 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: ae6be5bb4f40f334c713bdf0dc11ac6a59f6461d Maintainer: HonestQiao Status: ready -->
-<!-- Reviewed: no Maintainer: HonestQiao -->
+<!-- EN-Revision: 91376f31d472fad0c6af42f1beda5c33ed62f39b Maintainer: Avenger Status: ready -->
 <appendix xml:id="migration5" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
   <title>从 PHP 4 移植到 PHP 5</title>
   <para>
    &manual.migration.seealso;
    <link linkend="migration51">5.1.x</link>, 
-   <link linkend="migration52">5.2.x</link> and 
-   <link linkend="migration53">5.3.x</link>.
+   <link linkend="migration52">5.2.x</link>,
+   <link linkend="migration53">5.3.x</link>,
+   <link linkend="migration54">5.4.x</link>,
+   <link linkend="migration55">5.5.x</link> 和
+   <link linkend="migration56">5.6.x</link>。
   </para>
   <section xml:id="migration5.changes">
    <title>PHP 5 中有哪些改变</title>
@@ -16,20 +18,25 @@
     PHP 5 和集成的 Zend Engine 2 代极大提高了 PHP
     的性能和能力，而且投入极大努力尽可能避免破坏已有的代码的使用。因此将代码从
     PHP 4 移植到 PHP 5 应该很容易。大多数已有的 PHP 4
-    代码应该不用改就能运行，但还是应该注意到<link
-    linkend="migration5.incompatible">几点区别</link>并在实际运作环境下转换到新版本之前多做测试。
+    代码应该不用改就能运行，但还是应该注意到 <link
+    linkend="migration5.incompatible">几点区别</link> 并在实际运作环境下转换到新版本之前多做测试。
    </para>
   </section>
 
+  
+
+
   <section xml:id="migration5.incompatible">
-   <title>未向下兼容的改变</title>
+   <title>不向下兼容的改变</title>
    <para>
     尽管大部分 PHP 4 的代码应该不用修改就能运行，还是应该留意以下不向下兼容的改变：
    </para>
    <itemizedlist>
     <listitem>
+     
      <simpara>
-      有了一些<link linkend="reserved.keywords">新关键字</link>。
+      有了一些
+      <link linkend="reserved.keywords">新关键字</link>。
      </simpara>
     </listitem>
     <listitem>
@@ -41,7 +48,8 @@
     <listitem>
      <simpara>
       非法使用字符串偏移量会导致 <constant>E_ERROR</constant> 而不是
-      <constant>E_WARNING</constant>。一个非法使用的例子：<literal>$str = 'abc'; unset($str[0]);</literal>.
+      <constant>E_WARNING</constant>。一个非法使用的例子：
+      <literal>$str = 'abc'; unset($str[0]);</literal>。
      </simpara>
     </listitem>
     <listitem>
@@ -52,6 +60,7 @@
      </simpara>
     </listitem>
     <listitem>
+     
      <simpara>
       PATH_TRANSLATED 服务器变量在 Apache2 SAPI 中不再暗中设定，这和 PHP 4
       中的情形相反，如果 Apache 没产生此值则其被设为和
@@ -63,6 +72,8 @@
      </simpara>
     </listitem>
     <listitem>
+     
+
      <simpara>
       <link linkend="ref.tokenizer">Tokenizer</link> 扩展不再定义
       <constant>T_ML_COMMENT</constant> 常量。如果把
@@ -79,14 +90,18 @@
       如果 <link linkend="ini.variables-order">variables_order</link>
       包括“S”，$_SERVER 应该带有 argc 和 argv 被产生。如果用户特别配制系统不创建
       $_SERVER，那此变量当然就不存在了。改变的地方是不管 <link
-      linkend="ini.variables-order">variables_order</link> 怎么设定，在
+      linkend="ini.variables-order">variables_order</link>
+      怎么设定，在
       CLI 版本中 argc 和 argv 总是可用的。本来 CLI
       版不是总会产生全局变量 $argc 和 $argv 的。
      </simpara>
     </listitem>
     <listitem>
+
+
+
      <simpara>
-      没有属性的对象不再被当成“empty”。
+      没有属性的对象不再被当成 “empty”。
      </simpara>
     </listitem>
     <listitem>
@@ -96,12 +111,17 @@
      </simpara>
     </listitem>
     <listitem>
+
+
      <simpara>
       <function>get_class</function>，<function>get_parent_class</function>
       和 <function>get_class_methods</function>
       如今返回的类／方法名和定义时的名字一致（区分大小写），对于依赖以前行为（类／方法名总是返回小写的）的老脚本可能产生问题。一个可能的解决方法是在脚本中搜索所有这些函数并使用
       <function>strtolower</function>。
      </simpara>
+
+
+
      <simpara>
       区分大小写的改变也适用于<link
       linkend="language.constants.predefined">魔术常量</link>
@@ -110,6 +130,7 @@
      </simpara>
     </listitem>
     <listitem>
+
      <simpara>
       <function>ip2long</function> 在传递入一个非法
       IP 作为参数时返回 &false;，不再是
@@ -126,13 +147,26 @@
      </simpara>
     </listitem>
     <listitem>
+     
+
      <simpara>
       <function>include_once</function> 和 <function>require_once</function>
       在 Windows 下先将路径规格化，因此包含
       A.php 和 a.php 只会把文件包含一次。
      </simpara>
     </listitem>
+    <listitem>
+     <simpara>
+      将一个数组的值传递给一个函数，在函数内部访问数组时不再重置数组的内部指针。换句话说，在
+      PHP 4 中，当你把一个数组传给一个函数时，它在函数内部的指针会被重置，而在
+      PHP 5 中，当你把一个数组传给一个函数时，它在函数内部的数组指针会在传给函数时的位置。
+     </simpara>
+    </listitem>
    </itemizedlist>
+
+
+
+
 
    <para>
     <example>
@@ -223,6 +257,8 @@ class b implements c {
    </para>
   </section>
 
+  
+
   <section xml:id="migration5.configuration">
    <title>移植配置文件</title>
    <para>
@@ -267,6 +303,10 @@ Action application/x-httpd-php "/php/php-cgi.exe"
     其它的 web 服务器中，需要修改 CGI 或者 ISAPI 模块的名字。
    </para>
   </section>
+
+  
+
+
 
   <section xml:id="migration5.functions">
    <title>新函数</title>
@@ -331,6 +371,11 @@ Action application/x-httpd-php "/php/php-cgi.exe"
     </listitem>
    </itemizedlist>
 
+   
+
+
+
+
    <para><link linkend="ref.ibase">InterBase</link>:</para>
    <itemizedlist>
     <listitem>
@@ -359,14 +404,12 @@ Action application/x-httpd-php "/php/php-cgi.exe"
     </listitem>
     <listitem>
      <simpara>
-      <function>ibase_drop_db</function> -
-      删除一个数据库
+      <function>ibase_drop_db</function> - 删除一个数据库
      </simpara>
     </listitem>
     <listitem>
      <simpara>
-      <function>ibase_errcode</function> -
-      返回一个错误代码
+      <function>ibase_errcode</function> - 返回一个错误代码
      </simpara>
     </listitem>
     <listitem>
@@ -389,8 +432,7 @@ Action application/x-httpd-php "/php/php-cgi.exe"
     </listitem>
     <listitem>
      <simpara>
-      <function>ibase_name_result</function> -
-      给结果集指定一个名字
+      <function>ibase_name_result</function> - 给结果集指定一个名字
      </simpara>
     </listitem>
     <listitem>
@@ -425,8 +467,7 @@ Action application/x-httpd-php "/php/php-cgi.exe"
     </listitem>
     <listitem>
      <simpara>
-      <function>ibase_service_attach</function> -
-      连接到服务管理器
+      <function>ibase_service_attach</function> - 连接到服务管理器
      </simpara>
     </listitem>
     <listitem>
@@ -453,8 +494,7 @@ Action application/x-httpd-php "/php/php-cgi.exe"
    <itemizedlist>
     <listitem>
      <simpara>
-      <function>iconv_mime_decode</function> -
-      解码 MIME 头信息字段
+      <function>iconv_mime_decode</function> - 解码 MIME 头信息字段
      </simpara>
     </listitem>
     <listitem>
@@ -465,8 +505,7 @@ Action application/x-httpd-php "/php/php-cgi.exe"
     </listitem>
     <listitem>
      <simpara>
-      <function>iconv_mime_encode</function> -
-      压缩 MIME 头信息字段
+      <function>iconv_mime_encode</function> - 压缩 MIME 头信息字段
      </simpara>
     </listitem>
     <listitem>
@@ -489,8 +528,7 @@ Action application/x-httpd-php "/php/php-cgi.exe"
     </listitem>
     <listitem>
      <simpara>
-      <function>iconv_substr</function> -
-      从字符串中取出一部分
+      <function>iconv_substr</function> - 从字符串中取出一部分
      </simpara>
     </listitem>
    </itemizedlist>
@@ -571,6 +609,9 @@ Action application/x-httpd-php "/php/php-cgi.exe"
     </listitem>
    </itemizedlist>
 
+   
+
+
    <para><link linkend="ref.strings">Strings</link>:</para>
    <itemizedlist>
     <listitem>
@@ -590,6 +631,8 @@ Action application/x-httpd-php "/php/php-cgi.exe"
      </simpara>
     </listitem>
    </itemizedlist>
+
+   
 
    <para>Other:</para>
    <itemizedlist>
@@ -763,6 +806,23 @@ Action application/x-httpd-php "/php/php-cgi.exe"
   </section>
 
 
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   <section xml:id="migration5.newconf">
    <title>新指令</title>
    <para>
@@ -803,6 +863,11 @@ Action application/x-httpd-php "/php/php-cgi.exe"
    </itemizedlist>
   </section>
 
+  
+
+
+
+
   <section xml:id="migration5.databases">
    <title>数据库</title>
    <para>
@@ -829,6 +894,11 @@ Action application/x-httpd-php "/php/php-cgi.exe"
   </section>
 
 
+  
+
+
+
+
   <section xml:id="migration5.oop">
    <title>新对象模型</title>
    <para>
@@ -836,33 +906,52 @@ Action application/x-httpd-php "/php/php-cgi.exe"
     处理对象的方式完全重写了，允许更佳性能和更多特性。之前版本的
     PHP，对象处理方式和原始类型（例如整型和字符串）相同。此方法的缺点是当变量被赋值或作为参数传递给方法时语义上整个对象都被拷贝。在新方法中，对象通过句柄引用，而不是值（可以将句柄当成是对象的标识符）。
    </para>
+   
+
+
+
+
    <para>
     很多 PHP 程序员根本没意识到旧的对象模型的这种拷贝怪癖，因此大多数 PHP
     应用程序拿来就能运行，或者只做很小的修改。
    </para>
+   
    <para>
-    新对象模型的文档见<link
+    新对象模型的文档见 <link
     linkend="language.oop5">语言参考</link>。
    </para>
+   <para>
+    在 PHP 5 中，只有在同一个类中定义了类名的函数，才会作为构造函数被调用。在
+    PHP 4 中，如果定义在父类中，它也会被调用。
+   </para>
+   
    <para>
     与 PHP 4 的兼容性参见 <link
     linkend="ini.zend.ze1-compatibility-mode">zend.ze1_compatibility_mode</link>。
    </para>
   </section>
 
+  
   <section xml:id="migrating5.errorrep">
    <title>错误报告</title>
    <para>
-    自 PHP 5 起引进了新常量 E_STRICT，其值为
-    2048。它提供了对用户代码的协同性和向前兼容性的运行时 PHP
+    自 PHP 5 起引进了新常量 <constant>E_STRICT</constant>，其值为
+    <literal>2048</literal>。它提供了对用户代码的协同性和向前兼容性的运行时 PHP
     建议，有助于使用户保持最新和最好的编程风格。例如在使用已过时的函数时
     STRICT 信息会提出警告。
    </para>
+   
    <note>
     <simpara>
-     E_ALL 不包括 E_STRICT，因此其默认未激活。
+     <constant>E_ALL</constant> 不包括
+     <constant>E_STRICT</constant>，因此其默认未激活。你必需明确设置错误级别包括
+     <constant>E_STRICT</constant> 来查看这些信息。
     </simpara>
    </note>
+   
+   <para>
+    更多信息请参阅 <link linkend="errorfunc.constants">预定义常量</link>。
+   </para>
   </section>
 
  </appendix>
