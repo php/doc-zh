@@ -1,18 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
+<!-- EN-Revision: dcd5448282973a659f62e4240fb6e50aae0eb78b Maintainer: Avenger Status: ready -->
 <appendix xml:id="migration53" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <title>从 PHP 5.2.x 移植到 PHP 5.3.x</title>
  <simpara>
   &manual.migration.seealso;
-  <link linkend="migration5">5.0.x</link>, 
-  <link linkend="migration51">5.1.x</link> 和
-  <link linkend="migration52">5.2.x</link>.
+  <link linkend="migration5">5.0.x</link>，
+  <link linkend="migration51">5.1.x</link>,
+  <link linkend="migration52">5.2.x</link>,
+  <link linkend="migration54">5.4.x</link>,
+  <link linkend="migration55">5.5.x</link> 和
+  <link linkend="migration56">5.6.x</link>。
  </simpara>
-
  <section xml:id="migration53.changes">
   <title>PHP 5.3.x 的变化</title>
   <simpara>
-   PHP 5.3.x 的大多数改进对现有代码没有影响。需要注意的是有<link linkend="migration53.incompatible">一些不兼容</link>和<link linkend="migration53.new-features">新功能</link>，在生产环境中切换 PHP 版本需要先行测试代码。
+   PHP 5.3.x 的大多数改进对现有代码没有影响。需要注意的是有
+   <link linkend="migration53.incompatible">一些不兼容</link> 和
+   <link linkend="migration53.new-features">新功能</link>，在生产环境中切换
+   PHP 版本需要先行测试代码。
   </simpara>
   <simpara>
    由更老的 PHP 版本进行升级，有一些可用的相关文档：
@@ -20,113 +26,149 @@
   <itemizedlist>
    <listitem>
     <simpara>
-     <link linkend="migration52">PHP 5.2.x 升级说明</link>.
+     <link linkend="migration52">PHP 5.2.x 升级说明</link>。
     </simpara>
    </listitem>
    <listitem>
     <simpara>
-     <link linkend="migration51">PHP 5.1.x 升级说明</link>.
+     <link linkend="migration51">PHP 5.1.x 升级说明</link>。
     </simpara>
    </listitem>
    <listitem>
     <simpara>
-     <link linkend="migration5">从 PHP 4 移植到 PHP 5</link>.
+     <link linkend="migration5">从 PHP 4 移植到 PHP 5</link>。
     </simpara>
    </listitem>
   </itemizedlist>
  </section>
 
+
+
  <section xml:id="migration53.incompatible">
   <title>不向下兼容的变化</title>
   <simpara>
-   尽管大多数现有的 PHP 5 代码无需改变就可以工作，但是请注意一些不向下兼容的变化：
+   尽管大多数现有的 PHP 5
+   代码无需改变就可以工作，但是请注意一些不向下兼容的变化：
   </simpara>
   <itemizedlist>
    <listitem>
     <simpara>
-     在 PHP 5.3.x 的所有绑定扩展中应用了新的内部参数解析API, 当给函数传递了不兼容的参数时将返回 NULL. 但有一些例外，比如函数 <function>get_class</function> 在出现错误时将会返回 &false;.
+     在 PHP 5.3.x 的所有绑定扩展中应用了新的内部参数解析
+     API，当给函数传递了不兼容的参数时将返回 &null;。
+     <function>get_class</function> 在出现错误时将会返回 &false;。
+    </simpara>
+   </listitem>
+   
+
+   <listitem>
+    <simpara>
+     <function>clearstatcache</function> 默认不再清除缓存的
+     realpath。
     </simpara>
    </listitem>
    <listitem>
     <simpara>
-     <function>clearstatcache</function> 默认不再清除缓存的 realpath.
+     <function>realpath</function>
+     现在是完全与平台无关的。结果是非法的相对路径比如
+     <literal>__FILE__ 。"/../x"</literal>
+     将不会工作。
     </simpara>
    </listitem>
    <listitem>
     <simpara>
-     <function>realpath</function> 现在是完全与平台无关的. 结果是非法的相对路径比如 <literal>__FILE__ . "/../x"</literal> 将不会工作.
+     <function>call_user_func</function> 系列函数即使被调用者是一个父类也使用 $this。
     </simpara>
    </listitem>
    <listitem>
     <simpara>
-     <function>call_user_func</function> 系列函数即使被调用者是一个父类也使用 $this.
+     数组函数 <function>natsort</function>，<function>natcasesort</function>，<function>usort</function>，<function>uasort</function>，<function>uksort</function>，<function>array_flip</function>，和
+     <function>array_unique</function> 将不再接受对象作为参数。在将这些函数应用于对象时，请首先将对象转换为数组。
+    </simpara>
+   </listitem>
+   
+
+
+
+   <listitem>
+    <simpara>
+     按引用传递参数的函数在被按值传递调用时行为发生改变。此前函数将接受按值传递的参数，现在将抛出致命错误。之前任何期待传递引用但是在调用时传递了常量或者字面值
+     的函数，需要在调用前改为将该值赋给一个变量。
+    </simpara>
+   </listitem>
+   
+
+
+   <listitem>
+    <simpara>
+     新的 mysqlnd 库需要使用 MySQL 4.1 新的 41 字节密码格式。继续使用旧的 16 字节密码将导致
+     <function>mysql_connect</function> 和其它类似函数
+     抛出 <literal>"mysqlnd cannot connect to MySQL 4.1+ using old authentication."</literal> 错误。
+    </simpara>
+   </listitem>
+   
+
+   <listitem>
+    <simpara>
+     新的 mysqlnd 库将不再读取 MySQL 配置文件(my.cnf/my.ini)，这与旧版本的 libmysql 库不同。如果你的代码依赖于这些配置
+     文件，你可以使用 <function>mysqli_options</function> 显式地加载它。注意，这意味着如果
+     PDO 中的 MySQL 支持使用了 mysqlnd 进行编译，PDO 特有常量
+     <constant>PDO::MYSQL_ATTR_READ_DEFAULT_FILE</constant> 和
+     <constant>PDO::MYSQL_ATTR_READ_DEFAULT_GROUP</constant> 将是未定义的。
+    </simpara>
+   </listitem>
+   
+
+   <listitem>
+    <simpara>
+     <classname>SplFileInfo</classname>
+     及其相关目录类会移除末尾的 /。
     </simpara>
    </listitem>
    <listitem>
     <simpara>
-     数组函数 <function>natsort</function>, <function>natcasesort</function>, <function>usort</function>, <function>uasort</function>, <function>uksort</function>, <function>array_flip</function>, 和 <function>array_unique</function> 将不再接受对象作为参数. 在将这些函数应用于对象时, 请首先将对象转换为数组.
-    </simpara>
-   </listitem>
-   <listitem>
-    <simpara>
-     按引用传递参数的函数在被按值传递调用时行为发生改变. 此前函数将接受按值传递的参数, 现在将抛出致命错误. 之前任何期待传递引用但是在调用时传递了常量或者字面值
-     的函数, 需要在调用前改为将该值赋给一个变量。
-    </simpara>
-   </listitem>
-   <listitem>
-    <simpara>
-     新的 mysqlnd 库需要使用 MySQL 4.1 新的 41 字节密码格式。继续使用旧的 16 字节密码将导致 <function>mysql_connect</function> 和其它类似函数
-     抛出 <literal>"mysqlnd cannot connect to MySQL 4.1+ using old authentication."</literal> 错误.
-    </simpara>
-   </listitem>
-   <listitem>
-    <simpara>
-     新的 mysqlnd 库将不再读取 MySQL 配置文件(my.cnf/my.ini), 这与旧版本的 libmysql 库不同. 如果你的代码依赖于这些配置
-     文件, 你可以使用 <function>mysqli_options</function> 显式地加载它. 注意, 这意味着如果 PDO 中的 MySQL 支持使用了 mysqlnd 进行编译，PDO 特有常量 <constant>PDO::MYSQL_ATTR_READ_DEFAULT_FILE</constant> 和
-     <constant>PDO::MYSQL_ATTR_READ_DEFAULT_GROUP</constant> 将是未定义的.
-    </simpara>
-   </listitem>
-   <listitem>
-    <simpara>
-     <classname>SplFileInfo</classname> 及其相关目录类会移除末尾的 /.
-    </simpara>
-   </listitem>
-   <listitem>
-    <simpara>
-     <link linkend="language.oop5.magic.tostring">__toString</link> 魔术方法不再接受参数.
+     <link linkend="language.oop5.magic.tostring">__toString</link>
+     魔术方法不再接受参数。
     </simpara>
    </listitem>
    <listitem>
     <simpara>
      魔术方法 
-     <link linkend="language.oop5.overloading.members">__get</link>, 
-     <link linkend="language.oop5.overloading.members">__set</link>, 
-     <link linkend="language.oop5.overloading.members">__isset</link>, 
-     <link linkend="language.oop5.overloading.members">__unset</link>, and
-     <link linkend="language.oop5.overloading.methods">__call</link> 应该总是公共的(public)且不能是静态的(static). 方法签名是必须的.
+     <link linkend="language.oop5.overloading.members">__get</link>，
+     <link linkend="language.oop5.overloading.members">__set</link>，
+     <link linkend="language.oop5.overloading.members">__isset</link>，
+     <link linkend="language.oop5.overloading.members">__unset</link> 和
+     <link linkend="language.oop5.overloading.methods">__call</link>
+     应该总是公共的 (public) 且不能是静态的 (static)，方法签名是必须的。
     </simpara>
    </listitem>
    <listitem>
     <simpara>
-     现在 <link linkend="language.oop5.overloading.methods">__call</link> 魔术方法在访问私有的(private)和被保护的(protected)方法时被调用.
+     现在 <link linkend="language.oop5.overloading.methods">__call</link>
+     魔术方法在访问私有的 (private) 和被保护的 (protected) 方法时被调用。
     </simpara>
    </listitem>
    <listitem>
     <simpara>
-     函数内 <function>include</function> 或者 <function>require</function> 一个文件时，文件内
-     将不能使用 <function>func_get_arg</function>, <function>func_get_args</function> 和
+     函数内 <function>include</function> 或者
+     <function>require</function> 一个文件时，文件内
+     将不能使用
+     <function>func_get_arg</function>，<function>func_get_args</function> 和
      <function>func_num_args</function> 函数。
     </simpara>
    </listitem>
    <listitem>
     <simpara>
-     新增了一个包裹在 MHASH 扩展外面的仿真层。但是并非所有的算法都涉及到了，值得注意的是 s2k 哈希算法。这意味着 s2k 哈希算法在 PHP 5.3.0 中不再可用。
+     新增了一个包裹在 MHASH 扩展外面的仿真层。但是并非所有的算法都涉及到了，值得注意的是
+     s2k 哈希算法。这意味着 s2k 哈希算法在
+     PHP 5.3.0 中不再可用。
     </simpara>
    </listitem>
   </itemizedlist>
+  
   <simpara>
-   以下关键词被保留，将不能被用作函数名, 类名等。
+   以下关键词被保留，将不能被用作函数名，类名等。
   </simpara>
+  
   <itemizedlist>
    <listitem>
     <simpara>
@@ -144,60 +186,68 @@
  <section xml:id="migration53.new-features">
   <title>新特性</title>
   <simpara>
-   PHP 5.3.0 提供了广泛的新特性:
+   PHP 5.3.0 提供了广泛的新特性：
   </simpara>
   <itemizedlist>
    <listitem>
     <simpara>
-     添加了<link linkend="language.namespaces">命名空间</link>的支持.
+     添加了 <link linkend="language.namespaces">命名空间</link>
+     的支持.
     </simpara>
    </listitem>
    <listitem>
     <simpara>
-     添加了<link linkend="language.oop5.late-static-bindings">静态晚绑定</link>支持.
+     添加了 <link linkend="language.oop5.late-static-bindings">静态晚绑定</link>
+     支持.
     </simpara>
    </listitem>
    <listitem>
     <simpara>
-     添加了<link linkend="control-structures.goto">跳标签</link>支持. 
+     添加了 <link linkend="control-structures.goto">跳转标签</link>
+     (limited goto) 支持。
     </simpara>
    </listitem>
    <listitem>
     <simpara>
-     添加了原生的<link linkend="functions.anonymous">闭包</link>(Lambda/匿名函数)支持.
+     添加了原生的 <link linkend="functions.anonymous">闭包</link>
+     (Lambda/匿名函数) 支持.
     </simpara>
    </listitem>
    <listitem>
     <simpara>
      新增了两个魔术方法,
      <link linkend="language.oop5.overloading.methods">__callStatic</link> 和 
-     <link linkend="language.oop5.magic.invoke">__invoke</link>.
+     <link linkend="language.oop5.magic.invoke">__invoke</link>。
     </simpara>
    </listitem>
    <listitem>
     <simpara>
-     添加了 <link linkend="language.types.string.syntax.nowdoc">Nowdoc</link> 语法支持, 类似于
-     <link linkend="language.types.string.syntax.heredoc">Heredoc</link> 语法, 但是包含单引号.
+     添加了 <link linkend="language.types.string.syntax.nowdoc">Nowdoc</link> 语法支持，类似于
+     <link linkend="language.types.string.syntax.heredoc">Heredoc</link> 语法，但是包含单引号。
     </simpara>
    </listitem>
    <listitem>
     <simpara>
-     使用 <link linkend="language.types.string.syntax.heredoc">Heredoc</link> 来初始化静态变量和类属性/常量变为可能.
+     使用 <link linkend="language.types.string.syntax.heredoc">Heredoc</link>
+     来初始化静态变量和类属性/常量变为可能。
     </simpara>
    </listitem>
    <listitem>
     <simpara>
-     可使用双引号声明 <link linkend="language.types.string.syntax.heredoc">Heredoc</link>, 补充了 <link linkend="language.types.string.syntax.nowdoc">Nowdoc</link> 语法.
+     可使用双引号声明 <link linkend="language.types.string.syntax.heredoc">Heredoc</link>，补充了
+     <link linkend="language.types.string.syntax.nowdoc">Nowdoc</link> 语法。
     </simpara>
    </listitem>
    <listitem>
     <simpara>
-     可在类外部使用 <literal>const</literal> 关键词声明 <link linkend="language.constants.syntax">常量</link>.
+     可在类外部使用 <literal>const</literal> 关键词声明
+     <link linkend="language.constants.syntax">常量</link>。
     </simpara>
    </listitem>
    <listitem>
     <simpara>
-     <link linkend="language.operators.comparison.ternary">三元运算</link>操作符有了简写形式: <literal>?:</literal>.
+     <link linkend="language.operators.comparison.ternary">三元运算</link>
+     操作符有了简写形式：<literal>?:</literal>。
     </simpara>
    </listitem>
    <listitem>
@@ -207,67 +257,123 @@
    </listitem>
    <listitem>
     <simpara>
-     动态访问静态方法变为可能.
+     动态访问静态方法变为可能。
+    </simpara>
+    <informalexample>
+     <programlisting role="php">
+<![CDATA[
+<?php
+class C {
+   public static $foo = 123;
+}
+
+$a = "C";
+echo $a::$foo;
+?>
+]]>
+     </programlisting>
+     &example.outputs;
+     <screen>
+<![CDATA[
+123
+]]>
+     </screen>
+    </informalexample>
+   </listitem>
+   <listitem>
+    <simpara>
+     <link linkend="language.exceptions">异常</link>可以被内嵌：
+    </simpara>
+    <informalexample>
+     <programlisting role="php">
+<![CDATA[
+<?php
+class MyCustomException extends Exception {}
+
+try {
+    throw new MyCustomException("Exceptional", 112);
+} catch (Exception $e) {
+    /* Note the use of the third parameter to pass $e
+     * into the RuntimeException. */
+    throw new RuntimeException("Rethrowing", 911, $e);
+}
+?>
+]]>
+     </programlisting>
+    </informalexample>
+   </listitem>
+   <listitem>
+    <simpara>
+     新增了循环引用的 <link linkend="features.gc">垃圾回收器</link>
+     并且默认是开启的。
     </simpara>
    </listitem>
    <listitem>
     <simpara>
-     <link linkend="language.exceptions">异常</link>可以被内嵌.
-    </simpara>
-   </listitem>
-   <listitem>
-    <simpara>
-     新增了循环引用的垃圾回收器并且默认是开启的.
-    </simpara>
-   </listitem>
-   <listitem>
-    <simpara>
-     <function>mail</function> 现在支持邮件发送日志.
-     (注意: 仅支持通过该函数发送的邮件.)
+     <function>mail</function> 现在支持邮件发送日志，需要通过
+     <link linkend="ini.mail.log">mail.log</link>
+     配置。(注意: 仅支持通过该函数发送的邮件)。
     </simpara>
    </listitem>
   </itemizedlist>
  </section>
 
+ 
+
+
+
+
  <section xml:id="migration53.windows">
   <title>Windows 支持改变</title>
   <simpara>
-   Windows 发行版的改变:
+   Windows 发行版的改变：
   </simpara>
   <itemizedlist>
    <listitem>
     <simpara>
-     最小的 Windows 支持版本是 Windows XP SP3; Windows 98, ME, 2000 和 NT4 将不再被支持.
+     最小的 Windows 支持版本是 Windows XP SP3；Windows
+     98，ME，2000 和 NT4 将不再被支持。
     </simpara>
    </listitem>
    <listitem>
     <simpara>
-     Windows 二进制版支持 i586 以上版本. i386 和 i486 不再被支持.
+     Windows 二进制版支持 i586 以上版本。i386
+     和 i486 不再被支持。
     </simpara>
    </listitem>
    <listitem>
     <simpara>
-     Windows 上的 PHP x64 版本的支持是实验性的.
+     Windows 上的 PHP x64 版本的支持是实验性的。
     </simpara>
    </listitem>
    <listitem>
     <simpara>
-     通过使用 Visual Studio 2008, 编译器现在支持 Visual C++ 9 (VC9). 基于 VC9 的快照和发行版均可用. 旧的使用 VC6 的二进制版本仍然会与 VC9 版本同时被支持和发行.
+     通过使用 Visual Studio 2008，编译器现在支持 Visual C++ 9
+     (VC9)。基于 VC9 的快照和发行版均可用。旧的使用
+     VC6 的二进制版本仍然会与 VC9 版本同时被支持和发行.
     </simpara>
    </listitem>
    <listitem>
     <simpara>
-     <link linkend="ref.pdo-oci">PDO_OCI</link> <literal>php_pdo_oci8.dll</literal> 库(配合 Oracle version 8 客户端库使用)已经不会被内建. 作为替代, 使用 <literal>php_pdo_oci.dll</literal> (注意没有 '8') 配合 Oracle 10 或 11 客户端库. 仍然支持其他数据库版本的连接.
+     <link linkend="ref.pdo-oci">PDO_OCI</link>
+     <literal>php_pdo_oci8.dll</literal>
+     库 (配合 Oracle version 8 客户端库使用) 已经不会被内建。作为替代，使用
+     <literal>php_pdo_oci.dll</literal> (注意没有 '8')
+     配合 Oracle 10 或 11 客户端库。仍然支持其他数据库版本的连接.
     </simpara>
    </listitem>
    <listitem>
     <simpara>
-     对于 <link linkend="book.oci8">OCI8</link> 扩展而言, 除了 <literal>php_oci8.dll</literal> 之外, 一个新的库 <literal>php_oci8_11g.dll</literal> 可用. 但仅仅只能同时打开一个库. 配合 Oracle 10.2 客户端库使用 <literal>php_oci8.dll</literal>. 配合 Oracle 11 客户端库使用 <literal>php_oci8_11g.dll</literal>. 仍然支持其他数据库版本的连接.
+     对于 <link linkend="book.oci8">OCI8</link> 扩展而言，除了
+     <literal>php_oci8.dll</literal> 之外，一个新的库
+     <literal>php_oci8_11g.dll</literal> 可用。但仅仅只能同时打开一个库。配合 Oracle 10.2 客户端库使用
+     <literal>php_oci8.dll</literal>。配合 Oracle 11 客户端库使用
+     <literal>php_oci8_11g.dll</literal>。仍然支持其他数据库版本的连接.
     </simpara>
    </listitem>
   </itemizedlist>
   <simpara>
-   新增了如下这些 Windows 支持函数:
+   新增了如下这些 Windows 支持函数：
   </simpara>
   <itemizedlist>
    <listitem>
@@ -333,7 +439,8 @@
    <listitem>
     <simpara>
      <function>socket_create_pair</function>
-     - 该函数之前就可以在 Windows 平台使用, 但是自 PHP 4.3.0 起就因为一个 Bug 的原因而关闭了.
+     - 该函数之前就可以在 Windows 平台使用，但是自
+     PHP 4.3.0 起就因为一个 Bug 的原因而关闭了.
     </simpara>
    </listitem>
    <listitem>
@@ -363,48 +470,62 @@
   <itemizedlist>
    <listitem>
     <simpara>
-     改进了 <function>stat</function>, <function>touch</function>, <function>filemtime</function>, <function>filesize</function> 等相关函数的移植性(对于可用数据100%可移植).
+     改进了
+     <function>stat</function>，<function>touch</function>，<function>filemtime</function>，<function>filesize</function>
+     等相关函数的移植性 (对于可用数据100%可移植)。
     </simpara>
    </listitem>
    <listitem>
     <simpara>
-     现在可以使用 <function>link</function> 函数来在 Windows 平台上创建硬链接, 创建符号链接则使用 <function>symlink</function> 函数. 硬链接自 Windows 2000 起可用, 符号链接则自 Windows Vista 起可用.
+     现在可以使用
+     <function>link</function> 函数来在 Windows 平台上创建硬链接，创建符号链接则使用
+     <function>symlink</function> 函数。硬链接自
+     Windows 2000 起可用，符号链接则自 Windows Vista 起可用。
     </simpara>
    </listitem>
    <listitem>
     <simpara>
-     Windows 版本的 PHP 包含一组以 <literal>PHP_WINDOWS_*</literal> 为前缀的常量. 这些常量的列表可以在<xref linkend="info.constants" />找到.
+     Windows 版本的 PHP 包含一组以
+     <literal>PHP_WINDOWS_*</literal> 为前缀的常量。这些常量的列表可以在
+     <xref linkend="info.constants" />找到。
     </simpara>
    </listitem>
   </itemizedlist>
   <warning>
    <simpara>
-    丢弃 ISAPI 模块支持. 使用改进的 FastCGI SAPI 模块替代.
+    丢弃 ISAPI 模块支持。使用改进的 FastCGI SAPI 模块替代。
    </simpara>
   </warning>
   <note>
    <simpara>
-    一个新的专注于 PHP on Windows 的站点可用, 包括下载, 发布候选版本, 和各种快照(thread-safe/not-thread-safe, VC6/VC9, x86/x64). 网站的地址是 <link xlink:href="&url.php.windows;">&url.php.windows;</link>.
+    一个新的专注于 PHP on Windows 的站点可用，包括下载，发布候选版本，和各种快照
+    (thread-safe/not-thread-safe，VC6/VC9，x86/x64)。网站的地址是
+    <link xlink:href="&url.php.windows;">&url.php.windows;</link>。
    </simpara>
   </note>
  </section>
+
+ 
+
+
 
  <section xml:id="migration53.sapi">
   <title>SAPI 模块的改变</title>
   <itemizedlist>
    <listitem>
     <simpara>
-     一个新增的名为 litespeed 的 SAPI 模块可用.
+     一个新增的名为 litespeed 的 SAPI 模块可用。
     </simpara>
    </listitem>
    <listitem>
     <simpara>
-     CGI SAPI 中的 FastCGI 支持总是打开并且无法关闭. 更多信息请查看 <literal>sapi/cgi/CHANGES</literal>.
+     CGI SAPI 中的 FastCGI 支持总是打开并且无法关闭。更多信息请查看
+     <literal>sapi/cgi/CHANGES</literal>。
     </simpara>
    </listitem>
    <listitem>
     <simpara>
-     一个新的 CGI SAPI 选项 <literal>-T</literal> 可以被用来衡量一个脚本的重复执行时间.
+     一个新的 CGI SAPI 选项 <literal>-T</literal> 可以被用来衡量一个脚本的重复执行时间。
     </simpara>
    </listitem>
    <listitem>
@@ -415,21 +536,23 @@
    </listitem>
    <listitem>
     <simpara>
-     <function>dl</function> 函数默认被关闭, 并且现在只在 CLI, CGI, 和内嵌的 SAPI 环境下可用.
+     <function>dl</function> 函数默认被关闭，并且现在只在 CLI，CGI，和内嵌的 SAPI 环境下可用。
     </simpara>
    </listitem>
   </itemizedlist>
  </section>
 
+
+
  <section xml:id="migration53.deprecated">
   <title>PHP 5.3.x 中弃用的功能</title>
   <simpara>
    PHP 5.3.0 新增了两个错误等级: <constant>E_DEPRECATED</constant> 
-   和 <constant>E_USER_DEPRECATED</constant>. 错误等级 <constant>E_DEPRECATED</constant> 被用来说明一个函数或者功能已经被弃用. <constant>E_USER_DEPRECATED</constant> 等级目的在于表明用户代码中的弃用功能, 类似于
-   <constant>E_USER_ERROR</constant> 和 <constant>E_USER_WARNING</constant> 等级.
+   和 <constant>E_USER_DEPRECATED</constant>。错误等级 <constant>E_DEPRECATED</constant> 被用来说明一个函数或者功能已经被弃用。<constant>E_USER_DEPRECATED</constant> 等级目的在于表明用户代码中的弃用功能，类似于
+   <constant>E_USER_ERROR</constant> 和 <constant>E_USER_WARNING</constant> 等级。
   </simpara>
   <simpara>
-   下面是被弃用的 INI 指令列表. 使用下面任何指令都将导致 <constant>E_DEPRECATED</constant> 错误.
+   下面是被弃用的 INI 指令列表。使用下面任何指令都将导致 <constant>E_DEPRECATED</constant> 错误。
   </simpara>
   <itemizedlist>
    <listitem>
@@ -581,12 +704,13 @@
    </listitem>
    <listitem>
     <simpara>
-     废弃以字符串传递区域设置名称. 使用 LC_* 系列常量替代.
+     废弃以字符串传递区域设置名称。使用 LC_* 系列常量替代。
     </simpara>
    </listitem>
    <listitem>
     <simpara>
-     <function>mktime</function> 的 <parameter>is_dst</parameter> 参数. 使用新的时区处理函数替代.
+     <function>mktime</function> 的 <parameter>is_dst</parameter>
+     参数。使用新的时区处理函数替代。
     </simpara>
    </listitem>
   </itemizedlist>
@@ -596,12 +720,13 @@
   <itemizedlist>
    <listitem>
     <simpara>
-     弃用通过引用分配 <link linkend="language.oop5.basic.new">new</link> 的返回值.
+     弃用通过引用分配 <link linkend="language.oop5.basic.new">new</link>
+     的返回值。
     </simpara>
    </listitem>
    <listitem>
     <simpara>
-     调用时传递引用被弃用.
+     调用时传递引用被弃用。
     </simpara>
    </listitem>
   </itemizedlist>
@@ -610,7 +735,7 @@
  <section xml:id="migration53.undeprecated">
   <title>PHP 5.3.x 保留的功能</title>
   <simpara>
-   <function>is_a</function> 函数被保留. 它不再抛出 <constant>E_STRICT</constant> 错误.
+   <function>is_a</function> 函数被保留。它不再抛出 <constant>E_STRICT</constant> 错误。
   </simpara>
  </section>
 
@@ -631,7 +756,7 @@
    <listitem>
     <simpara>
      <function>copy</function>
-     - 新增流环境参数 <parameter>context</parameter>.
+     - 新增流环境参数 <parameter>context</parameter>。
     </simpara>
    </listitem>
    <listitem>
@@ -700,7 +825,7 @@
     <simpara>
      <function>stream_select</function>,
      <function>stream_set_blocking</function>,
-     <function>stream_set_timeout</function>, 和
+     <function>stream_set_timeout</function>，和
      <function>stream_set_write_buffer</function> 使用用户空间流包裹器.
     </simpara>
    </listitem>
@@ -765,7 +890,7 @@
    <listitem>
     <simpara>
      <function>forward_static_call_array</function>
-     - 从一个方法环境调用一个用户函数, 使用数组中的元素作为参数.
+     - 从一个方法环境调用一个用户函数，使用数组中的元素作为参数.
     </simpara>
    </listitem>
    <listitem>
@@ -871,13 +996,13 @@
    <listitem>
     <simpara>
      <function>date_add</function>
-     - 向 <classname>DateTime</classname> 对象增加一定数量的天, 月, 年, 小时, 分钟和秒数.
+     - 向 <classname>DateTime</classname> 对象增加一定数量的天，月，年，小时，分钟和秒数.
     </simpara>
    </listitem>
    <listitem>
     <simpara>
      <function>date_create_from_format</function>
-     - 根据给定的格式, 返回一个 <classname>DateTime</classname> 对象.
+     - 根据给定的格式，返回一个 <classname>DateTime</classname> 对象.
     </simpara>
    </listitem>
    <listitem>
@@ -889,7 +1014,7 @@
    <listitem>
     <simpara>
      <function>date_get_last_errors</function>
-     - 返回最后的日期/时间操作中产生的警告和错误.
+     - 返回最后的日期/时间操作中产生的警告和错误。
     </simpara>
    </listitem>
    <listitem>
@@ -901,7 +1026,7 @@
    <listitem>
     <simpara>
      <function>date_sub</function>
-     - 从 <classname>DateTime</classname> 对象减去一定数量的天, 月, 年, 时和秒数.
+     - 从 <classname>DateTime</classname> 对象减去一定数量的天，月，年，时和秒数.
     </simpara>
    </listitem>
    <listitem>
@@ -959,7 +1084,7 @@
    <listitem>
     <simpara>
      <function>json_last_error</function>
-     - 返回最后发生的 JSON 错误.
+     - 返回最后发生的 JSON 错误。
     </simpara>
    </listitem>
   </itemizedlist>
@@ -1019,7 +1144,7 @@
    <listitem>
     <simpara>
      <function>pcntl_sigtimedwait</function>
-     - 等待信号, 但是有超时时间.
+     - 等待信号，但是有超时时间.
     </simpara>
    </listitem>
    <listitem>
@@ -1035,7 +1160,7 @@
    <listitem>
     <simpara>
      <function>preg_filter</function>
-     - 执行正则查找和替换, 仅仅返回匹配正则的结果.
+     - 执行正则查找和替换，仅仅返回匹配正则的结果.
     </simpara>
    </listitem>
   </itemizedlist>
@@ -1051,13 +1176,13 @@
    <listitem>
     <simpara>
      <function>shm_has_var</function>
-     - 检查在一个共享内存段中, 是否存在指定的键(key).
+     - 检查在一个共享内存段中，是否存在指定的键(key).
     </simpara>
    </listitem>
   </itemizedlist>
 
   <simpara>
-   以下函数被原生支持, 因此它们在所有运行 PHP 的操作系统上均可用.
+   以下函数被原生支持，因此它们在所有运行 PHP 的操作系统上均可用。
   </simpara>
   <itemizedlist>
    <listitem>
@@ -1166,13 +1291,13 @@
    <listitem>
     <simpara>
      <function>DateTime::add</function>
-     - 向一个 <classname>DateTime</classname> 对象加上若干天, 月, 年, 小时, 分钟和秒.
+     - 向一个 <classname>DateTime</classname> 对象加上若干天，月，年，小时，分钟和秒.
     </simpara>
    </listitem>
    <listitem>
     <simpara>
      <function>DateTime::createFromFormat</function>
-     - 根据给定的格式, 返回一个新的格式化的<classname>DateTime</classname>对象.
+     - 根据给定的格式，返回一个新的格式化的<classname>DateTime</classname>对象.
     </simpara>
    </listitem>
    <listitem>
@@ -1184,13 +1309,13 @@
    <listitem>
     <simpara>
      <function>DateTime::getLastErrors</function>
-     - 返回最后的日期/时间处理中的警告和错误.
+     - 返回最后的日期/时间处理中的警告和错误。
     </simpara>
    </listitem>
    <listitem>
     <simpara>
      <function>DateTime::sub</function>
-     - 从 <classname>DateTime</classname> 对象中减去若干天, 月, 年, 小时, 分钟和秒.
+     - 从 <classname>DateTime</classname> 对象中减去若干天，月，年，小时，分钟和秒.
     </simpara>
    </listitem>
   </itemizedlist>
@@ -1313,13 +1438,13 @@
    <listitem>
     <simpara>
      <link linkend="book.fileinfo">文件信息</link>
-     - 已经被移除的 <link linkend="book.mime-magic">Mimetype</link> 扩展的一个改进的、更加可靠的替代, 以 BC 为特色.
+     - 已经被移除的 <link linkend="book.mime-magic">Mimetype</link> 扩展的一个改进的、更加可靠的替代，以 BC 为特色.
     </simpara>
    </listitem>
    <listitem>
     <simpara>
      <link linkend="book.intl">INTL</link>
-     - 国际化扩展. INTL 是 <link xlink:href="&url.icu.home;">ICU</link> 库的一个包装器.
+     - 国际化扩展。INTL 是 <link xlink:href="&url.icu.home;">ICU</link> 库的一个包装器.
     </simpara>
    </listitem>
    <listitem>
@@ -1336,16 +1461,16 @@
    </listitem>
   </itemizedlist>
   <simpara>
-   mysqlnd 是随 PHP 发布的新核心库. 它是 PHP 独有的 libmysql 的替代. 如果系统上未发现 libmysql, mysqlnd 将被用来构建 <link linkend="book.mysql">mysql</link>,
+   mysqlnd 是随 PHP 发布的新核心库。它是 PHP 独有的 libmysql 的替代。如果系统上未发现 libmysql，mysqlnd 将被用来构建 <link linkend="book.mysql">mysql</link>,
    <link linkend="book.mysqli">mysqli</link> 
-   和 <link linkend="ref.pdo-mysql">PDO_MySQL</link> 扩展. 甚至 libmysql 存在的情况下, 它也可以被用来代替 libmysql. 由于性能上的原因, 推荐在全部的 PHP 安装中都使用 mysqlnd.
+   和 <link linkend="ref.pdo-mysql">PDO_MySQL</link> 扩展。甚至 libmysql 存在的情况下，它也可以被用来代替 libmysql。由于性能上的原因，推荐在全部的 PHP 安装中都使用 mysqlnd.
   </simpara>
  </section>
 
  <section xml:id="migration53.removed-extensions">
   <title>被移除的扩展</title>
   <simpara>
-   这些扩展已经被移动至 PECL 并且不再是 PHP 发布的一部分. 这些扩展的 PECL 包版本将根据用户需求创建.
+   这些扩展已经被移动至 PECL 并且不再是 PHP 发布的一部分。这些扩展的 PECL 包版本将根据用户需求创建.
   </simpara>
   <itemizedlist>
    <listitem>
@@ -1393,7 +1518,7 @@
    <listitem>
     <simpara>
      <link linkend="book.mhash">mhash</link>
-     - 停用; 使用 <link linkend="book.hash">hash</link> 扩展代替. <link linkend="book.hash">hash</link> 全兼容 mhash; 全部使用旧函数的应用程序仍将可以工作.
+     - 停用; 使用 <link linkend="book.hash">hash</link> 扩展代替。<link linkend="book.hash">hash</link> 全兼容 mhash; 全部使用旧函数的应用程序仍将可以工作.
     </simpara>
    </listitem>
   </itemizedlist>
@@ -1441,7 +1566,7 @@
     <simpara>
      <link linkend="book.network">Network</link>
      - <function>dns_check_record</function> 现在返回一个额外的 "entries"
-     索引, 包含 TXT 元素.
+     索引，包含 TXT 元素.
     </simpara>
    </listitem>
    <listitem>
@@ -1459,7 +1584,7 @@
    <listitem>
     <simpara>
      <link linkend="book.oci8">OCI8</link>
-     - 在持久连接上调用 <function>oci_close</function> 或者在作用域外引用持久连接, 将回滚任何尚未提交的事务. 为了避免意外的行为, 根据需要明确发布和回滚事务. 使用 INI 指令<link linkend="ini.oci8.old-oci-close-semantics">oci8.old_oci_close_semantics</link>可以打开旧的行为.
+     - 在持久连接上调用 <function>oci_close</function> 或者在作用域外引用持久连接，将回滚任何尚未提交的事务。为了避免意外的行为，根据需要明确发布和回滚事务。使用 INI 指令<link linkend="ini.oci8.old-oci-close-semantics">oci8.old_oci_close_semantics</link>可以打开旧的行为.
     </simpara>
     <simpara>
      数据库驻留连接池(DRCP)和快速应用通知(FAN)获得支持.
@@ -1475,13 +1600,13 @@
    <listitem>
     <simpara>
      <link linkend="book.openssl">OpenSSL</link>
-     - 支持 OpenSSL 摘要和加密函数. 访问 DSA, RSA 和 DH 键的内部值变为可能.
+     - 支持 OpenSSL 摘要和加密函数。访问 DSA，RSA 和 DH 键的内部值变为可能.
     </simpara>
    </listitem>
    <listitem>
     <simpara>
      <link linkend="book.session">Session</link>
-     - 当应用了 <link linkend="ini.open-basedir">open_basedir</link> 限制, Session 不再将 Session 文件存储在 <literal>"/tmp"</literal> 目录中, 除非 <literal>"/tmp"</literal> 目录被明确添加到许可路径列表.
+     - 当应用了 <link linkend="ini.open-basedir">open_basedir</link> 限制，Session 不再将 Session 文件存储在 <literal>"/tmp"</literal> 目录中，除非 <literal>"/tmp"</literal> 目录被明确添加到许可路径列表.
     </simpara>
    </listitem>
    <listitem>
@@ -2054,13 +2179,13 @@
  <section xml:id="migration53.ini">
   <title>INI 文件处理改变</title>
   <simpara>
-   PHP 5.3.0 显著改进了 INI 文件的性能和解析, 并且新增了若干语法功能.
+   PHP 5.3.0 显著改进了 INI 文件的性能和解析，并且新增了若干语法功能.
   </simpara>
   <itemizedlist>
    <listitem>
     <simpara>
-     标准的 &php.ini; 文件被重新组织和命名. 
-     <literal>php.ini-development</literal> 包含在开发环境中推荐使用的设置. <literal>php.ini-production</literal>
+     标准的 &php.ini; 文件被重新组织和命名。
+     <literal>php.ini-development</literal> 包含在开发环境中推荐使用的设置。<literal>php.ini-production</literal>
      包含在生产环境中推荐使用的设置.
     </simpara>
    </listitem>
@@ -2068,19 +2193,19 @@
     <simpara>
      支持两个特殊章节:
      <literal>[PATH=/opt/httpd/www.example.com/]</literal> 和 
-     <literal>[HOST=www.example.com]</literal>. 这两个章节里的指令不能被用户定义的 INI 文件或者运行时覆盖. 关于这些章节的更多信息, 可以<link linkend="ini.sections">这里</link>找到.
+     <literal>[HOST=www.example.com]</literal>。这两个章节里的指令不能被用户定义的 INI 文件或者运行时覆盖。关于这些章节的更多信息，可以<link linkend="ini.sections">这里</link>找到.
     </simpara>
    </listitem>
    <listitem>
     <simpara>
      移除了 <literal>zend_extension_debug</literal> and
-     <literal>zend_extension_ts</literal>. 使用
+     <literal>zend_extension_ts</literal>。使用
      <literal>zend_extension</literal> 指令来加载全部 Zend 扩展.
     </simpara>
    </listitem>
    <listitem>
     <simpara>
-     移除了 <literal>zend.ze1_compatibility_mode</literal>. 如果该 INI 指令被设置为 On, 启动时将抛出 <constant>E_ERROR</constant> 级别错误.
+     移除了 <literal>zend.ze1_compatibility_mode</literal>。如果该 INI 指令被设置为 On，启动时将抛出 <constant>E_ERROR</constant> 级别错误。
     </simpara>
    </listitem>
    <listitem>
@@ -2090,7 +2215,7 @@
    </listitem>
    <listitem>
     <simpara>
-     <literal>"ini变量"</literal> 现在几乎在 &php.ini; 文件的任何地方都可以使用.
+     <literal>"ini变量"</literal> 现在几乎在 &php.ini; 文件的任何地方都可以使用。
     </simpara>
    </listitem>
    <listitem>
@@ -2141,18 +2266,18 @@
    <listitem>
     <simpara>
      新的 .htaccess-style 用户 INI 文件机制中的 <literal>user_ini.filename</literal> 和
-     <literal>user_ini.cache_ttl</literal>.
+     <literal>user_ini.cache_ttl</literal>。
     </simpara>
    </listitem>
    <listitem>
     <simpara>
-     新增 <literal>mbstring.http_output_conv_mimetype</literal>. 
+     新增 <literal>mbstring.http_output_conv_mimetype</literal>。
      该指令指定了 <function>mb_output_handler</function> 激活内容类型的正则表达式.
     </simpara>
    </listitem>
    <listitem>
     <simpara>
-     新增 <literal>request_order</literal>. 允许控制哪些外部变量在 <varname>$_REQUEST</varname> 中可用.
+     新增 <literal>request_order</literal>。允许控制哪些外部变量在 <varname>$_REQUEST</varname> 中可用。
     </simpara>
    </listitem>
   </itemizedlist>
@@ -2167,7 +2292,7 @@
    </listitem>
    <listitem>
     <simpara>
-     <literal>oci8.default_prefetch</literal> 变更为从 <literal>"10"</literal> 到 <literal>"100"</literal>.
+     <literal>oci8.default_prefetch</literal> 变更为从 <literal>"10"</literal> 到 <literal>"100"</literal>。
     </simpara>
    </listitem>
   </itemizedlist>
@@ -2183,12 +2308,12 @@
    </listitem>
    <listitem>
     <simpara>
-     <classname>SplObjectStorage</classname> 现在支持 <classname>ArrayAccess</classname>. 现在可以在 <classname>SplObjectStorage</classname> 中存储关联信息对象.
+     <classname>SplObjectStorage</classname> 现在支持 <classname>ArrayAccess</classname>。现在可以在 <classname>SplObjectStorage</classname> 中存储关联信息对象.
     </simpara>
    </listitem>
    <listitem>
     <simpara>
-     在 GD 扩展中, 通过 <function>imagefilter</function> 函数, 可以提供像素支持.
+     在 GD 扩展中，通过 <function>imagefilter</function> 函数，可以提供像素支持.
     </simpara>
    </listitem>
    <listitem>
@@ -2198,17 +2323,17 @@
    </listitem>
    <listitem>
     <simpara>
-     如果会话启动失败, <function>session_start</function> 现在将返回 &false;.
+     如果会话启动失败，<function>session_start</function> 现在将返回 &false;.
     </simpara>
    </listitem>
    <listitem>
     <simpara>
-     <function>property_exists</function> 可以检查一个属性的存在性, 而不管它的访问控制类型(类似于 <function>method_exists</function>).
+     <function>property_exists</function> 可以检查一个属性的存在性，而不管它的访问控制类型(类似于 <function>method_exists</function>).
     </simpara>
    </listitem>
    <listitem>
     <simpara>
-     <link linkend="ini.include-path">include_path</link> 现在可以使用<link linkend="wrappers">Stream 包装器</link>.
+     <link linkend="ini.include-path">include_path</link> 现在可以使用<link linkend="wrappers">Stream 包装器</link>。
     </simpara>
    </listitem>
    <listitem>
@@ -2218,24 +2343,24 @@
    </listitem>
    <listitem>
     <simpara>
-     如果没有明确传递上下文环境, <link linkend="ref.dir">目录函数</link> <function>opendir</function>, <function>scandir</function>, 和
+     如果没有明确传递上下文环境，<link linkend="ref.dir">目录函数</link> <function>opendir</function>，<function>scandir</function>，和
      <function>dir</function> 将使用默认的流上下文环境.
     </simpara>
    </listitem>
    <listitem>
     <simpara>
-     <function>crypt</function> 函数支持 Blowfish 和 DES 算法, 并且 <function>crypt</function> 的特点是非常便捷. 
-     PHP 有它自己内部的算法实现, 不管是否找到 <literal>crypt</literal> 或 <literal>crypt_r</literal>.
+     <function>crypt</function> 函数支持 Blowfish 和 DES 算法，并且 <function>crypt</function> 的特点是非常便捷。
+     PHP 有它自己内部的算法实现，不管是否找到 <literal>crypt</literal> 或 <literal>crypt_r</literal>。
     </simpara>
    </listitem>
    <listitem>
     <simpara>
-     在全部平台上, <function>getopt</function> 开始接受"长选项". 可选值和作为短选项分隔符的 <literal>=</literal> 被支持.
+     在全部平台上，<function>getopt</function> 开始接受"长选项"。可选值和作为短选项分隔符的 <literal>=</literal> 被支持.
     </simpara>
    </listitem>
    <listitem>
     <simpara>
-     <function>fopen</function> 新增了一个模式选项(<literal>n</literal>), 它传递 <constant>O_NONBLOCK</constant> 常量给底层的 <literal>open()</literal> 系统调用. 注意, Windows 上该模式尚未得到支持. 
+     <function>fopen</function> 新增了一个模式选项(<literal>n</literal>)，它传递 <constant>O_NONBLOCK</constant> 常量给底层的 <literal>open()</literal> 系统调用。注意，Windows 上该模式尚未得到支持。
     </simpara>
    </listitem>
    <listitem>
@@ -2245,7 +2370,7 @@
    </listitem>
    <listitem>
     <simpara>
-     mhash 扩展已经移动至 PECL, 但如果 PHP 使用 <literal>--with-mhash</literal> 选项参数进行编译, <link linkend="ref.hash">Hash</link> 扩展也将提供 mhash 支持. 注意, 不管是否开启 mhash 算法, Hash 扩展都无需 mhash 库可用.
+     mhash 扩展已经移动至 PECL，但如果 PHP 使用 <literal>--with-mhash</literal> 选项参数进行编译，<link linkend="ref.hash">Hash</link> 扩展也将提供 mhash 支持。注意，不管是否开启 mhash 算法，Hash 扩展都无需 mhash 库可用。
     </simpara>
    </listitem>
   </itemizedlist>
