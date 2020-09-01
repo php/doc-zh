@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
+<!-- EN-Revision: 7916455ba0cdb65c1590977df92ad2dd99f4c79f Maintainer: Avenger Status: ready -->
 
 <refentry xml:id="memcached.increment" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
@@ -15,10 +16,14 @@
    <methodparam choice="opt"><type>int</type><parameter>offset</parameter><initializer>1</initializer></methodparam>
   </methodsynopsis>
   <para>
-   <function>Memcached::increment</function>将一个数值元素增加参数<parameter>offset</parameter>指定的大小。
-   如果元素的值不是数值类型，将其作为0处理。如果元素不存在<function>Memcached::increment</function>失败。
+
+   <function>Memcached::increment</function>
+   将一个数值元素增加参数 <parameter>offset</parameter> 指定的大小。如果元素的值不是数值类型，将返回错误。如果元素不存在，
+   <function>Memcached::increment</function> 会将元素设置成
+   <parameter>initial_value</parameter> 指定的值。
   </para>
  </refsect1>
+
 
  <refsect1 role="parameters">
   &reftitle.parameters;
@@ -28,7 +33,7 @@
      <term><parameter>key</parameter></term>
      <listitem>
       <para>
-       要增加值的元素的key。
+       要增加值的元素的 key。
       </para>
      </listitem>
     </varlistentry>
@@ -40,6 +45,22 @@
       </para>
      </listitem>
     </varlistentry>
+    <varlistentry>
+     <term><parameter>initial_value</parameter></term>
+     <listitem>
+      <para>
+       如果元素不存在，要设置的默认值。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>expiry</parameter></term>
+     <listitem>
+      <para>
+       设置元素值的过期时间。
+      </para>
+     </listitem>
+    </varlistentry>
    </variablelist>
   </para>
  </refsect1>
@@ -48,7 +69,6 @@
   &reftitle.returnvalues;
   <para>
    成功时返回元素的新值&return.falseforfailure;。
-   如果key不存在<methodname>Memcached::getResultCode</methodname>方法返回<constant>Memcached::RES_NOTFOUND</constant>。
   </para>
  </refsect1>
 
@@ -65,11 +85,13 @@ $m->addServer('localhost', 11211);
 
 $m->set('counter', 0);
 $m->increment('counter');
-$m->increment('counter', 10);
-var_dump($m->get('counter'));
+$n = $m->increment('counter', 10);
+var_dump($n);
 
-$m->set('key', 'abc');
-$m->increment('counter');
+$m->set('counter', 'abc');
+$n = $m->increment('counter');
+// ^ will fail due to item value not being numeric
+var_dump($n);
 ?>
 ]]>
     </programlisting>
@@ -77,7 +99,7 @@ $m->increment('counter');
     <screen>
 <![CDATA[
 int(11)
-string(1) "1"
+bool(false)
 ]]>
     </screen>
    </example>
@@ -89,6 +111,8 @@ string(1) "1"
   <para>
    <simplelist>
     <member><methodname>Memcached::decrement</methodname></member>
+    <member><methodname>Memcached::decrementByKey</methodname></member>
+    <member><methodname>Memcached::incrementByKey</methodname></member>
    </simplelist>
   </para>
  </refsect1>
