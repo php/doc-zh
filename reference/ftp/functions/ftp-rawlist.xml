@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: n/a Maintainer: Avenger Status: ready -->
+<!-- EN-Revision: b8758b0605e80c4e3610137b7502a6abeea5c69b Maintainer: Avenger Status: ready -->
   <refentry xml:id="function.ftp-rawlist" xmlns="http://docbook.org/ns/docbook">
    <refnamediv>
     <refname>ftp_rawlist</refname>
@@ -12,6 +12,7 @@
      <type>array</type><methodname>ftp_rawlist</methodname>
      <methodparam><type>resource</type><parameter>ftp_stream</parameter></methodparam>
      <methodparam><type>string</type><parameter>directory</parameter></methodparam>
+   <methodparam choice="opt"><type>bool</type><parameter>recursive</parameter><initializer>&false;</initializer></methodparam>
     </methodsynopsis>
     <para>
      <function>ftp_rawlist</function> 函数将执行 FTP
@@ -34,7 +35,7 @@
       <term><parameter>directory</parameter></term>
       <listitem>
        <para>
-        目录路径。
+        要操作的目录路径，可以包括 <command>LIST</command> 参数。
        </para>
       </listitem>
      </varlistentry>
@@ -55,29 +56,34 @@
     返回一个数组，数组的每个元素为返回文本的每一行，输出结构不会被解析。使用函数
     <function>ftp_systype</function> 可以用来判断 FTP 服务器的类型，从而可以用来判断返回列表的类型。
    </para>
+  <para>
+   The output is not parsed in any way. The system type identifier returned by
+   <function>ftp_systype</function> can be used to determine how the results 
+   should be interpreted.
+  </para>
    </refsect1>
- <refsect1 role="examples">
+<refsect1 role="examples">
   &reftitle.examples;
   <para>
    <example>
-    <title><function>ftp_rawlist</function> 例子</title>
+    <title><function>ftp_rawlist</function> 示例</title>
     <programlisting role="php">
 <![CDATA[
 <?php
 
-// set up basic connection
+// 初始化连接
 $conn_id = ftp_connect($ftp_server);
 
-// login with username and password
+// 使用用户名和密码登录
 $login_result = ftp_login($conn_id, $ftp_user_name, $ftp_user_pass);
 
-// get the file list for /
+// 获取 / 路径下的文件列表
 $buff = ftp_rawlist($conn_id, '/');
 
-// close the connection
+// 关闭连接
 ftp_close($conn_id);
 
-// output the buffer
+// 输出
 var_dump($buff);
 ?>
 ]]>
@@ -98,34 +104,12 @@ array(3) {
    </example>
   </para>
  </refsect1>
- <refsect1 role="changelog">
-  &reftitle.changelog;
-  <para>
-   <informaltable>
-    <tgroup cols="2">
-     <thead>
-      <row>
-       <entry>&Version;</entry>
-       <entry>&Description;</entry>
-      </row>
-     </thead>
-     <tbody>
-      <row>
-       <entry>4.3.0</entry>
-       <entry>
-        增加 <parameter>recursive</parameter> 参数。
-       </entry>
-      </row>
-     </tbody>
-    </tgroup>
-   </informaltable>
-  </para>
- </refsect1>
  <refsect1 role="seealso">
   &reftitle.seealso;
   <para>
    <simplelist>
     <member><function>ftp_nlist</function></member>
+    <member><function>ftp_mlsd</function></member>
    </simplelist>
   </para>
  </refsect1>
