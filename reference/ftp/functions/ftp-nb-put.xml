@@ -1,91 +1,175 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: Avenger Status: ready -->
-  <refentry xml:id="function.ftp-nb-put" xmlns="http://docbook.org/ns/docbook">
-   <refnamediv>
-    <refname>ftp_nb_put</refname>
-    <refpurpose>存储一个文件至 FTP 服务器（non-blocking）</refpurpose>
-   </refnamediv>
-   <refsect1>
-    <title>说明</title>
-    <methodsynopsis>
-     <type>int</type><methodname>ftp_nb_put</methodname>
-     <methodparam><type>resource</type><parameter>ftp_stream</parameter></methodparam>
-     <methodparam><type>string</type><parameter>remote_file</parameter></methodparam>
-     <methodparam><type>string</type><parameter>local_file</parameter></methodparam>
-     <methodparam><type>int</type><parameter>mode</parameter></methodparam>
-     <methodparam choice="opt"><type>int</type><parameter>startpos</parameter></methodparam>
-    </methodsynopsis>
-    <para>
-     <function>ftp_nb_put</function> 函数用来把本地文件 <parameter>local_file</parameter>
-     存储到 FTP 服务器上由 <parameter>remote_file</parameter> 参数指定的路径。传输模式参数
-     <parameter>mode</parameter> 只能为 <constant>FTP_ASCII</constant> (文本模式) 或 <constant>FTP_BINARY</constant>
-     (二进制模式) 两种。与函数 <function>ftp_put</function>
-     不同的是，此函数上传文件的时候采用的是异步传输模式，也就意味着在文件传送的过程中，你的程序可以继续干其它的事情。
-    </para>
-    <para>
-     返回 <constant>FTP_FAILED</constant>，<constant>FTP_FINISHED</constant>
-     或 <constant>FTP_MOREDATA</constant>。
-    </para>
-    <para>
-     <example>
-      <title><function>ftp_nb_put</function> 实例</title>
-      <programlisting role="php">
+<!-- EN-Revision: 633eac97ff9a4b290b0762b1867ad15fc457ba40 Maintainer: avenger Status: ready -->
+<refentry xml:id="function.ftp-nb-put" xmlns="http://docbook.org/ns/docbook">
+ <refnamediv>
+  <refname>ftp_nb_put</refname>
+  <refpurpose>存储一个文件至 FTP 服务器（non-blocking）</refpurpose>
+ </refnamediv>
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <type>int</type><methodname>ftp_nb_put</methodname>
+   <methodparam><type>resource</type><parameter>ftp_stream</parameter></methodparam>
+   <methodparam><type>string</type><parameter>remote_file</parameter></methodparam>
+   <methodparam><type>string</type><parameter>local_file</parameter></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>mode</parameter><initializer><constant>FTP_BINARY</constant></initializer></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>startpos</parameter><initializer>0</initializer></methodparam>
+  </methodsynopsis>
+  <para>
+   <function>ftp_nb_put</function> 函数用来把本地文件 <parameter>local_file</parameter>
+   存储到 FTP 服务器上由 <parameter>remote_file</parameter> 参数指定的路径。
+  </para>
+  <para>
+   与函数 <function>ftp_put</function>
+   不同的是，此函数上传文件的时候采用的是异步传输模式，也就意味着在文件传送的过程中，你的程序可以继续干其它的事情。
+  </para>
+ </refsect1>
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>ftp_stream</parameter></term>
+     <listitem>
+      <para>
+       FTP 连接的链接标识符。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>remote_file</parameter></term>
+     <listitem>
+      <para>
+       远程文件路径。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>local_file</parameter></term>
+     <listitem>
+      <para>
+       本地文件路径。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>mode</parameter></term>
+     <listitem>
+      <para>
+       传输模式选择，可选参数为 <constant>FTP_ASCII</constant>（文本模式）或
+       <constant>FTP_BINARY</constant>（二进制模式）。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>startpos</parameter></term>
+     <listitem>
+      <para>指定传输开始的位置，用来续传支持。</para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   返回 <constant>FTP_FAILED</constant> 或 <constant>FTP_FINISHED</constant>
+   或 <constant>FTP_MOREDATA</constant>。
+  </para>
+ </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <informaltable>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>&Version;</entry>
+      <entry>&Description;</entry>
+     </row>
+    </thead>
+    <tbody>
+     <row>
+      <entry>7.3.0</entry>
+      <entry>
+       <parameter>mode</parameter> 参数为可选，之前版本中为必填。
+      </entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </informaltable>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title><function>ftp_nb_put</function> 示例</title>
+    <programlisting role="php">
 <![CDATA[
 <?php
-// 开始上传
+
+// 初始化
 $ret = ftp_nb_put($my_connection, "test.remote", "test.local", FTP_BINARY);
 while ($ret == FTP_MOREDATA) {
-
-   // 在这里可以加入其它代码
+   
+   // 可以同时干其它事
    echo ".";
 
-   // 继续传送...
-   $ret = ftp_nb_continue ($my_connection);
+   // 继续上传...
+   $ret = ftp_nb_continue($my_connection);
 }
 if ($ret != FTP_FINISHED) {
-   echo "上传文件中发生错误...";
+   echo "上传过程中发生错误...";
    exit(1);
 }
 ?>
 ]]>
-      </programlisting>
-     </example>
-     <example>
-      <title>使用 <function>ftp_nb_put</function> 来断线续传</title>
-      <programlisting role="php">
+    </programlisting>
+   </example>
+   <example>
+    <title>使用 <function>ftp_nb_put</function> 来续传文件</title>
+    <programlisting role="php">
 <![CDATA[
 <?php
-// 开始
-$ret = ftp_nb_put ($my_connection, "test.remote", "test.local",
+
+// 初始化
+$ret = ftp_nb_put($my_connection, "test.remote", "test.local", 
                       FTP_BINARY, ftp_size("test.remote"));
-// 或: $ret = ftp_nb_put ($my_connection, "test.remote", "test.local",
+// 另一种写法: $ret = ftp_nb_put($my_connection, "test.remote", "test.local", 
 //                           FTP_BINARY, FTP_AUTORESUME);
 
 while ($ret == FTP_MOREDATA) {
-
-   // 加入其它要执行的代码
+   
+   // 可以同时干其它事情
    echo ".";
 
-   // 继续传送...
-   $ret = ftp_nb_continue ($my_connection);
+   // 继续上传...
+   $ret = ftp_nb_continue($my_connection);
 }
 if ($ret != FTP_FINISHED) {
-   echo "上传文件中发生错误...";
+   echo "上传过程中发生错误...";
    exit(1);
 }
 ?>
 ]]>
-      </programlisting>
-     </example>
-    </para>
-    <para>
-     参见 <function>ftp_nb_fput</function>，<function>ftp_nb_continue</function>，<function>ftp_put</function>
-     和 <function>ftp_fput</function>。
-    </para>
-   </refsect1>
-  </refentry>
+    </programlisting>
+   </example>
+  </para>
+ </refsect1>
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>ftp_nb_fput</function></member>
+    <member><function>ftp_nb_continue</function></member>
+    <member><function>ftp_put</function></member>
+    <member><function>ftp_fput</function></member>
+   </simplelist>
+  </para>
+ </refsect1>
+</refentry>
 
 <!-- Keep this comment at the end of the file
 Local variables:
