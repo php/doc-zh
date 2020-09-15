@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: f9f9a44875b22e54e99f85d345f5209d6e198617 Maintainer: daijie Status: ready -->
+<!-- EN-Revision: d6bb81836451c473b17756a842169db797123608 Maintainer: daijie Status: ready -->
   <refentry xml:id="function.array-splice" xmlns="http://docbook.org/ns/docbook">
    <refnamediv>
     <refname>array_splice</refname>
@@ -23,8 +23,9 @@
      指定的单元去掉，如果提供了 <parameter>replacement</parameter> 参数，则用其中的单元取代。
   </para>
   <para>
-     注意
-     <parameter>input</parameter> 中的数字键名不被保留。
+     <note>
+       <parameter>input</parameter> 中的数字键名不被保留。
+     </note>
     </para>
     <note>
    <simpara>
@@ -52,7 +53,10 @@
      <listitem>
       <para>
        如果 <parameter>offset</parameter> 为正，则从 <parameter>input</parameter>
-     数组中该值指定的偏移量开始移除。如果 <parameter>offset</parameter>
+     数组中该值指定的偏移量开始移除。
+      </para>
+      <para>
+       如果 <parameter>offset</parameter>
      为负，则从 <parameter>input</parameter> 末尾倒数该值指定的偏移量开始移除。
       </para>
      </listitem>
@@ -62,15 +66,26 @@
      <listitem>
       <para>
        如果省略 <parameter>length</parameter>，则移除数组中从 <parameter>offset</parameter>
-     到结尾的所有部分。如果指定了 <parameter>length</parameter>
-     并且为正值，则移除这么多单元。如果指定了 <parameter>length</parameter>
-     并且为负值，则移除从 <parameter>offset</parameter> 到数组末尾倒数
-     <parameter>length</parameter> 为止中间所有的单元。
-      如果设置了 <parameter>length</parameter> 为零，不会移除单元。
-       小窍门：当给出了
-     <parameter>replacement</parameter> 时要移除从 <parameter>offset</parameter>
-     到数组末尾所有单元时，用 <literal>count($input)</literal> 作为 <parameter>length</parameter>。
+     到结尾的所有部分。
       </para>
+      <para>
+       如果指定了 <parameter>length</parameter>
+     并且为正值，则移除这么多单元。
+      </para>
+      <para>
+       如果指定了 <parameter>length</parameter>
+     并且为负值，则移除部分停止于数组末尾该数量的单元。
+      </para>
+      <para>
+      如果设置了 <parameter>length</parameter> 为零，不会移除单元。
+      </para>
+      <tip>
+       <para>
+        当给出了
+      <parameter>replacement</parameter> 时要移除从 <parameter>offset</parameter>
+      到数组末尾所有单元时，用 <literal>count($input)</literal> 作为 <parameter>length</parameter>。
+       </para>
+      </tip>
      </listitem>
     </varlistentry>
     <varlistentry>
@@ -84,11 +99,16 @@
         <parameter>offset</parameter> 和 <parameter>length</parameter>
         的组合结果是不会移除任何值，则 <parameter>replacement</parameter>
         数组中的单元将被插入到 <parameter>offset</parameter>
-        指定的位置。 注意替换数组中的键名不保留。
+        指定的位置。
       </para>
+      <note>
+       <para>
+        不保留替换数组 <parameter>replacement</parameter> 中的键名。
+        </para>
+      </note>
       <para>
        如果用来替换 <parameter>replacement</parameter> 只有一个单元，那么不需要给它加上
-        <literal>array()</literal>，除非该单元本身就是一个数组、一个对象或者 &null;。
+        <literal>array()</literal> 或方括号，除非该单元本身就是一个数组、一个对象或者 &null;。
       </para>
      </listitem>
     </varlistentry>
@@ -111,35 +131,64 @@
 <?php
 $input = array("red", "green", "blue", "yellow");
 array_splice($input, 2);
-// $input is now array("red", "green")
+var_dump($input);
 
 $input = array("red", "green", "blue", "yellow");
 array_splice($input, 1, -1);
-// $input is now array("red", "yellow")
+var_dump($input);
 
 $input = array("red", "green", "blue", "yellow");
 array_splice($input, 1, count($input), "orange");
-// $input is now array("red", "orange")
+var_dump($input);
 
 $input = array("red", "green", "blue", "yellow");
 array_splice($input, -1, 1, array("black", "maroon"));
-// $input is now array("red", "green",
-//          "blue", "black", "maroon")
-
-$input = array("red", "green", "blue", "yellow");
-array_splice($input, 3, 0, "purple");
-// $input is now array("red", "green",
-//          "blue", "purple", "yellow");
+var_dump($input);
 ?>
 ]]>
     </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+array(2) {
+  [0]=>
+  string(3) "red"
+  [1]=>
+  string(5) "green"
+}
+array(2) {
+  [0]=>
+  string(3) "red"
+  [1]=>
+  string(6) "yellow"
+}
+array(2) {
+  [0]=>
+  string(3) "red"
+  [1]=>
+  string(6) "orange"
+}
+array(5) {
+  [0]=>
+  string(3) "red"
+  [1]=>
+  string(5) "green"
+  [2]=>
+  string(4) "blue"
+  [3]=>
+  string(5) "black"
+  [4]=>
+  string(6) "maroon"
+}
+]]>
+    </screen>
    </example>
   </para>
   <para>
    <example>
-    <title><function>array_splice</function> 例子</title>
+    <title>几个以不同表达式实现相同效果的 <function>array_splice</function> 例子</title>
     <para>
-     以下表达式以同样方式修改了 <varname>$input</varname>：
+     以下表达式是相同的：
     </para>
     <programlisting role="php">
 <![CDATA[
@@ -174,9 +223,9 @@ array_splice($input, $x, 1, $y);
   &reftitle.seealso;
   <para>
    <simplelist>
+    <member><function>array_merge</function></member>
     <member><function>array_slice</function></member>
     <member><function>unset</function></member>
-    <member><function>array_merge</function></member>
    </simplelist>
   </para>
  </refsect1>  
