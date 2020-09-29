@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
 <!-- $Author$ -->
-<!-- EN-Revision: 84fee8e038581781a81abd8a20809d913700c840 Maintainer: lm92 Status: ready -->
+<!-- EN-Revision: 70fb482c26ecfb7b95b1484ebb73a14f272c9871 Maintainer: lm92 Status: ready -->
  <sect1 xml:id="language.oop5.visibility" xmlns="http://docbook.org/ns/docbook">
   <title>访问控制（可见性）</title>
   <para>
-   对属性或方法的访问控制，是通过在前面添加关键字
+   对属性或方法的访问控制（PHP 7.1.0 以后支持常量），是通过在前面添加关键字
    <emphasis>public</emphasis>（公有），<emphasis>protected</emphasis>（受保护）或
    <emphasis>private</emphasis>（私有）来实现的。被定义为公有的类成员可以在任何地方被访问。被定义为受保护的类成员则可以被其自身以及其子类和父类访问。被定义为私有的类成员则只能被其定义所在的类访问。
   </para>
@@ -52,6 +52,7 @@ $obj->printHello(); // 输出 Public、Protected 和 Private
 class MyClass2 extends MyClass
 {
     // 可以对 public 和 protected 进行重定义，但 private 而不能
+    public $public = 'Public2';
     protected $protected = 'Protected2';
 
     function printHello()
@@ -64,8 +65,8 @@ class MyClass2 extends MyClass
 
 $obj2 = new MyClass2();
 echo $obj2->public; // 这行能被正常执行
-echo $obj2->private; // 未定义 private
 echo $obj2->protected; // 这行会产生一个致命错误
+echo $obj2->private; // 未定义 private
 $obj2->printHello(); // 输出 Public、Protected2 和 Undefined
 
 ?> 
@@ -174,6 +175,70 @@ class Foo extends Bar
 $myFoo = new foo();
 $myFoo->test(); // Bar::testPrivate 
                 // Foo::testPublic
+?>
+]]>
+     </programlisting>
+    </example>
+   </para>
+  </sect2>
+
+  <sect2 xml:id="language.oop5.visiblity-constants">
+   <title>常量的控制访问</title>
+   <para>
+    PHP 7.1.0 开始，类的常量可以定义为公有、私有或受保护。如果没有设置这些关键字，则该常量默认为公有。
+   </para>
+   <para>
+    <example>
+     <title>PHP 7.1.0 中的常量声明</title>
+     <programlisting role="php">
+<![CDATA[
+<?php
+/**
+ * Define MyClass
+ */
+class MyClass
+{
+    // 公有常量
+    public const MY_PUBLIC = 'public';
+
+    // 受保护的常量
+    protected const MY_PROTECTED = 'protected';
+
+    // 私有常量
+    private const MY_PRIVATE = 'private';
+
+    public function foo()
+    {
+        echo self::MY_PUBLIC;
+        echo self::MY_PROTECTED;
+        echo self::MY_PRIVATE;
+    }
+}
+
+$myclass = new MyClass();
+MyClass::MY_PUBLIC; // 这行可以正常执行
+MyClass::MY_PROTECTED; // 这行会产生一个致命错误 
+MyClass::MY_PRIVATE; // 这行会产生一个致命错误
+$myclass->foo(); // 将会输出：Public Protected Private
+
+
+/**
+ * Define MyClass2
+ */
+class MyClass2 extends MyClass
+{
+    // This is public
+    function foo2()
+    {
+        echo self::MY_PUBLIC;
+        echo self::MY_PROTECTED;
+        echo self::MY_PRIVATE; // 这行会产生一个致命错误
+    }
+}
+
+$myclass2 = new MyClass2;
+echo MyClass2::MY_PUBLIC; // 这行可以正常执行
+$myclass2->foo2(); // 将会输出：Public Protected，MY_PRIVATE 是私有常量，无法输出
 ?>
 ]]>
      </programlisting>
