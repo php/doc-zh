@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: f6b3cb343776c44d10ad79dc56278caef5ba5372 Maintainer: daijie Status: ready -->
+<!-- EN-Revision: 9af43469f46843451955b8926fe470a9f3d45034 Maintainer: daijie Status: ready -->
 <refentry xml:id="function.preg-match" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>preg_match</refname>
@@ -56,13 +56,13 @@
      <term><parameter>flags</parameter></term>
      <listitem>
       <para>
-       <parameter>flags</parameter>可以被设置为以下标记值：
+       <parameter>flags</parameter> 可以被设置为以下标记值的组合：
        <variablelist>
         <varlistentry>
          <term><constant>PREG_OFFSET_CAPTURE</constant></term>
          <listitem>
           <para>
-          如果传递了这个标记，对于每一个出现的匹配返回时会附加字符串偏移量(相对于目标字符串的)。
+          如果传递了这个标记，对于每一个出现的匹配返回时会附加字符串偏移量(相对于目标字符串的字节数)。
           注意：这会改变填充到<parameter>matches</parameter>参数的数组，使其每个元素成为一个由
           第<literal>0</literal>个元素是匹配到的字符串，第<literal>1</literal>个元素是该匹配字符串
           在目标字符串<parameter>subject</parameter>中的偏移量。
@@ -105,6 +105,51 @@ Array
         )
 
 )
+]]>
+            </screen>
+           </informalexample>
+          </para>
+         </listitem>
+        </varlistentry>
+        <varlistentry>
+         <term><constant>PREG_UNMATCHED_AS_NULL</constant></term>
+         <listitem>
+          <para>
+           使用该标记，未匹配的子组会报告为 &null;；未使用时，报告为空的 <type>string</type>。
+           <informalexample>
+            <programlisting role="php">
+<![CDATA[
+<?php
+preg_match('/(a)(b)*(c)/', 'ac', $matches);
+var_dump($matches);
+preg_match('/(a)(b)*(c)/', 'ac', $matches, PREG_UNMATCHED_AS_NULL);
+var_dump($matches);
+?>
+]]>
+            </programlisting>
+            &example.outputs;
+            <screen>
+<![CDATA[
+array(4) {
+  [0]=>
+  string(2) "ac"
+  [1]=>
+  string(1) "a"
+  [2]=>
+  string(0) ""
+  [3]=>
+  string(1) "c"
+}
+array(4) {
+  [0]=>
+  string(2) "ac"
+  [1]=>
+  string(1) "a"
+  [2]=>
+  NULL
+  [3]=>
+  string(1) "c"
+}
 ]]>
             </screen>
            </informalexample>
@@ -176,6 +221,9 @@ Array
 )
 ]]>
          </screen>
+         <para>
+          要避免使用 <function>substr</function>，可以用 <literal>\G</literal> 断言而不是 <literal>^</literal> 锚，或者 <literal>A</literal> 修改器，它们都能和 <parameter>offset</parameter> 参数一起运行。
+         </para>
         </informalexample>
        </para>
       </note>
@@ -209,16 +257,9 @@ Array
      </thead>
      <tbody>
       <row>
-       <entry>5.3.6</entry>
+       <entry>7.2.0</entry>
        <entry>
-        如果 <parameter>offset</parameter> 比 <parameter>subject</parameter> 的长度还要大则返回 &false;。
-       </entry>
-      </row>
-      <row>
-       <entry>5.2.2</entry>
-       <entry>
-       命名子组可以接受<literal>(?&lt;name&gt;)</literal>， <literal>(?'name')</literal>
-       以及<literal>(?P&lt;name&gt;)</literal>语法。之前版本仅接受<literal>(?P&lt;name&gt;)</literal>语法。
+        现在 <parameter>$flags</parameter> 参数支持 <constant>PREG_UNMATCHED_AS_NULL</constant>。
        </entry>
       </row>
      </tbody>
