@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
 <!-- $Author$ -->
-<!-- EN-Revision: 4307b3bcdf87f058147f6a917051986871ed8fe1 Maintainer: Haohappy Status: ready -->
+<!-- EN-Revision: e1438a020bbc755a27f18235a0ea94f3d9d556aa Maintainer: Haohappy Status: ready -->
  <sect1 xml:id="language.oop5.magic" xmlns="http://docbook.org/ns/docbook">
   <title>魔术方法</title>
   <para>
@@ -15,6 +15,8 @@
    <link linkend="object.unset">__unset()</link>，
    <link linkend="object.sleep">__sleep()</link>，
    <link linkend="object.wakeup">__wakeup()</link>，
+   <link linkend="object.serialize">__serialize()</link>,
+   <link linkend="object.unserialize">__unserialize()</link>,
    <link linkend="object.tostring">__toString()</link>，
    <link linkend="object.invoke">__invoke()</link>，
    <link linkend="object.set-state">__set_state()</link>，
@@ -23,6 +25,12 @@
    等方法在 PHP 中被称为<quote>魔术方法</quote>（Magic
    methods）。在命名自己的类方法时不能使用这些方法名，除非是想使用其魔术功能。
   </para>
+
+  <note>
+   <simpara>
+    所有的魔术方法 <emphasis>必须</emphasis> 声明为 <literal>public</literal>
+   </simpara>
+  </note>
 
   <caution>
    <simpara>
@@ -42,7 +50,7 @@
     <void/>
    </methodsynopsis>
    <methodsynopsis xml:id="object.wakeup">
-    <type>void</type><methodname>__wakeup</methodname>
+    <modifier>public</modifier> <type>void</type><methodname>__wakeup</methodname>
     <void/>
    </methodsynopsis>
    
@@ -106,6 +114,103 @@ class Connection
     }
 }
 ?>
+]]>
+    </programlisting>
+   </example>
+  </sect2>
+
+  <sect2 xml:id="language.oop5.magic.serialize">
+   <title>
+    <link linkend="object.serialize">__serialize()</link> 和
+    <link linkend="object.unserialize">__unserialize()</link>
+   </title>
+
+   <methodsynopsis xml:id="object.serialize">
+    <modifier>public</modifier> <type>array</type><methodname>__serialize</methodname>
+    <void/>
+   </methodsynopsis>
+   <methodsynopsis xml:id="object.unserialize">
+    <modifier>public</modifier> <type>void</type><methodname>__unserialize</methodname>
+    <methodparam><type>array</type><parameter>data</parameter></methodparam>
+   </methodsynopsis>
+
+   <para>
+    <function>serialize</function> 函数会检查类中是否存在一个魔术方法
+    <link linkend="object.serialize">__serialize()</link>。如果存在，该方法将在任何序列化之前优先执行。它必须以一个代表对象序列化形式的 键/值 成对的关联数组形式来返回，如果没有返回数组，将会抛出一个
+    <classname>TypeError</classname> 错误。
+   </para>
+   <note>
+    <para>
+     如果类中同时定义了 <link linkend="object.serialize">__serialize()</link> 和 <link linkend="object.sleep">__sleep()</link>
+     两个魔术方法，则只有 <link linkend="object.serialize">__serialize()</link> 方法会被调用。
+     <link linkend="object.sleep">__sleep()</link> 方法会被忽略掉。如果对象实现了 <link linkend="class.serializable">Serializable</link>
+     接口，接口的 <literal>serialize()</literal> 方法会被忽略，做为代替类中的 <link linkend="object.serialize">__serialize()</link> 方法会被调用。
+    </para>
+   </note>
+   <para>
+    The intended use of <link linkend="object.serialize">__serialize()</link> is to define a serialization-friendly
+    arbitrary representation of the object. Elements of the array may correspond to properties of the object but
+    that is not required.
+   </para>
+   <para>
+    Conversely, <function>unserialize</function> checks for the
+    presence of a function with the magic name
+    <link linkend="object.unserialize">__unserialize()</link>. If present, this function will be passed the
+    restored array that was returned from <link linkend="object.serialize">__serialize()</link>.  It may
+    then restore the properties of the object from that array as appropriate.
+   </para>
+   <note>
+    <para>
+     如果类中同时定义了 <link linkend="object.unserialize">__unserialize()</link> 和 <link linkend="object.wakeup">__wakeup()</link>
+     两个魔术方法，则只有 <link linkend="object.unserialize">__unserialize()</link> 方法会生效，<link linkend="object.wakeup">__wakeup()</link> 方法会被忽略。
+    </para>
+   </note>
+   <note>
+    <para>
+      此特性自 PHP 7.4.0 起可用。
+    </para>
+   </note>
+   <example>
+    <title>序列化和反序列化</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+class Connection
+{
+    protected $link;
+    private $dsn, $username, $password;
+
+    public function __construct($dsn, $username, $password)
+    {
+        $this->dsn = $dsn;
+        $this->username = $username;
+        $this->password = $password;
+        $this->connect();
+    }
+
+    private function connect()
+    {
+        $this->link = new PDO($this->dsn, $this->username, $this->password);
+    }
+
+    public function __serialize(): array
+    {
+        return [
+          'dsn' => $this->dsn,
+          'user' => $this->username,
+          'pass' => $this->password,
+        ];
+    }
+
+    public function __unserialize(array $data): void
+    {
+        $this->dsn = $data['dsn'];
+        $this->username = $data['user'];
+        $this->password = $data['pass'];
+
+        $this->connect();
+    }
+}?>
 ]]>
     </programlisting>
    </example>
