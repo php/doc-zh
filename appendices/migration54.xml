@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: cd09fab47b40563cb8b2316d817efc973d991713 Maintainer: ichenshy Status: ready -->
+<!-- EN-Revision: 6fe0f9389b85c7b574f818acb7aa5192d31ac949 Maintainer: ichenshy Status: ready -->
 <!-- Reviewed: no -->
 
-<!-- Based on UPGRADING version 322438. Work in progess !-->
+<!-- Based on UPGRADING version 322438. Work in progress !-->
 
 <appendix xml:id="migration54" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <title>从 PHP 5.3.X 迁移到 PHP 5.4.X</title>
  <simpara>
   &manual.migration.seealso;
-  <link linkend="migration5">5.0.x</link>  、 <link linkend="migration51">5.1.x</link>  、 <link linkend="migration52">5.2.x</link> 、<link linkend="migration53">5.3.x</link> 以及 <link linkend="migration55">5.5.x</link>。
+  <link linkend="migration5">5.0.x</link>  、 <link linkend="migration51">5.1.x</link>  、 <link linkend="migration52">5.2.x</link> 、<link linkend="migration53">5.3.x</link>、<link linkend="migration55">5.5.x</link>、
+<link linkend="migration56">5.6.x</link>。
  </simpara>
 
  <section xml:id="migration54.changes">
@@ -60,12 +61,17 @@
      移除 <link linkend="security.magicquotes">魔术引号</link>  。为避免出现安全问题，依赖此特性的应用可能需要升级。
     </simpara>
     <simpara>
-     <function>get_magic_quotes_gpc</function> 和 <function>get_magic_quotes_runtime</function> 现在总是返回 &false; 。 调用 <function>set_magic_quotes_runtime</function> 将产生一个 <constant>E_CORE_ERROR</constant> 级别的错误。
+     <function>get_magic_quotes_gpc</function> 和 <function>get_magic_quotes_runtime</function> 现在总是返回 &false; 。 想用 <function>set_magic_quotes_runtime</function> 开启 <link linkend="security.magicquotes">魔术引号</link> 时将产生一个 <constant>E_CORE_ERROR</constant> 级别的错误。
     </simpara>
    </listitem>
    <listitem>
     <simpara>
    <link linkend="ini.register-globals">register_globals</link> 和 <link linkend="ini.register-long-arrays">register_long_arrays</link> &php.ini;  指令被移除。
+    </simpara>
+   </listitem>
+   <listitem>
+    <simpara>
+     删除了 mbstring.script_encoding 指令。使用 <link linkend="ini.zend.script-encoding">zend.script_encoding</link> 代替。
     </simpara>
    </listitem>
    <listitem>
@@ -76,6 +82,16 @@
    <listitem>
     <simpara>
      <link linkend="control-structures.break">break</link> 和 <link linkend="control-structures.continue">continue</link> 语句不再接受可变参数（ 比如： <literal>break 1 + foo() * $bar;</literal> ）。像类似 <literal>break 2;</literal> 这样的固定参数仍可使用。受此变化影响，不再允许出现 <literal>break 0;</literal> 和 <literal>continue 0;</literal> 。
+    </simpara>
+   </listitem>
+   <listitem>
+    <simpara>
+     现在 <function>htmlspecialchars</function>、
+     <function>htmlentities</function>、 <function>html_entity_decode</function> 的默认字符集是 <literal>UTF-8</literal>，而之前是 <literal>ISO-8859-1</literal>。
+     除非你调用      <function>htmlspecialchars</function>/<function>htmlentities</function>/<function>html_entity_decode</function> 时 encoding 参数传入了 "" （空字符串），否则此次修改不会影响 htmlspecialchars/htmlentities 输出设置。 
+     通常我们不推荐这么用，因为用这些函数输出字符集时不应该依赖于运行环境。
+     最安全的办法是每次调用 <function>htmlspecialchars</function>、
+     <function>htmlentities</function>、 <function>html_entity_decode</function> 时都明确指定字符集。
     </simpara>
    </listitem>
    <listitem>
@@ -116,12 +132,28 @@
    </listitem>
    <listitem>
     <simpara>
+     现在 Tiger <link linkend="book.hash">哈希算法</link> 使用大端字节序（big-endian）
+     请按照 <link linkend="function.hash.tiger-bc">本示例</link> 编写代码，以便同时兼容 PHP 5.3 和 5.4。
+    </simpara>
+   </listitem>
+   <listitem>
+    <simpara>
      当使用两个空数组作为参数时， <function>array_combine</function> 现在返回 <literal>array()</literal>  而不是 &false; 。
     </simpara>
    </listitem>
    <listitem>
     <simpara>
      <function>htmlentities</function> 将像 <function>htmlspecialchars</function> 一样处理亚洲字符集，这是以前 PHP 版本的处理情况，但现在将会发出一条 <constant>E_STRICT</constant> 错误。
+    </simpara>
+   </listitem>
+   <listitem>
+    <simpara>
+     现在 <function>ob_start</function> 的第三个参数由
+     <type>bool</type> <parameter>erase</parameter> 变为 <type>int</type>
+     <parameter>flags</parameter>。
+     注意，在 PHP 5.4 里代码明确设置
+     <parameter>erase</parameter> 为 &false; 将不会按预期运行：
+     请按 <link linkend="function.ob-start.flags-bc">本示例</link> 编写代码，以便同时兼容 PHP 5.3 和 5.4。
     </simpara>
    </listitem>
    <listitem>
@@ -238,6 +270,11 @@
      内置用于开发的 <link linkend="features.commandline.webserver"> CLI 模式的 web server </link> 。
     </simpara>
    </listitem>
+   <listitem>
+    <simpara>
+     现在 GD 扩展可通过 <function>imagecreatefromwebp</function> 和 <function>imagewebp</function> 来相应地读取、写入 WebP 图片。
+    </simpara>
+   </listitem>
   </itemizedlist>
  </section>
 
@@ -278,11 +315,6 @@
    过时的函数：
   </simpara>
   <itemizedlist>
-   <listitem>
-    <simpara>
-     <function>mcrypt_generic_end</function>
-    </simpara>
-   </listitem>
    <listitem>
     <simpara>
      <function>mysql_list_dbs</function>
@@ -701,7 +733,7 @@
   <itemizedlist>
    <listitem>
     <simpara>
-     <link linkend="book.sqlite">sqlite</link>
+     sqlite
      - 注意： ext/sqlite3 和 ext/pdo_sqlite 不受影响
     </simpara>
    </listitem>
@@ -1214,6 +1246,11 @@
    </listitem>
    <listitem>
     <simpara>
+     mbstring.script_encoding
+    </simpara>
+   </listitem>
+   <listitem>
+    <simpara>
      <link linkend="ini.y2k-compliance">y2k_compliance</link>
     </simpara>
    </listitem>
@@ -1307,11 +1344,6 @@
   <itemizedlist>
    <listitem>
     <simpara>
-     <function>htmlspecialchars</function> 和 <function>htmlentities</function> 现在默认的字符集为 <literal>UTF-8</literal>，而不再是 <literal>ISO-8859-1</literal> 。注意输出字符集的变化，通过 <link linkend="ini.default-charset">default_charset</link> 配置设置不影响  htmlspecialchars/htmlentities ，除非将 ""（空字符串）作为编码参数传递给<function>htmlspecialchars</function> / <function>htmlentities</function>调用。通常不推荐这么做，因可以通过这些函数运行时使用的字符集不受影响地改变输出字符集。最安全的方法是每次调用 <function>htmlspecialchars</function> 和 <function>htmlentities</function> 都明确地设置字符集。
-    </simpara>
-   </listitem>
-   <listitem>
-    <simpara>
      在 <link linkend="ini.error-reporting">error_reporting</link> 配置指令中，<constant>E_ALL</constant> 现在包括了 <constant>E_STRICT</constant> 级别的错误。
     </simpara>
    </listitem>
@@ -1359,7 +1391,7 @@
    </listitem>
    <listitem>
     <simpara>
-     <type>SimpleXMLElement</type> 组织成的数组现在总是包含所有节点，而不仅仅是第一个匹配的节点。当使用 <function>var_dump</function> 、 <function>var_export</function> 以及 <function>print_r</function> 时，所有 <type>SimpleXMLElement</type> 子元素总是被打印出来。
+     <type>SimpleXMLElement</type> 组织成的数组现在<emphasis>总是</emphasis>包含所有节点，而不仅仅是第一个匹配的节点。当使用 <function>var_dump</function> 、 <function>var_export</function> 以及 <function>print_r</function> 时，所有 <type>SimpleXMLElement</type> 子元素<emphasis>总是</emphasis>被打印出来。
     </simpara>
    </listitem>
    <listitem>
