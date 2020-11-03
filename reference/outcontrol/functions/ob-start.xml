@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $EN-Revision: 1aa26c3b0d05e083518a0ffe56821f7118959eae $ -->
+<!-- EN-Revision: 3e15d2894fb35432d2a111db36fe8ba8ebc62024 Maintainer: avenger Status: ready -->
 <refentry xmlns="http://docbook.org/ns/docbook" xml:id="function.ob-start">
  <refnamediv>
   <refname>ob_start</refname>
@@ -11,22 +11,26 @@
   &reftitle.description;
   <methodsynopsis>
    <type>bool</type><methodname>ob_start</methodname>
-   <methodparam choice="opt"><type>callback</type><parameter>output_callback</parameter></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter>chunk_size</parameter></methodparam>
-   <methodparam choice="opt"><type>bool</type><parameter>erase</parameter></methodparam>
+   <methodparam choice="opt"><type>callable</type><parameter>output_callback</parameter><initializer>&null;</initializer></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>chunk_size</parameter><initializer>0</initializer></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>flags</parameter><initializer><constant>PHP_OUTPUT_HANDLER_STDFLAGS</constant></initializer></methodparam>
   </methodsynopsis>
   <para>
    此函数将打开输出缓冲。当输出缓冲激活后，脚本将不会输出内容（除http标头外），相反需要输出的内容被存储在内部缓冲区中。
   </para>
+
   <para>
     内部缓冲区的内容可以用 <function>ob_get_contents</function> 函数复制到一个字符串变量中。
     想要输出存储在内部缓冲区中的内容，可以使用 <function>ob_end_flush</function> 函数。另外，
     使用 <function>ob_end_clean</function> 函数会静默丢弃掉缓冲区的内容。
   </para>
+
+  
   <warning>
    <para>
     当有正在调用的回调函数时，一些网络服务器（例如Apache）会改变一个脚本的工作目录。
-    你可以在回调函数中再把它改回来，例如 <literal>chdir(dirname($_SERVER['SCRIPT_FILENAME']))</literal> 。
+    你可以在回调函数中再把它改回来，例如
+    <literal>chdir(dirname($_SERVER['SCRIPT_FILENAME']))</literal> 。
    </para>
   </warning>
   <para>
@@ -37,6 +41,10 @@
   </para>
  </refsect1>
 
+
+ 
+ 
+ 
  <refsect1 role="parameters">
   &reftitle.parameters;
   <para>
@@ -51,13 +59,33 @@
        当调用 <parameter>output_callback</parameter> 时，它将收到输出缓冲区的内容作为参数
        并预期返回一个新的输出缓冲区作为结果，这个新返回的输出缓冲区内容将被送到浏览器。
        如果这个 <parameter>output_callback</parameter> 不是一个可以调用的函数，此函数
-       会返回 &false; 。
+       会返回 &false;。以下是回调签名：
       </para>
+
       <para>
-       如果回调函数有两个参数，第二个参数会由一个位域补充，该位域由
-       <constant>PHP_OUTPUT_HANDLER_START</constant>,
-       <constant>PHP_OUTPUT_HANDLER_CONT</constant> 和
-       <constant>PHP_OUTPUT_HANDLER_END</constant> 组成。
+       <methodsynopsis>
+        <type>string</type><methodname><replaceable>handler</replaceable></methodname>
+        <methodparam><type>string</type><parameter>buffer</parameter></methodparam>
+        <methodparam choice="opt"><type>int</type><parameter>phase</parameter></methodparam>
+       </methodsynopsis>
+       <variablelist>
+        <varlistentry>
+         <term><parameter>buffer</parameter></term>
+         <listitem>
+          <simpara>
+           输出缓冲区中的内容。
+          </simpara>
+         </listitem>
+        </varlistentry>
+        <varlistentry>
+         <term><parameter>phase</parameter></term>
+         <listitem>
+          <simpara>
+           比特掩码 <link linkend="outcontrol.constants"><constant>PHP_OUTPUT_HANDLER_*</constant> 常量</link>。
+          </simpara>
+         </listitem>
+        </varlistentry>
+       </variablelist>
       </para>
       <para>
        如果 <parameter>output_callback</parameter> 返回 &false; ，其原来的输入
@@ -69,7 +97,7 @@
       </para>
       <para>
        <function>ob_end_clean</function>, <function>ob_end_flush</function>,
-       <function>ob_clean</function>, <function>ob_flush</function> and
+       <function>ob_clean</function>, <function>ob_flush</function> 和
        <function>ob_start</function> 不能从一个回调函数中调用。
        如果从回调函数中调用了它们，产生的行为是不明确的。
        如果想要删除缓冲区的内容，从回调函数中返回一个"" (空字符串)。
@@ -78,31 +106,79 @@
       </para>
       <note>
        <para>
-        在PHP 4.0.4中， <function>ob_gzhandler</function> 被引入是为了简化把gz编码过 
-        数据发送到支持压缩网页的浏览器。
-        <function>ob_gzhandler</function> 会判定浏览器可以接受哪种类型的编码内容，并返回相应
-        的输出。
+        <function>ob_gzhandler</function> function exists to
+        facilitate sending gz-encoded data to web browsers that support
+        compressed web pages.  <function>ob_gzhandler</function> determines
+        what type of content encoding the browser will accept and will return
+        its output accordingly.
        </para>
       </note>
      </listitem>
-    </varlistentry>
+    </varlistentry>            
     <varlistentry>
      <term><parameter>chunk_size</parameter></term>
      <listitem>
       <para>
        如果可选参数 <parameter>chunk_size</parameter> 被赋值了，在任何一个能引起缓冲区的长度等于
        或超过 <parameter>chunk_size</parameter> 的输出操作后，缓冲区都会被刷送。
-       默认值 0 意味着函数仅在最后被调用，其余的特殊值可以将 <parameter>chunk_size</parameter>
-       从 1 设定到 4096。
+       默认值 <literal>0</literal> 意味着函数仅在最后被调用。
+      </para>
+      <para>
+       PHP 5.4.0 之前，<literal>1</literal> 是一个特殊情况下的值，代表将 chunk_size 设置为 4096 字节。
       </para>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>erase</parameter></term>
+     <term><parameter>flags</parameter></term>
      <listitem>
       <para>
-       如果可选参数 <parameter>erase</parameter> 被赋成 &false;，直到脚本执行完成缓冲区才被删除。
-       这使得，如果调用了冲刷和清洗（清除）函数，会抛出一个“notice”,并返回 &false; 值。
+       <parameter>flags</parameter> 参数代表了一个掩码位，用来控制对缓冲区的操作。
+       The default
+       is to allow output buffers to be cleaned, flushed and removed, which
+       can be set explicitly via
+       <constant>PHP_OUTPUT_HANDLER_CLEANABLE</constant> |
+       <constant>PHP_OUTPUT_HANDLER_FLUSHABLE</constant> |
+       <constant>PHP_OUTPUT_HANDLER_REMOVABLE</constant>, or
+       <constant>PHP_OUTPUT_HANDLER_STDFLAGS</constant> as shorthand.
+      </para>
+      <para>
+       每个标志都控制着对一组功能的访问，详细介绍如下：
+       <informaltable>
+        <tgroup cols="2">
+         <thead>
+          <row>
+           <entry>Constant</entry>
+           <entry>Functions</entry>
+          </row>
+         </thead>
+         <tbody>
+          <row>
+           <entry><constant>PHP_OUTPUT_HANDLER_CLEANABLE</constant></entry>
+           <entry>
+            <function>ob_clean</function>,
+            <function>ob_end_clean</function> 和
+            <function>ob_get_clean</function>。
+           </entry>
+          </row>
+          <row>
+           <entry><constant>PHP_OUTPUT_HANDLER_FLUSHABLE</constant></entry>
+           <entry>
+            <function>ob_end_flush</function>,
+            <function>ob_flush</function> 和
+            <function>ob_get_flush</function>。
+           </entry>
+          </row>
+          <row>
+           <entry><constant>PHP_OUTPUT_HANDLER_REMOVABLE</constant></entry>
+           <entry>
+            <function>ob_end_clean</function>,
+            <function>ob_end_flush</function> 和
+            <function>ob_get_flush</function>。
+           </entry>
+          </row>
+         </tbody>
+        </tgroup>
+       </informaltable>
       </para>
      </listitem>
     </varlistentry>
@@ -114,45 +190,6 @@
   &reftitle.returnvalues;
   <para>
    &return.success;
-  </para>
- </refsect1>
-
- <refsect1 role="changelog">
-  &reftitle.changelog;
-  <para>
-   <informaltable>
-    <tgroup cols="2">
-     <thead>
-      <row>
-       <entry>&Version;</entry>
-       <entry>&Description;</entry>
-      </row>
-     </thead>
-     <tbody>
-      <!-- FIXME PHP_6
-      <row>
-       <entry>6.0.0</entry>
-       <entry>
-        Value 1 is no more special.
-       </entry>
-      </row>
-      -->
-      <row>
-       <entry>4.3.2</entry>
-       <entry>
-        在传递的 <parameter>output_callback</parameter> 不能被执行时，此函数
-        被改成返回 &false; 
-       </entry>
-      </row>
-      <row>
-       <entry>4.2.0</entry>
-       <entry>
-        添加了 <parameter>erase</parameter> 参数。
-       </entry>
-      </row>
-     </tbody>
-    </tgroup>
-   </informaltable>
   </para>
  </refsect1>
 
@@ -196,6 +233,26 @@ ob_end_flush();
 </html>
 ]]>
     </screen>
+   </example>
+  </para>
+
+ <para>
+   <example xml:id="function.ob-start.flags-bc">
+    <title>以兼容 PHP 5.3 和 5.4 的方式创建一个不可擦除的输出缓冲区</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+
+if (version_compare(PHP_VERSION, '5.4.0', '>=')) {
+  ob_start(null, 0, PHP_OUTPUT_HANDLER_STDFLAGS ^
+    PHP_OUTPUT_HANDLER_REMOVABLE);
+} else {
+  ob_start(null, 0, false);
+}
+
+?>
+]]>
+    </programlisting>
    </example>
   </para>
  </refsect1>
