@@ -14,7 +14,7 @@
    <methodparam><type>array</type><parameter>array</parameter></methodparam>
    <methodparam><type>int</type><parameter>offset</parameter></methodparam>
    <methodparam choice="opt"><type>int</type><parameter>length</parameter><initializer>&null;</initializer></methodparam>
-   <methodparam choice="opt"><type>bool</type><parameter>preserve_keys</parameter><initializer>false</initializer></methodparam>
+   <methodparam choice="opt"><type>bool</type><parameter>preserve_keys</parameter><initializer>&false;</initializer></methodparam>
   </methodsynopsis>
     <para>
      <function>array_slice</function> 返回根据 <parameter>offset</parameter> 和
@@ -39,17 +39,32 @@
      <listitem>
       <para>
         如果 <parameter>offset</parameter> 非负，则序列将从 <parameter>array</parameter>
-     中的此偏移量开始。如果 <parameter>offset</parameter> 为负，则序列将从
+     中的此偏移量开始。
+      </para>
+      <para>
+       如果 <parameter>offset</parameter> 为负，则序列将从
      <parameter>array</parameter> 中距离末端这么远的地方开始。
       </para>
+      <note>
+       <para>
+        参数 <parameter>offset</parameter> 标识的是数组中的位置，而不是键。
+       </para>
+      </note>
      </listitem>
     </varlistentry>
     <varlistentry>
      <term><parameter>length</parameter></term>
      <listitem>
       <para>
-       如果给出了 <parameter>length</parameter> 并且为正，则序列中将具有这么多的单元。如果给出了
-     <parameter>length</parameter> 并且为负，则序列将终止在距离数组末端这么远的地方。如果省略，则序列将从
+       如果给出了 <parameter>length</parameter> 并且为正，则序列中将具有这么多的单元。
+      </para>
+      <para>
+       如果 array 比 <parameter>length</parameter> 要短，只会保留有效的数组单元。
+      </para>
+      <para>如果给出了
+     <parameter>length</parameter> 并且为负，则序列将终止在距离数组末端这么远的地方。
+      </para>
+      <para>如果省略，则序列将从
      <parameter>offset</parameter> 开始一直到 <parameter>array</parameter> 的末端。
       </para>
      </listitem>
@@ -57,10 +72,13 @@
     <varlistentry>
      <term><parameter>preserve_keys</parameter></term>
      <listitem>
+      <note>
       <para>
         注意 <function>array_slice</function> 默认会重新排序并重置数组的数字索引。你可以通过将
      <parameter>preserve_keys</parameter> 设为 &true; 来改变此行为。
+       无论本参数如何设置，都会保留字符串的键。
       </para>
+      </note>
      </listitem>
     </varlistentry>
    </variablelist>
@@ -105,6 +123,61 @@ Array
 (
     [2] => c
     [3] => d
+)
+]]>
+    </screen>
+   </example>
+  </para>
+  
+  <para>
+   <example>
+    <title><function>array_slice</function> 于索引从 1 开始的 array</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$input = array(1 => "a", "b", "c", "d", "e");
+print_r(array_slice($input, 1, 2));
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+Array
+(
+    [0] => b
+    [1] => c
+)
+]]>
+    </screen>
+   </example>
+  </para>
+  <para>
+   <example>
+    <title><function>array_slice</function> 与混合类型键的 array</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$ar = array('a'=>'apple', 'b'=>'banana', '42'=>'pear', 'd'=>'orange');
+print_r(array_slice($ar, 0, 3));
+print_r(array_slice($ar, 0, 3, true));
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+Array
+(
+    [a] => apple
+    [b] => banana
+    [0] => pear
+)
+Array
+(
+    [a] => apple
+    [b] => banana
+    [42] => pear
 )
 ]]>
     </screen>
