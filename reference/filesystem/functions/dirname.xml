@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
 <!-- $Author$ -->
-<!-- EN-Revision: 50e15d60d325cf561e9371dd8da0947a7698c6d9 Maintainer: dallas Status: ready -->
+<!-- EN-Revision: af6fdf16ab44bcf4d045407963e43c3d9dd2ff29 Maintainer: dallas Status: ready -->
 <refentry xml:id="function.dirname" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>dirname</refname>
@@ -13,10 +13,22 @@
   <methodsynopsis>
    <type>string</type><methodname>dirname</methodname>
    <methodparam><type>string</type><parameter>path</parameter></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>levels</parameter><initializer>1</initializer></methodparam>
   </methodsynopsis>
   <para>
-   给出一个包含有指向一个文件的全路径的字符串，本函数返回去掉文件名后的目录名。
+   给出一个包含有指向一个文件的全路径的字符串，本函数返回去掉文件名后的目录名，且目录深度为 <parameter>levels</parameter> 级。
   </para>
+  <note>
+   <para>
+    <function>dirname</function> 纯粹基于输入字符串操作，
+    它不会受实际文件系统和类似 "<literal>..</literal>" 的路径格式影响。
+   </para>
+  </note>
+  <caution>
+   <para>
+    <function>dirname</function> 是本地化的，所以如果要正确处理多字节字符的路径，需要用 <function>setlocale</function> 正确设置匹配的 locale。
+   </para>
+  </caution>
  </refsect1>
  
   <refsect1 role="parameters">
@@ -31,6 +43,17 @@
       </para>
       <para>
        在 Windows 中，斜线（<literal>/</literal>）和反斜线（<literal>\</literal>）都可以用作目录分隔符。在其它环境下是斜线（<literal>/</literal>）。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>levels</parameter></term>
+     <listitem>
+      <para>
+       要向上的父目录数量。
+      </para>
+      <para>
+       整型，必须大于 0。
       </para>
      </listitem>
     </varlistentry>
@@ -49,6 +72,7 @@
   </para>
  </refsect1>
  
+ 
  <refsect1 role="changelog">
   &reftitle.changelog;
   <para>
@@ -62,16 +86,9 @@
      </thead>
      <tbody>
       <row>
-       <entry>5.0.0</entry>
+       <entry>7.0.0</entry>
        <entry>
-        <function>dirname</function> 的操作从 PHP 5.0.0 版开始是二进制安全的。
-       </entry>
-      </row>
-      <row>
-       <entry>4.0.3</entry>
-       <entry>
-        在这个版本中，<function>dirname</function> 被修正为
-    POSIX 兼容。
+        添加可选的 <parameter>levels</parameter> 参数。
        </entry>
       </row>
      </tbody>
@@ -88,58 +105,24 @@
     <programlisting role="php">
 <![CDATA[
 <?php
-echo "1) " . dirname("/etc/passwd") . PHP_EOL; // 1) /etc
-echo "2) " . dirname("/etc/") . PHP_EOL; // 2) / (or \ on Windows)
-echo "3) " . dirname("."); // 3) .
-?>
+echo dirname("/etc/passwd") . PHP_EOL;
+echo dirname("/etc/") . PHP_EOL;
+echo dirname(".") . PHP_EOL;
+echo dirname("C:\\") . PHP_EOL;
+echo dirname("/usr/local/lib", 2);
 ]]>
     </programlisting>
-   </example>
-  </para>
- </refsect1>
- 
-  <refsect1 role="notes">
-  &reftitle.notes;
-  <note>
-   <para>
-    <function>dirname</function> operates naively on the input string,
-    and is not aware of the actual filesystem, or path components such
-    as "<literal>..</literal>".
-   </para>
-  </note>
-  <note>
-   <para>
-    <function>dirname</function> is locale aware, so for it to see the 
-    correct directory name with multibyte character paths, the matching locale must 
-    be set using the <function>setlocale</function> function.
-   </para>
-  </note>
-  <note>
-   <para>
-    Since PHP 4.3.0, you will often get a slash or a dot back from
-    <function>dirname</function> in situations where the older
-    functionality would have given you the empty string.
-   </para>
-  </note>
-  <para>
-   检查下面发生变化的例子：
-   <informalexample>
-    <programlisting role="php">
+    &example.outputs.similar;
+    <screen>
 <![CDATA[
-<?php
-
-// PHP 4.3.0 以前
-dirname('c:/'); // 返回 '.'
-
-// PHP 4.3.0 以后
-dirname('c:/x'); // 返回 'c:'
-dirname('c:/Temp/x'); // 返回 'c:/Temp'
-dirname('/x'); // 返回 '\'
-
-?>
+/etc
+/ (or \ on Windows)
+.
+C:\
+/usr
 ]]>
-    </programlisting>
-   </informalexample>
+    </screen>
+   </example>
   </para>
  </refsect1>
 
