@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: ef362e88b393422e1962c48c825aa1c6e65b380b Maintainer: daijie Status: ready -->
+<!-- EN-Revision: 86e6094e86b84a51d00ab217ac50ce8dde33d82a Maintainer: daijie Status: ready -->
 <refentry xml:id="function.define" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>define</refname>
@@ -13,7 +13,7 @@
    <type>bool</type><methodname>define</methodname>
    <methodparam><type>string</type><parameter>name</parameter></methodparam>
    <methodparam><type>mixed</type><parameter>value</parameter></methodparam>
-   <methodparam choice="opt"><type>bool</type><parameter>case_insensitive</parameter><initializer>false</initializer></methodparam>
+   <methodparam choice="opt"><type>bool</type><parameter>case_insensitive</parameter><initializer>&false;</initializer></methodparam>
   </methodsynopsis>
   <para>
   在运行时定义一个常量。
@@ -30,13 +30,20 @@
       <para>
        常量名。
       </para>
+      <note>
+       <para>
+        可以用 <function>define</function> 定义保留关键词甚至无效名称的常量，并且可以（仅可以）通过
+        <function>constant</function> 获取值。
+        不过，不推荐这么做。
+       </para>
+      </note>
      </listitem>
     </varlistentry>
     <varlistentry>
      <term><parameter>value</parameter></term>
      <listitem>
       <para>
-      常量的值；在 PHP 5 中，<parameter>value</parameter> 必须是标量( <type>integer</type>、
+      常量的值；在 PHP 5 中，<parameter>value</parameter> 必须是标量( <type>int</type>、
        <type>float</type>、<type>string</type>、<type>boolean</type>、&null;）在 PHP 7 中还允许是个 <type>array</type> 的值。
       </para>
       <warning>
@@ -53,6 +60,11 @@
        如果设置为 &true;，该常量则大小写不敏感。默认是大小写敏感的。比如，
        <literal>CONSTANT</literal> 和 <literal>Constant</literal> 代表了不同的值。
       </para>
+      <warning>
+       <simpara>
+        PHP 7.3.0 起废弃了定义大小写不敏感的常量。
+       </simpara>
+      </warning>
       <note>
        <para>
         大小写不敏感的常量以小写的方式储存。
@@ -84,6 +96,12 @@
       </row>
      </thead>
      <tbody>
+      <row>
+       <entry>7.3.0</entry>
+       <entry>
+        废弃了 <parameter>case_insensitive</parameter>，并将在 8.0.0 版中移除。
+       </entry>
+      </row>
       <row>
        <entry>7.0.0</entry>
        <entry>
@@ -126,6 +144,34 @@ echo ANIMALS[1]; // 输出 "cat"
     </programlisting>
    </example>
   </para>
+  <para>
+   <example>
+    <title>以保留名称定义常量</title>
+    <para>
+     本例子说明了以 <link linkend="language.constants.predefined">魔术常量</link> 相同名称定义常量的<emphasis>能力</emphasis>。
+     由于行为结果过于令人迷惑，所以实践中不推荐。
+    </para>
+    <programlisting role="php">
+<![CDATA[
+<?php
+var_dump(defined('__LINE__'));
+var_dump(define('__LINE__', 'test'));
+var_dump(constant('__LINE__'));
+var_dump(__LINE__);
+?>
+]]>
+    </programlisting>
+   &example.outputs;
+   <screen>
+<![CDATA[
+bool(false)
+bool(true)
+string(4) "test"
+int(5)
+]]>
+   </screen>
+   </example>
+  </para>
  </refsect1>
 
  <refsect1 role="seealso">
@@ -134,7 +180,7 @@ echo ANIMALS[1]; // 输出 "cat"
    <simplelist>
     <member><function>defined</function></member>
     <member><function>constant</function></member>
-    <member><link linkend="language.constants">Constants</link>这一节</member>
+    <member><link linkend="language.constants">常量</link>这一节</member>
    </simplelist>
   </para>
  </refsect1>
