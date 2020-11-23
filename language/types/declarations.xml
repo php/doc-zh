@@ -1,30 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: f99285b50417abb9a6a11d5667ad1cb4e80b8766 Maintainer: avenger Status: ready -->
-<!-- Reviewed: no -->
-
+<!-- EN-Revision: f99285b50417abb9a6a11d5667ad1cb4e80b8766 Maintainer: avenger Status: partial -->
 <sect1 xml:id="language.types.declarations">
- <title>Type declarations</title>
+ <title>类型声明</title>
 
  <para>
-  Type declarations can be added to function arguments, return values,
-  and, as of PHP 7.4.0, class properties. They ensure that the value
-  is of the specified type at call time, otherwise a
-  <classname>TypeError</classname> is thrown.
+  类型声明可以用于函数的参数、返回值，PHP 7.4.0
+  起还可以用于类的属性，来显性的指定需要的类型，如果预期类型在调用时不匹配，则会抛出一个
+  <classname>TypeError</classname> 异常。
  </para>
 
  <!-- Find better place where to put this note -->
  <note>
   <!-- TODO Link to covariance section -->
   <para>
-   When overriding a parent method, the child's method must match any return
-   type declaration on the parent. If the parent doesn't define a return
-   type, then the child method may do so.
+   当子类覆盖父方法时，子类的方法必须匹配父类的类型声明。如果父类没有定义返回类型，那么子方法可以指定自己的返回类型。
   </para>
  </note>
 
  <sect2 xml:id="language.types.declarations.base">
-  <title>Single types</title>
+  <title>单一类型</title>
   <informaltable>
    <tgroup cols="3">
     <thead>
@@ -36,9 +31,9 @@
     </thead>
     <tbody>
      <row>
-      <entry>Class/interface name</entry>
+      <entry>类/接口 名称</entry>
       <entry>
-       The value must be an &instanceof; the given class or interface.
+        值必须为指定类和接口的实例化对象 &instanceof; 
       </entry>
       <entry></entry>
      </row>
@@ -54,7 +49,7 @@
      <row>
       <entry><type>array</type></entry>
       <entry>
-       The value must be an <type>array</type>.
+        值必须为 <type>array</type>。
       </entry>
       <entry></entry>
      </row>
@@ -69,49 +64,49 @@
      <row>
       <entry><type>bool</type></entry>
       <entry>
-       The value must be a boolean value.
+        值必须为一个布尔值。
       </entry>
       <entry></entry>
      </row>
      <row>
       <entry><type>float</type></entry>
       <entry>
-       The value must be a floating point number.
+        值必须为一个浮点数字。
       </entry>
       <entry></entry>
      </row>
      <row>
       <entry><type>int</type></entry>
       <entry>
-       The value must be an integer.
+        值必须为一个整型数字。
       </entry>
       <entry></entry>
      </row>
      <row>
       <entry><type>string</type></entry>
       <entry>
-       The value must be a <type>string</type>.
+        值必须为一个 <type>string</type>。
       </entry>
       <entry></entry>
      </row>
      <row>
       <entry><type>iterable</type></entry>
       <entry>
-       The value must be either an <type>array</type> or an &instanceof; <classname>Traversable</classname>.
+        值必须为 <type>array</type> 或 &instanceof; <classname>Traversable</classname>。
       </entry>
       <entry>PHP 7.1.0</entry>
      </row>
      <row>
       <entry><type>object</type></entry>
       <entry>
-       The value must be an <type>object</type>.
+        值必须为<type>object</type>。
       </entry>
       <entry>PHP 7.2.0</entry>
      </row>
      <row>
       <entry><type>mixed</type></entry>
       <entry>
-       The value can be any value.
+        值可以为任何类型。
       </entry>
       <entry>PHP 8.0.0</entry>
      </row>
@@ -121,11 +116,10 @@
 
   <warning>
    <para>
-    Aliases for the above scalar types are not supported.
-    Instead, they are treated as class or interface names.
-    For example, using <literal>boolean</literal> as a type declaration
-    will require the value to be an &instanceof; the class or interface
-    <literal>boolean</literal>, rather than of type <type>bool</type>:
+    不支持上述标量类型的别名。相反，它们被视为类或接口名。例如，使用
+    <literal>boolean</literal> 作为类型声明，将要求值是一个 &instanceof; 类或接口
+    <literal>boolean</literal>，而不能是类型
+    <type>bool</type>。
    </para>
    <para>
     <example>
@@ -156,7 +150,7 @@ Stack trace:
   <sect3 xml:id="language.types.declarations.examples">
    &reftitle.examples;
    <example>
-    <title>Basic class type declaration</title>
+    <title>类型声明在类中的使用</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -192,7 +186,7 @@ Stack trace:
    </example>
 
    <example>
-    <title>Basic interface type declaration</title>
+    <title>类型声明在接口中的使用</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -226,7 +220,7 @@ Stack trace:
    </example>
 
    <example>
-    <title>Basic return type declaration</title>
+    <title>返回类型声明</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -248,7 +242,7 @@ float(3)
    </example>
 
    <example>
-    <title>Returning an object</title>
+    <title>返回一个对象</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -274,17 +268,16 @@ object(C)#1 (0) {
  </sect2>
 
  <sect2 xml:id="language.types.declarations.nullable">
-  <title>Nullable type</title>
+  <title>允许为空的（Nullable）类型</title>
 
   <para>
-   As of PHP 7.1.0, type declarations can be marked nullable by prefixing the
-   type name with a question mark (<literal>?</literal>).
-   This signifies that the value can be of the specified type or &null;.
+    自 PHP 7.1.0 起，类型声明允许前置一个问号 (<literal>?</literal>)
+    用来声明这个值允许为指定类型，或者为 &null;。
   </para>
 
   <para>
    <example>
-    <title>Nullable argument type declaration</title>
+    <title>允许为空的参数类型定义</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -310,7 +303,7 @@ NULL
    </example>
 
    <example>
-    <title>Nullable return type declaration</title>
+    <title>允许为空的返回类型定义</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -329,12 +322,12 @@ function get_item(): ?string {
 
   <note>
    <para>
-    Prior to PHP 7.1.0, it was possible to achieve nullable arguments by making
-    <literal>null</literal> the default value.
-    This is not recommended as this breaks during inheritance.
+    在 PHP 7.1.0 之前版本中，可以通过设置参数的默认值为
+    <literal>null</literal>
+    来实现允许为空的参数。不建议这样做，因为影响到类的继承调用。
    </para>
    <example>
-    <title>Old way to make arguments nullable</title>
+    <title>旧版本中实现允许为空参数的示例</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -362,26 +355,23 @@ NULL
  </sect2>
 
  <sect2 xml:id="language.types.declarations.union">
-  <title>Union types</title>
+  <title>联合类型</title>
   <para>
-   A union type declaration accepts values of multiple different types,
-   rather than a single one.
-   Union types are specified using the syntax <literal>T1|T2|...</literal>.
-   Union types are available as of PHP 8.0.0.
+    联合类型接受多个不同的类型做为参数。声明联合类型的语法为
+    <literal>T1|T2|...</literal>。联合类型自 PHP 8.0.0 起可用。
   </para>
 
   <sect3 xml:id="language.types.declarations.union.nullable">
-   <title>Nullable union types</title>
+   <title>允许为空的联合类型</title>
    <para>
-    The <literal>null</literal> type is supported as part of unions,
-    such that <literal>T1|T2|null</literal> can be used to create a nullable union.
-    The existing <literal>?T</literal> notation is considered a shorthand
-    for the common case of <literal>T|null</literal>.
+    <literal>null</literal> 类型允许在联合类型中使用，例如
+    <literal>T1|T2|null</literal> 代表接受一个空值为参数。已经存在的 <literal>?T</literal>
+    语法可以视为以下联合类型的一个简写 <literal>T|null</literal>。
    </para>
 
    <caution>
     <simpara>
-     <literal>null</literal> cannot be used as a standalone type.
+     <literal>null</literal> 不能作为一个独立的类型使用。
     </simpara>
    </caution>
   </sect3>
