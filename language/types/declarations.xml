@@ -40,9 +40,8 @@
      <row>
       <entry><type>self</type></entry>
       <entry>
-       The value must be an &instanceof; the same class as the one the
-       method is defined on.
-       Can only be used in classes.
+       值必定是所在方法的类的一个 &instanceof;。
+       只能在类的内部使用。
       </entry>
       <entry></entry>
      </row>
@@ -56,8 +55,8 @@
      <row>
       <entry><type>callable</type></entry>
       <entry>
-       The value must be a valid <type>callable</type>.
-       Cannot be used as a class property type declaration.
+       值必定是一个有效的 <type>callable</type>。
+       不能用于类属性的类型声明。
       </entry>
       <entry></entry>
      </row>
@@ -150,14 +149,14 @@ Stack trace:
   <sect3 xml:id="language.types.declarations.examples">
    &reftitle.examples;
    <example>
-    <title>类型声明在类中的使用</title>
+    <title>在类中使用类型声明</title>
     <programlisting role="php">
 <![CDATA[
 <?php
 class C {}
 class D extends C {}
 
-// This doesn't extend C.
+// 它没有 extend C。
 class E {}
 
 function f(C $c) {
@@ -186,14 +185,14 @@ Stack trace:
    </example>
 
    <example>
-    <title>类型声明在接口中的使用</title>
+    <title>在接口中使用类型声明</title>
     <programlisting role="php">
 <![CDATA[
 <?php
 interface I { public function f(); }
 class C implements I { public function f() {} }
 
-// This doesn't implement I.
+// 它没有 implement I。
 class E {}
 
 function f(I $i) {
@@ -228,7 +227,7 @@ function sum($a, $b): float {
     return $a + $b;
 }
 
-// Note that a float will be returned.
+// 注意必须返回一个 float。
 var_dump(sum(1, 2));
 ?>
 ]]>
@@ -277,7 +276,7 @@ object(C)#1 (0) {
 
   <para>
    <example>
-    <title>允许为空的参数类型定义</title>
+    <title>定义可空（Nullable）的参数类型</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -303,7 +302,7 @@ NULL
    </example>
 
    <example>
-    <title>允许为空的返回类型定义</title>
+    <title>定义可空（Nullable）的返回类型</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -377,58 +376,55 @@ NULL
   </sect3>
 
   <sect3 xml:id="language.types.declarations.union.false">
-   <title>false pseudo-type</title>
+   <title>false 伪类型</title>
    <para>
-    The <literal>false</literal> literal type is supported as part of unions,
-    and is included as for historical reasons many internal functions return
-    <literal>false</literal> instead of <literal>null</literal> for failures.
-    A classic example of such a function is <function>strpos</function>.
+    通过联合类型支持字面类型（Literal Type）<literal>false</literal>，
+    出于历史原因，很多内部函数在失败时返回了 <literal>false</literal> 而不是 <literal>null</literal>。
+    这类函数的典型例子是 <function>strpos</function>。
    </para>
 
    <caution>
     <simpara>
-     <literal>false</literal> cannot be used as a standalone type (including
-     nullable standalone type).
-     As such, all of <literal>false</literal>, <literal>false|null</literal>
-     and <literal>?false</literal> are not permitted.
+     <literal>false</literal> 不能单独作为类型使用（包括可空 nullable 类型）。
+     因此，<literal>false</literal>、<literal>false|null</literal>、
+     <literal>?false</literal> 都是不可以用的。
     </simpara>
    </caution>
    <caution>
     <simpara>
-     The <literal>true</literal> literal type does <emphasis>not</emphasis>
-     exist.
+     <literal>true</literal> 字面类型<emphasis>不存在</emphasis>。
     </simpara>
    </caution>
   </sect3>
 
   <sect3 xml:id="language.types.declarations.union.redundant">
-   <title>Duplicate and redundant types</title>
+   <title>重复冗余的类型</title>
    <para>
-    To catch simple bugs in union type declarations, redundant types that
-    can be detected without performing class loading will result in a
-    compile-time error. This includes:
+    为了能在联合类型声明中暴露简单的 bug，不需要加载 class 
+    就可以在编译时让重复冗余的类型产生错误。
+    包含：
 
     <itemizedlist>
      <listitem>
       <simpara>
-       Each name-resolved type may only occur once. Types such as
-       <literal>int|string|INT</literal> result in an error.
+       解析出来的类型只能出现一次。例如这样的类型
+       <literal>int|string|INT</literal> 会导致错误。
       </simpara>
      </listitem>
      <listitem>
       <simpara>
-       If <type>bool</type> is used, <type>false</type> cannot be used additionally.
+       使用了 <type>bool</type> 时就不能再附带使用 <type>false</type>。
       </simpara>
      </listitem>
      <listitem>
       <simpara>
-       If <type>object</type> is used, class types cannot be used additionally.
+       使用了 <type>object</type> 时就不能再附带使用 class 类型。
       </simpara>
      </listitem>
      <listitem>
       <simpara>
-       If <type>iterable</type> is used, <type>array</type>
-       and <classname>Traversable</classname> cannot be used additionally.
+       使用了 <type>iterable</type> 时，<type>array</type>、
+       <classname>Traversable</classname> 都不能再附带使用。
       </simpara>
      </listitem>
     </itemizedlist>
@@ -436,32 +432,31 @@ NULL
 
    <note>
     <simpara>
-     This does not guarantee that the type is “minimal”, because doing so would
-     require loading all used class types.
+     不过它不能确保类型最小化，因为要达到这样的效果，还要加载使用类型的 class。
     </simpara>
    </note>
 
    <para>
-    For example, if <literal>A</literal> and <literal>B</literal> are class
-    aliases, then <literal>A|B</literal> remains a legal union type, even
-    though it could be reduced to either <literal>A</literal> or
-    <literal>B</literal>.
-    Similarly, if class <code>B extends A {}</code>, then <literal>A|B</literal>
-    is also a legal union type, even though it could be reduced to just
-    <literal>A</literal>.
+    例如，假设 <literal>A</literal> 和 <literal>B</literal> 都是一个类的别名，
+    而 <literal>A|B</literal> 仍然是有效的，哪怕它可以被简化为
+    <literal>A</literal> 或
+    <literal>B</literal>。
+    同样的，如果 <code>B extends A {}</code>，那 <literal>A|B</literal>
+    仍然是有效的联合类型，尽管它可以被简化为
+    <literal>A</literal>。
 
     <informalexample>
      <programlisting role="php">
 <![CDATA[
 <?php
-function foo(): int|INT {} // Disallowed
-function foo(): bool|false {} // Disallowed
+function foo(): int|INT {} // 不允许
+function foo(): bool|false {} // 不允许
 
 use A as B;
-function foo(): A|B {} // Disallowed ("use" is part of name resolution)
+function foo(): A|B {} // 不允许 ("use" 是名称解析的一部分)
 
 class_alias('X', 'Y');
-function foo(): X|Y {} // Allowed (redundancy is only known at runtime)
+function foo(): X|Y {} // 允许 (运行时才能知道重复性)
 ?>
 ]]>
      </programlisting>
@@ -472,77 +467,70 @@ function foo(): X|Y {} // Allowed (redundancy is only known at runtime)
  </sect2>
 
  <sect2 xml:id="language.types.declarations.return-only">
-  <title>Return only types</title>
+  <title>仅仅返回类型</title>
 
   <sect3 xml:id="language.types.declarations.void">
    <title>void</title>
    <para>
-    <literal>void</literal> is a return type indicating the function does not
-    return a value.
-    Therefore it cannot be part of a union type declaration.
-    Available as of PHP 7.1.0.
+    <literal>void</literal> 是一个返回类型，用于标识函数没有返回值。
+    它不能是联合类型的一部分。
+    PHP 7.1.0 起可用。
    </para>
   </sect3>
 
   <sect3 xml:id="language.types.declarations.static">
    <title>static</title>
    <para>
-    The value must be an &instanceof; the same class as the one the
-    method is called in.
-    Available as of PHP 8.0.0.
+    它的值必须是一个 class 的 &instanceof;，该 class 是调用方法所在的同一个类。
+    PHP 8.0.0 起有效。
    </para>
   </sect3>
  </sect2>
 
  <sect2 xml:id="language.types.declarations.strict">
-  <title>Strict typing</title>
+  <title>严格类型</title>
 
   <para>
-   By default, PHP will coerce values of the wrong type into the expected
-   scalar type declaration if possible. For example, a function that is given
-   an <type>int</type> for a parameter that expects a <type>string</type>
-   will get a variable of type <type>string</type>.
+   默认如果可能，PHP 会强制转化不合适的类型为想要的标量类型。
+   比如，参数想要 <type>string</type>，传入的是 <type>int</type>，
+   则会获取 <type>string</type> 类型的变量。
   </para>
 
   <para>
-   It is possible to enable strict mode on a per-file basis. In strict
-   mode, only a value corresponding exactly to the type declaration will be
-   accepted, otherwise a <classname>TypeError</classname> will be thrown.
-   The only exception to this rule is that an <type>int</type> value will
-   pass a <type>float</type> type declaration.
+   可以按文件开启严格模式。
+   在严格模式下，只能接受完全匹配的类型，否则会抛出 <classname>TypeError</classname>。
+   唯一的例外是 <type>int</type> 值也可以传入声明为 <type>float</type> 的类型。
   </para>
 
   <warning>
    <simpara>
-    Function calls from within internal functions will not be affected by
-    the <literal>strict_types</literal> declaration.
+    通过内部函数调用函数时，不会受 <literal>strict_types</literal> 声明影响。
    </simpara>
   </warning>
 
   <para>
-   To enable strict mode, the &declare; statement is used with the
-   <literal>strict_types</literal> declaration:
+   要开启严格模式，使用 &declare; 开启
+   <literal>strict_types</literal>：
   </para>
 
   <note>
    <para>
-    Strict typing applies to function calls made from
-    <emphasis>within</emphasis> the file with strict typing enabled, not to
-    the functions declared within that file. If a file without strict
-    typing enabled makes a call to a function that was defined in a file
-    with strict typing, the caller's preference (coercive typing) will be
-    respected, and the value will be coerced.
+    文件开启严格类型后的<emphasis>内部</emphasis>调用函数将应用严格类型，
+    而不是在声明函数的文件内开启。
+    如果文件没有声明开启严格类型，而被调用的函数所在文件有严格类型声明，
+    那将遵循调用者的设置（开启类型强制转化），
+    值也会强制转化。
    </para>
   </note>
 
   <note>
    <para>
-    Strict typing is only defined for scalar type declarations.
+    只有为标量类型的声明开启严格类型。
    </para>
   </note>
 
   <example>
-   <title>Strict typing for arguments values</title>
+   <title>参数值的严格类型</title>
    <programlisting role="php">
 <![CDATA[
 <?php
@@ -572,7 +560,7 @@ Stack trace:
   </example>
 
   <example>
-   <title>Coercive typing for argument values</title>
+   <title>参数值的类型强制转化</title>
    <programlisting role="php">
 <![CDATA[
 <?php
@@ -582,7 +570,7 @@ function sum(int $a, int $b) {
 
 var_dump(sum(1, 2));
 
-// These will be coerced to integers: note the output below!
+// 以下会强制转化为整型，注意以下内容输出！
 var_dump(sum(1.5, 2.5));
 ?>
 ]]>
@@ -597,7 +585,7 @@ int(3)
   </example>
 
   <example>
-   <title>Strict typing for return values</title>
+   <title>返回值的严格类型</title>
    <programlisting role="php">
 <![CDATA[
 <?php
@@ -628,12 +616,10 @@ Stack trace:
  </sect2>
 
  <sect2 xml:id="language.types.declarations.union.coercive">
-  <title>Coercive typing with union types</title>
+  <title>联合类型的内部隐式强制转化</title>
   <para>
-   When <literal>strict_types</literal> is not enabled, scalar type declarations
-   are subject to limited implicit type coercions.
-   If the exact type of the value is not part of the union, then the target type
-   is chosen in the following order of preference:
+   没有开启 <literal>strict_types</literal> 时，标量类型可能会限制内部隐式类型转化。
+   如果值的类型不是联合类型中的一部分，则目标类型会按以下顺序：
 
    <orderedlist>
     <listitem>
@@ -657,55 +643,50 @@ Stack trace:
      </simpara>
     </listitem>
    </orderedlist>
-
-   If the type both exists in the union, and the value can be coerced to the
-   type under PHPs existing type checking semantics, then the type is chosen.
-   Otherwise the next type is tried.
+   如果类型出现在组合中，值可以按 PHP 现有的类型语义检测进行内部隐式强制转化，则会选择该类型。
+   否则会尝试下一个类型。
   </para>
 
   <caution>
    <para>
-    As an exception, if the value is a string and both int and float are part
-    of the union, the preferred type is determined by the existing
-    “numeric string” semantics.
-    For example, for <literal>"42"</literal> <type>int</type> is chosen,
-    while for <literal>"42.0"</literal> <type>float</type> is chosen.
+    有一个例外：当值是字符串，而 int 与 float 同时在组合中，将按现有的“数字字符串”检测语义，识别首选的类型。
+    例如，<literal>"42"</literal> 会选择 <type>int</type> 类型，
+    而 <literal>"42.0"</literal> 会选择 <type>float</type> 类型。
    </para>
   </caution>
 
   <note>
    <para>
-    Types that are not part of the above preference list are not eligible
-    targets for implicit coercion. In particular no implicit coercions to
-    the <literal>null</literal> and <literal>false</literal> types occur.
+    没有出现在上面列表中的类型则不是有效的内部隐式转化目标。
+    尤其是不会出现内部隐式转化 <literal>null</literal> 和 <literal>false</literal> 类型。
    </para>
   </note>
 
   <example>
-   <title>Example of types being coerced into a type part of the union</title>
+   <title>类型强制转换为联合类型的例子</title>
    <programlisting role="php">
 <![CDATA[
 <?php
 // int|string
-42    --> 42          // exact type
-"42"  --> "42"        // exact type
-new ObjectWithToString --> "Result of __toString()"
-                      // object never compatible with int, fall back to string
-42.0  --> 42          // float compatible with int
-42.1  --> 42          // float compatible with int
-1e100 --> "1.0E+100"  // float too large for int type, fall back to string
-INF   --> "INF"       // float too large for int type, fall back to string
-true  --> 1           // bool compatible with int
-[]    --> TypeError   // array not compatible with int or string
+42    --> 42          // 类型完全匹配
+"42"  --> "42"        // 类型完全匹配
+new ObjectWithToString --> "__toString() 的结果"
+                      // object 不兼容 int，降级到 string
+42.0  --> 42          // float 与 int 兼容
+42.1  --> 42          // float 与 int 兼容
+1e100 --> "1.0E+100"  // float 比 int 大太多了，降级到 string
+INF   --> "INF"       // float 比 int 大太多了，降级到 string
+true  --> 1           // bool 与 int 兼容
+[]    --> TypeError   // array 不兼容 int 或 string
 
 // int|float|bool
-"45"    --> 45        // int numeric string
-"45.0"  --> 45.0      // float numeric string
+"45"    --> 45        // int 的数字字符串
+"45.0"  --> 45.0      // float 的数字字符串
 
-"45X"   --> true      // not numeric string, fall back to bool
-""      --> false     // not numeric string, fall back to bool
-"X"     --> true      // not numeric string, fall back to bool
-[]      --> TypeError // array not compatible with int, float or bool
+"45X"   --> true      // 不是数字字符串，降级到 bool
+""      --> false     // 不是数字字符串，降级到 bool
+"X"     --> true      // 不是数字字符串，降级到 bool
+[]      --> TypeError // array 不兼容 int、float、bool
 ?>
 ]]>
    </programlisting>
@@ -714,13 +695,12 @@ true  --> 1           // bool compatible with int
 
 <!-- TODO figure out what do to with these things -->
  <sect2 xml:id="language.types.declarations.misc">
-  <title>Misc</title>
+  <title>其他</title>
    <example>
-    <title>Typed pass-by-reference Parameters</title>
+    <title>传引用参数的类型</title>
     <simpara>
-     Declared types of reference parameters are checked on function entry, but
-     not when the function returns, so after the function had returned, the
-     argument's type may have changed.
+     仅仅会在函数入口检查传引用的参数类型，而不是在函数返回时检查。
+     所以函数返回时，参数类型可能会发生变化。
     </simpara>
     <programlisting role="php">
 <![CDATA[
@@ -751,7 +731,7 @@ Stack trace:
    </example>
 
    <example>
-    <title>Catching <classname>TypeError</classname></title>
+    <title>捕获 <classname>TypeError</classname></title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -802,3 +782,4 @@ vim600: syn=xml fen fdm=syntax fdl=2 si
 vim: et tw=78 syn=sgml
 vi: ts=1 sw=1
 -->
+
