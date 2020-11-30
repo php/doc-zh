@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
 <!-- $Author$ -->
-<!-- EN-Revision: 9268006bcf989f31baeaa9035e4ef7cfc7690c28 Maintainer: Avenger Status: ready -->
+<!-- EN-Revision: 574f492ae951e820d36bc6d9273f9da90ba46ef7 Maintainer: avenger Status: ready -->
 <!-- CREDITS: Gregory, dallas -->
- <chapter xml:id="language.functions" xmlns="http://docbook.org/ns/docbook">
+<chapter xml:id="language.functions" xmlns="http://docbook.org/ns/docbook">
   <title>函数</title>
 
   <sect1 xml:id="functions.user-defined">
@@ -86,7 +86,6 @@ function bar()
    
    
    
-   
    <para>
     <example>
      <title>函数中的函数</title>
@@ -130,8 +129,7 @@ bar();
    
    
    
-   
-   
+      
    <simpara>
     PHP 的函数支持 <link linkend="functions.variable-arg-list">可变数量的参数</link> 和
     <link linkend="functions.arguments.default">默认参数</link>。参见
@@ -141,6 +139,7 @@ bar();
    
    
    
+
    <para>
     在 PHP 中可以调用递归函数。
     <example>
@@ -168,6 +167,7 @@ function recursion($a)
    </note>
    </para>
   </sect1>
+
 
   <sect1 xml:id="functions.arguments">
    <title>函数的参数</title>
@@ -201,7 +201,30 @@ function takes_array($input)
     </example>
    </para>
 
-   
+   <para>
+    从 PHP 8.0.0 开始，函数参数列表可以包含一个尾部的逗号，这个逗号将被忽略。这在参数列表较长或包含较长的变量名的情况下特别有用，这样可以方便地垂直列出参数。
+   </para>
+   <example>
+    <title>Function Argument List with trailing Comma</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+function takes_many_args(
+    $first_arg,
+    $second_arg,
+    $a_very_long_argument_name,
+    $arg_with_default = 5,
+    $again = 'a default string', // 在 8.0.0 之前，这个尾部的逗号是不允许的。
+)
+{
+    // ...
+}
+?>
+]]>
+    </programlisting>
+   </example>
+
+
    <sect2 xml:id="functions.arguments.by-reference">
     <title>通过引用传递参数</title>
 
@@ -210,10 +233,7 @@ function takes_array($input)
     </simpara>
     <para>
      如果想要函数的一个参数总是通过引用传递，可以在函数定义中该参数的前面加上符号 &amp;：
-    </para>
-    
-    
-    
+    </para>    
     <para>
      <example>
       <title>用引用传递函数参数</title>
@@ -232,9 +252,11 @@ echo $str;    // outputs 'This is a string, and something extra.'
       </programlisting>
      </example>
     </para>
-
    </sect2>
 
+   
+   
+   
    <sect2 xml:id="functions.arguments.default">
     <title>默认参数的值</title>
 
@@ -350,417 +372,40 @@ Making a bowl of acidophilus raspberry.
     </para>
     <note>
      <simpara>
-      自 PHP 5 起，传引用的参数也可以有默认值。
+      传引用的参数也可以有默认值。
      </simpara>
     </note>
-
    </sect2>
 
-   <sect2 xml:id="functions.arguments.type-declaration">
-    <title>类型声明</title>
 
-    <note>
-     <para>
-      在 PHP 5 中，类型声明也被称为类型提示。
-     </para>
-    </note>
-
-    <para>
-     类型声明允许函数在调用时要求参数为特定类型。
-     如果给出的值类型不对，那么将会产生一个错误：
-     在 PHP 5 中，这将是一个可恢复的致命错误，而在 PHP 7 中将会抛出一个
-     <classname>TypeError</classname> 异常。
-    </para>
-
-    <para>
-     为了指定一个类型声明，类型应该加到参数名前。这个声明可以通过将参数的默认值设为 &null; 来实现允许传递 &null;。
-    </para>
-
-    <sect3 xml:id="functions.arguments.type-declaration.types">
-     <title>有效类型</title>
-     <informaltable>
-      <tgroup cols="3">
-       <thead>
-        <row>
-         <entry>类型</entry>
-         <entry>描述</entry>
-         <entry>最小可用 PHP 版本</entry>
-        </row>
-       </thead>
-       <tbody>
-        <row>
-         <entry>Class/interface name</entry>
-         <entry>
-          参数为指定类或接口的 &instanceof;。
-         </entry>
-         <entry>PHP 5.0.0</entry>
-        </row>
-        <row>
-         <entry><literal>self</literal></entry>
-         <entry>
-          参数为当前类的 &instanceof;。可以为类或接口。
-         </entry>
-         <entry>PHP 5.0.0</entry>
-        </row>
-        <row>
-         <entry><type>array</type></entry>
-         <entry>
-          参数必须为 <type>array</type>。
-         </entry>
-         <entry>PHP 5.1.0</entry>
-        </row>
-        <row>
-         <entry><type>callable</type></entry>
-         <entry>
-          参数必须为有效的 <type>callable</type>。
-         </entry>
-         <entry>PHP 5.4.0</entry>
-        </row>
-        <row>
-         <entry><type>bool</type></entry>
-         <entry>
-          参数必须为 <type>boolean</type> 值。
-         </entry>
-         <entry>PHP 7.0.0</entry>
-        </row>
-        <row>
-         <entry><type>float</type></entry>
-         <entry>
-          参数必须为 <type>float</type> 浮点数。
-         </entry>
-         <entry>PHP 7.0.0</entry>
-        </row>
-        <row>
-         <entry><type>int</type></entry>
-         <entry>
-          参数必须为 <type>integer</type>。
-         </entry>
-         <entry>PHP 7.0.0</entry>
-        </row>
-        <row>
-         <entry><type>string</type></entry>
-         <entry>
-          参数必须为 <type>string</type>。
-         </entry>
-         <entry>PHP 7.0.0</entry>
-        </row>
-        <row>
-         <entry><literal>iterable</literal></entry>
-         <entry>
-          参数必须为 <type>array</type> 或 <classname>Traversable</classname> 的 &instanceof;。
-         </entry>
-         <entry>PHP 7.1.0</entry>
-        </row>
-        <row>
-         <entry><literal>object</literal></entry>
-         <entry>
-          参数必须为 <type>object</type>。
-         </entry>
-         <entry>PHP 7.2.0</entry>
-        </row>
-       </tbody>
-      </tgroup>
-     </informaltable>
-     
-     <warning>
-      <para>
-       Aliases for the above scalar types are not supported. Instead, they are
-       treated as class or interface names. For example, using
-       <literal>boolean</literal> as a parameter or return type will require
-       an argument or return value that is an &instanceof; the class or
-       interface <literal>boolean</literal>, rather than of type
-       <type>bool</type>:
-      </para>
-      <para>
-       <example>
-        <programlisting role="php">
- <![CDATA[
- <?php
- function test(boolean $param) {}
- test(true);
- ?>
- ]]>
-        </programlisting>
-        &example.outputs;
-        <screen>
- <![CDATA[
- Fatal error: Uncaught TypeError: Argument 1 passed to test() must be an instance of boolean, boolean given, called in - on line 1 and defined in -:1
- ]]>
-        </screen>
-       </example>
-      </para>
-     </warning>
-    </sect3>
-
-    <sect3 xml:id="functions.arguments.type-declaration.examples">
-     &reftitle.examples;
-     <example>
-      <title>基类类型声明</title>
-      <programlisting role="php">
-<![CDATA[
-<?php
-class C {}
-class D extends C {}
-
-// This doesn't extend C.
-class E {}
-
-function f(C $c) {
-    echo get_class($c)."\n";
-}
-
-f(new C);
-f(new D);
-f(new E);
-?>
-]]>
-      </programlisting>
-      &example.outputs;
-      <screen>
-<![CDATA[
-C
-D
-
-Fatal error: Uncaught TypeError: Argument 1 passed to f() must be an instance of C, instance of E given, called in - on line 14 and defined in -:8
-Stack trace:
-#0 -(14): f(Object(E))
-#1 {main}
-  thrown in - on line 8
-]]>
-      </screen>
-     </example>
-
-     <example>
-      <title>接口类类型声明</title>
-      <programlisting role="php">
-<![CDATA[
-<?php
-interface I { public function f(); }
-class C implements I { public function f() {} }
-
-// This doesn't implement I.
-class E {}
-
-function f(I $i) {
-    echo get_class($i)."\n";
-}
-
-f(new C);
-f(new E);
-?>
-]]>
-      </programlisting>
-      &example.outputs;
-      <screen>
-<![CDATA[
-C
-
-Fatal error: Uncaught TypeError: Argument 1 passed to f() must implement interface I, instance of E given, called in - on line 13 and defined in -:8
-Stack trace:
-#0 -(13): f(Object(E))
-#1 {main}
-  thrown in - on line 8
-]]>
-      </screen>
-     </example>
-
-     <example>
-      <title>Typed pass-by-reference Parameters</title>
-      <simpara>
-       Declared types of reference parameters are checked on function entry, but
-       not when the function returns, so after the function had returned, the
-       argument's type may have changed.
-      </simpara>
-      <programlisting role="php">
-<![CDATA[
-<?php
-function array_baz(array &$param)
-{
-    $param = 1;
-}
-$var = [];
-array_baz($var);
-var_dump($var);
-array_baz($var);
-?>
-]]>
-      </programlisting>
-      &example.outputs.similar;
-      <screen>
-<![CDATA[
-int(1)
-
-Fatal error: Uncaught TypeError: Argument 1 passed to array_baz() must be of the type array, int given, called in %s on line %d
-]]>
-      </screen>
-     </example>
-     <example>
-      <title>可空类型声明</title>
-      <programlisting role="php">
-<![CDATA[
-<?php
-class C {}
-
-function f(C $c = null) {
-    var_dump($c);
-}
-
-f(new C);
-f(null);
-?>
-]]>
-      </programlisting>
-      &example.outputs;
-      <screen>
-<![CDATA[
-object(C)#1 (0) {
-}
-NULL
-]]>
-      </screen>
-     </example>
-    </sect3>
-
-    <sect3 xml:id="functions.arguments.type-declaration.strict">
-     <title>严格类型声明</title>
-
-     <para>
-      默认情况下，如果能做到的话，PHP 将会强迫错误类型的值转为函数期望的标量类型。
-      例如，一个函数的一个参数期望是 <type>string</type>，但传入的是 <type>integer</type>，最终函数得到的将会是一个
-      <type>string</type> 类型的值。
-     </para>
-
-     <para>
-      可以基于每一个文件开启严格模式。在严格模式中，只有一个与类型声明完全相符的变量才会被接受，否则将会抛出一个
-      <classname>TypeError</classname>。唯一的一个例外是可以将
-      <type>integer</type> 传给一个期望 <type>float</type> 的函数。
-     </para>
-
-     <para>
-      使用 &declare; 语句和 <literal>strict_types</literal> 声明来启用严格模式：
-     </para>
-
-     <caution>
-      <para>
-       启用严格模式同时也会影响 <link linkend="functions.returning-values.type-declaration">返回值类型声明</link>。
-      </para>
-     </caution>
-
-     <note>
-      <para>
-       严格类型适用于在 <emphasis>启用严格模式的文件内</emphasis> 的函数调用，而不是在那个文件内声明的函数。
-       一个没有启用严格模式的文件内调用了一个在启用严格模式的文件中定义的函数，那么将会遵循调用者的偏好（弱类型），而这个值将会被转换。
-      </para>
-     </note>
-
-     <note>
-      <para>
-       严格类型仅用于标量类型声明，也正是因为如此，这需要 PHP 7.0.0 或更新版本，因为标量类型声明也是在那个版本中添加的。
-      </para>
-     </note>
-
-     <example>
-      <title>严格类型</title>
-      <programlisting role="php">
-<![CDATA[
-<?php
-declare(strict_types=1);
-
-function sum(int $a, int $b) {
-    return $a + $b;
-}
-
-var_dump(sum(1, 2));
-var_dump(sum(1.5, 2.5));
-?>
-]]>
-      </programlisting>
-      &example.outputs;
-      <screen>
-<![CDATA[
-int(3)
-
-Fatal error: Uncaught TypeError: Argument 1 passed to sum() must be of the type integer, float given, called in - on line 9 and defined in -:4
-Stack trace:
-#0 -(9): sum(1.5, 2.5)
-#1 {main}
-  thrown in - on line 4
-]]>
-      </screen>
-     </example>
-
-     <example>
-      <title>弱类型转换</title>
-      <programlisting role="php">
-<![CDATA[
-<?php
-function sum(int $a, int $b) {
-    return $a + $b;
-}
-
-var_dump(sum(1, 2));
-
-// These will be coerced to integers: note the output below!
-var_dump(sum(1.5, 2.5));
-?>
-]]>
-      </programlisting>
-      &example.outputs;
-      <screen>
-<![CDATA[
-int(3)
-int(3)
-]]>
-      </screen>
-     </example>
-
-     <example>
-      <title>捕捉 <classname>TypeError</classname></title>
-      <programlisting role="php">
-<![CDATA[
-<?php
-declare(strict_types=1);
-
-function sum(int $a, int $b) {
-    return $a + $b;
-}
-
-try {
-    var_dump(sum(1, 2));
-    var_dump(sum(1.5, 2.5));
-} catch (TypeError $e) {
-    echo 'Error: '.$e->getMessage();
-}
-?>
-]]>
-      </programlisting>
-      &example.outputs;
-      <screen>
-<![CDATA[
-int(3)
-Error: Argument 1 passed to sum() must be of the type integer, float given, called in - on line 10
-]]>
-      </screen>
-     </example>
-    </sect3>
-   </sect2>
-
+   
+   
    <sect2 xml:id="functions.variable-arg-list">
     <title>可变数量的参数列表</title>
 
+
     <simpara>
-     PHP 在用户自定义函数中支持可变数量的参数列表。在 PHP 5.6 及以上的版本中，由
-     <literal>...</literal> 语法实现；在 PHP 5.5 及更早版本中，使用函数
-     <function>func_num_args</function>，<function>func_get_arg</function>，和
-     <function>func_get_args</function> 。
+     PHP 在用户自定义函数中支持可变数量的参数列表。由
+     <literal>...</literal> 语法实现。
     </simpara>
-    <sect3 xml:id="functions.variable-arg-list.new">
-     <title><literal>...</literal> in PHP 5.6+</title>
+
+    <note>
+     <simpara>
+      还可以使用以下函数来获取可变参数
+      <function>func_num_args</function>、
+      <function>func_get_arg</function> 和
+      <function>func_get_args</function>，不建议使用此方式，请使用
+      <literal>...</literal> 来替代。
+     </simpara>
+    </note>
 
      <para>
-      PHP 5.6 之后的版本中，包含
-      <literal>...</literal> 的参数，会转换为指定参数变量的一个数组，见以下示例：
+      包含 <literal>...</literal>
+      的参数，会转换为指定参数变量的一个数组，见以下示例：
 
+
+      
+      
       <example>
        <title>使用 <literal>...</literal> 来访问变量参数</title>
        <programlisting role="php">
@@ -791,6 +436,7 @@ echo sum(1, 2, 3, 4);
       也可以使用 <literal>...</literal> 语法来传递 <type>array</type> 或
       <classname>Traversable</classname> 做为参数到函数中：
 
+
       <example>
        <title>使用 <literal>...</literal> 来传递参数</title>
        <programlisting role="php">
@@ -817,20 +463,20 @@ echo add(...$a);
       </example>
      </para>
 
-     <para>
-      You may specify normal positional arguments before the
-      <literal>...</literal> token. In this case, only the trailing arguments
-      that don't match a positional argument will be added to the array
-      generated by <literal>...</literal>.
-     </para>
+    <para>
+     你可以在
+     <literal>...</literal> 前指定正常的位置参数。在这种情况下，只有不符合位置参数的尾部参数才会被添加到
+     <literal>...</literal> 生成的数组中。
+    </para>
 
-     <para>
-      It is also possible to add a
-      <link linkend="language.oop5.typehinting">type hint</link> before the
-      <literal>...</literal> token. If this is present, then all arguments
-      captured by <literal>...</literal> must be objects of the hinted class.
+    <para>
+     你也可以在
+     <literal>...</literal> 标记前添加一个
+     <link linkend="language.types.declarations">类型声明</link>。如果存在这种情况，那么
+     <literal>...</literal> 捕获的所有参数必须是提示类的对象。
 
-      <example>
+
+     <example>
        <title>输入提示的变量参数</title>
        <programlisting role="php">
 <![CDATA[
@@ -863,12 +509,11 @@ Catchable fatal error: Argument 2 passed to total_intervals() must be an instanc
      </para>
 
      <para>
-      Finally, you may also pass variable arguments
-      <link linkend="functions.arguments.by-reference">by reference</link> by
-      prefixing the <literal>...</literal> with an ampersand
-      (<literal>&amp;</literal>).
+      最后，你还可以给参数传递
+      <link linkend="functions.arguments.by-reference">引用变量</link>，通过在
+      <literal>...</literal> 前加上一个 (<literal>&amp;</literal>) 符号来实现。
      </para>
-    </sect3>
+
 
     <sect3 xml:id="functions.variable-arg-list.old">
      <title>旧版本的 PHP</title>
@@ -880,10 +525,10 @@ Catchable fatal error: Argument 2 passed to total_intervals() must be an instanc
      </para>
 
      <para>
-      上面的第一个例子在 PHP 5.5 和更早的版本中的实现如下：
+      上面的第一个例子在早期 PHP 版本中的实现如下：
 
       <example>
-       <title>在 PHP 5.5 和更早的版本中访问可变参数</title>
+       <title>在 PHP 早期版本中访问可变参数</title>
        <programlisting role="php">
 <![CDATA[
 <?php
@@ -910,8 +555,8 @@ echo sum(1, 2, 3, 4);
     </sect3>
 
    </sect2>
-
   </sect1>
+
 
   <sect1 xml:id="functions.returning-values">
    <title>返回值</title>
@@ -922,15 +567,19 @@ echo sum(1, 2, 3, 4);
    </para>
    <note>
     <para>
-     如果省略了 <function>return</function>，则返回值为 &null;。
+     如果省略了
+     <function>return</function>，则返回值为 &null;。
     </para>
    </note>
    
    
+
+   
+   
    <sect2>
      <title>return 的使用</title>
-   <para>
-    <example>
+     <para>
+     <example>
      <title><function>return</function> 的使用</title>
      <programlisting role="php">
 <![CDATA[
@@ -969,6 +618,9 @@ list ($zero, $one, $two) = small_numbers();
     从函数返回一个引用，必须在函数声明和指派返回值给一个变量时都使用引用运算符 &amp;：
    </para>
    <para>
+
+    
+    
     <example>
      <title>从函数返回一个引用</title>
      <programlisting role="php">
@@ -989,149 +641,9 @@ $newref =& returns_reference();
     有关引用的更多信息, 请查看 <link linkend="language.references">引用的解释</link>。
    </simpara>
    </sect2> 
-   
-   <sect2 xml:id="functions.returning-values.type-declaration">
-   <title>返回值类型声明</title>
-
-   <para>
-    PHP 7 增加了对返回值类型声明的支持。 就如
-    <link linkend="functions.arguments.type-declaration">类型声明</link> 一样,
-    返回值类型声明将指定该函数返回值的类型。同样，返回值类型声明也与
-    <link linkend="functions.arguments.type-declaration.types">有效类型</link>
-    中可用的参数类型声明一致。
-   </para>
-
-   <para>
-    <link linkend="functions.arguments.type-declaration.strict">严格类型声明</link>
-    也会影响返回值类型声明。在默认情况下，如果返回值与返回值的类型不一致，则会被强制转换为返回值声明的类型，在强制转换失败的情况下才会抛出
-    <classname>TypeError</classname> 异常（例如：函数预期返回 &array; 实际返回 &integer; 的情况，无法强制转换）。而在严格类型声明模式中，返回值的类型必须与预期一致，否则将会直接抛出
-    <classname>TypeError</classname> 异常。
-   </para>
-
-   <para>
-    从 PHP 7.1.0 开始，不指定类型的返回语句会导致一个 <constant>E_COMPILE_ERROR</constant>
-    错误，除非指定了返回类型为 <type>void</type>，在此情况下，带有指定类型的返回会触发此错误。
-   </para>
-    
-   <para>
-    从 7.1.0 开始，返回值可以通过在类型前添加问号
-    (<literal>?</literal>)
-    来标记为允许返回空值。这表示该函数将返回指定类型或 &null;。
-   </para>
-    
-   <note>
-    <para>
-     当覆盖一个父类方法时，子类方法的返回值类型声明必须与父类一致。如果父类方法没有定义返回类型，那么子类方法可以定义任意的返回值类型声明。
-    </para>
-   </note>
-
-   <sect3 xml:id="functions.returning-values.type-declaration.examples">
-    &reftitle.examples;
-
-    <example>
-     <title>基础返回值类型声明</title>
-     <programlisting role="php">
-<![CDATA[
-<?php
-function sum($a, $b): float {
-    return $a + $b;
-}
-
-// Note that a float will be returned.
-var_dump(sum(1, 2));
-?>
-]]>
-      </programlisting>
-      &example.outputs;
-      <screen>
-<![CDATA[
-float(3)
-]]>
-      </screen>
-     </example>
-
-     <example>
-      <title>严格模式下执行</title>
-      <programlisting role="php">
-<![CDATA[
-<?php
-declare(strict_types=1);
-
-function sum($a, $b): int {
-    return $a + $b;
-}
-
-var_dump(sum(1, 2));
-var_dump(sum(1, 2.5));
-?>
-]]>
-      </programlisting>
-      &example.outputs;
-      <screen>
-<![CDATA[
-int(3)
-
-Fatal error: Uncaught TypeError: Return value of sum() must be of the type integer, float returned in - on line 5 in -:5
-Stack trace:
-#0 -(9): sum(1, 2.5)
-#1 {main}
-  thrown in - on line 5
-]]>
-      </screen>
-     </example>
-
-     <example>
-      <title>返回一个对象</title>
-      <programlisting role="php">
-<![CDATA[
-<?php
-class C {}
-
-function getC(): C {
-    return new C;
-}
-
-var_dump(getC());
-?>
-]]>
-      </programlisting>
-      &example.outputs;
-      <screen>
-<![CDATA[
-object(C)#1 (0) {
-}
-]]>
-      </screen>
-     </example>
-
-     <example>
-      <title>指定可选返回空值 (PHP 7.1.0 起可用)</title>
-      <programlisting role="php">
-<![CDATA[
-<?php
-function get_item(): ?string {
-    if (isset($_GET['item'])) {
-        return $_GET['item'];
-    } else {
-        return null;
-    }
-}
-?>
-]]>
-      </programlisting>
-     </example>
-    </sect3>
-   </sect2> 
-  </sect1>
-
+  </sect1>  
   
-  
-  
-  
-  
-  
-  
-  
+
   <sect1 xml:id="functions.variable-functions">
    <title>可变函数</title>
 
@@ -1234,7 +746,6 @@ Foo::$variable();  // This calls $foo->Variable() reading $variable in this scop
     </example>
    </para>
    <para>
-     PHP 5.4.0, you can call any <type>callable</type> stored in a variable.
     <example>
      <title>Complex callables</title>
      <programlisting role="php">
@@ -1257,46 +768,22 @@ $func(); // prints "bar"
 $func = array(new Foo, "baz");
 $func(); // prints "baz"
 $func = "Foo::bar";
-$func(); // prints "bar" as of PHP 7.0.0; prior, it raised a fatal error
+$func(); // prints "bar"
 ?>
 ]]>
      </programlisting>
     </example>
    </para>
 
-   <para>
-    参见 <function>is_callable</function>，<function>call_user_func</function>，<link
-    linkend="language.variables.variable">可变变量</link>和
-    <function>function_exists</function>。
-   </para>
-   
-   <sect2 role="changelog">
-    &reftitle.changelog;
+  <sect2 role="seealso">
+    &reftitle.seealso;
     <para>
-     <informaltable>
-      <tgroup cols="2">
-       <thead>
-        <row>
-         <entry>&Version;</entry>
-         <entry>&Description;</entry>
-        </row>
-       </thead>
-       <tbody>
-        <row>
-         <entry>7.0.0</entry>
-         <entry>
-          'ClassName::methodName' 允许为可变函数。
-         </entry>
-        </row>
-        <row>
-         <entry>5.4.0</entry>
-         <entry>
-          Arrays, which are valid callables, are allowed as variable functions.
-         </entry>
-        </row>
-       </tbody>
-      </tgroup>
-     </informaltable>
+     <simplelist>
+      <member><function>is_callable</function></member>
+      <member><function>call_user_func</function></member>
+      <member><function>function_exists</function></member>
+      <member><link linkend="language.variables.variable">variable variables</link></member>
+     </simplelist>
     </para>
    </sect2>
   </sect1>
@@ -1334,23 +821,20 @@ $func(); // prints "bar" as of PHP 7.0.0; prior, it raised a fatal error
      &null;。但这仅仅是一个惯例，并不一定如此。
     </simpara>
    </note>    
-     <para>
-      参见 <function>function_exists</function>，<link
-      linkend="funcref">函数参考</link>，<function>get_extension_funcs</function>
-      和 <function>dl</function>。
-     </para>
+
+   <sect2 role="seealso">
+    &reftitle.seealso;
+    <para>
+     <simplelist>
+      <member><function>function_exists</function></member>
+      <member><link linkend="funcref">the function reference</link></member>
+      <member><function>get_extension_funcs</function></member>
+      <member><function>dl</function></member>
+     </simplelist>
+    </para>
+   </sect2>
     </sect1>
 
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
   
   <sect1 xml:id="functions.anonymous">
    <title>匿名函数</title>
@@ -1468,7 +952,11 @@ string(11) "hello world"
     </screen>
    </example>
 
-     <simpara>
+   <para>
+    从 PHP 8.0.0 开始，作用域继承的变量列表可能包含一个尾部的逗号，这个逗号将被忽略。
+   </para>
+
+  <simpara>
     这些变量都必须在函数或类的头部声明。
     
     从父作用域中继承变量与使用全局变量是<emphasis>不同</emphasis>的。全局变量存在于一个全局的范围，无论当前在执行的是哪个函数。而
@@ -1565,23 +1053,17 @@ object(Test)#1 (0) {
 }
 ]]>
     </screen>
-    &example.outputs.53;
-    <screen>
-<![CDATA[
-Notice: Undefined variable: this in script.php on line 8
-NULL]]>
-    </screen>
    </example>
    
    <para>
-    从 PHP 5.4.0 开始，当在类的上下文中声明时，当前的类会自动与之绑定，使得
+    当在类的上下文中声明时，当前的类会自动与之绑定，使得
     <literal>$this</literal> 在函数的作用域中可用。如果不需要当前类的自动绑定，可以使用
     <link linkend="functions.anonymous-functions.static">静态匿名函数</link> 替代。
    </para>
      <sect2 xml:id="functions.anonymous-functions.static">
     <title>静态匿名函数</title>
     <para>
-     从 PHP 5.4 开始，匿名函数允许被定义为静态化。这样可以防止当前类自动绑定到它们身上，对象在运行时也可能不会被绑定到它们上面。
+     匿名函数允许被定义为静态化。这样可以防止当前类自动绑定到它们身上，对象在运行时也可能不会被绑定到它们上面。
     </para>
     <para>
      <example>
@@ -1659,18 +1141,6 @@ Warning: Cannot bind an instance to a static closure in %s on line %d
           Anonymous functions may not close over &link.superglobals;,
           <varname>$this</varname>, or any variable with the same name as a
           parameter.
-         </entry>
-        </row>
-        <row>
-         <entry>5.4.0</entry>
-         <entry>
-          <varname>$this</varname> 可用于匿名函数。
-         </entry>
-        </row>
-        <row>
-         <entry>5.3.0</entry>
-         <entry>
-          可以使用匿名函数。
          </entry>
         </row>
        </tbody>
@@ -1866,3 +1336,4 @@ vim600: syn=xml fen fdm=syntax fdl=2 si
 vim: et tw=78 syn=sgml
 vi: ts=1 sw=1
 -->
+
