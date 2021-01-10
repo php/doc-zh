@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 351652 Maintainer: daijie Status: ready -->
+<!-- EN-Revision: 1d58f726462a821d3f926fb61247357f49fa1ce5 Maintainer: daijie Status: ready -->
 
  <chapter xml:id="language.exceptions" xmlns="http://docbook.org/ns/docbook">
-  <title>异常处理</title>
+  <title>异常</title>
    
   <sect1 xml:id="language.exceptions.extending">
    <title>扩展（extend） 异常处理类</title>
    <para>
     用户可以用自定义的异常处理类来扩展 PHP
-    内置的异常处理类。以下的代码说明了在内置的异常处理类中，哪些属性和方法在子类中是可访问和可继承的。译者注：以下这段代码只为说明内置异常处理类的结构，它并不是一段有实际意义的可用代码。
+    内置的异常处理类。以下的代码说明了在内置的异常处理类中，哪些属性和方法在子类中是可访问和可继承的。
    </para>
    <example>
     <title>内置的异常处理类</title>
@@ -19,27 +19,27 @@
 class Exception extends Throwable
 {
     protected $message = 'Unknown exception';   // 异常信息
-    private   $string;                          // __toString cache
-    protected $code = 0;                        // 用户自定义异常代码
-    protected $file;                            // 发生异常的文件名
-    protected $line;                            // 发生异常的代码行号
+    private   $string;                          // __toString 的缓存
+    protected $code = 0;                        // 用户自定义异常错误码
+    protected $file;                            // 发生异常的源文件名
+    protected $line;                            // 发生异常的源代码行号
     private   $trace;                           // backtrace
-    private   $previous;                        // previous exception if nested exception
+    private   $previous;                        // 如果是嵌套异常，则是之前的 exception
 
     public function __construct($message = null, $code = 0, Exception $previous = null);
 
     final private function __clone();           // Inhibits cloning of exceptions.
 
-    final public  function getMessage();        // 返回异常信息
-    final public  function getCode();           // 返回异常代码
-    final public  function getFile();           // 返回发生异常的文件名
-    final public  function getLine();           // 返回发生异常的代码行号
+    final public  function getMessage();        // 异常信息
+    final public  function getCode();           // 异常错误码
+    final public  function getFile();           // 发生异常的源文件名
+    final public  function getLine();           // 发生异常的源代码行号
     final public  function getTrace();          // backtrace() 数组
     final public  function getPrevious();       // 之前的 exception
     final public  function getTraceAsString();  // 已格成化成字符串的 getTrace() 信息
 
     // Overrideable
-    public function __toString();               // 可输出的字符串
+    public function __toString();               // 可输出的格式化后的字符串
 }
 ?>
 ]]>
@@ -70,13 +70,13 @@ class MyException extends Exception
 {
     // 重定义构造器使 message 变为必须被指定的属性
     public function __construct($message, $code = 0, Exception $previous = null) {
-        // 自定义的代码
+        // 这里写用户的代码
 
         // 确保所有变量都被正确赋值
         parent::__construct($message, $code, $previous);
     }
 
-    // 自定义字符串输出的样式
+    // 自定义字符串输出的格式
     public function __toString() {
         return __CLASS__ . ": [{$this->code}]: {$this->message}\n";
     }
@@ -88,7 +88,7 @@ class MyException extends Exception
 
 
 /**
- * 创建一个用于测试异常处理机制的类
+ * 创建一个类，测试该 exception 类
  */
 class TestException
 {
@@ -130,7 +130,7 @@ try {
     echo "Caught Default Exception\n", $e;
 }
 
-// Continue execution
+// 继续执行后续代码
 var_dump($o); // Null
 echo "\n\n";
 
@@ -208,66 +208,56 @@ echo "\n\n";
   <simplesect xml:id="language.exceptions.catch">
    <title><literal>catch</literal></title>
    <para>
-    A &catch; block defines how to respond to a thrown exception.  A &catch;
-    block defines one or more types of exception or error it can handle, and
-    optionally a variable to which to assign the exception. (The variable was
-    required prior to PHP 8.0.0.)  The first &catch; block a thrown exception
-    or error encounters that matches the type of the thrown object will handle
-    the object.
+    &catch; 定义了处理抛出异常的方式。
+    &catch; 块定义了它能处理的异常/错误的类型，并可以选择将异常赋值到变量中。
+    （在 PHP 8.0.0 之前的版本中必须要赋值到变量）
+    如果遇到抛出对象的类型匹配了首个 &catch; 块的异常或错误，将会处理该对象。
    </para>
    <para>
-    Multiple &catch; blocks can be used to catch different classes of
-    exceptions. Normal execution (when no exception is thrown within the &try;
-    block) will continue after that last &catch; block defined in sequence.
-    Exceptions can be &throw;n (or re-thrown) within a &catch; block. If not,
-    execution will continue after the &catch; block that was triggered.
+    可用多个 &catch; 捕获不同的异常类。
+    正常情况下（&try; 代码块里没有抛出异常）会在最后一个定义的 &catch; 后面继续执行。
+    &catch; 代码块里也可以 &throw; 或者重新抛出异常。
+    不抛出的话，会在触发的 &catch; 后面继续执行。
    </para>
    <para>
-    When an exception is thrown, code following the statement will not be
-    executed, and PHP will attempt to find the first matching &catch; block.
-    If an exception is not caught, a PHP Fatal Error will be issued with an
-    "<literal>Uncaught Exception ...</literal>" message, unless a handler has
-    been defined with <function>set_exception_handler</function>.
+    当 PHP 抛出一个异常时，将不会执行后续的代码语句，并会尝试查找首个匹配的 &catch; 代码块。
+    如果没有用 <function>set_exception_handler</function> 设置异常处理函数，
+    PHP 会在异常未被捕获时产生 Fatal 级错误，提示 "<literal>Uncaught Exception ...</literal>"
+    消息。
    </para>
    <para>
-    As of PHP 7.1.0, a &catch; block may specify multiple exceptions
-    using the pipe (<literal>|</literal>) character. This is useful for when
-    different exceptions from different class hierarchies are handled the
-    same.
+    从 PHP 7.1.0 起 &catch; 可以用竖线符（<literal>|</literal>） 指定多个异常。
+    如果在不同的类层次结构中，不同异常的异常需要用同样的方式处理，就特别适用这种方式。
    </para>
    <para>
-    As of PHP 8.0.0, the variable name for a caught exception is optional.
-    If not specified, the &catch; block will still execute but will not
-    have access to the thrown object.
+    从 PHP 8.0.0 起，捕获的异常不再强制要求指定变量名。
+    &catch; 代码块会在未指定时继续执行，只是无法访问到抛出的对象。
    </para>
   </simplesect>
 
   <simplesect xml:id="language.exceptions.finally">
    <title><literal>finally</literal></title>
    <para>
-    A &finally; block may also be specified after or
-    instead of &catch; blocks. Code within the &finally; block will always be
-    executed after the &try; and &catch; blocks, regardless of whether an
-    exception has been thrown, and before normal execution resumes.
+    &finally; 代码块可以放在 &catch; 之后，或者直接代替它。 
+    无论是否抛出了异常，在 &try; 和 &catch; 之后、在执行后续代码之前，
+    放在 &finally; 里的代码总是会执行。
    </para>
    <para>
-    One notable interaction is between the &finally; block and a &return; statement.
-    If a &return; statement is encountered inside either the &try; or the &catch; blocks,
-    the &finally; block will still be executed. Moreover, the &return; statement is
-    evaluated when encountered, but the result will be returned after the &finally; block
-    is executed. Additionally, if the &finally; block also contains a &return; statement,
-    the value from the &finally; block is returned.
+    值得注意的是 &finally; 和 &return; 语句之间存在相互影响。
+    如果在 &try; 或 &catch; 里遇到 &return;，仍然会执行 &finally; 里的代码。
+    而且，遇到 &return; 语句时，会先执行 &finally; 再返回结果。
+    此外，如果 &finally; 里也包含了 &return; 语句，将返回 &finally; 里的值。
    </para>
   </simplesect>
 
  <simplesect xml:id="language.exceptions.exception-handler">
-  <title><literal>Global exception handler</literal></title>
+  <title><literal>全局异常处理器</literal></title>
   <para>
-   If an exception is allowed to bubble up to the global scope, it may be caught
-   by a global exception handler if set.  The <function>set_exception_handler</function>
-   function can set a function that will be called in place of a &catch; block if no
-   other block is invoked.  The effect is essentially the same as if the entire program
-   were wrapped in a &try;-&catch; block with that function as the &catch;.
+   当允许异常冒泡到全局范围时，它可以被全局异常处理器捕获到。
+   <function>set_exception_handler</function> 
+   可以设置一个函数，在没有调用其他块时代替 &catch;。
+   在本质上，实现的效果等同于整个程序被 &try;-&catch; 包裹起来，
+   而该函数就是 &catch;。
   </para>
  </simplesect>
 
@@ -276,15 +266,14 @@ echo "\n\n";
 
    <note>
     <para>
-     Internal PHP functions mainly use
-     <link linkend="ini.error-reporting">Error reporting</link>, only modern
-     <link linkend="language.oop5">Object oriented</link>
-     extensions use exceptions. However, errors can be easily translated to
-     exceptions with <link linkend="class.errorexception">ErrorException</link>.
-     This technique only works with non-fatal errors, however.
+     PHP 内部函数主要使用 <link linkend="ini.error-reporting">错误报告</link>，
+     只有一些现代 <link linkend="language.oop5">面向对象</link> 的扩展使用异常。
+     不过，错误很容易用 <link linkend="class.errorexception">ErrorException</link>
+     转化成异常。
+     然而，这个技术方案仅适用非 Fatal 级的错误。
     </para>
     <example>
-     <title>Converting error reporting to exceptions</title>
+     <title>将错误报告转成异常</title>
      <programlisting role="php">
 <![CDATA[
 <?php
@@ -300,9 +289,8 @@ set_error_handler('exceptions_error_handler');
    </note>
    <tip>
     <para>
-     The <link linkend="intro.spl">Standard PHP Library (SPL)</link> provides
-     a good number of <link linkend="spl.exceptions">built-in
-     exceptions</link>.
+     <link linkend="intro.spl">PHP 标准库（SPL）</link> 
+     提供了大量的 <link linkend="spl.exceptions">标准内置异常</link>。
     </para>
    </tip>
   </simplesect>
@@ -311,7 +299,7 @@ set_error_handler('exceptions_error_handler');
    &reftitle.examples;
 
    <example>
-    <title>Throwing an Exception</title>
+    <title>抛出一个异常</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -344,7 +332,7 @@ Hello World
     </screen>
    </example>
    <example>
-    <title>Exception handling with a &finally; block</title>
+    <title>带 &finally; 块的异常处理</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -371,7 +359,7 @@ try {
     echo "Second finally.\n";
 }
 
-// Continue execution
+// 继续执行
 echo "Hello World\n";
 ?>
 ]]>
@@ -388,7 +376,7 @@ Hello World
     </screen>
    </example>
    <example>
-    <title>Interaction between the &finally; block and &return;</title>
+    <title>&finally; 块和 &return; 之间的用法</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -415,7 +403,7 @@ finally
     </screen>
    </example>
    <example>
-    <title>Nested Exception</title>
+    <title>异常嵌套</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -428,7 +416,7 @@ class Test {
             try {
                 throw new MyException('foo!');
             } catch (MyException $e) {
-                // rethrow it
+                // 重新 throw
                 throw $e;
             }
         } catch (Exception $e) {
@@ -451,7 +439,7 @@ string(4) "foo!"
     </screen>
    </example>
    <example>
-    <title>Multi catch exception handling</title>
+    <title>多个异常的捕获处理</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -484,8 +472,8 @@ string(11) "MyException"
     </screen>
    </example>
    <example>
-    <title>Omitting the caught variable</title>
-    <para>Only permitted in PHP 8.0.0 and later.</para>
+    <title>忽略捕获的变量</title>
+    <para>仅仅在 PHP 8.0.0 及以上版本有效</para>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -506,8 +494,8 @@ try {
     </programlisting>
    </example>
    <example>
-    <title>Throw as an expression</title>
-    <para>Only permitted in PHP 8.0.0 and later.</para>
+    <title>以表达式的形式抛出</title>
+    <para>仅仅在 PHP 8.0.0 及以上版本有效</para>
     <programlisting role="php">
 <![CDATA[
 <?php
