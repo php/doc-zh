@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: d62d6b01c4d00cfebb7737054d19ba7ce26132d0 Maintainer: daijie Status: ready -->
+<!-- EN-Revision: 4a7ddddc27271967b616ad3400cfbe2a9b48212b Maintainer: daijie Status: ready -->
 <!-- Reviewed: no -->
 
 <refentry xml:id="function.setcookie" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -11,15 +11,22 @@
  
  <refsect1 role="description">
   &reftitle.description;
-  <methodsynopsis>
+  <methodsynopsis role="procedural">
    <type>bool</type><methodname>setcookie</methodname>
    <methodparam><type>string</type><parameter>name</parameter></methodparam>
    <methodparam choice="opt"><type>string</type><parameter>value</parameter><initializer>""</initializer></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter>expire</parameter><initializer>0</initializer></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>expires</parameter><initializer>0</initializer></methodparam>
    <methodparam choice="opt"><type>string</type><parameter>path</parameter><initializer>""</initializer></methodparam>
    <methodparam choice="opt"><type>string</type><parameter>domain</parameter><initializer>""</initializer></methodparam>
-   <methodparam choice="opt"><type>bool</type><parameter>secure</parameter><initializer>false</initializer></methodparam>
-   <methodparam choice="opt"><type>bool</type><parameter>httponly</parameter><initializer>false</initializer></methodparam>
+   <methodparam choice="opt"><type>bool</type><parameter>secure</parameter><initializer>&false;</initializer></methodparam>
+   <methodparam choice="opt"><type>bool</type><parameter>httponly</parameter><initializer>&false;</initializer></methodparam>
+  </methodsynopsis>
+  <para>PHP 7.3.0 起有效的签名：</para>
+  <methodsynopsis role="procedural">
+   <type>bool</type><methodname>setcookie</methodname>
+   <methodparam><type>string</type><parameter>name</parameter></methodparam>
+   <methodparam choice="opt"><type>string</type><parameter>value</parameter><initializer>""</initializer></methodparam>
+   <methodparam choice="opt"><type>array</type><parameter>options</parameter><initializer>[]</initializer></methodparam>
   </methodsynopsis>
   <para>
    <function>setcookie</function> 定义了 Cookie，会和剩下的 HTTP 头一起发送给客户端。
@@ -57,7 +64,7 @@
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>expire</parameter></term>
+     <term><parameter>expires</parameter></term>
      <listitem>
       <para>
        Cookie 的过期时间。
@@ -70,7 +77,7 @@
       <para>
        <note>
         <para>
-          你可能注意到了，<parameter>expire</parameter> 使用 Unix 时间戳而非 <literal>Wdy, DD-Mon-YYYY
+          你可能注意到了，<parameter>expires</parameter> 使用 Unix 时间戳而非 <literal>Wdy, DD-Mon-YYYY
          HH:MM:SS GMT</literal> 这样的日期格式，是因为 PHP 内部作了转换。
         </para>
        </note>
@@ -121,11 +128,29 @@
        设置成 &true;，Cookie 仅可通过 HTTP 协议访问。
        这意思就是 Cookie 无法通过类似 JavaScript 这样的脚本语言访问。
        要有效减少 XSS 攻击时的身份窃取行为，可建议用此设置（虽然不是所有浏览器都支持），不过这个说法经常有争议。
-       PHP 5.2.0 中添加。
        &true; 或 &false;
       </para>
      </listitem>
     </varlistentry>
+    <varlistentry>
+        <term><parameter>options</parameter></term>
+        <listitem>
+            <para>
+                An associative <type>array</type> which may have any of the keys
+                <literal>expires</literal>, <literal>path</literal>, <literal>domain</literal>,
+                <literal>secure</literal>, <literal>httponly</literal> and <literal>samesite</literal>.
+                If any other key is present an error of level <constant>E_WARNING</constant>
+                is generated. The values have the same meaning as described for the 
+                parameters with the same name. The value of the <literal>samesite</literal>
+                element should be either <literal>None</literal>, <literal>Lax</literal>
+                or <literal>Strict</literal>.
+                If any of the allowed options are not given, their default values are the
+                same as the default values of the explicit parameters. If the
+                <literal>samesite</literal> element is omitted, no SameSite cookie
+                attribute is set.
+            </para>
+        </listitem>
+       </varlistentry>
    </variablelist>
   </para>
  </refsect1>
@@ -159,7 +184,7 @@ setcookie("TestCookie", $value, time()+3600, "/~rasmus/", "example.com", 1);
   </para>
   <para>
    注意：在发送 Cookie 时，值的部分会被自动 urlencode 编码。收到 Cookie 时，会自动解码，并赋值到可变的 Cookie 名称上。
-   如果不想被编码，可以使用 <function>setrawcookie</function> 代替——如果你的 PHP 版本是 5 及以上。
+   如果不想被编码，可以使用 <function>setrawcookie</function> 代替。
    在脚本里查看我们的测试 Cookie 的内容，使用下面的一个例子：
   </para>
   <para>
@@ -231,6 +256,13 @@ one : cookieone
 ]]>
     </screen>
    </example>
+   <note>
+    <simpara>
+     Using separator characters such as <literal>[</literal> and <literal>]</literal>
+     as part of the cookie name is not compliant to RFC 6265, section 4, but supposed
+     to be supported by user agents according to RFC 6265, section 5.
+    </simpara>
+   </note>
   </para>
  </refsect1>
 
@@ -247,17 +279,13 @@ one : cookieone
      </thead>
      <tbody>
       <row>
-       <entry>5.5.0</entry>
-       <entry>
-        发送给客户端的 Set-Cookie 头现在会包含 Max-Age 属性。
-       </entry>
-      </row>
-      <row>
-       <entry>5.2.0</entry>
-       <entry>
-        添加 <parameter>httponly</parameter> 参数。
-       </entry>
-      </row>
+        <entry>7.3.0</entry>
+        <entry>
+         An alternative signature supporting an <parameter>options</parameter>
+         array has been added. This signature supports also setting of the
+         SameSite cookie attribute.
+        </entry>
+       </row>
      </tbody>
     </tgroup>
    </informaltable>
@@ -274,14 +302,6 @@ one : cookieone
     或设置 <literal>output_buffering</literal> &php.ini; 或服务器配置文件里的配置指令。
    </para>
   </note>
-  <note>
-   <para>
-    如果 PHP 指令 <link linkend="ini.register-globals">register_globals</link>
-    设置成 <literal>on</literal>，Cookie 值会自动设置成变量。
-    下面的例子里会存在 <varname>$TestCookie</varname>。
-    我们推荐你使用 <varname>$_COOKIE</varname>。
-   </para>
-  </note>
   <para>
    注意避坑：
    <itemizedlist>
@@ -289,7 +309,7 @@ one : cookieone
      <simpara>
       在页面（ Cookie 可见的页面）下次刷新前，Cookie 不会生效。
       测试 Cookie 是否已经成功设置，需要在下次页面加载时、Cookie 过期前检测。
-      过期时间是通过 <parameter>expire</parameter> 参数设置的。
+      过期时间是通过 <parameter>expires</parameter> 参数设置的。
       直接调用 <literal>print_r($_COOKIE);</literal> 调试检测 Cookie 是个很好的方式。
      </simpara>
     </listitem>
