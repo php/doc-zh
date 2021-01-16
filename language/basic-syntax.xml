@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
 <!-- $Author$ -->
-<!-- EN-Revision: 203cd3e98e3c8c640cb34ed77bd61e9ddf3a86f8 Maintainer: verdana  Status:ready -->
+<!-- EN-Revision: a71742330defbc0edfbc6822b4f947bf437b2f70 Maintainer: verdana  Status:ready -->
 <!-- CREDITS: dallas -->
 <chapter xml:id="language.basic-syntax" xmlns="http://docbook.org/ns/docbook">
  <title>基本语法</title>
@@ -14,32 +14,66 @@
    可以被嵌入到各种不同的文档中去，而任何起始和结束标记之外的部分都会被
    PHP 解析器忽略。
   </para>
+
   <para>
-   PHP 也允许使用短标记 <literal>&lt;?</literal> 和
-   <literal>?&gt;</literal>，但不鼓励使用。只有通过激活 &php.ini;
-   中的 <link linkend="ini.short-open-tag">short_open_tag</link>
-   配置指令或者在编译 PHP 时使用了配置选项 <option>--enable-short-tags</option>
-   时才能使用短标记。
-  </para>
+    PHP 有一个 echo 标记简写 <literal>&lt;?=</literal>，
+    它是更完整的 <code>&lt;?php echo</code> 的简写形式。
+   </para>
+ 
+   <para>
+    <example>
+     <title>PHP 开始和结束标记</title>
+     <programlisting role="php">
+ <![CDATA[
+ 1.  <?php echo 'if you want to serve PHP code in XHTML or XML documents,
+                 use these tags'; ?>
+ 
+ 2.  You can use the short echo tag to <?= 'print this string' ?>.
+     It's equivalent to <?php echo 'print this string' ?>.
+ 
+ 3.  <? echo 'this code is within short tags, but will only work '.
+         'if short_open_tag is enabled'; ?>
+ ]]>
+     </programlisting>
+    </example>
+   </para>
+
+   <para>
+    Short tags (example three) are available by default but can be disabled
+    either via the <link linkend="ini.short-open-tag">short_open_tag</link>
+    &php.ini; configuration file directive, or are disabled by default if
+    PHP is built with the <option>--disable-short-tags</option> configuration.
+   </para>
+   
+   <para>
+    <note>
+     <para>
+      As short tags can be disabled it is recommened to only use the normal
+      tags (<code>&lt;?php ?&gt;</code> and <code>&lt;?= ?&gt;</code>) to
+      maximise compatibility.
+     </para>
+    </note>
+   </para>
+
   <para>
-   如果文件内容是纯 PHP 代码，最好在文件末尾删除 PHP
-   结束标记。这可以避免在 PHP 结束标记之后万一意外加入了空格或者换行符，会导致
-   PHP 开始输出这些空白，而脚本中此时并无输出的意图。
-   <informalexample>
-    <programlisting role="php">
-<![CDATA[
-<?php
-echo "Hello world";
-
-// ... more code
-
-echo "Last statement";
-
-// 脚本至此结束，并无 PHP 结束标记
-]]>
-    </programlisting>
-   </informalexample>
-  </para>
+    如果文件内容仅仅包含 PHP 代码，最好在文件末尾删除 PHP
+    结束标记。这可以避免在 PHP 结束标记之后万一意外加入了空格或者换行符，会导致
+    PHP 开始输出这些空白，而脚本中此时并无输出的意图。
+    <informalexample>
+     <programlisting role="php">
+ <![CDATA[
+ <?php
+ echo "Hello world";
+ 
+ // ... more code
+ 
+ echo "Last statement";
+ 
+ // 脚本至此结束，并无 PHP 结束标记
+ ]]>
+     </programlisting>
+    </informalexample>
+   </para>
  </sect1>
 
  <sect1 xml:id="language.basic-syntax.phpmode">
@@ -48,7 +82,7 @@ echo "Last statement";
    凡是在一对开始和结束标记之外的内容都会被
    PHP 解析器忽略，这使得 PHP 文件可以具备混合内容。 可以使 PHP
    嵌入到 HTML 文档中去，如下例所示。
-   <example>
+   <informalexample>
     <programlisting role="php">
 <![CDATA[
 <p>This is going to be ignored by PHP and displayed by the browser.</p>
@@ -56,7 +90,7 @@ echo "Last statement";
 <p>This will also be ignored by PHP and displayed by the browser.</p>
 ]]>
     </programlisting>
-   </example>
+   </informalexample>
    这将如预期中的运行，因为当 PHP 解释器碰到 ?&gt;
    结束标记时就简单地将其后内容原样输出（除非马上紧接换行 - 见<link
    linkend="language.basic-syntax.instruction-separation">指令分隔符</link>）直到碰到下一个开始标记；例外是处于条件语句中间时，此时
@@ -84,70 +118,13 @@ echo "Last statement";
    <function>echo</function> 或 <function>print</function> 输出更有效率。
   </para>
   <para>
-   可以在 PHP 中使用四对不同的开始和结束标记。其中两种，&lt;?php ?&gt;
-   和 &lt;script language="php"&gt; &lt;/script&gt; 总是可用的。另两种是短标记和
-   <productname>ASP</productname> 风格标记，可以在 &php.ini;
-   配置文件中打开或关闭。尽管有些人觉得短标记和
-   <productname>ASP</productname> 风格标记很方便，但移植性较差，通常不推荐使用。
-   <note>
-    <para>
-     此外注意如果将 PHP 嵌入到 XML 或 XHTML
-     中则需要使用 &lt;?php ?&gt; 标记以保持符合标准。
+    <note>
+        <para>
+            此外注意如果将 PHP 嵌入到 XML 或 XHTML
+            中则需要使用  <code>&lt;?php ?&gt;</code> 标记以保持符合标准。
+        </para>
+    </note>
     </para>
-   </note>
-  </para>
-  <para>
-   <example>
-    <title>PHP 开始和结束标记</title>
-    <programlisting role="php">
-<![CDATA[
-1.  <?php echo 'if you want to serve XHTML or XML documents, do it like this'; ?>
-
-2.  <script language="php">
-        echo 'some editors (like FrontPage) don\'t
-              like processing instructions';
-    </script>
-
-3.  <? echo 'this is the simplest, an SGML processing instruction'; ?>
-    <?= expression ?> This is a shortcut for "<? echo expression ?>"
-
-4.  <% echo 'You may optionally use ASP-style tags'; %>
-    <%= $variable; # This is a shortcut for "<% echo . . ." %>
-]]>
-    </programlisting>
-   </example>
-  </para>
-  <para>
-   上例中的 1 和 2 中使用的标记总是可用的，其中示例 1 中是最常用，并建议使用的。
-  </para>
-  <para>
-   短标记（上例 3）仅在通过 &php.ini; 配置文件中的指令
-   <link linkend="ini.short-open-tag">short_open_tag</link>
-   打开后才可用，或者在 PHP 编译时加入了
-   <option>--enable-short-tags</option> 选项。
-  </para>
-  <para>
-   <productname>ASP</productname> 风格标记（上例 4）仅在通过 &php.ini;
-   配置文件中的指令
-   <link linkend="ini.asp-tags">asp_tags</link> 打开后才可用。
-  </para>
-  <note>
-   <para>
-    在以下情况应避免使用短标记：开发需要再次发布的程序或者库，或者在用户不能控制的服务器上开发。因为目标服务器可能不支持短标记。为了代码的移植及发行，确保不要使用短标记。
-   </para>
-  </note>
-  <note>
-   <para>
-    在 PHP 5.2 和之前的版本中，解释器不允许一个文件的全部内容就是一个开始标记
-    <literal>&lt;?php</literal>。自 PHP 5.3 起则允许此种文件，但要开始标记后有一个或更多白空格符。
-   </para>
-  </note>
-  <note>
-   <para>
-    自 PHP 5.4 起，短格式的 echo 标记 <literal>&lt;?=</literal>
-    总会被识别并且合法，而不管 <link linkend="ini.short-open-tag">short_open_tag</link> 的设置是什么。
-   </para>
-  </note>
  </sect1>
 
  <sect1 xml:id="language.basic-syntax.instruction-separation">
@@ -156,6 +133,31 @@ echo "Last statement";
    同 C 或 Perl 一样，PHP 需要在每个语句后用分号结束指令。一段 PHP
    代码中的结束标记隐含表示了一个分号；在一个 PHP
    代码段中的最后一行可以不用分号结束。如果后面还有新行，则代码段的结束标记包含了行结束。
+   </para>
+
+   <para>
+    <example>
+     <title>Example showing the closing tag encompasing the trailing newline</title>
+     <programlisting role="php">
+<![CDATA[
+<?php echo "Some text"; ?>
+No newline
+<?= "But newline now" ?>
+]]>
+     </programlisting>
+     &example.outputs;
+     <screen>
+<![CDATA[
+Some textNo newline
+But newline now
+]]>
+     </screen>
+    </example>
+   </para>
+
+   <para>
+    Examples of entering and exiting the PHP parser:
+
    <informalexample>
     <programlisting role="php">
 <![CDATA[
@@ -202,11 +204,8 @@ echo "Last statement";
    <literal>// ... ?&gt;</literal> 或者 <literal># ...  ?&gt;</literal>
    之后的 HTML 代码将被显示出来：?&gt;
    跳出了 PHP 模式并返回了 HTML 模式，<literal>//</literal> 或 <literal>#</literal>
-   并不能影响到这一点。如果启用了
-   <link linkend="ini.asp-tags">asp_tags</link> 配置选项，其行为和
-   <literal>// %&gt;</literal> 或 <literal># %&gt;</literal>
-   相同。不过，<literal>&lt;/script&gt;</literal>
-   标记在单行注释中不会跳出 PHP 模式。
+   并不能影响到这一点。
+   
   </simpara>
   <para>
    <informalexample>
