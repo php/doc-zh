@@ -2,10 +2,10 @@
 <!-- $Revision$ -->
 <!-- $Author$ -->
 <!-- Reviewed: yes Maintainer: dallas -->
-<!-- EN-Revision: 3ac3e340846ebed0f806322504139b0116b96714 Maintainer: dallas Status: ready -->
+<!-- EN-Revision: 7104ee97ced1768a3231588dfc0bc0d7eb1117ad Maintainer: dallas Status: ready -->
 
 <sect1 xml:id="control-structures.declare" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
- <title><literal>declare</literal></title>
+ <title>declare</title>
  <?phpdoc print-version-for="declare"?>
  <para>
   <literal>declare</literal> 结构用来设定一段代码的执行指令。<literal>declare</literal>
@@ -21,16 +21,32 @@ declare (directive)
  </para>
  <para>
   <literal>directive</literal> 部分允许设定 <literal>declare</literal>
-  代码段的行为。目前只认识两个指令：<literal>ticks</literal>（更多信息见下面
-  <link linkend="control-structures.declare.ticks">ticks</link> 指令）以及 
+  代码段的行为。目前只认识三个指令：<literal>ticks</literal>（更多信息见下面
+  <link linkend="control-structures.declare.ticks">ticks</link> 指令）、
   <literal>encoding</literal>（更多信息见下面 <link 
-  linkend="control-structures.declare.encoding">encoding</link> 指令）。
+  linkend="control-structures.declare.encoding">encoding</link> 指令）、
+ <literal>strict_types</literal> 指令 (更多信息见函数参数页面
+     <link linkend="language.types.declarations.strict">严格类型</link>
+   章节)。
  </para>
- <note>
-  <simpara>
-   encoding 是 PHP 5.3.0 新增指令。
-  </simpara>
- </note> 
+ <para>
+     因为本指令是在文件编译时处理的，所以指令只接受字面量的值。
+     无法使用变量和常量。下面为你演示：
+    <informalexample>
+        <programlisting role="php">
+            <![CDATA[
+<?php
+// 这样是有效的：
+declare(ticks=1);
+
+// 这样是无效的：
+const TICK_VALUE = 1;
+declare(ticks=TICK_VALUE);
+?>
+]]>
+        </programlisting>
+    </informalexample>
+ </para>
  <para>
   <literal>declare</literal> 代码段中的 <literal>statement</literal>
   部分将被执行——怎样执行以及执行中有什么副作用出现取决于
@@ -43,16 +59,16 @@ declare (directive)
    <programlisting role="php">
 <![CDATA[
 <?php
-// these are the same:
+// 两者相等：
 
-// you can use this:
+// 可以这样用：
 declare(ticks=1) {
-    // entire script here
+    // 这里写完整的脚本
 }
 
-// or you can use this:
+// 也可以这样用：
 declare(ticks=1);
-// entire script here
+// 这里写完整的脚本
 ?>
 ]]>
    </programlisting>
@@ -83,7 +99,7 @@ declare(ticks=1);
 
 declare(ticks=1);
 
-// A function called on each tick event
+// 每次 tick 事件都会调用该函数
 function tick_handler()
 {
     echo "tick_handler() called\n";
@@ -140,14 +156,14 @@ tick_handler();
  <sect2 xml:id="control-structures.declare.encoding">
   <title>Encoding</title>
   <para>
-   可以用 encoding 指令来对每段脚本指定其编码方式。
+   可以用 <literal>encoding</literal> 指令来对每段脚本指定其编码方式。
    <example>
     <title>对脚本指定编码方式</title>
     <programlisting role="php">
 <![CDATA[
 <?php
 declare(encoding='ISO-8859-1');
-// code here
+// 在这里写代码
 ?>
 ]]>
    </programlisting>
@@ -163,21 +179,8 @@ declare(encoding='ISO-8859-1');
    </simpara>
   </caution>
   <para>
-   在 PHP 5.3 中除非在编译时指定了
-   <literal>--enable-zend-multibyte</literal>，否则 declare 中的 encoding 值会被忽略。
-  </para>
-  <para>
-   注意除非用 <function>phpinfo</function>，否则 PHP
-   不会显示出是否在编译时指定了 <literal>--enable-zend-multibyte</literal>。
-  </para>
-  <para>
    参见 <link linkend="ini.zend.script-encoding">zend.script_encoding</link>。
   </para>
-  <!-- FIXME PHP_6 
-   In PHP 6.0, the <literal>encoding</literal>
-   directive will be used to inform the scanner what encoding the file is created in.  Legal
-   values are encoding names such as <literal>UTF-8</literal>.
-   -->
  </sect2>
 </sect1>
 
