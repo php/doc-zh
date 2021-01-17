@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
 <!-- $Author$ -->
-<!-- EN-Revision: 8ad0d94e1c87b2daabff88e74acc31e8a11eec0a Maintainer: dallas Status: ready -->
+<!-- EN-Revision: 7104ee97ced1768a3231588dfc0bc0d7eb1117ad Maintainer: dallas Status: ready -->
 
 <sect1 xml:id="control-structures.foreach" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
- <title><literal>foreach</literal></title>
+ <title>foreach</title>
  <?phpdoc print-version-for="foreach"?>
  <para>
   <literal>foreach</literal> 语法结构提供了遍历数组的简单方式。<literal>foreach</literal>
@@ -12,18 +12,17 @@
   <informalexample>
    <programlisting>
 <![CDATA[
-foreach (array_expression as $value)
+foreach (iterable_expression as $value)
     statement
-foreach (array_expression as $key => $value)
+foreach (iterable_expression as $key => $value)
     statement
 ]]>
    </programlisting>
   </informalexample>
  </para>
  <simpara>
-  第一种格式遍历给定的 <literal>array_expression</literal>
-  数组。每次循环中，当前单元的值被赋给 <literal>$value</literal>
-  并且数组内部的指针向前移一步（因此下一次循环中将会得到下一个单元）。
+  第一种格式遍历给定的 <literal>iterable_expression</literal>
+  迭代器。每次循环中，当前单元的值被赋给 <literal>$value</literal>。
  </simpara>
  <simpara>
   第二种格式做同样的事，只除了当前单元的键名也会在每次循环中被赋给变量
@@ -32,18 +31,7 @@ foreach (array_expression as $key => $value)
  <simpara>
   还能够自定义<link linkend="language.oop5.iterations">遍历对象</link>。
  </simpara>
- <para>
-  <note>
-   <para>
-    当 <literal>foreach</literal>
-    开始执行时，数组内部的指针会自动指向第一个单元。这意味着不需要在
-    <literal>foreach</literal> 循环之前调用 <function>reset</function>。
-   </para>
-   <para>
-    由于 <literal>foreach</literal> 依赖内部数组指针，在循环中修改其值将可能导致意外的行为。
-   </para>
-  </note>
- </para>
+
  <para>
   可以很容易地通过在 <literal>$value</literal> 之前加上
   &amp; 来修改数组的元素。此方法将以<link
@@ -63,75 +51,65 @@ unset($value); // 最后取消掉引用
    </programlisting>
   </informalexample>
  </para>
- <para>
-  <literal>$value</literal> 的引用仅在被遍历的数组可以被引用时才可用（例如是个变量）。以下代码则无法运行：
-  <informalexample>
-   <programlisting role="php">
-<![CDATA[
-<?php
-foreach (array(1, 2, 3, 4) as &$value) {
-    $value = $value * 2;
-}
-
-?>
-]]>
-   </programlisting>   
-  </informalexample>
- </para> 
  <warning>
   <para>
    数组最后一个元素的 <literal>$value</literal> 引用在
    <literal>foreach</literal> 循环之后仍会保留。建议使用
    <function>unset</function> 来将其销毁。
+    否则你会遇到下面的情况：
   </para>
- </warning>  
- <para>
-  <note>
-   <para>
-    <literal>foreach</literal> 不支持用“@”来抑制错误信息的能力。
-   </para>
-  </note>
- </para>
- <para>
-  用户可能注意到了以下的代码功能完全相同：
-  <informalexample>
+   <informalexample>
    <programlisting role="php">
-<![CDATA[
+     <![CDATA[
 <?php
-$arr = array("one", "two", "three");
-reset($arr);
-while (list(, $value) = each($arr)) {
-    echo "Value: $value<br>\n";
+$arr = array(1, 2, 3, 4);
+foreach ($arr as &$value) {
+    $value = $value * 2;
 }
+// 现在 $arr 是 array(2, 4, 6, 8)
 
-foreach ($arr as $value) {
-    echo "Value: $value<br />\n";
-}
-?>
-]]>
-   </programlisting>
-  </informalexample>
- </para>
- <para>
-  以下代码功能也完全相同：
-  <informalexample>
-   <programlisting role="php">
-<![CDATA[
-<?php
-$arr = array("one", "two", "three");
-reset($arr);
-while (list($key, $value) = each($arr)) {
-    echo "Key: $key; Value: $value<br />\n";
-}
+// 未使用 unset($value) 时，$value 仍然引用到最后一项 $arr[3]
 
 foreach ($arr as $key => $value) {
-    echo "Key: $key; Value: $value<br />\n";
+    // $arr[3] 会被 $arr 的每一项值更新掉…
+    echo "{$key} => {$value} ";
+    print_r($arr);
 }
+// ...until ultimately the second-to-last value is copied onto the last value
+
+// output:
+// 0 => 2 Array ( [0] => 2, [1] => 4, [2] => 6, [3] => 2 )
+// 1 => 4 Array ( [0] => 2, [1] => 4, [2] => 6, [3] => 4 )
+// 2 => 6 Array ( [0] => 2, [1] => 4, [2] => 6, [3] => 6 )
+// 3 => 6 Array ( [0] => 2, [1] => 4, [2] => 6, [3] => 6 )
 ?>
 ]]>
    </programlisting>
-  </informalexample>
- </para>
+ </informalexample>
+ </warning>
+ <para>
+   可以通过引用来遍历数组常量的值：
+    <informalexample>
+      <programlisting role="php">
+        <![CDATA[
+<?php
+foreach (array(1, 2, 3, 4) as &$value) {
+    $value = $value * 2;
+}
+?>
+]]>
+      </programlisting>
+    </informalexample>
+  </para>
+  <para>
+    <note>
+      <para>
+        <literal>foreach</literal> 不支持用
+        “<literal linkend="language.operators.errorcontrol">@</literal>”
+        来抑制错误信息的能力。
+      </para>
+    </note>
+  </para>
  <para>
   示范用法的更多例子：
   <informalexample>
@@ -200,7 +178,7 @@ foreach (array(1, 2, 3, 4, 5) as $v) {
   <?phpdoc print-version-for="foreach.list"?>
 
   <para>
-   PHP 5.5 增添了遍历一个数组的数组的功能并且把嵌套的数组解包到循环变量中，只需将
+   可以遍历一个数组的数组并且把嵌套的数组解包到循环变量中，只需将
    <function>list</function> 作为值提供。
   </para>
 
@@ -292,6 +270,7 @@ A: 3; B: 4; C:
    </informalexample>
   </para>
  </sect2>
+
 </sect1>
 
 <!-- Keep this comment at the end of the file
