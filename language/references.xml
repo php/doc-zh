@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
 <!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: Altair Status: ready -->
+<!-- EN-Revision: a71742330defbc0edfbc6822b4f947bf437b2f70 Maintainer: Altair Status: ready -->
 <!-- CREDITS: dallas -->
 <chapter xml:id="language.references" xmlns="http://docbook.org/ns/docbook">
  <title>引用的解释</title>
@@ -22,30 +22,36 @@
  <sect1 xml:id="language.references.whatdo">
   <title>引用做什么</title>
   <para>
-   PHP 的引用允许用两个变量来指向同一个内容。意思是，当这样做时：
-   <informalexample>
-    <programlisting role="php">
-<![CDATA[
-<?php
-$a =& $b;
-?>
-]]>
-    </programlisting>
-   </informalexample>
-   这意味着 <varname>$a</varname> 和 <varname>$b</varname> 指向了同一个变量。
-   <note>
-    <para>
-     <varname>$a</varname> 和 <varname>$b</varname> 在这里是完全相同的，这并不是
-     <varname>$a</varname> 指向了 <varname>$b</varname> 或者相反，而是
-     <varname>$a</varname> 和 <varname>$b</varname> 指向了同一个地方。
-    </para>
-   </note>
+     There are three basic operations performed using references:
+     <link linkend="language.references.whatdo.assign">assigning by
+         reference</link>, <link linkend="language.references.whatdo.pass">passing
+     by reference</link>,
+     and <link linkend="language.references.whatdo.return">returning by
+     reference</link>. This section will give an introduction to these
+     operations, with links for further reading.
   </para>
-  <note>
-   <para>
-    如果具有引用的数组被拷贝，其值不会解除引用。对于数组传值给函数也是如此。
-   </para>
-  </note>
+  <sect2 xml:id="language.references.whatdo.assign">
+    <title>引用赋值</title>
+    <para>
+     PHP 的引用允许用两个变量来指向同一个内容。意思是，当这样做时：
+     <informalexample>
+      <programlisting role="php">
+  <![CDATA[
+  <?php
+  $a =& $b;
+  ?>
+  ]]>
+      </programlisting>
+     </informalexample>
+     这意味着 <varname>$a</varname> 和 <varname>$b</varname> 指向了同一个变量。
+     <note>
+      <para>
+       <varname>$a</varname> 和 <varname>$b</varname> 在这里是完全相同的，这并不是
+       <varname>$a</varname> 指向了 <varname>$b</varname> 或者相反，而是
+       <varname>$a</varname> 和 <varname>$b</varname> 指向了同一个地方。
+      </para>
+     </note>
+    </para>
    <note>
     <para>
     如果对一个未定义的变量进行引用赋值、引用参数传递或引用返回，则会自动创建该变量。
@@ -72,35 +78,20 @@ var_dump(property_exists($c, 'd')); // bool(true)
     </para>
    </note>  
   <para>
-   同样的语法可以用在函数中，它返回引用，以及用在 <literal>new</literal>
-   运算符中（PHP 4.0.4 以及以后版本）：
+   同样的语法可以用在返回引用的函数中：
    <informalexample>
     <programlisting role="php">
 <![CDATA[
 <?php
-$bar =& new fooclass();
 $foo =& find_var($bar);
 ?>
 ]]>
     </programlisting>
    </informalexample>
-   自 PHP 5 起，<link linkend="language.oop5.basic.new">new</link>
-   自动返回引用，因此在此使用 <literal>=&amp;</literal> 已经过时了并且会产生
-   E_STRICT 级别的消息。
+    <link linkend="language.oop5.basic.new">new</link>
+    会自动返回引用，因此在语法上这样是无效的。
+    更多信息参见 <link linkend="language.oop5.references">对象和引用</link> 章节。
   </para>
-  <note>
-   <para>
-    不用 <literal>&amp;</literal> 运算符导致对象生成了一个拷贝。如果在类中用
-    <literal>$this</literal>，它将作用于该类当前的实例。没有用 <literal>&amp;</literal>
-    的赋值将拷贝这个实例（例如对象）并且 <literal>$this</literal>
-    将作用于这个拷贝上，这并不总是想要的结果。由于性能和内存消耗的问题，通常只想工作在一个实例上面。
-   </para>
-   <para>
-    尽管可以用 <literal>@</literal> 运算符来<emphasis>抑制</emphasis>构造函数中的任何错误信息，例如用
-    <literal>@new</literal>，但用 <literal>&amp;new</literal> 语句时这不起效果。这是
-    Zend 引擎的一个限制并且会导致一个解析错误。
-   </para>
-  </note>
   <warning>
    <para>
     如果在一个函数内部给一个声明为 <literal>global</literal>
@@ -139,8 +130,7 @@ echo "var2 is set to '$var2'\n"; // var2 is set to 'Example variable'
   </warning>
   <note>
    <para>
-    如果在 <link
-    linkend="control-structures.foreach">foreach</link>
+    如果在 &foreach;
     语句中给一个具有引用的变量赋值，被引用的对象也被改变。
     <example>
      <title>引用与 foreach 语句</title>
@@ -159,6 +149,60 @@ echo $ref; // 3 - last element of the iterated array
     </example>
    </para>
   </note>
+    <para>
+      While not being strictly an assignment by reference, expressions created
+      with the language construct
+      <link linkend="function.array"><literal>array()</literal></link> can also
+      behave as such by prefixing <literal>&amp;</literal> to the array element
+      to add. Example:
+      <informalexample>
+        <programlisting role="php">
+          <![CDATA[
+<?php
+$a = 1;
+$b = array(2, 3);
+$arr = array(&$a, &$b[0], &$b[1]);
+$arr[0]++; $arr[1]++; $arr[2]++;
+/* $a == 2, $b == array(3, 4); */
+?>
+]]>
+        </programlisting>
+      </informalexample>
+    </para>
+    <para>
+      Note, however, that references inside arrays are potentially dangerous.
+      Doing a normal (not by reference) assignment with a reference on the
+      right side does not turn the left side into a reference, but references
+      inside arrays are preserved in these normal assignments. This also applies
+      to function calls where the array is passed by value. Example:
+      <informalexample>
+        <programlisting role="php">
+          <![CDATA[
+<?php
+/* Assignment of scalar variables */
+$a = 1;
+$b =& $a;
+$c = $b;
+$c = 7; //$c is not a reference; no change to $a or $b
+
+/* Assignment of array variables */
+$arr = array(1);
+$a =& $arr[0]; //$a and $arr[0] are in the same reference set
+$arr2 = $arr; //not an assignment-by-reference!
+$arr2[0]++;
+/* $a == 2, $arr == array(2) */
+/* The contents of $arr are changed even though it's not a reference! */
+?>
+]]>
+        </programlisting>
+      </informalexample>
+      In other words, the reference behavior of arrays is defined in an
+      element-by-element basis; the reference behavior of individual elements
+      is dissociated from the reference status of the array container.
+    </para>
+  </sect2>
+  <sect2 xml:id="language.references.whatdo.pass">
+  <title>传引用</title>
   <para>
    引用做的第二件事是用引用传递变量。这是通过在函数内建立一个本地变量并且该变量在呼叫范围内引用了同一个内容来实现的。例如：
    <informalexample>
@@ -180,9 +224,13 @@ foo($a);
    <varname>$var</varname> 指向了和 <varname>$a</varname> 指向的同一个内容。更多详细解释见<link
    linkend="language.references.pass">引用传递</link>。
   </para>
-  <simpara>
+  </sect2>
+  <sect2 xml:id="language.references.whatdo.return">
+   <title>引用返回</title>
+  <para>
    引用做的第三件事是<link linkend="language.references.return">引用返回</link>。
-  </simpara>
+  </para>
+  </sect2>
  </sect1>
 
  <sect1 xml:id="language.references.arent">
@@ -234,9 +282,7 @@ foo($a);
 ]]>
     </programlisting>
    </informalexample>
-   注意在函数调用时没有引用符号——只有函数定义中有。光是函数定义就足够使参数通过引用来正确传递了。在最近版本的
-   PHP 中如果把 &amp; 用在 <literal>foo(&amp;$a);</literal>
-   中会得到一条警告说“Call-time pass-by-reference”已经过时了。
+   注意在函数调用时没有引用符号——只有函数定义中有。光是函数定义就足够使参数通过引用来正确传递了。
   </para>
   <para>
   以下内容可以通过引用传递：
@@ -247,17 +293,16 @@ foo($a);
      </simpara>
     </listitem>
     <listitem>
-     <simpara>
-      New 语句，例如 <literal>foo(new foobar())</literal>
-     </simpara>
-    </listitem>
-    <listitem>
      <para>
       从函数中返回的引用，例如：
     <informalexample>
      <programlisting role="php">
 <![CDATA[
 <?php
+function foo(&$var)
+{
+    $var++;
+}
 function &bar()
 {
     $a = 5;
@@ -288,22 +333,31 @@ function bar() // Note the missing &
     $a = 5;
     return $a;
 }
-foo(bar()); // 自 PHP 5.0.5 起导致致命错误，自 PHP 5.1.1 起导致严格模式错误
-            // 自 PHP 7.0 起导致 notice 信息
+foo(bar()); // 导致 notice 信息
+
 foo($a = 5) // 表达式，不是变量
 foo(5) // 导致致命错误
+
+class Foobar
+{
+}
+
+foo(new Foobar()) // Produces a notice as of PHP 7.0.7
+                  // Notice: Only variables should be passed by reference
 ?>
 ]]>
      </programlisting>
     </informalexample>
-   这些条件是 PHP 4.0.4 以及以后版本有的。
   </para>
  </sect1>
 
  <sect1 xml:id="language.references.return">
   <title>引用返回</title>
   <para>
-   引用返回用在当想用函数找到引用应该被绑定在哪一个变量上面时。<emphasis>不要</emphasis>用返回引用来增加性能，引擎足够聪明来自己进行优化。仅在有合理的技术原因时才返回引用！要返回引用，使用此语法：
+   引用返回用在当想用函数找到引用应该被绑定在哪一个变量上面时。
+    <emphasis>不要</emphasis>用返回引用来增加性能，引擎足够聪明来自己进行优化。
+    仅在有合理的技术原因时才返回引用！
+    使用此语法返回引用：
    <informalexample>
      <programlisting role="php">
 <![CDATA[
@@ -324,7 +378,8 @@ echo $myValue;                // prints the new value of $obj->value, i.e. 2.
 ]]>
      </programlisting>
    </informalexample>
-   本例中 <varname>getValue</varname> 函数所返回的对象的属性将被赋值，而不是拷贝，就和没有用引用语法一样。
+   本例中 <varname>getValue</varname> 函数所返回的对象的属性将被赋值，
+    而不是拷贝，就和没有用引用语法一样。
   </para>
   <note>
    <simpara>
@@ -336,11 +391,49 @@ echo $myValue;                // prints the new value of $obj->value, i.e. 2.
   <note>
    <simpara>
     如果试图这样从函数返回引用：<literal>return
-    ($this->value);</literal>，这将<emphasis>不会</emphasis>起作用，因为在试图返回一个<emphasis>表达式</emphasis>的结果而不是一个引用的变量。只能从函数返回引用变量——没别的方法。如果代码试图返回一个动态表达式或
-    <literal>new</literal> 运算符的结果，自 PHP 4.4.0 和 PHP 5.1.0 起会发出一条
-    <constant>E_NOTICE</constant> 错误。
+    ($this->value);</literal>，这将<emphasis>不会</emphasis>起作用，
+     因为在试图返回一个<emphasis>表达式</emphasis>的结果而不是一个引用的变量。
+     只能从函数返回引用变量——没别的方法。
    </simpara>
   </note>
+   <para>
+     To use the returned reference, you must use reference assignment:
+     <informalexample>
+       <programlisting role="php">
+         <![CDATA[
+<?php
+function &collector() {
+  static $collection = array();
+  return $collection;
+}
+$collection = &collector();
+$collection[] = 'foo';
+?>
+]]>
+       </programlisting>
+     </informalexample>
+     To pass the returned reference to another function expecting a reference
+     you can use this syntax:
+     <informalexample>
+       <programlisting role="php">
+         <![CDATA[
+<?php
+function &collector() {
+  static $collection = array();
+  return $collection;
+}
+array_push(collector(), 'foo');
+?>
+]]>
+       </programlisting>
+     </informalexample>
+   </para>
+   <note>
+     <simpara>
+       Note that <literal>array_push(&amp;collector(), 'foo');</literal> will
+       <emphasis>not</emphasis> work, it results in a fatal error.
+     </simpara>
+   </note>
  </sect1>
 
  <sect1 xml:id="language.references.unset">
@@ -368,13 +461,16 @@ unset($a);
  <sect1 xml:id="language.references.spot">
   <title>引用定位</title>
   <simpara>
-   许多 PHP 的语法结构是通过引用机制实现的，所以上述有关引用绑定的一切也都适用于这些结构。一些结构，例如引用传递和返回，已经在上面提到了。其它使用引用的结构有：
+   许多 PHP 的语法结构是通过引用机制实现的，所以上述有关引用绑定的一切也都适用于这些结构。
+    一些结构，例如引用传递和返回，已经在上面提到了。
+    其它使用引用的结构有：
   </simpara>
 
   <sect2 xml:id="references.global">
-   <title><literal>global</literal> 引用</title>
+   <title>global 引用</title>
    <para>
-    当用 <command>global $var</command> 声明一个变量时实际上建立了一个到全局变量的引用。也就是说和这样做是相同的：
+    当用 <command>global $var</command> 声明一个变量时实际上建立了一个到全局变量的引用。
+     也就是说和这样做是相同的：
     <informalexample>
      <programlisting role="php">
 <![CDATA[
@@ -396,7 +492,6 @@ $var =& $GLOBALS["var"];
     在一个对象的方法中，<varname>$this</varname> 永远是调用它的对象的引用。
    </simpara>
   </sect2>
-
  </sect1>
 
 </chapter>
