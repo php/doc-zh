@@ -1,24 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
 <!-- $Author$ -->
-<!-- EN-Revision: 89a73e348c5d4bdd0300996566c672035745e2b0 Maintainer: dallas Status: ready -->
+<!-- EN-Revision: cd943f94a013b74df8765ab8e1a620a916a64a85 Maintainer: avenger Status: ready -->
   <refentry xml:id="function.current" xmlns="http://docbook.org/ns/docbook">
    <refnamediv>
     <refname>current</refname>
-    <refpurpose>返回数组中的当前单元</refpurpose>
+    <refpurpose>返回数组中的当前值</refpurpose>
    </refnamediv>
-   
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
    <type>mixed</type><methodname>current</methodname>
-   <methodparam><type>array</type><parameter role="reference">array</parameter></methodparam>
+   <methodparam><type class="union"><type>array</type><type>object</type></type><parameter>array</parameter></methodparam>
   </methodsynopsis>
     <para>
-     每个数组中都有一个内部的指针指向它“当前的”单元，初始指向插入到数组中的第一个单元。
+     每个数组中都有一个内部的指针指向它“当前的”单元，初始化时会指向该数组中的第一个值。
     </para>
    </refsect1>
-   
  <refsect1 role="parameters">
   &reftitle.parameters;
   <para>
@@ -27,7 +25,7 @@
      <term><parameter>array</parameter></term>
      <listitem>
       <para>
-       这个数组。
+       要操作的数组。
       </para>
      </listitem>
     </varlistentry>
@@ -37,16 +35,40 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   <function>current</function> 函数返回当前被内部指针指向的数组单元的值，并不移动指针。如果内部指针指向超出了单元列表的末端，<function>current</function>
-     返回 &false;。
+   <function>current</function>
+   函数返回当前被内部指针指向的数组单元的值，并不移动指针。如果内部指针指向超出了单元列表的末端，<function>current</function>
+   将返回 &false;。
   </para>
   &return.falseproblem;
+ </refsect1>
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <para>
+   <informaltable>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>&Version;</entry>
+       <entry>&Description;</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>7.0.0</entry>
+       <entry>
+        <parameter>array</parameter> 参数始终通过赋值来传递。之前的版本中，默认通过引用来传值。
+       </entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </informaltable>
+  </para>
  </refsect1>
  <refsect1 role="examples">
   &reftitle.examples;
   <para>
    <example>
-    <title>使用  <function>current</function> 系列函数的例子</title>
+    <title> <function>current</function> 函数使用示例</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -73,9 +95,15 @@ var_dump(current($arr)); // array(0) { }
   &reftitle.notes;
   <note>
    <simpara>
-    如果数组包含 <type>boolean</type> &false; 的单元则本函数在碰到这个单元时也返回
-       &false;，使得不可能判断是否到了此数组列表的末端。
-    要正确遍历可能含有空单元的数组，用 <function>each</function> 函数。
+    在一个空数组上使用 <function>current</function>
+    函数，和在一个内部指针指向单元末端以外的数组上使用此函数，结果是相同的，同样都会返回
+    <type>bool</type> &false;。如果希望正确遍历一个包含 &false; 的数组，请参阅
+    <function>foreach</function> 函数。
+   </simpara>
+   <simpara>
+    如果仍然希望使用 <function>current</function> 来判断数组单元真实的值，应该同时使用
+    <function>key</function> 和 <function>current</function>
+    来检查当前元素是否为 &null;。
    </simpara>
   </note>
  </refsect1>
@@ -91,10 +119,8 @@ var_dump(current($arr)); // array(0) { }
     <member><function>next</function></member>
    </simplelist>
   </para>
- </refsect1>  
-  
-  </refentry>
-
+ </refsect1>
+</refentry>
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
