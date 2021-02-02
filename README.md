@@ -1,5 +1,5 @@
 # PHP 中文手册 mirror
-![](https://img.shields.io/github/workflow/status/php/doc-zh/Build%20Test)
+![Build](https://github.com/php/doc-zh/workflows/Build/badge.svg)
 
 本仓库是官方 docbook 的 github 镜像，该仓库的上游位于
 
@@ -12,20 +12,20 @@ http://git.php.net/?p=doc/zh.git
 即使你有 git 账号，也不能直接 push 内容到此仓库。如果此文档收到一个 pull reqeust 请求，请按照以下流程将其推送到 git.php.net 上。
 
 1. 将 ".patch" 添加到 pull request 网址中：
-    - 例如: https://github.com/php/doc-en/pull/293.patch
-    - 上述链接是一个真实的英文文档 PR 例子
+    - 例如: https://github.com/php/doc-zh/pull/12.patch
+    - 上述链接是一个真实的中文手册文档 PR 例子
 2. 下载该 patch 文件到本地：
-    - wget https://patch-diff.githubusercontent.com/raw/php/doc-en/pull/293.patch
+    - wget https://patch-diff.githubusercontent.com/raw/php/doc-zh/pull/12.patch
 3. 使用以下命令应用更改：
-    - git am 293.patch
+    - git am 12.patch
 4. 在提交信息中加入 Close 关键字，可以自动关闭对应的 pull request：
     - git commit --am
-    - 在提交信息中加入 "Close php/doc-en#293"
+    - 在提交信息中加入 "Close php/doc-zh#12"
 5. 推送更改到官方仓库：
     - git push origin master
     - github 仓库会被同步更新，同时关闭对应的 PR
 
-有些人可能会觉得这个流程很繁琐，这和目前 php-src 的维护流程是一样的。自动化的流程官方还在优化中，可以参考 [此邮件](https://news-web.php.net/php.doc/969387756) 来进一步了解相关操作。
+有些人可能会觉得这个流程很繁琐，这和目前 `php/php-src` 的维护流程是一样的。自动化的流程官方还在优化中，可以参考 [此邮件](https://news-web.php.net/php.doc/969387756) 来进一步了解相关操作。
 
 ## PHP 中文手册翻译指南
 
@@ -58,9 +58,11 @@ PHP 文档的翻译工作完全是一项志愿行动，你不会从中得到任�
 
 ### 无障碍参与方式
 
-#### 在线编辑
+~~#### 在线编辑~~
 
-官方提供一个最简单的编辑文档方式，任何人都可以用你的 GitHub 或 Facebook 账号登录 [edit.php.net](https://edit.php.net)，在线查看文档库，在线提交修改内容，你修改的内容需要经过翻译小组审核后，才会正式合并到官方文档中。
+~~官方提供一个最简单的编辑文档方式，任何人都可以用你的 GitHub 或 Facebook 账号登录 [edit.php.net](https://edit.php.net)，在线查看文档库，在线提交修改内容，你修改的内容需要经过翻译小组审核后，才会正式合并到官方文档中。~~
+
+> 注意：文档仓库转到 git 后，在线编辑器尚未支持 git 仓库，现阶段请使用提交 PR 方式来参与。
 
 #### 通过 Github 提交 PR
 
