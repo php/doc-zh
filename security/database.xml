@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
 <!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: lm92 Status: ready -->
+<!-- EN-Revision: fa6c0138655159c9a360fbbf0364ac0f38274abd Maintainer: lm92 Status: ready -->
 <!-- CREDITS: dallas -->
-  <chapter xml:id="security.database" xmlns="http://docbook.org/ns/docbook">
+  <chapter xml:id="security.database" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
    <title>数据库安全</title>
 
    <simpara>
@@ -64,42 +64,57 @@
      服务器），敏感数据就可能暴露或者被滥用，除非数据库自己保护了这些信息。对数据库内的数据加密是减少这类风险的有效途径，但是只有很少的数据库提供这些加密功能。
     </simpara>
     <simpara>
-     对于这个问题，有一个简单的解决办法，就是创建自己的加密机制，然后把它用在 PHP
-     程序内。PHP 有几个扩展库可以完成这个工作，比如说
-     <link linkend="ref.mcrypt">Mcrypt</link> 和
-     <link linkend="ref.mhash">Mhash</link> 等，它们包含多种加密运算法则。脚本在插入数据库之前先把数据加密，以后提取出来时再解密。有关加密如何工作的例子请参考相关手册。
+     解决这个问题最简单的方法是创建自己的加密包，然后在 <acronym>PHP</acronym> 脚本中使用它。<acronym>PHP</acronym>
+     可以通过一些扩展来帮助你解决这个问题，比如 <link
+     linkend="book.openssl">OpenSSL</link> 和 <link
+     linkend="book.sodium">Sodium</link>，涵盖了多种加密算法。脚本在将数据插入数据库之前对其进行加密，并在检索时对其进行解密。更多关于加密工作的例子请参见参考文献。
     </simpara>
-    <simpara>
-     对某些真正隐蔽的数据，如果不需要以明文的形式存在（即不用显示），可以考虑用散列算法。使用散列算法最常见的例子就是把密码经过
-     MD5 加密后的散列存进数据库来代替原来的明文密码。参见
-     <function>crypt</function> 和 <function>md5</function>。
-    </simpara>
-    <example>
-     <title>对密码字段进行散列加密</title>
-     <programlisting role="php">
+
+    <sect2 xml:id="security.database.storage.hashing">
+    <title>Hashing</title>
+     <simpara>
+      In the case of truly hidden data, if its raw representation is not needed
+      (i.e. will not be displayed), hashing should be taken into consideration.
+      The well-known example for hashing is storing the cryptographic hash of a
+      password in a database, instead of the password itself.
+     </simpara>
+     <simpara>
+      The <link linkend="ref.password">password</link> functions
+      provide a convenient way to hash sensitive data and work with these hashes.
+     </simpara>
+     <simpara>
+      <function>password_hash</function> is used to hash a given string using the
+      strongest algorithm currently available and <function>password_verify</function>
+      checks whether the given password matches the hash stored in database.
+     </simpara>
+     <example>
+      <title>Hashing password field</title>
+      <programlisting role="php">
 <![CDATA[
 <?php
 
 // 存储密码散列
 $query  = sprintf("INSERT INTO users(name,pwd) VALUES('%s','%s');",
-            pg_escape_string($username), md5($password));
+            pg_escape_string($username),
+            password_hash($password, PASSWORD_DEFAULT));
 $result = pg_query($connection, $query);
 
 // 发送请求来验证用户密码
-$query = sprintf("SELECT 1 FROM users WHERE name='%s' AND pwd='%s';",
-            pg_escape_string($username), md5($password));
-$result = pg_query($connection, $query);
+$query = sprintf("SELECT pwd FROM users WHERE name='%s';",
+            pg_escape_string($username));
+$row = pg_fetch_assoc(pg_query($connection, $query));
 
-if (pg_num_rows($result) > 0) {
-    echo 'Welcome, $username!';
+if ($row && password_verify($password, $row['pwd'])) {
+    echo 'Welcome, ' . htmlspecialchars($username) . '!';
 } else {
-    echo 'Authentication failed for $username.';
+    echo 'Authentication failed for ' . htmlspecialchars($username) . '.';
 }
 
 ?>
 ]]>
-     </programlisting>
-    </example>
+      </programlisting>
+     </example>
+    </sect2>
    </sect1>
 
    <sect1 xml:id="security.database.sql-injection">
@@ -119,7 +134,7 @@ if (pg_num_rows($result) > 0) {
      由于在缺乏对输入的数据进行验证，并且使用了超级用户或其它有权创建新用户的数据库帐号来连接，攻击者可以在数据库中新建一个超级用户。
      <example>
       <title>
-       一段实现数据分页显示的代码……也可以被用作创建一个超级用户（PostgreSQL系统）。
+       一段实现数据分页显示的代码…… 也可以被用作创建一个超级用户（PostgreSQL 数据库）。
       </title>
       <programlisting role="php">
 <![CDATA[
@@ -153,8 +168,7 @@ insert into pg_shadow(usename,usesysid,usesuper,usecatupd,passwd)
     </para>
     <note>
      <para>
-      <literal>--</literal> 是 SQL 的注释标记，一般可以使用来它告诉 SQL
-      解释器忽略后面的语句。
+      <literal>--</literal> 是 SQL 的注释标记，一般可以使用来它告诉 SQL 解释器忽略后面的语句。
      </para>
     </note>
     <para>
@@ -173,16 +187,15 @@ insert into pg_shadow(usename,usesysid,usesuper,usecatupd,passwd)
 <?php
 
 $query  = "SELECT id, name, inserted, size FROM products
-                  WHERE size = '$size'
-                  ORDER BY $order LIMIT $limit, $offset;";
+           WHERE size = '$size'";
 $result = odbc_exec($conn, $query);
 
 ?>
 ]]>
       </programlisting>
      </example>
-     可以在原来的查询的基础上添加另一个 <literal>SELECT</literal>
-     查询来获得密码：
+     可以在原来的查询的基础上添加另一个
+     <literal>SELECT</literal> 查询来获得密码：
      <informalexample>
       <programlisting role="sql">
 <![CDATA[
@@ -222,11 +235,11 @@ $query = "UPDATE usertable SET pwd='$pwd' WHERE uid='$uid';";
 <![CDATA[
 <?php
 
-// $uid == ' or uid like'%admin%'; --
-$query = "UPDATE usertable SET pwd='...' WHERE uid='' or uid like '%admin%'; --";
+// $uid: ' or uid like '%admin%
+$query = "UPDATE usertable SET pwd='...' WHERE uid='' or uid like '%admin%';";
 
-// $pwd == "hehehe', admin='yes', trusted=100 "
-$query = "UPDATE usertable SET pwd='hehehe', admin='yes', trusted=100 WHERE
+// $pwd: hehehe', trusted=100, admin='yes
+$query = "UPDATE usertable SET pwd='hehehe', trusted=100, admin='yes' WHERE
 ...;";
 
 ?>
@@ -237,7 +250,7 @@ $query = "UPDATE usertable SET pwd='hehehe', admin='yes', trusted=100 WHERE
     <para>
      下面这个可怕的例子将会演示如何在某些数据库上执行系统命令。
      <example>
-     <title>攻击数据库所在主机的操作系统（MSSQL Server）</title>
+     <title>攻击数据库所在主机的操作系统（MSSQL Server 数据库）</title>
       <programlisting role="php">
 <![CDATA[
 <?php
@@ -259,8 +272,8 @@ $result = mssql_query($query);
 <?php
 
 $query  = "SELECT * FROM products
-                    WHERE id LIKE '%a%'
-                    exec master..xp_cmdshell 'net user test testpass /ADD'--";
+           WHERE id LIKE '%a%'
+           exec master..xp_cmdshell 'net user test testpass /ADD' --%'";
 $result = mssql_query($query);
 
 ?>
@@ -277,6 +290,15 @@ $result = mssql_query($query);
       虽然以上的例子是针对某一特定的数据库系统的，但是这并不代表不能对其它数据库系统实施类似的攻击。使用不同的方法，各种数据库都有可能遭殃。
      </para>
     </note>
+    <para>
+     <mediaobject>
+      <alt>关于 SQL 注入问题的工作实例</alt>
+      <imageobject>
+       <imagedata fileref="en/security/figures/xkcd-bobby-tables.png" format="PNG"/>
+      </imageobject>
+     </mediaobject>
+     Image courtesy of <link xlink:href="&url.xkcd;327">xkcd</link>
+    </para>
 
     <sect2 xml:id="security.database.avoiding">
      <title>预防措施</title>
@@ -297,9 +319,9 @@ $result = mssql_query($query);
       <listitem>
        <simpara>
         检查输入的数据是否具有所期望的数据格式。PHP
-        有很多可以用于检查输入的函数，从简单的<link
-        linkend="ref.var">变量函数</link>和<link
-        linkend="ref.ctype">字符类型函数</link>（比如
+        有很多可以用于检查输入的函数，从简单的
+        <link linkend="ref.var">变量函数</link> 和
+        <link linkend="ref.ctype">字符类型函数</link>（比如
         <function>is_numeric</function>，<function>ctype_digit</function>）到复杂的
         <link linkend="ref.pcre">Perl 兼容正则表达式函数</link>都可以完成这个工作。
        </simpara>
@@ -350,6 +372,7 @@ $query = sprintf("SELECT id, name FROM products ORDER BY name LIMIT 20 OFFSET %d
        </simpara>
       </listitem>
      </itemizedlist>
+
      <simpara>
       除此之外，在允许的情况下，使用代码或数据库系统保存查询日志也是一个好办法。显然，日志并不能防止任何攻击，但利用它可以跟踪到哪个程序曾经被尝试攻击过。日志本身没用，要查阅其中包含的信息才行。毕竟，更多的信息总比没有要好。
      </simpara>
