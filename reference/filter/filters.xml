@@ -1,0 +1,774 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision$ -->
+<!-- EN-Revision: 06e8e34994d0d5183cf43b72932a2ffa48406dce Maintainer: towserchen Status: ready -->
+<chapter xml:id="filter.filters" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <title>Types of filters</title>
+
+ <!--Validate filters: {{{-->
+ <section xml:id="filter.filters.validate">
+  <title>Validate filters</title>
+   <para>
+    <table>
+     <title>Listing of filters for validation</title>
+     <tgroup cols="5">
+      <thead>
+       <row>
+        <entry>ID</entry>
+        <entry>Name</entry>
+        <entry>Options</entry>
+        <entry>Flags</entry>
+        <entry>Description</entry>
+       </row>
+      </thead>
+      <tbody>
+       <row>
+        <entry><constant>FILTER_VALIDATE_BOOLEAN</constant></entry>
+        <entry>"boolean"</entry>
+        <entry>
+         <parameter>default</parameter>
+        </entry>
+        <entry>
+          <constant>FILTER_NULL_ON_FAILURE</constant>
+        </entry>
+        <entry>
+         <para>
+          当值为 "1"、 "true"、 "on" 和 "yes" 时返回 &true;
+          其他情况返回 &false;
+         </para>
+         <para>
+          如果设置了 <constant>FILTER_NULL_ON_FAILURE</constant>，只有当值为 "0"、
+          "false"、"off"、"no"、"" 返回 &false;。所有非布尔值都返回 &null;
+         </para>
+        </entry>
+       </row>
+       <row>
+        <entry><constant>FILTER_VALIDATE_DOMAIN</constant></entry>
+        <entry>"validate_domain"</entry>
+        <entry>
+         <parameter>default</parameter>
+        </entry>
+        <entry>
+         <constant>FILTER_FLAG_HOSTNAME</constant>
+        </entry>
+        <entry>
+         <para>
+          验证域名长度是否有效
+         </para>
+         <para>
+          根据 RFC 1034, RFC 1035, RFC 952, RFC 1123, RFC 2732, RFC 2181 和 RFC 1123 验证域名。
+          可选标志 <constant>FILTER_FLAG_HOSTNAME</constant> 增加了验证主机名的能力（主机名必须以字母数字字符开头，并且只
+          包含字母数字或连字符）。
+         </para>
+        </entry>
+       </row>
+       <row>
+        <entry><constant>FILTER_VALIDATE_EMAIL</constant></entry>
+        <entry>"validate_email"</entry>
+        <entry>
+         <parameter>default</parameter>
+        </entry>
+        <entry>
+         <constant>FILTER_FLAG_EMAIL_UNICODE</constant>
+        </entry>
+        <entry>
+         <para>
+          验证是否是有效的邮箱地址
+         </para>
+         <para>
+          通常，这将根据 RFC 822 中的语法验证电子邮件地址，但不支持注释、空白和没有点号的域名。
+         </para>
+        </entry>
+       </row>
+       <row>
+        <entry><constant>FILTER_VALIDATE_FLOAT</constant></entry>
+        <entry>"float"</entry>
+        <entry>
+         <parameter>default</parameter>,
+         <parameter>decimal</parameter>,
+         <parameter>min_range</parameter>,
+         <parameter>max_range</parameter>
+        </entry>
+        <entry>
+         <constant>FILTER_FLAG_ALLOW_THOUSAND</constant>
+        </entry>
+        <entry>验证值是否为浮点数，可以从指定范围中选择，成功后转换为浮点类型。</entry>
+       </row>
+       <row>
+        <entry><constant>FILTER_VALIDATE_INT</constant></entry>
+        <entry>"int"</entry>
+        <entry>
+         <parameter>default</parameter>,
+         <parameter>min_range</parameter>,
+         <parameter>max_range</parameter>
+        </entry>
+        <entry>
+         <constant>FILTER_FLAG_ALLOW_OCTAL</constant>,
+         <constant>FILTER_FLAG_ALLOW_HEX</constant>
+        </entry>
+        <entry>验证值是否为整数，可以从指定范围中选择，成功后转换为整数类型。</entry>
+       </row>
+       <row>
+        <entry><constant>FILTER_VALIDATE_IP</constant></entry>
+        <entry>"validate_ip"</entry>
+        <entry>
+         <parameter>default</parameter>
+        </entry>
+        <entry>
+         <constant>FILTER_FLAG_IPV4</constant>,
+         <constant>FILTER_FLAG_IPV6</constant>,
+         <constant>FILTER_FLAG_NO_PRIV_RANGE</constant>,
+         <constant>FILTER_FLAG_NO_RES_RANGE</constant>
+        </entry>
+        <entry>
+         验证值是否是 IP 地址，可选 IPV4、IPV6 或者不从私有地址或保留地址中选择。
+        </entry>
+       </row>
+       <row>
+        <entry><constant>FILTER_VALIDATE_MAC</constant></entry>
+        <entry>"validate_mac_address"</entry>
+        <entry>
+         <parameter>default</parameter>
+        </entry>
+        <entry></entry>
+        <entry>验证值是否是 MAC 地址。</entry>
+       </row>
+       <row>
+        <entry><constant>FILTER_VALIDATE_REGEXP</constant></entry>
+        <entry>"validate_regexp"</entry>
+        <entry>
+         <parameter>default</parameter>,
+         <parameter>regexp</parameter>
+        </entry>
+        <entry></entry>
+        <entry>
+          根据 <parameter>regexp</parameter> 验证值，这是一个 <link linkend="book.pcre">兼容 Perl</link> 的正则表达式验证器。
+        </entry>
+       </row>
+       <row>
+        <entry><constant>FILTER_VALIDATE_URL</constant></entry>
+        <entry>"validate_url"</entry>
+        <entry>
+         <parameter>default</parameter>
+        </entry>
+        <entry>
+         <constant>FILTER_FLAG_SCHEME_REQUIRED</constant>,
+         <constant>FILTER_FLAG_HOST_REQUIRED</constant>,
+         <constant>FILTER_FLAG_PATH_REQUIRED</constant>,
+         <constant>FILTER_FLAG_QUERY_REQUIRED</constant>
+        </entry>
+        <entry>
+          验证值是否是 URL （根据<link xlink:href="&url.rfc;2396">&url.rfc;2396</link>），可选择所使用的组件。注意，一个有效的 URL 可能没有指定 HTTP 协议 <literal>http://</literal>，因此可能需要进一步验证来确定 URL 所使用的协议，例如 <literal>ssh://</literal> 或 <literal>mailto:</literal> 。注意，这个函数只查找有效的 ASCII URL，国际化域名（包含非 ASCII 字符）将被认为不合法。
+        </entry>
+       </row>
+      </tbody>
+     </tgroup>
+    </table>
+   </para>
+   <note>
+    <para>
+     从 5.4.11 起，数字 +0 和 -0 将被认为即是整数也是浮点数（使用 <constant>FILTER_VALIDATE_FLOAT</constant> 和 <constant>FILTER_VALIDATE_INT</constant> 标志）。在 PHP 5.4.11 之前，他们只被验证为浮点数（使用 <constant>FILTER_VALIDATE_FLOAT</constant>）。
+    </para>
+    <para>
+     当使用 <parameter>default</parameter> 选项时，如果验证不通过将使用 <parameter>default</parameter> 的值。
+    </para>
+   </note>
+
+  <simplesect role="changelog">
+   &reftitle.changelog;
+   <para>
+    <informaltable>
+     <tgroup cols="2">
+      <thead>
+       <row>
+        <entry>&Version;</entry>
+        <entry>&Description;</entry>
+       </row>
+      </thead>
+      <tbody>
+       <row>
+        <entry>7.4.0</entry>
+        <entry>
+         为 <constant>FILTER_VALIDATE_FLOAT</constant> 增加 <parameter>min_range</parameter> 和 <parameter>max_range</parameter>
+         选项。
+        </entry>
+       </row>
+       <row>
+        <entry>7.0.0</entry>
+        <entry>
+         增加 <constant>FILTER_FLAG_HOSTNAME</constant> 和 <constant>FILTER_VALIDATE_DOMAIN</constant>.
+        </entry>
+       </row>
+       <row>
+        <entry>5.5.0</entry>
+        <entry>
+         增加 <constant>FILTER_VALIDATE_MAC</constant>.
+        </entry>
+       </row>
+       <row>
+        <entry>5.2.1</entry>
+        <entry>
+         <constant>FILTER_VALIDATE_URL</constant> 现在隐式使用
+         <constant>FILTER_FLAG_SCHEME_REQUIRED</constant> 和
+         <constant>FILTER_FLAG_HOST_REQUIRED</constant>.
+        </entry>
+       </row>
+      </tbody>
+     </tgroup>
+    </informaltable>
+   </para>
+  </simplesect>
+
+ </section>
+ <!--}}}-->
+
+ <!-- Sanitize filters: {{{-->
+ <section xml:id="filter.filters.sanitize">
+  <title>Sanitize filters</title>
+   <para>
+    <table>
+     <title>List of filters for sanitization</title>
+     <tgroup cols="5">
+      <thead>
+       <row>
+        <entry>ID</entry>
+        <entry>Name</entry>
+        <entry>Flags</entry>
+        <entry>Description</entry>
+       </row>
+      </thead>
+      <tbody>
+       <row>
+        <entry><constant>FILTER_SANITIZE_EMAIL</constant></entry>
+        <entry>"email"</entry>
+        <entry></entry>
+        <entry>
+         删除所有字符除了字母，数字和 <literal>!#$%&amp;'*+-=?^_`{|}~@.[]</literal> 。
+        </entry>
+       </row>
+       <row>
+        <entry><constant>FILTER_SANITIZE_ENCODED</constant></entry>
+        <entry>"encoded"</entry>
+        <entry>
+         <constant>FILTER_FLAG_STRIP_LOW</constant>,
+         <constant>FILTER_FLAG_STRIP_HIGH</constant>,
+         <constant>FILTER_FLAG_STRIP_BACKTICK</constant>,
+         <constant>FILTER_FLAG_ENCODE_LOW</constant>,
+         <constant>FILTER_FLAG_ENCODE_HIGH</constant>
+        </entry>
+        <entry>url_encode 字符串，可以剔除特殊字符或对它们编码。</entry>
+       </row>
+       <row>
+        <entry><constant>FILTER_SANITIZE_MAGIC_QUOTES</constant></entry>
+        <entry>"magic_quotes"</entry>
+        <entry></entry>
+        <entry>同 <function>addslashes</function>.</entry>
+       </row>
+       <row>
+        <entry><constant>FILTER_SANITIZE_NUMBER_FLOAT</constant></entry>
+        <entry>"number_float"</entry>
+        <entry>
+         <constant>FILTER_FLAG_ALLOW_FRACTION</constant>,
+         <constant>FILTER_FLAG_ALLOW_THOUSAND</constant>,
+         <constant>FILTER_FLAG_ALLOW_SCIENTIFIC</constant>
+        </entry>
+        <entry>
+         删除除 <literal>+-</literal> 以外的所有字符，额外可选 <literal>.,eE</literal>。
+        </entry>
+       </row>
+       <row>
+        <entry><constant>FILTER_SANITIZE_NUMBER_INT</constant></entry>
+        <entry>"number_int"</entry>
+        <entry></entry>
+        <entry>
+         删除除数字、加号、减号外的所有字符。
+        </entry>
+       </row>
+       <row>
+        <entry><constant>FILTER_SANITIZE_SPECIAL_CHARS</constant></entry>
+        <entry>"special_chars"</entry>
+        <entry>
+         <constant>FILTER_FLAG_STRIP_LOW</constant>,
+         <constant>FILTER_FLAG_STRIP_HIGH</constant>,
+         <constant>FILTER_FLAG_STRIP_BACKTICK</constant>,
+         <constant>FILTER_FLAG_ENCODE_HIGH</constant>
+        </entry>
+        <entry>
+         HTML 转义 <literal>'"&lt;&gt;&amp;</literal> 和小于 32 的 ASCII 字符，可选剔除或编码特殊字符。
+        </entry>
+       </row>
+       <row>
+        <entry><constant>FILTER_SANITIZE_FULL_SPECIAL_CHARS</constant></entry>
+        <entry>"full_special_chars"</entry>
+        <entry>
+         <constant>FILTER_FLAG_NO_ENCODE_QUOTES</constant>,
+        </entry>
+        <entry>
+         相当于调用 <function>htmlspecialchars</function> 并设置 <constant>ENT_QUOTES</constant>。可以通过设置 <constant>FILTER_FLAG_NO_ENCODE_QUOTES</constant>
+         来禁止编码引号。与 <function>htmlspecialchars</function> 类似，这个过滤器能够识别 <link linkend="ini.default-charset">default_charset</link> 并且如果检测到组成
+         当前字符串中的无效字符的字符序列，则整个字符串都将被拒绝，并产生一个长度为 0 的字符串。当使用此过滤器时，请参阅下面关于将默认标志设置为 0 的警告。
+        </entry>
+       </row>
+       <row>
+        <entry><constant>FILTER_SANITIZE_STRING</constant></entry>
+        <entry>"string"</entry>
+        <entry>
+         <constant>FILTER_FLAG_NO_ENCODE_QUOTES</constant>,
+         <constant>FILTER_FLAG_STRIP_LOW</constant>,
+         <constant>FILTER_FLAG_STRIP_HIGH</constant>,
+         <constant>FILTER_FLAG_STRIP_BACKTICK</constant>,
+         <constant>FILTER_FLAG_ENCODE_LOW</constant>,
+         <constant>FILTER_FLAG_ENCODE_HIGH</constant>,
+         <constant>FILTER_FLAG_ENCODE_AMP</constant>
+        </entry>
+        <entry>剔除标签, 可选剔除或编码特殊字符。</entry>
+       </row>
+       <row>
+        <entry><constant>FILTER_SANITIZE_STRIPPED</constant></entry>
+        <entry>"stripped"</entry>
+        <entry></entry>
+        <entry>字符串过滤器的别名。</entry>
+       </row>
+       <row>
+        <entry><constant>FILTER_SANITIZE_URL</constant></entry>
+        <entry>"url"</entry>
+        <entry></entry>
+        <entry>
+         剔除除了字母、数字和 <literal>$-_.+!*'(),{}|\\^~[]`&lt;&gt;#%";/?:@&amp;=</literal> 以外的所有字符。
+        </entry>
+       </row>
+       <row>
+        <entry><constant>FILTER_UNSAFE_RAW</constant></entry>
+        <entry>"unsafe_raw"</entry>
+        <entry>
+         <constant>FILTER_FLAG_STRIP_LOW</constant>,
+         <constant>FILTER_FLAG_STRIP_HIGH</constant>,
+         <constant>FILTER_FLAG_STRIP_BACKTICK</constant>,
+         <constant>FILTER_FLAG_ENCODE_LOW</constant>,
+         <constant>FILTER_FLAG_ENCODE_HIGH</constant>,
+         <constant>FILTER_FLAG_ENCODE_AMP</constant>
+        </entry>
+        <entry>
+         什么也不做，或选择剔除 或编码特使字符。这个过滤器也有别名 <constant>FILTER_DEFAULT</constant> 。
+        </entry>
+       </row>
+      </tbody>
+     </tgroup>
+    </table>
+   </para>
+   <warning>
+     <para>
+       当通过ini文件或web服务器的配置使用其中一个过滤器作为默认过滤器时，默认标志设置
+       为 <constant>FILTER_FLAG_NO_ENCODE_QUOTES</constant>。您需要显式地
+       将 filter.default_flags 设置为 0，以便默认情况下对引号进行编码。如:
+       <example>
+         <title>将默认过滤器设置为 htmlspecialchars</title>
+         <programlisting role="php">
+<![CDATA[
+filter.default = full_special_chars
+filter.default_flags = 0
+]]>
+         </programlisting>
+       </example>
+     </para>
+   </warning>
+   
+  <simplesect role="changelog">
+   &reftitle.changelog;
+   <para>
+    <informaltable>
+     <tgroup cols="2">
+      <thead>
+       <row>
+        <entry>&Version;</entry>
+        <entry>&Description;</entry>
+       </row>
+      </thead>
+      <tbody>
+       <row>
+        <entry>5.2.11/5.3.1</entry>
+        <entry>
+         斜线 (<literal>/</literal>) 从 <constant>FILTER_SANITIZE_EMAIL</constant> 中
+         删除。之前他们被保留了下来。
+        </entry>
+       </row>
+      </tbody>
+     </tgroup>
+    </informaltable>
+   </para>
+  </simplesect>
+
+ </section>
+ <!--}}}-->
+
+ <!-- Other filters: {{{-->
+ <section xml:id="filter.filters.misc">
+  <title>Other filters</title>
+   <para>
+    <table>
+     <title>List of miscellaneous filters</title>
+     <tgroup cols="5">
+      <thead>
+       <row>
+        <entry>ID</entry>
+        <entry>Name</entry>
+        <entry>Options</entry>
+        <entry>Flags</entry>
+        <entry>Description</entry>
+       </row>
+      </thead>
+      <tbody>
+       <row>
+        <entry><constant>FILTER_CALLBACK</constant></entry>
+        <entry>"callback"</entry>
+        <entry><type>callable</type> function or method</entry>
+        <entry>所有标志都将被忽略。</entry>
+        <entry>调用用户定义的函数来过滤数据。</entry>
+       </row>
+      </tbody>
+     </tgroup>
+    </table>
+   </para>
+ </section>
+ <!--}}}-->
+
+ <!-- Filter flags: {{{-->
+ <section xml:id="filter.filters.flags">
+  <title>Filter flags</title>
+  
+  <para>
+   <table>
+    <title>List of filter flags</title>
+    <tgroup cols="3">
+     <thead>
+      <row>
+       <entry>ID</entry>
+       <entry>Used with</entry>
+       <entry>Description</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry><constant>FILTER_FLAG_STRIP_LOW</constant></entry>
+       <entry>
+        <constant>FILTER_SANITIZE_ENCODED</constant>,
+        <constant>FILTER_SANITIZE_SPECIAL_CHARS</constant>,
+        <constant>FILTER_SANITIZE_STRING</constant>,
+        <constant>FILTER_UNSAFE_RAW</constant>
+       </entry>
+       <entry>
+        剔除数值 &lt;32 的字符。
+       </entry>
+      </row>
+      <row>
+       <entry><constant>FILTER_FLAG_STRIP_HIGH</constant></entry>
+       <entry>
+        <constant>FILTER_SANITIZE_ENCODED</constant>,
+        <constant>FILTER_SANITIZE_SPECIAL_CHARS</constant>,
+        <constant>FILTER_SANITIZE_STRING</constant>,
+        <constant>FILTER_UNSAFE_RAW</constant>
+       </entry>
+       <entry>
+        剔除数值 &gt;127 的字符。
+       </entry>
+      </row>
+      <row>
+       <entry><constant>FILTER_FLAG_STRIP_BACKTICK</constant></entry>
+       <entry>
+        <constant>FILTER_SANITIZE_ENCODED</constant>,
+        <constant>FILTER_SANITIZE_SPECIAL_CHARS</constant>,
+        <constant>FILTER_SANITIZE_STRING</constant>,
+        <constant>FILTER_UNSAFE_RAW</constant>
+       </entry>
+       <entry>
+        剔除反引号字符。
+       </entry>
+      </row>
+      <row>
+       <entry><constant>FILTER_FLAG_ALLOW_FRACTION</constant></entry>
+       <entry>
+        <constant>FILTER_SANITIZE_NUMBER_FLOAT</constant>
+       </entry>
+       <entry>
+        允许用英文句号（<literal>.</literal>）作为数字中的分数分隔符。
+       </entry>
+      </row>
+      <row>
+       <entry><constant>FILTER_FLAG_ALLOW_THOUSAND</constant></entry>
+       <entry>
+        <constant>FILTER_SANITIZE_NUMBER_FLOAT</constant>,
+        <constant>FILTER_VALIDATE_FLOAT</constant>
+       </entry>
+       <entry>
+        允许用英文逗号（<literal>,</literal>）作为数字中的千位分隔符。
+       </entry>
+      </row>
+      <row>
+       <entry><constant>FILTER_FLAG_ALLOW_SCIENTIFIC</constant></entry>
+       <entry>
+        <constant>FILTER_SANITIZE_NUMBER_FLOAT</constant>
+       </entry>
+       <entry>
+        允许数字中使用 <literal>e</literal> 或 <literal>E</literal> 作为科学计数法符号。
+       </entry>
+      </row>
+      <row>
+       <entry><constant>FILTER_FLAG_NO_ENCODE_QUOTES</constant></entry>
+       <entry>
+        <constant>FILTER_SANITIZE_STRING</constant>
+       </entry>
+       <entry>
+        如果使用这个标志，单引号（<literal>'</literal>）和双引号<literal>"</literal>不会被编码。
+       </entry>
+      </row>
+      <row>
+       <entry><constant>FILTER_FLAG_ENCODE_LOW</constant></entry>
+       <entry>
+        <constant>FILTER_SANITIZE_ENCODED</constant>,
+        <constant>FILTER_SANITIZE_STRING</constant>,
+        <constant>FILTER_SANITIZE_RAW</constant>
+       </entry>
+       <entry>
+        编码所有数值 &lt;32 的字符。
+       </entry>
+      </row>
+      <row>
+       <entry><constant>FILTER_FLAG_ENCODE_HIGH</constant></entry>
+       <entry>
+        <constant>FILTER_SANITIZE_ENCODED</constant>,
+        <constant>FILTER_SANITIZE_SPECIAL_CHARS</constant>,
+        <constant>FILTER_SANITIZE_STRING</constant>,
+        <constant>FILTER_SANITIZE_RAW</constant>
+       </entry>
+       <entry>
+        编码所有数值 &gt;127 的字符。
+       </entry>
+      </row>
+      <row>
+       <entry><constant>FILTER_FLAG_ENCODE_AMP</constant></entry>
+       <entry>
+        <constant>FILTER_SANITIZE_STRING</constant>,
+        <constant>FILTER_SANITIZE_RAW</constant>
+       </entry>
+       <entry>
+        编码逻辑与符号 （<literal>&amp;</literal>）。
+       </entry>
+      </row>
+      <row>
+       <entry><constant>FILTER_NULL_ON_FAILURE</constant></entry>
+       <entry>
+        <constant>FILTER_VALIDATE_BOOLEAN</constant>
+       </entry>
+       <entry>
+        未识别的 boolean 类型值返回 &null;。
+       </entry>
+      </row>
+      <row>
+       <entry><constant>FILTER_FLAG_ALLOW_OCTAL</constant></entry>
+       <entry>
+        <constant>FILTER_VALIDATE_INT</constant>
+       </entry>
+       <entry>
+        将以0（<literal>0</literal>）开头的输入视为八进制数。这只允许后面的数字为 <literal>0-7</literal>。
+       </entry>
+      </row>
+      <row>
+       <entry><constant>FILTER_FLAG_ALLOW_HEX</constant></entry>
+       <entry>
+        <constant>FILTER_VALIDATE_INT</constant>
+       </entry>
+       <entry>
+        以 <literal>0x</literal> 或 <literal>0X</literal> 开头的输入作为十六进制数。这只允许后面的字符是 <literal>a-fA-F0-9</literal>。
+       </entry>
+      </row>
+      <row>
+       <entry><constant>FILTER_FLAG_EMAIL_UNICODE</constant></entry>
+       <entry>
+        <constant>FILTER_VALIDATE_EMAIL</constant>
+       </entry>
+       <entry>
+        允许电子邮件地址的本地部分包含 Unicode 字符。
+       </entry>
+      </row>
+      <row>
+       <entry><constant>FILTER_FLAG_IPV4</constant></entry>
+       <entry>
+        <constant>FILTER_VALIDATE_IP</constant>
+       </entry>
+       <entry>
+        允许IP地址为 IPv4 格式。
+       </entry>
+      </row>
+      <row>
+       <entry><constant>FILTER_FLAG_IPV6</constant></entry>
+       <entry>
+        <constant>FILTER_VALIDATE_IP</constant>
+       </entry>
+       <entry>
+        允许IP地址为 IPv6 格式。
+       </entry>
+      </row>
+      <row>
+       <entry><constant>FILTER_FLAG_NO_PRIV_RANGE</constant></entry>
+       <entry>
+        <constant>FILTER_VALIDATE_IP</constant>
+       </entry>
+       <entry>
+        <para>
+         下列范围的 IPV4 地址将被验证失败：
+         <literal>10.0.0.0/8</literal>， <literal>172.16.0.0/12</literal> 和
+         <literal>192.168.0.0/16</literal>。
+        </para>
+        <para>
+         下列开头的 IPV6 地址将被验证失败：
+         <literal>FD</literal> or <literal>FC</literal>.
+        </para>
+       </entry>
+      </row>
+      <row>
+       <entry><constant>FILTER_FLAG_NO_RES_RANGE</constant></entry>
+       <entry>
+        <constant>FILTER_VALIDATE_IP</constant>
+       </entry>
+       <entry>
+        <para>
+        下列 IPV4 保留地址将被验证失败：
+        <literal>0.0.0.0/8</literal>， <literal>169.254.0.0/16</literal>，
+        <literal>127.0.0.0/8</literal> 和 <literal>240.0.0.0/4</literal>。
+        </para>
+        <para>
+          下列 IPV6 保留地址将被验证失败：
+         <literal>::1/128</literal>, <literal>::/128</literal>，
+         <literal>::ffff:0:0/96</literal> 和 <literal>fe80::/10</literal>。
+        </para>
+       </entry>
+      </row>
+      <row>
+       <entry><constant>FILTER_FLAG_SCHEME_REQUIRED</constant></entry>
+       <entry>
+        <constant>FILTER_VALIDATE_URL</constant>
+       </entry>
+       <entry>
+        要求 <acronym>URL</acronym> 包含 scheme 部分。
+       </entry>
+      </row>
+      <row>
+       <entry><constant>FILTER_FLAG_HOST_REQUIRED</constant></entry>
+       <entry>
+        <constant>FILTER_VALIDATE_URL</constant>
+       </entry>
+       <entry>
+        要求 <acronym>URL</acronym> 包含 host 部分。
+       </entry>
+      </row>
+      <row>
+       <entry><constant>FILTER_FLAG_PATH_REQUIRED</constant></entry>
+       <entry>
+        <constant>FILTER_VALIDATE_URL</constant>
+       </entry>
+       <entry>
+        要求 <acronym>URL</acronym> 包含 path 部分。
+       </entry>
+      </row>
+      <row>
+       <entry><constant>FILTER_FLAG_QUERY_REQUIRED</constant></entry>
+       <entry>
+        <constant>FILTER_VALIDATE_URL</constant>
+       </entry>
+       <entry>
+        要求 <acronym>URL</acronym> 包含 query string （查询字符串）部分。
+       </entry>
+      </row>
+      <row>
+       <entry><constant>FILTER_REQUIRE_SCALAR</constant></entry>
+       <entry>
+       </entry>
+       <entry>
+        要求值为标量数据。
+       </entry>
+      </row>
+      <row>
+       <entry><constant>FILTER_REQUIRE_ARRAY</constant></entry>
+       <entry>
+       </entry>
+       <entry>
+        要求值为数组。
+       </entry>
+      </row>
+      <row>
+       <entry><constant>FILTER_FORCE_ARRAY</constant></entry>
+       <entry>
+       </entry>
+       <entry>
+        如果值是标量，则将其视为数组，标量值仅作为元素。
+       </entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </table>
+  </para>
+
+  <simplesect role="changelog">
+   &reftitle.changelog;
+   <para>
+    <informaltable>
+     <tgroup cols="2">
+      <thead>
+       <row>
+        <entry>&Version;</entry>
+        <entry>&Description;</entry>
+       </row>
+      </thead>
+      <tbody>
+       <row>
+        <entry>7.3.0</entry>
+        <entry>
+         <constant>FILTER_FLAG_SCHEME_REQUIRED</constant> 和 <constant>FILTER_FLAG_HOST_REQUIRED</constant> 的显式使用已被弃用。
+        </entry>
+       </row>
+       <row>
+        <entry>7.1.0</entry>
+        <entry>
+         新增 <constant>FILTER_FLAG_EMAIL_UNICODE</constant>。
+        </entry>
+       </row>
+       <row>
+        <entry>5.3.2</entry>
+        <entry>
+         新增 <constant>FILTER_FLAG_STRIP_BACKTICK</constant>。
+        </entry>
+       </row>
+       <row>
+        <entry>5.2.10</entry>
+        <entry>
+         <constant>FILTER_FLAG_NO_RES_RANGE</constant> 也支持 IPV6 地址。
+        </entry>
+       </row>
+      </tbody>
+     </tgroup>
+    </informaltable>
+   </para>
+  </simplesect>
+ </section>
+ <!--}}}-->
+</chapter>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=marker fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
