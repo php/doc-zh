@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 379fa4cf1c5efda46b455d5fab4b76edf2321a91 Maintainer: daijie Status: ready -->
-<!-- Reviewed: no -->
-
+<!-- EN-Revision: e53495bc3ac5a5ff701fd2ea3ae9aea4e99fda68 Maintainer: daijie Status: ready -->
 <refentry xmlns="http://docbook.org/ns/docbook" xml:id="function.getopt">
  <refnamediv>
   <refname>getopt</refname>
@@ -12,10 +10,10 @@
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <type>array</type><methodname>getopt</methodname>
-   <methodparam><type>string</type><parameter>options</parameter></methodparam>
-   <methodparam choice="opt"><type>array</type><parameter>longopts</parameter></methodparam>
-      <methodparam choice="opt"><type>int</type><parameter role="reference">optind</parameter></methodparam>
+   <type class="union"><type>array</type><type>false</type></type><methodname>getopt</methodname>
+   <methodparam><type>string</type><parameter>short_options</parameter></methodparam>
+   <methodparam choice="opt"><type>array</type><parameter>long_options</parameter><initializer>[]</initializer></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter role="reference">rest_index</parameter><initializer>&null;</initializer></methodparam>
   </methodsynopsis>
   <para>
    解析传入脚本的选项。
@@ -27,13 +25,14 @@
   <para>
    <variablelist>
     <varlistentry>
-     <term><parameter>options</parameter></term>
+     <term><parameter>short_options</parameter></term>
      <listitem>
       <simpara>
-       该字符串中的每个字符会被当做选项字符，匹配传入脚本的选项以单个连字符(-)开头。
+       该字符串中的每个字符会被当做选项字符，匹配传入脚本的选项以单个连字符 (<literal>-</literal>) 开头。
       </simpara>
       <simpara>
-       比如，一个选项字符串 <literal>"x"</literal> 识别了一个选项 <literal>-x</literal>。
+       比如，一个选项字符串 <literal>"x"</literal> 识别了一个选项
+       <literal>-x</literal>。
       </simpara>
       <simpara>
        只允许 a-z、A-Z 和 0-9。
@@ -41,29 +40,31 @@
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>longopts</parameter></term>
+     <term><parameter>long_options</parameter></term>
      <listitem>
       <simpara>
-       选项数组。此数组中的每个元素会被作为选项字符串，匹配了以两个连字符(<literal>--</literal>)传入到脚本的选项。
+       选项数组。此数组中的每个元素会被作为选项字符串，匹配了以两个连字符
+       (<literal>--</literal>) 传入到脚本的选项。
       </simpara>
       <simpara>
-       例如，长选项元素 <literal>"opt"</literal> 识别了一个选项 <literal>--opt</literal>。
+       例如，长选项元素 <literal>"opt"</literal> 识别了一个选项
+       <literal>--opt</literal>。
       </simpara>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>optind</parameter></term>
+     <term><parameter>rest_index</parameter></term>
      <listitem>
       <simpara>
-       If the <parameter>optind</parameter> parameter is present, then the
-       index where argument parsing stopped will be written to this variable.
+       如果传递了 <parameter>rest_index</parameter>
+       参数，那么参数解析停止时的索引，将被赋值给此变量。
       </simpara>
      </listitem>
     </varlistentry>
    </variablelist>
   </para>
   <para>
-   <parameter>options</parameter> 可能包含了以下元素：
+   <parameter>short_options</parameter> 可能包含了以下元素：
    <simplelist>
     <member>单独的字符（不接受值）</member>
     <member>后面跟随冒号的字符（此选项需要值）</member>
@@ -76,9 +77,19 @@
     </simpara>
    </note>
   </para>
+  <para>
+   <parameter>long_options</parameter> 数组可能包含了以下元素：
+    <simplelist>
+      <member>字符串（参数不接受任何值）</member>
+      <member>后面跟随冒号的字符串（此选项需要值）</member>
+      <member>后面跟随两个冒号的字符串（此选项的值可选）</member>
+    </simplelist>
+  </para>
   <note>
    <para>
-    <parameter>options</parameter> 和 <parameter>longopts</parameter> 的格式几乎是一样的，唯一的不同之处是 <parameter>longopts</parameter> 需要是选项的数组（每个元素为一个选项），而 <parameter>options</parameter> 需要一个字符串（每个字符是个选项）。
+    <parameter>options</parameter> 和 <parameter>longopts</parameter> 的格式几乎是一样的，唯一的不同之处是
+    <parameter>longopts</parameter> 需要是选项的数组（每个元素为一个选项），而 <parameter>options</parameter>
+    需要一个字符串（每个字符是个选项）。
    </para>
   </note>
  </refsect1>
@@ -111,30 +122,6 @@
        <entry>7.1.0</entry>
        <entry>
         添加 <parameter>optind</parameter> 参数。
-       </entry>
-      </row>
-      <row>
-       <entry>5.3.0</entry>
-       <entry>
-        支持 "=" 作为 参数和值的分隔符。
-       </entry>
-      </row>
-      <row>
-       <entry>5.3.0</entry>
-       <entry>
-        增加了可选值的支持（用"::"指定）。
-       </entry>
-      </row>
-      <row>
-       <entry>5.3.0</entry>
-       <entry>
-        参数 <parameter>longopts</parameter> 在所有系统平台上均可用。
-       </entry>
-      </row>
-      <row>
-       <entry>5.3.0</entry>
-       <entry>
-        此函数不再依赖于操作系统，现在也能够在 Windows 上运行。
        </entry>
       </row>
      </tbody>
@@ -302,7 +289,6 @@ array(1) {
  </refsect1>
 
 </refentry>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
