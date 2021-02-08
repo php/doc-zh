@@ -1,90 +1,170 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
 <!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
-  <refentry xml:id="function.mysql-pconnect" xmlns="http://docbook.org/ns/docbook">
-   <refnamediv>
-    <refname>mysql_pconnect</refname>
-    <refpurpose>
-     打开一个到 MySQL 服务器的持久连接
-    </refpurpose>
-   </refnamediv>
-   <refsect1>
-    <title>说明</title>
-     <methodsynopsis>
-      <type>resource</type><methodname>mysql_pconnect</methodname>
-      <methodparam choice="opt"><type>string</type><parameter>server</parameter></methodparam> 
-      <methodparam choice="opt"><type>string</type><parameter>username</parameter></methodparam>
-      <methodparam choice="opt"><type>string</type><parameter>password</parameter></methodparam>
-      <methodparam choice="opt"><type>int</type><parameter>client_flags</parameter></methodparam>
-     </methodsynopsis>
-    <para>
-     如果成功则返回一个正的 MySQL 持久连接标识符，出错则返回 &false;。
-    </para>
-    <para>
-     <function>mysql_pconnect</function>
-     建立一个到 MySQL
-     服务器的连接。如果没有提供可选参数，则使用如下默认值：<parameter>server</parameter> =
-     'localhost:3306'，<parameter>username</parameter> =
-     服务器进程所有者的用户名，<parameter>password</parameter> =
-     空密码。<parameter>client_flags</parameter>
-     参数可以是以下常量的组合：MYSQL_CLIENT_COMPRESS，MYSQL_CLIENT_IGNORE_SPACE
-     或者 MYSQL_CLIENT_INTERACTIVE。
-    </para>
-    <para>
-     <parameter>server</parameter>
-     参数也可以包括端口号，例如
-     &quot;hostname:port&quot;，或者是本机套接字的的路径，例如
-     &quot;:/path/to/socket&quot;。
-     <note>
-      <para>
-       对 &quot;:port&quot; 的支持是 3.0B4 版添加的。
-      </para>
-      <para>
-       对 &quot;:/path/to/socket&quot; 的支持是 3.0.10 版添加的。
-      </para>
-     </note>
-    </para>
+<!-- EN-Revision: 4206843127f9a72a283b63ac82c0155a598506b1 Maintainer: avenger Status: ready -->
+<refentry xml:id="function.mysql-pconnect" xmlns="http://docbook.org/ns/docbook">
+ <refnamediv>
+  <refname>mysql_pconnect</refname>
+  <refpurpose>打开一个到 MySQL 服务器的持久连接</refpurpose>
+ </refnamediv>
 
-    <!-- TODO move the story to features.persistent, and refer to that -->
-    <para>
-     <function>mysql_pconnect</function>
-     和
-     <function>mysql_connect</function>
-     非常相似，但有两个主要区别。
-    </para>
-    <para>
-     首先，当连接的时候本函数将先尝试寻找一个在同一个主机上用同样的用户名和密码已经打开的（持久）连接，如果找到，则返回此连接标识而不打开新连接。
-    </para>
-    <para>
-     其次，当脚本执行完毕后到
-     SQL 服务器的连接不会被关闭，此连接将保持打开以备以后使用（<function>mysql_close</function>
-     不会关闭由
-     <function>mysql_pconnect</function> 建立的连接）。
-    </para>
-    <para>
-     可选参数
-     <parameter>client_flags</parameter>
-     自 PHP 4.3.0 版起可用。
-    </para>
-    <para>
-     此种连接称为“持久的”。
-    </para>
-    <note>
-     <para>
-      注意，此种连接仅能用于模块版本的 PHP。更多信息参见<link
-      linkend="features.persistent-connections">数据库持久连接</link>一节。
-     </para>
-    </note>
-    <warning>
-     <para>
-      使用持久连接需要调整一些
-      Apache 和 MySQL
-      的配置以使不会超出 MySQL 所允许的连接数目。
-     </para>
-    </warning>
-   </refsect1>
-  </refentry>
+ <refsynopsisdiv>
+  <warning>
+   &mysql.alternative.note;
+   <simplelist role="alternatives">
+    <member><function>mysqli_connect</function> with <literal>p:</literal> host prefix</member>
+    <member><methodname>PDO::__construct</methodname> with <constant>PDO::ATTR_PERSISTENT</constant> as a driver option</member>
+   </simplelist>
+  </warning>
+ </refsynopsisdiv>
+
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <type>resource</type><methodname>mysql_pconnect</methodname>
+   <methodparam choice="opt"><type>string</type><parameter>server</parameter><initializer>ini_get("mysql.default_host")</initializer></methodparam>
+   <methodparam choice="opt"><type>string</type><parameter>username</parameter><initializer>ini_get("mysql.default_user")</initializer></methodparam>
+   <methodparam choice="opt"><type>string</type><parameter>password</parameter><initializer>ini_get("mysql.default_password")</initializer></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>client_flags</parameter><initializer>0</initializer></methodparam>
+  </methodsynopsis>
+  <!-- Undocumented confusing syntax:
+  <methodsynopsis>
+   <type>resource</type><methodname>mysql_pconnect</methodname>
+   <methodparam choice="opt"><type>string</type><parameter>server</parameter></methodparam>
+   <methodparam choice="opt"><type>string</type><parameter>username</parameter></methodparam>
+   <methodparam choice="opt"><type>string</type><parameter>password</parameter></methodparam>
+   <methodparam choice="opt"><type>bool</type><parameter>new_link</parameter></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>client_flags</parameter></methodparam>
+  </methodsynopsis>
+  -->
+  <para>
+   打开一个到 MySQL 服务器的持久连接。
+  </para>
+  <!-- TODO: Integrate this information more nicely with features.persistent -->
+  <para>
+   <function>mysql_pconnect</function> 和
+   <function>mysql_connect</function> 非常相似，但有两个主要区别。
+  </para>
+  <para>
+   首先，当连接的时候本函数将先尝试寻找一个在同一个主机上用同样的用户名和密码已经打开的（持久）连接，如果找到，则返回此连接标识而不打开新连接。
+  </para>
+  <para>
+   其次，当脚本执行完毕后到 SQL 服务器的连接不会被关闭，此连接将保持打开以备以后使用（<function>mysql_close</function>
+   不会关闭由 <function>mysql_pconnect</function> 建立的连接）。
+  </para>
+  <para>
+   此种连接称为“持久的”。
+  </para>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>server</parameter></term>
+     <listitem>
+      <para>
+       MySQL 服务器地址，参数也可以包括端口号，例如
+       “hostname:port“ 或者是本机套接字的的路径，例如 “:/path/to/socket“
+      </para>
+      <para>
+       如果 PHP 配置文件中 <link linkend="ini.mysql.default-host">
+       mysql.default_host</link> 的值未设置（默认情况下），则默认值为 'localhost:3306'
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>username</parameter></term>
+     <listitem>
+      <para>
+       数据库连接使用的用户名。默认为当前服务器进程的用户。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>password</parameter></term>
+     <listitem>
+      <para>
+       数据库连接使用的密码。默认为空密码。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>client_flags</parameter></term>
+     <listitem>
+      <para>
+       参数 <parameter>client_flags</parameter> 可以为以下常量：
+       128 (enable <literal>LOAD DATA LOCAL</literal> handling),
+       <constant>MYSQL_CLIENT_SSL</constant>,
+       <constant>MYSQL_CLIENT_COMPRESS</constant>,
+       <constant>MYSQL_CLIENT_IGNORE_SPACE</constant> 或
+       <constant>MYSQL_CLIENT_INTERACTIVE</constant>。
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   如果成功则返回一个正的 MySQL 持久连接标识符，出错则返回 &false;。
+  </para>
+ </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <para>
+   <informaltable xml:id="function.mysql-pconnect.changelog">
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>&Version;</entry>
+       <entry>&Description;</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>5.5.0</entry>
+       <entry>
+        函数会抛出一个 <constant>E_DEPRECATED</constant> 错误。
+       </entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </informaltable>
+  </para>
+ </refsect1>
+
+ <refsect1 role="notes">
+  &reftitle.notes;
+  <note>
+   <para>
+    需要注意的是，此函数仅当在 PHP 模块化运行时才会生效。更多信息请参阅
+    <link linkend="features.persistent-connections">持久数据库连接</link> 章节。
+   </para>
+  </note>
+  <warning>
+   <para>
+    使用持久连接可能需要对 Apache 和 MySQL 配置进行一些调整，以确保不超过
+    MySQL 服务器允许的最大连接数。
+   </para>
+  </warning>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>mysql_connect</function></member>
+    <member><link linkend="features.persistent-connections">Persistent
+    Database Connections</link></member>
+   </simplelist>
+  </para>
+ </refsect1>
+</refentry>
 
 <!-- Keep this comment at the end of the file
 Local variables:

@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 70642d85d00cb893efced8e6e1ddf1d31085dc3b Maintainer: HonestQiao Status: ready -->
+<!-- EN-Revision: 4206843127f9a72a283b63ac82c0155a598506b1 Maintainer: HonestQiao Status: ready -->
 <!-- Reviewed: no Maintainer: HonestQiao -->
 <refentry xml:id="function.mysql-connect" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>mysql_connect</refname>
   <refpurpose>打开一个到 MySQL 服务器的连接</refpurpose>
  </refnamediv>
- 
+
  <refsynopsisdiv>
   <warning>
    &mysql.alternative.note;
@@ -21,12 +21,12 @@
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <type>resource</type><methodname>mysql_connect</methodname>
-   <methodparam choice="opt"><type>string</type><parameter>server</parameter></methodparam>
-   <methodparam choice="opt"><type>string</type><parameter>username</parameter></methodparam>
-   <methodparam choice="opt"><type>string</type><parameter>password</parameter></methodparam>
-   <methodparam choice="opt"><type>bool</type><parameter>new_link</parameter></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter>client_flags</parameter></methodparam>
+   <type class="union"><type>resource</type><type>false</type></type><methodname>mysql_connect</methodname>
+   <methodparam choice="opt"><type>string</type><parameter>server</parameter><initializer>ini_get("mysql.default_host")</initializer></methodparam>
+   <methodparam choice="opt"><type>string</type><parameter>username</parameter><initializer>ini_get("mysql.default_user")</initializer></methodparam>
+   <methodparam choice="opt"><type>string</type><parameter>password</parameter><initializer>ini_get("mysql.default_password")</initializer></methodparam>
+   <methodparam choice="opt"><type>bool</type><parameter>new_link</parameter><initializer>&false;</initializer></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>client_flags</parameter><initializer>0</initializer></methodparam>
   </methodsynopsis>
   <para>
    打开或重复使用一个到 MySQL 服务器的连接。
@@ -56,8 +56,8 @@
      <listitem>
       <para>
        用户名。默认值由 <link
-       linkend="ini.mysql.default-user">mysql.default_user</link> 定义。
-       在 &sqlsafemode; 时，参数被忽略，总是使用服务器进程所有者的用户名。
+       linkend="ini.mysql.default-user">mysql.default_user</link> 定义。 在
+       &sqlsafemode; 时，参数被忽略，总是使用服务器进程所有者的用户名。
       </para>
      </listitem>
     </varlistentry>
@@ -66,7 +66,8 @@
      <listitem>
       <para>
        密码。默认值由<link
-       linkend="ini.mysql.default-password">mysql.default_password</link>定义。在 &sqlsafemode; 时，参数被忽略，总是使用空密码。
+       linkend="ini.mysql.default-password">mysql.default_password</link>定义。在
+       &sqlsafemode; 时，参数被忽略，总是使用空密码。
       </para>
      </listitem>
     </varlistentry>
@@ -88,7 +89,8 @@
       <para>
        <parameter>client_flags</parameter>
        参数可以是以下常量的组合：<constant>MYSQL_CLIENT_SSL</constant>，<constant>MYSQL_CLIENT_COMPRESS</constant>，<constant>MYSQL_CLIENT_IGNORE_SPACE</constant>
-       或 <constant>MYSQL_CLIENT_INTERACTIVE</constant>。进一步信息见<xref linkend="mysql.client-flags" />。
+       或 <constant>MYSQL_CLIENT_INTERACTIVE</constant>。进一步信息见
+       <xref linkend="mysql.client-flags" />。
       </para>
      </listitem>
     </varlistentry>
@@ -106,7 +108,7 @@
  <refsect1 role="changelog">
   &reftitle.changelog;
   <para>
-   <informaltable>
+   <informaltable xml:id="function.mysql-connect.changelog">
     <tgroup cols="2">
      <thead>
       <row>
@@ -116,27 +118,9 @@
      </thead>
      <tbody>
       <row>
-       <entry>4.3.0</entry>
+       <entry>5.5.0</entry>
        <entry>
-        添加 <parameter>client_flags</parameter> 参数。
-       </entry>
-      </row>
-      <row>
-       <entry>4.2.0</entry>
-       <entry>
-        添加 <parameter>new_link</parameter> 参数。
-       </entry>
-      </row>
-      <row>
-       <entry>3.0.10</entry>
-       <entry>
-        对 <parameter>server</parameter> 添加 ":/path/to/socket" 支持。
-       </entry>
-      </row>
-      <row>
-       <entry>3.0.0</entry>
-       <entry>
-        对 <parameter>server</parameter> 添加 ":port" 支持。
+        此函数会生成一个 <constant>E_DEPRECATED</constant> 错误。
        </entry>
       </row>
      </tbody>
@@ -198,8 +182,8 @@ mysql_close($link);
 <?php
 // we connect to localhost and socket e.g. /tmp/mysql.sock
 
-//variant 1: ommit localhost
-$link = mysql_connect('/tmp/mysql', 'mysql_user', 'mysql_password');
+// variant 1: omit localhost
+$link = mysql_connect(':/tmp/mysql', 'mysql_user', 'mysql_password');
 if (!$link) {
     die('Could not connect: ' . mysql_error());
 }
@@ -224,15 +208,6 @@ mysql_close($link);
  <refsect1 role="notes">
   &reftitle.notes;
   <note>
-   &mysql.alternative.note;
-   <para>
-    <simplelist>
-     <member><function>mysqli_connect</function></member>
-     <member><methodname>PDO::__construct</methodname></member>
-    </simplelist>
-   </para>
-  </note>
-  <note>
    <para>
     只要将 server 指定为 &quot;localhost&quot; 或
     &quot;localhost:port&quot;，MySQL 客户端库会越过此值并尝试连接到本地套接字（Windows
@@ -250,9 +225,11 @@ mysql_close($link);
   </note>
   <note>
    <para>
-    可以在函数名前加上一个
-    <link linkend="language.operators.errorcontrol">@</link>
-    来抑制出错时的错误信息。
+    Error "Can't create TCP/IP socket (10106)" usually means that the <link
+    linkend="ini.variables-order">variables_order</link> configure directive
+    doesn't contain character <literal>E</literal>. On Windows, if the
+    environment is not copied the <literal>SYSTEMROOT</literal> environment
+    variable won't be available and PHP will have problems loading Winsock.
    </para>
   </note>
  </refsect1>

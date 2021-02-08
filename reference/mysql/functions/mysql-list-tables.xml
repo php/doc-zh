@@ -1,81 +1,147 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
+<!-- EN-Revision: 4206843127f9a72a283b63ac82c0155a598506b1 Maintainer: avenger Status: ready -->
 <!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
-  <refentry xml:id="function.mysql-list-tables" xmlns="http://docbook.org/ns/docbook">
-   <refnamediv>
-    <refname>mysql_list_tables</refname>
-    <refpurpose>列出 MySQL 数据库中的表</refpurpose>
-   </refnamediv>
-   <refsect1>
-    <title>说明</title>
-    <methodsynopsis>
-     <type>resource</type><methodname>mysql_list_tables</methodname>
-     <methodparam><type>string</type><parameter>database</parameter></methodparam>
-     <methodparam choice="opt"><type>resource</type><parameter>link_identifier</parameter></methodparam>
-    </methodsynopsis>
-    <para>
-     <function>mysql_list_tables</function>
-     接受一个数据库名并返回和
-     <function>mysql_query</function>
-     函数很相似的一个结果指针。用
-     <function>mysql_tablename</function>
-     函数来遍历此结果指针，或者任何使用结果表的函数，例如
-     <function>mysql_fetch_array</function>。
-    </para>
-    <para>
-     <parameter>database</parameter>
-     参数是需要被取得其中的的表名的数据库名。如果失败
-     <function>mysql_list_tables</function> 返回 &false;。
-    </para>
-    <para>
-     为向下兼容仍然可以使用本函数的别名
-     <function>mysql_listtables</function>，但反对这样做。
-    </para>
-    <para>
-     <note>
-      <simpara>
-       该函数已经被删除了，请不要再使用该函数。您可以用命令 SHOW TABLES FROM DATABASE 来实现该函数的功能。
-      </simpara>
-     </note>
-    </para>
-    <para>
-     <example>
-      <title><function>mysql_list_tables</function> 例子</title>
-      <programlisting role="php">
+<refentry xml:id="function.mysql-list-tables" xmlns="http://docbook.org/ns/docbook">
+ <refnamediv>
+  <refname>mysql_list_tables</refname>
+  <refpurpose>列出 MySQL 数据库中的表</refpurpose>
+ </refnamediv>
+
+ <refsynopsisdiv>
+  <warning>
+   &mysql.alternative.note.4-3-0;
+   <simplelist role="alternatives">
+    <member>SQL Query: <literal>SHOW TABLES FROM dbname</literal></member>
+   </simplelist>
+  </warning>
+ </refsynopsisdiv>
+
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <type class="union"><type>resource</type><type>false</type></type><methodname>mysql_list_tables</methodname>
+   <methodparam><type>string</type><parameter>database</parameter></methodparam>
+   <methodparam choice="opt"><type>resource</type><parameter>link_identifier</parameter></methodparam>
+  </methodsynopsis>
+  <para>
+   列出 MySQL 数据库中的表。
+  </para>
+  <para>
+   此函数已废弃。推荐使用
+   <function>mysql_query</function> 来执行 SQL <literal>SHOW TABLES
+   [FROM db_name] [LIKE 'pattern']</literal> 来实现同样的操作。
+  </para>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>database</parameter></term>
+     <listitem>
+      <para>
+       数据库名称
+      </para>
+     </listitem>
+    </varlistentry>
+    &mysql.linkid.description;
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   成功时返回结果指针 <type>resource</type> &return.falseforfailure;。
+  </para>
+  <para>
+   可以使用 <function>mysql_tablename</function> 函数来遍历该结果指针，或者使用任何针对表操作的函数，类似
+   <function>mysql_fetch_array</function>。
+  </para>
+ </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <para>
+   <informaltable xml:id="function.mysql-list-tables.changelog">
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>&Version;</entry>
+       <entry>&Description;</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>4.3.7</entry>
+       <entry>
+        此函数已废弃。
+       </entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </informaltable>
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title><function>mysql_list_tables</function> 例子</title>
+    <programlisting role="php">
 <![CDATA[
 <?php
-    $dbname = 'mysql_dbname';
+$dbname = 'mysql_dbname';
 
-    if (!mysql_connect('mysql_host', 'mysql_user', 'mysql_password')) {
-        print 'Could not connect to mysql';
-        exit;
-    }
+if (!mysql_connect('mysql_host', 'mysql_user', 'mysql_password')) {
+    echo 'Could not connect to mysql';
+    exit;
+}
 
-    $result = mysql_list_tables($dbname);
+$sql = "SHOW TABLES FROM $dbname";
+$result = mysql_query($sql);
 
-    if (!$result) {
-        print "DB Error, could not list tables\n";
-        print 'MySQL Error: ' . mysql_error();
-        exit;
-    }
+if (!$result) {
+    echo "DB Error, could not list tables\n";
+    echo 'MySQL Error: ' . mysql_error();
+    exit;
+}
 
-    while ($row = mysql_fetch_row($result)) {
-        print "Table: $row[0]\n";
-    }
+while ($row = mysql_fetch_row($result)) {
+    echo "Table: {$row[0]}\n";
+}
 
-    mysql_free_result($result);
+mysql_free_result($result);
 ?>
 ]]>
-      </programlisting>
-     </example>
-    </para>
-    <para>
-    参见 <function>mysql_list_dbs</function> 和
-    <function>mysql_tablename</function>。
-    </para>
-   </refsect1>
-  </refentry>
+    </programlisting>
+   </example>
+  </para>
+ </refsect1>
+
+ <refsect1 role="notes">
+  &reftitle.notes;
+  <note>
+   <para>
+    &info.deprecated.alias;
+    <function>mysql_listtables</function>
+   </para>
+  </note>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>mysql_list_dbs</function></member>
+    <member><function>mysql_tablename</function></member>
+   </simplelist>
+  </para>
+ </refsect1>
+</refentry>
 
 <!-- Keep this comment at the end of the file
 Local variables:
