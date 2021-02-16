@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
 <!-- $Author$ -->
-<!-- EN-Revision: 4f04bd50ed71039b89e2b9a5aba7e53e74cac4c6 Maintainer: avenger Status: ready -->
+<!-- EN-Revision: ae956cd678e63a4c5c47d9aa23f68ac552581a09 Maintainer: avenger Status: ready -->
 <!-- CREDITS: Gregory, dallas -->
 <chapter xml:id="language.functions" xmlns="http://docbook.org/ns/docbook">
   <title>函数</title>
@@ -123,7 +123,8 @@ bar();
    <simpara>
     PHP 的函数支持 <link linkend="functions.variable-arg-list">可变数量的参数</link> 和
     <link linkend="functions.arguments.default">默认参数</link>。参见
-    <function>func_num_args</function>，<function>func_get_arg</function> 和 <function>func_get_args</function>。
+    <function>func_num_args</function>，<function>func_get_arg</function> 和
+    <function>func_get_args</function>。
    </simpara>
 
    <para>
@@ -164,8 +165,9 @@ function recursion($a)
    <para>
     PHP 支持按值传递参数（默认），<link
     linkend="functions.arguments.by-reference">通过引用传递参数</link> 以及 <link
-    linkend="functions.arguments.default">默认参数</link>。也支持 <link
-    linkend="functions.variable-arg-list">可变长度参数列表</link>。
+    linkend="functions.arguments.default">默认参数</link>。也支持
+    <link linkend="functions.variable-arg-list">可变长度参数列表</link> 和
+    <link linkend="functions.named-arguments">命名参数</link>。
    </para>
    <para>
     <example>
@@ -422,8 +424,8 @@ echo sum(1, 2, 3, 4);
 
     <para>
     也可以使用 <literal>...</literal> 语法来传递 <type>array</type> 或
-     <classname>Traversable</classname> 做为参数到函数中：
-
+     <classname>Traversable</classname>
+     做为参数到函数中：
 
      <example>
       <title>使用 <literal>...</literal> 来传递参数</title>
@@ -544,25 +546,18 @@ echo sum(1, 2, 3, 4);
    </sect2>
 
    <sect2 xml:id="functions.named-arguments">
-    <title>Named Arguments</title>
+    <title>命名参数</title>
 
     <para>
-     PHP 8.0.0 introduced named arguments as an extension of the existing
-     positional parameters. Named arguments allow passing arguments to a
-     function based on the parameter name, rather than the parameter position.
-     This makes the meaning of the argument self-documenting, makes the
-     arguments order-independent and allows skipping default values arbitrarily.
+     PHP 8.0.0 开始引入了命名参数作为现有位置参数的扩展。命名参数允许根据参数名而不是参数位置向函数传参。这使得参数的含义自成体系，参数与顺序无关，并允许任意跳过默认值。
     </para>
 
     <para>
-     Named arguments are passed by prefixing the value with the parameter name
-     followed by a colon. Using reserved keywords as parameter names is allowed.
-     The parameter name must be an identifier, specifying dynamically
-     is not allowed.
+     命名参数通过在参数名前加上冒号来传递。允许使用保留关键字作为参数名。参数名必须是一个标识符，不允许动态指定。
     </para>
 
     <example>
-     <title>Named argument syntax</title>
+     <title>命名参数的语法</title>
      <programlisting role="php">
       <![CDATA[
 <?php
@@ -577,14 +572,14 @@ function_name($variableStoringParamName: $value);
     </example>
 
     <example>
-     <title>Positional arguments versus named arguments</title>
+     <title>通过位置传参与命名参数的对比</title>
      <programlisting role="php">
       <![CDATA[
 <?php
-// Using positional arguments:
+// 使用顺序传递参数：
 array_fill(0, 100, 50);
 
-// Using named arguments:
+// 使用命名参数：
 array_fill(start_index: 0, count: 100, value: 50);
 ?>
 ]]>
@@ -592,11 +587,11 @@ array_fill(start_index: 0, count: 100, value: 50);
     </example>
 
     <para>
-     The order in which the named arguments are passed does not matter.
+     指定参数的传递顺序并不重要。
     </para>
 
     <example>
-     <title>Same example as above with a different order of parameters</title>
+     <title>参数顺序不同的示例（同上例）</title>
      <programlisting role="php">
       <![CDATA[
 <?php
@@ -607,19 +602,16 @@ array_fill(value: 50, num: 100, start_index: 0);
     </example>
 
     <para>
-     Named arguments can be combined with positional arguments. In this case,
-     the named arguments must come after the positional arguments.
-     It is also possible to specify only some of the optional arguments of a
-     function, regardless of their order.
+     命名参数也可以与位置参数相结合使用。此种情况下，命名参数必须在位置参数之后。也可以只指定一个函数的部分可选参数，而不考虑它们的顺序。
     </para>
 
     <example>
-     <title>Combining named arguments with positional arguments</title>
+     <title>命名参数与位置参数结合使用</title>
      <programlisting role="php">
       <![CDATA[
 <?php
 htmlspecialchars($string, double_encode: false);
-// Same as
+// 等价于
 htmlspecialchars($string, ENT_COMPAT | ENT_HTML401, 'UTF-8', false);
 ?>
 ]]>
@@ -656,6 +648,7 @@ foo(1, param: 2);
     值通过使用可选的返回语句返回。可以返回包括数组和对象的任意类型。返回语句会立即中止函数的运行，并且将控制权交回调用该函数的代码行。更多信息见
     <function>return</function>。
    </para>
+
    <note>
     <para>
      如果省略了
@@ -722,7 +715,8 @@ $newref =& returns_reference();
      </example>
     </para>
     <simpara>
-    有关引用的更多信息, 请查看 <link linkend="language.references">引用的解释</link>。
+    有关引用的更多信息, 请查看 <link
+     linkend="language.references">引用的解释</link>。
    </simpara>
    </sect2>
   </sect1>
@@ -1392,6 +1386,7 @@ var_export($x);  // 输出 1
     </note>
    </sect2>
   </sect1>
+
  </chapter>
 
 <!-- Keep this comment at the end of the file
