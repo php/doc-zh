@@ -1,22 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 5d5a8ef9cbe225d53f1b66b6ae369511d0f6170a Maintainer: duanxiaoqiang Status: ready -->
+<!-- EN-Revision: 2e02eeb87167732c245530d970b79061b8aaa24a Maintainer: duanxiaoqiang Status: ready -->
 <!-- Reviewed: no -->
-
-<refentry xmlns="http://docbook.org/ns/docbook" xml:id="function.openssl-pkey-new">
+<refentry xml:id="function.openssl-pkey-new" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>openssl_pkey_new</refname>
   <refpurpose>生成一个新的私钥</refpurpose>
  </refnamediv>
- 
+
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <type>resource</type><methodname>openssl_pkey_new</methodname>
-   <methodparam choice="opt"><type>array</type><parameter>configargs</parameter></methodparam>
+   <type class="union"><type>OpenSSLAsymmetricKey</type><type>false</type></type><methodname>openssl_pkey_new</methodname>
+   <methodparam choice="opt"><type class="union"><type>array</type><type>null</type></type><parameter>options</parameter><initializer>&null;</initializer></methodparam>
   </methodsynopsis>
   <para>
-   <function>openssl_pkey_new</function> 生成一个新的私钥和公钥对。通过 <function>openssl_pkey_get_public</function> 函数获取该密钥的公共组件。
+   <function>openssl_pkey_new</function> 生成一个新的私钥和公钥对。如何获取该密钥的公共组件参见以下示例。
   </para>
   &note.openssl.cnf;
  </refsect1>
@@ -26,10 +25,12 @@
   <para>
    <variablelist>
     <varlistentry>
-     <term><parameter>configargs</parameter></term>
+     <term><parameter>options</parameter></term>
      <listitem>
       <para>
-       你可以使用<parameter>configargs</parameter>参数微调密钥的生成（比如指定位数）。查看<function>openssl_csr_new</function>获取更多关于<parameter>configargs</parameter>的信息。
+       你可以使用 <parameter>options</parameter> 参数微调密钥的生成（比如指定位数）。查看
+       <function>openssl_csr_new</function> 获取更多关于
+       <parameter>options</parameter> 的信息。
       </para>
      </listitem>
     </varlistentry>
@@ -40,7 +41,7 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   成功，返回pkey的资源标识符，错误则返回 &false; 。
+   成功时返回 <classname>OpenSSLAsymmetricKey</classname> 实例，错误则返回 &false; 。
   </para>
  </refsect1>
 
@@ -56,6 +57,13 @@
     </thead>
     <tbody>
      <row>
+      <entry>8.0.0</entry>
+      <entry>
+       成功时此函数会返回 <classname>OpenSSLAsymmetricKey</classname> 的实例；在之前版本中，则会返回类似为
+       <literal>OpenSSL key</literal> 的 &resource;。
+      </entry>
+     </row>
+     <row>
       <entry>7.1.0</entry>
       <entry>添加了 <parameter>curve_name</parameter> 配置参数使得可以创建 EC 密钥。</entry>
      </row>
@@ -64,8 +72,40 @@
   </informaltable>
  </refsect1>
 
-</refentry>
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <example xml:id="function.openssl-pkey-new.example.public-key">
+   <title>Obtain the public key from a private key</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+$private_key = openssl_pkey_new();
+$public_key_pem = openssl_pkey_get_details($private_key)['key'];
+echo $public_key_pem;
+$public_key = openssl_pkey_get_public($public_key_pem);
+var_dump($public_key);
+?>
+]]>
+   </programlisting>
+   &example.outputs.similar;
+   <screen>
+<![CDATA[
+-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArZFsmN2P6rx1Xt7YV95o
+gcdlal0k3ryiIhFNzjwtRNNTXfEfBr6lUuaIJYQ8/XqEBX0hpcfuuF6tTRlonA3t
+WLME0QFD93YVsAaXcy76YqjjqcRRodIBphAbYyyMI/lXkQAdn7kbAmr7neSOsMYJ
+El9Wo4Hl4oG6e52ZnYHyqW9dxh4hX93eupR2TmcCdVf+r9xoHewP0KJYSHt7vDUX
+AQlWYcQiWHIadFsmL0orr6mutlXFReoHbesgKY9/3YLOu0JfxflSjIZ2JeL1NTl1
+MsmODsUwgAUrwnWKKx+eQUP5g3GnSB3dPkRh9zRVRiLNWbCugyjrf3e6DgQWrW7j
+pwIDAQAB
+-----END PUBLIC KEY-----
+resource(5) of type (OpenSSL key)
+]]>
+   </screen>
+  </example>
+ </refsect1>
 
+</refentry>
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
