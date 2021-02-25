@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
 <!-- $Author$ -->
-<!-- EN-Revision: f029b664b8728bd5cbb697cb9a4409aea07cb36c Maintainer: Avenger Status: ready -->
+<!-- EN-Revision: 3e08a8aae657492bdcdc7c550099ddf072042fa9 Maintainer: Avenger Status: ready -->
 <chapter xml:id="faq.using"
          xmlns="http://docbook.org/ns/docbook"
          xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -96,68 +96,6 @@ if (empty($empty)) {
           <function>stripslashes</function> 可以在旧的 PHP 版本中实现类似的操作。
         </para>
 
-      </answer>
-    </qandaentry>
-
-    <qandaentry xml:id="faq.register-globals">
-      <question>
-        <para>
-          PHP 选项 register_globals 对我有什么影响？
-        </para>
-      </question>
-      <answer>
-         &warn.deprecated.feature-5-3-0.removed-5-4-0;
-         <para>
-          首先要理解这个设置选项的作用。假如我们使用以下 URL： 
-          <literal>http://example.com/foo.php?animal=cat</literal>，那么在
-          <filename>foo.php</filename>中我们可能会使用以下代码：</para>
-
-
-
-          <para>
-            <programlisting role="php">
-<![CDATA[
-<?php
-// 建议使用这种访问变量的方式
-echo $_GET['animal'];
-
-// 如果想直接访问 $animal 变量，就要把 register_globals 选项设置为 on
-// 强烈建议不要这么做！！
-echo $animal;
-
-// 这个选项的值会影响到所有变量，包括 $_SERVER
-echo $_SERVER['PHP_SELF'];
-
-// 同样，要使 $PHP_SELF 变量自动生效，register_globals 选项必须设置为 on
-// 强烈建议不要这么做！！
-echo $PHP_SELF;
-?>
-]]>
-            </programlisting>
-          </para>
-          <para>
-            上面的代码解释了 register_globals 的作用，就是自动生成变量。多年来，这种编程方式被很多人所不喜，所以从
-            PHP 6 开始，这个选项就被禁用了。目前市面上绝大部分虚拟主机服务商也都默认把
-            register_globals 禁用，但是请注意，你在阅读一些过时的资料时，可能仍有一些文章、教程、书籍要求把该选项开启。不用管它！
-          </para>
-          
-
-          <para>
-            请参阅以下资源进一步了解： 
-            <simplelist>
-              <member><link linkend="ini.register-globals">register_globals</link> 选项说明</member>
-              <member><link linkend="security.globals">注册全局变量的安全问题</link></member>
-              <member><link linkend="language.variables.external">处理外部变量</link></member>
-              <member>使用 <link linkend="language.variables.superglobals">超级全局变量</link> 的替代方案</member>
-            </simplelist>
-          </para>
-          <note>
-          <para>
-            以上示例中，我们使用了一个 <acronym>URL</acronym>，其中包含了一个 QUERY_STRING。PHP 会把
-            QUERY_STRING 中的信息通过 GET HTTP 请求传递，所以我们可以通过超级全局变量（superglobal）
-            <varname>$_GET</varname> 来访问其中的变量。
-          </para>
-        </note>
       </answer>
     </qandaentry>
 
@@ -392,25 +330,12 @@ foreach ($headers as $name => $content) {
          <varname>$HTTP_REFERER</varname>），但是找不到，哪里出了错？
         </para>
       </question>
-      
-      <answer>
+     <answer>
       <para>
-        首先非常重要的一点是 PHP 设置项 <link
-        linkend="ini.register-globals">register_globals</link> 同样会对服务器端和环境变量产生影响。当
-        register_globals = off （从 PHP 4.2.0 开始其默认值为 off），变量
-        <varname>$DOCUMENT_ROOT</varname> 将不会存在，而只有 
-        <varname>$_SERVER['DOCUMENT_ROOT']</varname>。如果 register_globals = on 则变量 
-        <varname>$DOCUMENT_ROOT</varname> 和 
-        <varname>$GLOBALS['DOCUMENT_ROOT']</varname> 将同时存在。
+       使用 <varname>$_SERVER['DOCUMENT_ROOT']</varname> 和
+       <varname>$_SERVER['HTTP_REFERER']</varname> 替代。
       </para>
-      <para>
-        如果确认 register_globals = on 但不知道为什么 
-        <varname>$DOCUMENT_ROOT</varname> 在函数内部不可用，这是因为它和其它的变量一样需要在函数中执行
-        <literal>global $DOCUMENT_ROOT</literal>。请参阅手册中的
-        <link linkend="language.variables.scope">变量范围</link> 一节。建议在 register_globals = off 的情况下进行编码。
-      </para>
-
-    </answer>
+     </answer>
     </qandaentry>
 
 

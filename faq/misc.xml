@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 96c9d88bad9a7d7d44bfb7f26c226df7ee9ddf26 Maintainer: daijie Status: ready -->
+<!-- EN-Revision: 3e08a8aae657492bdcdc7c550099ddf072042fa9 Maintainer: daijie Status: ready -->
 <!-- $Author$ -->
 <!-- $EN-Revision: 96c9d88bad9a7d7d44bfb7f26c226df7ee9ddf26 $ -->
 <chapter xml:id="faq.misc"
@@ -41,98 +41,6 @@
         </itemizedlist></para>
         <para>在下载了包含很多 html 文件的 php_manual_lang.tar.bz2 的情况下，过程是一样的。唯一区别是得到了一个 php_manual_lang.tar 文件。tar 格式可以被大多数 Windows 下流行的压缩工具所处理，例如 
         <link xlink:href="&url.winzip;">WinZip</link>。</para>
-      </answer>
-    </qandaentry>
-    <qandaentry xml:id="faq.misc.arguments.references">
-      <question>
-        <para>在函数定义中，参数旁边的 &amp; 是什么意思？例如 
-        <function>asort</function>。</para>
-      </question>
-      <answer>
-        <para>这表示该参数是
-        <link linkend="language.references.pass">引用传递</link>，该函数会修改其值。只可以用此方法传递变量，其实都不需要在函数调用中用 &amp; 传递（此方式都已
-        <link linkend="ini.allow-call-time-pass-reference">过时了</link>）。</para>
-      </answer>
-    </qandaentry>
-    <qandaentry xml:id="faq.misc.registerglobals">
-      <question>
-        <para>怎么处理 
-        <literal>register_globals</literal>？</para>
-      </question>
-      <answer>
-        <para>有关 
-        <literal>register_globals</literal>实现方面的安全性，请阅读
-        <link linkend="security.globals">使用 register_globals</link>一章。</para>
-        <para>推荐使用
-        <link linkend="language.variables.superglobals">超全局变量</link>而不要依赖 
-        <literal>register_globals</literal>。</para>
-        <para>如果需要在一台关闭了 
-        <literal>register_globals</literal>的共享主机上运行一些旧式程序而该程序需要此选项打开时，或者在一些打开了此选项的主机上但想消除安全隐患，那么就需要用 PHP 来模拟出相反的设定。最好先问清楚是否能否在哪里更改 PHP 配置的选项，如果不行，那可以用如下的兼容手段。</para>
-        <para>
-          <example>
-            <title>模拟注册全局变量</title>
-            <para>本例模拟 register_globals On。如果改变了配置文件中的 
-            <link linkend="ini.variables-order">variables_order</link>选项，则考虑对 
-            <varname>$superglobals</varname>作出相应的改动。</para>
-            <programlisting role="php">
-              <![CDATA[
-<?php
-// Emulate register_globals on
-if (!ini_get('register_globals')) {
-    $superglobals = array($_SERVER, $_ENV,
-        $_FILES, $_COOKIE, $_POST, $_GET);
-    if (isset($_SESSION)) {
-        array_unshift($superglobals, $_SESSION);
-    }
-    foreach ($superglobals as $superglobal) {
-        extract($superglobal, EXTR_SKIP);
-    }
-}
-?>
-]]>
-</programlisting>
-            <para>本例模拟 register_globals Off。要记住此代码应在脚本最开头的地方调用。如果使用了会话机制，则在 
-            <function>session_start</function>之后调用。</para>
-            <programlisting role="php">
-              <![CDATA[
-<?php
-// Emulate register_globals off
-function unregister_GLOBALS()
-{
-    if (!ini_get('register_globals')) {
-        return;
-    }
-
-    // Might want to change this perhaps to a nicer error
-    if (isset($_REQUEST['GLOBALS']) || isset($_FILES['GLOBALS'])) {
-        die('GLOBALS overwrite attempt detected');
-    }
-
-    // Variables that shouldn't be unset
-    $noUnset = array('GLOBALS',  '_GET',
-                     '_POST',    '_COOKIE',
-                     '_REQUEST', '_SERVER',
-                     '_ENV',     '_FILES');
-
-    $input = array_merge($_GET,    $_POST,
-                         $_COOKIE, $_SERVER,
-                         $_ENV,    $_FILES,
-                         isset($_SESSION) && is_array($_SESSION) ? $_SESSION : array());
-
-    foreach ($input as $k => $v) {
-        if (!in_array($k, $noUnset) && isset($GLOBALS[$k])) {
-            unset($GLOBALS[$k]);
-        }
-    }
-}
-
-unregister_GLOBALS();
-
-?>
-]]>
-</programlisting>
-          </example>
-        </para>
       </answer>
     </qandaentry>
   </qandaset>
