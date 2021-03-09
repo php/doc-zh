@@ -1,28 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
 <!-- $Author$ -->
-<!-- EN-Revision: 71895e9afbfad9767d53f4f37b8573744aedaf96 Maintainer: dallas Status: ready -->
+<!-- EN-Revision: 0c9c2dd669fe9395eaa73d487fbd160f9057429a Maintainer: dallas Status: ready -->
 <refentry xml:id="function.realpath" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>realpath</refname>
   <refpurpose>返回规范化的绝对路径名</refpurpose>
  </refnamediv>
  
-  <refsect1 role="description">
+ <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <type>string</type><methodname>realpath</methodname>
+   <type class="union"><type>string</type><type>false</type></type><methodname>realpath</methodname>
    <methodparam><type>string</type><parameter>path</parameter></methodparam>
   </methodsynopsis>
   <para>
-   <function>realpath</function> 扩展所有的符号连接并且处理输入的
-   <parameter>path</parameter> 中的 '/./', '/../' 以及多余的 '/'
-   并返回规范化后的绝对路径名。返回的路径中没有符号连接，'/./'
-   或 '/../' 成分。
+   <function>realpath</function> 扩展所有符号连接，并处理输入
+   <parameter>path</parameter> 中的 <literal>/./</literal>、<literal>/../</literal> 和多余的
+   <literal>/</literal>，并返回规范化的绝对路径名。
   </para>
  </refsect1>
- 
-  <refsect1 role="parameters">
+
+ <refsect1 role="parameters">
   &reftitle.parameters;
   <para>
    <variablelist>
@@ -30,11 +29,11 @@
      <term><parameter>path</parameter></term>
      <listitem>
       <para>
-       要检查的路径。
+       要处理的路径。
        <note>
         <para>
-         Whilst a path must be supplied, the value can be blank or &null;
-         In these cases, the value is interpreted as the current directory.
+         虽然必须提供路径，但该值可以是一个空字符串。
+         在这种情况下，该值将被解释为当前目录。
         </para>
        </note>
       </para>
@@ -44,56 +43,37 @@
   </para>
  </refsect1>
  
-  <refsect1 role="returnvalues">
+ <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   Returns the canonicalized absolute pathname on success. The resulting path 
-   will have no symbolic link, '/./' or '/../' components.
+   成功时返回规范化的绝对路径名。返回的路径中没有符号连接（symbolic link）、<literal>/./</literal> 或 <literal>/../</literal> 成分。
+   例如 <literal>\</literal> 和 <literal>/</literal> 这样的尾随分隔符也将被删除。
   </para>
   <para>
-   <function>realpath</function> 失败时返回 &false;，比如说文件不存在的话。
+   <function>realpath</function> 失败时返回 &false;，例如文件不存在。
   </para>
   <note>
    <para>
-    The running script must have executable permissions on all directories in
-    the hierarchy, otherwise <function>realpath</function> will return
-    &false;.
+    当前运行的脚本必须对要处理的路径中的每层目录都具有可执行权限，否则
+    <function>realpath</function> 将返回 &false;。
+   </para>
+  </note>
+  <note>
+   <para>
+    对于不区分大小写的文件系统，<function>realpath</function> 不一定会规范字符大小写。
+   </para>
+  </note>
+  <note>
+   <para>
+    <function>realpath</function> 函数不适用于 Phar 内的文件，因为该路径是虚拟路径，而不是真实路径。
+   </para>
+  </note>
+  <note>
+   <para>
+    在 Windows 上，目录的结点和符号链接仅扩展一级。
    </para>
   </note>
   &fs.file.32bit;
- </refsect1>
- 
- <refsect1 role="changelog">
-  &reftitle.changelog;
-  <para>
-   <informaltable>
-    <tgroup cols="2">
-     <thead>
-      <row>
-       <entry>&Version;</entry>
-       <entry>&Description;</entry>
-      </row>
-     </thead>
-     <tbody>
-      <row>
-       <entry>5.3.0</entry>
-       <entry>
-        在之前的版本中，在 *BSD
-   系统上，如果仅仅是 <parameter>path</parameter> 不存在的话，<function>realpath</function>
-   并不会像其它系统那样返回 &false;。
-       </entry>
-      </row>
-      <row>
-       <entry>5.0.0</entry>
-       <entry>
-        在此之前的版本中，如果 <parameter>path</parameter> 传入了空或者 
- &null;，将导致 <function>realpath</function> 返回脚本当前的目录。
-       </entry>
-      </row>
-     </tbody>
-    </tgroup>
-   </informaltable>
-  </para>
  </refsect1>
 
  <refsect1 role="examples">
@@ -105,7 +85,9 @@
 <![CDATA[
 <?php
 chdir('/var/www/');
-echo realpath('./../../etc/passwd');
+echo realpath('./../../etc/passwd') . PHP_EOL;
+
+echo realpath('/tmp/') . PHP_EOL;
 ?>
 ]]>
     </programlisting>
@@ -113,18 +95,21 @@ echo realpath('./../../etc/passwd');
     <screen>
 <![CDATA[
 /etc/passwd
+/tmp
 ]]>
     </screen>
    </example>
    <example>
     <title>Windows 上的 <function>realpath</function></title>
     <para>
-     在 Windows 上，<function>realpath</function> 会将 unix 风格的路径改成 Windows 风格的。
+     在 Windows 上，<function>realpath</function> 会将 unix 风格的路径改成 Windows 风格。
     </para>
     <programlisting role="php">
 <![CDATA[
 <?php
-echo realpath('/windows/system32');
+echo realpath('/windows/system32'), PHP_EOL;
+
+echo realpath('C:\Program Files\\'), PHP_EOL;
 ?>
 ]]>
     </programlisting>
@@ -132,13 +117,14 @@ echo realpath('/windows/system32');
     <screen>
 <![CDATA[
 C:\WINDOWS\System32
+C:\Program Files
 ]]>
     </screen>
    </example>
   </para>
  </refsect1>
- 
-  <refsect1 role="seealso">
+
+ <refsect1 role="seealso">
   &reftitle.seealso;
   <para>
    <simplelist>
@@ -148,9 +134,8 @@ C:\WINDOWS\System32
    </simplelist>
   </para>
  </refsect1>
- 
-</refentry>
 
+</refentry>
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
