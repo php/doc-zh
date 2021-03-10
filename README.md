@@ -223,7 +223,7 @@ git 仓库中的每个文件都有一个版本号，它用来指明当前文件�
 1. 中英文字词之间使用空格分开，与中文标点之间就不要有空格了；
 1. 不要翻译 TRUE，FALSE，Boolean 之类的词。翻译中请注意！
 1. 请翻译的时候注意使用书面用语，翻译完成后检查确认没有错别字和其它错误后再提交！
-1. 请参加翻译的人员加入 `doc-zh@lists.php.net` 邮件列表.具体方法是向 `doc-zh-subscribe@lists.php.net` 发一封空白电子邮件，然后回信确认。我们在这这个邮件列表里面讨论和协调翻译工作。该邮件列表的内容可以通过如下地址访问 https://news-web.php.net/php.doc.zh
+1. 请参加翻译的人员加入 `doc-zh@lists.php.net` 邮件列表.具体方法是向 `doc-zh-subscribe@lists.php.net` 发一封空白电子邮件，然后回信确认。我们在这个邮件列表里面讨论和协调翻译工作。该邮件列表的内容可以通过如下地址访问 https://news-web.php.net/php.doc.zh
 1. 请参加翻译的人员，一定要在提交翻译完成的 XML 文件前运行 `php configure.php --with-lang=zh` 命令，检查文件是否有语法和拼写错误。
 
 #### 有关在翻译后的中文文件中的空格与换行的说明
