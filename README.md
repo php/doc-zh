@@ -1,7 +1,7 @@
 # PHP 中文手册 mirror
 ![Build](https://github.com/php/doc-zh/workflows/Build/badge.svg)
 
-本仓库是官方 docbook 的 github 镜像，该仓库的上游位于
+本仓库是官方 docbook 的 GitHub 镜像，该仓库的上游位于
 
 http://git.php.net/?p=doc/zh.git
 
@@ -9,21 +9,21 @@ http://git.php.net/?p=doc/zh.git
 
 ## 手册维护者须知
 
-即使你有 git 账号，也不能直接 push 内容到此仓库。如果此文档收到一个 pull reqeust 请求，请按照以下流程将其推送到 git.php.net 上。
+即使你有 git 账号，也不能直接 push 内容到此仓库。如果此文档收到一个 Pull Request 请求，请按照以下流程将其推送到 git.php.net 上。
 
-1. 将 ".patch" 添加到 pull request 网址中：
+1. 将 ".patch" 添加到 Pull Request 网址中：
     - 例如: https://github.com/php/doc-zh/pull/12.patch
     - 上述链接是一个真实的中文手册文档 PR 例子
 2. 下载该 patch 文件到本地：
     - wget https://patch-diff.githubusercontent.com/raw/php/doc-zh/pull/12.patch
 3. 使用以下命令应用更改：
     - git am 12.patch
-4. 在提交信息中加入 Close 关键字，可以自动关闭对应的 pull request：
+4. 在提交信息中加入 Close 关键字，可以自动关闭对应的 Pull Request：
     - git commit --am
     - 在提交信息中加入 "Close php/doc-zh#12"
 5. 推送更改到官方仓库：
     - git push origin master
-    - github 仓库会被同步更新，同时关闭对应的 PR
+    - GitHub 仓库会被同步更新，同时关闭对应的 PR
 
 有些人可能会觉得这个流程很繁琐，这和目前 `php/php-src` 的维护流程是一样的。自动化的流程官方还在优化中，可以参考 [此邮件](https://news-web.php.net/php.doc/969387756) 来进一步了解相关操作。
 
@@ -64,10 +64,9 @@ PHP 文档的翻译工作完全是一项志愿行动，你不会从中得到任�
 
 > 注意：文档仓库转到 git 后，在线编辑器尚未支持 git 仓库，现阶段请使用提交 PR 方式来参与。
 
-#### 通过 Github 提交 PR
+#### 通过 GitHub 提交 PR
 
-官方有一个镜像 [Github 仓库](https://github.com/php/doc-zh)。你可以直接按照 github 的工作流程：[Github Flow](https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests/github-flow)，fork 此仓库完成修改后再提交 PUSH REQUEST，你提交的 PR 会通过翻译小组审核后，合并到官方文档中。
-
+官方有一个镜像 [GitHub 仓库](https://github.com/php/doc-zh)。你可以直接按照 GitHub 的工作流程：[GitHub Flow](https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests/github-flow)，fork 此仓库完成修改后再提交 Pull Request，你提交的 PR 会在通过翻译小组审核后，合并到官方文档中。
 
 > 如果你不满足于简单的参与，希望对 PHP 文档手册做出更大的贡献，你需要配置对应的环境，并申请自己的 git 账号，请继续往下阅读。 
 
@@ -101,7 +100,6 @@ git clone git@git.php.net:/doc/base.git doc-base
 #### 了解 DocBook 格式
 
 仓库里的 .xml 文件是文档的原始文件，我们所看到的 html 和官方在线的 php 文档，都是由这些 xml 文件生成的。XML 的格式为 [DocBook](http://www.docbook.org/)，这也是在 markdown 成为主流之前最流行的文档规范。
-
 
 #### PhD: 官方的手册生成工具
 
@@ -175,7 +173,7 @@ git 仓库中的每个文件都有一个版本号，它用来指明当前文件�
 
 假设你想更新 `password_needs_rehash()` 的翻译。有两种简单的方法可以看到哪些文件需要更新，哪些需要修改以与英文版本同步：使用 [在线编辑器](https://edit.php.net/) 或 [doc.php.net 工具](http://doc.php.net/revcheck.php?lang=zh)。下面以第二种方法为例：
 
-点击 [Outdated files](http://doc.php.net/revcheck.php?p=files&lang=zh) 链接，可以通过目录或用户名来过滤文件（用户名来自于上述头注释中的 Mantainer 变量）。我们假设该工具将 `password-needs-rehash.xml` 标记为过时的文件。点击文件名，你会看到 `diff` -- 两个版本的文件之间的变化列表：你的版本（在你的翻译中的 `EN-Revision` 中的当前数字）和英文源树中的最新版本。下面的例子应该是 `diff` 的样子。
+点击 [Outdated files](http://doc.php.net/revcheck.php?p=files&lang=zh) 链接，可以通过目录或用户名来过滤文件（用户名来自于上述头注释中的 Maintainer 变量）。我们假设该工具将 `password-needs-rehash.xml` 标记为过时的文件。点击文件名，你会看到 `diff` -- 两个版本的文件之间的变化列表：你的版本（在你的翻译中的 `EN-Revision` 中的当前数字）和英文源树中的最新版本。下面的例子应该是 `diff` 的样子。
 
 ```diff
 --- phpdoc/en/trunk/reference/password/functions/password-needs-rehash.xml    2013/06/21 12:24:55    330609
@@ -200,7 +198,7 @@ git 仓库中的每个文件都有一个版本号，它用来指明当前文件�
 原文件头：
 
 ```xml
-<?xml version="1.0" encoding="utf-8"?> >
+<?xml version="1.0" encoding="utf-8"?>
 <!-- EN-Revision: 330609 Maintainer: someone Status: ready ->。
 <!-- $Revision: 123456$ -->
 ```
@@ -218,7 +216,6 @@ git 仓库中的每个文件都有一个版本号，它用来指明当前文件�
 
 现在翻译已经是最新的了，我们只需要等待官方文档每天同步更新，即可看到你的最新工作成果。
 
-
 ### 翻译中需要注意的问题  
 
 1. 文件是 UNIX 的文件格式而不是 DOS 的，也就是文件中的换行标记只有换行符（\n），而没有回车符（\r）。并且在文件中不要使用 <TAB>（制表符\t）而要使用空格；
@@ -228,7 +225,6 @@ git 仓库中的每个文件都有一个版本号，它用来指明当前文件�
 1. 请翻译的时候注意使用书面用语，翻译完成后检查确认没有错别字和其它错误后再提交！
 1. 请参加翻译的人员加入 `doc-zh@lists.php.net` 邮件列表.具体方法是向 `doc-zh-subscribe@lists.php.net` 发一封空白电子邮件，然后回信确认。我们在这这个邮件列表里面讨论和协调翻译工作。该邮件列表的内容可以通过如下地址访问 https://news-web.php.net/php.doc.zh
 1. 请参加翻译的人员，一定要在提交翻译完成的 XML 文件前运行 `php configure.php --with-lang=zh` 命令，检查文件是否有语法和拼写错误。
-
 
 #### 有关在翻译后的中文文件中的空格与换行的说明
 
