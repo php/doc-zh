@@ -1,31 +1,9 @@
 # PHP 中文手册 mirror
 ![Build](https://github.com/php/doc-zh/workflows/Build/badge.svg)
 
-本仓库是官方 docbook 的 GitHub 镜像，该仓库的上游位于
+本仓库是官方 docbook 的 git 仓库。
 
-http://git.php.net/?p=doc/zh.git
-
-此仓库的存在只是为了接受贡献者的 Pull Request。如果您有官方 git 账号，请直接使用以上地址 push。
-
-## 手册维护者须知
-
-即使你有 git 账号，也不能直接 push 内容到此仓库。如果此文档收到一个 Pull Request 请求，请按照以下流程将其推送到 git.php.net 上。
-
-1. 将 ".patch" 添加到 Pull Request 网址中：
-    - 例如: https://github.com/php/doc-zh/pull/12.patch
-    - 上述链接是一个真实的中文手册文档 PR 例子
-2. 下载该 patch 文件到本地：
-    - wget https://patch-diff.githubusercontent.com/raw/php/doc-zh/pull/12.patch
-3. 使用以下命令应用更改：
-    - git am 12.patch
-4. 在提交信息中加入 Close 关键字，可以自动关闭对应的 Pull Request：
-    - git commit --am
-    - 在提交信息中加入 "Close php/doc-zh#12"
-5. 推送更改到官方仓库：
-    - git push origin master
-    - GitHub 仓库会被同步更新，同时关闭对应的 PR
-
-有些人可能会觉得这个流程很繁琐，这和目前 `php/php-src` 的维护流程是一样的。自动化的流程官方还在优化中，可以参考 [此邮件](https://news-web.php.net/php.doc/969387756) 来进一步了解相关操作。
+_请注意原来的位于 git.php.net 的上游仓库已被弃用，目前此仓库为正式仓库，而非镜像_
 
 ## PHP 中文手册翻译指南
 
@@ -66,7 +44,7 @@ PHP 文档的翻译工作完全是一项志愿行动，你不会从中得到任�
 
 #### 通过 GitHub 提交 PR
 
-官方有一个镜像 [GitHub 仓库](https://github.com/php/doc-zh)。你可以直接按照 GitHub 的工作流程：[GitHub Flow](https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests/github-flow)，fork 此仓库完成修改后再提交 Pull Request，你提交的 PR 会在通过翻译小组审核后，合并到官方文档中。
+你可以直接按照 GitHub 的工作流程：[GitHub Flow](https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests/github-flow)，fork 此仓库完成修改后再提交 Pull Request，你提交的 PR 会在通过翻译小组审核后，合并到官方文档中。
 
 > 如果你不满足于简单的参与，希望对 PHP 文档手册做出更大的贡献，你需要配置对应的环境，并申请自己的 git 账号，请继续往下阅读。 
 
