@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 8ad0d94e1c87b2daabff88e74acc31e8a11eec0a Maintainer: dallas Status: ready -->
+<!-- EN-Revision: 35af8187d0ca49b354a55f613ac5d62f5741f402 Maintainer: dallas Status: ready -->
 <sect1 xml:id="language.types.string">
  <title>String 字符串</title>
 
- <!-- FIXME PHP_6 Likely unicode support will alter this -->
  <para>
   一个字符串 <type>string</type> 就是由一系列的字符组成，其中每个字符等同于一个字节。这意味着
   PHP 只能支持 256 的字符集，因此不支持 Unicode 。详见<link linkend="language.types.string.details">字符串类型详解</link>。
@@ -12,7 +11,7 @@
 
  <note>
   <simpara>
-   <type>string</type> 最大可以达到 2GB。
+   在 32 位版本中，<type>string</type> 最大可以达到 2GB（最多 2147483647 字节）。
   </simpara>
  </note>
 
@@ -41,7 +40,7 @@
    </listitem>
    <listitem>
     <simpara>
-     <link linkend="language.types.string.syntax.nowdoc">nowdoc 语法结构</link>（自 PHP 5.3.0 起）
+     <link linkend="language.types.string.syntax.nowdoc">nowdoc 语法结构</link>
     </simpara>
    </listitem>
   </itemizedlist>
@@ -75,7 +74,7 @@
 echo 'this is a simple string';
 
 // 可以录入多行
-echo 'You can also have embedded newlines in 
+echo 'You can also have embedded newlines in
 strings this way as it is
 okay to do';
 
@@ -104,7 +103,7 @@ echo 'Variables do not $expand $either';
    <title>双引号</title>
 
    <para>
-    如果字符串是包围在双引号（"）中， PHP 将对一些特殊的字符进行解析：
+    如果字符串是包围在双引号（"）中， PHP 将对以下特殊的字符进行解析：
    </para>
 
    <table>
@@ -133,15 +132,15 @@ echo 'Variables do not $expand $either';
       </row>
       <row>
        <entry><literal>\v</literal></entry>
-       <entry>垂直制表符（ASCII 字符集中的 VT 或 0x0B (11)）（自 PHP 5.2.5 起）</entry>
+       <entry>垂直制表符（ASCII 字符集中的 VT 或 0x0B (11)）</entry>
       </row>
       <row>
        <entry><literal>\e</literal></entry>
-       <entry>Escape（ASCII 字符集中的 ESC 或 0x1B (27)）（自 PHP 5.4.0 起）</entry>
+       <entry>Escape（ASCII 字符集中的 ESC 或 0x1B (27)）</entry>
       </row>
       <row>
        <entry><literal>\f</literal></entry>
-       <entry>换页（ASCII 字符集中的 FF 或 0x0C (12)）（自 PHP 5.2.5 起）</entry>
+       <entry>换页（ASCII 字符集中的 FF 或 0x0C (12)）</entry>
       </row>
       <row>
        <entry><literal>\\</literal></entry>
@@ -158,7 +157,8 @@ echo 'Variables do not $expand $either';
       <row>
        <entry><literal>\[0-7]{1,3}</literal></entry>
        <entry>
-        符合该正则表达式序列的是一个以八进制方式来表达的字符
+        符合该正则表达式序列的是一个以八进制方式来表达的字符，which silently overflows to fit in a byte
+        (e.g. "\400" === "\000")
        </entry>
       </row>
       <row>
@@ -167,13 +167,19 @@ echo 'Variables do not $expand $either';
         符合该正则表达式序列的是一个以十六进制方式来表达的字符
        </entry>
       </row>
+      <row>
+       <entry><literal>\u{[0-9A-Fa-f]+}</literal></entry>
+       <entry>
+        匹配正则表达式的字符序列是 unicode 码位，
+        该码位能作为 UTF-8 的表达方式输出字符串
+       </entry>
+      </row>
      </tbody>
     </tgroup>
    </table>
 
    <para>
-    和单引号字符串一样，转义任何其它字符都会导致反斜线被显示出来。PHP 5.1.1
-    以前，<literal>\{$var}</literal> 中的反斜线还不会被显示出来。
+    和单引号字符串一样，转义任何其它字符都会导致反斜线被显示出来。
    </para>
 
    <para>
@@ -198,8 +204,8 @@ echo 'Variables do not $expand $either';
    
    <warning>
     <simpara>
-     要注意的是结束标识符这行除了<emphasis>可能</emphasis>有一个分号（<literal>;</literal>）外，绝对不能包含其它字符。这意味着标识符<emphasis>不能缩进</emphasis>，分号的前后也不能有任何空白或制表符。更重要的是结束标识符的前面必须是个被本地操作系统认可的换行，比如在
-     UNIX 和 Mac OS X 系统中是 <literal>\n</literal>，而结束定界符（可能其后有个分号）之后也必须紧跟一个换行。
+     要注意的是结束标识符这行除了有一个分号（<literal>;</literal>）外，绝对不能包含其它字符。这意味着标识符<emphasis>不能缩进</emphasis>，分号的前后也不能有任何空白或制表符。更重要的是结束标识符的前面必须是个被本地操作系统认可的换行，比如在
+     UNIX 和 macOS 系统中是 <literal>\n</literal>，而结束定界符之后也必须紧跟一个换行。
     </simpara>
 
     <simpara>
@@ -208,13 +214,26 @@ echo 'Variables do not $expand $either';
      将会在最后一行产生一个解析错误。
     </simpara>
 
-    <para>
-     Heredocs 结构不能用来初始化类的属性。自 PHP 5.3 起，此限制仅对 heredoc 包含变量时有效。
-    </para>
-    
     <example>
      <title>非法的示例</title>
      <programlisting role="php">
+      <!-- This is an INVALID example -->
+<![CDATA[
+<?php
+class foo {
+    public $bar = <<<EOT
+bar
+    EOT;
+}
+// Identifier must not be indented
+?>
+]]>
+     </programlisting>
+    </example>
+    <example>
+     <title>合法的示例</title>
+     <programlisting role="php">
+      <!-- This is a VALID example -->
 <![CDATA[
 <?php
 class foo {
@@ -226,6 +245,10 @@ bar
 ]]>
      </programlisting>
     </example>
+
+    <para>
+     Heredocs 结构不能用来初始化类的属性。自 PHP 5.3 起，此限制仅对 heredoc 包含变量时有效。
+    </para>
    </warning>
 
    <para>
@@ -251,7 +274,7 @@ class foo
     var $foo;
     var $bar;
 
-    function foo()
+    function __construct()
     {
         $this->foo = 'Foo';
         $this->bar = array('Bar1', 'Bar2', 'Bar3');
@@ -282,7 +305,7 @@ This should print a capital 'A': A]]>
     也可以把 Heredoc 结构用在函数参数中来传递数据：
    </para>
 
-   <example> 
+   <example>
     <title>Heredoc 结构在参数中的示例</title>
     <programlisting role="php">
 <![CDATA[
@@ -297,10 +320,10 @@ EOD
    </example>
 
    <para>
-    在 PHP 5.3.0 以后，也可以用 Heredoc 结构来初始化静态变量和类的属性和常量：
+    可以用 Heredoc 结构来初始化静态变量和类的属性和常量：
    </para>
 
-   <example> 
+   <example>
     <title>使用 Heredoc 结构来初始化静态值</title>
     <programlisting role="php">
 <![CDATA[
@@ -330,10 +353,10 @@ FOOBAR;
    </example>
 
    <para>
-    自 PHP 5.3.0 起还可以在 Heredoc 结构中用双引号来声明标识符：
+    还可以在 Heredoc 结构中用双引号来声明标识符：
    </para>
 
-   <example> 
+   <example>
     <title>在 heredoc 结构中使用双引号</title>
     <programlisting role="php">
 <![CDATA[
@@ -347,10 +370,10 @@ FOOBAR;
    </example>
 
   </sect3>
-  
+
   <sect3 xml:id="language.types.string.syntax.nowdoc">
    <title>Nowdoc 结构</title>
-   
+
    <para>
     就象 heredoc 结构类似于双引号字符串，Nowdoc 结构是类似于单引号字符串的。Nowdoc
     结构很象 heredoc 结构，但是 nowdoc
@@ -358,24 +381,41 @@ FOOBAR;
     代码或其它大段文本而无需对其中的特殊字符进行转义。与 SGML 的
     <literal>&lt;![CDATA[ ]]&gt;</literal> 结构是用来声明大段的不用解析的文本类似，nowdoc 结构也有相同的特征。
    </para>
-   
+
    <para>
     一个 nowdoc 结构也用和 heredocs 结构一样的标记
     <literal>&lt;&lt;&lt;</literal>， 但是跟在后面的标识符要用单引号括起来，即
     <literal>&lt;&lt;&lt;'EOT'</literal>。Heredoc 结构的所有规则也同样适用于 nowdoc
     结构，尤其是结束标识符的规则。
    </para>
-   
+
    <example>
     <title>Nowdoc 结构字符串示例</title>
     <programlisting role="php">
 <![CDATA[
 <?php
-$str = <<<'EOD'
-Example of string
-spanning multiple lines
-using nowdoc syntax.
+echo <<<'EOD'
+Example of string spanning multiple lines
+using nowdoc syntax. Backslashes are always treated literally,
+e.g. \\ and \'.
 EOD;
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+     <![CDATA[
+Example of string spanning multiple lines
+using nowdoc syntax. Backslashes are always treated literally,
+e.g. \\ and \'.
+]]>
+    </screen>
+   </example>
+
+   <example>
+    <title>含变量引用的 Nowdoc 字符串示例</title>
+    <programlisting role="php">
+     <![CDATA[
+<?php
 
 /* 含有变量的更复杂的示例 */
 class foo
@@ -383,7 +423,7 @@ class foo
     public $foo;
     public $bar;
 
-    function foo()
+    function __construct()
     {
         $this->foo = 'Foo';
         $this->bar = array('Bar1', 'Bar2', 'Bar3');
@@ -401,19 +441,15 @@ EOT;
 ?>
 ]]>
     </programlisting>
-   </example>
-   &example.outputs;
+    &example.outputs;
    <screen>
 <![CDATA[
 My name is "$name". I am printing some $foo->foo.
 Now, I am printing some {$foo->bar[1]}.
-This should not print a capital 'A': \x41]]></screen>
-   
-   <note>
-    <para>
-     不象 heredoc 结构，nowdoc 结构可以用在任意的静态数据环境中，最典型的示例是用来初始化类的属性或常量：
-    </para>
-    
+This should not print a capital 'A': \x41]]>
+   </screen>
+ </example>
+
     <example>
      <title>静态数据的示例</title>
      <programlisting role="php">
@@ -428,7 +464,6 @@ EOT;
 ]]>
      </programlisting>
     </example>
-   </note>
 
    <note>
     <para>
@@ -473,6 +508,8 @@ $juice = "apple";
 echo "He drank some $juice juice.".PHP_EOL;
 // Invalid. "s" is a valid character for a variable name, but the variable is $juice.
 echo "He drank some juice made of $juices.";
+// Valid. Explicitly specify the end of the variable name by enclosing it in braces:
+echo "He drank some juice made of ${juice}s.";
 ?>
 ]]>
      </programlisting>
@@ -481,6 +518,7 @@ echo "He drank some juice made of $juices.";
 <![CDATA[
 He drank some apple juice.
 He drank some juice made of .
+He drank some juice made of apples.
 ]]>
      </screen>
     </informalexample>
@@ -499,14 +537,13 @@ $juices = array("apple", "orange", "koolaid1" => "purple");
 
 echo "He drank some $juices[0] juice.".PHP_EOL;
 echo "He drank some $juices[1] juice.".PHP_EOL;
-echo "He drank some juice made of $juice[0]s.".PHP_EOL; // Won't work
 echo "He drank some $juices[koolaid1] juice.".PHP_EOL;
 
 class people {
     public $john = "John Smith";
     public $jane = "Jane Smith";
     public $robert = "Robert Paulsen";
-    
+
     public $smith = "Smith";
 }
 
@@ -524,12 +561,36 @@ echo "$people->robert greeted the two $people->smiths."; // Won't work
 <![CDATA[
 He drank some apple juice.
 He drank some orange juice.
-He drank some juice made of s.
 He drank some purple juice.
 John Smith drank some apple juice.
 John Smith then said hello to Jane Smith.
 John Smith's wife greeted Robert Paulsen.
 Robert Paulsen greeted the two .
+]]>
+     </screen>
+    </example>
+
+    <simpara>
+     As of PHP 7.1.0 also <emphasis>negative</emphasis> numeric indices are
+     supported.
+    </simpara>
+
+    <example><title>Negative numeric indices</title>
+     <programlisting role="php">
+      <![CDATA[
+<?php
+$string = 'string';
+echo "The character at index -2 is $string[-2].", PHP_EOL;
+$string[-3] = 'o';
+echo "Changing the character at index -3 to o gives $string.", PHP_EOL;
+?>
+]]>
+     </programlisting>
+     &example.outputs;
+     <screen>
+      <![CDATA[
+The character at index -2 is n.
+Changing the character at index -3 to o gives strong.
 ]]>
      </screen>
     </example>
@@ -570,10 +631,9 @@ echo "This is { $great}";
 
 // 有效，输出： This is fantastic
 echo "This is {$great}";
-echo "This is ${great}";
 
 // 有效
-echo "This square is {$square->width}00 centimeters broad."; 
+echo "This square is {$square->width}00 centimeters broad.";
 
 // 有效，只有通过花括号语法才能正确解析带引号的键名
 echo "This works: {$arr['key']}";
@@ -584,7 +644,7 @@ echo "This works: {$arr[4][3]}";
 // 这是错误的表达式，因为就象 $foo[bar] 的格式在字符串以外也是错的一样。
 // 换句话说，只有在 PHP 能找到常量 foo 的前提下才会正常工作；这里会产生一个
 // E_NOTICE (undefined constant) 级别的错误。
-echo "This is wrong: {$arr[foo][3]}"; 
+echo "This is wrong: {$arr[foo][3]}";
 
 // 有效，当在字符串中使用多重数组时，一定要用括号将它括起来
 echo "This works: {$arr['foo'][3]}";
@@ -604,8 +664,8 @@ echo "This is the value of the var named by the return value of \$object->getNam
 echo "This is the return value of getName(): {getName()}";
 ?>
 ]]>
-<!-- maybe it's better to leave this out?? 
-// this works, but i disencourage its use, since this is NOT 
+<!-- maybe it's better to leave this out??
+// this works, but i disencourage its use, since this is NOT
 // involving functions, rather than mere variables, arrays and objects.
 $beer = 'Heineken';
 echo "I'd like to have another {${ strrev('reeb') }}, hips";
@@ -639,11 +699,11 @@ I am bar.
 I am bar.
    </screen>
    </informalexample>
-    
+
     <note>
      <para>
-      函数、方法、静态类变量和类常量只有在 PHP 5 以后才可在 <literal>{$}</literal>
-      中使用。然而，只有在该字符串被定义的命名空间中才可以将其值作为变量名来访问。只单一使用花括号
+      函数、方法、静态类变量和类常量可使用 <literal>{$}</literal>
+      ，在该字符串被定义的命名空间中将其值作为变量名来访问。只单一使用花括号
       (<literal>{}</literal>) 无法处理从函数或方法的返回值或者类常量以及类静态变量的值。
      </para>
     </note>
@@ -689,15 +749,28 @@ echo "I'd like an {${beers::$ale}}\n";
 
    <note>
     <simpara>
-     <type>string</type> 也可用花括号访问，比如 <varname>$str{42}</varname>。
+     As of PHP 7.1.0, negative string offsets are also supported. These specify
+     the offset from the end of the string.
+     Formerly, negative offsets emitted <constant>E_NOTICE</constant> for reading
+     (yielding an empty string) and <constant>E_WARNING</constant> for writing
+     (leaving the string untouched).
+    </simpara>
+   </note>
+
+   <note>
+    <simpara>
+     Prior to PHP 8.0.0, <type>string</type>s could also be accessed using braces, as in
+     <varname>$str{42}</varname>, for the same purpose.
+     This curly brace syntax was deprecated as of PHP 7.4.0 and no longer supported as of PHP 8.0.0.
     </simpara>
    </note>
 
    <warning>
     <simpara>
      用超出字符串长度的下标写入将会拉长该字符串并以空格填充。非整数类型下标会被转换成整数。非法下标类型会产生一个
-     <constant>E_NOTICE</constant> 级别错误。用负数下标写入字符串时会产生一个 <constant>E_NOTICE</constant>
-     级别错误，用负数下标读取字符串时返回空字符串。写入时只用到了赋值字符串的第一个字符。用空字符串赋值则赋给的值是
+     <constant>E_WARNING</constant> 级别错误。
+     写入时只用到了赋值字符串的第一个字符。
+     PHP 7.1.0 开始，用空字符串赋值会导致 fatal 错误；在之前赋给的值是
      NULL 字符。
     </simpara>
    </warning>
@@ -708,6 +781,13 @@ echo "I'd like an {${beers::$ale}}\n";
      ISO-8859-1 的字符串进行此类操作。
     </simpara>
    </warning>
+
+   <note>
+    <simpara>
+     As of PHP 7.1.0, applying the empty index operator on an empty string throws a fatal
+     error. Formerly, the empty string was silently converted to an array.
+    </simpara>
+   </note>
 
    <example>
     <title>一些字符串示例</title>
@@ -723,7 +803,7 @@ $third = $str[2];
 
 // 取得字符串的最后一个字符
 $str = 'This is still a test.';
-$last = $str[strlen($str)-1]; 
+$last = $str[strlen($str)-1];
 
 // 修改字符串的最后一个字符
 $str = 'Look at the sea';
@@ -735,12 +815,13 @@ $str[strlen($str)-1] = 'e';
    </example>
 
    <para>
-    自 PHP 5.4 起字符串下标必须为整数或可转换为整数的字符串，否则会发出警告。之前类似
+    字符串下标必须为整数或可转换为整数的字符串，否则会发出警告。之前类似
     <literal>"foo"</literal> 的下标会无声地转换成 <literal>0</literal>。
    </para>
 
    <example>
-    <title>PHP 5.3 和 PHP 5.4 的区别</title>
+    <!-- TODO Update for PHP 8.0 -->
+    <title>字符串无效下标的例子</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -760,20 +841,7 @@ var_dump(isset($str['1x']));
 ?>
 ]]>
     </programlisting>
-    &example.outputs.53;
-    <screen>
-<![CDATA[
-string(1) "b"
-bool(true)
-string(1) "b"
-bool(true)
-string(1) "a"
-bool(true)
-string(1) "b"
-bool(true)
-]]>
-    </screen>
-    &example.outputs.54;
+    &example.outputs;
     <screen>
 <![CDATA[
 string(1) "b"
@@ -801,11 +869,18 @@ bool(false)
 
    <note>
     <para>
-     PHP 5.5 增加了直接在字符串原型中用
-     <literal>[]</literal> 或 <literal>{}</literal> 访问字符的支持。
+     可以直接在字符串原型中用
+     <literal>[]</literal> 或 <literal>{}</literal> 访问字符。
     </para>
    </note>
 
+   <note>
+    <para>
+     Accessing characters within string literals using the
+     <literal>{}</literal> syntax has been deprecated in PHP 7.4.
+     This has been removed in PHP 8.0.
+    </para>
+   </note>
   </sect3>
  </sect2><!-- end syntax -->
 
@@ -822,15 +897,14 @@ bool(false)
   </para>
 
   <simpara>
-   可以参考<link linkend="ref.strings">字符串函数</link>了解大部分函数，高级的查找与替换功能可以参考<link
-   linkend="ref.regex">正则表达式函数</link>或
+   可以参考<link linkend="ref.strings">字符串函数</link>了解大部分函数，高级的查找与替换功能可以参考
    <link linkend="ref.pcre">Perl 兼容正则表达式函数</link>。
   </simpara>
 
   <simpara>
    另外还有 <link linkend="ref.url">URL
-   字符串函数</link>，也有加密／解密字符串的函数（<link linkend="ref.mcrypt">mcrypt</link> 和
-   <link linkend="ref.mhash">mhash</link>）。
+   字符串函数</link>，也有加密／解密字符串的函数（<link linkend="ref.sodium">Sodium</link> 和
+   <link linkend="ref.hash">Hash</link>）。
   </simpara>
 
   <simpara>
@@ -852,20 +926,22 @@ bool(false)
   </para>
   
   <para>
-   一个布尔值 <type>boolean</type> 的 &true; 被转换成 <type>string</type> 的
-   <literal>"1"</literal>。<type>Boolean</type> 的 &false; 被转换成
-   <literal>""</literal>（空字符串）。这种转换可以在 <type>boolean</type>
+   一个布尔值 <type>bool</type> 的 &true; 被转换成 <type>string</type> 的
+   <literal>"1"</literal>。<type>bool</type> 的 &false; 被转换成
+   <literal>""</literal>（空字符串）。这种转换可以在 <type>bool</type>
    和 <type>string</type> 之间相互进行。
   </para>
 
   <para> 
-   一个整数 <type>integer</type> 或浮点数 <type>float</type> 被转换为数字的字面样式的
+   一个整数 <type>int</type> 或浮点数 <type>float</type> 被转换为数字的字面样式的
    <type>string</type>（包括 <type>float</type>
    中的指数部分）。使用指数计数法的浮点数（<literal>4.1E+6</literal>）也可转换。
   </para>
 
   <note>
    <para>
+    PHP 8.0.0 起，十进制小数点字符都是
+    <literal>.</literal>。 而在此之前的版本，
     在脚本的区域（category LC_NUMERIC）中定义了十进制小数点字符。参见 <function>setlocale</function>。
    </para>
   </note>
@@ -878,16 +954,19 @@ bool(false)
   </para>
 
   <para>
-   在 PHP 4 中对象 <type>object</type> 总是被转换成字符串
-   <literal>"Object"</literal>，如果为了调试原因需要打印出对象的值，请继续阅读下文。为了得到对象的类的名称，可以用 
-   <function>get_class</function> 函数。自 PHP 5 起，适当时可以用 <link
-   linkend="language.oop5.magic">__toString</link> 方法。
+   必须使用魔术方法 <link linkend="language.oop5.magic">__toString</link>
+   才能将 <type>object</type> 转换为 <type>string</type>。
   </para>
 
   <para>
-   资源 <type>resource</type> 总会被转变成 <literal>"Resource id #1" </literal>
+   资源 <type>Resource</type> 总会被转变成 <literal>"Resource id #1" </literal>
    这种结构的字符串，其中的 <literal>1</literal> 是 PHP
-   在运行时分配给该 <type>resource</type> 的唯一值。不要依赖此结构，可能会有变更。要得到一个
+   在运行时分配给该 <type>resource</type> 的资源数字。
+   While the exact structure of this string should not be relied on
+   and is subject to change, it will always be unique for a given resource
+   within the lifetime of a script being executed (ie a Web request or CLI
+   process) and won't be reused.
+   要得到一个
    <type>resource</type> 的类型，可以用函数 <function>get_resource_type</function>。
   </para>
 
@@ -903,70 +982,7 @@ bool(false)
   
   <para>
    大部分的 PHP 值可以转变成 <type>string</type> 来永久保存，这被称作串行化，可以用函数
-   <function>serialize</function> 来实现。如果 PHP 引擎设定支持
-   <link linkend="ref.wddx">WDDX</link>，PHP 值也可被串行化为格式良好的 XML 文本。
-  </para>
-
- </sect2>
-
- <sect2 xml:id="language.types.string.conversion">
-  <title>字符串转换为数值</title>
-
-  <simpara>
-   当一个字符串被当作一个数值来取值，其结果和类型如下：
-  </simpara>
-
-  <simpara>
-   如果该字符串没有包含 '.'，'e' 或 'E'
-   并且其数字值在整型的范围之内（由 <constant>PHP_INT_MAX</constant>
-   所定义），该字符串将被当成 <type>integer</type>
-   来取值。其它所有情况下都被作为 <type>float</type> 来取值。
-  </simpara>
-
-  <para>
-   该字符串的开始部分决定了它的值。如果该字符串以合法的数值开始，则使用该数值。否则其值为
-   0（零）。合法数值由可选的正负号，后面跟着一个或多个数字（可能有小数点），再跟着可选的指数部分。指数部分由
-   'e' 或 'E' 后面跟着一个或多个数字构成。
-  </para>
-
-  <informalexample>
-   <programlisting role="php">
-<![CDATA[
-<?php
-$foo = 1 + "10.5";                // $foo is float (11.5)
-$foo = 1 + "-1.3e3";              // $foo is float (-1299)
-$foo = 1 + "bob-1.3e3";           // $foo is integer (1)
-$foo = 1 + "bob3";                // $foo is integer (1)
-$foo = 1 + "10 Small Pigs";       // $foo is integer (11)
-$foo = 4 + "10.2 Little Piggies"; // $foo is float (14.2)
-$foo = "10.0 pigs " + 1;          // $foo is float (11)
-$foo = "10.0 pigs " + 1.0;        // $foo is float (11)     
-?>
-]]>
-   </programlisting>
-  </informalexample>
-
-  <simpara>
-   更多信息可以参考 Unix 手册中的 strtod(3)。
-  </simpara>
-
-  <para>
-   本节中的示例可以通过复制／粘贴到下面的代码中来显示：
-  </para>
-
-  <informalexample>
-   <programlisting role="php">
-<![CDATA[
-<?php
-echo "\$foo==$foo; type is " . gettype ($foo) . "<br />\n";
-?>
-]]>
-   </programlisting>
-  </informalexample>
-
-  <para>
-   不要想像在 C 语言中的那样，通过将一个字符转换成整数以得到其代码。使用函数
-   <function>ord</function> 和 <function>chr</function> 实现 ASCII 码和字符间的转换。
+   <function>serialize</function> 来实现。
   </para>
 
  </sect2>

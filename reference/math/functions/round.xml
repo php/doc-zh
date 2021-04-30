@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
 <!-- $Author$ -->
-<!-- EN-Revision: 8dba9f7de96f8b94f0d45aec4a3f0691d12547c7 Maintainer: dallas Status: ready -->
+<!-- EN-Revision: 16a1bdfd1c36108534b5af08dc4b751c7ac0fdaf Maintainer: dallas Status: ready -->
   <refentry xml:id="function.round" xmlns="http://docbook.org/ns/docbook">
    <refnamediv>
     <refname>round</refname>
@@ -31,14 +31,6 @@
      </caution>
     </para>
      -->
-    <para>
-     <note>
-      <simpara>
-       PHP 默认不能正确处理类似 <literal>"12,300.2"</literal>
-       的字符串。见<link linkend="language.types.string.conversion">字符串转换为数值</link>。
-      </simpara>
-     </note>
-    </para>
    </refsect1>
    <refsect1 role="parameters">
   &reftitle.parameters;
@@ -48,7 +40,7 @@
      <term><parameter>val</parameter></term>
      <listitem>
       <para>
-       要处理的值
+       要处理的值。
       </para>
      </listitem>
     </varlistentry>
@@ -58,16 +50,64 @@
       <para>
        可选的十进制小数点后数字的数目。
       </para>
+      <para>
+       If the <parameter>precision</parameter> is positive, <parameter>val</parameter> is
+       rounded to <parameter>precision</parameter> significant digits after the decimal point.
+      </para>
+      <para>
+       If the <parameter>precision</parameter> is negative, <parameter>val</parameter> is
+       rounded to <parameter>precision</parameter> significant digits before the decimal point,
+       i.e. to the nearest multiple of <literal>pow(10, -precision)</literal>, e.g. for a
+       <parameter>precision</parameter> of -1 <parameter>val</parameter> is rounded to tens,
+       for a <parameter>precision</parameter> of -2 to hundreds, etc.
+      </para>
      </listitem>
     </varlistentry>
     <varlistentry>
      <term><parameter>mode</parameter></term>
      <listitem>
       <para>
-       以下之一： <constant>PHP_ROUND_HALF_UP</constant>、
-       <constant>PHP_ROUND_HALF_DOWN</constant>
-       <constant>PHP_ROUND_HALF_EVEN</constant> 或
-       <constant>PHP_ROUND_HALF_ODD</constant>
+       Use one of the following constants to specify the mode in which rounding occurs.
+       <informaltable>
+        <tgroup cols="2">
+         <thead>
+          <row>
+           <entry>&Constants;</entry>
+           <entry>&Description;</entry>
+          </row>
+         </thead>
+         <tbody>
+          <row>
+           <entry><constant>PHP_ROUND_HALF_UP</constant></entry>
+           <entry>
+            Rounds <parameter>val</parameter> away from zero when it is half way there,
+            making 1.5 into 2 and -1.5 into -2.
+           </entry>
+          </row>
+          <row>
+           <entry><constant>PHP_ROUND_HALF_DOWN</constant></entry>
+           <entry>
+            Rounds <parameter>val</parameter> towards zero when it is half way there,
+            making 1.5 into 1 and -1.5 into -1.
+           </entry>
+          </row>
+          <row>
+           <entry><constant>PHP_ROUND_HALF_EVEN</constant></entry>
+           <entry>
+            Rounds <parameter>val</parameter> towards the nearest even value when it is half way
+            there, making both 1.5 and 2.5 into 2.
+           </entry>
+          </row>
+          <row>
+           <entry><constant>PHP_ROUND_HALF_ODD</constant></entry>
+           <entry>
+            Rounds <parameter>val</parameter> towards the nearest odd value when it is half way
+            there, making 1.5 into 1 and 2.5 into 3.
+           </entry>
+          </row>
+         </tbody>
+        </tgroup>
+       </informaltable>
       </para>
      </listitem>
     </varlistentry>
@@ -77,7 +117,7 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   四舍五入后的值
+   The value rounded to the given <parameter>precision</parameter> as a &float;.
   </para>
  </refsect1>
  <refsect1 role="examples">
@@ -88,17 +128,66 @@
     <programlisting role="php">
 <![CDATA[
 <?php
-echo round(3.4);         // 3
-echo round(3.5);         // 4
-echo round(3.6);         // 4
-echo round(3.6, 0);      // 4
-echo round(1.95583, 2);  // 1.96
-echo round(1241757, -3); // 1242000
-echo round(5.045, 2);    // 5.05
-echo round(5.055, 2);    // 5.06
+var_dump(round(3.4));
+var_dump(round(3.5));
+var_dump(round(3.6));
+var_dump(round(3.6, 0));
+var_dump(round(5.045, 2));
+var_dump(round(5.055, 2));
+var_dump(round(345, -2));
+var_dump(round(345, -3));
+var_dump(round(678, -2));
+var_dump(round(678, -3));
 ?>
 ]]>
     </programlisting>
+    &example.outputs;
+    <screen role="php">
+<![CDATA[
+float(3)
+float(4)
+float(4)
+float(4)
+float(5.05)
+float(5.06)
+float(300)
+float(0)
+float(700)
+float(1000)
+]]>
+    </screen>
+   </example>
+  </para>
+  <para>
+   <example>
+    <title>How <parameter>precision</parameter> affects a float</title>
+    <programlisting role="php">
+     <![CDATA[
+<?php
+$number = 135.79;
+
+var_dump(round($number, 3));
+var_dump(round($number, 2));
+var_dump(round($number, 1));
+var_dump(round($number, 0));
+var_dump(round($number, -1));
+var_dump(round($number, -2));
+var_dump(round($number, -3));
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen role="php">
+     <![CDATA[
+float(135.79)
+float(135.79)
+float(135.8)
+float(136)
+float(140)
+float(100)
+float(0)
+]]>
+    </screen>
    </example>
   </para>
   <para>
@@ -107,48 +196,87 @@ echo round(5.055, 2);    // 5.06
     <programlisting role="php">
 <![CDATA[
 <?php
-echo round(9.5, 0, PHP_ROUND_HALF_UP);   // 10
-echo round(9.5, 0, PHP_ROUND_HALF_DOWN); // 9
-echo round(9.5, 0, PHP_ROUND_HALF_EVEN); // 10
-echo round(9.5, 0, PHP_ROUND_HALF_ODD);  // 9
+echo 'Rounding modes with 9.5' . PHP_EOL;
+var_dump(round(9.5, 0, PHP_ROUND_HALF_UP));
+var_dump(round(9.5, 0, PHP_ROUND_HALF_DOWN));
+var_dump(round(9.5, 0, PHP_ROUND_HALF_EVEN));
+var_dump(round(9.5, 0, PHP_ROUND_HALF_ODD));
 
-echo round(8.5, 0, PHP_ROUND_HALF_UP);   // 9
-echo round(8.5, 0, PHP_ROUND_HALF_DOWN); // 8
-echo round(8.5, 0, PHP_ROUND_HALF_EVEN); // 8
-echo round(8.5, 0, PHP_ROUND_HALF_ODD);  // 9
+echo PHP_EOL;
+echo 'Rounding modes with 8.5' . PHP_EOL;
+var_dump(round(8.5, 0, PHP_ROUND_HALF_UP));
+var_dump(round(8.5, 0, PHP_ROUND_HALF_DOWN));
+var_dump(round(8.5, 0, PHP_ROUND_HALF_EVEN));
+var_dump(round(8.5, 0, PHP_ROUND_HALF_ODD));
 ?>
 ]]>
     </programlisting>
+    &example.outputs;
+    <screen role="php">
+     <![CDATA[
+Rounding modes with 9.5
+float(10)
+float(9)
+float(10)
+float(9)
+
+Rounding modes with 8.5
+float(9)
+float(8)
+float(8)
+float(9)
+]]>
+    </screen>
    </example>
   </para>
- </refsect1>
- <refsect1 role="changelog">
-  &reftitle.changelog;
   <para>
-   <informaltable>
-    <tgroup cols="2">
-     <thead>
-      <row>
-       <entry>&Version;</entry>
-       <entry>&Description;</entry>
-      </row>
-     </thead>
-     <tbody>
-      <row>
-       <entry>5.3.0</entry>
-       <entry>
-        引入了 <parameter>mode</parameter> 参数
-       </entry>
-      </row>
-      <row>
-       <entry>5.2.7</entry>
-       <entry>
-         <function>round</function> 的内部运作修改符合 C99 的标准。
-       </entry>
-      </row>
-     </tbody>
-    </tgroup>
-   </informaltable>
+   <example>
+    <title><parameter>mode</parameter> with <parameter>precision</parameter> examples</title>
+    <programlisting role="php">
+     <![CDATA[
+<?php
+echo 'Using PHP_ROUND_HALF_UP with 1 decimal digit precision' . PHP_EOL;
+var_dump(round( 1.55, 1, PHP_ROUND_HALF_UP));
+var_dump(round(-1.55, 1, PHP_ROUND_HALF_UP));
+
+echo PHP_EOL;
+echo 'Using PHP_ROUND_HALF_DOWN with 1 decimal digit precision' . PHP_EOL;
+var_dump(round( 1.55, 1, PHP_ROUND_HALF_DOWN));
+var_dump(round(-1.55, 1, PHP_ROUND_HALF_DOWN));
+
+echo PHP_EOL;
+echo 'Using PHP_ROUND_HALF_EVEN with 1 decimal digit precision' . PHP_EOL;
+var_dump(round( 1.55, 1, PHP_ROUND_HALF_EVEN));
+var_dump(round(-1.55, 1, PHP_ROUND_HALF_EVEN));
+
+echo PHP_EOL;
+echo 'Using PHP_ROUND_HALF_ODD with 1 decimal digit precision' . PHP_EOL;
+var_dump(round( 1.55, 1, PHP_ROUND_HALF_ODD));
+var_dump(round(-1.55, 1, PHP_ROUND_HALF_ODD));
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen role="php">
+     <![CDATA[
+Using PHP_ROUND_HALF_UP with 1 decimal digit precision
+float(1.6)
+float(-1.6)
+
+Using PHP_ROUND_HALF_DOWN with 1 decimal digit precision
+float(1.5)
+float(-1.5)
+
+Using PHP_ROUND_HALF_EVEN with 1 decimal digit precision
+float(1.6)
+float(-1.6)
+
+Using PHP_ROUND_HALF_ODD with 1 decimal digit precision
+float(1.5)
+float(-1.5)
+]]>
+    </screen>
+   </example>
   </para>
  </refsect1>
 
