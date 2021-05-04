@@ -1,5 +1,6 @@
 # PHP 中文手册 mirror
-![Build](https://github.com/php/doc-zh/workflows/Build/badge.svg)
+
+[![Build](https://github.com/php/doc-zh/workflows/Build/badge.svg)](https://github.com/php/doc-zh/actions)
 
 本仓库是官方 docbook 的 git 仓库。
 
