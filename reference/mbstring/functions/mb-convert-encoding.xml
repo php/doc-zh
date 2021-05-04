@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 4757bd1743a1a8347fb4761b98bd551fe99d7b99 Maintainer: daijie Status: ready -->
+<!-- EN-Revision: c9893954e17ec13bf66f54433e72c8af026406cf Maintainer: daijie Status: ready -->
 <!-- Reviewed: no -->
 
 <refentry xml:id="function.mb-convert-encoding" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -12,13 +12,14 @@
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <type>string</type><methodname>mb_convert_encoding</methodname>
-   <methodparam><type>string</type><parameter>str</parameter></methodparam>
+   <type class="union"><type>array</type><type>string</type><type>false</type></type><methodname>mb_convert_encoding</methodname>
+   <methodparam><type class="union"><type>array</type><type>string</type></type><parameter>string</parameter></methodparam>
    <methodparam><type>string</type><parameter>to_encoding</parameter></methodparam>
-   <methodparam choice="opt"><type>mixed</type><parameter>from_encoding</parameter><initializer>mb_internal_encoding()</initializer></methodparam>
+   <methodparam choice="opt"><type class="union"><type>array</type><type>string</type><type>null</type></type><parameter>from_encoding</parameter><initializer>&null;</initializer></methodparam>
   </methodsynopsis>
   <para>
    将 <type>string</type> 类型 <parameter>str</parameter> 的字符编码从可选的 <parameter>from_encoding</parameter> 转换到 <parameter>to_encoding</parameter>。
+   当参数 <parameter>string</parameter> 是一个 &array; 时，将递归转换它所有的 &string; 值。
   </para>
  </refsect1>
 
@@ -27,10 +28,10 @@
   <para>
    <variablelist>
     <varlistentry>
-     <term><parameter>str</parameter></term>
+     <term><parameter>string</parameter></term>
      <listitem>
       <para>
-       要编码的 <type>string</type>。
+       要编码的 &string; 或 &array;。
       </para>
      </listitem>
     </varlistentry>
@@ -38,7 +39,7 @@
      <term><parameter>to_encoding</parameter></term>
      <listitem>
       <para>
-       <parameter>str</parameter> 要转换成的编码类型。
+       <parameter>string</parameter> 要转换成的编码类型。
       </para>
      </listitem>
     </varlistentry>
@@ -63,7 +64,60 @@
   &reftitle.returnvalues;
   <para>
    编码后的 <type>string</type>。
+   成功时返回编码后的 &string; 或 &array;，&return.falseforfailure;。
   </para>
+ </refsect1>
+
+ <refsect1 role="errors">
+  &reftitle.errors;
+  <para>
+   当 <parameter>to_encoding</parameter> 或 <parameter>from_encoding</parameter> 为无效的编码时，
+   PHP 8.0.0 起将抛出 <classname>ValueError</classname>；
+   而在 PHP 8.0.0 之前的版本里，会产生一个 <constant>E_WARNING</constant>。
+  </para>
+ </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <informaltable>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>&Version;</entry>
+      <entry>&Description;</entry>
+     </row>
+    </thead>
+    <tbody>
+     <row>
+      <entry>8.0.0</entry>
+      <entry>
+       现在，当 <parameter>to_encoding</parameter> 为无效编码时，
+       <function>mb_convert_encoding</function> 会抛出 <classname>ValueError</classname>。
+      </entry>
+     </row>
+     <row>
+      <entry>8.0.0</entry>
+      <entry>
+       现在，当 <parameter>from_encoding</parameter> 为无效编码时，
+       <function>mb_convert_encoding</function> 会抛出 <classname>ValueError</classname>。
+      </entry>
+     </row>
+     <row>
+      <entry>8.0.0</entry>
+      <entry>
+       现在 <parameter>from_encoding</parameter> 可以传入 null。
+      </entry>
+     </row>
+     <row>
+      <entry>7.2.0</entry>
+      <entry>
+       现在该函数的 <parameter>string</parameter> 参数同时能接受 &array; 类型。
+       在此之前，仅支持 &string;。
+      </entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </informaltable>
  </refsect1>
 
  <refsect1 role="examples">
