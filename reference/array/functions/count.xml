@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: e1dfc3586d96fccef420795b56892c92f2c319db Maintainer: daijie Status: ready -->
+<!-- EN-Revision: 8a7c2e03689cc5edf0dfb6710c9d3fe0b450849f Maintainer: daijie Status: ready -->
   <refentry xml:id="function.count" xmlns="http://docbook.org/ns/docbook">
    <refnamediv>
     <refname>count</refname>
@@ -10,8 +10,8 @@
   &reftitle.description;
   <methodsynopsis>
    <type>int</type><methodname>count</methodname>
-   <methodparam><type>mixed</type><parameter>array_or_countable</parameter></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter>mode</parameter><initializer>COUNT_NORMAL</initializer></methodparam>
+   <methodparam><type class="union"><type>Countable</type><type>array</type></type><parameter>value</parameter></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>mode</parameter><initializer><constant>COUNT_NORMAL</constant></initializer></methodparam>
   </methodsynopsis>
   <para>
    统计出数组里的所有元素的数量，或者对象里的东西。
@@ -27,12 +27,12 @@
      关于 PHP 中如何实现和使用数组可以参考手册中<link linkend="language.types.array">数组</link>章节中的详细描述。
   </para>
  </refsect1>
-    <refsect1 role="parameters">
+ <refsect1 role="parameters">
   &reftitle.parameters;
   <para>
    <variablelist>
     <varlistentry>
-     <term><parameter>array_or_countable</parameter></term>
+     <term><parameter>value</parameter></term>
      <listitem>
       <para>
        数组或者 <classname>Countable</classname>  对象。
@@ -58,18 +58,50 @@
    </variablelist>
   </para>
  </refsect1>
+
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   返回 <parameter>array_or_countable</parameter> 中的单元数目。
+   返回 <parameter>value</parameter> 中的单元数目。
    
    如果参数既不是数组，也不是实现
      <literal>Countable</literal> 接口的对象，将返回
      <literal>1</literal>。
    有个例外：如果
-     <parameter>array_or_countable</parameter> 是 &null; 则结果是 <literal>0</literal>。
+     <parameter>value</parameter> 是 &null; 则结果是 <literal>0</literal>。
   </para>
  </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <informaltable>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>&Version;</entry>
+      <entry>&Description;</entry>
+     </row>
+    </thead>
+    <tbody>
+     <row>
+      <entry>8.0.0</entry>
+      <entry>
+       当 <parameter>value</parameter> 参数传入了无效的 countable 类型，
+       <function>count</function> 现在会抛出 <classname>TypeError</classname>。
+      </entry>
+     </row>
+     <row>
+      <entry>7.2.0</entry>
+      <entry>
+       当 <parameter>value</parameter> 参数传入了无效的 countable 类型，
+       <function>count</function> 现在会产生警告。
+      </entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </informaltable>
+ </refsect1>
+
  <refsect1 role="examples">
   &reftitle.examples;
   <para>
@@ -87,6 +119,28 @@ $b[0]  = 7;
 $b[5]  = 9;
 $b[10] = 11;
 var_dump(count($b));
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen role="php">
+     <![CDATA[
+int(3)
+int(3)
+]]>
+    </screen>
+   </example>
+  </para>
+  <para>
+   <example>
+    <title><function>count</function> 非 Countable|array 的例子 （这是个反例，请勿模仿）</title>
+    <programlisting role="php">
+     <![CDATA[
+<?php
+$b[0]  = 7;
+$b[5]  = 9;
+$b[10] = 11;
+var_dump(count($b));
 
 var_dump(count(null));
 
@@ -98,13 +152,28 @@ var_dump(count(false));
     <screen role="php">
 <![CDATA[
 int(3)
+int(0)
+int(1)
+]]>
+    </screen>
+    &example.outputs.72;
+    <screen role="php">
+     <![CDATA[
 int(3)
 
-Warning: count(): Parameter must be an array or an object that implements Countable in … on line 12 // PHP 7.2 起
+Warning: count(): Parameter must be an array or an object that implements Countable in … on line 12
 int(0)
 
-Warning: count(): Parameter must be an array or an object that implements Countable in … on line 14 // PHP 7.2 起
+Warning: count(): Parameter must be an array or an object that implements Countable in … on line 14
 int(1)
+]]>
+    </screen>
+    &example.outputs.8;
+    <screen role="php">
+     <![CDATA[
+int(3)
+
+Fatal error: Uncaught TypeError: count(): Argument #1 ($var) must be of type Countable .. on line 12
 ]]>
     </screen>
    </example>
@@ -130,27 +199,6 @@ echo count($food); // output 2
    </example>
   </para>
  </refsect1>
- <refsect1 role="changelog">
-  &reftitle.changelog;
-  <informaltable>
-   <tgroup cols="2">
-    <thead>
-     <row>
-      <entry>&Version;</entry>
-      <entry>&Description;</entry>
-     </row>
-    </thead>
-    <tbody>
-     <row>
-      <entry>7.2.0</entry>
-      <entry>
-       当无效的 countable 类型传递给 <parameter>array_or_countable</parameter> 参数时，<function>count</function> 会产生警告。
-      </entry>
-     </row>
-    </tbody>
-   </tgroup>
-  </informaltable>
- </refsect1>
   
  <refsect1 role="seealso">
   &reftitle.seealso;
@@ -164,6 +212,7 @@ echo count($food); // output 2
    </simplelist>
   </para>
  </refsect1>
+
 </refentry>
   
 
