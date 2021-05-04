@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: a56106f69198dfe88c6084593c78a71c26b24353 Maintainer: ichenshy Status: ready -->
+<!-- EN-Revision: 84e8f0960b841a5ebca9d81cd2c2311b6504a371 Maintainer: ichenshy Status: ready -->
 <!-- Reviewed: no -->
 
 <chapter xml:id="pdo.prepared-statements" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -87,10 +87,9 @@ $stmt->execute();
 <![CDATA[
 <?php
 $stmt = $dbh->prepare("SELECT * FROM REGISTRY where name = ?");
-if ($stmt->execute(array($_GET['name']))) {
-  while ($row = $stmt->fetch()) {
-    print_r($row);
-  }
+$stmt->execute([$_GET['name']]);
+foreach ($stmt as $row) {
+  print_r($row);
 }
 ?>
 ]]>
@@ -98,12 +97,14 @@ if ($stmt->execute(array($_GET['name']))) {
   </example>
  </para>
  <para>
- 如果数据库驱动支持，应用程序还可以绑定输出和输入参数.输出参数通常用于从存储过程获取值。输出参数使用起来比输入参数要稍微复杂一些，因为当绑定一个输出参数时，必须知道给定参数的长度。如果为参数绑定的值大于建议的长度，就会产生一个错误。
- </para>
-
- <para>
   <example>
-   <title>带输出参数调用存储过程</title>
+  <title>Calling a stored procedure with an output parameter</title>
+  <simpara>
+  如果数据库驱动支持，应用程序还可以绑定输出和输入参数。
+  输出参数通常用于从存储过程获取值。
+  输出参数使用起来比输入参数要稍微复杂一些，因为当绑定一个输出参数时，必须知道给定参数的长度。
+  如果为参数绑定的值大于建议的长度，就会产生一个错误。
+  </simpara>
    <programlisting role="php">
 <![CDATA[
 <?php
@@ -121,12 +122,13 @@ print "procedure returned $return_value\n";
  </para>
 
  <para>
-  还可以指定同时具有输入和输出值的参数，其语法类似于输出参数。在下一个例子中，字符串“hello”被传递给存储过程，当存储过程返回时，hello 被替换为该存储过程返回的值。
- </para>
-
- <para>
   <example>
    <title> 带输入/输出参数调用存储过程</title>
+   <simpara>
+    还可以指定同时具有输入和输出值的参数，其语法类似于输出参数。
+    在下一个例子中，字符串“hello”被传递给存储过程，
+    当存储过程返回时，hello 被替换为该存储过程返回的值。
+   </simpara>
    <programlisting role="php">
 <![CDATA[
 <?php
@@ -150,11 +152,11 @@ print "procedure returned $value\n";
 <![CDATA[
 <?php
 $stmt = $dbh->prepare("SELECT * FROM REGISTRY where name LIKE '%?%'");
-$stmt->execute(array($_GET['name']));
+$stmt->execute([$_GET['name']]);
 
 // 占位符必须被用在整个值的位置
 $stmt = $dbh->prepare("SELECT * FROM REGISTRY where name LIKE ?");
-$stmt->execute(array("%$_GET[name]%"));
+$stmt->execute(["%$_GET[name]%"]);
 ?>
 ]]>
    </programlisting>
