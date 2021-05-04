@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 7ed327e1437810b073a0d4fb0e862717558ce608 Maintainer: daijie Status: ready -->
+<!-- EN-Revision: 8a058e9acded067eaa1bd445ed6943158e7311df Maintainer: daijie Status: ready -->
 <refentry xml:id="pdo.prepare" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>PDO::prepare</refname>
@@ -18,9 +18,9 @@
 
   <para>
    为 <function>PDOStatement::execute</function> 方法准备待执行的 SQL 语句。
-   SQL 语句可以包含零个或多个参数占位标记，格式是命名（:name）或问号（?）的形式，当它执行时将用真实数据取代。
+   语句模板可以包含零个或多个参数占位标记，格式是命名（:name）或问号（?）的形式，当它执行时将用真实数据取代。
    
-   在同一个 SQL 语句里，命名形式和问号形式不能同时使用；只能选择其中一种参数形式。
+   在同一个语句模板里，命名形式和问号形式不能同时使用；只能选择其中一种参数形式。
    请用参数形式绑定用户输入的数据，不要直接字符串拼接到查询里。
   </para>
   <para>
@@ -34,11 +34,26 @@
    </para>
   </note>
   <para>
-    如果用不同参数，通过 <function>PDO::prepare</function> 和 <function>PDOStatement::execute</function> 多次调用同一个 SQL 语句，将提升应用的性能 —— 驱动可以让客户端/服务器缓存查询和元信息，还能阻止 SQL 注入攻击，不需要手动给参数加引号。
+    如果用不同参数，通过 <function>PDO::prepare</function> 和 <function>PDOStatement::execute</function>
+   多次调用同一个 SQL 语句，将提升应用的性能 —— 驱动可以让客户端/服务器缓存查询和元信息。
+   同时，调用 <function>PDO::prepare</function> 和
+   <function>PDOStatement::execute</function> 还能阻止 SQL 注入攻击，不需要给参数手动加引号与转义。
   </para>
   <para>
     如果内置驱动不支持参数，PDO 将模拟出参数的功能；如果驱动仅仅支持其中一种风格（命名参数和问号参数两种），也会自动重写到另外一种风格。
   </para>
+  <note>
+   <simpara>
+    The parser used for emulated prepared statements and for
+    rewriting named or question mark style parameters supports the non standard
+    backslash escapes for single- and double quotes. That means that terminating
+    quotes immediately preceeded by a backslash are not recognized as such, which
+    may result in wrong detection of parameters causing the prepared statement to
+    fail when it is executed. A work-around is to not use emulated prepares for
+    such SQL queries, and to avoid rewriting of parameters by using a parameter style
+    which is natively supported by the driver.
+   </simpara>
+  </note>
  </refsect1>
  <refsect1 role="parameters">
   &reftitle.parameters;
@@ -88,7 +103,7 @@
  <refsect1 role="examples">
   &reftitle.examples;
   <para>
-   <example><title>用命名参数形式准备 SQL 语句参数</title>
+   <example><title>命名参数形式的 SQL 语句模板</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -106,7 +121,7 @@ $yellow = $sth->fetchAll();
     </programlisting>
    </example>
    <example>
-    <title>用问号形式准备 SQL 语句参数</title>
+    <title>问号形式的 SQL 语句模板</title>
     <programlisting role="php">
 <![CDATA[
 <?php

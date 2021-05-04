@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: e25450d9dc5f49da38026350643730de2017ac67 Maintainer: daijie Status: ready -->
+<!-- EN-Revision: 8a058e9acded067eaa1bd445ed6943158e7311df Maintainer: daijie Status: ready -->
 <!-- splitted from ./en/functions/pcre.xml, last change in rev 1.2 -->
 <chapter xml:id="reference.pcre.pattern.syntax" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <title>模式语法</title>
@@ -23,7 +23,9 @@
  <section xml:id="regexp.reference.delimiters">
   <title>分隔符</title>
   <para>
-  当使用 PCRE 函数的时候，模式需要由<emphasis>分隔符</emphasis>闭合包裹。分隔符可以使任意非字母数字、非反斜线、非空白字符。
+  当使用 PCRE 函数的时候，模式需要由<emphasis>分隔符</emphasis>闭合包裹。
+   分隔符可以是任意非字母数字、非反斜线、非空白字符。
+   静默忽略合法分隔符之前的空白字符。
   </para>
   <para>
   经常使用的分隔符是正斜线(<literal>/</literal>)、hash符号(<literal>#</literal>)
@@ -40,8 +42,28 @@
    </informalexample>
   </para>
   <para>
-  如果分隔符需要在模式内进行匹配，它必须使用反斜线进行转义。如果分隔符经常在
-  模式内出现， 一个更好的选择就是是用其他分隔符来提高可读性。
+   It is also possible to use
+   bracket style delimiters where the opening and closing brackets are the
+   starting and ending delimiter, respectively. <literal>()</literal>,
+   <literal>{}</literal>, <literal>[]</literal> and <literal>&lt;&gt;</literal>
+   are all valid bracket style delimiter pairs.
+   <informalexample>
+    <programlisting>
+<![CDATA[
+(this [is] a (pattern))
+{this [is] a (pattern)}
+[this [is] a (pattern)]
+<this [is] a (pattern)>
+]]>
+    </programlisting>
+   </informalexample>
+   Bracket style delimiters do not need to be escaped when they are used as meta
+   characters within the pattern, but as with other delimiters they must be
+   escaped when they are used as literal characters.
+  </para>
+  <para>
+  如果需要在正则模式内匹配分隔符，必须使用反斜线转义。如果分隔符经常在
+   正则模式内出现， 最好使用其他分隔符以便提高可读性。
    <informalexample>
     <programlisting>
 <![CDATA[
@@ -52,17 +74,6 @@
    </informalexample>
    需要将一个字符串放入模式中使用时，可以用 <function>preg_quote</function> 函数对其进行
    转义，它的第二个参数(可选)可以用于指定需要被转义的分隔符。
-  </para>
-  <para>
-  除了上面提到的分隔符，也可以使用括号样式的分隔符，左括号和右括号分别作为开始和结束
-  分隔符。
-   <informalexample>
-    <programlisting>
-<![CDATA[
-{this is a pattern}
-]]>
-    </programlisting>
-   </informalexample>
   </para>
   <para>
   可以在结束分隔符后面增加<link linkend="reference.pcre.pattern.modifiers">模式修饰符</link>。
@@ -87,86 +98,90 @@
   共有两种不同的元字符：一种是可以在模式中方括号外任何地方使用的，另外一种
   是需要在方括号内使用的。
   在方括号外使用的元字符如下：
-   <variablelist>
-    <varlistentry>
-     <term><emphasis>\</emphasis></term>
-     <listitem><simpara>一般用于转义字符</simpara></listitem>
-    </varlistentry>
-    <varlistentry>
-     <term><emphasis>^</emphasis></term>
-     <listitem><simpara>断言目标的开始位置(或在多行模式下是行首)</simpara></listitem>
-    </varlistentry>
-    <varlistentry>
-     <term><emphasis>$</emphasis></term>
-     <listitem><simpara>断言目标的结束位置(或在多行模式下是行尾)</simpara></listitem>
-    </varlistentry>
-    <varlistentry>
-     <term><emphasis>.</emphasis></term>
-     <listitem><simpara>匹配除换行符外的任何字符(默认)</simpara></listitem>
-    </varlistentry>
-    <varlistentry>
-     <term><emphasis>[</emphasis></term>
-     <listitem><simpara>开始字符类定义</simpara></listitem>
-    </varlistentry>
-    <varlistentry>
-     <term><emphasis>]</emphasis></term>
-     <listitem><simpara>结束字符类定义</simpara></listitem>
-    </varlistentry>
-    <varlistentry>
-     <term><emphasis>|</emphasis></term>
-     <listitem><simpara>开始一个可选分支</simpara></listitem>
-    </varlistentry>
-    <varlistentry>
-     <term><emphasis>(</emphasis></term>
-     <listitem><simpara>子组的开始标记</simpara></listitem>
-    </varlistentry>
-    <varlistentry>
-     <term><emphasis>)</emphasis></term>
-     <listitem><simpara>子组的结束标记</simpara></listitem>
-    </varlistentry>
-    <varlistentry>
-     <term><emphasis>?</emphasis></term>
-     <listitem>
-      <simpara>
-      作为量词，表示 0 次或 1 次匹配。位于量词后面用于改变量词的贪婪特性。
-      (查阅<link linkend="regexp.reference.repetition">量词</link>)
-      </simpara>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
-     <term><emphasis>*</emphasis></term>
-     <listitem><simpara>量词，0 次或多次匹配</simpara></listitem>
-    </varlistentry>
-    <varlistentry>
-     <term><emphasis>+</emphasis></term>
-     <listitem><simpara>量词，1 次或多次匹配</simpara></listitem>
-    </varlistentry>
-    <varlistentry>
-     <term><emphasis>{</emphasis></term>
-     <listitem><simpara>自定义量词开始标记</simpara></listitem>
-    </varlistentry>
-    <varlistentry>
-     <term><emphasis>}</emphasis></term>
-     <listitem><simpara>自定义量词结束标记</simpara></listitem>
-    </varlistentry>
-   </variablelist>
-   模式中方括号内的部分称为“字符类”。 在一个字符类中仅有以下可用元字符：
-   
-   <variablelist>
-    <varlistentry>
-     <term><emphasis>\</emphasis></term>
-     <listitem><simpara>转义字符</simpara></listitem>
-    </varlistentry>
-    <varlistentry>
-     <term><emphasis>^</emphasis></term>
-     <listitem><simpara>仅在作为第一个字符(方括号内)时，表明字符类取反</simpara></listitem>
-    </varlistentry>
-    <varlistentry>
-     <term><emphasis>-</emphasis></term>
-     <listitem><simpara>标记字符范围</simpara></listitem>
-    </varlistentry>
-   </variablelist>
-   下面部分描述每个元字符的用法。
+
+
+   <table>
+    <title>方括号外的元字符</title>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>元字符</entry><entry>描述</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>\</entry><entry>一般用于转义字符</entry>
+      </row>
+      <row>
+       <entry>^</entry><entry>断言目标的开始位置(或在多行模式下是行首)</entry>
+      </row>
+      <row>
+       <entry>$</entry><entry>断言目标的结束位置(或在多行模式下是行尾)</entry>
+      </row>
+      <row>
+       <entry>.</entry><entry>匹配除换行符外的任何字符(默认)</entry>
+      </row>
+      <row>
+       <entry>[</entry><entry>开始字符类定义</entry>
+      </row>
+      <row>
+       <entry>]</entry><entry>结束字符类定义</entry>
+      </row>
+      <row>
+       <entry>|</entry><entry>开始一个可选分支</entry>
+      </row>
+      <row>
+       <entry>(</entry><entry>子组的开始标记</entry>
+      </row>
+      <row>
+       <entry>)</entry><entry>子组的结束标记</entry>
+      </row>
+      <row>
+       <entry>?</entry><entry>作为量词，表示 0 次或 1 次匹配。位于量词后面用于改变量词的贪婪特性。
+       (查阅<link linkend="regexp.reference.repetition">量词</link>)
+      </entry>
+      </row>
+      <row>
+       <entry>*</entry><entry>量词，0 次或多次匹配</entry>
+      </row>
+      <row>
+       <entry>+</entry><entry>量词，1 次或多次匹配</entry>
+      </row>
+      <row>
+       <entry>{</entry><entry>自定义量词开始标记</entry>
+      </row>
+      <row>
+       <entry>}</entry><entry>自定义量词结束标记</entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </table>
+   模式中方括号内的部分称为“<link linkend="regexp.reference.character-classes">字符类</link>”。
+   在一个字符类中仅有以下可用元字符：
+
+   <table>
+    <title>方括号内的元字符（<emphasis>字符类</emphasis>）</title>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>元字符</entry><entry>描述</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>\</entry><entry>转义字符</entry>
+      </row>
+      <row>
+       <entry>^</entry><entry>仅在作为第一个字符(方括号内)时，表明字符类取反</entry>
+      </row>
+      <row>
+       <entry>-</entry><entry>标记字符范围</entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </table>
+
+   下面章节描述了每个元字符的用法。
   </para>
  </section>
  
@@ -185,13 +200,10 @@
   </para>
   <note>
    <para>
-   反斜线在单引号字符串和双引号<link
+   反斜线在单引号和双引号 PHP <link
    linkend="language.types.string.syntax">字符串</link>
-   中都有特殊含义，因此要匹配一个反斜线，
-   模式中必须写为 ”\\\\”。 译注： “/\\/”， 首先它作为字符串，反斜线会进行转义，
-   那么转义后的结果是/\/，这个才是正则表达式引擎拿到的模式，
-   而正则表达式引擎也认为 \ 是转义标记，它会将分隔符 / 进行转义，
-   从而得到的是一个错误，因此，需要 4 个反斜线才可以匹配一个反斜线。
+   中都有特殊含义。因此要匹配一个反斜线 \，正则表达式写法是 \\，
+   然后 PHP 代码中需要转义写成 "\\\\" 或 '\\\\'。
    </para>
   </note>
   <para>
@@ -203,7 +215,7 @@
   反斜线的第二种用途提供了一种对非打印字符进行可见编码的控制手段。
   除了二进制的 0 会终结一个模式外，并不会严格的限制非打印字符(自身)的出现，
   但是当一个模式以文本编辑器的方式编辑准备的时候，
-  使用下面的转义序列相比使用二进制字符会更加容易。
+  使用下面的转义序列相比使用二进制字符会更加容易：
   </para>
   <para>
    <variablelist>
@@ -260,16 +272,22 @@
      </listitem>
     </varlistentry>
     <varlistentry>
+     <term><emphasis>\R</emphasis></term>
+     <listitem>
+      <simpara>换行符：能匹配 \n、\r、\r\n</simpara>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
      <term><emphasis>\t</emphasis></term>
      <listitem>
-      <simpara>水平制表符 (十六进制 09)</simpara>
+      <simpara>水平制表符 tab (十六进制 09)</simpara>
      </listitem>
     </varlistentry>
     <varlistentry>
      <term><emphasis>\xhh</emphasis></term>
      <listitem>
       <simpara>
-      hh十六进制编码的字符，详细查看<link linkend="regexp.reference.unicode">unicode properties</link> 属性
+      hh 十六进制编码的字符
       </simpara>
      </listitem>
     </varlistentry>
@@ -350,7 +368,8 @@
      <term><emphasis>\113</emphasis></term>
      <listitem>
       <simpara>
-      八进制113代表的字符
+      八进制113代表的字符(since there
+       can be no more than 99 back references)
       </simpara>
      </listitem>
     </varlistentry>
@@ -374,7 +393,8 @@
   </para>
   <para>
   所有序列定义的单字节值都可以在字符类内部或外部使用。另外，在字符类中,
-  序列 ”<literal>\b</literal>” 解释为退格字符。字符类外它又有不同的意义(下面有描述)
+  序列 ”<literal>\b</literal>” 解释为退格字符(hex 08)。
+  字符类外它又有不同的意义(下面有描述)。
   </para>
   <para>
   反斜线的第三种用法是用来描述特定的字符类：
@@ -391,11 +411,11 @@
     </varlistentry>
     <varlistentry>
      <term><emphasis>\h</emphasis></term>
-     <listitem><simpara>任意水平空白字符(since PHP 5.2.4)</simpara></listitem>
+     <listitem><simpara>任意水平空白字符</simpara></listitem>
     </varlistentry>
     <varlistentry>
      <term><emphasis>\H</emphasis></term>
-     <listitem><simpara>任意非水平空白字符(since PHP 5.2.4)</simpara></listitem>
+     <listitem><simpara>任意非水平空白字符</simpara></listitem>
     </varlistentry>
     <varlistentry>
      <term><emphasis>\s</emphasis></term>
@@ -407,11 +427,11 @@
     </varlistentry>
     <varlistentry>
      <term><emphasis>\v</emphasis></term>
-     <listitem><simpara>任意垂直空白字符(since PHP 5.2.4)</simpara></listitem>
+     <listitem><simpara>任意垂直空白字符</simpara></listitem>
     </varlistentry>
     <varlistentry>
      <term><emphasis>\V</emphasis></term>
-     <listitem><simpara>任意非垂直空白字符(since PHP 5.2.4)</simpara></listitem>
+     <listitem><simpara>任意非垂直空白字符</simpara></listitem>
     </varlistentry>
     <varlistentry>
      <term><emphasis>\w</emphasis></term>
@@ -428,10 +448,15 @@
   任意字符一定会匹配其中一个，同时一定不会匹配另外一个。
   </para>
   <para>
+   "空白字符"（whitespace）是 HT (9)、LF (10)、FF (12)、CR (13)、space (32)。
+   然而，若发生了本地化匹配，在代码点 128-255 范围内亦可能出现空白字符，
+   比如说 NBSP (A0)。
+  </para>
+  <para>
   单词字符指的是任意字母、数字、下划线。
   也就是说任意可以组成perl<emphasis>单词</emphasis>的字符。
   字母和数字的定义通过PCRE字符表控制，可以通过指定地域设置使其匹配改变。比如，
-  在法国 (fr) 地域设置中，一些超过 128 的字符代码被用于重音字母，
+  在法国 (fr) 本地化设置中，一些超过 128 的字符代码被用于重音字母，
   它们可以实用 <literal>\w</literal> 匹配。
   </para>
   <para>
@@ -483,13 +508,13 @@
   </para>
   <para>
   一个单词边界表示的是在目标字符串中，
-  当前字符和前一个字符不同时匹配<literal>\w</literal>或<literal>\W</literal>(一个比配<literal>\w</literal>,
+  当前字符和前一个字符不同时匹配<literal>\w</literal>或<literal>\W</literal>(一个匹配<literal>\w</literal>,
   一个匹配<literal>\W</literal>)，
   或者作为字符串开始或结尾字符的时候当前字符匹配<literal>\w</literal>。
   </para>
   <para>
   <literal>\A</literal>， <literal>\Z</literal>，
-  <literal>\z</literal>断言不同于传统的<literal>^</literal>和<literal>$</literal>(详见下文)，
+  <literal>\z</literal>断言不同于传统的<literal>^</literal>和<literal>$</literal>(详见 <link linkend="regexp.reference.anchors">锚</link>)，
   因为他们永远匹配目标字符串的开始和结尾，而不会受模式修饰符的限制。
   它们不受<link
   linkend="reference.pcre.pattern.modifiers">PCRE_MULTILINE</link>，<link
@@ -498,22 +523,22 @@
   而 <literal>\z</literal> 只匹配字符串结尾。
   </para>
   <para>
-  <literal>\G</literal> 断言在指定了<parameter>$offset</parameter> 参数的<function>preg_match</function> 调用中，
+  <literal>\G</literal> 断言在指定了<parameter>offset</parameter> 参数的<function>preg_match</function> 调用中，
   仅在当前匹配位置在匹配开始点的时候才是成功的。
-  当 <parameter>$offset</parameter> 的值不为 0 的时候，
+  当 <parameter>offset</parameter> 的值不为 0 的时候，
   它与 <literal>\A</literal> 是不同的。 译注：另外一点与 <literal>\A</literal> 的不同之处在于使用 preg_match_all() 时，
   每次匹配 <literal>\G</literal> 只是断言是否是匹配结果的开始位置，
   而 <literal>\A</literal> 断言的则是匹配结果的开始位置是否在目标字符串开始位置。
   </para>
   
   <para>
-  自 PHP 4.3.3开始， <literal>\Q</literal> 和 <literal>\E</literal> 可以用于在模式中忽略正则表达式元字符。比如：
-  <literal>\w+\Q.$.\E$</literal> 会匹配一个或多个单词字符，紧接着一个点号，一个$，一个点号，
+   <literal>\Q</literal> 和 <literal>\E</literal> 可以用于在模式中忽略正则表达式元字符。比如：
+  <literal>\w+\Q.$.\E$</literal> 会匹配一个或多个单词字符，紧接着 <literal>.$.</literal>，
   最后锚向字符串末尾。
   </para>
   
   <para>
-  自 PHP 5.2.4 开始。 <literal>\K</literal> 可以用于重置匹配。 比如，
+   <literal>\K</literal> 可以用于重置匹配。 比如，
    <literal>foot\Kbar</literal> 匹配”footbar”。
   但是得到的匹配结果是 ”bar”。但是， <literal>\K</literal> 的使用不会干预到子组内的内容，
   比如 <literal>(foot)\Kbar</literal> 匹配 ”footbar”，第一个子组内的结果仍然会是 ”foo”。译注：
@@ -523,10 +548,10 @@
  </section>
  
  <section xml:id="regexp.reference.unicode">
-  <title>Unicode字符属性</title>
+  <title>Unicode 字符属性</title>
   <para>
-  自从 PHP 4.4.0 和 5.1.0，
-  三个额外的转义序列在选用 <emphasis>UTF-8模式</emphasis>时用于匹配通用字符类型。他们是：
+  自 PHP 5.1.0 起，
+  三个额外的转义序列在选用 <emphasis>UTF-8 模式</emphasis>时用于匹配通用字符类型。他们是：
   </para>
   <variablelist>
    <varlistentry>
@@ -545,13 +570,13 @@
   <para>
   上面 <literal>xx</literal> 代表的属性名用于限制 Unicode 通常的类别属性。
   每个字符都有一个这样的确定的属性，通过两个缩写的字母指定。
-   为了与 perl 兼容，
+   为了与 Perl 兼容，
   可以在左花括号 { 后面增加 ^ 表示取反。比如：
   <literal>\p{^Lu}</literal> 就等同于 <literal>\P{Lu}</literal>。
   </para>
   <para>
   如果通过 <literal>\p</literal> 或 <literal>\P</literal> 仅指定了一个字母，它包含所有以这个字母开头的属性。
-  在这种情况下，花括号的转义序列是可选的。
+  在这种情况下，花括号的转义序列是可选的；以下两个例子是等同的：
   </para>
   <informalexample>
    <programlisting>
@@ -562,7 +587,7 @@
    </programlisting>
   </informalexample>
   <table>
-   <title>支持的Unicode属性</title>
+   <title>支持的 Unicode 属性</title>
    <tgroup cols="3">
     <thead>
      <row>
@@ -606,14 +631,14 @@
       <entry><literal>L</literal></entry>
       <entry>Letter</entry>
       <entry>
-       Includes the following properties: <literal>Ll</literal>, 
-       <literal>Lm</literal>, <literal>Lo</literal>, <literal>Lt</literal> and 
+       包含以下属性：<literal>Ll</literal>、
+       <literal>Lm</literal>、<literal>Lo</literal>、<literal>Lt</literal>、
        <literal>Lu</literal>.
       </entry>
      </row>
      <row>
       <entry><literal>Ll</literal></entry>
-      <entry>Lower case letter</entry>
+      <entry>小写字母</entry>
       <entry></entry>
      </row>
      <row>
@@ -941,16 +966,20 @@
    </tgroup>
   </table>
   <para>
-  <literal>\X</literal> 转义匹配任意数量的 Unicode 字符。
-  <literal>\X</literal> 等价于 <literal>(?>\PM\pM*)</literal>
+   <literal>\X</literal> 转义匹配了 Unicode 可扩展字符集（Unicode extended grapheme clusters）。
+   可扩展字符集是一个或多个 Unicode 字符，组合表达了单个象形字符。
+   因此无论渲染时实际使用了多少个独立字符，可以视该 Unicode 等同于 <literal>.</literal>，
+   会匹配单个组合后的字符。
   </para>
   <para>
+   小于 PCRE 8.32 的版本中（对应小于 PHP 5.4.14 的内置绑定 PCRE 库），
+   <literal>\X</literal> 等价于 <literal>(?>\PM\pM*)</literal>。
   也就是说，它匹配一个没有 ”mark” 属性的字符，紧接着任意多个由 ”mark” 属性的字符。
   并将这个序列认为是一个原子组(详见下文)。
   典型的有 ”mark” 属性的字符是影响到前面的字符的重音符。
   </para>
   <para>
-  用 Unicode 属性来匹配字符并不快，
+  用 Unicode 属性来匹配字符的速度并不快，
   因为 PCRE 需要去搜索一个包含超过 15000 字符的数据结构。
   这就是为什么在 PCRE中 要使用传统的转义序列<literal>\d</literal>、
   <literal>\w</literal> 而不使用 Unicode 属性的原因。
@@ -961,33 +990,37 @@
   <title>锚</title>
   <para>
   在一个字符类外面，在默认匹配模式下，
-  <literal>^</literal> 是一个断言当前匹配点位于目标字符串开始处的断言。在一个字符类内部，
-  <literal>^</literal> 表明这个字符类中描述的字符取反(详见下文)。
+  脱字符（<literal>^</literal>） 是一个断言当前匹配点位于目标字符串开始处的断言。
+   在一个字符类内部，
+   脱字符（<literal>^</literal>） 表明这个字符类中描述的字符取反(详见下文)。
   </para>
   <para>
-  <literal>^</literal> 并不一定要是模式的第一个字符， 但是如果处于某个可选分支时，
-  它应该是该分支的首字符。如果所有选择分支都以 <literal>^</literal> 开头，这就是说，
+  脱字符（<literal>^</literal>）并不一定要是模式的第一个字符， 但是如果处于某个可选分支时，
+  它应该是该分支的首字符。如果所有选择分支都以脱字符（<literal>^</literal>）开头，这就是说，
   如果模式限制为只匹配目标的开头，
   它被称为是一个 ”紧固” 模式。(同样也有其他方式可以构造出紧固模式)
   </para>
   <para>
-  <literal>$</literal> 是用于断言当前匹配点位于目标字符串末尾，
+  美元符(<literal>$</literal>)是用于断言当前匹配点位于目标字符串末尾，
   或当目标字符串以换行符结尾时当前匹配点位于该换行符位置(默认情况)。
-  <literal>$</literal> 不一定要作为模式的最后一个字符，但是如果它在某个可选分支中时，
-  就应该位于该分支的末尾。 <literal>$</literal> 在字符类中没有特殊的意义。
+  美元符(<literal>$</literal>)不一定要作为模式的最后一个字符，但是如果它在某个可选分支中时，
+  就应该位于该分支的末尾。美元符在字符类中没有特殊的意义。
   </para>
   <para>
   <literal>$</literal> 的意义可以通过在编译或匹配时设置 <link linkend="reference.pcre.pattern.modifiers">PCRE_DOLLAR_ENDONLY</link> 改变为只匹配字符串末尾。
   这不会影响 \Z 断言的行为。
   </para>
   <para>
-  <literal>^</literal> 和 <literal>$</literal> 字符的意义在 <link linkend="reference.pcre.pattern.modifiers">PCRE_MULTILINE</link> 选项被设置时会发生变化。 当在这种情况下时，
+  脱字符 <literal>^</literal> 和美元符 <literal>$</literal> 字符的意义在
+   <link linkend="reference.pcre.pattern.modifiers">PCRE_MULTILINE</link> 选项被设置时会发生变化。 当在这种情况下时，
   它们匹配每一个换行符后面的和前面的字符，另外，
   也会匹配目标字符串的开始和结束。比如,
   模式 /^abc$/ 在多行模式下会成功匹配目标字符串 ”def\nabc”，
-  而正常情况下不会。因此，由于所有的可选分支都以 ^ 开始，
+  而正常情况下不会。因此，由于所有的可选分支都以 "^" 开始，
   在单行模式下这成为紧固模式，然而在多行模式下，这是非紧固的。
-  <link linkend="reference.pcre.pattern.modifiers">PCRE_DOLLAR_ENDONLY</link> 选项在<link linkend="reference.pcre.pattern.modifiers">PCRE_MULTILINE</link> 设置后失效。
+  <link linkend="reference.pcre.pattern.modifiers">PCRE_DOLLAR_ENDONLY</link>
+   选项在 <link linkend="reference.pcre.pattern.modifiers">PCRE_MULTILINE</link>
+   设置后失效。
   </para>
   <para>
   注意： \A、\Z、
@@ -1002,22 +1035,24 @@
   <title>句点</title>
   <para>
   在字符类外部，模式中的句点匹配目标字符串中的任意字符，包括非打印字符，
-  但是(默认)不包括换行符。如果 <link linkend="reference.pcre.pattern.modifiers">PCRE_DOTALL</link> 被设置，句点就会匹配换行符。
+  但是(默认)不包括换行符。如果设置了
+   <link linkend="reference.pcre.pattern.modifiers">PCRE_DOTALL</link>，
+  句点就会匹配换行符。
   句点的处理和^、$的处理没有关联，它们唯一的关系是它们都涉及到了换行符。
   句点在字符类中没有任何意义。
   </para>
   <para>
   <emphasis>\C</emphasis>可以被用于匹配单字节，
-  也就是说在<emphasis>UTF-8</emphasis>模式下，句点可以匹配多字节字符。
+  也就是说在<emphasis>UTF-8 模式</emphasis>下，句点可以匹配多字节字符。
   </para>
  </section>
- 
+
  <section xml:id="regexp.reference.character-classes">
   <title>字符类(方括号)</title>
   <para>
   左方括号开始一个字符类的描述，并以方中括号结束。
   单独的一个右方括号没有特殊含义。如果一个右方括号需要作为一个字符类中的成员,
-  那么可以将它写在字符类的首字符处(如果使用了^取反，
+  那么可以将它写在字符类的首字符处(如果使用了 ^ 取反，
   那么是第二个)或者使用转义符。
   </para>
   <para>
@@ -1040,8 +1075,10 @@
   "A"。
   </para>
   <para>
-  换行符在字符类中没有任何特殊涵义， 与 <link linkend="reference.pcre.pattern.modifiers">PCRE_DOTALL</link> 或 <link linkend="reference.pcre.pattern.modifiers">PCRE_MULTILINE</link> 选项都无关。
-  一个字符类比如 [^a] 始终会匹配换行符。
+  换行符在字符类中没有任何特殊涵义， 与 <link
+   linkend="reference.pcre.pattern.modifiers">PCRE_DOTALL</link> 或
+  <link linkend="reference.pcre.pattern.modifiers">PCRE_MULTILINE</link> 选项都无关。
+  例如 [^a] 这样的字符类始终会匹配换行符。
   </para>
   <para>
   在字符类中，一个中划线(减号 -)可以用于指定从一个字符到另一个字符的范围。
@@ -1064,7 +1101,7 @@
   则同时匹配它的大小写形式。
   比如 [W-c] 在不区分大小写匹配时等价于 [][\^_`wxyzabc]，并且，
   如果使用了 ”fr”(法国) 的地域设置字符表时，
-  [\xc8-xcb] 将会在所有模式下匹配重音E字符。
+  [\xc8-xcb] 将会在所有模式下匹配重音 E 字符。
   </para>
   <para>
   字符类\d、\D、 \s、\S、\w 和 \W 也可以出现在一个字符类中，
@@ -1081,7 +1118,7 @@
   Perl 支持 POSIX 字符类符号。这种字符类使用<literal>[:</literal>和<literal>:]</literal>闭合。 PCRE 同样支持这些字符类，
   比如，<literal>[01[:alpha:]%]</literal>匹配 ”0”、“1”、任意字母或”%”。 支持的字符类如下：
    <table>
-    <title>Character classes</title>
+    <title>字符类</title>
     <tgroup cols="2">
      <tbody>
       <row><entry><literal>alnum</literal></entry><entry>字母和数字</entry></row>
@@ -1096,23 +1133,31 @@
       <row><entry><literal>punct</literal></entry><entry>打印字符, 不包括字母和数字</entry></row>
       <row><entry><literal>space</literal></entry><entry>空白字符 (比\s多垂直制表符)</entry></row>
       <row><entry><literal>upper</literal></entry><entry>大写字母</entry></row>
-      <row><entry><literal>word</literal></entry><entry>单词字符(same as \w)</entry></row>
+      <row><entry><literal>word</literal></entry><entry>单词字符(和 \w 一样)</entry></row>
       <row><entry><literal>xdigit</literal></entry><entry>十六进制数字</entry></row>
      </tbody>
     </tgroup>
    </table>
    空白字符有HT(9)、 LF(10)、VT(11)、 FF(12)、CR(13)、space(32)。 注意，
    这个列表包含了垂直制表符。这使得space不同于<literal>\s</literal>，
-   因为它不包含垂直制表符(为了向 perl 兼容)
+   因为它不包含垂直制表符(为了向 Perl 兼容)
   </para>
   <para>
-  <literal>[:word:]</literal>是一个 perl扩展，<literal>[:blank:]</literal>是一个从 Perl5.8 中来的 GNU 扩展。
-  另外一个 perl 扩展是取反，通过前置一个<literal>^</literal>。 比如，
+  <literal>[:word:]</literal>是一个 Perl扩展，<literal>[:blank:]</literal>是一个从 Perl5.8 中来的 GNU 扩展。
+  另外一个 Perl 扩展是取反，通过前置一个<literal>^</literal>。 比如，
   <literal>[12[:^digit:]]</literal> 匹配”1”,
   “2” 或任何非数字字符
   </para>
   <para>
-  在 UTF-8 模式，大于 128 的字符值不会匹配任何 POSIX 字符类。
+  在 UTF-8 模式中，大于 128 的字符值不会匹配任何 POSIX 字符类。
+  自 libpcre 8.10 起，某些字符类改为使用 Unicode 字符属性，所以不会出现提醒中的限制。
+  详情参阅 <link xlink:href="&url.pcre.man;">PCRE(3) manual</link>。
+  </para>
+  <para>
+   Unicode character properties can appear inside a character class. They can
+   not be part of a range. The minus (hyphen) character after a Unicode
+   character class will match literally. Trying to end a range with a Unicode
+   character property will result in a warning.
   </para>
  </section>
  
@@ -1131,15 +1176,14 @@
  <section xml:id="regexp.reference.internal-options">
   <title>内部选项设置</title>
   <para>
-   <link linkend="reference.pcre.pattern.modifiers">PCRE_CASELESS</link>, 
-   <link linkend="reference.pcre.pattern.modifiers">PCRE_MULTILINE</link>,  
-   <link linkend="reference.pcre.pattern.modifiers">PCRE_DOTALL</link>,
-   <link linkend="reference.pcre.pattern.modifiers">PCRE_UNGREEDY</link>,
-   <link linkend="reference.pcre.pattern.modifiers">PCRE_EXTRA</link>,
-   <link linkend="reference.pcre.pattern.modifiers">PCRE_EXTENDED</link>
-   and
-   PCRE_DUPNAMES 等模式修饰符设置可以在模式内部通过一个 perl 选项字符序列来设置，
-   语法为:(?修饰符)，可用的修饰符有：
+   <link linkend="reference.pcre.pattern.modifiers">PCRE_CASELESS</link>、
+   <link linkend="reference.pcre.pattern.modifiers">PCRE_MULTILINE</link>、
+   <link linkend="reference.pcre.pattern.modifiers">PCRE_DOTALL</link>、
+   <link linkend="reference.pcre.pattern.modifiers">PCRE_UNGREEDY</link>、
+   <link linkend="reference.pcre.pattern.modifiers">PCRE_EXTRA</link>、
+   <link linkend="reference.pcre.pattern.modifiers">PCRE_EXTENDED</link>、
+   PCRE_DUPNAMES 等模式修饰符设置可以在模式内部通过一个 Perl 选项字符序列来设置，
+   语法是 (?修饰符)，可用的修饰符有：
    
    <table>
     <title>Internal option letters</title>
@@ -1190,22 +1234,24 @@
   <para>
   当一个选项在模式的最上级(也就是说不在子组中)时，
   这个改变会影响模式中剩余部分。比如 <literal>/ab(?i)c/</literal> 仅仅匹配 ”abc” 和 ”abC”。
-  这个形式在 PCRE 4.0(PHP 4.3.3) 中被改变。在此之前的版本中，
-  /ab(?i)c/ 行为和 /abc/i 完全一致。
   </para>
   <para>
-  如果一个选项在子组中设置，产生的影响是不同的。这是 perl 5.005 中行为的一个变种。
+  如果一个选项在子组中设置，产生的影响是不同的。这是 Perl 5.005 中行为的一个变种。
   一个选项在子组内部设置，仅仅改变子组中剩余的部分，
-  因此 <literal>(a(?i)b)c</literal> 仅仅匹配 ”abc” 和 ”aBc” (假设没有使用 <link linkend="reference.pcre.pattern.modifiers">PCRE_CASELESS</link> 选项)。
-  这就意味着选项在模式的不同位置可以造成不同的影响。 在同一个子模式中，
+  因此 <literal>(a(?i)b)c</literal> 仅仅匹配 ”abc” 和 ”aBc” (假设没有使用
+   <link linkend="reference.pcre.pattern.modifiers">PCRE_CASELESS</link> 选项)。
+  这就意味着选项在模式的不同位置可以造成不同的影响。
+  在同一个子模式中，
   一个分支的选项设置回穿透到后面剩余的其他分支中去。
   比如 <literal>(a(?i)b|c)</literal> 匹配”ab”，
   “aB”， “c” 和 ”C”。 尽管在匹配 ”C” 时第一个分支会在选项被设定前就被丢弃。
   这是因为选项的设定是在编译期确定的，否则可能会带来非常怪异的行为。
   </para>
   <para>
-  PCRE 专用选项 <link linkend="reference.pcre.pattern.modifiers">PCRE_UNGREEDY</link> 和 <link linkend="reference.pcre.pattern.modifiers">PCRE_EXTRA</link> 可以和 perl 兼容选项以同样的方式来改变，
-  分别使用字母 U 和 X. (?X) 标记设定有些特殊，它必须出现在任何其他特性之前，
+  PCRE 专用选项 <link linkend="reference.pcre.pattern.modifiers">PCRE_UNGREEDY</link>
+   和 <link linkend="reference.pcre.pattern.modifiers">PCRE_EXTRA</link>
+   可以和 Perl 兼容选项以同样的方式来改变，
+  分别使用字母 U 和 X。 (?X) 标记设定有些特殊，它必须出现在任何其他特性之前，
   最好放在最开头的位置。
   </para>
  </section>
@@ -1226,8 +1272,9 @@
    </listitem>
    <listitem>
     <para>
-    将子组设定为捕获子组(向上面定义的). 当整个模式匹配后，
-    目标字符串中匹配子组的部分将会通过 <function>pcre_exec()</function> 的 <emphasis>ovector</emphasis> 参数回传给调用者。
+    将子组设定为捕获子组(向上面定义的)。当整个模式匹配后，
+    目标字符串中匹配子组的部分将会通过 <function>pcre_exec()</function>
+     的 <emphasis>ovector</emphasis> 参数回传给调用者。
     左括号从左至右出现的次序就是对应子组的下标(从 1 开始)，
     可以通过这些下标数字来获取捕获子模式匹配结果。
     </para>
@@ -1238,20 +1285,22 @@
   (king|queen))</literal> 进行匹配，
   模式匹配到的结果是 array(“red king”， ”red king”, “red”, “king”) 的形式，
   其中第 0 个元素是整个模式匹配的结果，后面的三个元素依次为三个子组匹配的结果。
-  它们的下表分别为 1， 2， 3。
+  它们的下标分别为 1， 2， 3。
   </para>
   <para>
-  事实上，圆括号履行的两种功能并不总是有用的。
-  经常我们会有一种需求需要使用子组进行分组， 但又不需要(单独的)捕获它们。
+  事实上，并不一定同时需要圆括号的两种功能。
+  经常我们会需要子组进行分组， 但又不需要(单独的)捕获它们。
   在子组定义的左括号后面紧跟字符串 ”?:” 会使得该子组不被单独捕获，
   并且不会对其后子组序号的计算产生影响。比如, 如果字符串 "the white queen"
-  匹配模式 <literal>the ((?:red|white) (king|queen))</literal>，匹配到的子串是 "white queen" 和 "queen"，
-  他们的下标分别是 1 和 2。捕获子组的最大序号为 65535。然而，有可能我们并不能编译这么长的
-  正则表达式，这取决于 libpcre 的配置。
+  匹配模式 <literal>the ((?:red|white) (king|queen))</literal>，
+   匹配到的子串是 "white queen" 和 "queen"，
+  他们的下标分别是 1 和 2。
+   捕获子组的最大序号为 65535。然而由于 libpcre 的配置，我们可能无法编译这么长的
+  正则表达式。
   </para>
   <para>
   为了方便简写，如果需要在非捕获子组开始位置设置选项，
-  选项字母可以位于 ? 和 : 之间，比如：
+  选项字母可以位于 ? 和 : 之间，比如两个模式：
   </para>
   
   <informalexample>
@@ -1264,17 +1313,17 @@
   </informalexample>
   
   <para>
-  上面两种写法实际上是相同的模式。因为可选分支会从左到右尝试每个分支，
+  匹配到了完全相同的字符集。因为可选分支会从左到右尝试每个分支，
   并且选项没有在子模式结束前被重置，
   并且由于选项的设置会穿透对后面的其他分支产生影响，因此，
   上面的模式都会匹配 ”SUNDAY” 以及 ”Saturday”。
   </para>
-  
+
   <para>
-  在 PHP 4.3.3 中，可以对子组使用 <literal>(?P&lt;name&gt;pattern)</literal> 的语法进行命名。
-  这个子模式将会在匹配结果中同时以其名称和顺序(数字下标)出现， PHP
-  5.2.2中又增加了两种味子组命名的语法：
-  <literal>(?&lt;name&gt;pattern)</literal> 和 <literal>(?’name’pattern)</literal>。
+  可以对子组使用 <literal>(?P&lt;name&gt;pattern)</literal> 的语法进行命名。
+  这个子模式将会在匹配结果中同时以其名称和顺序(数字下标)出现，
+  还有两种为子组命名的语法：
+  <literal>(?&lt;name&gt;pattern)</literal> 和 <literal>(?'name'pattern)</literal>。
   </para>
 
   <para>
@@ -1291,7 +1340,7 @@
   </informalexample>
 
   <para>
-  这里当后向引用 1 空时<literal>Sun</literal> 存储在后向引用 2 中.
+  这里当后向引用 1 空时<literal>Sun</literal> 存储在后向引用 2 中。
   当后向引用 2 不存在的时候 <literal>Sat</literal> 存储在后向引用 1中。 使用
   <literal>(?|</literal>修改模式来修复这个问题：
   </para>
@@ -1304,7 +1353,7 @@
 
   <para>
   使用这个模式，
-  <literal>Sun</literal>和<literal>Sat</literal>都会被存储到后向引用1中。
+  <literal>Sun</literal> 和 <literal>Sat</literal> 都会被存储到后向引用 1 中。
   </para>
  </section>
  
@@ -1318,18 +1367,29 @@
     <listitem><simpara>元字符。</simpara></listitem>
     <listitem><simpara>字符类</simpara></listitem>
     <listitem><simpara>后向引用(参加下一部分)</simpara></listitem>
-    <listitem><simpara>子组(除非它是一个断言)</simpara></listitem>
+    <listitem><simpara>子组(除非它是一个断言，参考下文)</simpara></listitem>
    </itemizedlist>
   </para>
   <para>
   一般的重复量词指定了一个最小数值和一个最大数值的匹配次数，
   通过花括号包裹两个数字，两个数字之间用逗号隔开的语法定义。
   两个数值都必须小于 65536， 并且第一个数字必须小于等于第二个。 比如：
-  <literal>z{2,4}</literal> 匹配 ”zz”， “zzz”， “zzzz”。 单个的右花括号不是特殊字符。
+
+  <literal>z{2,4}</literal>
+
+  匹配 ”zz”， “zzz”， “zzzz”。 单个的右花括号不是特殊字符。
   如果第二个数字被省略，但是逗号仍然存在，就代表没有上限；
   如果第二个数字和逗号都被省略，那么这个量词就限定的是一个确定次数的匹配。
-  比如 <literal>[aeiou]{3,}</literal> 匹配至少三个连续的元音字母，但是同时也可以匹配更多，
-  而 <literal>\d{8}</literal> 则只能匹配 8 个数字。
+  比如
+
+  <literal>[aeiou]{3,}</literal>
+
+  匹配至少三个连续的元音字母，但是同时也可以匹配更多，
+  而
+
+   <literal>\d{8}</literal>
+
+  则只能匹配 8 个数字。
   左花括号出现在不允许使用量词的位置或者与量词语法不匹配时，
   被认为是一个普通字符，对它自身进行原文匹配。 比如，{,6}就不是一个量词，
   会按照原文匹配四个字符 ”{,6}”。
@@ -1360,11 +1420,13 @@
    </table>
   </para>
   <para>
-  可以通过一个不匹配任何字符的子模式后面紧跟一个匹配 0 或多个字符的量词来构造一个没有上限的无限循环。
-  比如：<literal>(a?)*</literal>
+  可以通过一个不匹配任何字符的子模式后面紧跟一个匹配 0 或多个字符的量词
+  来构造一个没有上限的无限循环。比如：
+
+   <literal>(a?)*</literal>
   </para>
   <para>
-  早期版本的 perl 和 pcre 对于这种模式会在编译期得到一个错误。然而，
+  早期版本的 Perl 和 PCRE 对于这种模式会在编译期得到一个错误。然而，
   由于这在某些情况下是有用的，因此现在也接受这种模式了，
   但是如果任何子模式的重复确实匹配不到任何字符，循环会被强制跳出。
   </para>
@@ -1374,20 +1436,34 @@
   这种问题的典型示例就是尝试匹配C语言的注释。
   出现在 /* 和 */ 之间的所有内容都被认为是注释， 在注释中间，
   可以允许出现单独的 * 和 /。
-  对C注释匹配的一个尝试是使用模式 <literal>/\*.*\*/</literal>，
-  假设将此模式应用在字符串 ”<literal>/* first comment*/ not comment /*second
-  comment*/</literal>” 它会匹配到错误的结果，也就是整个字符串，
+  对 C 注释匹配的一个尝试是使用模式
+
+   <literal>/\*.*\*/</literal>
+   ，
+  假设将此模式应用在字符串 ”
+
+   <literal>/* first comment*/ not comment /*second
+  comment*/</literal>”
+
+  它会匹配到错误的结果，也就是整个字符串，
   这是因为量词的贪婪性导致的，它会尝试尽可能多的匹配字符。
   </para>
   <para>
   然而，如果一个量词紧跟着一个 ?(问号) 标记，它就会成为懒惰(非贪婪)模式，
   它不再尽可能多的匹配，而是尽可能少的匹配。
-  因此模式 <literal>/\*.*?\*/</literal> 在 C 的注释匹配上将会正确的执行。
+  因此模式
+
+   <literal>/\*.*?\*/</literal>
+
+   在 C 的注释匹配上将会正确的执行。
   各个量词自身的意义并不会改变，而是由于加入了 ? 使其首选的匹配次数发生改变。
   不要将 ? 的这个用法和它作为量词的用法混淆。因为它又两种用法，
-  因此有时它会出现量词，比如 <literal>\d??\d</literal> 会更倾向于匹配一个数字，
-  但同时如果为了达到整个模式匹配的目的，它也可以接受两个数字的匹配。译注：
-  以模式 \w\d??\d\w 为例，对于字符串 ”a33a”，虽然 \d?? 是非贪婪的，
+  因此有时它会出现量词，比如
+
+   <literal>\d??\d</literal>
+
+   会更倾向于匹配一个数字，
+  但同时如果为了达到整个模式匹配的目的，它也可以接受两个数字的匹配。译注：以模式 \w\d??\d\w 为例，对于字符串 ”a33a”，虽然 \d?? 是非贪婪的，
   但由于如果使用贪婪会导致整个模式不匹配，所以，
   最终它选择的仍然是匹配到一个数字。
   </para>
@@ -1401,7 +1477,7 @@
   量词后面紧跟一个 ”<literal>+</literal>” 是”占有”性。它会吃掉尽可能多的字符，
   并且不关注后面的其他模式，比如 <literal>.*abc</literal> 匹配 ”aabc”，
   但是 <literal>.*+abc</literal> 不会匹配，
-  因为 <literal>.*+</literal> 会吃掉整个字符串，从而导致后面剩余的模式得不到匹配。 自PHP 4.3.3 起，
+  因为 <literal>.*+</literal> 会吃掉整个字符串，从而导致后面剩余的模式得不到匹配。
   可以使用占有符 (+) 修饰量词来达到提升速度的目的。
   </para>
   <para>
@@ -1409,12 +1485,14 @@
   按照最小或最大的数量的比例需要更多的存储用于编译模式。
   </para>
   <para>
-  如果一个模式以 .* 或 .{0,} 开始并且 <link linkend="reference.pcre.pattern.modifiers">PCRE_DOTALL</link> 选项开启(等价于 perl 的/s)，
-  也就是允许.匹配换行符，那么模式会隐式的紧固，因为不管怎么样，
+  如果一个模式以 .* 或 .{0,} 开始并且 <link
+   linkend="reference.pcre.pattern.modifiers">PCRE_DOTALL</link> 选项开启(等价于 Perl 的 /s)，
+  也就是允许 . 匹配换行符，那么模式会隐式的紧固，因为不管怎么样，
   接下来都会对目标字符串中的每个字符位置进行尝试，因此在第一次之后，
   在任何位置都不会有一个对所有匹配重试的点。 PCRE 会想对待 \A 一样处理这个模式。
   在我们已知目标字符串没有包含换行符的情况下，
-  当模式以 .* 开始的时候我们为了获得这个优化，值得设置 <link linkend="reference.pcre.pattern.modifiers">PCRE_DOTALL</link>，
+  当模式以 .* 开始的时候我们为了获得这个优化，值得设置
+   <link linkend="reference.pcre.pattern.modifiers">PCRE_DOTALL</link>，
   或者选择使用 ^ 明确指明锚定。
   </para>
   <para>
@@ -1427,10 +1505,18 @@
   </para>
   <para>
   当一个捕获子组时重复的时，捕获到的该子组的结果是最后一次迭代捕获的值。比如，
-  <literal>(tweedle[dume]{3}\s*)+</literal>匹配字符串 ”tweedledum tweedledee”，
+
+  <literal>(tweedle[dume]{3}\s*)+</literal>
+
+   匹配字符串 ”tweedledum tweedledee”，
   得到的的子组捕获结果是 ”tweedledee”。然而，如果是嵌套的捕获子组，
-  相应的捕获值可能会被设置到之前的迭代中。比如，<literal>/(a|(b))+/</literal> 匹配字符串 ”aba”，
-  第二个捕获子组得到的结果会是 ”b”。译注：不理解然而之后的部分，以例子说明，
+  相应的捕获值可能会被设置到之前的迭代中。
+   比如，
+
+   <literal>/(a|(b))+/</literal>
+
+   匹配字符串 ”aba”，
+  第二个捕获子组得到的结果会是 ”b”。译注：以例子说明，
   b 是第二个子组最后一次捕获到的结果，所以， 第二个子组最后结果是 b，
   这是符合”然而”之前描述的规则的。
   </para>
@@ -1444,17 +1530,28 @@
   </para>
   <para>
   如果紧跟反斜线的数字小于 10， 它总是一个后向引用，
-  并且如果在模式中没有这么多的捕获组会引发一个错误。 换一种说法，
+  并且如果在模式中没有足够多的捕获组，将会引发一个错误。换而言之，
   被引用的括号不能少于被引用的小于 10 的数量。
+
+   A "forward back reference" can make sense when a repetition
+   is involved and the subpattern to the right has participated
+   in an earlier iteration.
   查看上面的”反斜线”部分查看具体的数字处理方式。
   </para>
   <para>
   一个后向引用会直接匹配被引用捕获组在目标字符串中实际捕获到的内容，
-  而不是匹配子组模式的内容。因此，模式<literal>(sens|respons)e and
-  \1ibility</literal>将会匹配 ”sense and sensibility” 和 ”response and responsibility”，
+  而不是匹配子组模式的内容。因此，模式
+
+   <literal>(sens|respons)e and \1ibility</literal>
+
+   将会匹配 ”sense and sensibility” 和 ”response and responsibility”，
   而不会匹配 ”sense and responsibility”。
   如果在后向引用时被强制进行了大小写敏感匹配,
-  比如 <literal>((?i)rah)\s+\1</literal> 匹配 ”rah
+  比如
+
+   <literal>((?i)rah)\s+\1</literal>
+
+   匹配 ”rah
   rah”和”RAH RAH”，但是不会匹配 ”RAH rah”，
   即使原始捕获子组自身是不区分大小写的。 译注：
   这里其实要考虑的是后向引用期望得到的内容是和那个被引用的捕获子组得到的内容是完全一致的(当然，
@@ -1466,26 +1563,36 @@
   可能会有超过一个的后向引用引用相同的子组。
   一个子组可能并不会真正的用于特定的匹配，此时，
   任何对这个子组的后向引用也都会失败。 比如，
-  模式 <literal>(a|(bc))\2</literal> 总是在匹配 ”a” 开头而不是 ”bc” 开头的字符串时失败。
+  模式
+
+   <literal>(a|(bc))\2</literal>
+
+   总是在匹配 ”a” 开头而不是 ”bc” 开头的字符串时失败。
   因为可能会有多达 99 个后向引用，
   所有紧跟反斜线后的数字都可能是一个潜在的后向引用计数。
   如果模式在后向引用之后紧接着还是一个数值字符，
-  那么必须使用一些分隔符用于终结后向引用语法。 如果 <link linkend="reference.pcre.pattern.modifiers">PCRE_EXTENDED</link> 选项被设置了，
+  那么必须使用一些分隔符用于终结后向引用语法。 如果设置了 <link
+   linkend="reference.pcre.pattern.modifiers">PCRE_EXTENDED</link> 选项，
   可以使用空格来做。其他情况下可以使用一个空的注释。
   </para>
   <para>
   如果一个后向引用出现在它所引用的子组内部， 它的匹配就会失败。比如，
    (a\1) 就不会得到任何匹配。然而这种引用可以用于内部的子模式重复。比如，
-  模式 <literal>(a|b\1)+</literal> 会匹配任意数量的 ”a” 组成的字符串以及 ”aba”， “ababba” 等等(译注：
+  模式
+
+   <literal>(a|b\1)+</literal>
+
+   会匹配任意数量的 ”a” 组成的字符串以及 ”aba”， “ababba” 等等(译注：
   因为子组内部有一个可选路径，可选路径中有一条路能够完成匹配，在匹配完成后，
   后向引用就能够引用到内容了)。在每次子模式的迭代过程中，
   后向引用匹配上一次迭代时这个子组匹配到的字符串。为了做这种工作，
   模式必须满足这样一个条件，模式在第一次迭代的时候，
   必须能够保证不需要匹配后向引用。
-  这种条件可以像上面的例子用可选路径来实现，也可以通过使用最小值为 0 的量词修饰后向引用的方式来完成。
+  这种条件可以像上面的例子用可选路径来实现，也可以通过使用最小值为 0
+   的量词修饰后向引用的方式来完成。
   </para>
   <para>
-  在 PHP 5.2.2之后， <literal>\g</literal> 转义序列可以用于子模式的绝对和相对引用。
+   转义序列 <literal>\g</literal> 可以用于子模式的绝对引用和相对引用。
   这个转义序列必须紧跟一个无符号数字或一个负数，
   可以选择性的使用括号对数字进行包裹。 序列<literal>\1</literal>，
   <literal>\g1</literal>，<literal>\g{1}</literal> 之间是同义词关系。
@@ -1497,21 +1604,25 @@
   <para>
   <literal>\g</literal> 转义序列紧跟一个负数代表一个相对的后向引用。比如：
   <literal>(foo)(bar)\g{-1}</literal> 可以匹配字符串 ”foobarbar”，
-  <literal>(foo)(bar)\g{-2}</literal> 可以匹配 ”foobarfoo”。 这在长的模式中作为一个可选方案，
+  <literal>(foo)(bar)\g{-2}</literal> 可以匹配 ”foobarfoo”。
+  这在长的模式中作为一个可选方案，
   用来保持对之前一个特定子组的引用的子组序号的追踪。
   </para>
   <para>
-  后向引用也支持使用子组名称的语法方式描述,
-  比如 <literal>(?P=name)</literal> 或者 PHP 5.2.2 开始可以实用<literal>\k&lt;name&gt;</literal> 或 <literal>\k’name’</literal>。
-  另外在 PHP 5.2.4 中加入了对<literal>\k{name}</literal> 和 <literal>\g{name}</literal> 的支持。
+  后向引用也支持使用子组名称的语法方式描述：
+   <literal>(?P=name)</literal>、<literal>\k&lt;name&gt;</literal>、
+   <literal>\k’name’</literal>、<literal>\k{name}</literal>、
+   <literal>\g{name}</literal>、<literal>\g&lt;name&gt;</literal>、
+   <literal>\g'name'</literal>。
   </para>
  </section>
- 
+
  <section xml:id="regexp.reference.assertions">
   <title>断言</title>
   <para>
   一个断言就是一个对当前匹配位置之前或之后的字符的测试，
-  它不会实际消耗任何字符。简单的断言代码有\b、\B、 \A、 \Z、\z、 ^、$ 等等。
+  它不会实际消耗任何字符。简单的断言代码有\b、\B、 \A、 \Z、\z、 ^、$ 等，在
+   <link linkend="regexp.reference.escape">转义序列(反斜线)</link> 中有描述。
   更加复杂的断言以子组的方式编码。 它有两种类型：
   <emphasis>前瞻断言</emphasis>(从当前位置向前测试)和<emphasis>后瞻断言</emphasis>(从当前位置向后测试)。
   </para>
@@ -1519,9 +1630,18 @@
   一个断言子组的匹配还是通过普通方式进行的，
   不同在于它不会导致当前的匹配点发生改变。
   <emphasis>前瞻断言</emphasis>中的正面断言(断言此匹配为真)以 ”(?=” 开始，消极断言以 ”(?!” 开头。比如，
-  <literal>\w+(?=;)</literal> 匹配一个单词紧跟着一个分号但是匹配结果不会包含分号，
-  <literal>foo(?!bar)</literal> 匹配所有后面没有紧跟 ”bar” 的 ”foo” 字符串。
-  注意一个类似的模式 <literal>(?!foo)bar</literal>，
+
+   <literal>\w+(?=;)</literal>
+
+   匹配一个单词紧跟着一个分号但是匹配结果不会包含分号，
+
+  <literal>foo(?!bar)</literal>
+
+   匹配所有后面没有紧跟 ”bar” 的 ”foo” 字符串。
+  注意一个类似的模式
+
+   <literal>(?!foo)bar</literal>
+
   它不能用于查找之前出现所有不是 ”foo” 的 ”bar” 匹配，
   它会查找到任意的 ”bar” 出现的情况，
   因为 (?!foo) 这个断言在接下来三个字符时 ”bar” 的时候是永远都 &true; 的。
@@ -1529,26 +1649,50 @@
   </para>
   <para>
   <emphasis>后瞻断言</emphasis>中的正面断言以”(?&lt;=”开始, 消极断言以”(?&lt;!”开始。比如，
-  <literal>(?&lt;!foo)bar</literal> 用于查找任何前面不是 ”foo” 的 ”bar”。
+
+  <literal>(?&lt;!foo)bar</literal>
+
+   用于查找任何前面不是 ”foo” 的 ”bar”。
   后瞻断言的内容被严格限制为只能用于匹配定长字符串。但是，如果有多个可选分支，
-  它们不需要拥有相同的长度。比如 <literal>(?&lt;=bullock|donkey)</literal> 是允许的，
-  但是 <literal>(?&lt;!dogs?|cats?)</literal> 将会引发一个编译期的错误。在最上级分支可以匹配不同长度的字符串是允许的。
+  它们不需要拥有相同的长度。比如
+
+   <literal>(?&lt;=bullock|donkey)</literal>
+
+   是允许的，
+  但是
+
+   <literal>(?&lt;!dogs?|cats?)</literal>
+
+   将会引发一个编译期的错误。在最上级分支可以匹配不同长度的字符串是允许的。
   相比较于 perl 5.005 而言，它会要求多个分支使用相同长度的字符串匹配。
-  <literal>(?&lt;=ab(c|de))</literal> 这样的断言是不允许的，
+
+  <literal>(?&lt;=ab(c|de))</literal>
+
+   这样的断言是不允许的，
   因为它单个的顶级分支可以匹配两个不同的长度，
-  但是它可以接受使用两个顶级分支的写法 <literal>(?&lt;=abc|abde)</literal> 这样的断言实现，
+  但是它可以接受使用两个顶级分支的写法
+
+   <literal>(?&lt;=abc|abde)</literal>
+
+   这样的断言实现，
   对于每个可选分支，暂时将当前位置移动到尝试匹配的当前位置之前的固定宽度处。
   如果在当前没有足够的字符就视为匹配失败。后瞻断言与一次性子组结合使用可以用来匹配字符串结尾；
   一个例子就是在一次性子组上给出字符串结尾。
   </para>
   <para>
   多个断言(任意顺序)可以同时出现。
-  比如 <literal>(?&lt;=\d{3})(?&lt;!999)foo</literal> 匹配前面有三个数字但不是 ”999” 的字符串 ”foo”。注意，
+  比如
+
+   <literal>(?&lt;=\d{3})(?&lt;!999)foo</literal>
+
+   匹配前面有三个数字但不是 ”999” 的字符串 ”foo”。注意，
   每个断言独立应用到对目标字符串该点的匹配。 首先它会检查前面的三位都是数字，
   然后检查这三位不是 ”999”。
   这个模式不能匹配 ”foo” 前面有三位数字然后紧跟 3 位非 999 共 6 个字符的字符串，比如，
   它不匹配 ”123abcfoo”。
-  匹配 ”123abcfoo” 这个字符串的模式可以是<literal>(?&lt;=\d{3}…)(?&lt;!999)foo</literal>。
+  匹配 ”123abcfoo” 这个字符串的模式可以是
+
+   <literal>(?&lt;=\d{3}…)(?&lt;!999)foo</literal>。
   </para>
   <para>
   这种情况下，第一个断言查看(当前匹配点)前面的 6 个字符，检查前三个是数字，
@@ -1556,8 +1700,16 @@
   </para>
   <para>
   断言可以以任意复杂度嵌套。
-  比如 <literal>(?&lt;=(?&lt;!foo)bar)baz</literal> 匹配前面有 ”bar” 但是 ”bar” 前面没有 ”foo” 的 ”baz”。
-  另外一个模式 <literal>(?&lt;=\d{3}…(?&lt;!999))foo</literal> 则匹配前面有三个数字字符紧跟 3 个不是 999 的任意字符的 ”foo”。
+  比如
+
+   <literal>(?&lt;=(?&lt;!foo)bar)baz</literal>
+
+   匹配前面有 ”bar” 但是 ”bar” 前面没有 ”foo” 的 ”baz”。
+  另外一个模式
+
+   <literal>(?&lt;=\d{3}...(?&lt;!999))foo</literal>
+
+   则匹配前面有三个数字字符紧跟 3 个不是 999 的任意字符的 ”foo”。
   </para>
   <para>
   断言子组时非捕获子组，并且不能用量词修饰，
@@ -1579,14 +1731,19 @@
   通过改变匹配的行为或者使其更早的匹配失败以阻止这种行为是很有用的。
   </para>
   <para>
-  考虑一个例子，模式 \d+foo 应用到目标行 <literal>123456bar</literal> 时：
+  考虑一个例子，模式 \d+foo 应用到目标行
+
+   <literal>123456bar</literal>
+   时：
   </para>
   <para>
   在匹配了 6 个数字后匹配 ”foo” 时失败，通常的行为时匹配器尝试使 \d+ 只匹配 5 个数字，
   只匹配 4 个数字，在最终失败之前依次进行尝试。 一次性子组提供了一种特殊的意义，
   当模式的一部分得到匹配后，不再对其进行重新评估，
   因此匹配器在第一次匹配 ”foo” 失败后就能立刻失败。语法符号是另外一种特殊的括号，
-  以 (?&gt; 开始，比如 <literal>(?>\d+)bar</literal>。
+  以 (?&gt; 开始，比如
+
+   <literal>(?>\d+)bar</literal>
   </para>
   <para>
   这种括号对模式的一部分提供了”锁定”，当它包含一个匹配之后，
@@ -1608,14 +1765,26 @@
   </para>
   <para>
   一次性子组可以和后瞻断言结合使用来指定在目标字符串末尾的有效匹配。
-  考虑当一个简单的模式比如<literal>abcd$</literal>应用到一个不匹配的长字符串上。
+  考虑当一个简单的模式比如
+
+   <literal>abcd$</literal>
+
+   应用到一个不匹配的长字符串上。
   由于匹配时从左到右处理的，
   PCRE会从目标中查找每一个 ”a” 然后查看是否紧接着会匹配模式的剩余部分。
-  如果模式是<literal>^.*abcd$</literal>，
+  如果模式是
+
+   <literal>^.*abcd$</literal>
+
+   ，
   那么初始的 .* 将首先匹配整个字符串，但是当它失败后(因为紧接着不是 ”a”)，
   它会回溯所有的匹配，依次吐出最后 1 个字符，倒数第 2 个字符等等。
   从右向左查找整个字符串中的 ”a”， 因此，我们不能很好的退出。然而，
-  如果模式写作 <literal>^(?&gt;.*)(?&lt;=abcd)</literal> 那么它就不会回溯 .* 这一部分，
+  如果模式写作
+
+   <literal>^(?>.*)(?&lt;=abcd)</literal>
+
+   那么它就不会回溯 .* 这一部分，
   它仅仅用于匹配整个字符串。后瞻断言对字符串末尾的后四个字符做了一个测试。
   如果它失败，匹配立即失败。对于长字符串，
   这个模式将会带来显著的处理时间上的性能提升。
@@ -1623,14 +1792,26 @@
   <para>
   当一个模式中包含一个子组自己可以无限重复并且内部有无限重复元素时，
   使用一次性子组是避免一些失败匹配消耗大量时间的唯一途径。
-  模式 <literal>(\D+|&lt;\d+&gt;)*[!?]</literal> 匹配一个不限制数目的非数字字符或由 &lt;&gt; 闭合的数字字符紧跟着 ! 或 ?。
+  模式
+
+   <literal>(\D+|&lt;\d+>)*[!?]</literal>
+
+   匹配一个不限制数目的非数字字符或由 &lt;> 闭合的数字字符紧跟着 ! 或 ?。
   当它匹配的时候，运行时快速的。然而，
-  如果它应用到 ”<literal>aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</literal>” 上将会在报告错误之前消耗很多时间。
+  如果它应用到
+
+   <literal>aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</literal>
+
+  上将会在报告错误之前消耗很多时间。
   这是因为字符串可以用于两种重复规则，并且需要为两种重复规则都分配进行尝试。
   (示例的结尾使用 [!?] 而不是单个的字符，
   是因为 PCRE 和 perl 都会对模式最后是一个单独字符时的快速报错有优化。
   它们会记录最后需要匹配的单个字符，当它们没有出现在字符串中时快速报错。)
-  如果模式修改为 <literal>((?>\D+)|&lt;\d+>)*[!?]</literal> 就会快速得到报错。(译注：
+  如果模式修改为
+
+   <literal>((?>\D+)|&lt;\d+>)*[!?]</literal>
+
+   就会快速得到报错。(译注：
   对于这里给出的模式，当目标字符串更长的时候，消耗时间会迅速增加，慎用。)
   </para>
  </section>
@@ -1642,7 +1823,7 @@
   或者之前的一个捕获子组是否匹配来条件式的匹配一个子组或者在两个可选子组中选择。
   条件子组的两种语法如下：
   </para>
-  
+
   <informalexample>
    <programlisting>
 <![CDATA[
@@ -1659,9 +1840,17 @@
   条件一共有两种。如果在(condition)的括号内是数字组成的文本，
   条件在该数字代表的(之前的)子组得到匹配时满足(即使用 yes-pattern)。
   考虑下面的模式，
-  为了使其易于阅读其中增加了一些空白字符(查看<link linkend="reference.pcre.pattern.modifiers">PCRE_EXTENDED</link> 选项)并且将其分为三个部分：
-  <literal>( \( )?  [^()]+  (?(1) \) )</literal>
+  为了使其易于阅读其中增加了一些空白字符(查看<link
+   linkend="reference.pcre.pattern.modifiers">PCRE_EXTENDED</link>
+   选项)并且将其分为三个部分：
   </para>
+  <informalexample>
+   <programlisting>
+<![CDATA[
+( \( )?    [^()]+    (?(1) \) )
+]]>
+   </programlisting>
+  </informalexample>
   <para>
   模式的第一部分匹配一个可选的左括号，并且如果该字符出现，
   设置其为第一个子组的捕获子串。第二部分匹配一个或多个非括号字符。
@@ -1672,15 +1861,15 @@
   这个模式匹配一个没有括号的或者闭合括号包裹的字符序列。
   </para>
   <para>
-  如果条件式字符串 <literal>(R)</literal>，它在得到对模式或子模式的递归调用时满足。 在”最上级”，
-  条件总是false。
+  如果条件式字符串 <literal>(R)</literal>，它在得到对模式或子模式的递归调用时满足。
+   在”最上级”，条件总是false。
   </para>
   <para>
   如果条件不是数字序列或(R)，它就必须是一个断言。这里的断言可以使任意的，积极，
   消极，正向，后向都是可以的。考虑这个模式， 同样为了方便阅读，
   增加了一些空白字符，并且在第二行有两个可选路径。
   </para>
-  
+
   <informalexample>
    <programlisting>
 <![CDATA[
@@ -1717,8 +1906,11 @@
   最好的方式是使用一个模式匹配固定深度的嵌套。它不能处理任意深度的嵌套。 perl 
   5.6 提供了一个实验性的功能允许正则表达式递归。
   特殊项 (?R) 提供了递归的这种特殊用法。
-  这个PCRE模式解决了圆括号问题(假设 <link linkend="reference.pcre.pattern.modifiers">PCRE_EXTENDED</link> 选项被设置了，
-  因此空白字符被忽略)： <literal>\(  (  (?>[^()]+)  |  (?R)  )*  \)</literal>。
+  这个PCRE模式解决了圆括号问题(假设
+   <link linkend="reference.pcre.pattern.modifiers">PCRE_EXTENDED</link> 选项被设置了，
+  因此空白字符被忽略)：
+
+   <literal>\( ( (?>[^()]+) | (?R) )* \)</literal>
   </para>
   <para>
   首先，它匹配一个左括号。
@@ -1728,16 +1920,26 @@
   <para>
   这个例子模式包含无限重复的嵌套，因此使用了一次性子组匹配非括号字符，
   这在模式应用到模式不匹配的字符串时非常重要。比如，
-  当它应用到 <literal>(aaaaaaaaaaaaaaaaaaaaaaaaaaaaa()</literal> 时就会很快的产生”不匹配”结果。
+  当它应用到
+
+   <literal>(aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa()</literal>
+
+   时就会很快的产生”不匹配”结果。
   然而，如果不使用一次性子组，这个匹配将会运行很长时间，
   因为有很多途径让 + 和 * 重复限定分隔目标字符串，
   并且在报告失败之前需要测试所有路径。
   </para>
   <para>
   所有捕获子组最终被设置的捕获值都是从递归最外层子模式捕获的值。
-  如果上面的模式匹配 <literal>(ab(cd)ef)</literal>，捕获子组最终被设置的值为 ”ef”，
-  即顶级得到的最后一个值。如果增加了额外的括号，<literal>\(  (  (  (?>[^()]+)  |  (?R)
-  )*  )  \)</literal>，捕获到的字符串就是顶层括号的匹配内容 ”ab(cd)ef”。
+  如果上面的模式匹配
+
+   <literal>(ab(cd)ef)</literal>
+
+   ，捕获子组最终被设置的值为 ”ef”，
+  即顶级得到的最后一个值。如果增加了额外的括号
+
+   <literal>\( ( ( (?>[^()]+) | (?R) )* ) \)</literal>
+   捕获到的字符串就是顶层括号的匹配内容 ”ab(cd)ef”。
   如果在模式中有超过 15 个捕获括号，
   PCRE 在递归期间就会使用 pcre_malloc 分配额外的内存来存储数据，
   随后通过 pcre_free 释放他们。如果没有内存可被分配，它就仅保存前 15 个捕获括号，
@@ -1745,7 +1947,8 @@
   </para>
   
   <para>
-  从 PHP 4.3.3 开始, <literal>(?1)</literal>、<literal>(?2)</literal> 等可以用于递归子组。这同样可以用于命名子组：
+  <literal>(?1)</literal>、<literal>(?2)</literal> 等可以用于递归子组。
+   这同样可以用于命名子组：
   <literal>(?P&gt;name)</literal> 或 <literal>(?P&amp;name)</literal>。
   </para>
   <para>
@@ -1766,9 +1969,9 @@
   PCRE 使用递归处理子组和无限重复。
   这就是说对于某些模式可用的栈空间可能会受目标字符串限制。
   </para>
-  
+
  </section>
- 
+
  <section xml:id="regexp.reference.performance">
   <title>性能</title>
   <para>
@@ -1778,22 +1981,31 @@
   Friedl 书(精通正则表达式)中包含了很多关于正则表达式性能的讨论。
   </para>
   <para>
-  当一个模式以 .* 开始并且设置了 <link linkend="reference.pcre.pattern.modifiers">PCRE_DOTALL</link> 选项时，模式通过PCRE隐式锚定，
-  因为它可以匹配字符串的开始。然而，如果 <link linkend="reference.pcre.pattern.modifiers">PCRE_DOTALL</link> 没有设置，
-  PCRE 不能做这个优化，因为.元字符不能匹配换行符，如果目标字符串包含换行符，
-  模式可能会从一个换行符后面开始匹配，而不是最开始位置。 比如，模式 <literal>(.*)
-  second</literal> 匹配目标字符串 ”first\nand
+  当一个模式以 .* 开始并且设置了 <link
+   linkend="reference.pcre.pattern.modifiers">PCRE_DOTALL</link>
+   选项时，模式通过PCRE隐式锚定，
+  因为它可以匹配字符串的开始。然而，如果
+   <link linkend="reference.pcre.pattern.modifiers">PCRE_DOTALL</link>
+   没有设置，PCRE 不能做这个优化，因为.元字符不能匹配换行符，如果目标字符串包含换行符，
+  模式可能会从一个换行符后面开始匹配，而不是最开始位置。 比如，模式
+
+   <literal>(.*) second</literal>
+
+   匹配目标字符串 ”first\nand
   second”(\n 是一个换行符)第一个捕获子组结果是 ”and”。为了这样做，
   PCRE 尝试从目标字符串中每个换行符后开始匹配。
   </para>
   <para>
   如果你使用模式匹配没有换行符的目标字符串，
-  可以通过设置 <link linkend="reference.pcre.pattern.modifiers">PCRE_DOTALL</link> 或以 ^.* 开始的模式明确指示锚定以获取最佳性能。
+  可以通过设置 <link linkend="reference.pcre.pattern.modifiers">PCRE_DOTALL</link>
+  或以 ^.* 开始的模式明确指示锚定以获取最佳性能。
   这样节省了 PCRE 沿目标字符串扫描查找换行符重新开始的时间。
   </para>
   <para>
   小心模式中的无限重复嵌套。这在应用到不匹配字符串时可能会导致运行时间很长。
-  考虑模式片段 <literal>(a+)*</literal>。
+  考虑模式片段
+
+   <literal>(a+)*</literal>
   </para>
   <para>
   这个模式可以有 33 种方式匹配 ”aaaa”，
@@ -1803,10 +2015,18 @@
   这将会非常耗时。
   </para>
   <para>
-  对于一些简单的情况的优化是像 <literal>(a+)*b</literal> 这样紧接着使用原文字符串.。
+  对于一些简单的情况的优化是像
+
+   <literal>(a+)*b</literal>
+
+   这样紧接着使用原文字符串.。
   在着手正式匹配工作之前，PCRE 检查目标字符串后面是否有 ”b” 字符，
   如果没有就立即失败。然而当紧接着没有原文字符的时候这个优化是不可用的。
-  你可以比较观察 <literal>(a+)*\d</literal> 和上面模式的行为差异。
+  你可以比较观察
+
+   <literal>(a+)*\d</literal>
+
+  和上面模式的行为差异。
   前者在应用到整行的 ”a” 组成的字符串时几乎是立即报告失败，
   而后者在目标字符串长于 20 个字符时，时间消耗就相当可观。
   </para>
