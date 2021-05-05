@@ -1,5 +1,6 @@
 # PHP 中文手册 mirror
-![Build](https://github.com/php/doc-zh/workflows/Build/badge.svg)
+
+[![Build](https://github.com/php/doc-zh/workflows/Build/badge.svg)](https://github.com/php/doc-zh/actions)
 
 本仓库是官方 docbook 的 git 仓库。
 
@@ -54,7 +55,7 @@ PHP 文档的翻译工作完全是一项志愿行动，你不会从中得到任�
 
 在我们开始之前，我们假设：
 
-- 你运行的是 OS X/Linux 环境
+- 你运行的是 macOS/Linux 环境
 - 你已经安装了 php，并且可以通过命令行来运行它
 - 你已经安装了 git 环境
 
@@ -70,9 +71,9 @@ cd ~/php-docs
 ```bash
 mkdir phpdoc
 cd phpdoc
-git clone git@git.php.net:/doc/en.git
-git clone git@git.php.net:/doc/zh.git
-git clone git@git.php.net:/doc/base.git doc-base
+git clone git@github.com:php/doc-en.git en
+git clone git@github.com:php/doc-zh.git zh
+git clone git@github.com:php/doc-base.git
 ```
 
 #### 了解 DocBook 格式
@@ -85,7 +86,7 @@ git clone git@git.php.net:/doc/base.git doc-base
 
 ```bash
 cd ~/php-docs
-git clone http://git.php.net/repository/phd.git
+git clone git@github.com:php/phd.git
 cd ./phd
 ```
 
