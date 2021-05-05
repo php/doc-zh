@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: d7a2a4e3f7114ec8f0a71da90ed7e55b70fb77ec Maintainer: avenger Status: partial -->
+<!-- EN-Revision: 12b1d4704ea448b55ec155619be1e50c0e67e9f9 Maintainer: avenger Status: partial -->
 <!-- Reviewed: no -->
 
 <sect1 xml:id="migration80.incompatible" xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -116,7 +116,8 @@
     </listitem>
     <listitem>
      <para>
-      The <parameter>errcontext</parameter> argument for custom error handlers has been removed.
+      The <parameter>errcontext</parameter> argument will no longer be passed to custom error handlers
+      set with <function>set_error_handler</function>.
      </para>
     </listitem>
     <listitem>
@@ -199,7 +200,7 @@
 // Replace
 function my_error_handler($err_no, $err_msg, $filename, $linenum) {
     if (error_reporting() == 0) {
-        return; // Silenced
+        return false; // Silenced
     }
     // ...
 }
@@ -207,7 +208,7 @@ function my_error_handler($err_no, $err_msg, $filename, $linenum) {
 // With
 function my_error_handler($err_no, $err_msg, $filename, $linenum) {
     if (!(error_reporting() & $err_no)) {
-        return; // Silenced
+        return false; // Silenced
     }
     // ...
 }
@@ -454,7 +455,7 @@ class MyClass {
       Float to string casting will now always behave locale-independently.
      </para>
      <para>
-      <programlisting>
+      <programlisting role="php">
 <![CDATA[
 <?php
 setlocale(LC_ALL, "de_DE");
@@ -477,7 +478,7 @@ echo $f, "\n";
       Support for deprecated curly braces for offset access has been removed.
      </para>
      <para>
-      <programlisting>
+      <programlisting role="php">
 <![CDATA[
 <?php
 // Instead of:
@@ -723,7 +724,7 @@ $array["key"];
    <listitem>
     <para>
      <function>xml_parser_create</function> and <function>xml_parser_create_ns</function> will now
-     return an <classname>XmlParser</classname> object rather than a &resource;. The
+     return an <classname>XMLParser</classname> object rather than a &resource;. The
      <function>xml_parser_free</function> function no longer has an effect, instead the XmlParser
      instance is automatically destroyed if it is no longer referenced.
     </para>
@@ -1043,7 +1044,7 @@ $array["key"];
    <listitem>
     <para>
      <function>mb_ereg</function> and <function>mb_eregi</function> will now return boolean &true; on
-     a successfuly match. Previously they returned integer <literal>1</literal> if
+     a successful match. Previously they returned integer <literal>1</literal> if
      <parameter>matches</parameter> was not passed, or <code>max(1, strlen($matches[0]))</code> if
      <parameter>matches</parameter> was passed.
     </para>
@@ -1149,6 +1150,17 @@ $array["key"];
    The &php.ini; directive
    <link linkend="ini.pdo-odbc.db2-instance-name">pdo_odbc.db2_instance_name</link> has been
    removed.
+  </para>
+ </sect2>
+
+ <sect2 xml:id="migration80.incompatible.pdo-mysql">
+  <title>PDO MySQL</title>
+
+  <para>
+   <methodname>PDO::inTransaction</methodname> now reports the actual transaction state of
+   the connection, rather than an approximation maintained by PDO. If a query that is
+   subject to "implicit commit" is executed, <methodname>PDO::inTransaction</methodname>
+   will subsequently return &false;, as a transaction is no longer active.
   </para>
  </sect2>
 
@@ -1279,6 +1291,12 @@ $array["key"];
    <listitem>
     <para>
      <methodname>SplFileObject::fgetss</methodname> has been removed.
+    </para>
+   </listitem>
+   <listitem>
+    <para>
+     <methodname>SplFileObject::seek</methodname> now always seeks to the beginning of the line.
+     Previously, positions <literal>=1</literal> sought to the beginning of the next line.
     </para>
    </listitem>
    <listitem>
