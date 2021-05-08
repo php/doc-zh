@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: d744059987f679aed86f424f1f2b2506d165181d Maintainer: yuanyuqiang Status: ready -->
+<!-- EN-Revision: e41806c30bf6975e452c0d4ce35ab0984c2fa68c Maintainer: yuanyuqiang Status: ready -->
 <!-- Reviewed: no -->
 <!-- splitted from ./en/functions/exec.xml, last change in rev 1.28 -->
   <refentry xml:id='function.proc-open' xmlns="http://docbook.org/ns/docbook">
@@ -14,7 +14,7 @@
     &reftitle.description;
      <methodsynopsis>
       <type>resource</type><methodname>proc_open</methodname>
-      <methodparam><type>string</type><parameter>cmd</parameter></methodparam>
+      <methodparam><type>mixed</type><parameter>cmd</parameter></methodparam>
       <methodparam><type>array</type><parameter>descriptorspec</parameter></methodparam>
       <methodparam><type>array</type><parameter role="reference">pipes</parameter></methodparam>
       <methodparam choice="opt"><type>string</type><parameter>cwd</parameter><initializer>&null;</initializer></methodparam>
@@ -49,8 +49,30 @@
      <term><parameter>cmd</parameter></term>
      <listitem>
       <para>
-       要执行的命令
+       以 &string; 形式执行的命令行。特殊字符必须经过转义，并且使用正确的引号。
       </para>
+      <note>
+       <simpara>
+        在 <emphasis>Windows</emphasis> 上, 除非在 <parameter>other_options</parameter> 中
+        把 <literal>bypass_shell</literal> 设置为  &true;
+        ，否则 <parameter>cmd</parameter> 会被传递给 <command>cmd.exe</command> （实际上是 <literal>%ComSpec%</literal>）
+        其中的 <literal>/c</literal> 标志是 <emphasis>未加引号的</emphasis> 字符串 （也就是和 <function>proc_open</function> 一样）。
+        这可能会导致 <command>cmd.exe</command> 删除 <parameter>cmd</parameter> 中的引号 （详见 <command>cmd.exe</command> 文档），
+        从而导致意外的，甚至是潜在的危险行为，因为
+        <command>cmd.exe</command> 错误消息可能包含 （部分） 传递的 <parameter>cmd</parameter> （见下面的例子）。
+       </simpara>
+      </note>
+      <para>
+       从 PHP 7.4.0 开始，<parameter>cmd</parameter> 参数可以使用 &array; 类型传递。
+       在这种情况下，进程将直接打开（不通过 shell ）。
+       而 PHP 会处理任何必要的参数转义。
+      </para>
+      <note>
+       <para>
+        在 Windows 上， &array; 元素的参数转义假定
+        执行命令的命令行解析与 VC 运行时进行的命令行参数解析兼容。
+       </para>
+      </note>
      </listitem>
     </varlistentry>
     <varlistentry>
@@ -132,6 +154,18 @@
          <literal>bypass_shell</literal> （仅用于 Windows 平台）：
          设置为 &true; 表示绕过 <literal>cmd.exe</literal> shell。
         </member>
+        <member>
+         <literal>blocking_pipes</literal> （仅用于 Windows 平台）：
+         设置为 &true; 表示强制堵塞管道。
+        </member>
+        <member>
+         <literal>create_process_group</literal> （仅用于 Windows 平台）：
+         设置为 &true; 表示允许子进程处理 <literal>CTRL</literal> 事件。
+        </member>
+        <member>
+         <literal>create_new_console</literal> （仅用于 Windows 平台）：
+         表示新进程有一个新的控制台，用于代替父进程的控制台。
+        </member>
        </simplelist>
       </para>
      </listitem>
@@ -162,9 +196,21 @@
      </thead>
      <tbody>
       <row>
-       <entry>5.2.1</entry>
+       <entry>7.4.4</entry>
        <entry>
-        为 <parameter>other_options</parameter> 参数增加 <literal>bypass_shell</literal> 选项。
+        为 <parameter>other_options</parameter> 参数增加 <literal>create_new_console</literal> 选项。
+       </entry>
+      </row>
+      <row>
+       <entry>7.4.0</entry>
+       <entry>
+        <function>proc_open</function> 的 <parameter>cmd</parameter> 参数现在也允许数组类型。
+       </entry>
+      </row>
+      <row>
+       <entry>7.4.0</entry>
+       <entry>
+        为 <parameter>other_options</parameter> 参数增加 <literal>create_process_group</literal> 选项。
        </entry>
       </row>
      </tbody>
@@ -226,6 +272,42 @@ Array
 command returned 0
 ]]>
     </screen>
+   </example>
+  </para>
+
+  <para>
+   <example>
+    <title><function>proc_open</function> 在 Windows 上的怪异行为</title>
+    <simpara>
+     虽然人们可能期望下面的程序能够搜索文件
+     <filename>filename.txt</filename> 进行文本搜索，
+     并打印结果，但它的行为相当不同。
+    </simpara>
+    <programlisting role="php">
+     <![CDATA[
+<?php
+$descriptorspec = [STDIN, STDOUT, STDOUT];
+$cmd = '"findstr" "search" "filename.txt"';
+$proc = proc_open($cmd, $descriptorspec, $pipes);
+proc_close($proc);
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+     <![CDATA[
+'findstr" "search" "filename.txt' is not recognized as an internal or external command,
+operable program or batch file.
+]]>
+    </screen>
+    <simpara>
+     要解决该行为，通常只需将 <parameter>cmd</parameter> 加上引号：
+    </simpara>
+    <programlisting role="php">
+     <![CDATA[
+$cmd = '""findstr" "search" "filename.txt""';
+]]>
+    </programlisting>
    </example>
   </para>
 
