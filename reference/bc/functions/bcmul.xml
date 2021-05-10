@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: fad0f5afbabffce803df9d592d72ad8c9151c19f Maintainer: jakquan Status: ready -->
+<!-- EN-Revision: 23f5599c8cc2713e7a4fdc29d8cceab66c341c48 Maintainer: jakquan Status: ready -->
 <!-- Reviewed: no -->
 
 <refentry xml:id="function.bcmul" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>bcmul</refname>
-  <refpurpose>2个任意精度数字乘法计算</refpurpose>
+  <refpurpose>两个任意精度数字乘法计算</refpurpose>
  </refnamediv>
  
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
    <type>string</type><methodname>bcmul</methodname>
-   <methodparam><type>string</type><parameter>left_operand</parameter></methodparam>
-   <methodparam><type>string</type><parameter>right_operand</parameter></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter>scale</parameter><initializer>int</initializer></methodparam>
+   <methodparam><type>string</type><parameter>num1</parameter></methodparam>
+   <methodparam><type>string</type><parameter>num2</parameter></methodparam>
+   <methodparam choice="opt"><type class="union"><type>int</type><type>null</type></type><parameter>scale</parameter><initializer>&null;</initializer></methodparam>
   </methodsynopsis>
   <para>
-   <parameter>左操作数</parameter>乘以<parameter>右操作数</parameter>
+   <parameter>num1</parameter> 乘以 <parameter>num2</parameter>。
   </para>
  </refsect1>
 
@@ -27,18 +27,18 @@
   <para>
    <variablelist>
     <varlistentry>
-     <term><parameter>left_operand</parameter></term>
+     <term><parameter>num1</parameter></term>
      <listitem>
       <para>
-       字符串类型的左操作数.
+       字符串类型的左操作数。
       </para>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>right_operand</parameter></term>
+     <term><parameter>num2</parameter></term>
      <listitem>
       <para>
-       字符串类型的右操作数.
+       字符串类型的右操作数。
       </para>
      </listitem>
     </varlistentry>
@@ -50,9 +50,38 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   返回结果为字符串类型.
+   返回字符串类型的结果。
   </para>
  </refsect1>
+
+ <refsect1 role="changelog"><!-- {{{ -->
+  &reftitle.changelog;
+  <informaltable>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>&Version;</entry>
+      <entry>&Description;</entry>
+     </row>
+    </thead>
+    <tbody>
+     <row>
+      <entry>8.0.0</entry>
+      <entry>
+       现在 <parameter>scale</parameter> 可以为 null。
+      </entry>
+     </row>
+     <row>
+      <entry>7.3.0</entry>
+      <entry>
+       现在 <function>bcmul</function> 可以按想要的小数点位数返回数字。
+       而之前，返回的数字会忽略尾随零（trailing decimal zeroes）。
+      </entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </informaltable>
+ </refsect1><!-- }}} -->
  
  <refsect1 role="examples">
   &reftitle.examples;
@@ -67,6 +96,28 @@ echo bcmul('2', '4'); // 8
 ]]>
    </programlisting>
   </example>
+ </refsect1>
+
+ <refsect1 role="notes">
+  &reftitle.notes;
+  <note>
+   <para>
+    Before PHP 7.3.0 <function>bcmul</function> may return a result with fewer digits after the
+    decimal point than the <parameter>scale</parameter> parameter would
+    indicate. This only occurs when the result doesn't require all of the
+    precision allowed by the <parameter>scale</parameter>. For example:
+    <example>
+     <title><function>bcmul</function> scale example</title>
+     <programlisting role="php">
+      <![CDATA[
+<?php
+echo bcmul('5', '2', 2);     // prints "10", not "10.00"
+?>
+]]>
+     </programlisting>
+    </example>
+   </para>
+  </note>
  </refsect1>
  
  <refsect1 role="seealso">

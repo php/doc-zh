@@ -1,23 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 96c9d88bad9a7d7d44bfb7f26c226df7ee9ddf26 Maintainer: jakquan Status: ready -->
+<!-- EN-Revision: 4754397753fd79f1c846868b66a2448babab1c54 Maintainer: jakquan Status: ready -->
 <!-- Reviewed: no -->
 
 <refentry xml:id="function.bcmod" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>bcmod</refname>
-  <refpurpose>对一个任意精度数字取模</refpurpose>
+  <refpurpose>任意精度数字取模</refpurpose>
  </refnamediv>
  
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
    <type>string</type><methodname>bcmod</methodname>
-   <methodparam><type>string</type><parameter>left_operand</parameter></methodparam>
-   <methodparam><type>string</type><parameter>modulus</parameter></methodparam>
+   <methodparam><type>string</type><parameter>num1</parameter></methodparam>
+   <methodparam><type>string</type><parameter>num2</parameter></methodparam>
+   <methodparam choice="opt"><type class="union"><type>int</type><type>null</type></type><parameter>scale</parameter><initializer>&null;</initializer></methodparam>
   </methodsynopsis>
   <para>
-   对左操作数使用<parameter>系数</parameter>取模
+   对 <parameter>num1</parameter> 使用 <parameter>num2</parameter> 取模。
+   除非 <parameter>num2</parameter> 是零，否则结果必定和 <parameter>num1</parameter>
+   有相同的符号。
   </para>
  </refsect1>
 
@@ -26,18 +29,18 @@
   <para>
    <variablelist>
     <varlistentry>
-     <term><parameter>left_operand</parameter></term>
+     <term><parameter>num1</parameter></term>
      <listitem>
       <para>
-       字符串类型的左操作数
+       string 类型的被除数。
       </para>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>modulus</parameter></term>
+     <term><parameter>num2</parameter></term>
      <listitem>
       <para>
-       字符串类型系数
+       string 类型的除数。
       </para>
      </listitem>
     </varlistentry>
@@ -48,19 +51,70 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   返回字符串类型取模后结果，如果系数为0则返回null
+   返回字符串类型取模后的结果，如果 <parameter>num2</parameter> 为 0 则返回  &null;。
   </para>
  </refsect1>
- 
+
+ <refsect1 role="changelog"><!-- {{{ -->
+  &reftitle.changelog;
+  <informaltable>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>&Version;</entry>
+      <entry>&Description;</entry>
+     </row>
+    </thead>
+    <tbody>
+     <row>
+      <entry>8.0.0</entry>
+      <entry>
+       现在 <parameter>scale</parameter> 可以为 null。
+      </entry>
+     </row>
+     <row>
+      <entry>7.2.0</entry>
+      <entry>
+       现在
+       <parameter>num1</parameter> 和 <parameter>num2</parameter> 不会截断成整数。
+       所以现在 <function>bcmod</function> 的表现更接近 <function>fmod</function>
+       而不是 <literal>%</literal> 操作符。
+      </entry>
+     </row>
+     <row>
+      <entry>7.2.0</entry>
+      <entry>
+       新增参数 <parameter>scale</parameter>。
+      </entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </informaltable>
+ </refsect1><!-- }}} -->
+
  <refsect1 role="examples">
   &reftitle.examples;
   <example>
-   <title><function>bcmod</function> example</title>
+   <title><function>bcmod</function> 示例</title>
    <programlisting role="php">
-<![CDATA[
+    <![CDATA[
 <?php
-echo bcmod('4', '2'); // 0
-echo bcmod('2', '4'); // 2
+bcscale(0);
+echo bcmod( '5',  '3'); //  2
+echo bcmod( '5', '-3'); //  2
+echo bcmod('-5',  '3'); // -2
+echo bcmod('-5', '-3'); // -2
+?>
+]]>
+   </programlisting>
+  </example>
+  <example>
+   <title>带小数点的 <function>bcmod</function></title>
+   <programlisting role="php">
+    <![CDATA[
+<?php
+bcscale(1);
+echo bcmod('5.7', '1.3'); // PHP 7.2.0 起是 0.5；之前是 0
 ?>
 ]]>
    </programlisting>

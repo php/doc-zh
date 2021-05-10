@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: f5cf724823d42771298854a25d33d5e656972ab6 Maintainer: jakquan Status: ready -->
+<!-- EN-Revision: 23f5599c8cc2713e7a4fdc29d8cceab66c341c48 Maintainer: jakquan Status: ready -->
 <!-- Reviewed: no -->
 
 <refentry xml:id="function.bcpow" xmlns="http://docbook.org/ns/docbook">
@@ -13,12 +13,12 @@
   &reftitle.description;
   <methodsynopsis>
    <type>string</type><methodname>bcpow</methodname>
-   <methodparam><type>string</type><parameter>left_operand</parameter></methodparam>
-   <methodparam><type>string</type><parameter>right_operand</parameter></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter>scale</parameter></methodparam>
+   <methodparam><type>string</type><parameter>num</parameter></methodparam>
+   <methodparam><type>string</type><parameter>exponent</parameter></methodparam>
+   <methodparam choice="opt"><type class="union"><type>int</type><type>null</type></type><parameter>scale</parameter><initializer>&null;</initializer></methodparam>
   </methodsynopsis>
   <para>
-   <parameter>左操作数</parameter>的<parameter>右操作数</parameter>次方运算.
+   <parameter>num</parameter> 的 <parameter>exponent</parameter> 次方运算。
   </para>
  </refsect1>
 
@@ -27,18 +27,20 @@
   <para>
    <variablelist>
     <varlistentry>
-     <term><parameter>left_operand</parameter></term>
+     <term><parameter>num</parameter></term>
      <listitem>
       <para>
-       字符串类型的左操作数.
+       string 类型的底数。
       </para>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>right_operand</parameter></term>
+     <term><parameter>exponent</parameter></term>
      <listitem>
       <para>
-       字符串类型的右操作数.
+       string 类型的指数。 如果指数不是整数，将被截断。
+       指数的有效范围取决于平台，但起码支持
+       <literal>-2147483648</literal> 到 <literal>2147483647</literal> 的范围。
       </para>
      </listitem>
     </varlistentry>
@@ -50,9 +52,32 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   返回结果为字符串类型.
+   返回字符串类型的结果。
   </para>
  </refsect1>
+
+ <refsect1 role="changelog"><!-- {{{ -->
+  &reftitle.changelog;
+  <informaltable>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>&Version;</entry>
+      <entry>&Description;</entry>
+     </row>
+    </thead>
+    <tbody>
+     <row>
+      <entry>7.3.0</entry>
+      <entry>
+       现在 <function>bcpow</function> 可以按想要的小数点位数返回数字。
+       而之前，返回的数字会忽略尾随零（trailing decimal zeroes）。
+      </entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </informaltable>
+ </refsect1><!-- }}} -->
  
  <refsect1 role="examples">
   &reftitle.examples;
@@ -74,7 +99,7 @@ echo bcpow('4.2', '3', 2); // 74.08
   &reftitle.notes;
   <note>
    <para>
-    <function>bcpow</function> may return a result with fewer digits after the
+    Before PHP 7.3.0 <function>bcpow</function> may return a result with fewer digits after the
     decimal point than the <parameter>scale</parameter> parameter would
     indicate. This only occurs when the result doesn't require all of the
     precision allowed by the <parameter>scale</parameter>. For example:
