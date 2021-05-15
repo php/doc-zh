@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
 <!-- $Author$ -->
-<!-- EN-Revision: 02f3bf57175c48abff767ad2c0961c6cfe58a39e Maintainer: avenger Status: ready -->
+<!-- EN-Revision: 9ee9eccf455188ab6eb352194eb6f9eb99e15606 Maintainer: avenger Status: ready -->
 <sect1 xml:id="language.oop5.basic" xmlns="http://docbook.org/ns/docbook">
  <title>基本概念</title>
 
@@ -268,7 +268,8 @@ echo (new DateTime())->format('Y');
   <sect2 xml:id="language.oop5.basic.properties-methods">
    <title>属性和方法</title>
    <para>
-    类的属性和方法存在于不同的“命名空间”中，这意味着同一个类的属性和方法可以使用同样的名字。在类中访问属性和调用方法使用同样的操作符，具体是访问一个属性还是调用一个方法，取决于你的上下文，即用法是变量访问还是函数调用。
+    类的属性和方法存在于不同的“命名空间”中，这意味着同一个类的属性和方法可以使用同样的名字。
+    在类中访问属性和调用方法使用同样的操作符，具体是访问一个属性还是调用一个方法，取决于你的上下文，即用法是变量访问还是函数调用。
    </para>
    <example>
     <title>访问类属性 vs. 调用类方法</title>
@@ -375,22 +376,19 @@ a default value
    </example>
 
    <sect3 xml:id="language.oop.lsp">
-    <title>Signature compatibility rules</title>
+    <title>签名兼容性规则</title>
     <para>
-     When overriding a method, its signature must be compatible with the parent
-     method. Otherwise, a fatal error is emitted, or, prior to PHP 8.0.0, an
-     <constant>E_WARNING</constant> level error is generated.
-     A signature is compatible if it respects the
-     <link linkend="language.oop5.variance">variance</link> rules, makes a
-     mandatory parameter optional, and if any new parameters are optional.
-     This is known as the Liskov Substitution Principle, or LSP for short.
-     The <link linkend="language.oop5.decon.constructor">constructor</link>,
-     and <literal>private</literal> methods are exempt from these signature
-     compatibility rules, and thus won't emit a fatal error in case of a
-     signature mismatch.
+     当覆盖（override）方法时，签名必须兼容父类方法。
+     否则会导致 Fatal 错误（PHP 8.0.0 之前是 <constant>E_WARNING</constant> 级错误）。
+     兼容签名是指：遵守<link linkend="language.oop5.variance">协变与逆变</link>规则；
+     强制参数可以改为可选参数；新参数为可选参数。
+     这就是著名的里氏替换原则（Liskov Substitution Principle），简称 LSP。
+     不过<link linkend="language.oop5.decon.constructor">构造器</link>和
+     私有（<literal>private</literal>）方法不需要遵循签名兼容规则，
+     哪怕签名不匹配也不会导致 Fatal 错误。
     </para>
     <example>
-     <title>Compatible child methods</title>
+     <title>兼容的子类方法</title>
      <programlisting role="php">
 <![CDATA[
 <?php
@@ -434,11 +432,10 @@ Valid
     </example>
 
     <para>
-     The following examples demonstrate that a child method which removes a parameter, or makes an optional
-     parameter mandatory, is not compatible with the parent method.
+     下面演示子类与父类方法不兼容的例子：通过移除参数、修改可选参数为必填参数。
     </para>
     <example>
-     <title>Fatal error when a child method removes a parameter</title>
+     <title>子类方法移除参数后，导致 Fatal 错误</title>
      <programlisting role="php">
 <![CDATA[
 <?php
@@ -467,7 +464,7 @@ Fatal error: Declaration of Extend::foo() must be compatible with Base::foo(int 
      </screen>
     </example>
     <example>
-     <title>Fatal error when a child method makes an optional parameter mandatory</title>
+     <title>子类方法把可选参数改成强制参数，导致 Fatal 错误</title>
      <programlisting role="php">
 <![CDATA[
 <?php
@@ -498,14 +495,12 @@ Fatal error: Declaration of Extend::foo(int $a) must be compatible with Base::fo
 
     <warning>
      <para>
-      Renaming a method's parameter in a child class is not a signature
-      incompatibility. However, this is discouraged as it will result in a
-      runtime <classname>Error</classname> if
-      <link linkend="functions.named-arguments">named arguments</link>
-      are used.
+      重命名子类方法的参数名称也是签名兼容的。
+      然而我们不建议这样做，因为使用<link linkend="functions.named-arguments">命名参数</link>时，
+      这种做法会导致运行时的 <classname>Error</classname>。
      </para>
      <example>
-      <title>Error when using named arguments and parameters were renamed in a child class</title>
+      <title>在子类中重命一个命名参数，导致 Error</title>
       <programlisting role="php">
 <![CDATA[
 <?php
@@ -520,7 +515,7 @@ class B extends A {
 
 $obj = new B;
 
-// Pass parameters according to A::test() contract
+// 按 A::test() 的签名约定传入参数
 $obj->test(foo: "foo", bar: "bar"); // ERROR!
 ]]>
       </programlisting>
@@ -542,7 +537,8 @@ Stack trace:
    <title>::class</title>
 
    <para>
-    关键词 <literal>class</literal> 也可用于类名的解析。使用 <literal>ClassName::class</literal> 你可以获取一个字符串，包含了类 <literal>ClassName</literal> 的完全限定名称。这对使用了
+    关键词 <literal>class</literal> 也可用于类名的解析。使用 <literal>ClassName::class</literal>
+    可以获取包含类 <literal>ClassName</literal> 的完全限定名称。这对使用了
     <link linkend="language.namespaces">命名空间</link> 的类尤其有用。
    </para>
    <para>
@@ -570,7 +566,8 @@ NS\ClassName
    </para>
    <note>
     <para>使用 <literal>::class</literal>
-     解析类名操作会在底层编译时进行。这意味着在执行该操作时，类还没有被加载。因此，即使要调用的类不存在，类名也会被展示。在此种场景下，并不会发生错误。
+     解析类名操作会在底层编译时进行。这意味着在执行该操作时，类还没有被加载。
+     因此，即使要调用的类不存在，类名也会被展示。在此种场景下，并不会发生错误。
     </para>
     <example xml:id="language.oop5.basic.class.class.fail">
      <title>解析不存在的类名</title>
@@ -590,7 +587,8 @@ Does\Not\Exist
     </example>
    </note>
    <para>
-    自 PHP 8.0.0 起，<literal>::class</literal> 关键字也可以对象上使用。与上述情况不同，此时解析将会在运行时进行。此操作的运行结果和
+    自 PHP 8.0.0 起，<literal>::class</literal> 关键字也可以对象上使用。
+    与上述情况不同，此时解析将会在运行时进行。此操作的运行结果和
     <function>get_class</function> 函数一致。
    </para>
    <example xml:id="language.oop5.basic.class.class.object">
@@ -618,15 +616,15 @@ NS\ClassName
  <sect2 xml:id="language.oop5.basic.nullsafe">
   <title>Nullsafe 方法和属性</title>
   <para>
-   自 PHP 8.0.0 起，类属性和方法新增加了一个 "nullsafe" 操作符:
-   <literal>?-></literal>。The nullsafe operator
-   works the same as property or method access as above, except that if the
-   object being dereferenced is &null; then &null;
-   will be returned rather than an exception thrown. If the dereference is part of a
-   chain, the rest of the chain is skipped.
+   自 PHP 8.0.0 起，类属性和方法可以通过 "nullsafe" 操作符访问：
+   <literal>?-></literal>。
+   除了一处不同，nullsafe 操作符和以上原来的属性、方法访问是一致的：
+   对象引用解析（dereference）为 &null; 时不抛出异常，而是返回 &null;。
+   并且如果是链式调用中的一部分，剩余链条会直接跳过。
   </para>
   <para>
-   此操作的结果，类似于在每次访问前使用 <function>is_null</function> 函数判断方法和属性是否存在，但更加简洁。
+   此操作的结果，类似于在每次访问前使用 <function>is_null</function>
+   函数判断方法和属性是否存在，但更加简洁。
   </para>
   <para>
    <example>
