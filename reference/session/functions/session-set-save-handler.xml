@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: ba0a270fbc5b2d8afc879552c7579b76104d48d6 Maintainer: yuanyuqiang Status: ready -->
+<!-- EN-Revision: 184f3f7bd45643cb80f828d0bb001991ec3a5fad Maintainer: yuanyuqiang Status: ready -->
 <!-- Reviewed: no -->
 
 <refentry xmlns="http://docbook.org/ns/docbook" xml:id="function.session-set-save-handler" xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -24,7 +24,7 @@
    <methodparam choice="opt"><type>callable</type><parameter>update_timestamp</parameter></methodparam>
   </methodsynopsis>
   <para>
-   自 PHP 5.4 开始，可以使用下面的方式来注册自定义会话存储函数：
+   可以使用下面的方式来注册自定义会话存储函数：
   </para>
   <methodsynopsis>
    <type>bool</type><methodname>session_set_save_handler</methodname>
@@ -51,11 +51,10 @@
       <para>
        实现了
        <interfacename>SessionHandlerInterface</interfacename>，
-       <interfacename>SessionIdInterface</interfacename> 和/或
+       <interfacename>SessionIdInterface</interfacename>（可选） 和/或
        <interfacename>SessionUpdateTimestampHandlerInterface</interfacename>
        接口的对象，
        例如 <classname>SessionHandler</classname>。
-       自 PHP 5.4 之后可以使用。
       </para>
      </listitem>
     </varlistentry>
@@ -77,6 +76,14 @@
      <term><parameter>open(string $savePath, string $sessionName)</parameter></term>
      <listitem>
       <para>
+       实现了以下签名的 callable 回调：
+       <methodsynopsis>
+        <type>bool</type><methodname><replaceable>open</replaceable></methodname>
+        <methodparam><type>string</type><parameter>savePath</parameter></methodparam>
+        <methodparam><type>string</type><parameter>sessionName</parameter></methodparam>
+       </methodsynopsis>
+      </para>
+      <para>
        open 回调函数类似于类的构造函数，
        在会话打开的时候会被调用。
        这是自动开始会话或者通过调用 <function>session_start</function> 手动开始会话
@@ -86,7 +93,7 @@
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>close()</parameter></term>
+     <term><parameter>close</parameter></term>
      <listitem>
       <para>
        close 回调函数类似于类的析构函数。
@@ -97,8 +104,15 @@
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>read(string $sessionId)</parameter></term>
+     <term><parameter>read</parameter></term>
      <listitem>
+      <para>
+       实现了以下签名的 callable 回调：
+       <methodsynopsis>
+        <type>string</type><methodname><replaceable>read</replaceable></methodname>
+        <methodparam><type>string</type><parameter>sessionId</parameter></methodparam>
+       </methodsynopsis>
+      </para>
       <para>
        如果会话中有数据，read 回调函数必须返回将会话数据编码（序列化）后的字符串。
        如果会话中没有数据，read 回调函数返回空字符串。
@@ -118,8 +132,16 @@
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>write(string $sessionId, string $data)</parameter></term>
+     <term><parameter>write</parameter></term>
      <listitem>
+      <para>
+       实现了以下签名的 callable 回调：
+       <methodsynopsis>
+        <type>bool</type><methodname><replaceable>write</replaceable></methodname>
+        <methodparam><type>string</type><parameter>sessionId</parameter></methodparam>
+        <methodparam><type>string</type><parameter>data</parameter></methodparam>
+       </methodsynopsis>
+      </para>
       <para>
        在会话保存数据时会调用 <parameter>write</parameter> 回调函数。
        此回调函数接收当前会话 ID 以及 <varname>$_SESSION</varname> 中数据序列化之后的字符串作为参数。
@@ -146,8 +168,15 @@
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>destroy($sessionId)</parameter></term>
+     <term><parameter>destroy</parameter></term>
      <listitem>
+      <para>
+       实现了以下签名的 callable 回调：
+       <methodsynopsis>
+        <type>bool</type><methodname><replaceable>destroy</replaceable></methodname>
+        <methodparam><type>string</type><parameter>sessionId</parameter></methodparam>
+       </methodsynopsis>
+      </para>
       <para>
        当调用 <function>session_destroy</function> 函数，
        或者调用  <function>session_regenerate_id</function> 函数并且设置 destroy 参数为 &true; 时，
@@ -156,8 +185,15 @@
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>gc($lifetime)</parameter></term>
+     <term><parameter>gc</parameter></term>
      <listitem>
+      <para>
+       实现了以下签名的 callable 回调：
+       <methodsynopsis>
+        <type>bool</type><methodname><replaceable>gc</replaceable></methodname>
+        <methodparam><type>int</type><parameter>lifetime</parameter></methodparam>
+       </methodsynopsis>
+      </para>
       <para>
        为了清理会话中的旧数据，PHP 会不时的调用垃圾收集回调函数。
        调用周期由 <link linkend="ini.session.gc-probability">session.gc_probability</link> 
@@ -168,12 +204,55 @@
      </listitem>
     </varlistentry>   
     <varlistentry>
-     <term><parameter>create_sid()</parameter></term>
+     <term><parameter>create_sid</parameter></term>
      <listitem>
       <para>
-       当需要新的会话 ID 时被调用的回调函数。
-       回调函数被调用时无传入参数，
-       其返回值应该是一个字符串格式的、有效的会话 ID。
+       实现了以下签名的 callable 回调：
+       <methodsynopsis>
+        <type>string</type><methodname><replaceable>create_sid</replaceable></methodname>
+        <void/>
+       </methodsynopsis>
+      </para>
+      <para>
+       需要新的会话 ID 时，执行此回调函数。
+       它被调用时不会传入参数，其返回值应该是一个字符串格式的、有效的 session ID。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>validate_sid</parameter></term>
+     <listitem>
+      <para>
+       实现了以下签名的 callable 回调：
+       <methodsynopsis>
+        <type>bool</type><methodname><replaceable>validate_sid</replaceable></methodname>
+        <methodparam><type>string</type><parameter>key</parameter></methodparam>
+       </methodsynopsis>
+      </para>
+      <para>
+       开启 <link linkend="ini.session.use-strict-mode">session.use_strict_mode</link> 后，
+       当启动一个 session 时，提供了 session ID 后会执行此回调。
+       参数 <parameter>key</parameter> 是待验证的 session ID。
+       如果该 ID 的 session 已经存在，则为有效 session ID。
+       成功时返回值应当为 &true;，失败时为 &false;。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>update_timestamp</parameter></term>
+     <listitem>
+      <para>
+       实现了以下签名的 callable 回调：
+       <methodsynopsis>
+        <type>bool</type><methodname><replaceable>update_timestamp</replaceable></methodname>
+        <methodparam><type>string</type><parameter>key</parameter></methodparam>
+        <methodparam><type>string</type><parameter>val</parameter></methodparam>
+       </methodsynopsis>
+      </para>
+      <para>
+       更新 session 时执行此回调。
+       参数 <parameter>key</parameter> 是 session ID；参数 <parameter>val</parameter> 是 session 的数据。
+       成功时返回值应当为 &true;，失败时为 &false;。
       </para>
      </listitem>
     </varlistentry>
@@ -187,41 +266,6 @@
    &return.success;
   </para>
  </refsect1>
- <refsect1 role="changelog">
-  &reftitle.changelog;
-  <informaltable>
-   <tgroup cols="2">
-    <thead>
-     <row>
-      <entry>&Version;</entry>
-      <entry>&Description;</entry>
-     </row>
-    </thead>
-    <tbody>
-     <row>
-      <entry>7.0.0</entry>
-      <entry>
-       新增可选参数 <parameter>validate_sid</parameter> 和
-       <parameter>update_timestamp</parameter>。
-      </entry>
-     </row>
-     <row>
-      <entry>5.5.1</entry>
-      <entry>
-       新增可选参数 <parameter>create_sid</parameter>。
-      </entry>
-     </row>
-     <row>
-      <entry>5.4.0</entry>
-      <entry>
-       新增用来实现自定义会话处理器的接口 <interfacename>SessionHandlerInterface</interfacename>；
-       新增 PHP 内部会话处理器类：<classname>SessionHandler</classname>。
-      </entry>
-     </row>
-    </tbody>
-   </tgroup>
-  </informaltable>
- </refsect1>
 
  <refsect1 role="examples">
   &reftitle.examples;
@@ -231,7 +275,6 @@
      自定义会话管理器： 完整代码请参见 <classname>SessionHandlerInterface</classname>。
     </title>
     <para>
-     下列代码适用于 PHP 5.4.0 及以上版本。
      这里仅列出了调用方式，完整代码请参见 <classname>SessionHandlerInterface</classname>。
     </para>
     <para>
@@ -255,95 +298,6 @@ session_start();
 ]]>
     </programlisting>
    </example>
-   <example>
-    <title>使用对象自定义会话保存管理器</title>
-    <para>
-     下列代码适用于 PHP 5.4.0 之前的版本。
-    </para>
-    <para>
-     下例演示了基于文件的会话数据存储，
-     和 PHP 默认的  <parameter>files</parameter> 存储器很相似。
-     通过对此示例代码进行扩展，
-     你可以很方便的实现使用数据库保存会话数据的功能。
-    </para>
-    <para>
-     针对于 PHP 5.4.0 之前的版本，
-     通过调用 <function>register_shutdown_function</function> 函数
-     来注册 <function>session_write_close</function> 回调函数。
-     这也是我们建议的方式。
-    </para>
-    <programlisting role="php">
-<![CDATA[
-<?php
-class FileSessionHandler
-{
-    private $savePath;
-
-    function open($savePath, $sessionName)
-    {
-        $this->savePath = $savePath;
-        if (!is_dir($this->savePath)) {
-            mkdir($this->savePath, 0777);
-        }
-
-        return true;
-    }
-
-    function close()
-    {
-        return true;
-    }
-
-    function read($id)
-    {
-        return (string)@file_get_contents("$this->savePath/sess_$id");
-    }
-
-    function write($id, $data)
-    {
-        return file_put_contents("$this->savePath/sess_$id", $data) === false ? false : true;
-    }
-
-    function destroy($id)
-    {
-        $file = "$this->savePath/sess_$id";
-        if (file_exists($file)) {
-            unlink($file);
-        }
-
-        return true;
-    }
-
-    function gc($maxlifetime)
-    {
-        foreach (glob("$this->savePath/sess_*") as $file) {
-            if (filemtime($file) + $maxlifetime < time() && file_exists($file)) {
-                unlink($file);
-            }
-        }
-
-        return true;
-    }
-}
-
-$handler = new FileSessionHandler();
-session_set_save_handler(
-    array($handler, 'open'),
-    array($handler, 'close'),
-    array($handler, 'read'),
-    array($handler, 'write'),
-    array($handler, 'destroy'),
-    array($handler, 'gc')
-    );
-
-// 下面这行代码可以防止使用对象作为会话保存管理器时可能引发的非预期行为
-register_shutdown_function('session_write_close');
-
-session_start();
-// 现在可以使用 $_SESSION 保存以及获取数据了
-]]>
-    </programlisting>
-   </example>
   </para>
  </refsect1>
 
@@ -351,23 +305,7 @@ session_start();
   &reftitle.notes;
   <warning>
    <para>
-    在脚本执行完毕之后，PHP 内部会清除对象，
-    所以有可能不调用 <parameter>write</parameter> 和 <parameter>close</parameter> 回调函数。
-    这样可能会引发非预期的行为，所以当使用对象作为会话保存管理器时，
-    需要通过注册 shutdown 回调函数来规避风险。
-    通常，你可以通过调用 <function>register_shutdown_function</function> 函数
-    来注册 <parameter>'session_write_close'</parameter> 回调函数。
-   </para>
-   <para>
-    在 PHP 5.4.0 中，可以调用 <function>session_register_shutdown</function> 
-    函数来注册 shutdown 回调函数。
-    如果你使用 <function>session_set_save_handler</function> 的 OOP 原型，
-    那么仅需设置 “register shutdown” 为 &true; 即可。
-   </para>
-  </warning>
-  <warning>
-   <para>
-    在 PHP 5.0.5 中，在对象销毁之后才会调用
+    在对象销毁之后才会调用
     <parameter>write</parameter> 和 <parameter>close</parameter> 回调函数，
     所以，在这两个回调函数中不可以使用对象，也不可以抛出异常。
     如果在函数中抛出异常，PHP 既不会捕获它，也不会跟踪它，
@@ -401,7 +339,7 @@ session_start();
      配置指示
     </member>
     <member><function>register_shutdown_function</function></member>
-    <member><function>session_register_shutdown</function> PHP 5.4.0+</member>
+    <member><function>session_register_shutdown</function></member>
     <member>
      完整的实现请参考 
      <link xlink:href="&url.session-save-handler;">save_handler.inc</link>。
