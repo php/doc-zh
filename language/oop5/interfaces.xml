@@ -1,43 +1,76 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: a9a6224ca97531df0a4e4b9b16b59c3f2baf1b09 Maintainer: jhdxr Status: ready -->
+<!-- EN-Revision: c045b64078ef641d32b04d2e8f0c4dda7c92aab6 Maintainer: jhdxr Status: ready -->
 <!-- $Author$ -->
 <sect1 xml:id="language.oop5.interfaces" xmlns="http://docbook.org/ns/docbook"
 xmlns:xlink="http://www.w3.org/1999/xlink">
  <title>对象接口</title>
  <para>
   使用接口（interface），可以指定某个类必须实现哪些方法，但不需要定义这些方法的具体内容。
+  由于接口（interface）和类（class）、trait 共享了命名空间，所以它们不能重名。
  </para>
  <para>
-  接口是通过 <literal>interface</literal> 关键字来定义的，就像定义一个标准的类一样，但其中定义所有的方法都是空的。
+  接口就像定义一个标准的类一样，通过 <literal>interface</literal> 关键字替换掉
+  <literal>class</literal> 关键字来定义，但其中所有的方法都是空的。
  </para>
  <para>
   接口中定义的所有方法都必须是公有，这是接口的特性。
  </para>
  <para>
-  需要注意的是，在接口中定义一个<link linkend="language.oop5.decon.constructor">构造方法</link>是被允许的。在有些场景下这可能会很有用，例如用于工厂模式时。
+  在实践中，往往出于两个辅助目的使用接口：
  </para>
+ <simplelist>
+  <member>
+   因为实现了同一个接口，所以开发者创建的对象虽然源自不同的类，但可能可以交换使用。
+   常用于多个数据库的服务访问、多个支付网关、不同的缓存策略等。
+   可能不需要任何代码修改，就能切换不同的实现方式。
+  </member>
+  <member>
+   能够让函数与方法接受一个符合接口的参数，而不需要关心对象如何做、如何实现。
+   这些接口常常命名成类似 <literal>Iterable</literal>、<literal>Cacheable</literal>、<literal>Renderable</literal>，
+   以便于体现出功能的含义。
+  </member>
+ </simplelist>
+ <para>
+  接口可以定义<link linkend="language.oop5.magic">魔术方法</link>，以便要求类（class）实现这些方法。
+ </para>
+ <note>
+  <para>
+   虽然没有禁止，但是强烈建议不要在接口中使用 <link linkend="language.oop5.decon.constructor">构造器</link>。
+   因为这样在对象实现接口时，会大幅降低灵活性。
+   此外，也不能强制确保构造器遵守继承规则，将导致不可预料的行为结果。
+  </para>
+ </note>
 
 
  <sect2 xml:id="language.oop5.interfaces.implements">
   <title>实现（<literal>implements</literal>）</title>
   <para>   
    要实现一个接口，使用 <literal>implements</literal>
-   操作符。类中必须实现接口中定义的所有方法，否则会报一个致命错误。类可以实现多个接口，用逗号来分隔多个接口的名称。
+   操作符。类中必须实现接口中定义的所有方法，否则会报一个致命错误。
+   类可以实现多个接口，用逗号来分隔多个接口的名称。
   </para>
+  <warning>
+   <para>
+    类实现（implement）两个接口时，如果它们定义了相同名称的方法，只有签名相同的时候才是允许的。
+   </para>
+  </warning>
+  <warning>
+   <para>
+    实现接口的时候，class 中的参数名称不必和接口完全一致。
+    然而， PHP 8.0 起语法开始支持<link linkend="functions.named-arguments">命名参数</link>，
+    也就是说调用方会依赖接口中参数的名称。
+    因此，强烈建议开发者的参数的命名，在类和接口中保持一致。
+   </para>
+  </warning>
   <note>
    <para>
-    在 PHP 5.3.9 之前，实现多个接口时，接口中的方法不能有重名，因为这可能会有歧义。在最近的 PHP 版本中，只要这些重名的方法签名相同，这种行为就是允许的。
+    接口也可以通过 <link linkend="language.oop5.inheritance">extends</link> 操作符扩展。
    </para>
   </note>
   <note>
    <para>
-    接口也可以继承，通过使用 <link linkend="language.oop5.inheritance">extends</link> 操作符。
-   </para>
-  </note>
-  <note>
-   <para>
-    类要实现接口，必须使用和接口中所定义的方法完全一致的方式。否则会导致致命错误。
+    类实现接口时，必须以<link linkend="language.oop.lsp">兼容的签名</link>定义接口中所有方法。
    </para>
   </note>
  </sect2>
@@ -58,8 +91,8 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
 <![CDATA[
 <?php
 
-// 声明一个'iTemplate'接口
-interface iTemplate
+// 声明一个'Template'接口
+interface Template
 {
     public function setVariable($name, $var);
     public function getHtml($template);
@@ -68,9 +101,9 @@ interface iTemplate
 
 // 实现接口
 // 下面的写法是正确的
-class Template implements iTemplate
+class WorkingTemplate implements Template
 {
-    private $vars = array();
+    private $vars = [];
   
     public function setVariable($name, $var)
     {
@@ -89,10 +122,10 @@ class Template implements iTemplate
 
 // 下面的写法是错误的，会报错，因为没有实现 getHtml()：
 // Fatal error: Class BadTemplate contains 1 abstract methods
-// and must therefore be declared abstract (iTemplate::getHtml)
-class BadTemplate implements iTemplate
+// and must therefore be declared abstract (Template::getHtml)
+class BadTemplate implements Template
 {
-    private $vars = array();
+    private $vars = [];
   
     public function setVariable($name, $var)
     {
@@ -108,18 +141,18 @@ class BadTemplate implements iTemplate
     <programlisting role="php">
 <![CDATA[
 <?php
-interface a
+interface A
 {
     public function foo();
 }
 
-interface b extends a
+interface B extends A
 {
     public function baz(Baz $baz);
 }
 
 // 正确写法
-class c implements b
+class C implements B
 {
     public function foo()
     {
@@ -131,7 +164,7 @@ class c implements b
 }
 
 // 错误写法会导致一个致命错误
-class d implements b
+class D implements B
 {
     public function foo()
     {
@@ -146,26 +179,26 @@ class d implements b
     </programlisting>
   </example>
   <example xml:id="language.oop5.interfaces.examples.ex3">
-   <title>继承多个接口</title>
+   <title>扩展多个接口</title>
     <programlisting role="php">
 <![CDATA[
 <?php
-interface a
+interface A
 {
     public function foo();
 }
 
-interface b
+interface B
 {
     public function bar();
 }
 
-interface c extends a, b
+interface C extends A, B
 {
     public function baz();
 }
 
-class d implements c
+class D implements C
 {
     public function foo()
     {
@@ -188,18 +221,81 @@ class d implements c
     <programlisting role="php">
 <![CDATA[
 <?php
-interface a
+interface A
 {
-    const b = 'Interface constant';
+    const B = 'Interface constant';
 }
 
 // 输出接口常量
-echo a::b;
+echo A::B;
 
 // 错误写法，因为常量不能被覆盖。接口常量的概念和类常量是一样的。
-class b implements a
+class B implements A
 {
-    const b = 'Class constant';
+    const B = 'Class constant';
+}
+?>
+]]>
+   </programlisting>
+  </example>
+  <example xml:id="language.oop5.interfaces.examples.ex5">
+   <title>抽象（abstract）类的接口使用</title>
+   <programlisting role="php">
+    <![CDATA[
+<?php
+interface A
+{
+    public function foo(string $s): string;
+
+    public function bar(int $i): int;
+}
+
+// 抽象类可能仅实现了接口的一部分。
+// 扩展该抽象类时必须实现剩余部分。
+abstract class B implements A
+{
+    pubic function foo(string $s): string
+    {
+        return $s . PHP_EOL;
+    }
+}
+
+class C extends B
+{
+    public function bar(int $i): int
+    {
+        return $i * 2;
+    }
+}
+?>
+]]>
+   </programlisting>
+  </example>
+  <example xml:id="language.oop5.interfaces.examples.ex6">
+   <title>同时使用扩展和实现</title>
+   <programlisting role="php">
+    <![CDATA[
+<?php
+
+class One
+{
+    /* ... */
+}
+
+interface Usable
+{
+    /* ... */
+}
+
+interface Updatable
+{
+    /* ... */
+}
+
+// 关键词顺序至关重要： 'extends' 必须在前面
+class Two extends One implements Usable, Updatable
+{
+    /* ... */
 }
 ?>
 ]]>
