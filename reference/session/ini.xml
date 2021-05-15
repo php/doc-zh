@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 3e08a8aae657492bdcdc7c550099ddf072042fa9 Maintainer: HonestQiao Status: ready -->
+<!-- EN-Revision: 184f3f7bd45643cb80f828d0bb001991ec3a5fad Maintainer: HonestQiao Status: ready -->
 <!-- Reviewed: no Maintainer: HonestQiao -->
 <section xml:id="session.configuration" xmlns="http://docbook.org/ns/docbook"> 
  &reftitle.runtime;
@@ -250,14 +250,13 @@
    </term>
    <listitem>
     <simpara>
-     <literal>session.save_handler</literal> defines the name of the
-     handler which is used for storing and retrieving data
-     associated with a session. Defaults to
-     <literal>files</literal>. Note that individual extensions may register
-     their own <literal>save_handler</literal>s; registered handlers can be
-     obtained on a per-installation basis by referring to
-     <function>phpinfo</function>. See also
-     <function>session_set_save_handler</function>.
+     <literal>session.save_handler</literal>
+     定义处理器（handler）名称，可以获取/储存关联 session 数据。
+     默认为
+     <literal>files</literal>。
+     注意不同的扩展可能会注册它们各自的 <literal>save_handler</literal>。
+     <function>phpinfo</function> 提到的预装数据，包含了注册过的 hander。
+     可以参考 <function>session_set_save_handler</function>。
     </simpara>
    </listitem>
   </varlistentry>
@@ -298,7 +297,10 @@
     </warning>
     <caution>
      <para>
-      使用以上描述的可选目录层级参数 <literal>N</literal> 时请注意，对于绝大多数站点，大于1或者2的值会不太合适——因为这需要创建大量的目录：例如，值设置为 3 需要在文件系统上创建 <literal>64^3</literal> 个目录，将浪费很多空间和 inode。
+      使用以上描述的可选目录层级参数 <literal>N</literal> 时请注意，对于绝大多数站点，
+      大于1或者2的值会不太合适——因为这需要创建大量的目录：
+      例如，值设置为 3 需要在文件系统上创建 <literal>64^3</literal> 个目录，
+      将浪费很多空间和 inode。
      </para>
      <para>
       仅仅在绝对肯定站点足够大时，才可以设置 <literal>N</literal> 大于2。
@@ -348,7 +350,7 @@
      
      如果 PHP 编译时加入了 <link linkend="ref.wddx">WDDX
      支持</link>，则只能用 WDDX。
-     自 PHP 5.5.4 起可以使用 <literal>php_serialize</literal>。 <literal>php_serialize</literal> 在内部简单地直接使用 
+     <literal>php_serialize</literal> 在内部简单地直接使用
      serialize/unserialize 函数，并且不会有 <literal>php</literal>
      和 <literal>php_binary</literal> 所具有的限制。
      
@@ -444,7 +446,7 @@
      <literal>/dev/random</literal> 或 <literal>/dev/urandom</literal>。
     </simpara>
     <simpara>
-     在 Windows 上自 PHP 5.3.3 起加入了此功能。
+     在 Windows 上也支持此功能。
      设置  <literal>session.entropy_length</literal> 为非零的值将使 PHP 使用 Windows Random API 作为熵值源。
     </simpara>
     <note>
@@ -452,8 +454,8 @@
        PHP 7.1.0 中移除。
       </simpara>
      <simpara>
-      自 PHP 5.4.0 起，默认情况下， <literal>session.entropy_file</literal> 在 <literal>/dev/urandom</literal> 或 <literal>/dev/arandom</literal> 可用的时候使用它们。
-      在 PHP 5.3.0 中此指令默认留空。
+     在 <literal>/dev/urandom</literal> 或 <literal>/dev/arandom</literal> 可用的时候，
+      <literal>session.entropy_file</literal>  默认使用它们。
      </simpara>
     </note>
    </listitem>
@@ -482,29 +484,29 @@
    </term>
    <listitem>
     <simpara>
-     <literal>session.use_strict_mode</literal> specifies whether the
-     module will use strict session id mode. If this mode is enabled,
-     the module does not accept uninitialized session IDs. If an uninitialized
-     session ID is sent from the browser, a new session ID is sent to the browser.
-     Applications are protected from session fixation via session adoption
-     with strict mode.
-     Defaults to <literal>0</literal> (disabled).
+     <literal>session.use_strict_mode</literal>
+     设置是否启用严格 session id 模式。
+     开启此模式后，模块不会接受未初始化过的 session ID。
+     从浏览器端传入未初始化的 session ID 后，将会发送一个新的 session ID 给它。
+     通过 session 启用严格模式可固定 session 以保护应用。
+     默认为 <literal>0</literal> （禁用）。
     </simpara>
     <note>
      <simpara>
-     Enabling <literal>session.use_strict_mode</literal> is mandatory for
-     general session security. All sites are advised to enable this. See 
-     <function>session_create_id</function> example code for more details.
+      开启 <literal>session.use_strict_mode</literal> 是常规的 session 安全强制性措施。
+      建议所有站点都开启此模式。
+      可以参考 <function>session_create_id</function> 例子中的代码。
      </simpara>
     </note>
     <warning>
      <para>
-      If a custom session handler registered via <function>session_set_save_handler</function>
-      does not implement <methodname>SessionUpdateTimestampHandlerInterface::validateId</methodname>,
-      nor supplies the <parameter>validate_sid</parameter> callback, respectively,
-      strict session ID mode is effectively disabled, regardless of the value of this directive.
-      Particularly note that <classname>SessionHandler</classname> does <emphasis>not</emphasis>
-      implement <methodname>SessionHandler::validateId</methodname>.
+      如果 <function>session_set_save_handler</function> 注册的自定义 session 处理器
+      没有实现 <methodname>SessionUpdateTimestampHandlerInterface::validateId</methodname>，
+      也没有相应提供 <parameter>validate_sid</parameter> 回调，那么无论上述指令的值如何设置，
+      实际上严格 session ID 模式都是关闭状态的。
+      尤其需要注意<emphasis>没有</emphasis>
+      实现 <methodname>SessionHandler::validateId</methodname>
+      的 <classname>SessionHandler</classname>。
      </para>
     </warning>
    </listitem>
@@ -532,7 +534,7 @@
     <simpara>
      <literal>session.use_only_cookies</literal> 指定是否在客户端<emphasis
      role="strong">仅仅</emphasis>使用 cookie 来存放会话 ID。。启用此设定可以防止有关通过
-     URL 传递会话 ID 的攻击。自PHP 5.3.0开始，默认值为<literal>1</literal>（启用）
+     URL 传递会话 ID 的攻击。默认值为<literal>1</literal>（启用）
     </simpara>
    </listitem>
   </varlistentry>
@@ -553,9 +555,9 @@
      <function>session_set_cookie_params</function>。
     </simpara>
     <note>
-     <para> 
-      The expiration timestamp is set relative to the server time, which is
-      not necessarily the same as the time in the client's browser.
+     <para>
+      过期时间是根据服务器时间设置的，
+      它没有必要和浏览器端的时间一致。
      </para>
     </note> 
    </listitem>
@@ -613,10 +615,9 @@
    </term>
    <listitem>
     <simpara>
-     Marks the cookie as accessible only through the HTTP protocol. This means
-     that the cookie won't be accessible by scripting languages, such as
-     JavaScript. This setting can effectively help to reduce identity theft
-     through XSS attacks (although it is not supported by all browsers).
+     设置 cookie 仅能够通过 HTTP 协议访问。
+     它意味着 cookie 无法通过类似 JavaScript 这样的脚本语言访问。
+     该设置可有效避免 XSS 攻击窃取身份（但并非所有浏览器都支持）。
     </simpara>
    </listitem>
   </varlistentry>
@@ -707,20 +708,21 @@
     </term>
     <listitem>
      <simpara>
-      <literal>session.trans_sid_tags</literal> specifies which HTML tags
-      are rewritten to include session id when transparent sid support
-      is enabled. Defaults to
+      开启支持透明 sid 时， <literal>session.trans_sid_tags</literal>
+      指定是否需要重写 HTML 标签来包含 session id。
+      默认为
       <literal>a=href,area=href,frame=src,input=src,form=</literal>
      </simpara>
      <simpara>
-      <literal>form</literal> is special tag. <literal>&lt;input hidden="session_id" name="session_name"&gt;</literal>
-      is added as form variable.
+      <literal>form</literal> 是个特殊标签。
+      <literal>&lt;input hidden="session_id" name="session_name"&gt;</literal>
+      作为表单变量添加。
      </simpara>
      <note>
       <simpara>
-       Before PHP 7.1.0, <link linkend="ini.url-rewriter.tags">url_rewriter.tags</link>
-       was used for this purpose. Since PHP 7.1.0, <literal>fieldset</literal> 
-       is no longer considered as special tag.
+       PHP 7.1.0 之前，<link linkend="ini.url-rewriter.tags">url_rewriter.tags</link>
+       用于此目的。
+       PHP 7.1.0 之后，<literal>fieldset</literal> 不再作为特殊标签对待。
       </simpara>
      </note>
     </listitem>
@@ -733,11 +735,11 @@
    </term>
    <listitem>
     <simpara>
-     <literal>session.trans_sid_hosts</literal> specifies which hosts
-     are rewritten to include session id when transparent sid support
-     is enabled. Defaults to <literal>$_SERVER['HTTP_HOST']</literal>
-     Multiple hosts can be specified by ",", no space is allowed
-     between hosts. e.g. <literal>php.net,wiki.php.net,bugs.php.net</literal>
+     当透明 sid 支持开启时，<literal>session.trans_sid_hosts</literal>
+     设置了要重写包含 session 的主机名，
+     默认为 <literal>$_SERVER['HTTP_HOST']</literal>。
+     多个主机用半角逗号 "," 分隔；主机名之间不能用空格。
+     例如 <literal>php.net,wiki.php.net,bugs.php.net</literal>。
     </simpara>
    </listitem>
   </varlistentry>
@@ -749,14 +751,15 @@
     </term>
     <listitem>
      <simpara>
-      <literal>session.sid_length</literal> allows you to specify the
-      length of session ID string. Session ID length can be between 22
-      to 256.
+      通过 <literal>session.sid_length</literal> 可以设置
+      session ID 字符串长度。
+      Session ID 的长度可以是在 22 到 256 之间。
      </simpara>
      <simpara>
-      The default is 32. If you need compatibility you may specify 32,
-      40, etc. Longer session ID is harder to guess. At least 32 chars
-      are recommended.
+      默认是 32。
+      如果需要较好的兼容性可以设置为 32、40 等。
+      较长的 session ID 会更难猜测。
+      推荐至少要 32 个字符。
      </simpara>
      <tip>
       <para>
@@ -768,16 +771,15 @@
        <literal>session.hash_function</literal>=0 (MD5) and
        <literal>session.hash_bits_per_character</literal>=5. Use 22 instead of
        <literal>session.hash_function</literal>=0 (MD5) and
-       <literal>session.hash_bits_per_character</literal>=6. You must
-       configure INI values to have at least 128 bits in session ID. Do
-       not forget to set an appropriate value for
-       <literal>session.sid_bits_per_character</literal>, otherwise you
-       will have weaker session ID.
+       <literal>session.hash_bits_per_character</literal>=6.
+       必须正确配置 INI 值，让 session ID 至少有 128 比特（bits）。
+       不要忘了为 <literal>session.sid_bits_per_character</literal>
+       设置合适的值；否则将会有一个较弱的 session ID。
       </para>
      </tip> 
      <note>
       <simpara>
-       This setting is introduced in PHP 7.1.0.
+       PHP 7.1.0 中加入该设置。
       </simpara>
      </note>
     </listitem>
@@ -790,19 +792,20 @@
     </term>
     <listitem>
      <simpara>
-      <literal>session.sid_per_character</literal> allows you to specify the
-      number of bits in encoded session ID character. The possible values are 
-      '4' (0-9, a-f), '5' (0-9, a-v), and '6' (0-9, a-z, A-Z, "-", ",").
+      <literal>session.sid_per_character</literal> 设置要编码 session ID 字符的比特数。
+      可能的设置有：
+      '4'（0-9、a-f）、'5'（0-9、a-v）、'6'（0-9、a-z、A-Z、"-"、","）。
      </simpara>
      <simpara>
-      The default is 4. The more bits results in stronger session ID. 5 is
-      recommended value for most environments.
+      默认为 4。
+      更多的比特数会产生更强健的 session ID。
+      对于绝大多数环境，推荐值是 5。
      </simpara>
      <para>
      </para>
      <note>
       <simpara>
-       This setting is introduced in PHP 7.1.0.
+       PHP 7.1.0 中加入该设置。
       </simpara>
      </note>
     </listitem>
@@ -819,15 +822,14 @@
      ID 的散列算法。'0' 表示 MD5（128 位），'1' 表示 SHA-1（160 位）。
     </simpara>
     <para>
-     Since PHP 5.3.0 it is also possible to specify any of the algorithms
-     provided by the <link linkend="ref.hash">hash extension</link> (if it is
-     available), like <literal>sha512</literal> or
-     <literal>whirlpool</literal>. A complete list of supported algorithms can
-     be obtained with the <function>hash_algos</function> function.
+     还可以指定 <link linkend="ref.hash">hash 扩展</link>（开启的时候）
+     支持的任意算法，例如 <literal>sha512</literal> 或
+     <literal>whirlpool</literal>。
+     可通过 <function>hash_algos</function> 函数获取支持的算法完整名单。
     </para>
     <note>
      <para>
-      这是 PHP 5 引进的。
+      PHP 7.1.0 中已经移除。
      </para>
     </note>
    </listitem>
@@ -958,8 +960,8 @@
    </term>
    <listitem>
     <simpara>
-     <literal>session.lazy_write</literal>, when set to 1, means that session
-     data is only rewritten if it changes. Defaults to 1, enabled.
+     <literal>session.lazy_write</literal>，设置成 1 的含义是：
+     只有 session 数据发生变化时才需要重新写入。默认为开启状态 1。
     </simpara>
    </listitem>
   </varlistentry>
