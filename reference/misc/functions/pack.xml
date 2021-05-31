@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
 <!-- $Author$ -->
-<!-- EN-Revision: a532689f9ff143372e7f682d4e9106faf3304204 Maintainer: Avenger Status: ready -->
+<!-- EN-Revision: f9c4a68ef4f89e51e6d9b905ad3ddb6492386dd3 Maintainer: Avenger Status: ready -->
 <refentry xml:id="function.pack" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>pack</refname>
@@ -13,7 +13,7 @@
   <methodsynopsis>
    <type>string</type><methodname>pack</methodname>
    <methodparam><type>string</type><parameter>format</parameter></methodparam>
-   <methodparam choice="opt"><type>mixed</type><parameter>...</parameter></methodparam>
+   <methodparam rep="repeat"><type>mixed</type><parameter>values</parameter></methodparam>
   </methodsynopsis>
   <para>
    将输入参数打包成 <parameter>format</parameter> 格式的二进制字符串。
@@ -166,7 +166,7 @@
           </row>
           <row>
            <entry>Z</entry>
-           <entry>以 NUL 字节填充字符串空白(自 PHP 5.5 加入)</entry>
+           <entry>以 NUL 字节填充字符串空白</entry>
           </row>
           <row>
            <entry>@</entry>
@@ -179,7 +179,7 @@
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>...</parameter></term>
+     <term><parameter>values</parameter></term>
      <listitem>
       <para>
       </para>
@@ -209,28 +209,21 @@
      </thead>
      <tbody>
       <row>
+       <entry>8.0.0</entry>
+       <entry>
+        此函数不再在失败时返回 &false; 。
+       </entry>
+      </row>
+      <row>
        <entry>7.2.0</entry>
        <entry>
-        <type>float</type> 和 <type>double</type> 类型支持打断和小端。
+        <type>float</type> 和 <type>double</type> 类型支持大端和小端。
        </entry>
       </row>
       <row>
        <entry>7.0.15,7.1.1</entry>
        <entry>
         添加了 “e”,“E”,“g” 和 “G” 代码以启用 float 和 double 的字节顺序支持。
-       </entry>
-      </row>
-      <row>
-       <entry>5.6.3</entry>
-       <entry>
-        添加了 “q”、“q”、“J” 和 “P” 代码以支持处理 64 位数字。
-       </entry>
-      </row>
-      <row>
-       <entry>5.5.0</entry>
-       <entry>
-        “Z” 代码添加了与 “a” 等效的功能，以实现 Perl
-        兼容性。
        </entry>
       </row>
      </tbody>
@@ -258,29 +251,29 @@ $binarydata = pack("nvc*", 0x1234, 0x5678, 65, 66);
    </example>
   </para>
  </refsect1>
- 
+
  <refsect1 role="notes">
   &reftitle.notes;
   <caution>
-   <para>Note that PHP internally stores <type>integer</type> values as
-    signed values of a machine-dependent size (C type <literal>long</literal>).   
-    Integer literals and operations that yield numbers outside the bounds of the  
-    <type>integer</type> type will be stored as <type>float</type>.
-    When packing these floats as integers, they are first cast into the integer   
+   <para>Note that PHP internally stores <type>int</type> values as
+    signed values of a machine-dependent size (C type <literal>long</literal>).
+    Integer literals and operations that yield numbers outside the bounds of the
+    <type>int</type> type will be stored as <type>float</type>.
+    When packing these floats as integers, they are first cast into the integer
     type. This may or may not result in the desired byte pattern.
    </para>
    <para>The most relevant case is when packing unsigned numbers that would
-    be representable with the <type>integer</type> type if it were unsigned.
-    In systems where the <type>integer</type> type has a 32-bit size, the cast
-    usually results in the same byte pattern as if the <type>integer</type> were
+    be representable with the <type>int</type> type if it were unsigned.
+    In systems where the <type>int</type> type has a 32-bit size, the cast
+    usually results in the same byte pattern as if the <type>int</type> were
     unsigned (although this relies on implementation-defined unsigned to signed
     conversions, as per the C standard). In systems where the
-    <type>integer</type> type has 64-bit size, the <type>float</type> most
+    <type>int</type> type has 64-bit size, the <type>float</type> most
     likely does not have a mantissa large enough to hold the value without
     loss of precision. If those systems also have a native 64-bit C
-    <literal>int</literal> type (most UNIX-like systems don't), the only way to  
+    <literal>int</literal> type (most UNIX-like systems don't), the only way to
     use the <literal>I</literal> pack format in the upper range is to create
-    <type>integer</type> negative values with the same byte representation
+    <type>int</type> negative values with the same byte representation
     as the desired unsigned value.
    </para>
   </caution>
