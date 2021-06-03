@@ -1,54 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: cff6fa6abc65d088f4e93aa35a09c38c000fe79f Maintainer: HonestQiao Status: ready -->
-<!-- Reviewed: no Maintainer: HonestQiao -->
+<!-- EN-Revision: a7421437b658dc4e0455ba8ea7e37a39a530845e Maintainer: jhdxr Status: ready -->
+<!-- Reviewed: no Maintainer: jhdxr -->
 <refentry xml:id="function.exif-read-data" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
   <refname>exif_read_data</refname>
-  <refpurpose>
-   从 <acronym>JPEG</acronym> 或 <acronym>TIFF</acronym>
-   文件中读取 <acronym>EXIF</acronym> 头信息
-  </refpurpose>
+  <refpurpose>从一个图片文件中读取 <acronym>EXIF</acronym> 头信息</refpurpose>
  </refnamediv>
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <type>array</type><methodname>exif_read_data</methodname>
-   <methodparam><type>string</type><parameter>filename</parameter></methodparam>
-   <methodparam choice="opt"><type>string</type><parameter>sections</parameter><initializer>&null;</initializer></methodparam>
-   <methodparam choice="opt"><type>bool</type><parameter>arrays</parameter><initializer>false</initializer></methodparam>
-   <methodparam choice="opt"><type>bool</type><parameter>thumbnail</parameter><initializer>false</initializer></methodparam>
+   <type class="union"><type>array</type><type>false</type></type><methodname>exif_read_data</methodname>
+   <methodparam><type class="union"><type>resource</type><type>string</type></type><parameter>file</parameter></methodparam>
+   <methodparam choice="opt"><type class="union"><type>string</type><type>null</type></type><parameter>required_sections</parameter><initializer>&null;</initializer></methodparam>
+   <methodparam choice="opt"><type>bool</type><parameter>as_arrays</parameter><initializer>&false;</initializer></methodparam>
+   <methodparam choice="opt"><type>bool</type><parameter>read_thumbnail</parameter><initializer>&false;</initializer></methodparam>
   </methodsynopsis>
   <para>
-   <function>exif_read_data</function> 函数从 <acronym>JPEG</acronym> 或 <acronym>TIFF</acronym> 图像文件中读取 <acronym>EXIF</acronym>
-   头信息。这样就可以读取数码相机产生的元数据。
+   <function>exif_read_data</function> 函数从一个图片文件中读取
+   <acronym>EXIF</acronym> 头信息。这样就可以读取数码相机产生的元数据。
   </para>
   <para>
    <acronym>EXIF</acronym> 头信息往往存在于数码相机生成的 JPEG/TIFF
-   图像中，但不幸的是每个数码相机制造商的标记都不同，因此（编写代码时）不能依赖于某个特定的
+   图片中，但不幸的是每个数码相机制造商的标记都不同，因此（编写代码时）不能依赖于某个特定的
    Exif 头信息。
   </para>
   <para>
-   Height 和 Width 是用和 <function>getimagesize</function>
+   <literal>Height</literal> 和 <literal>Width</literal> 是用和 <function>getimagesize</function>
    一样的方法计算的，因此它们的值不能是任何返回的头信息的部分。此外
-   html 是一个 height/width 的文本字符串可以用于普通的 <acronym>HTML</acronym> 中。
+   <literal>html</literal> 是一个可以用于普通的 <acronym>HTML</acronym> 中的 height/width 的文本字符串。
   </para>
   <para>
    当一个 Exif 头信息包含有一个 Copyright 时注意它本身可以包含两个值。解决方案和
-   Exif 2.10 标准不一致，COMPUTED 区段会同时返回
-   Copyright.Photographer 和
-   Copyright.Editor，但是 IFD0
+   Exif 2.10 标准不一致，<literal>COMPUTED</literal> 区段会同时返回
+   <literal>Copyright.Photographer</literal> 和
+   <literal>Copyright.Editor</literal>，但是 <literal>IFD0</literal>
    区段则包含有一个字节数组用 NULL 字符分隔开两个项目。或者只有第一项如果数据类型错误的话（Exif
-   的正常行为）。COMPUTED 也会包含
-   Copyright，要么是原始的版权字符串，要么是逗号分隔的摄像与编辑的版权信息。
+   的正常行为）。<literal>COMPUTED</literal> 也会包含
+   <literal>Copyright</literal>，要么是原始的版权字符串，要么是逗号分隔的摄像与编辑的版权信息。
   </para>
   <para>
-   UserComment 标记和 Copyright
+   <literal>UserComment</literal> 标记和 Copyright
    有同样的问题。它也可以存储两个值，第一个是使用的编码方式，第二个是其值本身。如果这样则
-   IFD0 区段仅包含编码方式或者一个字节数组。COMPUTED
-   区段将存储两个值到 UserCommentEncoding 和
-   UserComment。UserComment
-   在两种情况下都可用因此应该优先使用它而不是 IFD0 区段中的该值。
+   <literal>IFD</literal> 区段仅包含编码方式或者一个字节数组。<literal>COMPUTED</literal>
+   区段将存储两个值到 <literal>UserCommentEncoding</literal> 和
+   <literal>UserComment</literal>。<literal>UserComment</literal>
+   在两种情况下都可用因此应该优先使用它而不是 <literal>IFD0</literal> 区段中的该值。
   </para>
   <para>
    <function>exif_read_data</function> 还会根据 EXIF
@@ -56,28 +53,22 @@
    xlink:href="&url.exifspec;">&url.exifspec;</link>，第
    20 页）来验证 EXIF 数据。
   </para>
-  <note>
-   <para>
-    Windows ME/XP 在连接到数码相机时能清除掉
-    Exif 头信息。
-   </para>
-  </note>
  </refsect1>
-
  <refsect1 role="parameters">
   &reftitle.parameters;
   <para>
    <variablelist>
     <varlistentry>
-     <term><parameter>filename</parameter></term>
+     <term><parameter>file</parameter></term>
      <listitem>
       <para>
-       被读取的图像文件名。不能是 <acronym>URL</acronym>。
+       图片文件的位置。这可以是一个文件路径（和往常一样，流封装也是支持的），
+       或者是一个流式资源（stream <type>resource</type>）。
       </para>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>sections</parameter></term>
+     <term><parameter>required_sections</parameter></term>
      <listitem>
       <para>
        是需要存在于文件中的逗号分隔的区段列表用来产生结果数组。如果未找到所请求的区段则返回值为
@@ -95,12 +86,12 @@
             html，Width，Height，IsColor，可能有更多其它的。Height
             和 Width 是用和 <function>getimagesize</function>
             一样的方法计算的，因此它们的值不能是任何返回的头信息的部分。此外
-            html 是一个 height/width 的文本字符串可以用于普通的 <acronym>HTML</acronym> 中。
+            <literal>html</literal> 是一个可以用于普通的 <acronym>HTML</acronym> 中的 height/width 的文本字符串。
            </entry>
           </row>
           <row>
            <entry>ANY_TAG</entry>
-           <entry>任何包含有标记的信息，例如 IFD0，EXIF，...</entry>
+           <entry>任何包含有标记的信息，例如 <literal>IFD0</literal>，<literal>EXIF</literal>，...</entry>
           </row>
           <row>
            <entry>IFD0</entry>
@@ -111,7 +102,7 @@
           <row>
            <entry>THUMBNAIL</entry>
            <entry>
-            如果有第二个 IFD，文件应该包含有缩略图。所有有关嵌入缩略图的标记信息都存储在本区。
+            如果有第二个 <literal>IFD</literal>，文件应该包含有缩略图。所有有关嵌入缩略图的标记信息都存储在本区。
            </entry>
           </row>
           <row>
@@ -121,7 +112,7 @@
           <row>
            <entry>EXIF</entry>
            <entry>
-            EXIF 区段是 IFDO 的子区，包含有图像的更多详细信息。大多数内容都是数码相机相关的。
+            EXIF 区段是 <literal>IFD0</literal> 的子区，包含有图像的更多详细信息。大多数内容都是数码相机相关的。
            </entry>
           </row>
          </tbody>
@@ -131,10 +122,10 @@
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>arrays</parameter></term>
+     <term><parameter>as_arrays</parameter></term>
       <listitem>
       <para>
-       指定了是否每个区段都成为一个数组。<parameter>sections</parameter>
+       指定了是否每个区段都成为一个数组。<parameter>required_sections</parameter>
        <literal>COMPUTED</literal>，<literal>THUMBNAIL</literal>
        和<literal>COMMENT</literal>
        区段总是成为数组，因为它们里面包含的名字和其它区段冲突。
@@ -142,7 +133,7 @@
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>thumbnail</parameter></term>
+     <term><parameter>read_thumbnail</parameter></term>
      <listitem>
       <para>
        当设定为 &true; 时，读取缩略图本身。否则只读取标记数据。
@@ -160,6 +151,14 @@
   </para>
  </refsect1>
 
+ <refsect1 role="errors">
+  &reftitle.errors;
+  <para>
+   当遇到不支持的标签，或其他潜在的错误情况时，将抛出<constant>E_WARNING</constant>
+   与<constant>E_NOTICE</constant>等级的错误，但这个函数依然会尝试去读取所有可理解的信息。
+  </para>
+ </refsect1>
+
  <refsect1 role="changelog">
   &reftitle.changelog;
   <para>
@@ -173,31 +172,78 @@
      </thead>
      <tbody>
       <row>
-       <entry>4.3.0</entry>
+       <entry>8.0.0</entry>
        <entry>
-        可以读取所有嵌入的 <acronym>IFD</acronym>
-        数据，包括数组（也返回数组）。此外嵌入的缩略图的大小包括在
-        THUMBNAIL 子数组中并且
-        <function>exif_read_data</function> 可以将缩略图按照
-        <acronym>TIFF</acronym> 格式返回。最后，不再有返回值最大长度的限制了（直到达到内存限定）。
+        <parameter>required_sections</parameter> 现在可以为空。
        </entry>
       </row>
       <row>
-       <entry>4.3.0</entry>
+       <entry>7.2.0</entry>
        <entry>
-        如果 PHP 有 <link linkend="ref.mbstring">mbstring</link>
-        支持，则用户注释可以自动改变编码。此外，如果用户注释使用
-        Unicode 或 JIS 编码，将会根据 EXIF 在 &php.ini; 中的
-        设置被自动改变。
+        <parameter>file</parameter> 参数现在起支持本地文件和流式资源。
        </entry>
       </row>
       <row>
-       <entry>4.3.0</entry>
+       <entry>7.2.0</entry>
        <entry>
-        如果图像包含任何 IFD0 数据，则 COMPUTED 会包含有一项
-        ByteOrderMotorola，对于 little-endian (intel) 字节顺序，其值为 0，对于
-        big-endian (motorola) 字节顺序，其值为 1。此外，COMPUTED
-        和 UserComment 在数据类型出错时也不再仅包含第一个版权条目。
+        新增了以下 EXIF 格式的支持：
+        <itemizedlist>
+         <listitem>
+          <simpara>
+           Samsung
+          </simpara>
+         </listitem>
+         <listitem>
+          <simpara>
+           DJI
+          </simpara>
+         </listitem>
+         <listitem>
+          <simpara>
+           Panasonic
+          </simpara>
+         </listitem>
+         <listitem>
+          <simpara>
+           Sony
+          </simpara>
+         </listitem>
+         <listitem>
+          <simpara>
+           Pentax
+          </simpara>
+         </listitem>
+         <listitem>
+          <simpara>
+           Minolta
+          </simpara>
+         </listitem>
+         <listitem>
+          <simpara>
+           Sigma/Foveon
+          </simpara>
+         </listitem>
+         <listitem>
+          <simpara>
+           AGFA
+          </simpara>
+         </listitem>
+         <listitem>
+          <simpara>
+           Kyocera
+          </simpara>
+         </listitem>
+         <listitem>
+          <simpara>
+           Ricoh
+          </simpara>
+         </listitem>
+         <listitem>
+          <simpara>
+           Epson
+          </simpara>
+         </listitem>
+        </itemizedlist>
        </entry>
       </row>
      </tbody>
@@ -205,7 +251,6 @@
    </informaltable>
   </para>
  </refsect1>
-
  <refsect1 role="examples">
   &reftitle.examples;
   <para>
@@ -266,8 +311,77 @@ THUMBNAIL.Thumbnail.Height: 1
     </screen>
    </example>
   </para>
+  <para>
+   <example>
+    <title><function>exif_read_data</function> with streams available as of PHP 7.2.0</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+// Open a the file, this should be in binary mode
+$fp = fopen('/path/to/image.jpg', 'rb');
+
+if (!$fp) {
+    echo 'Error: Unable to open image for reading';
+    exit;
+}
+
+// Attempt to read the exif headers
+$headers = exif_read_data($fp);
+
+if (!$headers) {
+    echo 'Error: Unable to read exif headers';
+    exit;
+}
+
+// Print the 'COMPUTED' headers
+echo 'EXIF Headers:' . PHP_EOL;
+
+foreach ($headers['COMPUTED'] as $header => $value) {
+    printf(' %s => %s%s', $header, $value, PHP_EOL);
+}
+?>
+]]>
+    </programlisting>
+    &example.outputs.similar;
+    <screen role="php">
+<![CDATA[
+EXIF Headers:
+ Height => 576
+ Width => 1024
+ IsColor => 1
+ ByteOrderMotorola => 0
+ ApertureFNumber => f/5.6
+ UserComment =>
+ UserCommentEncoding => UNDEFINED
+ Copyright => Denis
+ Thumbnail.FileType => 2
+ Thumbnail.MimeType => image/jpeg
+]]>
+    </screen>
+   </example>
+  </para>
  </refsect1>
-<refsect1 role="seealso">
+ <refsect1 role="notes">
+  &reftitle.notes;
+  <note>
+   <para>
+    If <link linkend="ref.mbstring">mbstring</link> is enabled, exif will attempt to process
+    the unicode and pick a charset as specified by
+    <link linkend="ini.exif.decode-unicode-motorola">exif.decode_unicode_motorola</link> and
+    <link linkend="ini.exif.decode-unicode-intel">exif.decode_unicode_intel</link>. The exif
+    extension will not attempt to figure out the encoding on its own, and it is up to the user
+    to properly specify the encoding for which to use for decoding by setting one of these two
+    ini directives prior to calling <function>exif_read_data</function>.
+   </para>
+  </note>
+  <note>
+   <para>
+    If the <parameter>file</parameter> is used to pass a stream to this function, then the stream
+    must be seekable. Note that the file pointer position is not changed after this function returns.
+   </para>
+  </note>
+ </refsect1>
+ <refsect1 role="seealso">
   &reftitle.seealso;
   <para>
    <simplelist>
@@ -277,7 +391,6 @@ THUMBNAIL.Thumbnail.Height: 1
   </para>
  </refsect1>
 </refentry>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
