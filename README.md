@@ -1,4 +1,4 @@
-# PHP 中文手册 mirror
+# PHP 中文手册 
 
 [![Build](https://github.com/php/doc-zh/workflows/Build/badge.svg)](https://github.com/php/doc-zh/actions)
 
