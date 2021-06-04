@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: a9b26c34e481fa948bcc7d75b73b441605142dd7 Maintainer: HonestQiao Status: ready -->
-<!-- Reviewed: no Maintainer: HonestQiao -->
+<!-- EN-Revision: a0ae28d3bc85f927c22649ebd9a590b921534b7d Maintainer: jhdxr Status: ready -->
+<!-- Reviewed: no Maintainer: jhdxr -->
 <section xml:id="filesystem.configuration" xmlns="http://docbook.org/ns/docbook">
  &reftitle.runtime;
  &extension.runtime;
@@ -19,34 +19,46 @@
     </thead>
     <tbody>
      <row>
-      <entry>allow_url_fopen</entry>
+      <entry><link linkend="ini.allow-url-fopen">allow_url_fopen</link></entry>
       <entry>"1"</entry>
       <entry>PHP_INI_SYSTEM</entry>
-      <entry>在 PHP &lt;= 4.3.4 时是 PHP_INI_ALL。PHP 4.0.4 版以后可用。</entry>
+      <entry></entry>
      </row>
      <row>
-      <entry>user_agent</entry>
+      <entry><link linkend="ini.allow-url-include">allow_url_include</link></entry>
+      <entry>"0"</entry>
+      <entry>PHP_INI_SYSTEM</entry>
+      <entry>自 PHP 7.4.0 起废弃。</entry>
+     </row>
+     <row>
+      <entry><link linkend="ini.user-agent">user_agent</link></entry>
       <entry>NULL</entry>
       <entry>PHP_INI_ALL</entry>
-      <entry>PHP 4.3.0 版以后可用。</entry>
+      <entry></entry>
      </row>
      <row>
-      <entry>default_socket_timeout</entry>
+      <entry><link linkend="ini.default-socket-timeout">default_socket_timeout</link></entry>
       <entry>"60"</entry>
       <entry>PHP_INI_ALL</entry>
-      <entry>PHP 4.3.0 版以后可用。</entry>
+      <entry></entry>
     </row>
      <row>
-      <entry>from</entry>
+      <entry><link linkend="ini.from">from</link></entry>
       <entry>""</entry>
       <entry>PHP_INI_ALL</entry>
       <entry></entry>
      </row>
      <row>
-      <entry>auto_detect_line_endings</entry>
+      <entry><link linkend="ini.auto-detect-line-endings">auto_detect_line_endings</link></entry>
       <entry>"0"</entry>
       <entry>PHP_INI_ALL</entry>
-      <entry>PHP 4.3.0 版以后可用。</entry>
+      <entry></entry>
+     </row>
+     <row>
+      <entry><link linkend="ini.sys-temp-dir">sys_temp_dir</link></entry>
+      <entry>""</entry>
+      <entry>PHP_INI_SYSTEM</entry>
+      <entry></entry>
      </row>
     </tbody>
    </tgroup>
@@ -60,7 +72,7 @@
    <varlistentry xml:id="ini.allow-url-fopen">
     <term>
      <parameter>allow_url_fopen</parameter>
-     <type>boolean</type>
+     <type>bool</type>
     </term>
     <listitem>
      <para>
@@ -69,34 +81,13 @@
       linkend="features.remote-files">远程文件</link>，一些扩展库例如
       <link linkend="ref.zlib">zlib</link> 可能会注册更多的封装协议。
      </para>
-     <note>
-      <para>
-       出于安全性考虑，此选项只能在 php.ini 中设置。
-      </para>
-     </note>
-     <note>
-      <para>
-       此选项是紧接着版本 4.0.3 发布后引进的。版本 4.0.3
-       以及之前的版本只能在编译时通过配置项
-       <link linkend="configure.disable-url-fopen-wrapper"><parameter>
-       --disable-url-fopen-wrapper</parameter></link>
-       来取消此特性。
-      </para>
-     </note>
-     <warning>
-      <para>
-       Windows 版在 PHP 4.3.0
-       之前，以下函数不支持远程文件访问：<function>include</function>，<function>include_once</function>, <function>require</function>，<function>require_once</function>
-       和<xref linkend="ref.image"/>中的 imagecreatefromXXX 函数。
-      </para>
-     </warning>
     </listitem>
    </varlistentry>
 
    <varlistentry xml:id="ini.allow-url-include">
     <term>
      <parameter>allow_url_include</parameter>
-     <type>boolean</type>
+     <type>bool</type>
     </term>
     <listitem>
      <para>
@@ -106,7 +97,7 @@
      </para>
      <note>
       <para>
-       This setting requires allow_url_fopen to be on. 
+       这个设置项需要开启 allow_url_fopen 。
       </para>
      </note>
     </listitem>
@@ -127,17 +118,12 @@
    <varlistentry xml:id="ini.default-socket-timeout">
     <term>
      <parameter>default_socket_timeout</parameter>
-     <type>integer</type>
+     <type>int</type>
     </term>
     <listitem>
      <para>
-      基于 socket 的流的默认超时时间（秒）。
+      指定基于 socket 的流的默认超时时间（秒）。指定一个负值意味着不会超时。
      </para>
-     <note>
-      <simpara>
-       本配置参数是 PHP 4.3.0 引进的。
-      </simpara>
-     </note>
     </listitem>
    </varlistentry>
 
@@ -148,7 +134,9 @@
     </term>
     <listitem>
      <para>
-      定义匿名 ftp 的密码（email 地址）。
+      这个 email 地址在使用 ftp 封装器的时候用于未认证的 FTP
+      连接，在使用 http 封装器的时候用于 HTTP 连接的消息头中的
+      From 字段。
      </para>
     </listitem>
    </varlistentry>
@@ -156,7 +144,7 @@
    <varlistentry xml:id="ini.auto-detect-line-endings">
     <term>
      <parameter>auto_detect_line_endings</parameter>
-     <type>boolean</type>
+     <type>bool</type>
     </term>
     <listitem>
      <para>
@@ -165,17 +153,25 @@
       取得的数据中的行结束符号是符合 Unix，MS-DOS，还是 Macintosh 的习惯。
      </para>
      <para>
-      这使得 PHP 可以和 Macintosh 系统交互操作，但是默认值是 Off，因为在检测第一行的
+      这使得 PHP 可以和 Macintosh 系统交互操作，但是默认值是
+      Off，因为在检测第一行的
       EOL 习惯时会有很小的性能损失，而且在 Unix
       系统下使用回车符号作为项目分隔符的人们会遭遇向下不兼容的行为。
      </para>
-     <note>
-      <simpara>
-       本配置参数是 PHP 4.3.0 引进的。
-      </simpara>
-     </note>
     </listitem>
    </varlistentry>
+
+   <varlistentry xml:id="ini.sys-temp-dir">
+    <term>
+     <parameter>sys_temp_dir</parameter>
+     <type>string</type>
+    </term>
+    <listitem>
+     <para>
+     </para>
+    </listitem>
+   </varlistentry>
+
   </variablelist>
  </para>
 </section>
