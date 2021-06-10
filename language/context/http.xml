@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 2726a42e43b7b2ce0579d9e2eb969638ef39da0f Maintainer: z warmwinter Status: ready -->
+<!-- EN-Revision: 4dfe5cc41eabcfb5b7eb7afa194ce078ad4e1bf4 Maintainer: z warmwinter Status: ready -->
 <!-- Reviewed: no -->
+<!-- CREDITS: Jader --> 
 
 <refentry xml:id="context.http" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" role="noversion">
  <refnamediv>
@@ -38,13 +39,16 @@
     <varlistentry xml:id="context.http.header">
      <term>
       <parameter>header</parameter>
-      <type>string</type>
+      <type>array</type> 或 <type>string</type>
      </term>
      <listitem>
       <para>
-       请求期间发送的额外 header 。在此选项的值将覆盖其他值
-       （诸如 <literal>User-agent:</literal>， <literal>Host:</literal> 和 
-       <literal>Authentication:</literal>）。
+       请求期间发送的附加 header 。此选项中的值将覆盖其他值
+       （如 <literal>User-agent:</literal>， <literal>Host:</literal> 和 
+        <literal>Authentication:</literal>)，
+        即使在执行 <literal>Location:</literal> 重定向时也是如此。
+        所以，如果启用了 <parameter>follow_location</parameter>
+        就不建议设置 <literal>Host:</literal> header。
       </para>
      </listitem>
     </varlistentry>
@@ -89,7 +93,7 @@
     <varlistentry xml:id="context.http.request-fulluri">
      <term>
       <parameter>request_fulluri</parameter>
-      <type>boolean</type>
+      <type>bool</type>
      </term>
      <listitem>
       <para>
@@ -105,7 +109,7 @@
     <varlistentry xml:id="context.http.follow-location">
      <term>
       <parameter>follow_location</parameter>
-      <type>integer</type>
+      <type>int</type>
      </term>
      <listitem>
       <para>
@@ -119,7 +123,7 @@
     <varlistentry xml:id="context.http.max-redirects">
      <term>
       <parameter>max_redirects</parameter>
-      <type>integer</type>
+      <type>int</type>
      </term>
      <listitem>
       <para>
@@ -142,12 +146,6 @@
       <para>
        默认值是 <literal>1.0</literal>。
       </para>
-      <note>
-       <para>
-        PHP 5.3.0 以前的版本没有实现分块传输解码。
-        如果此值设置为 <literal>1.1</literal> ，与 <literal>1.1</literal> 的兼容将是你的责任。
-       </para>
-      </note>
      </listitem>
     </varlistentry>
     <varlistentry xml:id="context.http.timeout">
@@ -167,7 +165,7 @@
     <varlistentry xml:id="context.http.ignore-errors">
      <term>
       <parameter>ignore_errors</parameter>
-      <type>boolean</type>
+      <type>bool</type>
      </term>
      <listitem>
       <para>
@@ -181,74 +179,7 @@
    </variablelist>
   </para>
  </refsect1><!-- }}} -->
- 
- <refsect1 role="changelog"><!-- {{{ -->
-  &reftitle.changelog;
-  <para>
-   <informaltable>
-    <tgroup cols="2">
-     <thead>
-      <row>
-       <entry>&Version;</entry>
-       <entry>&Description;</entry>
-      </row>
-     </thead>
-     <tbody>
-      <row>
-       <entry>5.3.4</entry>
-       <entry>
-        添加 <parameter>follow_location</parameter>。
-       </entry>
-      </row>
-      <row>
-       <entry>5.3.0</entry>
-       <entry>
-        当 <parameter>protocol_version</parameter> 设置为 <literal>1.1</literal> 时支持分块传输解码。
-       </entry>
-      </row>
-      <row>
-       <entry>5.2.10</entry>
-       <entry>
-        添加 <parameter>ignore_errors</parameter>。
-       </entry>
-      </row>
-      <row>
-       <entry>5.2.10</entry>
-       <entry>
-        <parameter>header</parameter> 现在可以是一个数字索引的 <type>array</type>。
-       </entry>
-      </row>
-      <row>
-       <entry>5.2.1</entry>
-       <entry>
-        添加 <parameter>timeout</parameter>。
-       </entry>
-      </row>
-      <row>
-       <entry>5.1.0</entry>
-       <entry>
-        Added HTTPS proxying through HTTP proxies.
-        添加经由 HTTP 代理的 HTTPS 代理。
-       </entry>
-      </row>
-      <row>
-       <entry>5.1.0</entry>
-       <entry>
-        添加 <parameter>max_redirects</parameter>。
-       </entry>
-      </row>
-      <row>
-       <entry>5.1.0</entry>
-       <entry>
-        添加 <parameter>protocol_version</parameter>。
-       </entry>
-      </row>
-     </tbody>
-    </tgroup>
-   </informaltable>
-  </para>
- </refsect1><!-- }}} -->
- 
+
  <refsect1 role="examples"><!-- {{{ -->
   &reftitle.examples;
   <para>
@@ -343,7 +274,7 @@ fclose($stream);
 array (
   'wrapper_data' =>
   array (
-    0 => 'HTTP/1.0 301 Moved Permantenly',
+    0 => 'HTTP/1.0 301 Moved Permanently',
     1 => 'Cache-Control: no-cache',
     2 => 'Connection: close',
     3 => 'Location: http://example.com/foo.jpg',
