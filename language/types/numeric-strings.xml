@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision$ -->
+<!-- EN-Revision: dde64312eb88c1b648edc32e65bf8cfe4b830387 Maintainer: Jader Status: ready -->
+<!-- Reviewed: no -->
+
+<sect1 xml:id="language.types.numeric-strings" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <title>数字字符串</title>
+ <para>
+  如果一个 PHP <type>字符串</type> 可以被解释为 <type>整数</type> 或 <type>浮点数</type>，
+  那么它就被认为是数字。
+ </para>
+
+ <para>
+  从 PHP 8.0.0 正式开始：
+ </para>
+
+ <informalexample>
+  <programlisting>
+   <![CDATA[
+WHITESPACES      \s*
+LNUM             [0-9]+
+DNUM             ([0-9]*)[\.]{LNUM}) | ({LNUM}[\.][0-9]*)
+EXPONENT_DNUM    (({LNUM} | {DNUM}) [eE][+-]? {LNUM})
+INT_NUM_STRING   {WHITESPACES} [+-]? {LNUM} {WHITESPACES}
+FLOAT_NUM_STRING {WHITESPACES} [+-]? ({DNUM} | {EXPONENT_DNUM}) {WHITESPACES}
+NUM_STRING       ({INT_NUM_STRING} | {FLOAT_NUM_STRING})
+]]>
+  </programlisting>
+ </informalexample>
+
+ <para>
+  PHP也有 <emphasis>前导</emphasis> 数字字符串的概念。
+  这只是一个字符串，它以数字字符串开头，后面跟着任何字符。
+ </para>
+
+ <sect2 xml:id="language.types.numeric-string.conversion">
+  <title>在数字上下文中使用的字符串</title>
+  <para>
+   当一个 <type>字符串</type> 需要以数字的形式计算时 (例如算术运算， <type>int</type> 类型声明等。) ，
+   需要执行以下步骤来确定结果:
+
+   <orderedlist>
+    <listitem>
+     <simpara>
+      如果 <type>字符串</type> 是数字，则解析为 <type>int</type> 类型，
+      如果 <type>字符串</type> 是整数型且符合
+      <type>int</type> 型类型限制 （由
+      <constant>PHP_INT_MAX</constant> 定义）， 
+      否则解析为 <type>float</type> 型.
+     </simpara>
+    </listitem>
+    <listitem>
+     <simpara>
+      如果上下文允许前导数字字符串且 <type>字符串</type> 为1，
+      如果前导部分是整数数字 <type>字符串</type>
+      且符合 <type>int</type> 类型限制（由
+      <constant>PHP_INT_MAX</constant> 定义），
+      则解析为 <type>int</type> 类型，
+      否则解析为 <type>float</type> 类型。
+      另外还会抛出一个级别为 <constant>E_WARNING</constant> 的错误。
+     </simpara>     
+    </listitem>
+    <listitem>
+     <simpara>
+      如果 <type>字符串</type> 不是数字，
+      则抛出 <classname>TypeError</classname>。
+     </simpara>
+    </listitem>
+   </orderedlist>
+  </para>
+ </sect2>
+
+ <sect2 xml:id="language.types.numeric-string.prior">
+  <title>PHP 8.0.0 之前的表现</title>
+  <para>
+   在 PHP 8.0.0 之前，<type>字符串</type> 只有在有<emphasis>前导</emphasis> 
+   空格时才被认为是数字，
+   如果它有 <emphasis>后导</emphasis>空格，则该字符串被认为是前导数字。
+  </para>
+
+  <para>
+   在PHP 8.0.0之前，当一个字符串在数值上下文中使用时，
+   它将执行与上面相同的步骤，但有以下不同：
+   <itemizedlist>
+    <listitem>
+     <simpara>
+      使用前导数字字符串会引发
+      <constant>E_NOTICE</constant> 而不是 <constant>E_WARNING</constant>。
+     </simpara>
+     </listitem>
+    <listitem>
+     <simpara>
+      如果字符串不是数字， 
+      将引发 <constant>E_WARNING</constant> 并返回值 <literal>0</literal>。
+     </simpara>
+    </listitem>
+   </itemizedlist>
+   在PHP 7.1.0之前， <constant>E_NOTICE</constant> 和 <constant>E_WARNING</constant> 都没有被触发。
+  </para>
+
+  <informalexample>
+   <programlisting role="php">
+<![CDATA[
+<?php
+$foo = 1 + "10.5";                // $foo is float (11.5)
+$foo = 1 + "-1.3e3";              // $foo is float (-1299)
+$foo = 1 + "bob-1.3e3";           // TypeError as of PHP 8.0.0, $foo is integer (1) previously
+$foo = 1 + "bob3";                // TypeError as of PHP 8.0.0, $foo is integer (1) previously
+$foo = 1 + "10 Small Pigs";       // $foo is integer (11) and an E_WARNING is raised in PHP 8.0.0, E_NOTICE previously
+$foo = 4 + "10.2 Little Piggies"; // $foo is float (14.2) and an E_WARNING is raised in PHP 8.0.0, E_NOTICE previously
+$foo = "10.0 pigs " + 1;          // $foo is float (11) and an E_WARNING is raised in PHP 8.0.0, E_NOTICE previously
+$foo = "10.0 pigs " + 1.0;        // $foo is float (11) and an E_WARNING is raised in PHP 8.0.0, E_NOTICE previously
+?>
+]]>
+   </programlisting>
+  </informalexample>
+ </sect2>
+</sect1>
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
