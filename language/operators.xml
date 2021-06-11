@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 783fbc2001b129f5f8956937e15e253969b8765c Maintainer: jhdxr Status: ready -->
+<!-- EN-Revision: e4b889a3e8b9d87ab605aac9bbe85d2c16c69a1b Maintainer: jhdxr Status: ready -->
+<!-- CREDITS: Jader --> 
+
  <chapter xml:id="language.operators" xmlns="http://docbook.org/ns/docbook">
   <title>运算符</title>
   <simpara>
@@ -41,6 +43,10 @@
     <literal>&lt;=</literal>。
    </para>
    <para>
+    结合性仅对二元（和三元）运算符有意义。一元运算符要么是前缀，要么是后缀，所以这个概念不适用。
+    例如 <literal>!!$a</literal> 只能被分组为 <literal>!(!$a)</literal>。
+   </para>
+   <para>
     括号的使用，哪怕在不是必要的场合下，通过括号的配对来明确标明运算顺序，而非靠运算符优先级和结合性来决定，通常能够增加代码的可读性。
    </para>
    <para>
@@ -72,6 +78,8 @@
        <row>
         <entry>不适用</entry>
         <entry>
+         <literal>+</literal> 
+         <literal>-</literal> 
          <literal>++</literal>
          <literal>--</literal>
          <literal>~</literal>
@@ -84,14 +92,18 @@
          <literal>@</literal>
         </entry>
         <entry>
-         <link linkend="language.types">类型</link>、<link linkend="language.operators.increment">递增／递减</link>
+         <link linkend="language.operators.arithmetic">算术</link> （一元 <literal>+</literal> 和 <literal>-</literal>），
+         <link linkend="language.operators.increment">递增/递减</link>，
+         <link linkend="language.operators.bitwise">按位</link>，
+         <link linkend="language.types.typecasting">类型转换</link>&listendand;
+         <link linkend="language.operators.errorcontrol">错误控制</link>
         </entry>
        </row>
        <row>
         <entry>左</entry>
         <entry><literal>instanceof</literal></entry>
         <entry>
-         <link linkend="language.types">类型</link>
+         <link linkend="language.operators.type">类型</link>
         </entry>
        </row>
        <row>
@@ -120,8 +132,10 @@
          <literal>.</literal>
         </entry>
         <entry>
-         <link linkend="language.operators.arithmetic">算术运算符</link>&listendand;<link
-         linkend="language.operators.string">字符串运算符</link></entry>
+         <link linkend="language.operators.arithmetic">算术运算符</link>（二进制 <literal>+</literal> 和 <literal>-</literal>），
+         <link linkend="language.operators.array">数组运算符</link>&listendand;
+         <link linkend="language.operators.string">字符串运算符</link>（<literal>.</literal> 在PHP 8.0.0之前）
+        </entry>
        </row>
        <row>
         <entry>左</entry>
@@ -131,6 +145,13 @@
         </entry>
         <entry>
          <link linkend="language.operators.bitwise">位运算符</link>
+        </entry>
+       </row>
+       <row>
+        <entry>左</entry>
+        <entry><literal>.</literal></entry>
+        <entry>
+         <link linkend="language.operators.string">字符串运算符</link> （从PHP 8.0.0开始）
         </entry>
        </row>
        <row>
@@ -202,10 +223,11 @@
         </entry>
        </row>
        <row>
-        <entry>左</entry>
+        <entry>无</entry>
         <entry><literal>? :</literal></entry>
         <entry>
          <link linkend="language.operators.comparison.ternary">三元运算符</link>
+         （PHP 8.0.0 之前是左）
         </entry>
        </row>
        <row>
@@ -282,7 +304,7 @@
 <?php
 $a = 3 * 3 % 5; // (3 * 3) % 5 = 4
 // ternary operator associativity differs from C/C++
-$a = true ? 0 : true ? 1 : 2; // (true ? 0 : true) ? 1 : 2 = 2
+$a = true ? 0 : true ? 1 : 2; // (true ? 0 : true) ? 1 : 2 = 2 (prior to PHP 8.0.0)
 
 $a = 1;
 $b = 2;
@@ -293,14 +315,11 @@ $a = $b += 3; // $a = ($b += 3) -> $a = 5, $b = 5
     </example>
    </para>
    <para>
-    Operator precedence and associativity only determine how expressions
-    are grouped, they do not specify an order of evaluation. PHP does not
-    (in the general case) specify in which order an expression is evaluated
-    and code that assumes a specific order of evaluation should be avoided,
-    because the behavior can change between versions of PHP or depending on
-    the surrounding code.
+    运算符优先级和结合性仅决定表达式如何分组，它们不指定求值顺序。
+    PHP 不（在一般情况下）指定表达式的计算顺序，并且应该避免假设特定的求值顺序的代码，
+    因为行为可以在不同的PHP版本之间改变，或者取决于周围的代码。
     <example>
-     <title>Undefined order of evaluation</title>
+     <title>未定义的求值顺序</title>
      <programlisting role="php">
 <![CDATA[
 <?php
@@ -321,7 +340,7 @@ $array[$i] = $i++; // may set either index 1 or 2
 $x = 4;
 // this line might result in unexpected output:
 echo "x minus one equals " . $x-1 . ", or so I hope\n";
-// because it is evaluated like this line:
+// because it is evaluated like this line (prior to PHP 8.0.0):
 echo (("x minus one equals " . $x) - 1) . ", or so I hope\n";
 // the desired precedence can be enforced by using parentheses:
 echo "x minus one equals " . ($x-1) . ", or so I hope\n";
@@ -345,6 +364,52 @@ x minus one equals 3, or so I hope
      <literal>foo()</literal> 的返回值被赋给了 <varname>$a</varname>。
     </para>
    </note>
+   <sect2 role="changelog">
+    &reftitle.changelog;
+    <informaltable>
+     <tgroup cols="2">
+      <thead>
+       <row>
+        <entry>&Version;</entry>
+        <entry>&Description;</entry>
+       </row>
+      </thead>
+      <tbody>
+       <row>
+        <entry>8.0.0</entry>
+        <entry>
+         字符串连接（<literal>.</literal>）现在的优先级低于算术加法/减法（<literal>+</literal> 和 <literal>-</literal>）
+         和按位向左/右移位 (<literal>&lt;&lt;</literal> 和 <literal>&gt;&gt;</literal>)；
+         以前它具有与 <literal>+</literal> 和 <literal>-</literal> 相同的优先级，
+         并且比 <literal>&lt;&lt;</literal> 和 <literal>&gt;&gt;</literal> 具有更高的优先级。
+        </entry>
+       </row>
+       <row>
+        <entry>8.0.0</entry>
+        <entry>
+         三元运算符 (<literal>? :</literal>) 现在是非结合的；
+         以前它是左结合的。
+        </entry>
+       </row>
+       <row>
+        <entry>7.4.0</entry>
+        <entry>
+         不赞成依赖于字符串连接（<literal>.</literal>）相对于算术加法/减法（<literal>+</literal> 或 <literal>-</literal>）
+         或按位左/右移（<literal>&lt;&lt;</literal> 或 <literal>&gt;&gt;</literal>）的优先级，
+         即在无括号表达式中一起使用它们。
+        </entry>
+       </row>
+       <row>
+        <entry>7.4.0</entry>
+        <entry>
+         不推荐依赖三元运算符（<literal>? :</literal>）的左结合性，
+         即嵌套多个未带括号的三元运算符。
+        </entry>
+       </row>
+      </tbody>
+     </tgroup>
+    </informaltable>
+   </sect2>
   </sect1>
 
   <sect1 xml:id="language.operators.arithmetic">
@@ -414,7 +479,7 @@ x minus one equals 3, or so I hope
     整数除法可参考 <function>intdiv</function>。
    </simpara>
    <simpara>
-    取模运算符的操作数在运算之前都会转换成整数（除去小数部分）。 浮点数取模可参考
+    取模运算符的操作数在运算之前都会转换成<type>整型</type>（除去小数部分）。 浮点数取模可参考
     <function>fmod</function>。
    </simpara>
    <para>
@@ -739,22 +804,19 @@ Parse error: syntax error, unexpected 'new' (T_NEW) in …
     <literal>($a &amp; $b) == true</literal> 则先进行按位与再进行比较。
    </para>
    <para>
-    If both operands for the <literal>&amp;</literal>, <literal>|</literal> and
-    <literal>^</literal> operators are strings, then the operation will be
-    performed on the ASCII values of the characters that make up the strings and
-    the result will be a string. In all other cases, both operands will be
-    <link linkend="language.types.integer.casting">converted to integers</link>
-    and the result will be an integer.
+    如果 <literal>&amp;</literal> 操作两个数，<literal>|</literal> 和 <literal>^</literal> 运算符是字符串，
+    则将对组成字符串的字符的 ASCII 值进行运算，结果将是字符串。
+    在其他情况下，两个操作数都将<link linkend="language.types.integer.casting">转换为整数</link>，结果将为整数。
+    <link linkend="language.types.integer.casting">converted to integers</link>，
+    结果将为整数。
    </para>
    <para>
-    If the operand for the <literal>~</literal> operator is a string, the
-    operation will be performed on the ASCII values of the characters that make
-    up the string and the result will be a string, otherwise the operand and the
-    result will be treated as integers.
+    如果 <literal>~</literal> 运算符的操作是字符串, 
+    则将对组成字符串的字符的 ASCII 值进行操作，
+    结果将是字符串，否则操作数和结果将被视为整数。
    </para>
    <para>
-    Both operands and the result for the <literal>&lt;&lt;</literal> and
-    <literal>&gt;&gt;</literal> operators are always treated as integers.
+    <literal>&lt;&lt;</literal> 和 <literal>&gt;&gt;</literal> 运算符操作的数和结果始终被视为整数
    </para>
    <para>
     <informalexample>
@@ -1410,30 +1472,50 @@ Expression: 0 = -4 << 62
    </para>
    <warning>
    <para>
-   Prior to PHP 8.0.0, if a <type>string</type> is compared to a number
-   or a numeric string then the <type>string</type> was converted to a
-   number before performing the comparison. This can lead to surprising
-   results as can be seen with the following example:
+   在 PHP 8.0.0 之前，如果将 <type>字符串</type> 与数字或数字字符串进行比较，
+   则在执行比较之前将 <type>字符串</type> 转换为数字。
+   这可能会导致令人惊讶的结果，
+   如以下示例所示：
     <informalexample>
      <programlisting role="php">
 <![CDATA[
 <?php
-var_dump(0 == "a"); // 0 == 0 -> true
-var_dump("1" == "01"); // 1 == 1 -> true
-var_dump("10" == "1e1"); // 10 == 10 -> true
-var_dump(100 == "1e2"); // 100 == 100 -> true
+var_dump(0 == "a");
+var_dump("1" == "01");
+var_dump("10" == "1e1");
+var_dump(100 == "1e2");
 
 switch ("a") {
 case 0:
     echo "0";
     break;
-case "a": // never reached because "a" is already matched with 0
+case "a":
     echo "a";
     break;
 }
 ?>
 ]]>
       </programlisting>
+      &example.outputs.7;
+      <screen>
+<![CDATA[
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+0
+]]>
+      </screen>
+      &example.outputs.8;
+      <screen>
+<![CDATA[
+bool(false)
+bool(true)
+bool(true)
+bool(true)
+a
+]]>
+      </screen>
      </informalexample>
     </para>
    </warning>
@@ -1677,13 +1759,15 @@ if (empty($_POST['action'])) {
       PHP 运算结果不清晰。
       甚至在 PHP 8.0.0 之前，三元运算符是从左到右执行的，
       而大多数其他编程语言是从右到左的。
+      自 PHP 7.4.0 起，左结合已被弃用。
+      从PHP 8.0.0起，三元运算符是非结合的。
       <example>
        <title>不清晰的三元运算符行为</title>
        <programlisting role="php">
 <![CDATA[
 <?php
 // 乍看起来下面的输出是 'true'
-echo (true?'true':false?'t':'f');
+echo (true ? 'true' : false ? 't' : 'f');
 
 // 然而，上面语句的实际输出是't'，因为在 PHP 8.0.0 之前三元运算符是从左往右计算的
 
@@ -1766,14 +1850,37 @@ echo $foo ?? $bar ?? $baz ?? $qux; // 输出 1
   <sect1 xml:id="language.operators.errorcontrol">
    <title>错误控制运算符</title>
    <simpara>
-    PHP 支持一个错误控制运算符：@。当将其放置在一个 PHP
+    PHP 支持一个错误控制运算符：（<literal>@</literal>）。当将其放置在一个 PHP
     表达式之前，该表达式可能产生的任何错误信息都被忽略掉。
    </simpara>
-   <simpara>
-    如果用 <function>set_error_handler</function>
-    设定了自定义的错误处理函数，仍然会被调用，但是此错误处理函数可以（并且也应该）调用
-    <function>error_reporting</function>，而该函数在出错语句前有 @ 时将返回 0。
-   </simpara>
+   <para>
+    如果使用 <function>set_error_handler</function>
+    设置自定义错误处理程序函数，即使错误已被抑制，它仍将被调用，
+    因此自定义错误处理函数应该调用 <function>error_reporting</function> 并验证
+    <literal>@</literal> 运算符是否按以下方式使用：
+
+    <informalexample>
+     <programlisting role="php">
+<![CDATA[
+<?php
+function my_error_handler($err_no, $err_msg, $filename, $linenum) {
+    if (!(error_reporting() & $err_no)) {
+        return false; // Silenced
+    }
+    // ...
+}
+?>
+]]>
+     </programlisting>
+    </informalexample>
+   </para>
+
+   <warning>
+    <para>
+     在PHP 8.0.0之前，如果错误被抑制，传递给自定义错误处理程序的严重性值总是
+     <literal>0</literal>。PHP 8.0.0不再是这种情况。
+    </para>
+   </warning>
    <simpara>
     <function>error_get_last</function> 返回数组中的 <literal>"message"</literal> 元素储存了表达式产生的任意错误信息。
     此函数的返回结果会随着每次错误的发生而相应变化，所以需要尽早检查。
@@ -1806,9 +1913,9 @@ $value = @$cache[$key];
    </note>
    <warning>
     <para>
-     目前的“@”错误控制运算符前缀甚至使导致脚本终止的严重错误的错误报告也失效。
-     这意味着如果在某个不存在或者敲错了字母的函数调用前用了“@”来抑制错误信息，
-     那脚本会没有任何迹象显示原因而死在那里。
+     在 PHP 8.0.0 之前，<literal>@</literal> 操作符可以禁用会终止脚本执行的严重错误。
+     例如，在调用一个不存在的函数前加上 <literal>@</literal>
+     由于不可用或输入错误，将导致脚本终止而没有说明原因。
     </para>
    </warning>
 
