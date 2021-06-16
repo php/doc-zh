@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
 <!-- $Author$ -->
-<!-- $EN-Revision: 5179a9d3ad94cd96a537d0d68ab0facaf43d7189 $ -->
+<!-- $EN-Revision: 8e732e84a1425cf0ab3a5b0da8fe113c7a6da85e $ -->
 <chapter xml:id="faq.installation"
          xmlns="http://docbook.org/ns/docbook"
          xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -90,61 +90,19 @@
           <![CDATA[
 # Extra Modules
 AddModule mod_php.c
-AddModule mod_php3.c
 AddModule mod_perl.c
 
 # Extra Modules
 LoadModule php_module         modules/mod_php.so
-LoadModule php3_module        modules/libphp3.so     # for PHP 3
-LoadModule php4_module        modules/libphp4.so     # for PHP 4
+LoadModule php5_module        modules/libphp5.so
 LoadModule perl_module        modules/libperl.so
 ]]>
 </programlisting>并且把： 
         <programlisting role="apache-conf">
           <![CDATA[
-AddType application/x-httpd-php3 .php3    # for PHP 3
-AddType application/x-httpd-php .php      # for PHP 4
+AddType application/x-httpd-php .php
 ]]>
 </programlisting>添加到全局属性中，或者添加到你希望加入 PHP 支持的虚拟域中。</para>
-      </answer>
-    </qandaentry>
-    <qandaentry xml:id="faq.installation.compile">
-      <question>
-        <para>Unix：我从 RPMS 安装了 PHP 3，但它没有把我需要的数据库支持编译进去！这是怎么回事？</para>
-      </question>
-      <answer>
-        <para>由于 PHP 3 构造的原因，不容易编译出一个完全灵活的 PHP RPM 包来。这个问题在 PHP 4 中解决了。对于 PHP 3 来说，我们目前建议你用 PHP 发行包中 INSTALL.REDHAT 文件中所描述的机制。如果你坚持要用 PHP 3 的 RPM 版本，请接着往下看。</para>
-        <para>为了简化安装
-        <emphasis>以及</emphasis>由于 RPMS 使用了 /usr/ 而不是标准的 /usr/local/ 目录来存放文件，制作 RPM 包的人设定 RPMS 不安装任何数据库支持。你需要告诉 RPM 说明文件，你想要支持哪个数据库以及你的数据库服务器最高层路径。</para>
-        <para>下面的例子解说了如何在用模块安装下的 Apache 中加入流行的 MySQL 数据库服务器支持的过程。</para>
-        <para>当然这些信息可以调整用于任何 PHP 支持的数据库服务器。本例中我们也假定你从 RPMS 中完整安装了 MySQL 和 Apache。 
-        <itemizedlist>
-          <listitem>
-            <para>先去掉 mod_php3： 
-            <programlisting role="shell">rpm -e mod_php3</programlisting></para>
-          </listitem>
-          <listitem>
-            <para>然后取得源文件的 rpm 包并安装它，而不是编译它。 
-            <programlisting role="shell">rpm -Uvh mod_php3-3.0.5-2.src.rpm</programlisting></para>
-          </listitem>
-          <listitem>
-            <para>接着编辑 
-            <filename>/usr/src/redhat/SPECS/mod_php3.spec</filename>文件</para>
-            <para>在 %build 一节加入你想要的数据库支持，以及路径。</para>
-            <para>对应于 MySQL 你应该加入 
-            <option role="configure">--with-mysql=/usr</option>。则 %build 一节看上去将类似这样： 
-            <programlisting role="shell">./configure --prefix=/usr \ --with-apxs=/usr/sbin/apxs \ --with-config-file-path=/usr/lib \ --enable-debug=no \ --enable-safe-mode \ --with-exec-dir=/usr/bin \ --with-mysql=/usr \ --with-system-regex</programlisting></para>
-          </listitem>
-          <listitem>
-            <para>一旦完成了这个修改，就这样建立二进制程序的 rpm 包： 
-            <programlisting role="shell">rpm -bb /usr/src/redhat/SPECS/mod_php3.spec</programlisting></para>
-          </listitem>
-          <listitem>
-            <para>然后安装 rpm 
-            <programlisting>rpm -ivh /usr/src/redhat/RPMS/i386/mod_php3-3.0.5-2.i386.rpm</programlisting></para>
-          </listitem>
-        </itemizedlist>确认重新启动了 Apache，这下你就有了用 RPM 安装的并且带 MySQL 支持的 PHP 3 了。注意按照 PHP 3 发行包中 
-        <filename>INSTALL.REDHAT</filename>文件的说明来编译其实也许更容易一些。</para>
       </answer>
     </qandaentry>
     <qandaentry xml:id="faq.installation.frontpage">
@@ -313,53 +271,11 @@ AddType application/x-httpd-php .php      # for PHP 4
         <para>怎样使 &php.ini; 文件在 Windows 下被 PHP 所用？</para>
       </question>
       <answer>
-        <para>有几种方法。如果使用 Apache，阅读专门的安装指示（
-        <link linkend="install.windows.legacy.apache1">Apache 1</link>，
-        <link linkend="install.windows.legacy.apache2">Apache 2</link>），否则就必须设定 
-        <varname>PHPRC</varname>环境变量：</para>
-        <para>在 Windows NT，2000，XP 和 2003 种： 
-        <itemizedlist>
-          <listitem>
-            <para>进入控制面板并打开“系统”图标（开始 -&gt; 设置 -&gt; 控制面板 -&gt; 系统，Windows XP/2003 中是：开始 -&gt; 控制面板 -&gt; 系统）</para>
-          </listitem>
-          <listitem>
-            <para>选择“高级”标签页</para>
-          </listitem>
-          <listitem>
-            <para>点击“环境变量”按钮</para>
-          </listitem>
-          <listitem>
-            <para>在“系统变量”栏中</para>
-          </listitem>
-          <listitem>
-            <para>点击“新建”按钮并在“变量名”中输入“PHPRC”，在“变量值”中输入 &php.ini; 文件所在的目录（例如：
-            <literal>C:\php</literal>）</para>
-          </listitem>
-          <listitem>
-            <para>点击“确定”并重新启动电脑</para>
-          </listitem>
-        </itemizedlist></para>
-        <para>在 Windows 98/Me 中需要编辑 
-        <filename>autoexec.bat</filename>文件： 
-        <itemizedlist>
-          <listitem>
-            <para>打开记事本（开始 -&gt; 运行，然后输入 notepad 并点确定）</para>
-          </listitem>
-          <listitem>
-            <para>打开 
-            <filename>C:\autoexec.bat</filename>文件</para>
-          </listitem>
-          <listitem>
-            <para>在文件结尾处加入一行：
-            <literal>set PHPRC=C:\php</literal>（将 
-            <literal>C:\php</literal>替换为你的 &php.ini; 实际存在的目录）。注意路径中不能包含空格。例如将 PHP 安装到了 
-            <filename>C:\Program Files\PHP</filename>中，你需要输入 
-            <filename>C:\PROGRA~1\PHP</filename>替代之</para>
-          </listitem>
-          <listitem>
-            <para>保存文件并重新启动电脑</para>
-          </listitem>
-        </itemizedlist></para>
+        <para>
+         有几种方法可以做到这一点。如果您使用的是 Apache，
+         请参阅 Apache 文档，否则
+         您必须设置<varname>PHPRC</varname>环境变量。
+        </para>
       </answer>
     </qandaentry>
     <qandaentry xml:id="faq.installation.apache.multiviews">
