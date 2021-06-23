@@ -1,26 +1,34 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <!-- $Revision$ -->
 <!-- $Author$ -->
-<!-- EN-Revision: 0853ac91680817a11b8e87a9a4beb12dd2bbcaef Maintainer: Avenger Status: ready -->
-<!-- CREDITS: Altair --> 
+<!-- EN-Revision: 5a945dfef09a9595c83855cdb858ffa4a96af305 Maintainer: Avenger Status: ready -->
+<!-- CREDITS: Altair, Luffy -->
  <chapter xml:id="language.constants" xmlns="http://docbook.org/ns/docbook">
   <title>常量</title>
 
   <simpara>
    常量是一个简单值的标识符（名字）。如同其名称所暗示的，在脚本执行期间该值不能改变（除了所谓的
-   <link linkend="language.constants.predefined">魔术常量</link>，它们其实不是常量）。常量默认为大小写敏感。传统上常量标识符总是大写的。
+   <link linkend="language.constants.magic">魔术常量</link>，它们其实不是常量）。常量大小写敏感。传统上常量标识符总是大写的。
   </simpara>
-  <para>
+
+  <note>
+   <para>
+    在 PHP 8.0.0 之前，使用 <function>define</function> 定义的常量可能不区分大小写。
+   </para>
+  </note>
+
+ <para>
    常量名和其它任何 PHP
    标签遵循同样的命名规则。合法的常量名以字母或下划线开始，后面跟着任何字母，数字或下划线。用正则表达式是这样表达的：
    <code>^[a-zA-Z_\x80-\xff][a-zA-Z0-9_\x80-\xff]*$</code>。
   </para>
   <para>
-   还可以使用 <function>define</function> 来定义包含保留字或非常规名称的常量，这类常量可以通过
-   <function>constant</function> 来获取名称，但是非常不推荐这种用法。
+   还可以使用 <function>define</function> 函数来定义包含保留字或非常规名称的常量，这类常量可以通过
+   <function>constant</function> 函数来获取名称，但是非常不推荐这种用法。
   </para>
   &tip.userlandnaming;  
   <para>
+   <!-- TODO Move into syntax section? -->
    <example>
     <title>合法与非法的常量名</title>
     <programlisting role="php">
@@ -53,20 +61,27 @@ define("__FOO__", "something");
   </note>
 
   <simpara>
-   和 &link.superglobals; 一样，常量的范围是全局的。不用管作用区域就可以在脚本的任何地方访问常量。有关作用区域的更多信息请阅读手册中的<link
+   和 &link.superglobals; 一样，常量的范围是全局的。常量可以从脚本的任何地方被访问，而不考虑作用域。有关作用域的更多信息请阅读手册中的<link
    linkend="language.variables.scope">变量范围</link>。
   </simpara>
 
-  <sect1 xml:id="language.constants.syntax">
+  <note>
+   <simpara>
+    从 PHP 7.1.0 开始，类常量可以声明为 protected 或 private 的可见性，
+    使其只在其定义的类的层次范围内可用。
+   </simpara>
+  </note>
+
+ <sect1 xml:id="language.constants.syntax">
    <title>语法</title>
    <simpara>
-    在PHP 5.3.0 之后的版本中，你可以用 <function>define</function> 函数，或 <literal>const</literal> 两种方法来定义一个常量。函数
+    可以使用 <literal>const</literal> 关键字或 <function>define</function> 函数两种方法来定义一个常量。函数
     <function>define</function> 允许将常量定义为一个表达式，而
     <literal>const</literal> 关键字有一些限制，具体可参见下述章节。一个常量一旦被定义，就不能再改变或者取消定义。
    </simpara>
    <simpara>
-    使用 <literal>const</literal> 关键字定义常量时，PHP 5.6 之前只能包含标量数据（<type>boolean</type>，<type>integer</type>，<type>float</type>
-    和 <type>string</type>）。从 PHP 5.6 开始，可以将常量定义为一个表达式，也可以定义为一个 <type>array</type>。还可以定义
+    使用 <literal>const</literal> 关键字定义常量时，只能包含标量数据（<type>bool</type>、<type>int</type>、<type>float</type>
+    、<type>string</type>）。可以将常量定义为一个表达式，也可以定义为一个 <type>array</type>。还可以定义
     <type>resource</type> 为常量，但应尽量避免，因为可能会造成不可预料的结果。
    </simpara>
    <simpara>
@@ -75,32 +90,35 @@ define("__FOO__", "something");
      <function>constant</function> 来获取常量的值。用 
      <function>get_defined_constants</function> 可以获得所有已定义的常量列表。
    </simpara>
+
    <note>
     <simpara>
      常量和（全局）变量在不同的名字空间中。这意味着例如 &true; 和 <varname>$TRUE</varname> 是不同的。
     </simpara>
    </note>
+
    <simpara>
-    如果使用了一个未定义的常量，PHP
-    假定想要的是该常量本身的名字，如同用字符串调用它一样（CONSTANT 对应
-    "CONSTANT"）。此方法已在 PHP 7.2.0 中被废弃，会抛出一个 <constant>E_WARNING</constant> 级错误。（之前版本会发出一个
+    如果使用了一个未定义的常量，则会抛出 <classname>Error</classname>。
+    在 PHP 8.0.0 之前，调用未定义的常量会被解释为一个该常量的
+    字符串，即（CONSTANT 对应 "CONSTANT" ）。
+    此方法已在 PHP 7.2.0 中被废弃，会抛出一个 <constant>E_WARNING</constant> 级错误。（PHP 7.2.0 之前会发出一个
     <link linkend="ref.errorfunc">E_NOTICE</link> 级的错误。）参见手册中为什么
     <link linkend="language.types.array.foo-bar">$foo[bar]</link>
-    是错误的（除非事先用 <function>define</function> 将 <literal>bar</literal>
-    定义为一个常量）。这不适用于 <link linkend="language.namespaces.rules">(完全)限定的常量</link>，如果未定义，将引发致命错误。如果仅是检查是否定义了某常量，请使用
-    <function>defined</function> 函数。
+    是错误的（除非 <literal>bar</literal> 是一个常量）。这不适用于 <link linkend="language.namespaces.rules">(完全)限定的常量</link>，如果未定义，将始终引发 <classname>Error</classname> 。
    </simpara>
-   <para>
+
+   <note>
+    <simpara>
+     如果要检查是否定义了某常量，请使用 <function>defined</function> 函数。
+    </simpara>
+   </note>
+
+  <para>
     常量和变量有如下不同：
     <itemizedlist>
      <listitem>
       <simpara>
        常量前面没有美元符号（<literal>$</literal>）；
-      </simpara>
-     </listitem>
-     <listitem>
-      <simpara>
-       PHP 5.3 之前，常量只能用 <function>define</function> 函数定义，而不能通过赋值语句；
       </simpara>
      </listitem>
      <listitem>
@@ -115,10 +133,7 @@ define("__FOO__", "something");
      </listitem>
      <listitem>
       <simpara>
-        常量的值只能是标量值。从 PHP 5.6 开始可以用 <literal>const</literal>
-        关键字来定义数组常量，从 PHP 7 开始也可以用
-        <function>define</function> 函数来定义。你可以在常量标量表达式中使用数组（例如
-        <literal>const FOO = array(1,2,3)[0];</literal>），但是要求最终的结果必须是一个允许的类型的值。
+        常量只能计算标量值或数组。
        </simpara>
      </listitem>
     </itemizedlist>
@@ -131,8 +146,9 @@ define("__FOO__", "something");
 <![CDATA[
 <?php
 define("CONSTANT", "Hello world.");
-echo CONSTANT; // outputs "Hello world."
-echo Constant; // 输出 "Constant" 并发出一个提示级别错误信息
+echo CONSTANT; // 输出 "Hello world."
+echo Constant; // 抛出错误：未定义的常量 "Constant"
+               // 在 PHP 8.0.0 之前，输出 "Constant" 并发出一个提示级别错误信息
 ?>
 ]]>
      </programlisting>
@@ -145,19 +161,19 @@ echo Constant; // 输出 "Constant" 并发出一个提示级别错误信息
      <programlisting role="php">
 <![CDATA[
 <?php
-// 以下代码在 PHP 5.3.0 后可以正常工作
+// 简单的标量值
 const CONSTANT = 'Hello World';
 
 echo CONSTANT;
 
-// PHP 5.6.0 后的写法
+// 标量表达式
 const ANOTHER_CONST = CONSTANT.'; Goodbye World';
 echo ANOTHER_CONST;
 
 const ANIMALS = array('dog', 'cat', 'bird');
 echo ANIMALS[1]; // 将输出 "cat"
 
-// PHP 7 中的写法
+// 常量数组
 define('ANIMALS', array(
     'dog',
     'cat',
@@ -175,43 +191,45 @@ echo ANIMALS[1]; // 将输出 "cat"
    <note>
     <para>
      和使用 <function>define</function> 来定义常量相反的是，使用 <literal>const</literal>
-     关键字定义常量必须处于最顶端的作用区域，因为用此方法是在编译时定义的。这就意味着不能在函数内，循环内以及
+     关键字定义常量必须处于最顶端的作用域，因为用此方法是在编译时定义的。这就意味着不能在函数内，循环内以及
      <literal>if</literal> 或 <literal>try</literal>/<literal>catch</literal>
      语句之内用 <literal>const</literal> 来定义常量。
     </para>
    </note>
 
-   <note>
-    <para>
-      使用 <literal>const</literal> 关键字定义的常量总是大小写敏感的，而使用
-      <function>define</function> 函数定义的常量可能不区分大小写。
-    </para>
-   </note>
-
-   <simpara>
-    参见<link linkend="language.oop5.constants">类常量</link>。
-   </simpara>
+   <sect2 role="seealso">
+    &reftitle.seealso;
+     <para>
+      <simplelist>
+       <member><link linkend="language.oop5.constants">类常量</link></member>
+      </simplelist>
+     </para>
+   </sect2>
   </sect1>
 
   <sect1 xml:id="language.constants.predefined">
-   <title>魔术常量</title>
+   <title>预定义常量</title>
 
    <simpara>
     PHP 向它运行的任何脚本提供了大量的<link
     linkend="reserved.constants">预定义常量</link>。不过很多常量都是由不同的扩展库定义的，只有在加载了这些扩展库时才会出现，或者动态加载后，或者在编译时已经包括进去了。
    </simpara>
+  </sect1>
+
+ <sect1 xml:id="language.constants.magic">
+  <title>魔术常量</title>
    <para>
-    有八个魔术常量它们的值随着它们在代码中的位置改变而改变。例如
+    有九个魔术常量它们的值随着它们在代码中的位置改变而改变。例如
     <constant>__LINE__</constant> 的值就依赖于它在脚本中所处的行来决定。这些特殊的常量不区分大小写，如下：
    </para>
    <para>
     <table>
-     <title>几个 PHP 的“魔术常量”</title>
+     <title>PHP 的魔术常量</title>
      <tgroup cols="2">
       <thead>
        <row>
-        <entry>名称</entry>
-        <entry>说明</entry>
+        <entry>&Name;</entry>
+        <entry>&Description;</entry>
        </row>
       </thead>
       <tbody>
@@ -243,16 +261,15 @@ echo ANIMALS[1]; // 将输出 "cat"
        <row xml:id="constant.class">
         <entry><constant>__CLASS__</constant></entry>
         <entry>
-         当前类的名称。类名包括其被声明的作用区域（例如
-         <literal>Foo\Bar</literal>）。注意自 PHP 5.4 起 __CLASS__
-         对 trait 也起作用。当用在 trait 方法中时，__CLASS__
+         当前类的名称。类名包括其被声明的作用域（例如
+         <literal>Foo\Bar</literal>）。当用在 trait 方法中时，__CLASS__
          是调用 trait 方法的类的名字。
         </entry>
        </row>
        <row xml:id="constant.trait">
         <entry><constant>__TRAIT__</constant></entry>
         <entry>
-         Trait 的名字。Trait 名包括其被声明的作用区域（例如
+         Trait 的名字。Trait 名包括其被声明的作用域（例如
          <literal>Foo\Bar</literal>）。
         </entry>
        </row>
@@ -269,10 +286,9 @@ echo ANIMALS[1]; // 将输出 "cat"
         </entry>
        </row>
        <row xml:id="constant.coloncolonclass">
-        <entry><constant>ClassName::class</constant></entry>
+        <entry><constant><replaceable>ClassName</replaceable>::class</constant></entry>
         <entry>
-          完整的类名，参见
-          <link linkend="language.oop5.basic.class.class">::class</link>。
+          完整的类名。
         </entry>
        </row>
       </tbody>
@@ -280,50 +296,16 @@ echo ANIMALS[1]; // 将输出 "cat"
     </table>
    </para>
 
- <!-- <link linkend="language.oop5.basic.class.class">::class</link> -->
-
-   <para>
-    参见
-    <function>get_class</function>
-    <function>get_object_vars</function>,
-    <function>file_exists</function>&listendand;
-    <function>function_exists</function>。
-   </para>
-
-   <sect2 xml:id="language.constants.predefined.changelog">
-    &reftitle.changelog;
-
+   <sect2 role="seealso">
+   &reftitle.seealso;
     <para>
-     <informaltable>
-      <tgroup cols="2">
-       <thead>
-        <row>
-         <entry>&Version;</entry>
-         <entry>&Description;</entry>
-        </row>
-       </thead>
-       <tbody>
-        <row>
-         <entry>5.5.0</entry>
-         <entry>
-          增加 <constant>::class</constant> 魔术常量
-         </entry>
-        </row>
-        <row>
-         <entry>5.4.0</entry>
-         <entry>
-          增加 <constant>__TRAIT__</constant> 常量
-         </entry>
-        </row>
-        <row>
-         <entry>5.3.0</entry>
-         <entry>
-          增加 <constant>__DIR__</constant> 和 <constant>__NAMESPACE__</constant> 常量
-         </entry>
-        </row>
-       </tbody>
-      </tgroup>
-     </informaltable>
+     <simplelist>
+      <member><link linkend="language.oop5.basic.class.class">::class</link></member>
+      <member><function>get_class</function></member>
+      <member><function>get_object_vars</function></member>
+      <member><function>file_exists</function></member>
+      <member><function>function_exists</function></member>
+     </simplelist>
     </para>
    </sect2>
 
