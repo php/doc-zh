@@ -1,24 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 424e4bdde84f9b975515f6ce88b8d12662f5c87d Maintainer: 邹松 Status: ready -->
+<!-- EN-Revision: 8cdc6621f9826d04abc3e50438c010804d7e8683 Maintainer: 邹松 Status: ready -->
 
 <refentry xml:id="function.array-column" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>array_column</refname>
-  <refpurpose>返回数组中指定的一列</refpurpose>
+  <refpurpose>返回输入数组中指定列的值</refpurpose>
  </refnamediv>
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
    <type>array</type><methodname>array_column</methodname>
-   <methodparam><type>array</type><parameter>input</parameter></methodparam>
-   <methodparam><type>mixed</type><parameter>column_key</parameter></methodparam>
-   <methodparam choice="opt"><type>mixed</type><parameter>index_key</parameter><initializer>null</initializer></methodparam>
+   <methodparam><type>array</type><parameter>array</parameter></methodparam>
+   <methodparam><type class="union"><type>int</type><type>string</type><type>null</type></type><parameter>column_key</parameter></methodparam>
+   <methodparam choice="opt"><type class="union"><type>int</type><type>string</type><type>null</type></type><parameter>index_key</parameter><initializer>&null;</initializer></methodparam>
   </methodsynopsis>
   <para>
-   <function>array_column</function>
-   返回<parameter>input</parameter>数组中键值为<parameter>column_key</parameter>的列，
-   如果指定了可选参数<parameter>index_key</parameter>，那么<parameter>input</parameter>数组中的这一列的值将作为返回数组中对应值的键。
+   <function>array_column</function> 返回
+   <parameter>array</parameter> 中键名为
+   <parameter>column_key</parameter> 的一列值。 如果指定了可选参数
+   <parameter>index_key</parameter>，则使用输入数组中
+   <parameter>index_key</parameter> 列的值将作为返回数组中对应值的键。
   </para>
  </refsect1>
  <refsect1 role="parameters">
@@ -26,12 +28,12 @@
   <para>
    <variablelist>
     <varlistentry>
-     <term><parameter>input</parameter></term>
+     <term><parameter>array</parameter></term>
      <listitem>
       <para>
-       需要取出数组列的多维数组。
-       如果提供的是包含一组对象的数组，只有 public 属性会被直接取出。
-       为了也能取出 private 和 protected 属性，类必须实现
+       多维数组或对象数组，从中提取一列值。
+       如果提供的是对象数组，只有 public 的属性会被直接取出。
+       如果想取出 private 和 protected 的属性，类必须实现
        <function>__get</function> 和 <function>__isset</function> 魔术方法。
       </para>
      </listitem>
@@ -40,8 +42,9 @@
      <term><parameter>column_key</parameter></term>
      <listitem>
       <para>
-       需要返回值的列，它可以是索引数组的列索引，或者是关联数组的列的键，也可以是属性名。
-       也可以是&null;，此时将返回整个数组（配合<parameter>index_key</parameter>参数来重置数组键的时候，非常管用）
+       需要返回值的列。它可以是索引数组的列索引，或者是关联数组的列的键，也可以是属性名。
+       也可以是 &null; ，此时将返回整个数组（配合
+       <parameter>index_key</parameter> 参数来重新索引数组时非常好用）。
       </para>
      </listitem>
     </varlistentry>
@@ -49,7 +52,9 @@
      <term><parameter>index_key</parameter></term>
      <listitem>
       <para>
-       作为返回数组的索引/键的列，它可以是该列的整数索引，或者字符串键值。
+       作为返回数组的索引/键的列。它可以是该列的整数索引，或者字符串键值。
+       该值会像数组键一样被 <link linkend="language.types.array.key-casts">强制转换</link>
+       （但是，在 PHP 8.0.0 之前，也被允许支持转换为字符串对象）。
       </para>
      </listitem>
     </varlistentry>
@@ -59,7 +64,7 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   从多维数组中返回单列数组。
+   返回输入数组中单列值的数组。
   </para>
  </refsect1>
  <refsect1 role="changelog">
@@ -75,9 +80,10 @@
      </thead>
      <tbody>
       <row>
-       <entry>7.0.0</entry>
+       <entry>8.0.0</entry>
        <entry>
-         <parameter>input</parameter> 参数现在可以是包含对象的数组。
+        <parameter>index_key</parameter> 参数指定的列中的对象不再强制转换为字符串，而是会抛出
+        <classname>TypeError</classname>。
        </entry>
       </row>
      </tbody>
@@ -89,11 +95,11 @@
   &reftitle.examples;
   <para>
    <example>
-    <title>从结果集中取出first names列</title>
+    <title>从结果集中取出 first_name 列</title>
     <programlisting role="php">
 <![CDATA[
 <?php
-// Array representing a possible record set returned from a database
+// 表示从数据库返回的记录集的数组
 $records = array(
     array(
         'id' => 2135,
@@ -139,12 +145,12 @@ Array
   <para>
    <example>
     <title>
-     从结果集中总取出last names列，用相应的id作为键值
+     从结果集中总取出 last_name 列，用相应的“id”作为键值
     </title>
     <programlisting role="php">
 <![CDATA[
 <?php
-// Using the $records array from Example #1
+// 使用示例 #1 中的 $records 数组
 $last_names = array_column($records, 'last_name', 'id');
 print_r($last_names);
 ?>
@@ -209,7 +215,7 @@ Array
   <para>
    <example>
     <title>
-     获取  username 列，从对象通过魔术方法  <function>__get</function> 获取 private 的 "username" 属性。
+     通过 <function>__get</function> 魔术方法从对象中获取 private 属性的 "name" 列。
     </title>
     <programlisting role="php">
 <![CDATA[
@@ -257,23 +263,11 @@ Array
 ]]>
     </screen>
    </example>
-   如果不提供<function>__isset</function>，会返回空数组。
+   如果不提供 <function>__isset</function>，会返回空数组。
   </para>
  </refsect1>
 
- <refsect1 role="seealso">
-  &reftitle.seealso;
-  <para>
-   <simplelist>
-    <member>
-     <link xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="&url.arraycolumn.compat;">Recommended
-     userland implementation for PHP lower than 5.5</link>
-    </member>
-   </simplelist>
-  </para>
- </refsect1>
 </refentry>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
