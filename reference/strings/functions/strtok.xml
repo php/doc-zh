@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 2f4863e1f6066a7bc7802164a8f46cd46b067132 Maintainer: daijie Status: ready -->
+ <!-- EN-Revision: d335ba69a16f4013280de8e3e71d9ba19fe3cb3c Maintainer: daijie Status: ready -->
+<!-- CREDITS: Luffy -->
 <refentry xml:id="function.strtok" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
   <refname>strtok</refname>
@@ -30,6 +31,18 @@
    如果要重新开始分割一个新的字符串，你需要再次使用 <parameter>string</parameter> 参数来调用 strtok 函数来对其进行初始化。
    注意，可以在 <parameter>token</parameter> 参数中使用多个字符。字符串将被 <parameter>token</parameter> 参数中任何一个字符分割。
   </para>
+  <note>
+   <para>
+    这个函数的行为可能与熟悉 <function>explode</function> 的人期望略有不同。
+    首先，在解析的字符串中，两个或多个连续的 <parameter>token</parameter> 的
+    字符被认为是单一的分隔符。
+    此外，位于字符串开始或结束处的 <parameter>token</parameter> 将被忽略。
+    例如，如果使用一个字符串 <literal>";aaa;;bbb;"</literal> ，连续调用 <function>strtok</function>
+    并将 <literal>";"</literal> 作为一个 <parameter>token</parameter>
+    将返回字符串 "aaa" 和 "bbb"，然后返回 &false; 。
+    因此，字符串将仅被拆分为两个元素，而 <literal>explode(";", $string)</literal> 将返回一个包含 5 个元素的数组。
+   </para>
+  </note>
  </refsect1>
 
  <refsect1 role="parameters">
@@ -105,6 +118,33 @@ var_dump($first_token, $second_token);
     </screen>
    </example>
   </para>
+  <para>
+   <example>
+    <title>The difference between <function>strtok</function> and <function>explode</function></title>
+    <programlisting role="php">
+     <![CDATA[
+<?php
+$string = ";aaa;;bbb;";
+$parts = [];
+$tok = strtok($string, ";");
+while ($tok !== false) {
+    $parts[] = $tok;
+    $tok = strtok(";");
+}
+echo json_encode($parts),"\n";
+$parts = explode(";", $string);
+echo json_encode($parts),"\n";
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+     <![CDATA[
+["aaa","bbb"]
+["","aaa","","bbb",""]
+]]>
+    </screen>
+   </example>
+  </para>
  </refsect1>
 
  <refsect1 role="notes">
@@ -117,7 +157,6 @@ var_dump($first_token, $second_token);
   &reftitle.seealso;
   <para>
    <simplelist>
-    <member><function>split</function></member>
     <member><function>explode</function></member>
    </simplelist>
   </para>
