@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
 <!-- $Author$ -->
-<!-- EN-Revision: 8e732e84a1425cf0ab3a5b0da8fe113c7a6da85e Maintainer: Luffy Status: ready -->
+<!-- EN-Revision: 5a76d426b6c3f37f1ad041f9bd26a546c03cad12 Maintainer: Luffy Status: ready -->
 <sect1 xml:id="install.windows.apache2" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <title>Microsoft Windows 下的 Apache 2.x</title>
  <para>
@@ -39,8 +39,10 @@
     <programlisting role="apache-conf">
 <![CDATA[
 #
-LoadModule php8_module "c:/php/php8apache2_4.dll"
-AddHandler application/x-httpd-php .php
+LoadModule php_module "c:/php/php8apache2_4.dll"
+<FilesMatch \.php$>
+    SetHandler application/x-httpd-php
+</FilesMatch>
 # 配置 php.ini 的路径
 PHPIniDir "C:/php"
 ]]>
@@ -55,23 +57,8 @@ PHPIniDir "C:/php"
     <filename>php8apache2_4.dll</filename>，并且该文件确实位于所指定的位置。
    </simpara>
   </note>
-  <para>
-   以上配置将使 PHP 处理任何具有 .php 后缀的文件，即使该文件还有其它的文件后缀。例如一个名为
-   <filename>example.php.txt</filename> 的文件将被作为 PHP 文件运行。要确保只有以
-   <filename>.php</filename> <emphasis>结尾</emphasis>的文件才被执行，则用以下配置替换上面的：
-  </para>
-
-  <example>
-   <programlisting role="apache-conf">
-<![CDATA[
- <FilesMatch \.php$>
-      SetHandler application/x-httpd-php
- </FilesMatch>
-]]>
-   </programlisting>
-  </example>
  </sect2>
- 
+
  <sect2 xml:id="install.windows.apache2.cgi">
   <title>以 CGI 方式运行 PHP</title>
   <para>
@@ -121,7 +108,9 @@ LoadModule fcgid_module modules/mod_fcgid.so
 # Where is your php.ini file?
 FcgidInitialEnv PHPRC        "c:/php" 
 
-AddHandler fcgid-script .php  
+<FilesMatch \.php$>
+    SetHandler fcgid-script
+</FilesMatch>
 FcgidWrapper "c:/php/php-cgi.exe" .php  
 ]]>
    </programlisting>
