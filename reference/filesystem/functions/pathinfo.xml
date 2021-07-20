@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 23474fb94e36d6a3ab4da9c411f02cec1fbea384 Maintainer: HonestQiao Status: ready -->
-<!-- Reviewed: no Maintainer: HonestQiao -->
+<!-- EN-Revision: 70babd5faf9fc63f08af63dc6781a350d04a3c57 Maintainer: HonestQiao Status: ready -->
+<!-- CREDITS: Luffy -->
+
 <refentry xml:id="function.pathinfo" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>pathinfo</refname>
@@ -11,14 +12,31 @@
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <type>mixed</type><methodname>pathinfo</methodname>
+   <type class="union"><type>array</type><type>string</type></type><methodname>pathinfo</methodname>
    <methodparam><type>string</type><parameter>path</parameter></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter>options</parameter><initializer>PATHINFO_DIRNAME | PATHINFO_BASENAME | PATHINFO_EXTENSION | PATHINFO_FILENAME</initializer></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>flags</parameter><initializer><constant>PATHINFO_ALL</constant></initializer></methodparam>
   </methodsynopsis>
   <para>
    <function>pathinfo</function> 返回一个关联数组包含有 <literal>path</literal>
-   的信息。返回关联数组还是字符串取决于 <parameter>options</parameter>。
+   的信息。返回关联数组还是字符串取决于 <parameter>flags</parameter>。
   </para>
+  <note>
+   <para>
+    有关取得当前路径信息的说明，请阅读 <link linkend="language.variables.predefined">预定义变量</link> 一节。
+   </para>
+  </note>
+  <note>
+   <para>
+    <function>pathinfo</function> 纯粹基于输入字符串操作，
+    它不会受实际文件系统和类似 "<literal>..</literal>" 的路径格式影响。
+   </para>
+  </note>
+  <caution>
+   <para>
+    <function>pathinfo</function> 是本地化的，所以为了让它能正确地解析一个包含多字节编码的路径，
+    必须使用 <function>setlocale</function> 函数来设置地区信息。
+   </para>
+  </caution>
  </refsect1>
 
  <refsect1 role="parameters">
@@ -34,13 +52,16 @@
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>options</parameter></term>
+     <term><parameter>flags</parameter></term>
      <listitem>
       <para>
-       如果指定了，将会返回指定元素；它们包括：<constant>PATHINFO_DIRNAME</constant>，<constant>PATHINFO_BASENAME</constant>
-   和 <constant>PATHINFO_EXTENSION</constant> 或 <constant>PATHINFO_FILENAME</constant>。
+       如果指定了，将会返回指定元素；它们包括：
+       <constant>PATHINFO_DIRNAME</constant>、
+       <constant>PATHINFO_BASENAME</constant>、
+       <constant>PATHINFO_EXTENSION</constant>、
+       <constant>PATHINFO_FILENAME</constant>。
       </para>
-      <para>如果没有指定 <parameter>options</parameter> 默认是返回全部的单元。
+      <para>如果没有指定 <parameter>flags</parameter> 默认是返回全部的单元。
       </para>
      </listitem>
     </varlistentry>
@@ -52,41 +73,32 @@
   &reftitle.returnvalues;
   <para>
    如果没有传入 <parameter>options</parameter> ，将会返回包括以下单元的数组 <type>array</type>：<literal>dirname</literal>，<literal>basename</literal>
-   和 <literal>extension</literal>（如果有），以 及<literal>filename</literal>。
+   和 <literal>extension</literal>（如果有），以及<literal>filename</literal>。
   </para>
   <note>
    <para>
-    If the <parameter>path</parameter> does not have an extension, no
-    <literal>extension</literal> element will be returned（以下第二个案例）。
+    如果 <parameter>path</parameter> 有一个以上的扩展名，
+    <constant>PATHINFO_EXTENSION</constant> 只返回最后一个，而
+    <constant>PATHINFO_FILENAME</constant> 仅剥离最后一个。
+    （参考第一个示例）。
+   </para>
+  </note>
+  <note>
+   <para>
+    如果 <parameter>path</parameter> 没有扩展名，返回数据中就不会有
+    <literal>extension</literal> 元素。（参考第二个示例）
+   </para>
+  </note>
+  <note>
+   <para>
+    如果 <parameter>path</parameter> 中的 <literal>basename</literal> 以点开始，
+    那后面的字符串将被解释为 <literal>extension</literal> ，
+    并且 <literal>filename</literal> 为空。（参考第三个示例）
    </para>
   </note>
   <para>
-   If <parameter>options</parameter> is present, returns a 
-   <type>string</type> containing the requested element.
-  </para>
- </refsect1>
-
- <refsect1 role="changelog">
-  &reftitle.changelog;
-  <para>
-   <informaltable>
-    <tgroup cols="2">
-     <thead>
-      <row>
-       <entry>&Version;</entry>
-       <entry>&Description;</entry>
-      </row>
-     </thead>
-     <tbody>
-      <row>
-       <entry>5.2.0</entry>
-       <entry>
-        添加了常量 <constant>PATHINFO_FILENAME</constant>。
-       </entry>
-      </row>
-     </tbody>
-    </tgroup>
-   </informaltable>
+   如果 <parameter>flags</parameter> 存在的，
+   则返回一个包含请求元素的 <type>string</type>。
   </para>
  </refsect1>
 
@@ -103,7 +115,7 @@ $path_parts = pathinfo('/www/htdocs/inc/lib.inc.php');
 echo $path_parts['dirname'], "\n";
 echo $path_parts['basename'], "\n";
 echo $path_parts['extension'], "\n";
-echo $path_parts['filename'], "\n"; // since PHP 5.2.0
+echo $path_parts['filename'], "\n";
 ?>
 ]]>
     </programlisting>
@@ -120,7 +132,7 @@ lib.inc
   </para>
   <para>
    <example>
-    <title><function>pathinfo</function> example showing difference between null and no extension</title>
+    <title><function>pathinfo</function> 对比空扩展名和无扩展名之间区别的示例</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -143,25 +155,32 @@ NULL
     </screen>
    </example>
   </para>
+  <para>
+   <example>
+    <title><function>pathinfo</function> 形如 .file 的示例</title>
+    <programlisting role="php">
+     <![CDATA[
+<?php
+print_r(pathinfo('/some/path/.test'));
+?>
+]]>
+    </programlisting>
+    &example.outputs.similar;
+    <screen>
+     <![CDATA[
+Array
+(
+    [dirname] => /some/path
+    [basename] => .test
+    [extension] => test
+    [filename] =>
+)
+]]>
+    </screen>
+   </example>
+  </para>
  </refsect1>
 
- <refsect1 role="notes">
-  &reftitle.notes;
-  <note>
-   <para>
-    有关取得当前路径信息的说明，请阅读<link
-    linkend="language.variables.predefined">预定义变量</link>一节。
-   </para>
-  </note>
-  <note>
-   <para>
-    <function>pathinfo</function> is locale aware, so for it to parse a path 
-    containing multibyte characters correctly, the matching locale must be set using 
-    the <function>setlocale</function> function.
-   </para>
-  </note>
- </refsect1>
- 
  <refsect1 role="seealso">
   &reftitle.seealso;
   <para>
@@ -173,8 +192,8 @@ NULL
    </simplelist>
   </para>
  </refsect1>
-</refentry>
 
+</refentry>
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
