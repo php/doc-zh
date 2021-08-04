@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
 <!-- $Author$ -->
-<!-- EN-Revision: 28d123ef985df5a7b86f3601e035968ee1b3b142 Maintainer: Haohappy Status: ready -->
+<!-- EN-Revision: 9ee9eccf455188ab6eb352194eb6f9eb99e15606 Maintainer: Haohappy Status: ready -->
  <sect1 xml:id="language.oop5.overloading" xmlns="http://docbook.org/ns/docbook">
   <title>重载</title>
 
@@ -32,40 +32,6 @@
    </para>
   </note>
 
-
-  <sect2 xml:id="language.oop5.overloading.changelog">
-   &reftitle.changelog;
-   <para>
-    <informaltable>
-     <tgroup cols="2">
-      <thead>
-       <row>
-        <entry>&Version;</entry>
-        <entry>&Description;</entry>
-       </row>
-      </thead>
-      <tbody>
-       <row>
-        <entry>5.3.0</entry>
-        <entry>
-         新增 <link linkend="object.callstatic">__callStatic()</link>魔术方法。可见性未设置为
-         public 或未声明为 static 的时候会产生一个警告。
-        </entry>
-       </row>
-       <row>
-        <entry>5.1.0</entry>
-        <entry>
-         新增 <link linkend="object.isset">__isset()</link> 和
-         <link linkend="object.unset">__unset()</link> 两个魔术方法。
-        </entry>
-       </row>
-      </tbody>
-     </tgroup>
-    </informaltable>
-   </para>
-  </sect2>
-
-
   <sect2 xml:id="language.oop5.overloading.members">
    <title>属性重载</title>
 
@@ -88,22 +54,22 @@
    </methodsynopsis>
 
    <para>
-    在给不可访问属性赋值时，<link linkend="object.set">__set()</link> 会被调用。
+    在给不可访问（protected 或 private）或不存在的属性赋值时，<link linkend="object.set">__set()</link> 会被调用。
    </para>
 
    <para>
-    读取不可访问属性的值时，<link linkend="object.get">__get()</link> 会被调用。
+    读取不可访问（protected 或 private）或不存在的属性的值时，<link linkend="object.get">__get()</link> 会被调用。
    </para>
 
    <para> 
-    当对不可访问属性调用 <function>isset</function> 或
+    当对不可访问（protected 或 private）或不存在的属性调用 <function>isset</function> 或
     <function>empty</function> 时，<link linkend="object.isset">__isset()</link> 
    会被调用。
    </para>
 
    <para>
-    当对不可访问属性调用 <function>unset</function> 时，<link linkend="object.unset">__unset()</link> 
-    会被调用。
+    当对不可访问（protected 或 private）或不存在的属性调用 <function>unset</function>
+    时，<link linkend="object.unset">__unset()</link> 会被调用。
    </para>
 
    <para>  
@@ -113,8 +79,7 @@
 
    <para>
     属性重载只能在对象中进行。在静态方法中，这些魔术方法将不会被调用。所以这些方法都不能被
-    声明为 <link linkend="language.oop5.static">static</link>。从 PHP 5.3.0
-    起, 将这些魔术方法定义为 <literal>static</literal> 会产生一个警告。
+    声明为 <link linkend="language.oop5.static">static</link>。将这些魔术方法定义为 <literal>static</literal> 会产生一个警告。
    </para>
 
    <note>
@@ -122,17 +87,6 @@
      因为 PHP 处理赋值运算的方式，<link linkend="object.set">__set()</link>
      的返回值将被忽略。类似的, 在下面这样的链式赋值中，<link linkend="object.get">__get()</link>
      不会被调用：<literal><![CDATA[ $a = $obj->b = 8; ]]></literal>
-    </para>
-   </note>
-
-   <note>
-    <para>
-     在除 <function>isset</function>
-     外的其它语言结构中无法使用重载的属性，这意味着当对一个重载的属性使用
-     <function>empty</function> 时，重载魔术方法将不会被调用。
-    </para>
-    <para>
-     为避开此限制，必须将重载属性赋值到本地变量再使用 <function>empty</function>。
     </para>
    </note>
 
@@ -176,14 +130,12 @@ class PropertyTest {
         return null;
     }
 
-    /**  PHP 5.1.0之后版本 */
     public function __isset($name) 
     {
         echo "Is '$name' set?\n";
         return isset($this->data[$name]);
     }
 
-    /**  PHP 5.1.0之后版本 */
     public function __unset($name) 
     {
         echo "Unsetting '$name'\n";
@@ -291,7 +243,6 @@ class MethodTest
              . implode(', ', $arguments). "\n";
     }
 
-    /**  PHP 5.3.0之后版本  */
     public static function __callStatic($name, $arguments) 
     {
         // 注意: $name 的值区分大小写
@@ -303,7 +254,7 @@ class MethodTest
 $obj = new MethodTest;
 $obj->runTest('in object context');
 
-MethodTest::runTest('in static context');  // PHP 5.3.0之后版本
+MethodTest::runTest('in static context');
 ?>
 ]]>
     </programlisting>
