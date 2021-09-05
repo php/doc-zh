@@ -3,9 +3,9 @@
 <!-- $Author: Annlix $ -->
 <!-- EN-Revision: dde64312eb88c1b648edc32e65bf8cfe4b830387 Maintainer: Annlix Status: ready -->
 <sect1 xml:id="language.types.numeric-strings" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
- <title>Numeric strings 数字字符串</title>
+ <title>数字字符串</title>
  <para>
-  如果一个 PHP <type>string</type> 可以被解释为 <type>int</type> 或 <type>float</type> 类型，则它被视为数字。
+  如果一个 PHP <type>string</type> 可以被解释为 <type>int</type> 或 <type>float</type> 类型，则它被视为数字字符串。
  </para>
 
  <para>
@@ -35,21 +35,20 @@ NUM_STRING       ({INT_NUM_STRING} | {FLOAT_NUM_STRING})
   <title>在数字上下文中使用的字符串</title>
   <para>
    当一个 <type>string</type> 需要被当作一个数字计算时，（例如：算术运算， <type>int</type> 
-   类型声明等等。) ，则采取以下步骤来确定结果：
+   类型声明等)，则采取以下步骤来确定结果：
 
    <orderedlist>
     <listitem>
      <simpara>
       如果 <type>string</type> 是数字，当 <type>string</type> 
-      是整数字符串并且符合 <type>int</type> 类型的限制（由 PHP_INT_MAX 
-      定义），则解析为 <type>int</type> ，否则解析为 <type>float</type> 。
+      是整数字符串并且符合 <type>int</type> 类型的范围限制（即是 PHP_INT_MAX 
+      定义的值），则解析为 <type>int</type> ，否则解析为 <type>float</type> 。
      </simpara>
     </listitem>
     <listitem>
      <simpara>
-      如果上下文允许前导数字字符串并且 <type>string</type>
-      是 1，如果 <type>string</type> 的前导部分是整数数字字符串且符合 <type>int</type> 
-      类型限制（由 PHP_INT_MAX 定义），则解析为 <type>int</type> ，否则解析为 <type>float</type> 。
+      如果上下文允许前导数字和一个 <type>string</type>，如果 <type>string</type> 的前导部分是整数数字字符串且符合 <type>int</type> 
+      类型限制（由 <constant>PHP_INT_MAX</constant> 定义），则解析为 <type>int</type> ，否则解析为 <type>float</type> 。
       此外，还会导致 <constant>E_WARNING</constant> 级别的错误。
      </simpara>
     </listitem>
@@ -65,8 +64,8 @@ NUM_STRING       ({INT_NUM_STRING} | {FLOAT_NUM_STRING})
  <sect2 xml:id="language.types.numeric-string.prior">
   <title> PHP 8.0.0 之前的行为</title>
   <para>
-   在 PHP 8.0.0 之前，一个 <type>string</type> 
-   只有在<emphasis>前导</emphasis>空格的时候才被认为是数字，如果它有 <emphasis>尾随</emphasis> 空格，则该字符串被视为是前导数字。
+   在 PHP 8.0.0 之前，
+   只有在<emphasis>前导</emphasis>空格的时候，<type>string</type> 才被认为是数字；如果它有<emphasis>尾随</emphasis>空格，则该字符串被视为是前导数字。
   </para>
 
   <para>
@@ -85,22 +84,21 @@ NUM_STRING       ({INT_NUM_STRING} | {FLOAT_NUM_STRING})
      </simpara>
     </listitem>
    </itemizedlist>
-   在 PHP 7.1.0 之前，则既不会导致 <constant>E_NOTICE</constant>
-   错误，也不会导致 <constant>E_WARNING</constant> 错误。
+   在 PHP 7.1.0 之前，则既不会导致 <constant>E_NOTICE</constant>，也不会导致 <constant>E_WARNING</constant>。
   </para>
 
   <informalexample>
    <programlisting role="php">
 <![CDATA[
 <?php
-$foo = 1 + "10.5";                // $foo is float (11.5)
-$foo = 1 + "-1.3e3";              // $foo is float (-1299)
-$foo = 1 + "bob-1.3e3";           // TypeError as of PHP 8.0.0, $foo is integer (1) previously
-$foo = 1 + "bob3";                // TypeError as of PHP 8.0.0, $foo is integer (1) previously
-$foo = 1 + "10 Small Pigs";       // $foo is integer (11) and an E_WARNING is raised in PHP 8.0.0, E_NOTICE previously
-$foo = 4 + "10.2 Little Piggies"; // $foo is float (14.2) and an E_WARNING is raised in PHP 8.0.0, E_NOTICE previously
-$foo = "10.0 pigs " + 1;          // $foo is float (11) and an E_WARNING is raised in PHP 8.0.0, E_NOTICE previously
-$foo = "10.0 pigs " + 1.0;        // $foo is float (11) and an E_WARNING is raised in PHP 8.0.0, E_NOTICE previously
+$foo = 1 + "10.5";                // $foo 是 float (11.5)
+$foo = 1 + "-1.3e3";              // $foo 是 float (-1299)
+$foo = 1 + "bob-1.3e3";           // PHP 8.0.0 起产生 TypeError；在此之前 $foo 是 integer (1)
+$foo = 1 + "bob3";                // PHP 8.0.0 起产生 TypeError；在此之前 $foo 是 integer (1)
+$foo = 1 + "10 Small Pigs";       // PHP 8.0.0 起，$foo 是 integer (11)，并且产生 E_WARNING；在此之前产生 E_NOTICE
+$foo = 4 + "10.2 Little Piggies"; // PHP 8.0.0 起，$foo 是 float (14.2)，并且产生 E_WARNING；在此之前产生 E_NOTICE
+$foo = "10.0 pigs " + 1;          // PHP 8.0.0 起，$foo 是 float (11)，并且产生 E_WARNING；在此之前产生 E_NOTICE
+$foo = "10.0 pigs " + 1.0;        // PHP 8.0.0 起，$foo 是 float (11)，并且产生 E_WARNING；在此之前产生 E_NOTICE
 ?>
 ]]>
    </programlisting>
