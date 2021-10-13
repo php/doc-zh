@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
 <!-- $Author$ -->
-<!-- $EN-Revision: 96c9d88bad9a7d7d44bfb7f26c226df7ee9ddf26 $ -->
+<!-- $EN-Revision: 18303121bc5ebbd696f8444b69eca93c974c25ac $ -->
 <appendix xml:id="filters"
           xmlns="http://docbook.org/ns/docbook"
           xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -20,9 +20,11 @@
   <section xml:id="filters.string">
     <title>字符串过滤器</title>
     <simpara>每个过滤器都正如其名字暗示的那样工作并与内置的 PHP 字符串函数的行为相对应。对于指定过滤器的更多信息，请参考该函数的手册页。</simpara>
+   <section xml:id="filters.string.rot13">
+    <title>string.rot13</title>
     <simpara>
-    <literal>string.rot13</literal>（自 PHP 4.3.0 起）使用此过滤器等同于用 
-    <function>str_rot13</function>函数处理所有的流数据。</simpara>
+     使用该过滤器也就是用 <function>str_rot13</function> 函数处理所有的流数据。
+    </simpara>
     <example>
       <title>string.rot13</title>
       <programlisting role="php">
@@ -36,9 +38,13 @@ fwrite($fp, "This is a test.\n");
 ]]>
 </programlisting>
     </example>
+   </section>
+
+   <section xml:id="filters.string.toupper">
+    <title>string.toupper</title>
     <simpara>
-    <literal>string.toupper</literal>（自 PHP 5.0.0 起）使用此过滤器等同于用 
-    <function>strtoupper</function>函数处理所有的流数据。</simpara>
+     使用此过滤器等同于用 <function>strtoupper</function>函数处理所有的流数据。
+    </simpara>
     <example>
       <title>string.toupper</title>
       <programlisting role="php">
@@ -52,9 +58,12 @@ fwrite($fp, "This is a test.\n");
 ]]>
 </programlisting>
     </example>
+  </section>
+
+   <section xml:id="filters.string.tolower">
+    <title>string.tolower</title>
     <simpara>
-    <literal>string.tolower</literal>（自 PHP 5.0.0 起）使用此过滤器等同于用 
-    <function>strtolower</function>函数处理所有的流数据。</simpara>
+    使用此过滤器等同于用 <function>strtolower</function>函数处理所有的流数据。</simpara>
     <example>
       <title>string.tolower</title>
       <programlisting role="php">
@@ -101,13 +110,16 @@ fclose($fp);
     </programlisting>
    </example>
   </section>
+  </section>
 
   <section xml:id="filters.convert">
     <title>转换过滤器</title>
-    <simpara>如同 string.* 过滤器，convert.* 过滤器的作用就和其名字一样。转换过滤器是 PHP 5.0.0 添加的。对于指定过滤器的更多信息，请参考该函数的手册页。</simpara>
+    <simpara>如同 string.* 过滤器，convert.* 过滤器的作用就和其名字一样。对于指定过滤器的更多信息，请参考该函数的手册页。</simpara>
+
+ <section xml:id="filters.convert.base64">
+  <title>convert.base64-encode 和 convert.base64-decode</title>
     <simpara>
-    <literal>convert.base64-encode</literal>和 
-    <literal>convert.base64-decode</literal>使用这两个过滤器等同于分别用 
+     使用这两个过滤器等同于分别用
     <function>base64_encode</function>和 
     <function>base64_decode</function>函数处理所有的流数据。
     <literal>convert.base64-encode</literal>支持以一个关联数组给出的参数。如果给出了 
@@ -145,9 +157,12 @@ fclose($fp);
 ]]>
 </programlisting>
     </example>
-    <simpara>
-    <literal>convert.quoted-printable-encode</literal>和 
-    <literal>convert.quoted-printable-decode</literal>使用此过滤器的 decode 版本等同于用 
+ </section>
+
+ <section xml:id="filters.covert.quoted-printable">
+  <title>convert.quoted-printable-encode 和 convert.quoted-printable-decode</title>
+  <simpara>
+   使用此过滤器的 decode 版本等同于用
     <function>quoted_printable_decode</function>函数处理所有的流数据。没有和 
     <literal>convert.quoted-printable-encode</literal>相对应的函数。
     <literal>convert.quoted-printable-encode</literal>支持以一个关联数组给出的参数。除了支持和 
@@ -171,38 +186,90 @@ fwrite($fp, "This is a test.\n");
 </programlisting>
     </example>
   </section>
+
+
+   <section xml:id="filters.convert.iconv">
+    <title>convert.iconv.*</title>
+    <simpara>
+     在激活 <link linkend="book.iconv">iconv</link>
+     的前提下可以使用 <literal>convert.iconv.*</literal> 压缩过滤器，
+     等同于用 <function>iconv</function> 处理所有的流数据。
+
+     该过滤器不支持参数，但可使用输入/输出的编码名称，组成过滤器名称，比如
+     <literal>convert.iconv.&lt;input-encoding&gt;.&lt;output-encoding&gt;</literal> 或
+     <literal>convert.iconv.&lt;input-encoding&gt;/&lt;output-encoding&gt;</literal>
+     （两种写法的语义都相同）。
+    </simpara>
+
+    <example>
+     <title>convert.iconv.*</title>
+     <programlisting role="php">
+      <![CDATA[
+<?php
+$fp = fopen('php://output', 'w');
+stream_filter_append($fp, 'convert.iconv.utf-16le.utf-8');
+fwrite($fp, "T\0h\0i\0s\0 \0i\0s\0 \0a\0 \0t\0e\0s\0t\0.\0\n\0");
+fclose($fp);
+/* Outputs: This is a test. */
+?>
+]]>
+     </programlisting>
+    </example>
+   </section>
+  </section>
+
   <section xml:id="filters.compression">
     <title>压缩过滤器</title>
-    <simpara>虽然
-    <link linkend="wrappers.compression">压缩封装协议</link>提供了在本地文件系统中 创建 gzip 和 bz2 兼容文件的方法，但不代表可以在网络的流中提供通用压缩的意思，也不代表可以将一个非压缩的流转换成一个压缩流。对此，压缩过滤器可以在任何时候应用于任何流资源。</simpara>
+
+    <simpara>
+     虽然 <link linkend="wrappers.compression">压缩封装协议</link> 提供了在本地文件系统中
+     创建 gzip 和 bz2 兼容文件的方法，但不代表可以在网络的流中提供通用压缩的意思，
+     也不代表可以将一个非压缩的流转换成一个压缩流。对此，压缩过滤器可以在任何时候应用于任何流资源。
+    </simpara>
+
     <note>
-      <simpara>压缩过滤器
-      <emphasis>不</emphasis>产生命令行工具如 
-      <literal>gzip</literal>的头和尾信息。只是压缩和解压数据流中的有效载荷部分。</simpara>
+      <simpara>
+       压缩过滤器<emphasis>不</emphasis>产生命令行工具如
+       <literal>gzip</literal> 的头和尾信息。只是压缩和解压数据流中的有效载荷部分。
+      </simpara>
     </note>
+
+ <section xml:id="filters.compression.zlib">
+  <title>zlib.deflate 和 zlib.inflate</title>
     <simpara>
     <literal>zlib.deflate</literal>（压缩）和 
     <literal>zlib.inflate</literal>（解压）实现了定义与 
     <link xlink:href="&url.rfc;1951">RFC 1951</link>的压缩算法。
     <literal>deflate</literal>过滤器可以接受以一个关联数组传递的最多三个参数。
-    <parameter>level</parameter>定义了压缩强度（1-9）。数字更高通常会产生更小的载荷，但要消耗更多的处理时间。存在两个特殊压缩等级：0（完全不压缩）和 -1（zlib 内部默认值，目前是 6）。
-    <parameter>window</parameter>是压缩回溯窗口大小，以二的次方表示。更高的值（大到 15 —— 32768 字节）产生更好的压缩效果但消耗更多内存，低的值（低到 9 —— 512 字节）产生产生较差的压缩效果但内存消耗低。目前默认的 
-    <parameter>window</parameter>大小是 
-    <constant>15</constant>。
-    <parameter>memory</parameter>用来指示要分配多少工作内存。合法的数值范围是从 1（最小分配）到 9（最大分配）。内存分配仅影响速度，不会影响生成的载荷的大小。</simpara>
+
+    <parameter>level</parameter>定义了压缩强度（1-9）。
+     数字更高通常会产生更小的载荷，但要消耗更多的处理时间。
+     存在两个特殊压缩等级：0（完全不压缩）和 -1（zlib 内部默认值，目前是 6）。
+
+    <parameter>window</parameter>是压缩回溯窗口大小，以二的次方表示。
+     更高的值（大到 15 —— 32768 字节）产生更好的压缩效果但消耗更多内存，
+     低的值（低到 9 —— 512 字节）产生产生较差的压缩效果但内存消耗低。
+     目前默认的 <parameter>window</parameter> 大小是 <constant>15</constant>。
+
+    <parameter>memory</parameter>用来指示要分配多少工作内存。
+     合法的数值范围是从 1（最小分配）到 9（最大分配）。
+     内存分配仅影响速度，不会影响生成的载荷的大小。
+    </simpara>
+
     <note>
-      <simpara>因为最常用的参数是压缩等级，也可以提供一个整数值作为此参数（而不用数组）。</simpara>
+      <simpara>
+       因为最常用的参数是压缩等级，也可以提供一个整数值作为此参数（而不用数组）。
+      </simpara>
     </note>
-    <simpara>zlib.* 压缩过滤器自 PHP 版本 
-    <literal>5.1.0</literal>起可用，在激活 
-    <link linkend="ref.zlib">zlib</link>的前提下。也可以通过安装来自 
-    <link xlink:href="&url.pecl;">PECL</link>的 
-    <link xlink:href="&url.pecl.package;zlib_filter">zlib_filter</link>包作为一个后门在 
-    <literal>5.0.x</literal>版中使用。此过滤器在 PHP 4 中
-    <emphasis>不可用</emphasis>。</simpara>
+
+    <simpara>
+     在激活 <link linkend="ref.zlib">zlib</link>
+     的前提下可以使用 zlib.* 压缩过滤器。
+    </simpara>
+
     <example>
       <title>
-      <literal>zlib.deflate</literal>和 
+      <literal>zlib.deflate</literal> 和
       <literal>zlib.inflate</literal></title>
       <programlisting role="php">
         <![CDATA[
@@ -236,6 +303,7 @@ This is not an important string.
 ]]>
 </programlisting>
     </example>
+
     <example>
       <title>
       <literal>zlib.deflate</literal>简单参数用法</title>
@@ -263,26 +331,38 @@ The compressed file is 56 bytes long.
 ]]>
 </programlisting>
     </example>
+ </section>
+
+ <section xml:id="filters.compression.bzip2">
+  <title>bzip2.compress 和 bzip2.decompress</title>
     <simpara>
     <literal>bzip2.compress</literal>和 
     <literal>bzip2.decompress</literal>工作的方式与上面讲的 zlib 过滤器相同。
+
     <literal>bzip2.compress</literal>过滤器接受以一个关联数组给出的最多两个参数：
+
     <parameter>blocks</parameter>是从 1 到 9 的整数值，指定分配多少个 100K 字节的内存块作为工作区。
-    <parameter>work</parameter>是 0 到 250 的整数值，指定在退回到一个慢一些，但更可靠的算法之前做多少次常规压缩算法的尝试。调整此参数仅影响到速度，压缩输出和内存使用都不受此设置的影响。将此参数设为 0 指示 bzip 库使用内部默认算法。
-    <literal>bzip2.decompress</literal>过滤器仅接受一个参数，可以用普通的布尔值传递，或者用一个关联数组中的 
-    <parameter>small</parameter>单元传递。当 
-    <parameter>small</parameter>设为 &amp;true; 值时，指示 bzip 库用最小的内存占用来执行解压缩，代价是速度会慢一些。</simpara>
-    <simpara>bzip2.* 压缩过滤器自 PHP 版本 
-    <literal>5.1.0</literal>起可用，在激活 
-    <link linkend="ref.bzip2">bz2</link>支持的前提下。也可以通过安装来自 
-    <link xlink:href="&url.pecl;">PECL</link>的
-    <link xlink:href="&url.pecl.package;bz2_filter">bz2_filter</link>包作为一个后门在 
-    <literal>5.0.x</literal>版中使用。此过滤器在 PHP 4 中
-    <emphasis>不可用</emphasis>。</simpara>
+
+    <parameter>work</parameter>是 0 到 250 的整数值，指定在退回到一个慢一些，
+     但更可靠的算法之前做多少次常规压缩算法的尝试。调整此参数仅影响到速度，
+     压缩输出和内存使用都不受此设置的影响。将此参数设为 0 指示 bzip 库使用内部默认算法。
+
+    <literal>bzip2.decompress</literal> 过滤器仅接受一个参数，可以用普通的布尔值传递，
+     或者用一个关联数组中的 <parameter>small</parameter> 单元传递。
+
+     当 <parameter>small</parameter>设为 &amp;true; 值时，指示 bzip 库用最小的内存占用来执行解压缩，
+     代价是速度会慢一些。
+    </simpara>
+
+    <simpara>
+     在激活 <link linkend="ref.bzip2">bz2</link> 支持的前提下可以使用 bzip2.* 压缩过滤器。
+    </simpara>
+
     <example>
       <title>
-      <literal>bzip2.compress</literal>和 
-      <literal>bzip2.decompress</literal></title>
+       <literal>bzip2.compress</literal> 和
+       <literal>bzip2.decompress</literal>
+      </title>
       <programlisting role="php">
         <![CDATA[
 <?php
@@ -307,16 +387,31 @@ The compressed file is 1488 bytes long.
 ]]>
 </programlisting>
     </example>
-  </section>
+ </section>
+ </section>
+
   <section xml:id="filters.encryption">
     <title>加密过滤器</title>
+
+   <para>
+    加密过滤器特别适用于文件/数据流的加密。
+   </para>
+
+ <section xml:id="filters.encryption.mcrypt">
+  <title>mcrypt.* 和 mdecrypt.*</title>
+  <para>
+   &warn.deprecated.feature-7-1-0;
+  </para>
+
     <simpara>
-    <literal>mcrypt.*</literal>和 
-    <literal>mdecrypt.*</literal>使用 libmcrypt 提供了对称的加密和解密。这两组过滤器都支持 
+     <literal>mcrypt.*</literal>和
+     <literal>mdecrypt.*</literal> 使用 libmcrypt 提供了对称的加密和解密。这两组过滤器都支持
     <link linkend="ref.mcrypt">mcrypt 扩展库</link>中相同的算法，格式为 
     <literal>mcrypt.ciphername</literal>，其中 
     <parameter>ciphername</parameter>是密码的名字，将被传递给 
-    <function>mcrypt_module_open</function>。有以下五个过滤器参数可用：</simpara>
+    <function>mcrypt_module_open</function>。有以下五个过滤器参数可用：
+    </simpara>
+
     <para>
       <table>
         <title>mcrypt 过滤器参数</title>
@@ -364,55 +459,151 @@ The compressed file is 1488 bytes long.
         </tgroup>
       </table>
     </para>
-    <example>
-      <title>用 3DES 将文件加密输出</title>
-      <programlisting role="php">
-        <![CDATA[
+
+  <example>
+   <title>用 Blowfish 算法加解密</title>
+   <programlisting role="php">
+    <![CDATA[
 <?php
-$passphrase = 'My secret';
-
-/* Turn a human readable passphrase
- * into a reproducable iv/key pair
- */
-$iv = substr(md5('iv'.$passphrase, true), 0, 8);
-$key = substr(md5('pass1'.$passphrase, true) .
-               md5('pass2'.$passphrase, true), 0, 24);
-$opts = array('iv'=>$iv, 'key'=>$key);
-
-$fp = fopen('secert-file.enc', 'wb');
-stream_filter_append($fp, 'mcrypt.tripledes', STREAM_FILTER_WRITE, $opts);
-fwrite($fp, 'Secret secret secret data');
-fclose($fp);
-?>
-]]>
-</programlisting>
-    </example>
-    <example>
-      <title>读取加密的文件</title>
-      <programlisting role="php">
-        <![CDATA[
-<?php
-$passphrase = 'My secret';
-
-/* Turn a human readable passphrase
- * into a reproducable iv/key pair
- */
-$iv = substr(md5('iv'.$passphrase, true), 0, 8);
-$key = substr(md5('pass1'.$passphrase, true) .
-               md5('pass2'.$passphrase, true), 0, 24);
-$opts = array('iv'=>$iv, 'key'=>$key);
-
-$fp = fopen('secert-file.enc', 'rb');
-stream_filter_append($fp, 'mdecrypt.tripledes', STREAM_FILTER_WRITE, $opts);
-$data = rtrim(stream_get_contents($fp));
+//假设之前已经生成了 $key
+$iv_size = mcrypt_get_iv_size(MCRYPT_BLOWFISH, MCRYPT_MODE_CBC);
+$iv = mcrypt_create_iv($iv_size, MCRYPT_DEV_URANDOM);
+$fp = fopen('encrypted-file.enc', 'wb');
+fwrite($fp, $iv);
+$opts = array('mode'=>'cbc','iv'=>$iv, 'key'=>$key);
+stream_filter_append($fp, 'mcrypt.blowfish', STREAM_FILTER_WRITE, $opts);
+fwrite($fp, 'message to encrypt');
 fclose($fp);
 
+//解密
+$fp = fopen('encrypted-file.enc', 'rb');
+$iv = fread($fp, $iv_size = mcrypt_get_iv_size(MCRYPT_BLOWFISH, MCRYPT_MODE_CBC));
+$opts = array('mode'=>'cbc','iv'=>$iv, 'key'=>$key)
+stream_filter_append($fp, 'mdecrypt.blowfish', STREAM_FILTER_READ, $opts);
+$data = rtrim(stream_get_contents($fp));//trims off null padding
+fclose($fp);
 echo $data;
 ?>
 ]]>
-</programlisting>
+   </programlisting>
+  </example>
+
+    <example>
+      <title>将文件以 SHA256 HMAC 的 AES-128 CBC 加密</title>
+     <programlisting role="php">
+      <![CDATA[
+<?php
+AES_CBC::encryptFile($password, "plaintext.txt", "encrypted.enc");
+AES_CBC::decryptFile($password, "encrypted.enc", "decrypted.txt");
+
+class AES_CBC
+{
+   protected static $KEY_SIZES = array('AES-128'=>16,'AES-192'=>24,'AES-256'=>32);
+   protected static function key_size() { return self::$KEY_SIZES['AES-128']; } //default AES-128
+   public static function encryptFile($password, $input_stream, $aes_filename){
+      $iv_size = mcrypt_get_iv_size(MCRYPT_RIJNDAEL_128, MCRYPT_MODE_CBC);
+      $fin = fopen($input_stream, "rb");
+      $fc = fopen($aes_filename, "wb+");
+      if (!empty($fin) && !empty($fc)) {
+         fwrite($fc, str_repeat("_", 32) );//placeholder, SHA256 HMAC will go here later
+         fwrite($fc, $hmac_salt = mcrypt_create_iv($iv_size, MCRYPT_DEV_URANDOM));
+         fwrite($fc, $esalt = mcrypt_create_iv($iv_size, MCRYPT_DEV_URANDOM));
+         fwrite($fc, $iv = mcrypt_create_iv($iv_size, MCRYPT_DEV_URANDOM));
+         $ekey = hash_pbkdf2("sha256", $password, $esalt, $it=1000, self::key_size(), $raw=true);
+         $opts = array('mode'=>'cbc', 'iv'=>$iv, 'key'=>$ekey);
+         stream_filter_append($fc, 'mcrypt.rijndael-128', STREAM_FILTER_WRITE, $opts);
+         $infilesize = 0;
+         while (!feof($fin)) {
+            $block = fread($fin, 8192);
+            $infilesize+=strlen($block);
+            fwrite($fc, $block);
+         }
+         $block_size = mcrypt_get_block_size(MCRYPT_RIJNDAEL_128, MCRYPT_MODE_CBC);
+         $padding = $block_size - ($infilesize % $block_size);//$padding is a number from 1-16
+         fwrite($fc, str_repeat(chr($padding), $padding) );//perform PKCS7 padding
+         fclose($fin);
+         fclose($fc);
+         $hmac_raw = self::calculate_hmac_after_32bytes($password, $hmac_salt, $aes_filename);
+         $fc = fopen($aes_filename, "rb+");
+         fwrite($fc, $hmac_raw);//overwrite placeholder
+         fclose($fc);
+      }
+   }
+   public static function decryptFile($password, $aes_filename, $out_stream) {
+      $iv_size = mcrypt_get_iv_size(MCRYPT_RIJNDAEL_128, MCRYPT_MODE_CBC);
+      $hmac_raw = file_get_contents($aes_filename, false, NULL,  0, 32);
+      $hmac_salt = file_get_contents($aes_filename, false, NULL, 32, $iv_size);
+      $hmac_calc = self::calculate_hmac_after_32bytes($password, $hmac_salt, $aes_filename);
+      $fc = fopen($aes_filename, "rb");
+      $fout = fopen($out_stream, 'wb');
+      if (!empty($fout) && !empty($fc) && self::hash_equals($hmac_raw,$hmac_calc)) {
+         fread($fc, 32+$iv_size);//skip sha256 hmac and salt
+         $esalt = fread($fc, $iv_size);
+         $iv    = fread($fc, $iv_size);
+         $ekey = hash_pbkdf2("sha256", $password, $esalt, $it=1000, self::key_size(), $raw=true);
+         $opts = array('mode'=>'cbc', 'iv'=>$iv, 'key'=>$ekey);
+         stream_filter_append($fc, 'mdecrypt.rijndael-128', STREAM_FILTER_READ, $opts);
+         while (!feof($fc)) {
+            $block = fread($fc, 8192);
+            if (feof($fc)) {
+               $padding = ord($block[strlen($block) - 1]);//assume PKCS7 padding
+               $block = substr($block, 0, 0-$padding);
+            }
+            fwrite($fout, $block);
+         }
+         fclose($fout);
+         fclose($fc);
+      }
+   }
+   private static function hash_equals($str1, $str2) {
+      if(strlen($str1) == strlen($str2)) {
+         $res = $str1 ^ $str2;
+         for($ret=0,$i = strlen($res) - 1; $i >= 0; $i--) $ret |= ord($res[$i]);
+         return !$ret;
+      }
+      return false;
+   }
+   private static function calculate_hmac_after_32bytes($password, $hsalt, $filename) {
+      static $init=0;
+      $init or $init = stream_filter_register("user-filter.skipfirst32bytes", "FileSkip32Bytes");
+      $stream = 'php://filter/read=user-filter.skipfirst32bytes/resource=' . $filename;
+      $hkey = hash_pbkdf2("sha256", $password, $hsalt, $iterations=1000, 24, $raw=true);
+      return hash_hmac_file('sha256', $stream, $hkey, $raw=true);
+   }
+}
+class FileSkip32Bytes extends php_user_filter
+{
+   private $skipped=0;
+   function filter($in, $out, &$consumed, $closing)  {
+      while ($bucket = stream_bucket_make_writeable($in)) {
+         $outlen = $bucket->datalen;
+         if ($this->skipped<32){
+            $outlen = min($bucket->datalen,32-$this->skipped);
+            $bucket->data = substr($bucket->data, $outlen);
+            $bucket->datalen = $bucket->datalen-$outlen;
+            $this->skipped+=$outlen;
+         }
+         $consumed += $outlen;
+         stream_bucket_append($out, $bucket);
+      }
+      return PSFS_PASS_ON;
+   }
+}
+class AES_128_CBC extends AES_CBC {
+   protected static function key_size() { return self::$KEY_SIZES['AES-128']; }
+}
+class AES_192_CBC extends AES_CBC {
+   protected static function key_size() { return self::$KEY_SIZES['AES-192']; }
+}
+class AES_256_CBC extends AES_CBC {
+   protected static function key_size() { return self::$KEY_SIZES['AES-256']; }
+}
+]]>
+     </programlisting>
     </example>
+   </section>
   </section>
+
 </appendix>
 <!-- Keep this comment at the end of the file
 Local variables:
