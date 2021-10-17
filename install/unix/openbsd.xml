@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
 <!-- $Author$ -->
-<!-- EN-Revision: 96c9d88bad9a7d7d44bfb7f26c226df7ee9ddf26 Maintainer: dallas Status: ready -->
+<!-- EN-Revision: 4eeb07225f615fcde68cbefb84df2fc9bf278f1f Maintainer: dallas Status: ready -->
 <sect1 xml:id="install.unix.openbsd" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <title>在 OpenBSD 系统下的安装</title>
  <para>
   本章节的内容和提示仅限于将 PHP 安装到 
-  <link xlink:href="&url.openbsd;">OpenBSD 3.6</link> 系统上。
+  <link xlink:href="&url.openbsd;">OpenBSD 5.8</link> 系统上。
  </para>
  <sect2 xml:id="install.openbsd.packages">
   <title>使用二进制包安装</title>
@@ -17,29 +17,28 @@
   </simpara>
   <simpara>
    需要安装的 PHP 核心包的文件是 
-   <filename>php4-core-4.3.8.tgz</filename>，它包含了基本的引擎（包括 gettext 和
-   iconv）。其次，可能还需要安装一些模块包，如：<filename>php4-mysql-4.3.8.tgz</filename> 或 
-   <filename>php4-imap-4.3.8.tgz</filename>。需要使用命令 
+   <filename>php</filename>，它包含了基本的引擎（包括 gettext 和
+   iconv）。其次，可能还需要安装一些模块包，如：<filename>php-mysql</filename> 或 
+   <filename>php-imap</filename>。需要使用命令 
    <command>phpxs</command> 去激活它，并且再通过修改 &php.ini; 文件来屏蔽他们。
   </simpara>
   <example xml:id="install.openbsd.ports.example">
    <title>在 OpenBSD 系统下的软件包的安装示例</title>
    <programlisting>
 <![CDATA[
-# pkg_add php4-core-4.3.8.tgz
-# /usr/local/sbin/phpxs -s
-# cp /usr/local/share/doc/php4/php.ini-recommended /var/www/conf/php.ini
-  （加入 mysql 包）
-# pkg_add php4-mysql-4.3.8.tgz
-# /usr/local/sbin/phpxs -a mysql
-  （加入 imap 包）
-# pkg_add php4-imap-4.3.8.tgz
-# /usr/local/sbin/phpxs -a imap
-  （测试一下删除 mysql 包）
-# pkg_delete php4-mysql-4.3.8
-# /usr/local/sbin/phpxs -r mysql
+# pkg_add php
+# pkg_add php-fpm
+# pkg_add php-mysql
   （安装 PEAR 库）
-# pkg_add php4-pear-4.3.8.tgz
+# pkg_add pear
+
+Follow the instructions shown with each package!
+
+  (移除包)
+# pkg_delete php
+# pkg_delete php-fpm
+# pkg_delete php-mysql
+# pkg_delete pear
 ]]>
    </programlisting>
   </example>
@@ -65,8 +64,13 @@
   <title>常见问题</title>
   <itemizedlist>
    <listitem>
+    <simpara>Apache 和 Nginx 不再是 OpenBSD 上的默认服务器，但他们都可以在 ports 和包中找到。 
+    新的默认服务器也被称为 “httpd”。
+    </simpara>
+   </listitem>
+   <listitem>
     <simpara>
-     默认安装的 Apache 运行于 
+     默认安装的 httpd 运行于 
      <link xlink:href="&url.openbsd.chroot;">chroot(2) jail</link> 内，将限制 PHP 脚本只能访问 
      <filename>/var/www</filename>下面的文件。需要建立 
      <filename>/var/www/tmp</filename> 目录来存放 PHP session 文件，或使用其它的
@@ -76,29 +80,16 @@
      <filename>/etc/resolv.conf</filename> 和 
      <filename>/etc/services</filename> 需要被移动到 
      <filename>/var/www/etc</filename> 中去。OpenBSD PEAR 包会自动安装到正确的
-     chroot 目录中，因此不需要作特殊改动。有关 OpenBSD Apache 的更多信息见 
-     OpenBSD FAQ。 <!-- Removed link to fix the build ~sobak 12/06/2016 -->
+     chroot 目录中。
     </simpara>
    </listitem>
    <listitem>
     <simpara>
-     对应于 <link xlink:href="&url.gd;">gd</link> 扩展的 OpenBSD 3.6
-     包需要预先安装 XFree86。如果不想使用那些需要 X11 的字体特性，则安装 
-     <filename>php4-gd-4.3.8-no_x11.tgz</filename> 包来替代之。
+     对应于 <link xlink:href="&url.gd;">gd</link> 扩展的 OpenBSD 5.7+
+     包需要预先安装 XFree86。通过添加 <filename>xbase.tgz</filename> 文件集到 post-installation （参阅 OpenBSD FAQ#4） 中。
     </simpara>
    </listitem>
   </itemizedlist>
- </sect2>
-
- <sect2 xml:id="install.openbsd.older">
-  <title>早期发布版本</title>
-   <simpara>
-    早期的 OpenBSD 系统使用 FLAVORS 系统把 PHP
-    连接为静态模式。自从使用这种方法编译就造成了问题：很难制作二进制软件包。仍然可以使用早期稳定的
-    ports trees，但这种方式已经不被 OpenBSD
-    小组所支持。如果对此有任何建议和意见，软件包当前的维护人是
-    Anil Madhavapeddy（avsm at openbsd dot org）。
-  </simpara>
  </sect2>
 </sect1>
 <!-- Keep this comment at the end of the file
