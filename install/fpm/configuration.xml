@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: e5500093db0f51a35f5d962d04d9d3ebf5530e52 Maintainer: HonestQiao Status: ready -->
+<!-- EN-Revision: 4eeb07225f615fcde68cbefb84df2fc9bf278f1f Maintainer: HonestQiao Status: ready -->
 
 <sect1 xml:id="install.fpm.configuration" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <title>配置</title>
@@ -44,6 +44,32 @@
      </para> 
     </listitem>
    </varlistentry>
+     <varlistentry xml:id="log-limit">
+      <term>
+       <parameter>log_limit</parameter>
+       <type>int</type>
+      </term>
+      <listitem>
+       <para>
+        日志记录行的限制，允许记录超过 1024 个字符的消息而不需要换行。
+        默认值：1024。
+        PHP 7.3.0 起可用。
+       </para>
+      </listitem>
+     </varlistentry>
+     <varlistentry xml:id="log-buffering">
+      <term>
+       <parameter>log_buffering</parameter>
+       <type>bool</type>
+      </term>
+      <listitem>
+       <para>
+        实验性：没有额外缓冲的日志记录。
+        默认值：yes。
+        PHP 7.3.0 后可用。
+       </para>
+      </listitem>
+     </varlistentry>
      <varlistentry xml:id="syslog-facility">
       <term>
        <parameter>syslog.facility</parameter>
@@ -132,7 +158,7 @@
    <varlistentry xml:id="daemonize">
     <term>
      <parameter>daemonize</parameter>
-     <type>boolean</type>
+     <type>bool</type>
     </term>
     <listitem>
      <para>
@@ -229,7 +255,7 @@
      <para>
       设置允许连接到 FastCGI 的服务器 IPV4 地址。等同于 PHP FastCGI (5.2.2+) 中的 FCGI_WEB_SERVER_ADDRS
       环境变量。仅对 TCP 监听起作用。每个地址是用逗号分隔，如果没有设置或者为空，则允许任何服务器请求连接。默认值：any。
-        PHP 5.5.20 和 5.6.4起，开始支持 IPv6 地址。
+      支持 IPv6 地址。
      </para> 
     </listitem>
    </varlistentry>
@@ -278,7 +304,7 @@
        <para>
         当系统支持 POSIX ACL（Access Control Lists）时，可以设置使用此选项。
         当设置了的时候，将会忽略 <literal>listen.owner</literal> 和 <literal>listen.group</literal>。
-        值是逗号分割的用户名列表。 PHP 5.6.5 起可用。
+        值是逗号分割的用户名列表。
        </para>
       </listitem>
      </varlistentry>
@@ -290,7 +316,7 @@
       <listitem>
        <para>
         参见 <literal>listen.acl_users</literal>。
-        值是逗号分割的用户组名称列表。 PHP 5.6.5 起可用。
+        值是逗号分割的用户组名称列表。
        </para>
       </listitem>
      </varlistentry>
@@ -338,7 +364,7 @@
      </para>
     </listitem>
    </varlistentry>
-   <varlistentry xml:id="pm.max-chidlren">
+   <varlistentry xml:id="pm.max-children">
     <term>
      <parameter>pm.max_children</parameter>
      <type>int</type>
@@ -463,6 +489,19 @@
        </para>
       </listitem>
      </varlistentry>
+     <varlistentry xml:id="process-dumpable">
+      <term>
+       <parameter>process.dumpable</parameter>
+       <type>bool</type>
+      </term>
+      <listitem>
+       <para>
+        即使进程用户或者组跟主进程用户是不同的，也设置进程可转储标志 (PR_SET_DUMPABLE prctl)。 
+        它允许为用户池创建进程 core dump 和 ptrace 进程。
+        默认值：no。自 PHP 7.0.29、7.1.17 和 7.2.5 起可用。
+       </para>
+      </listitem>
+     </varlistentry>
      <varlistentry xml:id="prefix">
       <term>
        <parameter>prefix</parameter>
@@ -558,7 +597,7 @@
    <varlistentry xml:id="catch-workers-output">
     <term>
      <parameter>catch_workers_output</parameter>
-     <type>boolean</type>
+     <type>bool</type>
     </term>
     <listitem>
      <para>
@@ -567,17 +606,30 @@
      </para> 
     </listitem>
    </varlistentry>
+     <varlistentry xml:id="decorate-workers-output">
+      <term>
+       <parameter>decorate_workers_output</parameter>
+       <type>bool</type>
+      </term>
+      <listitem>
+       <para>
+       当 <link linkend="catch-workers-output">catch_workers_output</link> 启用时，
+        为 worker 输出启用输出装饰。
+        默认值：yes。
+        自 PHP 7.3.0 起可用。
+       </para>
+      </listitem>
+     </varlistentry>
      <varlistentry xml:id="clear-env">
       <term>
        <parameter>clear_env</parameter>
-       <type>boolean</type>
+       <type>bool</type>
       </term>
       <listitem>
        <para>
         为 FPM worker 进程清除环境变量。
         在进程池配置文件里设置环境变量前，阻止任意系统的环境变量进入 FPM worker 进程。
-        自 PHP 5.4.27、 5.5.11 和 5.6.0 起。
-        默认值: Yes
+        默认值：Yes
        </para>
       </listitem>
      </varlistentry>
@@ -615,7 +667,128 @@
       <listitem>
        <para>
         access log 的格式。
-        默认值: "%R - %u %t \"%m %r\" %s"
+        默认: <literal>"%R - %u %t \"%m %r\" %s"</literal>：
+        <table xml:id="fpm.configuration.access.format">
+         <title>可用选项</title>
+         <tgroup cols="2">
+          <thead>
+           <row>
+            <entry>占位符</entry>
+            <entry>描述</entry>
+           </row>
+          </thead>
+          <tbody>
+           <row>
+            <entry>
+             <constant>%C</constant>
+            </entry>
+            <entry>%CPU</entry>
+           </row>
+           <row>
+            <entry>
+             <constant>%d</constant>
+            </entry>
+            <entry>持续时间 µs</entry>
+           </row>
+           <row>
+            <entry>
+             <constant>%e</constant>
+            </entry>
+            <entry>fastcgi 环境变量</entry>
+           </row>
+           <row>
+            <entry>
+             <constant>%f</constant>
+            </entry>
+            <entry>脚本文件</entry>
+           </row>
+           <row>
+            <entry>
+             <constant>%l</constant>
+            </entry>
+            <entry>内容长度</entry>
+           </row>
+           <row>
+            <entry>
+             <constant>%m</constant>
+            </entry>
+            <entry>请求方法</entry>
+           </row>
+           <row>
+            <entry>
+             <constant>%M</constant>
+            </entry>
+            <entry>内存</entry>
+           </row>
+           <row>
+            <entry>
+             <constant>%n</constant>
+            </entry>
+            <entry>进程池（pool）名称</entry>
+           </row>
+           <row>
+            <entry>
+             <constant>%o</constant>
+            </entry>
+            <entry>header 输出</entry>
+           </row>
+           <row>
+            <entry>
+             <constant>%p</constant>
+            </entry>
+            <entry>PID</entry>
+           </row>
+           <row>
+            <entry>
+             <constant>%q</constant>
+            </entry>
+            <entry>查询字符串</entry>
+           </row>
+           <row>
+            <entry>
+             <constant>%Q</constant>
+            </entry>
+            <entry>%q 和 %r 之间的连接字符</entry>
+           </row>
+           <row>
+            <entry>
+             <constant>%r</constant>
+            </entry>
+            <entry>请求 URI</entry>
+           </row>
+           <row>
+            <entry>
+             <constant>%R</constant>
+            </entry>
+            <entry>远程 IP 地址</entry>
+           </row>
+           <row>
+            <entry>
+             <constant>%s</constant>
+            </entry>
+            <entry>状态码</entry>
+           </row>
+           <row>
+            <entry>
+             <constant>%T</constant>
+            </entry>
+            <entry>时间</entry>
+           </row>
+           <row>
+            <entry>
+             <constant>%t</constant>
+            </entry>
+            <entry>时间</entry>
+           </row>
+           <row>
+            <entry>
+             <constant>%u</constant>
+            </entry>
+            <entry>远程用户</entry>
+           </row>
+          </tbody>
+         </tgroup>
+        </table>
        </para>
       </listitem>
      </varlistentry>
@@ -653,7 +826,7 @@
      定义的值，不能被 PHP 代码中的 <function>ini_set</function> 覆盖。
     </para>
     <para>
-     自 5.3.3 起，也可以通过 web 服务器设置 PHP 的设定。
+     可以通过 web 服务器设置 PHP 的设定。
      <example>
       <title>在 nginx.conf 中设定 PHP</title>
       <programlisting role="ini">
