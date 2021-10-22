@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 96c9d88bad9a7d7d44bfb7f26c226df7ee9ddf26 Maintainer: min shan Status: ready -->
+<!-- EN-Revision: a871ef72edf436c59422dedd538594db2541d5f1 Maintainer: min shan Status: ready -->
 <!-- Reviewed: yes -->
-
-<refentry xmlns="http://docbook.org/ns/docbook" xml:id="function.socket-create">
+<!-- CREDITS: her-cat -->
+<refentry xml:id="function.socket-create" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>socket_create</refname>
   <refpurpose>创建一个套接字（通讯节点）</refpurpose>
@@ -12,13 +12,13 @@
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <type>resource</type><methodname>socket_create</methodname>
+   <type class="union"><type>Socket</type><type>false</type></type><methodname>socket_create</methodname>
    <methodparam><type>int</type><parameter>domain</parameter></methodparam>
    <methodparam><type>int</type><parameter>type</parameter></methodparam>
    <methodparam><type>int</type><parameter>protocol</parameter></methodparam>
   </methodsynopsis>
   <para>
-   创建并返回一个套接字，也称作一个通讯节点。一个典型的网络连接由 2 个套接字构成，一个运行在客户端，另一个运行在服务器端。
+   创建并返回一个 <classname>Socket</classname> 实例，也称作一个通讯节点。一个典型的网络连接由 2 个套接字构成，一个运行在客户端，另一个运行在服务器端。
   </para>
  </refsect1>
  
@@ -167,11 +167,20 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   <function>socket_create</function> 正确时返回一个套接字，失败时返回
+   <function>socket_create</function> 正确时返回一个 <classname>Socket</classname> 实例，失败时返回
    &false;。要读取错误代码，可以调用 <function>socket_last_error</function>。这个错误代码可以通过 <function>socket_strerror</function> 读取文字的错误说明。
   </para>
  </refsect1>
- 
+
+ <refsect1 role="errors">
+  &reftitle.errors;
+  <para>
+   如果使用一个无效的 <parameter>domain</parameter> 或 <parameter>type</parameter>，<function>socket_create</function>
+   会使用 <constant>AF_INET</constant> 和
+   <constant>SOCK_STREAM</constant> 替代无效参数，同时会发出 <constant>E_WARNING</constant> 警告信息。
+  </para>
+ </refsect1>
+
  <refsect1 role="changelog">
   &reftitle.changelog;
   <para>
@@ -190,21 +199,19 @@
         增加 <constant>AF_INET6</constant> 支持。
        </entry>
       </row>
+      <row>
+       <entry>8.0.0</entry>
+       <entry>
+        创建成功时，该函数现在返回一个 <classname>Socket</classname> 实例；
+        在此之前，返回的是一个 <type>resource</type>。
+       </entry>
+      </row>
      </tbody>
     </tgroup>
    </informaltable>
   </para>
  </refsect1>
- 
- <refsect1 role="errors">
-  &reftitle.errors;
-  <para>
-   如果使用一个无效的 <parameter>domain</parameter> 或 <parameter>type</parameter>，<function>socket_create</function>
-   会使用 <constant>AF_INET</constant> 和
-   <constant>SOCK_STREAM</constant> 替代无效参数，同时会发出 <constant>E_WARNING</constant> 警告信息。
-  </para>
- </refsect1>
- 
+
  <refsect1 role="seealso">
   &reftitle.seealso;
   <para>
