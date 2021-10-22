@@ -1,29 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<refentry xmlns="http://docbook.org/ns/docbook" xml:id="function.socket-recv">
+<!-- EN-Revision: 14dc7c47365f2b71f6c907a5ba5bccf42534d5a9 Maintainer: daijie Status: ready -->
+<!-- CREDITS: her-cat -->
+<refentry xml:id="function.socket-recv" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>socket_recv</refname>
-  <refpurpose>从已连接的socket接收数据</refpurpose>
+  <refpurpose>从已连接的 socket 接收数据</refpurpose>
  </refnamediv>
  
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <type>int</type><methodname>socket_recv</methodname>
-   <methodparam><type>resource</type><parameter>socket</parameter></methodparam>
-   <methodparam><type>string</type><parameter role="reference">buf</parameter></methodparam>
-   <methodparam><type>int</type><parameter>len</parameter></methodparam>
+   <type class="union"><type>int</type><type>false</type></type><methodname>socket_recv</methodname>
+   <methodparam><type>Socket</type><parameter>socket</parameter></methodparam>
+   <methodparam><type class="union"><type>string</type><type>null</type></type><parameter role="reference">data</parameter></methodparam>
+   <methodparam><type>int</type><parameter>length</parameter></methodparam>
    <methodparam><type>int</type><parameter>flags</parameter></methodparam>
   </methodsynopsis>
   <para>
    函数 <function>socket_recv</function> 从 <parameter>socket</parameter> 中接受长度为
-   <parameter>len</parameter> 字节的数据，并保存在 <parameter>buf</parameter> 中。
-   <function>socket_recv</function> 用于从已连接的socket中接收数据。除此之外，可以设定一个或多个 flags 
+   <parameter>length</parameter> 字节的数据，并保存在 <parameter>data</parameter> 中。
+   <function>socket_recv</function> 用于从已连接的 socket 中接收数据。除此之外，可以设定一个或多个 flags
    来控制函数的具体行为。
   </para>
   <para>
-   <parameter>buf</parameter> 以引用形式传递，因此必须是一个以声明的有效的变量。从
-   <parameter>socket</parameter> 中接收到的数据将会保存在 <parameter>buf</parameter> 中。
+   <parameter>data</parameter> 是传引用的，因此必须以变量的形式，指定到参数列表。从
+   <parameter>socket</parameter> 中接收到的数据将会保存在 <parameter>data</parameter> 中。
   </para>
  </refsect1>
 
@@ -35,27 +37,27 @@
      <term><parameter>socket</parameter></term>
      <listitem>
       <para>
-       参数 <parameter>socket</parameter> 必须是一个由 <function>socket_create</function> 
-       创建的socket资源。
+       参数 <parameter>socket</parameter> 必须是一个由 <function>socket_create</function>
+       创建的 <classname>Socket</classname> 实例。
       </para>
      </listitem>
     </varlistentry>
 
     <varlistentry>
-     <term><parameter>buf</parameter></term>
+     <term><parameter>data</parameter></term>
      <listitem>
       <para>
-       从socket中获取的数据将被保存在由 <parameter>buf</parameter> 制定的变量中。
-       如果有错误发生，如链接被重置，数据不可用等等， <parameter>buf</parameter> 将被设为 &null;。
+       从 socket 中获取的数据将被保存在由 <parameter>data</parameter> 指定的变量中。
+       如果有错误发生，如链接被重置，数据不可用等等， <parameter>data</parameter> 将被设为 &null;。
       </para>
      </listitem>
     </varlistentry>
 
     <varlistentry>
-     <term><parameter>len</parameter></term>
+     <term><parameter>length</parameter></term>
      <listitem>
       <para>
-       长度最多为 <parameter>len</parameter> 字节的数据将被接收。
+       长度最多为 <parameter>length</parameter> 字节的数据将被接收。
       </para>
      </listitem>
     </varlistentry>
@@ -64,8 +66,8 @@
      <term><parameter>flags</parameter></term>
      <listitem>
       <para>
-       <parameter>flags</parameter> 的值可以为下列任意flag的组合。使用按位或运算符(<literal>|</literal>)来
-       组合不同的flag。
+       <parameter>flags</parameter> 的值可以为下列任意 flag 的组合。使用按位或运算符(<literal>|</literal>)来
+       组合不同的 flag。
       </para>
       
       <table>
@@ -93,14 +95,14 @@
          <row>
           <entry><constant>MSG_WAITALL</constant></entry>
           <entry>
-           在接收到至少 <parameter>len</parameter> 字节的数据之前，造成一个阻塞，并暂停脚本运行（block）。但是，
-           如果接收到中断信号，或远程服务器断开连接，该函数将返回少于 <parameter>len</parameter> 字节的数据。
+           在接收到至少 <parameter>length</parameter> 字节的数据之前，造成一个阻塞，并暂停脚本运行（block）。但是，
+           如果接收到中断信号，或远程服务器断开连接，该函数将返回少于 <parameter>length</parameter> 字节的数据。
           </entry>
          </row>
          <row>
           <entry><constant>MSG_DONTWAIT</constant></entry>
           <entry>
-           如果制定了该flag，函数将不会造成阻塞，即使在全局设置中指定了阻塞设置。
+           如果指定了该 flag，函数将不会造成阻塞，即使在全局设置中指定了阻塞设置。
           </entry>
          </row>
         </tbody>
@@ -121,13 +123,30 @@
   </para>
  </refsect1>
 
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <informaltable>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>&Version;</entry>
+      <entry>&Description;</entry>
+     </row>
+    </thead>
+    <tbody>
+     &sockets.changelog.socket-param;
+    </tbody>
+   </tgroup>
+  </informaltable>
+ </refsect1>
+
  <refsect1 role="examples">
   &reftitle.examples;
   <para>
    <example>
     <title><function>socket_recv</function> 范例</title>
     <para>
-     该范例简单地使用 <function>socket_recv</function> 重写了 <xref linkend="sockets.examples" /> 中的
+     该范例简单地使用 <function>socket_recv</function> 重写了 <xref linkend="sockets.examples"/> 中的
      第一个例子。
     </para>
     <programlisting role="php">
