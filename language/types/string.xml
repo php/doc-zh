@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 35af8187d0ca49b354a55f613ac5d62f5741f402 Maintainer: dallas Status: ready -->
+<!-- EN-Revision: 2513f792fc0d34e2e8543591099bbf5b92961f8c Maintainer: dallas Status: ready -->
 <sect1 xml:id="language.types.string">
  <title>String 字符串</title>
 
@@ -198,13 +198,184 @@ echo 'Variables do not $expand $either';
    </simpara>
 
    <simpara>
-    结束时所引用的标识符<emphasis>必须</emphasis>在该行的第一列，而且，标识符的命名也要像其它标签一样遵守
+    结束标识符可以使用空格或者制表符缩进，在这种情况下，缩进将从文档字符串的所有行中删除。
+    PHP 7.3.0 之前的版本，结束时所引用的标识符<emphasis>必须</emphasis>在该行的第一列。
+    </simpara>
+    <simpara>
+    而且，标识符的命名也要像其它标签一样遵守
     PHP 的规则：只能包含字母、数字和下划线，并且必须以字母和下划线作为开头。
    </simpara>
+
+   <example>
+    <title>PHP 7.3.0 之后的基础 Heredoc 示例</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+// 无缩进
+echo <<<END
+      a
+     b
+    c
+\n
+END;
+// 4 空格缩进
+echo <<<END
+      a
+     b
+    c
+    END;
+]]>
+    </programlisting>
+    &example.outputs.73;
+    <screen>
+<![CDATA[
+      a
+     b
+    c
+  a
+ b
+c
+]]>
+    </screen>
+   </example>
+
+   <simpara>
+    如果结束标识符的缩进超过内容的任何一行的缩进，则将抛出 <classname>ParseError</classname> 异常：
+   </simpara>
+
+   <example>
+    <title>结束标识符的缩进不能超过正文的任何一行</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+echo <<<END
+  a
+ b
+c
+   END;
+]]>
+    </programlisting>
+    &example.outputs.73;
+    <screen>
+<![CDATA[
+PHP Parse error:  Invalid body indentation level (expecting an indentation level of at least 3) in example.php on line 4
+]]>
+    </screen>
+   </example>
+
+   <simpara>
+    制表符也可以缩进结束标识符，但是，关于缩进结束标识符和内容，
+    制表符和空格<emphasis>不能</emphasis>混合使用。在任何情况下，
+    将会抛出 <classname>ParseError</classname> 异常。
+
+    之所以包含这些空白限制，是因为混合制表符和空格来缩进不利于易读性。
+   </simpara>
+
+   <example>
+    <title>内容（空白）和结束标识符的不同缩进</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+// 以下所有代码都不起作用。
+// 正文（空格）和结束标记（制表符），不同的缩进
+{
+	echo <<<END
+	 a
+		END;
+}
+// 在正文中混合空格和制表符
+{
+    echo <<<END
+    	a
+     END;
+}
+// 在结束标记中混合空格和制表符
+{
+	echo <<<END
+		  a
+		 END;
+}
+]]>
+    </programlisting>
+    &example.outputs.73;
+    <screen>
+<![CDATA[
+PHP Parse error:  Invalid indentation - tabs and spaces cannot be mixed in example.php line 8
+]]>
+    </screen>
+   </example>
+
+   <simpara>
+    内容字符串的结束标识符后面不需要跟分号或者换行符。
+    例如，从 PHP 7.3.0 开始允许以下代码：
+   </simpara>
+
+   <example>
+    <title>在结束标识符后继续表达式</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$values = [<<<END
+a
+  b
+    c
+END, 'd e f'];
+var_dump($values);
+]]>
+    </programlisting>
+    &example.outputs.73;
+    <screen>
+<![CDATA[
+array(2) {
+  [0] =>
+  string(11) "a
+  b
+    c"
+  [1] =>
+  string(5) "d e f"
+}
+]]>
+    </screen>
+   </example>
+
+   <warning>
+    <simpara>
+     如果在某一行的开头找到了结束标识符，那么不管它是否是另外一个单词的一部分，
+     它都可能看作结束标识符并引起 <classname>ParseError</classname>。
+    </simpara>
+
+    <example>
+     <title>字符串内容中的结束标识符往往会导致 ParseError</title>
+     <programlisting role="php">
+<![CDATA[
+<?php
+$values = [<<<END
+a
+b
+END ING
+END, 'd e f'];
+]]>
+     </programlisting>
+     &example.outputs.73;
+    <screen>
+<![CDATA[
+PHP Parse error:  syntax error, unexpected identifier "ING", expecting "]" in example.php on line 6
+]]>
+     </screen>
+    </example>
+
+    <simpara>
+     为了避免这个问题，简单的遵循以下安全规则：
+     <emphasis>不要选择文本内容中出现结束标识符</emphasis>。
+    </simpara>
+
+   </warning>
    
    <warning>
     <simpara>
-     要注意的是结束标识符这行除了有一个分号（<literal>;</literal>）外，绝对不能包含其它字符。这意味着标识符<emphasis>不能缩进</emphasis>，分号的前后也不能有任何空白或制表符。更重要的是结束标识符的前面必须是个被本地操作系统认可的换行，比如在
+     在 PHP 7.3.0 之前，请务必注意，带有结束标识符的行不能包含除
+     (<literal>;</literal>)外的任何其他字符。
+     这意味着标识符<emphasis>不能缩进</emphasis>，分号的前后也不能有任何空白或制表符。更重要的是结束标识符的前面必须是个被本地操作系统认可的换行，比如在
      UNIX 和 macOS 系统中是 <literal>\n</literal>，而结束定界符之后也必须紧跟一个换行。
     </simpara>
 
@@ -215,7 +386,7 @@ echo 'Variables do not $expand $either';
     </simpara>
 
     <example>
-     <title>非法的示例</title>
+     <title>错误示例，PHP 7.3.0 之前</title>
      <programlisting role="php">
       <!-- This is an INVALID example -->
 <![CDATA[
@@ -231,7 +402,7 @@ bar
      </programlisting>
     </example>
     <example>
-     <title>合法的示例</title>
+     <title>合法的示例, 即使在 PHP 7.3.0 之前</title>
      <programlisting role="php">
       <!-- This is a VALID example -->
 <![CDATA[
