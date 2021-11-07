@@ -2,10 +2,10 @@
 <!-- $Revision$ -->
 <!-- $Author$ -->
 <!-- Reviewed: yes Maintainer: dallas -->
-<!-- EN-Revision: 55713d3fa09bd9702d8fcca5ddc60e5f304bbef7 Maintainer: dallas Status: ready -->
+<!-- EN-Revision: 7104ee97ced1768a3231588dfc0bc0d7eb1117ad Maintainer: dallas Status: ready -->
 
 <sect1 xml:id="control-structures.continue" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
- <title><literal>continue</literal></title>
+ <title>continue</title>
  <?phpdoc print-version-for="continue"?>
  <simpara>
   <literal>continue</literal>
@@ -13,9 +13,13 @@
  </simpara>
  <note>
   <simpara>
-   注意在 PHP 中
+   在 PHP 中
    <link linkend="control-structures.switch">switch</link>
    语句被认为是可以使用 <literal>continue</literal> 的一种循环结构。
+   <literal>continue</literal> 的行为类似于没有传递参数的 
+   <literal>break</literal> ，但会引发警告，因为这可能是一个错误。
+   如果 <literal>switch</literal> 在循环内，
+   <literal>continue 2</literal> 将会外部循环中的下一个迭代中继续。
   </simpara>
  </note>
  <simpara>
@@ -27,8 +31,8 @@
    <programlisting role="php">
 <![CDATA[
 <?php
-while (list ($key, $value) = each($arr)) {
-    if (!($key % 2)) { // skip odd members
+foreach ($arr as $key => $value) {
+    if (!($key % 2)) { // 忽略偶数成员
         continue;
     }
     do_something_odd($value);
@@ -80,20 +84,6 @@ while ($i++ < 5) {
 4
 ]]>
    </screen>
-   <para>
-    可实际的输出是：
-   </para>
-   <screen>
-<![CDATA[
-2
-]]>
-   </screen>
-   <para>
-    因为整个 <literal>continue print "$i\n";</literal> 被当做单一的表达式而求值，所以
-    <function>print</function> 函数只有在 <literal>$i == 2</literal>
-    为真时才被调用（<literal>print</literal> 的值被当成了上述的可选数字参数而传递给了
-    <literal>continue</literal>）。
-   </para>
   </informalexample>
  </para>
  <para>
@@ -108,16 +98,10 @@ while ($i++ < 5) {
     </thead>
     <tbody>
      <row>
-      <entry>5.4.0</entry>
+      <entry>7.3.0</entry>
       <entry>
-       <literal>continue 0;</literal> 不再合法。这在之前的版本被解析为
-       <literal>continue 1;</literal>。
-      </entry>
-     </row>
-     <row>
-      <entry>5.4.0</entry>
-      <entry>
-       取消变量作为参数传递（例如 <literal>$num = 2; continue $num;</literal>）。
+      在 <literal>switch</literal> 中 <literal>continue</literal> 语句试图代替 <literal>break</literal>
+      语句将会触发 <constant>E_WARNING</constant> 。
       </entry>
      </row>
     </tbody>

@@ -2,13 +2,13 @@
 <!-- $Revision$ -->
 <!-- $Author$ -->
 <!-- Reviewed: no Maintainer: dallas -->
-<!-- EN-Revision: c5c902b47755cf0c0761e90cce4cc8ee1eb9426e Maintainer: dallas Status: ready -->
+<!-- EN-Revision: ffbe6525350c91d58e1d5b7a52c46c911035c8e0 Maintainer: dallas Status: ready -->
 
 <sect1 xml:id="function.include" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
- <title><function>include</function></title>
+ <title>include</title>
  <?phpdoc print-version-for="include"?>
  <simpara>
-  <literal>include</literal> 语句包含并运行指定文件。
+  <literal>include</literal> 表达式包含并运行指定文件。
  </simpara>
  <simpara>
   以下文档也适用于 <function>require</function>。
@@ -18,10 +18,13 @@
   <link linkend="ini.include-path">include_path</link> 指定的目录寻找。如果在
   <link linkend="ini.include-path">include_path</link> 下没找到该文件则
   <literal>include</literal> 最后才在调用脚本文件所在的目录和当前工作目录下寻找。如果最后仍未找到文件则
-  <literal>include</literal> 结构会发出一条<link
-  linkend="errorfunc.constants.errorlevels.e-warning">警告</link>；这一点和
-  <function>require</function> 不同，后者会发出一个<link
-  linkend="errorfunc.constants.errorlevels.e-error">致命错误</link>。
+  <literal>include</literal> 结构会发出一条 <constant>E_WARNING</constant> ；这一点和
+  <function>require</function> 不同，后者会发出一个 <constant>E_ERROR</constant> 。
+ </simpara>
+ <simpara>
+  注意如果文件无法访问， <literal>include</literal> 和 <literal>require</literal>
+  在分别发出最后的 <constant>E_WARNING</constant> 或 <constant>E_ERROR</constant>
+  之前，都会发出额外一条 <constant>E_WARNING</constant>。
  </simpara>
  <simpara>
   如果定义了路径——不管是绝对路径（在 Windows
@@ -86,10 +89,8 @@ function foo()
     echo "A $color $fruit";
 }
 
-/* vars.php is in the scope of foo() so     *
- * $fruit is NOT available outside of this  *
- * scope.  $color is because we declared it *
- * as global.                               */
+/* vars.php 在 foo() 范围内，所以 $fruit 在范围为不可用。 *
+ * $color 能用是因为声明成全局变量。 */
 
 foo();                    // A green apple
 echo "A $color $fruit";   // A green
@@ -119,25 +120,17 @@ echo "A $color $fruit";   // A green
 <![CDATA[
 <?php
 
-/* This example assumes that www.example.com is configured to parse .php *
- * files and not .txt files. Also, 'Works' here means that the variables *
- * $foo and $bar are available within the included file.                 */
+/* 这个示例假定 www.example.com 配置为解析 .php 文件而不解析 .txt 文件。 *
+ * 此外 “Works” 意味着 $foo 和 $bar 变量在包含的文件中是可用的。         */
 
-// Won't work; file.txt wasn't handled by www.example.com as PHP
+// 无法执行； file.txt 没有被 www.example.com 当作 PHP 处理。
 include 'http://www.example.com/file.txt?foo=1&bar=2';
 
-// Won't work; looks for a file named 'file.php?foo=1&bar=2' on the
-// local filesystem.
+// 无法执行；在本地文件系统中查找名为 “file.php?foo=1&bar=2” 的文件。
 include 'file.php?foo=1&bar=2';
 
-// Works.
+// Works。
 include 'http://www.example.com/file.php?foo=1&bar=2';
-
-$foo = 1;
-$bar = 2;
-include 'file.txt';  // Works.
-include 'file.php';  // Works.
-
 ?>
 ]]>
    </programlisting>
@@ -174,12 +167,12 @@ include 'file.php';  // Works.
    <programlisting role="php">
 <![CDATA[
 <?php
-// won't work, evaluated as include(('vars.php') == TRUE), i.e. include('')
+// 不能运行，执行 include(('vars.php') == TRUE) 就等于执行 include('1')
 if (include('vars.php') == TRUE) {
     echo 'OK';
 }
 
-// works
+// 正常
 if ((include 'vars.php') == TRUE) {
     echo 'OK';
 }
@@ -214,11 +207,11 @@ testreturns.php
 
 $foo = include 'return.php';
 
-echo $foo; // prints 'PHP'
+echo $foo; // 打印 'PHP'
 
 $bar = include 'noreturn.php';
 
-echo $bar; // prints 1
+echo $bar; // 打印 1
 
 ?>
 ]]>
@@ -232,11 +225,10 @@ echo $bar; // prints 1
   &false; 并发出一个 <constant>E_WARNING</constant> 警告。
  </simpara>
  <para>
-  如果在包含文件中定义有函数，这些函数不管是在 <function>return</function>
-  之前还是之后定义的，都可以独立在主文件中使用。如果文件被包含两次，PHP 5
-  发出致命错误因为函数已经被定义，但是 PHP 4 不会对在
-  <function>return</function> 之后定义的函数报错。推荐使用
-  <function>include_once</function> 而不是检查文件是否已包含并在包含文件中有条件返回。
+  如果在包含文件中定义了函数，无论是在 <function>return</function>
+  之前还是之后，都可以独立在主文件（main）中使用。如果文件被包含两次，由于函数重复定义，PHP 会
+  发出致命错误（fatal error）。推荐使用 <function>include_once</function>
+   而不是检查文件是否已包含并在包含文件中有条件返回。
  </para>
  <simpara>
   另一个将 PHP 文件“包含”到一个变量中的方法是用<link
@@ -275,8 +267,9 @@ function get_include_contents($filename) {
  </para>
  &note.language-construct;
  <simpara>
-  参见 <function>require</function>，<function>require_once</function>，<function>include_once</function>，<function>get_included_files</function>，<function>readfile</function>，<function>virtual</function>
-  和 <link linkend="ini.include-path">include_path</link>。
+  参见 <function>require</function>、<function>require_once</function>、<function>include_once</function>、
+  <function>get_included_files</function>、<function>readfile</function>、<function>virtual</function>、
+  <link linkend="ini.include-path">include_path</link>。
  </simpara>
 </sect1>
 
