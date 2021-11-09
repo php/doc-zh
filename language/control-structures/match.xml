@@ -8,11 +8,12 @@
  <?phpdoc print-version-for="match"?>
  <para>
   <literal>match</literal> 表达式基于值的一致性进行分支计算。
-  与 <literal>switch</literal> 语句类似的是 <literal>match</literal> 
-  表达式也有一个主项表达式，用于与多个可选项进行比较。
-  与 <literal>switch</literal> 不同的是，它计算值很像是使用一致性检查（
-  <code>===</code>）而不是不是弱相等检查（<code>==</code>）的三元表达式。
-  <literal>match</literal> 表达式 PHP 8.0.0 起可用。
+  <literal>match</literal>表达式和 <literal>switch</literal> 语句类似，
+  都有一个表达式主体，可以和多个可选项进行比较。
+  与 <literal>switch</literal> 不同点是，它会像三元表达式一样求值。
+  与 <literal>switch</literal> 另一个不同点，它的比较是严格比较（
+  <code>===</code>）而不是松散比较（<code>==</code>）。
+  Match 表达式从 PHP 8.0.0 起可用。
  </para>
 
  <example>
@@ -55,63 +56,60 @@ string(19) "This food is a cake"
 
   <note>
    <simpara>
-    The result of a <literal>match</literal> expression does not need to be used.
+    不一定要使用 <literal>match</literal> 表达式的结果。
    </simpara>
   </note>
   <note>
    <simpara>
-    <literal>match</literal> <emphasis>必须</emphasis> 使用分号 <literal>;</literal> 结尾。
+    <literal>match</literal> 表达式<emphasis>必须</emphasis>使用分号 <literal>;</literal> 结尾。
     </simpara>
   </note>
  </example>
 
  <para>
-  <literal>match</literal> 表达式跟 <literal>switch</literal> 语句相似，但是有以下这些区别：
+  <literal>match</literal> 表达式跟 <literal>switch</literal> 语句相似，但是有以下关键区别：
   
   <itemizedlist>
    <listitem>
     <simpara>
-     A <literal>match</literal> arm compares values strictly (<code>===</code>) instead
-     of loosely as the switch statement does.
+     <literal>match</literal> 比较分支值，使用了严格比较 (<code>===</code>)，
+     而 switch 语句使用了松散比较。
     </simpara>
    </listitem>
    <listitem>
     <simpara>
-     <literal>match</literal> 表达式返回一个值。
+     <literal>match</literal> 表达式会返回一个值。
     </simpara>
    </listitem>
    <listitem>
     <simpara>
-     <literal>match</literal> arms do not fall-through to later cases the way
-     <literal>switch</literal> statements do.
+     <literal>match</literal> 的分支不会像 <literal>switch</literal> 语句一样，
+     落空时执行下个 case。
     </simpara>
    </listitem>
    <listitem>
     <simpara>
-     <literal>match</literal> 表达式必须彻底。
+     <literal>match</literal> 表达式必须彻底列举所有情况。
     </simpara>
    </listitem>
   </itemizedlist>
  </para>
 
  <para>
-  As <literal>switch</literal> statements, <literal>match</literal>
-  expressions are executed match arm by match arm.
-  In the beginning, no code is executed.
-  The conditional expressions are only evaluated if all previous conditional
-  expressions failed to match the subject expression.
-  Only the return expression corresponding to the matching conditional
-  expression will be evaluated.
-  For example:
+  <literal>match</literal> 表达式和 <literal>switch</literal> 语句类似，
+  逐个检测匹配分支。一开始不会执行代码。
+  只有在所有之前的条件不匹配主体表达式时，才会执行剩下的条件表达式。
+  只会执行返回的表达式所对应的匹配条件表达式。
+  举例：
   <informalexample>
    <programlisting role="php">
 <![CDATA[
 <?php
 $result = match ($x) {
     foo() => ...,
-    $this->bar() => ..., // $this->bar() isn't called if foo() === $x
-    $this->baz => beep(), // beep() isn't called unless $x === $this->baz
-    // etc.
+    $this->bar() => ..., // 如果 foo() === $x，不会执行 $this->bar()
+    $this->baz => beep(), // 只有 $x === $this->baz 时才会执行 beep() 
+    // 等等
 };
 ?>
 ]]>
@@ -120,9 +118,8 @@ $result = match ($x) {
  </para>
 
  <para>
-  <literal>match</literal> expression arms may contain multiple expressions
-  separated by a comma.  That is a logical OR, and is a short-hand for multiple
-  match arms with the same right-hand side.
+  <literal>match</literal> 表达式分支可以通过逗号分隔，包含多个表达式。
+  这是一个逻辑 OR，当多个分支表达式右侧相同时，就可以用这种缩写。
  </para>
  <para>
   <informalexample>
@@ -130,9 +127,9 @@ $result = match ($x) {
 <![CDATA[
 <?php
 $result = match ($x) {
-    // This match arm:
+    // 匹配分支：
     $a, $b, $c => 5,
-    // Is equivalent to these three match arms:
+    // 等同于以下三个分支：
     $a => 5,
     $b => 5,
     $c => 5,
@@ -143,8 +140,8 @@ $result = match ($x) {
   </informalexample>
  </para>
  <para>
-  A special case is the <literal>default</literal> pattern.
-  This pattern matches anything that wasn't previously matched.
+ <literal>default</literal> 模式是个特殊的条件。
+当之前的条件都不匹配时，会匹配到该模式。
   For example:
   <informalexample>
    <programlisting role="php">
@@ -167,9 +164,9 @@ $expressionResult = match ($condition) {
  </para>
 
  <para>
-  A <literal>match</literal> expression must be exhaustive.  If the
-  subject expression is not handled by any match arm an
-  <classname>UnhandledMatchError</classname> is thrown.
+  <literal>match</literal> 表达式必须详尽列出所有情况。
+  如果主体表达式不能被任意分支条件处理，
+  会抛出 <classname>UnhandledMatchError</classname>。
  </para>
 
  <example>
@@ -222,7 +219,7 @@ object(UnhandledMatchError)#1 (7) {
   </para>
 
   <example>
-   <title>Using a generalized match expressions to branch on integer ranges</title>
+   <title>针对整数范围，使用宽泛的表达式匹配分支</title>
    <programlisting role="php">
 <![CDATA[
 <?php
@@ -249,7 +246,7 @@ string(11) "young adult"
   </example>
 
   <example>
-   <title>在字符串内容上使用通用的 match 表达式</title>
+   <title>针对字符串内容，使用宽泛的表达式匹配分支</title>
    <programlisting role="php">
 <![CDATA[
 <?php
