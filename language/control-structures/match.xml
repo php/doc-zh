@@ -1,0 +1,295 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision$ -->
+<!-- $Author $ -->
+<!-- EN-Revision: 78d273c6d4b08d0ee04b69bc3a9230a39b99d60f Maintainer: mowangjuanzi Status: partial -->
+
+<sect1 xml:id="control-structures.match" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <title>match</title>
+ <?phpdoc print-version-for="match"?>
+ <para>
+  <literal>match</literal> 表达式基于值的一致性进行分支计算。
+  <literal>match</literal>表达式和 <literal>switch</literal> 语句类似，
+  都有一个表达式主体，可以和多个可选项进行比较。
+  与 <literal>switch</literal> 不同点是，它会像三元表达式一样求值。
+  与 <literal>switch</literal> 另一个不同点，它的比较是严格比较（
+  <code>===</code>）而不是松散比较（<code>==</code>）。
+  Match 表达式从 PHP 8.0.0 起可用。
+ </para>
+
+ <example>
+  <title> <literal>match</literal> 表达式结构</title>
+  <programlisting role="php">
+<![CDATA[
+<?php
+$return_value = match (subject_expression) {
+    single_conditional_expression => return_expression,
+    conditional_expression1, conditional_expression2 => return_expression,
+};
+?>
+]]>
+  </programlisting>
+  
+   <example>
+   <title> <literal>match</literal> 的基础用法</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$food = 'cake';
+
+$return_value = match ($food) {
+    'apple' => 'This food is an apple',
+    'bar' => 'This food is a bar',
+    'cake' => 'This food is a cake',
+};
+
+var_dump($return_value);
+?>
+]]>
+  </programlisting>
+  &example.outputs;
+   <screen>
+<![CDATA[
+string(19) "This food is a cake"
+]]>
+   </screen>
+  </example>
+
+  <note>
+   <simpara>
+    不一定要使用 <literal>match</literal> 表达式的结果。
+   </simpara>
+  </note>
+  <note>
+   <simpara>
+    <literal>match</literal> 表达式<emphasis>必须</emphasis>使用分号 <literal>;</literal> 结尾。
+    </simpara>
+  </note>
+ </example>
+
+ <para>
+  <literal>match</literal> 表达式跟 <literal>switch</literal> 语句相似，但是有以下关键区别：
+  
+  <itemizedlist>
+   <listitem>
+    <simpara>
+     <literal>match</literal> 比较分支值，使用了严格比较 (<code>===</code>)，
+     而 switch 语句使用了松散比较。
+    </simpara>
+   </listitem>
+   <listitem>
+    <simpara>
+     <literal>match</literal> 表达式会返回一个值。
+    </simpara>
+   </listitem>
+   <listitem>
+    <simpara>
+     <literal>match</literal> 的分支不会像 <literal>switch</literal> 语句一样，
+     落空时执行下个 case。
+    </simpara>
+   </listitem>
+   <listitem>
+    <simpara>
+     <literal>match</literal> 表达式必须彻底列举所有情况。
+    </simpara>
+   </listitem>
+  </itemizedlist>
+ </para>
+
+ <para>
+  <literal>match</literal> 表达式和 <literal>switch</literal> 语句类似，
+  逐个检测匹配分支。一开始不会执行代码。
+  只有在所有之前的条件不匹配主体表达式时，才会执行剩下的条件表达式。
+  只会执行返回的表达式所对应的匹配条件表达式。
+  举例：
+  <informalexample>
+   <programlisting role="php">
+<![CDATA[
+<?php
+$result = match ($x) {
+    foo() => ...,
+    $this->bar() => ..., // 如果 foo() === $x，不会执行 $this->bar()
+    $this->baz => beep(), // 只有 $x === $this->baz 时才会执行 beep() 
+    // 等等
+};
+?>
+]]>
+   </programlisting>
+  </informalexample>
+ </para>
+
+ <para>
+  <literal>match</literal> 表达式分支可以通过逗号分隔，包含多个表达式。
+  这是一个逻辑 OR，当多个分支表达式右侧相同时，就可以用这种缩写。
+ </para>
+ <para>
+  <informalexample>
+   <programlisting role="php">
+<![CDATA[
+<?php
+$result = match ($x) {
+    // 匹配分支：
+    $a, $b, $c => 5,
+    // 等同于以下三个分支：
+    $a => 5,
+    $b => 5,
+    $c => 5,
+};
+?>
+]]>
+   </programlisting>
+  </informalexample>
+ </para>
+ <para>
+ <literal>default</literal> 模式是个特殊的条件。
+当之前的条件都不匹配时，会匹配到该模式。
+  For example:
+  <informalexample>
+   <programlisting role="php">
+<![CDATA[
+<?php
+$expressionResult = match ($condition) {
+    1, 2 => foo(),
+    3, 4 => bar(),
+    default => baz(),
+};
+?>
+]]>
+   </programlisting>
+  </informalexample>
+  <note>
+   <simpara>
+    多个 default 模式将会触发 <constant>E_FATAL_ERROR</constant> 错误。
+   </simpara>
+  </note>
+ </para>
+
+ <para>
+  <literal>match</literal> 表达式必须详尽列出所有情况。
+  如果主体表达式不能被任意分支条件处理，
+  会抛出 <classname>UnhandledMatchError</classname>。
+ </para>
+
+ <example>
+  <title>match 表达式存在未处理的示例</title>
+  <programlisting role="php">
+<![CDATA[
+<?php
+$condition = 5;
+
+try {
+    match ($condition) {
+        1, 2 => foo(),
+        3, 4 => bar(),
+    };
+} catch (\UnhandledMatchError $e) {
+    var_dump($e);
+}
+?>
+]]>
+  </programlisting>
+  &example.outputs;
+  <screen>
+<![CDATA[
+object(UnhandledMatchError)#1 (7) {
+  ["message":protected]=>
+  string(33) "Unhandled match value of type int"
+  ["string":"Error":private]=>
+  string(0) ""
+  ["code":protected]=>
+  int(0)
+  ["file":protected]=>
+  string(9) "/in/ICgGK"
+  ["line":protected]=>
+  int(6)
+  ["trace":"Error":private]=>
+  array(0) {
+  }
+  ["previous":"Error":private]=>
+  NULL
+}
+]]>
+  </screen>
+ </example>
+
+ <sect2>
+  <title>使用 match 表达式处理非一致性检查</title>
+  <para>
+   可以使用 <literal>match</literal> 表达式将 <code>true</code> 
+   作为主项表达式来处理非一致性条件的情况。
+  </para>
+
+  <example>
+   <title>针对整数范围，使用宽泛的表达式匹配分支</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+
+$age = 23;
+
+$result = match (true) {
+    $age >= 65 => 'senior',
+    $age >= 25 => 'adult',
+    $age >= 18 => 'young adult',
+    default => 'kid',
+};
+
+var_dump($result);
+?>
+]]>
+   </programlisting>
+   &example.outputs;
+   <screen>
+<![CDATA[
+string(11) "young adult"
+]]>
+   </screen>
+  </example>
+
+  <example>
+   <title>针对字符串内容，使用宽泛的表达式匹配分支</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+
+$text = 'Bienvenue chez nous';
+
+$result = match (true) {
+    str_contains($text, 'Welcome') || str_contains($text, 'Hello') => 'en',
+    str_contains($text, 'Bienvenue') || str_contains($text, 'Bonjour') => 'fr',
+    // ...
+};
+
+var_dump($result);
+?>
+]]>
+   </programlisting>
+   &example.outputs;
+   <screen>
+<![CDATA[
+string(2) "fr"
+]]>
+   </screen>
+  </example>
+ </sect2>
+</sect1>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
