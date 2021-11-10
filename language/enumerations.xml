@@ -1,0 +1,822 @@
+<?xml version="1.0" encoding="utf-8"?>
+<chapter xml:id="language.enumerations" xmlns="http://docbook.org/ns/docbook">
+ <title>枚举</title>
+ <sect1 xml:id="language.enumerations.overview">
+  <title>枚举概览</title>
+  <?phpdoc print-version-for="enumerations"?>
+
+  <para>
+   枚举，或称 “Enum”，能够让开发者自定义类型为一系列可能的离散值中的一个。
+   在定义领域模型中很有用，它能够“隔离无效状态”（making invalid states unrepresentable）。
+  </para>
+
+  <para>
+   枚举以各种不同功能的形式出现在诸多语言中。
+   在 PHP 中， 枚举是一种特殊类型的对象。Enum 本身是一个类（Class），
+   它的各种条目（case）是这个类的单例对象，意味着也是个有效对象
+   —— 包括类型的检测，能用对象的地方，也可以用它。
+  </para>
+
+  <para>
+   最常见的枚举例子是内置的 boolean 类型，
+   该枚举类型有两个有效值 &true; 和 &false;。
+   Enum 使开发者能够任意定义出用户自己的、足够健壮的枚举。
+  </para>
+ </sect1>
+ <sect1 xml:id="language.enumerations.basics">
+  <title>枚举基础</title>
+
+  <para>
+   Enum 类似 class，它和 class、interface、trait 共享同样的命名空间。
+   也能用同样的方式自动加载。
+   一个 Enum 定义了一种新的类型，它有固定、数量有限、可能的合法值。
+  </para>
+
+
+  <programlisting role="php">
+   <![CDATA[
+<?php
+enum Suit
+{
+    case Hearts;
+    case Diamonds;
+    case Clubs;
+    case Spades;
+}
+?>
+]]>
+  </programlisting>
+
+  <para>
+   以上声明了新的枚举类型 <literal>Suit</literal>，仅有四个有效的值：
+   <literal>Suit::Hearts</literal>、<literal>Suit::Diamonds</literal>、
+   <literal>Suit::Clubs</literal>、<literal>Suit::Spades</literal>。
+   变量可以赋值为以上有效值里的其中一个。
+   函数可以检测枚举类型，这种情况下只能传入类型的值。
+  </para>
+
+  <programlisting role="php">
+   <![CDATA[
+<?php
+function pick_a_card(Suit $suit) { ... }
+
+$val = Suit::Diamonds;
+
+// OK
+pick_a_card($val);
+// OK
+pick_a_card(Suit::Clubs);
+// TypeError: pick_a_card(): Argument #1 ($suit) must be of type Suit, string given
+pick_a_card('Spades');
+?>
+]]>
+  </programlisting>
+
+  <para>
+   一个枚举可以定义零个或多个<literal>case</literal>，且没有最大数量限制。
+   虽然零个 case 的 enum 没什么用处，但在语法上也是有效的。
+  </para>
+
+  <para>
+   默认情况下，枚举的条目（case）本质上不是标量。
+   就是说 <literal>Suit::Hearts</literal> 不等同于 <literal>"0"</literal>。
+   其实，本质上每个条目是该名称对象的单例。 具体来说：
+  </para>
+
+  <programlisting role="php">
+   <![CDATA[
+<?php
+$a = Suit::Spades;
+$b = Suit::Spades;
+
+$a === $b; // true
+
+$a instanceof Suit;  // true
+?>
+]]>
+  </programlisting>
+
+  <para>
+   由于对象间的大小比较毫无意义，这也意味着 enum 值从来不会 <literal>&lt;</literal> 或 <literal>&gt;</literal> 其他值。
+   当 enum 的值用于比较时，总是返回 false。
+  </para>
+
+  <para>
+   这类没有关联数据的条目（case），被称为“纯粹条目”（Pure Case）。
+   仅包含纯粹 Case 的 Enum 被称为纯粹枚举（Pure Enum）。
+  </para>
+
+  <para>
+   枚举类型里所有的纯粹条目都是自身的实例。
+   枚举类型在内部的实现形式是一个 class。
+  </para>
+
+  <para>
+   所有的 case 有个只读的属性 <literal>name</literal>。
+   它大小写敏感，是 case 自身的名称。
+   在调试场景中比较有用。
+  </para>
+
+  <programlisting role="php">
+   <![CDATA[
+<?php
+print Suit::Spades->name;
+// 输出 "Spades"
+?>
+]]>
+  </programlisting>
+
+ </sect1>
+
+ <sect1 xml:id="language.enumerations.backed">
+  <title>回退（Backed）枚举</title>
+
+  <para>
+   默认情况下枚举条目实现形式不是标量。
+   它们是纯粹的对象实例。
+   不过，很多时候也需要在数据库、数据存储对象中来回读写枚举条目。
+   因此，能够内置支持标量形式也很有用（更易序列化）。
+  </para>
+
+  <para>按以下语法，定义标量形式的枚举：</para>
+
+  <programlisting role="php">
+   <![CDATA[
+<?php
+enum Suit: string
+{
+    case Hearts = 'H';
+    case Diamonds = 'D';
+    case Clubs = 'C';
+    case Spades = 'S';
+}
+?>
+]]>
+  </programlisting>
+
+  <para>
+   由于有标量的条目回退（Backed）到一个更简单值，又叫回退条目（Backed Case）。
+   包含所有回退条目的 Enum 又叫“回退 Enum”（Backed Enum）。
+   回退 Enum 只能包含回退条目。
+   纯粹 Enum 只能包含纯粹条目。
+  </para>
+
+  <para>
+   回退枚举仅能回退到 <literal>int</literal> 或 <literal>string</literal> 里的一种类型，
+   且同时仅支持使用一种类型（就是说，不能联合 <literal>int|string</literal>）。
+   如果枚举为标量形式，所有的条目必须明确定义唯一的标量值。
+   无法自动生成标量（比如：连续的数字）。
+   回退条目必须是唯一的；两个回退条目不能有相同的标量。
+   然而，也可以用常量引用到条目，实际上是创建了个别名。
+   参见 <link linkend="language.enumerations.constants">枚举常量</link>。
+  </para>
+
+  <para>
+   条目等同的值，必须是个字面量或它的表达式。
+   不能是常量和常量表达式。
+   换言之，允许 <literal>1 + 1</literal>，
+   不允许 <literal>1 + SOME_CONST</literal>。
+  </para>
+
+  <para>
+   回退条目有个额外的只读属性 <literal>value</literal>，
+   它是定义时指定的值。
+  </para>
+
+  <programlisting role="php">
+   <![CDATA[
+<?php
+print Suit::Clubs->value;
+// 输出 "C"
+?>
+]]>
+  </programlisting>
+
+  <para>
+   为了确保 <literal>value</literal> 的只读性，
+   无法将变量传引用给它。
+   也就是说，以下会抛出错误：
+  </para>
+
+  <programlisting role="php">
+   <![CDATA[
+<?php
+$suit = Suit::Clubs;
+$ref = &$suit->value;
+// Error: Cannot acquire reference to property Suit::$value
+?>
+]]>
+  </programlisting>
+
+  <para>
+   回退枚举实现了内置的 <interfacename>BackedEnum</interfacename> interface，
+   暴露了两个额外的方法：
+  </para>
+
+  <simplelist>
+   <member>
+    <literal>from(int|string): self</literal> 能够根据标量返回对应的枚举条目。
+    如果找不到该值，会抛出 <classname>ValueError</classname>。
+    主要用于输入标量为可信的情况，使用一个不存在的枚举值，可以考虑为需终止应用的错误。
+   </member>
+   <member>
+    <literal>tryFrom(int|string): ?self</literal> 能够根据标量返回对应的枚举条目。
+    如果找不到该值，会返回 <literal>null</literal>。
+    主要用于输入标量不可信的情况，调用者需要自己实现默认值的逻辑或错误的处理。
+   </member>
+  </simplelist>
+
+  <para>
+   <literal>from()</literal> 和 <literal>tryFrom()</literal> 方法也遵循基本的严格/松散类型规则。
+   系统在弱类型模式下接受传入 integer 和 string，并自动强制转换对应值。
+   传入 float 也能运行，并且强制转换。
+   在严格类型模式下，为 string 回退枚举的 <literal>from()</literal> 传入 integer 会导致
+   <classname>TypeError</classname>，反之亦然；float 都会出现有问题。
+   其他所有的参数类型，在以上所有模式中都会抛出 TypeError。
+  </para>
+
+  <programlisting role="php">
+   <![CDATA[
+<?php
+$record = get_stuff_from_database($id);
+print $record['suit'];
+
+$suit =  Suit::from($record['suit']);
+// 无效数据抛出 ValueError："X" is not a valid scalar value for enum "Suit"
+print $suit->value;
+
+$suit = Suit::tryFrom('A') ?? Suit::Spades;
+// 无效数据返回 null，因此会用 Suit::Spades 代替。
+print $suit->value;
+?>
+]]>
+  </programlisting>
+
+  <para>手动为回退枚举定义 <literal>from()</literal> 或 <literal>tryFrom()</literal> 方法会导致 fatal 错误。</para>
+
+ </sect1>
+
+ <sect1 xml:id="language.enumerations.methods">
+  <title>Enumeration methods</title>
+
+  <para>
+   枚举（包括纯粹枚举、回退枚举）还能包含方法，
+   也能实现 interface。
+   如果 Enum 实现了 interface，则其中的条目也能接受 interface 的类型检测。
+  </para>
+
+  <programlisting role="php">
+   <![CDATA[
+<?php
+interface Colorful
+{
+    public function color(): string;
+}
+
+enum Suit implements Colorful
+{
+    case Hearts;
+    case Diamonds;
+    case Clubs;
+    case Spades;
+
+    // 满足 interface 契约。
+    public function color(): string
+    {
+        return match($this) {
+            Suit::Hearts, Suit::Diamonds => 'Red',
+            Suit::Clubs, Suit::Spades => 'Black',
+        };
+    }
+
+    // 不是 interface 的一部分；也没问题
+    public function shape(): string
+    {
+        return "Rectangle";
+    }
+}
+
+function paint(Colorful $c) { ... }
+
+paint(Suit::Clubs);  // 正常
+
+print Suit::Diamonds->shape(); // 输出 "Rectangle"
+?>
+]]>
+  </programlisting>
+
+  <para>
+   在这例子中，<literal>Suit</literal> 所有的四个实例具有两个方法：
+   <literal>color()</literal>、<literal>shape()</literal>。
+   目前的调用代码和类型检查，和其他对象实例的行为完全一致。
+  </para>
+
+  <para>
+   在回退枚举中，interface 的声明紧跟回退类型的声明之后。
+  </para>
+
+  <programlisting role="php">
+   <![CDATA[
+<?php
+interface Colorful
+{
+    public function color(): string;
+}
+
+enum Suit: string implements Colorful
+{
+    case Hearts = 'H';
+    case Diamonds = 'D';
+    case Clubs = 'C';
+    case Spades = 'S';
+
+    // 满足 interface 的契约。
+    public function color(): string
+    {
+        return match($this) {
+            Suit::Hearts, Suit::Diamonds => 'Red',
+            Suit::Clubs, Suit::Spades => 'Black',
+        };
+    }
+}
+?>
+]]>
+  </programlisting>
+
+  <para>
+   在方法中，定义了 <literal>$this</literal> 变量，它引用到了条目实例。
+  </para>
+
+  <para>
+   方法中可以任意复杂，但一般的实践中，往往会返回静态的值，
+   或者为 <literal>$this</literal> <link linkend="control-structures.match">match</link>
+   各种情况并返回不同的值。
+  </para>
+
+  <para>
+   注意，在本示例中，更好的数据模型实践是再定一个包含 Red 和 Black
+   枚举值的 <literal>SuitColor</literal> 枚举，并且返回它作为代替。
+   然而这会让本示例复杂化。
+  </para>
+
+  <para>
+   以上的层次在逻辑中类似于下面的 class 结构（虽然这不是它实际运行的代码）：
+  </para>
+
+  <programlisting role="php">
+   <![CDATA[
+<?php
+interface Colorful
+{
+    public function color(): string;
+}
+
+final class Suit implements UnitEnum, Colorful
+{
+    public const Hearts = new self('Hearts');
+    public const Diamonds = new self('Diamonds');
+    public const Clubs = new self('Clubs');
+    public const Spades = new self('Spades');
+
+    private function __construct(public readonly string $name) {}
+
+    public function color(): string
+    {
+        return match($this) {
+            Suit::Hearts, Suit::Diamonds => 'Red',
+            Suit::Clubs, Suit::Spades => 'Black',
+        };
+    }
+
+    public function shape(): string
+    {
+        return "Rectangle";
+    }
+
+    public static function cases(): array
+    {
+        // 不合法的方法，Enum 中不允许手动定义 cases() 方法
+        // 参考 “枚举值清单” 章节
+    }
+}
+?>
+]]>
+  </programlisting>
+
+  <para>
+   仅管 enum 可以包括 public、private、protected 的方法，
+   但由于它不支持继承，因此在实践中 private 和 protected 效果是相同的。
+  </para>
+
+ </sect1>
+
+ <sect1 xml:id="language.enumerations.static-methods">
+  <title>枚举静态方法</title>
+
+  <para>
+   枚举也能有静态方法。
+   在枚举中静态方法主要用于取代构造器，如：
+  </para>
+
+  <programlisting role="php">
+   <![CDATA[
+<?php
+enum Size
+{
+    case Small;
+    case Medium;
+    case Large;
+
+    public static function fromLength(int $cm): static
+    {
+        return match(true) {
+            $cm < 50 => static::Small,
+            $cm < 100 => static::Medium,
+            default => static::Large,
+        };
+    }
+}
+?>
+]]>
+  </programlisting>
+
+  <para>
+   仅管 enum 可以包括 public、private、protected 的静态方法，
+   但由于它不支持继承，因此在实践中 private 和 protected 效果是相同的。
+  </para>
+
+ </sect1>
+
+ <sect1 xml:id="language.enumerations.constants">
+  <title>枚举常量</title>
+
+  <para>
+   仅管 enum 可以包括 public、private、protected 的常量，
+   但由于它不支持继承，因此在实践中 private 和 protected 效果是相同的。
+  </para>
+
+  <para>枚举常量可以引用枚举条目：</para>
+
+  <programlisting role="php">
+   <![CDATA[
+<?php
+enum Size
+{
+    case Small;
+    case Medium;
+    case Large;
+
+    public const Huge = self::Large;
+}
+?>
+]]>
+  </programlisting>
+ </sect1>
+
+ <sect1 xml:id="language.enumerations.traits">
+  <title>Trait</title>
+
+  <para>枚举也能使用 trait，行为和 class 一样。
+   留意在枚举中 <literal>use</literal> trait 不允许包含属性。
+   只能包含方法、静态方法。
+   包含属性的 trait 会导致 fatal 错误。
+  </para>
+
+  <programlisting role="php">
+   <![CDATA[
+<?php
+interface Colorful
+{
+    public function color(): string;
+}
+
+trait Rectangle
+{
+    public function shape(): string {
+        return "Rectangle";
+    }
+}
+
+enum Suit implements Colorful
+{
+    use Rectangle;
+
+    case Hearts;
+    case Diamonds;
+    case Clubs;
+    case Spades;
+
+    public function color(): string
+    {
+        return match($this) {
+            Suit::Hearts, Suit::Diamonds => 'Red',
+            Suit::Clubs, Suit::Spades => 'Black',
+        };
+    }
+}
+?>
+]]>
+  </programlisting>
+ </sect1>
+
+ <sect1 xml:id="language.enumerations.expressions">
+  <title>常量表达式的枚举值</title>
+
+  <para>
+    由于用 enum 自身的常量表示条目，它们可当作静态值，用于绝大多数常量表达式：
+    属性默认值、变量默认值、参数默认值、全局和类常量。
+    他们不能用于其他 enum 枚举值，但通常的常量可以引用枚举条目。
+  </para>
+
+  <para>
+   然而，因为不能保证结果值绝对不变，也不能避免调用方法时带来副作用，
+   所以枚举里类似 <classname>ArrayAccess</classname> 这样的隐式魔术方法调用无法用于静态定义和常量定义。
+   常量表达式还是不能使用函数调用、方法调用、属性访问。
+  </para>
+
+  <programlisting role="php">
+   <![CDATA[
+<?php
+// 这是完全合法的 Enum 定义
+enum Direction implements ArrayAccess
+{
+    case Up;
+    case Down;
+
+    public function offsetGet($val) { ... }
+    public function offsetExists($val) { ... }
+    public function offsetSet($val) { throw new Exception(); }
+    public functiond offsetUnset($val) { throw new Exception(); }
+}
+
+class Foo
+{
+    // 可以这样写。
+    const Bar = Direction::Down;
+
+    // 由于它是不确定的，所以不能这么写。
+    const Bar = Direction::Up['short'];
+    // Fatal error: Cannot use [] on enums in constant expression
+}
+
+// 由于它不是一个常量表达式，所以是完全合法的
+$x = Direction::Up['short'];
+?>
+]]>
+  </programlisting>
+ </sect1>
+
+ <sect1 xml:id="language.enumerations.object-differences">
+  <title>和对象的差异</title>
+
+  <para>
+  尽管 enum 基于类和对象，但它们不完全支持对象相关的所有功能。
+  尤其是枚举条目不能有状态。
+  </para>
+
+  <simplelist>
+   <member>禁止构造、析构函数。</member>
+   <member>不支持继承。无法 extend 一个 enum。</member>
+   <member>不支持静态属性和对象属性。</member>
+   <member>由于枚举条目是单例对象，所以不支持对象复制</member>
+   <member>除了下面列举项，不能使用<link linkend="language.oop5.magic">魔术方法</link>。</member>
+  </simplelist>
+
+  <para>以下对象功能可用，功能和其他对象一致：</para>
+
+  <simplelist>
+   <member>Public、private、protected 方法。</member>
+   <member>Public、private、protected 静态方法。</member>
+   <member>Public、private、protected 类常量。</member>
+   <member>enum 可以 implement 任意数量的 interface。</member>
+   <member>
+    枚举和它的条目都可以附加 <link linkend="language.attributes">注解</link>。
+    目标过滤器 <constant>TARGET_CLASS</constant> 包括枚举自身。
+    目标过滤器 <constant>TARGET_CLASS_CONST</constant> 包括枚举条目。
+   </member>
+   <member>
+    魔术方法：<link linkend="object.call">__call</link>、<link linkend="object.callstatic">__callStatic</link>、
+    <link linkend="object.invoke">__invoke</link>。
+   </member>
+   <member>常量 <constant>__CLASS__</constant> 和 <constant>__FUNCTION__</constant> 的功能和平时无差别</member>
+  </simplelist>
+
+  <para>
+   枚举类型的魔术常量 <literal>::class</literal>  和对象完全一样，
+   它是个包含命名空间的类型名称。
+   由于枚举条目是枚举类型的一个实例，因此它的 <literal>::class</literal> 
+   也和枚举类型一样。
+  </para>
+
+  <para>
+  此外，不能用 <literal>new</literal> 直接实例化枚举条目，
+  也不能用 <methodname>ReflectionClass::newInstanceWithoutConstructor</methodname> 反射实例化。
+  这么做都会导致错误。
+  </para>
+
+  <programlisting role="php">
+   <![CDATA[
+<?php
+$clovers = new Suit();
+// Error: Cannot instantiate enum Suit
+$horseshoes = (new ReflectionClass(Suit::class))->newInstanceWithoutConstructor()
+// Error: Cannot instantiate enum Suit
+?>
+]]>
+  </programlisting>
+ </sect1>
+
+ <sect1 xml:id="language.enumerations.listing">
+  <title>枚举值清单</title>
+
+  <para>
+   无论是纯粹枚举还是回退枚举，都实现了一个叫 <interfacename>UnitEnum</interfacename> 的内部接口。
+   <literal>UnitEnum</literal> 包含了一个静态方法：
+   <literal>cases()</literal>。
+   按照声明中的顺序，<literal>cases()</literal> 返回了打包的 array，包含全部定义的条目。
+  </para>
+
+  <programlisting role="php">
+   <![CDATA[
+<?php
+Suit::cases();
+// 产生： [Suit::Hearts, Suit::Diamonds, Suit::Clubs, Suit:Spades]
+?>
+]]>
+  </programlisting>
+
+  <para>为 Enum 手动定义 <literal>cases()</literal> 方法会导致 fatal 错误。</para>
+ </sect1>
+
+ <sect1 xml:id="language.enumerations.serialization">
+  <title>序列化</title>
+
+  <para>
+  枚举的序列化不同于对象。
+  尤其是它们有新的序列化代码：
+   <literal>"E"</literal>，指示了 enum 条目名称。
+   然后反序列化动作能够设置变量为现有的单例值。
+   确保那样：
+  </para>
+
+  <programlisting role="php">
+   <![CDATA[
+<?php
+Suit::Hearts === unserialize(serialize(Suit::Hearts));
+
+print serialize(Suit::Hearts);
+// E:11:"Suit:Hearts";
+?>
+]]>
+  </programlisting>
+
+  <para>
+   如果枚举和它的条目在反序列化时，无法匹配序列化的值，
+   会导致 warning 警告，并返回 <literal>false</literal>。
+  </para>
+
+  <para>
+   把纯粹枚举序列化为 JSON 将会导致错误。
+   把回退枚举序列化为 JSON 时，仅会用标量值的形式，以合适的类型表达。
+   可通过实现 <classname>JsonSerializable</classname> 来重载序列化行为。
+  </para>
+
+  <para>对于 <function>print_r</function>，输出的枚举条目略微不同于对象，
+  能减少迷惑。
+  </para>
+
+  <programlisting role="php">
+   <![CDATA[
+<?php
+enum Foo {
+    case Bar;
+}
+
+enum Baz: int {
+    case Beep = 5;
+}
+
+print_r(Foo::Bar);
+print_r(Baz::Beep);
+
+/* 产生
+
+Foo Enum (
+    [name] => Bar
+)
+Baz Enum:int {
+    [name] => Beep
+    [value] => 5
+}
+*/
+?>
+]]>
+  </programlisting>
+ </sect1>
+
+ <sect1 xml:id="language.enumerations.examples">
+  &reftitle.examples;
+
+  <para>
+   <example>
+    <title>值受限的基本用法</title>
+    <programlisting role="php">
+     <![CDATA[
+<?php
+enum SortOrder
+{
+    case ASC;
+    case DESC;
+}
+
+function query($fields, $filter, SortOrder $order = SortOrder::ASC) { ... }
+?>
+]]>
+    </programlisting>
+    <para>
+    由于确保 <literal>$order</literal> 不是 <literal>SortOrder::ASC</literal> 
+    就是 <literal>SortOrder::DESC</literal>，所以 <literal>query()</literal> 函数能安全处理。
+    因为其他任意值都会导致 <classname>TypeError</classname>，
+    所以不需要额外的错误检查。
+    </para>
+   </example>
+  </para>
+
+  <para>
+
+   <example>
+    <title>值排他的高级用法</title>
+
+    <programlisting role="php">
+     <![CDATA[
+<?php
+enum UserStatus: string
+{
+    case Pending = 'P';
+    case Active = 'A';
+    case Suspended = 'S';
+    case CanceledByUser = 'C';
+
+    public function label(): string
+    {
+        return match($this) {
+            static::Pending => 'Pending',
+            static::Active => 'Active',
+            static::Suspended => 'Suspended',
+            static::CanceledByUser => 'Canceled by user',
+        };
+    }
+}
+?>
+]]>
+    </programlisting>
+
+    <para>
+    这个例子中，用户的状态是 <literal>UserStatus::Pending</literal>、
+     <literal>UserStatus::Active</literal>、<literal>UserStatus::Suspended</literal>、
+     <literal>UserStatus::CanceledByUser</literal> 中的一个，具有独占性。
+     函数可以根据 <literal>UserStatus</literal> 设置参数类型，仅支持这四种值。
+    </para>
+
+    <para>
+     所有四个值都有一个 <literal>label()</literal> 方法，返回了人类可读的字符串。
+     它独立于等同于标量的“机器名”。
+     机器名用于类似数据库字段或 HTML 选择框这样的地方。
+    </para>
+
+    <programlisting role="php">
+     <![CDATA[
+<?php
+foreach (UserStatus::cases() as $case) {
+    printf('<option value="%s">%s</option>\n', $case->value, $case->label());
+}
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+
+ </sect1>
+
+</chapter>
+
+ <!-- Keep this comment at the end of the file
+ Local variables:
+ mode: sgml
+ sgml-omittag:t
+ sgml-shorttag:t
+ sgml-minimize-attributes:nil
+ sgml-always-quote-attributes:t
+ sgml-indent-step:1
+ sgml-indent-data:t
+ indent-tabs-mode:nil
+ sgml-parent-document:nil
+ sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+ sgml-exposed-tags:nil
+ sgml-local-catalogs:nil
+ sgml-local-ecat-files:nil
+ End:
+ vim600: syn=xml fen fdm=syntax fdl=2 si
+ vim: et tw=78 syn=sgml
+ vi: ts=1 sw=1
+ -->
