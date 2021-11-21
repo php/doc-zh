@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 8ad0d94e1c87b2daabff88e74acc31e8a11eec0a Maintainer: Haohappy Status: ready -->
+<!-- EN-Revision: 1fb0ef23d7be0d8ecd9604fce16ee1e0842c6ef6 Maintainer: Haohappy Status: ready -->
 <!-- CREDITS: dallas -->
 <sect1 xml:id="language.oop5.iterations" xmlns="http://docbook.org/ns/docbook">
  <title>遍历对象</title>
  <para>
-  PHP 5 提供了一种定义对象的方法使其可以通过单元列表来遍历，例如用 &foreach;
+  PHP 提供了一种定义对象的方法使其可以通过单元列表来遍历，例如用 &foreach;
   语句。默认情况下，所有<link linkend="language.oop5.visibility">可见</link>属性都将被用于遍历。
  </para>
 
@@ -25,7 +25,7 @@ class MyClass
 
     function iterateVisible() {
        echo "MyClass::iterateVisible:\n";
-       foreach($this as $key => $value) {
+       foreach ($this as $key => $value) {
            print "$key => $value\n";
        }
     }
@@ -63,178 +63,18 @@ private => private var
  <para>
   如上所示，&foreach; 遍历了所有其能够访问的<link linkend="language.oop5.visibility">可见</link>属性。
  </para>
- <para>
-  更进一步，可以实现 <interfacename>Iterator</interfacename>
-  <link linkend="language.oop5.interfaces">接口</link>。可以让对象自行决定如何遍历以及每次遍历时那些值可用。
- </para>
 
- <example>
-  <title>实现 Iterator 接口的对象遍历</title>
-  <programlisting role="php">
-<![CDATA[
-<?php
-class MyIterator implements Iterator
-{
-    private $var = array();
-
-    public function __construct($array)
-    {
-        if (is_array($array)) {
-            $this->var = $array;
-        }
-    }
-
-    public function rewind() {
-        echo "rewinding\n";
-        reset($this->var);
-    }
-
-    public function current() {
-        $var = current($this->var);
-        echo "current: $var\n";
-        return $var;
-    }
-
-    public function key() {
-        $var = key($this->var);
-        echo "key: $var\n";
-        return $var;
-    }
-
-    public function next() {
-        $var = next($this->var);
-        echo "next: $var\n";
-        return $var;
-    }
-
-    public function valid() {
-        $var = $this->current() !== false;
-        echo "valid: {$var}\n";
-        return $var;
-    }
-}
-
-$values = array(1,2,3);
-$it = new MyIterator($values);
-
-foreach ($it as $a => $b) {
-    print "$a: $b\n";
-}
-?>
-]]>
-  </programlisting>
-  &example.outputs;
-  <screen role="php">
-<![CDATA[
-rewinding
-current: 1
-valid: 1
-current: 1
-key: 0
-0: 1
-next: 2
-current: 2
-valid: 1
-current: 2
-key: 1
-1: 2
-next: 3
-current: 3
-valid: 1
-current: 3
-key: 2
-2: 3
-next:
-current:
-valid:
-]]>
-  </screen>
- </example>
-
- <para>
-  可以用 <interfacename>IteratorAggregate</interfacename>
-  <link linkend="language.oop5.interfaces">接口</link>以替代实现所有的
-  <interfacename>Iterator</interfacename> 方法。<interfacename>IteratorAggregate</interfacename>
-  只需要实现一个方法
-  <methodname>IteratorAggregate::getIterator</methodname>，其应返回一个实现了
-  <interfacename>Iterator</interfacename> 的类的实例。
- </para>
-
- <example>
-  <title>通过实现 IteratorAggregate 来遍历对象</title>
-  <programlisting role="php">
-<![CDATA[
-<?php
-class MyCollection implements IteratorAggregate
-{
-    private $items = array();
-    private $count = 0;
-
-    // Required definition of interface IteratorAggregate
-    public function getIterator() {
-        return new MyIterator($this->items);
-    }
-
-    public function add($value) {
-        $this->items[$this->count++] = $value;
-    }
-}
-
-$coll = new MyCollection();
-$coll->add('value 1');
-$coll->add('value 2');
-$coll->add('value 3');
-
-foreach ($coll as $key => $val) {
-    echo "key/value: [$key -> $val]\n\n";
-}
-?>
-]]>
-  </programlisting>
-  &example.outputs;  
-  <screen role="php">
-<![CDATA[
-rewinding
-current: value 1
-valid: 1
-current: value 1
-key: 0
-key/value: [0 -> value 1]
-
-next: value 2
-current: value 2
-valid: 1
-current: value 2
-key: 1
-key/value: [1 -> value 2]
-
-next: value 3
-current: value 3
-valid: 1
-current: value 3
-key: 2
-key/value: [2 -> value 3]
-
-next:
-current:
-valid:
-]]>
-  </screen>
- </example>
-
- <note>
+ <simplesect role="seealso">
+  &reftitle.seealso;
   <para>
-   更多遍历的示例见
-   <link linkend="spl.iterators">SPL 扩展</link>。
+   <simplelist>
+    <member><link linkend="language.generators">Generators</link></member>
+    <member><interfacename>Iterator</interfacename></member>
+    <member><interfacename>IteratorAggregate</interfacename> </member>
+    <member><link linkend="spl.iterators">SPL Iterators</link></member>
+   </simplelist>
   </para>
- </note> 
-
- <note>
-  <para>
-   PHP 5.5 及以后版本的用户也可参考<link
-   linkend="language.generators">生成器</link>，其提供了另一方法来定义 Iterators。
-  </para>
- </note> 
+ </simplesect>
 
 </sect1>
  

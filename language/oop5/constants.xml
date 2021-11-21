@@ -1,22 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
 <!-- $Author$ -->
-<!-- EN-Revision: a46a05a003c38d403ec36e7068d16d63f00eb15c Maintainer: Haohappy Status: ready -->
+<!-- EN-Revision: a9edd62d087ab1eb6292c795b7256e14ff9f1234 Maintainer: Haohappy Status: ready -->
  <sect1 xml:id="language.oop5.constants" xmlns="http://docbook.org/ns/docbook">
   <title>类常量</title>
   <para>
-   可以把在类中始终保持不变的值定义为常量。在定义和使用常量的时候不需要使用 <varname>$</varname> 符号。
+   可以把在类中始终保持不变的值定义为 <link linkend="language.constants">常量</link> 。
+   在定义和使用常量的时候不需要使用 <varname>$</varname> 符号。
+   类常量的默认可见性是 <literal>public</literal> 。
   </para>
+ <note>
   <para>
-   常量的值必须是一个定值，不能是变量，类属性，数学运算的结果或函数调用。
+   类常量可以通过子类重新定义。
   </para>
+ </note>
   <para>
    接口（interface）中也可以定义常量。更多示例见文档中的<link linkend="language.oop5.interfaces">接口</link>部分。
   </para>
   <para>
-   自 PHP 5.3.0 起，可以用一个变量来动态调用类。但该变量的值不能为关键字（如
-   <literal>self</literal>，<literal>parent</literal> 或 <literal>static</literal>）。
+   可以用一个变量来动态调用类。但该变量的值不能为关键字（如 <literal>self</literal> ， 
+   <literal>parent</literal> 或 <literal>static</literal>）。
   </para>
+  <para>
+  注意，类常量只为每个类分配一次，而不是为每个类的实例分配。
+ </para>
   <example>
    <title>定义和使用一个类常量</title>
    <programlisting role="php">
@@ -24,52 +31,91 @@
 <?php
 class MyClass
 {
-    const constant = 'constant value';
+    const CONSTANT = 'constant value';
 
     function showConstant() {
-        echo  self::constant . "\n";
+        echo  self::CONSTANT . "\n";
     }
 }
 
-echo MyClass::constant . "\n";
+echo MyClass::CONSTANT . "\n";
 
 $classname = "MyClass";
-echo $classname::constant . "\n"; // 自 5.3.0 起
+echo $classname::CONSTANT . "\n";
 
 $class = new MyClass();
 $class->showConstant();
 
-echo $class::constant."\n"; // 自 PHP 5.3.0 起
+echo $class::CONSTANT."\n";
 ?>
 ]]>
    </programlisting>
   </example>
-  
+  <para>
+  特殊的 <constant>::class</constant> 允许在编译时进行完全限定的类名解析，
+  这在命名空间类中非常有用。
+ </para>
   <example>
-   <title>静态数据示例</title>
-   <programlisting role="php">
+  <title>命名空间的 ::class 示例</title>
+  <programlisting role="php">
 <![CDATA[
 <?php
-class foo {
-    // 自 PHP 5.3.0 起
-    const bar = <<<'EOT'
-bar
-EOT;
+namespace foo {
+    class bar {
+    }
+
+    echo bar::class; // foo\bar
 }
 ?>
 ]]>
-   </programlisting>
-   <para>   
-    和 heredoc 不同，nowdoc 可以用在任何静态数据中。
-   </para>
-  </example>
-  <note>
-   <para>
-    Nowdoc 支持是在 PHP 5.3.0 新增的。
-   </para>
-  </note>
- </sect1>
- 
+  </programlisting>
+ </example>
+
+<example>
+  <title>类常量表达式示例</title>
+  <programlisting role="php">
+<![CDATA[
+<?php
+const ONE = 1;
+class foo {
+    const TWO = ONE * 2;
+    const THREE = ONE + self::TWO;
+    const SENTENCE = 'The value of THREE is '.self::THREE;
+}
+?>
+]]>
+  </programlisting>
+ </example>
+
+ <example>
+  <title>自 PHP 7.1.0 起，类常量支持可见性修饰符</title>
+  <programlisting role="php">
+<![CDATA[
+<?php
+class Foo {
+    public const BAR = 'bar';
+    private const BAZ = 'baz';
+}
+echo Foo::BAR, PHP_EOL;
+echo Foo::BAZ, PHP_EOL;
+?>
+]]>
+  </programlisting>
+   &example.outputs.71;
+   <screen>
+<![CDATA[
+bar
+
+Fatal error: Uncaught Error: Cannot access private const Foo::BAZ in …
+]]>
+   </screen>
+ </example>
+ <note>
+  <para>
+   自 PHP 7.1.0 起，类常量允许使用可见性修饰符。
+  </para>
+ </note>
+</sect1>
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml

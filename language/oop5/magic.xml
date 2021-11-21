@@ -1,43 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
 <!-- $Author$ -->
-<!-- EN-Revision: e1438a020bbc755a27f18235a0ea94f3d9d556aa Maintainer: Haohappy Status: ready -->
+<!-- EN-Revision: 3926279f825d418fdd2e7079968507d8b0c62b7d Maintainer: Haohappy Status: ready -->
  <sect1 xml:id="language.oop5.magic" xmlns="http://docbook.org/ns/docbook">
   <title>魔术方法</title>
   <para>
-   <link linkend="object.construct">__construct()</link>，
-   <link linkend="object.destruct">__destruct()</link>，
-   <link linkend="object.call">__call()</link>，
-   <link linkend="object.callstatic">__callStatic()</link>，
-   <link linkend="object.get">__get()</link>，
-   <link linkend="object.set">__set()</link>，
-   <link linkend="object.isset">__isset()</link>，
-   <link linkend="object.unset">__unset()</link>，
-   <link linkend="object.sleep">__sleep()</link>，
-   <link linkend="object.wakeup">__wakeup()</link>，
-   <link linkend="object.serialize">__serialize()</link>,
-   <link linkend="object.unserialize">__unserialize()</link>,
-   <link linkend="object.tostring">__toString()</link>，
-   <link linkend="object.invoke">__invoke()</link>，
-   <link linkend="object.set-state">__set_state()</link>，
-   <link linkend="object.clone">__clone()</link> 和 
-   <link linkend="object.debuginfo">__debugInfo()</link>
-   等方法在 PHP 中被称为<quote>魔术方法</quote>（Magic
-   methods）。在命名自己的类方法时不能使用这些方法名，除非是想使用其魔术功能。
+   魔术方法是一种特殊的方法，当对对象执行某些操作时会覆盖 PHP 的默认操作。
   </para>
-
-  <note>
-   <simpara>
-    所有的魔术方法 <emphasis>必须</emphasis> 声明为 <literal>public</literal>
-   </simpara>
-  </note>
-
   <caution>
    <simpara>
-    PHP 将所有以 __（两个下划线）开头的类方法保留为魔术方法。所以在定义类方法时，除了上述魔术方法，建议不要以
-    __ 为前缀。
+    PHP 保留所有以 <literal>__</literal> 开头的方法名称。
+    因此，除非覆盖 PHP 的行为，否则不建议使用此类方法名称。
    </simpara>
   </caution>
+  <para>
+   下列方法名被认为是魔术方法：
+   <!-- Should be an itemized list ? -->
+   <link linkend="object.construct">__construct()</link> ，
+   <link linkend="object.destruct">__destruct()</link> ，
+   <link linkend="object.call">__call()</link> ，
+   <link linkend="object.callstatic">__callStatic()</link> ，
+   <link linkend="object.get">__get()</link> ，
+   <link linkend="object.set">__set()</link> ，
+   <link linkend="object.isset">__isset()</link> ，
+   <link linkend="object.unset">__unset()</link> ，
+   <link linkend="object.sleep">__sleep()</link> ，
+   <link linkend="object.wakeup">__wakeup()</link> ，
+   <link linkend="object.serialize">__serialize()</link> ，
+   <link linkend="object.unserialize">__unserialize()</link> ，
+   <link linkend="object.tostring">__toString()</link> ，
+   <link linkend="object.invoke">__invoke()</link> ，
+   <link linkend="object.set-state">__set_state()</link> ，
+   <link linkend="object.clone">__clone()</link> 和 
+   <link linkend="object.debuginfo">__debugInfo()</link> 。
+  </para>
+
+  <warning>
+   <!-- See for a code example of this behaviour: https://3v4l.org/Bov34 -->
+   <simpara>
+    除了 <link linkend="object.construct">__construct()</link>，
+    <link linkend="object.destruct">__destruct()</link> ，和
+    <link linkend="object.clone">__clone()</link> 之外的所有魔术方法都
+    <emphasis>必须</emphasis> 声明为 <literal>public</literal>，
+    否则会发出 <constant>E_WARNING</constant>。
+    在 PHP 8.0.0 之前没有为魔术方法
+    <link linkend="object.sleep">__sleep()</link> ，
+    <link linkend="object.wakeup">__wakeup()</link> ，
+    <link linkend="object.serialize">__serialize()</link> ，
+    <link linkend="object.unserialize">__unserialize()</link> 和
+    <link linkend="object.set-state">__set_state()</link> 发出诊断信息。
+   </simpara>
+  </warning>
+  <warning>
+   <para>
+    如果定义魔术方法时使用类型声明，它们必须与本文档中描述的签名相同，否则会发出致命错误。
+    在 PHP 8.0.0 之前，不会发出诊断信息。
+    然而， <link linkend="object.construct">__construct()</link> 和
+    <link linkend="object.destruct">__destruct()</link> 不能声明返回类型，
+    否则会发出致命错误。
+   </para>
+  </warning>
  
   <sect2 xml:id="language.oop5.magic.sleep">
    <title>
@@ -62,11 +84,10 @@
    <note>
     <para>
      <link linkend="object.sleep">__sleep()</link> 不能返回父类的私有成员的名字。这样做会产生一个
-     <constant>E_NOTICE</constant> 级别的错误。可以用
-     <classname>Serializable</classname> 接口来替代。
+     <constant>E_NOTICE</constant> 级别的错误。使用
+     <classname>Serializable</classname> 接口替代。
     </para>
    </note>
-    
     
    <para>
     <link linkend="object.sleep">__sleep()</link> 方法常用于提交未提交的数据，或类似的清理操作。同时，如果有一些很大的对象，但不需要全部保存，这个功能就很好用。
@@ -136,7 +157,8 @@ class Connection
 
    <para>
     <function>serialize</function> 函数会检查类中是否存在一个魔术方法
-    <link linkend="object.serialize">__serialize()</link>。如果存在，该方法将在任何序列化之前优先执行。它必须以一个代表对象序列化形式的 键/值 成对的关联数组形式来返回，如果没有返回数组，将会抛出一个
+    <link linkend="object.serialize">__serialize()</link> 
+    。如果存在，该方法将在任何序列化之前优先执行。它必须以一个代表对象序列化形式的 键/值 成对的关联数组形式来返回，如果没有返回数组，将会抛出一个
     <classname>TypeError</classname> 错误。
    </para>
    <note>
@@ -148,16 +170,14 @@ class Connection
     </para>
    </note>
    <para>
-    The intended use of <link linkend="object.serialize">__serialize()</link> is to define a serialization-friendly
-    arbitrary representation of the object. Elements of the array may correspond to properties of the object but
-    that is not required.
+    <link linkend="object.serialize">__serialize()</link> 的预期用途是定义对象序列化友好的任意表示。
+    数组的元素可能对应对象的属性，但是这并不是必须的。
    </para>
    <para>
-    Conversely, <function>unserialize</function> checks for the
-    presence of a function with the magic name
-    <link linkend="object.unserialize">__unserialize()</link>. If present, this function will be passed the
-    restored array that was returned from <link linkend="object.serialize">__serialize()</link>.  It may
-    then restore the properties of the object from that array as appropriate.
+    相反， <function>unserialize</function> 检查是否存在具有名为 
+    <link linkend="object.unserialize">__unserialize()</link>
+    的魔术方法。此函数将会传递从 <link linkend="object.serialize">__serialize()</link>
+    返回的恢复数组。然后它可以根据需要从该数组中恢复对象的属性。
    </para>
    <note>
     <para>
@@ -225,12 +245,31 @@ class Connection
    
    <para>
     <link linkend="object.tostring">__toString()</link> 方法用于一个类被当成字符串时应怎样回应。例如
-    <literal>echo $obj;</literal> 应该显示些什么。此方法必须返回一个字符串，否则将发出一条
-    <constant>E_RECOVERABLE_ERROR</constant> 级别的致命错误。
+    <literal>echo $obj;</literal> 应该显示些什么。
    </para>
    <warning>
+    <para>
+     从 PHP 8.0.0 起，返回值遵循标准的 PHP 类型语义，
+     这意味着如果禁用 <link linkend="language.types.declarations.strict">严格类型</link>
+     ，它将会强制转换为字符串。
+    </para>
+    <para>
+     从 PHP 8.0.0 起，任何包含 <link linkend="object.tostring">__toString()</link>
+     方法的类都将隐性实现 <interfacename>Stringable</interfacename> 接口，
+     因此将通过该接口的类型检查。推荐无论如何应显式实现该接口。
+    </para>
+    <para>
+     在 PHP 7.4 中，返回值 <emphasis>必须</emphasis> 是 <type>string</type>
+     ，否则会抛出 <classname>Error</classname> 。
+    </para>
+    <para>
+     在 PHP 7.4。0 之前，返回值 <emphasis>必须</emphasis> 是 <type>string</type>
+     ，否则会抛出致命错误 <constant>E_RECOVERABLE_ERROR</constant> 。
+    </para>
+   </warning>
+   <warning>
     <simpara>
-     不能在 <link linkend="object.tostring">__toString()</link>
+     在 PHP 7.4.0 之前不能在 <link linkend="object.tostring">__toString()</link>
      方法中抛出异常。这么做会导致致命错误。
     </simpara>
    </warning>
@@ -266,31 +305,17 @@ Hello
 ]]>
     </screen>
    </example>
-   <para>
-    需要指出的是在 PHP 5.2.0 之前，<link linkend="object.tostring">__toString()</link>
-    方法只有在直接使用于 <function>echo</function> 或 <function>print</function>
-    时才能生效。PHP 5.2.0 之后，则可以在任何字符串环境生效（例如通过
-    <function>printf</function>，使用 <literal>%s</literal> 修饰符），但不能用于非字符串环境（如使用
-    <literal>%d</literal> 修饰符）。自 PHP 5.2.0 起，如果将一个未定义
-    <link linkend="object.tostring">__toString()</link> 方法的对象转换为字符串，会产生
-    <constant>E_RECOVERABLE_ERROR</constant> 级别的错误。
-   </para>
   </sect2>
 
   <sect2 xml:id="language.oop5.magic.invoke">
    <title><link linkend="object.invoke">__invoke()</link></title>
    <methodsynopsis xml:id="object.invoke">
     <type>mixed</type><methodname>__invoke</methodname>
-    <methodparam choice="opt"><parameter>...</parameter></methodparam>
+    <methodparam rep="repeat"><parameter>values</parameter></methodparam>
    </methodsynopsis>
    <para>
     当尝试以调用函数的方式调用一个对象时，<link linkend="object.invoke">__invoke()</link> 方法会被自动调用。
    </para>
-   <note>
-    <para>     
-     本特性只在 PHP 5.3.0 及以上版本有效。
-    </para>
-   </note>
    <example>
     <title>使用 <link linkend="object.invoke">__invoke()</link></title>
     <programlisting role="php">
@@ -325,14 +350,14 @@ bool(true)
     <methodparam><type>array</type><parameter>properties</parameter></methodparam>
    </methodsynopsis>
    <para>
-    自 PHP 5.1.0 起当调用 <function>var_export</function> 导出类时，此<link
+    当调用 <function>var_export</function> 导出类时，此<link
     linkend="language.oop5.static">静态</link> 方法会被调用。
    </para>
    <para>
-    本方法的唯一参数是一个数组，其中包含按 <literal>array('property' => value, ...)</literal> 格式排列的类属性。
+    本方法的唯一参数是一个数组，其中包含按 <literal>['property' => value, ...]</literal> 格式排列的类属性。
    </para>
    <example>
-    <title>使用 <link linkend="object.set-state">__set_state()</link>>（PHP 5.1.0 起）</title>
+    <title>使用 <link linkend="object.set-state">__set_state()</link>></title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -342,7 +367,7 @@ class A
     public $var1;
     public $var2;
 
-    public static function __set_state($an_array) // As of PHP 5.1.0
+    public static function __set_state($an_array)
     {
         $obj = new A;
         $obj->var1 = $an_array['var1'];
@@ -355,10 +380,10 @@ $a = new A;
 $a->var1 = 5;
 $a->var2 = 'foo';
 
-eval('$b = ' . var_export($a, true) . ';'); // $b = A::__set_state(array(
-                                            //    'var1' => 5,
-                                            //    'var2' => 'foo',
-                                            // ));
+$b = var_export($a, true);
+var_dump($b);
+eval('$c = ' . $b . ';');
+var_dump($c);
 var_dump($b);
 
 ?>
@@ -367,6 +392,10 @@ var_dump($b);
     &example.outputs;
     <screen>
 <![CDATA[
+string(60) "A::__set_state(array(
+   'var1' => 5,
+   'var2' => 'foo',
+))"
 object(A)#2 (2) {
   ["var1"]=>
   int(5)
@@ -376,6 +405,18 @@ object(A)#2 (2) {
 ]]>
     </screen>
    </example>
+   <note>
+    <simpara>
+     导出对象时， <function>var_export</function> 不会检查对象类是否实现了
+     <link linkend="object.set-state">__set_state()</link> ，
+     所以如果 <link linkend="object.set-state">__set_state()</link> 没有实现，
+     重新导入对象会触发 <classname>Error</classname> 异常。特别是这会影响内部(内置)类。
+    </simpara>
+    <simpara>
+     程序员有责任验证要重新导入的类是否实现了 
+     <link linkend="object.set-state">__set_state()</link> 。
+    </simpara>
+   </note>
   </sect2>
   <sect2 xml:id="language.oop5.magic.debuginfo">
    <title><link linkend="object.debuginfo">__debugInfo()</link></title>
@@ -384,16 +425,11 @@ object(A)#2 (2) {
     <void/>
    </methodsynopsis>
    <para>
-    This method is called by <function>var_dump</function> when dumping an
-    object to get the properties that should be shown. If the method isn't
-    defined on an object, then all public, protected and private properties
-    will be shown.
-   </para>
-   <para>
-    This feature was added in PHP 5.6.0.
+    当通过 <function>var_dump</function> 转储对象，获取应该要显示的属性的时候，
+    该函数就会被调用。如果对象中没有定义该方法，那么将会展示所有的公有、受保护和私有的属性。
    </para>
    <example>
-    <title>Using <link linkend="object.debuginfo">__debugInfo()</link></title>
+    <title>使用 <link linkend="object.debuginfo">__debugInfo()</link></title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -427,7 +463,6 @@ object(C)#1 (1) {
    </example>
   </sect2>
  </sect1>
- 
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
