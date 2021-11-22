@@ -1,17 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: addba5dcce72f6c9e66751d0d12fa830bdef4707 Maintainer: Haohappy Status: ready -->
+<!-- EN-Revision: 3ddc88b8364f27727a53ba6eb7c9a98f8525f3ce Maintainer: Haohappy Status: ready -->
 <sect1 xml:id="language.oop5.inheritance" xmlns="http://docbook.org/ns/docbook">
  <title>对象继承</title>
  <para>
   继承已为大家所熟知的一个程序设计特性，PHP 的对象模型也使用了继承。继承将会影响到类与类，对象与对象之间的关系。
  </para>
  <para>
-  比如，当扩展一个类，子类就会继承父类所有公有的和受保护的方法。除非子类覆盖了父类的方法，被继承的方法都会保留其原有功能。
+  比如，当扩展一个类，子类就会继承父类所有 public 和 protected 的方法，属性和常量。除非子类覆盖了父类的方法，被继承的方法都会保留其原有功能。
  </para>
  <para>
-  继承对于功能的设计和抽象是非常有用的，而且对于类似的对象增加新功能就无须重新再写这些公用的功能。
+  继承有助于功能的设计和抽象，在实现类似的对象、增加新功能时，无须重复编写这些公用的功能。
  </para>
+  <para>
+   子类无法访问父类的私有方法。因此，子类无需考虑正常的继承规则而重新实现私有方法。
+   然而，在 PHP 8.0.0 之前， <literal>final</literal> 和 <literal>static</literal>
+   的限制会应用于 private 方法。
+   从 PHP 8.0.0 开始，仅 <literal>private final</literal> 的构造器是唯一受限的 private 方法；
+   想要“禁用”构造器，我们通常用静态工厂方法作为代替。
+  </para>
+ <para>
+  方法，属性和常量的 <link linkend="language.oop5.visibility">可见性</link>
+  可以放宽，例如 <literal>protected</literal> 方法可以标记为 <literal>public</literal>，
+  但不能增加限制，例如标记 <literal>public</literal> 属性为 <literal>private</literal>。
+ </para>
+
  <note>
   <para>
    除非使用了自动加载，否则一个类必须在使用之前被定义。如果一个类扩展了另一个，则父类必须在子类之前被声明。此规则适用于类继承其它类与接口。
@@ -25,9 +38,9 @@
 <![CDATA[
 <?php
 
-class foo
+class Foo
 {
-    public function printItem($string) 
+    public function printItem($string)
     {
         echo 'Foo: ' . $string . PHP_EOL;
     }
@@ -38,7 +51,7 @@ class foo
     }
 }
 
-class bar extends foo
+class Bar extends Foo
 {
     public function printItem($string)
     {
@@ -46,12 +59,12 @@ class bar extends foo
     }
 }
 
-$foo = new foo();
-$bar = new bar();
-$foo->printItem('baz'); // Output: 'Foo: baz'
-$foo->printPHP();       // Output: 'PHP is great' 
-$bar->printItem('baz'); // Output: 'Bar: baz'
-$bar->printPHP();       // Output: 'PHP is great'
+$foo = new Foo();
+$bar = new Bar();
+$foo->printItem('baz'); // 输出: 'Foo: baz'
+$foo->printPHP();       // 输出: 'PHP is great' 
+$bar->printItem('baz'); // 输出: 'Bar: baz'
+$bar->printPHP();       // 输出: 'PHP is great'
 
 ?>
 ]]>
