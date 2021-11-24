@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision: $ -->
-<!-- EN-Revision: d60cfe1bfdfc1b3c297b98153671d7a72fdf2a1f Maintainer: daijie Status: ready -->
+<!-- EN-Revision: 9bdf88f157a8b9363999e5287ca5e1ef93841f9e Maintainer: daijie Status: ready -->
 <!-- Reviewed: no -->
 
  <chapter xml:id="language.attributes" xmlns="http://docbook.org/ns/docbook">
@@ -10,7 +10,7 @@
    <?phpdoc print-version-for="attributes"?>
 
    <para>
-    注解功能使得代码中的声明部分都可以添加结构化、机器可读的元数据，
+    注解功能提供了代码中的声明部分都可以添加结构化、机器可读的元数据的能力，
     注解的目标可以是类、方法、函数、参数、属性、类常量。
     
     通过 <link linkend="book.reflection">反射 API</link> 可在运行时获取注解所定义的元数据。
@@ -63,7 +63,11 @@ class CopyFile implements ActionHandler
     #[SetUp]
     public function targetDirectoryExists()
     {
-        mkdir($this->targetDirectory);
+        if (!file_exists($this->targetDirectory)) {
+            mkdir($this->targetDirectory);
+        } elseif (!is_dir($this->targetDirectory)) {
+            throw new RuntimeException("Target directory $this->targetDirectory is not a directory");
+        }
     }
 
     public function execute()
@@ -182,7 +186,7 @@ class AnotherThing
 
    <para>
     实例和反射注解的分离使得程序员增加了在丢失反射类、类型错误、丢失参数等情况下的处理能力，也能处理错误。
-    只有调用 <function>newInstance</function> 后，注解类的对象才会以验证过匹配的参数来实例化。
+    只有调用 <function>ReflectionAttribute::newInstance</function> 后，注解类的对象才会以验证过匹配的参数来实例化。
    </para>
 
    <example>
@@ -257,7 +261,7 @@ function dumpMyAttributeData($reflection) {
     }
 }
 
-dumpAttributeData(new ReflectionClass(Thing::class));
+dumpMyAttributeData(new ReflectionClass(Thing::class));
 ]]>
      </programlisting>
     </example>
@@ -272,7 +276,7 @@ dumpAttributeData(new ReflectionClass(Thing::class));
    </para>
 
   <example>
-   <title>目标限定使用的注解</title>
+   <title>简单的 Attribute 类</title>
 
    <programlisting role="php">
 <![CDATA[
@@ -295,7 +299,7 @@ class MyAttribute
   </para>
 
   <example>
-   <title>简单的 Attribute 类</title>
+   <title>目标限定使用的注解</title>
 
    <programlisting role="php">
 <![CDATA[

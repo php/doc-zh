@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 1d58f726462a821d3f926fb61247357f49fa1ce5 Maintainer: daijie Status: ready -->
+<!-- EN-Revision: 2e8ef0a1bd98243cb2c6c5c627a195bb53a7a440 Maintainer: daijie Status: ready -->
 
  <chapter xml:id="language.exceptions" xmlns="http://docbook.org/ns/docbook">
   <title>异常</title>
@@ -16,7 +16,7 @@
     <programlisting role="php">
 <![CDATA[
 <?php
-class Exception extends Throwable
+class Exception implements Throwable
 {
     protected $message = 'Unknown exception';   // 异常信息
     private   $string;                          // __toString 的缓存
@@ -26,9 +26,9 @@ class Exception extends Throwable
     private   $trace;                           // backtrace
     private   $previous;                        // 如果是嵌套异常，则是之前的 exception
 
-    public function __construct($message = null, $code = 0, Exception $previous = null);
+    public function __construct($message = '', $code = 0, Throwable $previous = null);
 
-    final private function __clone();           // Inhibits cloning of exceptions.
+    final private function __clone();           // 禁止克隆异常。
 
     final public  function getMessage();        // 异常信息
     final public  function getCode();           // 异常错误码
@@ -69,7 +69,7 @@ class Exception extends Throwable
 class MyException extends Exception
 {
     // 重定义构造器使 message 变为必须被指定的属性
-    public function __construct($message, $code = 0, Exception $previous = null) {
+    public function __construct($message, $code = 0, Throwable $previous = null) {
         // 这里写用户的代码
 
         // 确保所有变量都被正确赋值
@@ -317,7 +317,7 @@ try {
     echo 'Caught exception: ',  $e->getMessage(), "\n";
 }
 
-// Continue execution
+// 继续执行
 echo "Hello World\n";
 ?>
 ]]>
