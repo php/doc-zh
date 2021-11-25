@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
 <!-- $Author$ -->
-<!-- EN-Revision: 28ad235028930196e95023f9b41789e1339e7c7e Maintainer: avenger Status: ready -->
+<!-- EN-Revision: 14e006b4eea529ce9c3df9e550b27fb507aaa44c Maintainer: avenger Status: ready -->
 <!-- CREDITS: Gregory, dallas, Luffy -->
 <chapter xml:id="language.functions" xmlns="http://docbook.org/ns/docbook">
   <title>函数</title>
@@ -159,7 +159,7 @@ function recursion($a)
    <title>函数的参数</title>
 
    <simpara>
-    通过参数列表可以传递信息到函数，即以逗号作为分隔符的表达式列表。参数是从左向右求值的。
+    通过参数列表可以传递信息到函数，即以逗号作为分隔符的表达式列表。函数在实际调用之前，值参数是从左向右求值的（<emphasis>及早</emphasis>求值）。
    </simpara>
 
    <para>
@@ -207,15 +207,13 @@ function takes_many_args(
     </programlisting>
    </example>
    <para>
-    As of PHP 8.0.0, passing mandatory arguments after optional arguments
-    is deprecated. This can generally be resolved by dropping the default value.
-    One exception to this rule are arguments of the form
-    <code>Type $param = null</code>, where the &null; default makes the type implicitly
-    nullable. This usage remains allowed, though it is recommended to use an
-    explicit nullable type instead.
+    从 PHP 8.0.0 开始，废弃在可选参数后传递强制参数。可以通过删除默认值来解决。
+    此规则一个例外是 <code>Type $param = null</code> 形式的参数，
+    其中 &null; 默认值使类型隐性允许为空。
+    这种做法依然允许，但是推荐使用显性可为 null 的类型代替。
    </para>
    <example>
-    <title>Passing optional arguments after mandatory arguments</title>
+    <title>强制参数后传递可选参数</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -250,7 +248,7 @@ function add_some_extra(&$string)
 }
 $str = 'This is a string, ';
 add_some_extra($str);
-echo $str;    // outputs 'This is a string, and something extra.'
+echo $str;    // 输出 'This is a string, and something extra.'
 ?>
 ]]>
       </programlisting>
@@ -327,7 +325,7 @@ function makeyogurt($type = "acidophilus", $flavour)
     return "Making a bowl of $type $flavour.\n";
 }
 
-echo makeyogurt("raspberry");   // won't work as expected
+echo makeyogurt("raspberry");   // 不会按照预期工作
 ?>
 ]]>
       </programlisting>
@@ -355,7 +353,7 @@ function makeyogurt($flavour, $type = "acidophilus")
     return "Making a bowl of $type $flavour.\n";
 }
 
-echo makeyogurt("raspberry");   // works as expected
+echo makeyogurt("raspberry");   // 按预期工作
 ?>
 ]]>
       </programlisting>
@@ -463,7 +461,7 @@ echo add(...$a);
      你也可以在
      <literal>...</literal> 标记前添加一个
      <link linkend="language.types.declarations">类型声明</link>。如果存在这种情况，那么
-     <literal>...</literal> 捕获的所有参数必须是提示类的对象。
+     <literal>...</literal> 捕获的所有参数都必须匹配参数类型。
 
 
      <example>
@@ -483,7 +481,7 @@ $a = new DateInterval('P1D');
 $b = new DateInterval('P2D');
 echo total_intervals('d', $a, $b).' days';
 
-// This will fail, since null isn't a DateInterval object.
+// 这将会失败，因为 null 不是 DateInterval 对象。
 echo total_intervals('d', null);
 ?>
 ]]>
@@ -564,7 +562,7 @@ echo sum(1, 2, 3, 4);
 myFunction(paramName: $value);
 array_foobar(array: $value);
 
-// NOT supported.
+// 不支持。
 function_name($variableStoringParamName: $value);
 ?>
 ]]>
@@ -612,7 +610,7 @@ array_fill(value: 50, count: 100, start_index: 0);
 <?php
 htmlspecialchars($string, double_encode: false);
 // 等价于
-htmlspecialchars($string, ENT_COMPAT | ENT_HTML401, 'UTF-8', false);
+htmlspecialchars($string, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401, 'UTF-8', false);
 ?>
 ]]>
      </programlisting>
@@ -630,9 +628,9 @@ htmlspecialchars($string, ENT_COMPAT | ENT_HTML401, 'UTF-8', false);
 function foo($param) { ... }
 
 foo(param: 1, param: 2);
-// Error: Named parameter $param overwrites previous argument
+// 错误：命名参数 $param 覆盖了之前的参数
 foo(1, param: 2);
-// Error: Named parameter $param overwrites previous argument
+// 错误：命名参数 $param 覆盖了之前的参数
 ?>
 ]]>
      </programlisting>
@@ -668,7 +666,7 @@ function square($num)
 {
     return $num * $num;
 }
-echo square(4);   // outputs '16'.
+echo square(4);   // 输出 '16'。
 ?>
 ]]>
       </programlisting>
@@ -759,13 +757,13 @@ function echoit($string)
 }
 
 $func = 'foo';
-$func();        // This calls foo()
+$func();        // 调用 foo()
 
 $func = 'bar';
-$func('test');  // This calls bar()
+$func('test');  // 调用 bar()
 
 $func = 'echoit';
-$func('test');  // This calls echoit()
+$func('test');  // 调用 echoit()
 ?>
 ]]>
      </programlisting>
@@ -783,7 +781,7 @@ class Foo
     function Variable()
     {
         $name = 'Bar';
-        $this->$name(); // This calls the Bar() method
+        $this->$name(); // 调用 Bar() 方法
     }
 
     function Bar()
@@ -794,7 +792,7 @@ class Foo
 
 $foo = new Foo();
 $funcname = "Variable";
-$foo->$funcname();  // This calls $foo->Variable()
+$foo->$funcname();  // 调用 $foo->Variable()
 
 ?>
 ]]>
@@ -817,9 +815,9 @@ class Foo
     }
 }
 
-echo Foo::$variable; // This prints 'static property'. It does need a $variable in this scope.
+echo Foo::$variable; // 打印 'static property'。在该作用域中需要 $variable。
 $variable = "Variable";
-Foo::$variable();  // This calls $foo->Variable() reading $variable in this scope.
+Foo::$variable();  // 在该作用域中读取 $variable 调用 $foo->Variable()。
 
 ?>
 ]]>
@@ -828,7 +826,7 @@ Foo::$variable();  // This calls $foo->Variable() reading $variable in this scop
    </para>
    <para>
     <example>
-     <title>Complex callables</title>
+     <title>复杂调用</title>
      <programlisting role="php">
 <![CDATA[
 <?php
@@ -845,11 +843,11 @@ class Foo
 }
 
 $func = array("Foo", "bar");
-$func(); // prints "bar"
+$func(); // 打印 "bar"
 $func = array(new Foo, "baz");
-$func(); // prints "baz"
+$func(); // 打印 "baz"
 $func = "Foo::bar";
-$func(); // prints "bar"
+$func(); // 打印 "bar"
 ?>
 ]]>
      </programlisting>
@@ -863,7 +861,7 @@ $func(); // prints "bar"
       <member><function>is_callable</function></member>
       <member><function>call_user_func</function></member>
       <member><function>function_exists</function></member>
-      <member><link linkend="language.variables.variable">variable variables</link></member>
+      <member><link linkend="language.variables.variable">可变变量</link></member>
      </simplelist>
     </para>
    </sect2>
@@ -898,7 +896,7 @@ $func(); // prints "bar"
     <simpara>
      如果传递给函数的参数类型与实际的类型不一致，例如将一个 <type>array</type>
      传递给一个 <type>string</type> 类型的变量，那么函数的返回值是不确定的。在这种情况下，通常函数会返回
-     &null;。但这仅仅是一个惯例，并不一定如此。
+     &null;。但这仅仅是一个惯例，并不一定如此。从 PHP 8.0.0 起，这种情况下应抛出 <classname>TypeError</classname> 异常。
     </simpara>
    </note>
 
@@ -907,7 +905,7 @@ $func(); // prints "bar"
     <para>
      <simplelist>
       <member><function>function_exists</function></member>
-      <member><link linkend="funcref">the function reference</link></member>
+      <member><link linkend="funcref">函数参考</link></member>
       <member><function>get_extension_funcs</function></member>
       <member><function>dl</function></member>
      </simplelist>
@@ -966,8 +964,9 @@ $greet('PHP');
 
    <simpara>
     闭包可以从父作用域中继承变量。
-   任何此类变量都应该用 <literal>use</literal> 语言结构传递进去。
+    任何此类变量都应该用 <literal>use</literal> 语言结构传递进去。
     PHP 7.1 起，不能传入此类变量：  &link.superglobals;、 <varname>$this</varname> 或者和参数重名。
+    返回类型声明必须放在 <literal>use</literal> 子句的 <emphasis>后面</emphasis> 。
    </simpara>
 
    <example>
@@ -989,15 +988,14 @@ $example = function () use ($message) {
 };
 $example();
 
-// Inherited variable's value is from when the function
-// is defined, not when called
+// 当函数被定义而不是被调用的时候继承变量的值
 $message = 'world';
 $example();
 
-// Reset message
+// 重置 message
 $message = 'hello';
 
-// Inherit by-reference
+// 通过引用继承
 $example = function () use (&$message) {
     var_dump($message);
 };
@@ -1008,11 +1006,17 @@ $example();
 $message = 'world';
 $example();
 
-// Closures can also accept regular arguments
+// 闭包函数也可以接受常规参数
 $example = function ($arg) use ($message) {
     var_dump($arg . ' ' . $message);
 };
 $example("hello");
+
+// 返回类型在 use 子句的后面
+$example = function () use ($message): string {
+    return "hello $message";
+};
+var_dump($example());
 ?>
 ]]>
     </programlisting>
@@ -1025,6 +1029,7 @@ string(5) "hello"
 string(5) "hello"
 string(5) "hello"
 string(5) "world"
+string(11) "hello world"
 string(11) "hello world"
 ]]>
     </screen>
@@ -1215,9 +1220,8 @@ Warning: Cannot bind an instance to a static closure in %s on line %d
         <row>
          <entry>7.1.0</entry>
          <entry>
-          Anonymous functions may not close over &link.superglobals;,
-          <varname>$this</varname>, or any variable with the same name as a
-          parameter.
+          匿名函数不能用 use 包含 &link.superglobals; 、<varname>$this</varname> 、
+          跟参数同名的变量。
          </entry>
         </row>
        </tbody>
@@ -1275,7 +1279,7 @@ Warning: Cannot bind an instance to a static closure in %s on line %d
 $y = 1;
 
 $fn1 = fn($x) => $x + $y;
-// 相当于 using $y by value:
+// 相当于通过 value 使用 $y：
 $fn2 = function ($x) use ($y) {
     return $x + $y;
 };

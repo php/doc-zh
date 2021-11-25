@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
 <!-- $Author$ -->
-<!-- EN-Revision: a71742330defbc0edfbc6822b4f947bf437b2f70 Maintainer: Altair Status: ready -->
+<!-- EN-Revision: fe18943c11c6fe9be88688574153013ff249452d Maintainer: Altair Status: ready -->
 <!-- CREDITS: dallas -->
 <chapter xml:id="language.references" xmlns="http://docbook.org/ns/docbook">
  <title>引用的解释</title>
@@ -22,13 +22,10 @@
  <sect1 xml:id="language.references.whatdo">
   <title>引用做什么</title>
   <para>
-     There are three basic operations performed using references:
-     <link linkend="language.references.whatdo.assign">assigning by
-         reference</link>, <link linkend="language.references.whatdo.pass">passing
-     by reference</link>,
-     and <link linkend="language.references.whatdo.return">returning by
-     reference</link>. This section will give an introduction to these
-     operations, with links for further reading.
+     使用引用执行有三种基本操作： <link linkend="language.references.whatdo.assign">引用赋值</link> 、
+     <link linkend="language.references.whatdo.pass">传引用</link> 、
+     <link linkend="language.references.whatdo.return">引用返回</link> 。
+     本节介绍这些操作，并提供进一步阅读的链接。
   </para>
   <sect2 xml:id="language.references.whatdo.assign">
     <title>引用赋值</title>
@@ -62,7 +59,7 @@
 <?php
 function foo(&$var) { }
 
-foo($a); // $a is "created" and assigned to null
+foo($a); // 创建 $a 并赋值为 null
 
 $b = array();
 foo($b['b']);
@@ -88,10 +85,14 @@ $foo =& find_var($bar);
 ]]>
     </programlisting>
    </informalexample>
-    <link linkend="language.oop5.basic.new">new</link>
-    会自动返回引用，因此在语法上这样是无效的。
-    更多信息参见 <link linkend="language.oop5.references">对象和引用</link> 章节。
   </para>
+  <para>
+     在函数内使用相同的语法 <emphasis>不</emphasis> 通过引用返回将会产生错误，
+     就像将它与 <link linkend="language.oop5.basic.new">new</link> 运算符的结果一起使用一样。
+     正如
+     <link linkend="language.oop5.references">对象和引用</link> 中所述，
+     尽管对象是通过指针传递的，但是它们与引用不同。
+    </para>
   <warning>
    <para>
     如果在一个函数内部给一个声明为 <literal>global</literal>
@@ -109,9 +110,9 @@ function global_references($use_globals)
 {
     global $var1, $var2;
     if (!$use_globals) {
-        $var2 =& $var1; // visible only inside the function
+        $var2 =& $var1; // 仅在函数内部可见
     } else {
-        $GLOBALS["var2"] =& $var1; // visible also in global context
+        $GLOBALS["var2"] =& $var1; // 全局上下文可见
     }
 }
 
@@ -150,11 +151,10 @@ echo $ref; // 3 - last element of the iterated array
    </para>
   </note>
     <para>
-      While not being strictly an assignment by reference, expressions created
-      with the language construct
-      <link linkend="function.array"><literal>array()</literal></link> can also
-      behave as such by prefixing <literal>&amp;</literal> to the array element
-      to add. Example:
+      虽然不是严格意义上的引用赋值，但使用语言构造
+      <link linkend="function.array"><literal>array()</literal></link>
+      创建的表达式也可以通过在要添加的数组元素加上 <literal>&amp;</literal> 
+      前缀来表现为这样。例如：
       <informalexample>
         <programlisting role="php">
           <![CDATA[
@@ -170,35 +170,33 @@ $arr[0]++; $arr[1]++; $arr[2]++;
       </informalexample>
     </para>
     <para>
-      Note, however, that references inside arrays are potentially dangerous.
-      Doing a normal (not by reference) assignment with a reference on the
-      right side does not turn the left side into a reference, but references
-      inside arrays are preserved in these normal assignments. This also applies
-      to function calls where the array is passed by value. Example:
+      但是请注意，数组内的引用具有潜在的危险。
+      在右侧引用正常的赋值（不是通过引用）不会将左侧变为引用，
+      但是数组内部的引用会保留在这些正常赋值中。
+      这也适用于调用函数时按值传递数组的情况。例如：
       <informalexample>
         <programlisting role="php">
           <![CDATA[
 <?php
-/* Assignment of scalar variables */
+/* 标量变量赋值 */
 $a = 1;
 $b =& $a;
 $c = $b;
-$c = 7; //$c is not a reference; no change to $a or $b
+$c = 7; //$c 不是引用；不会改变 $a 或者 $b
 
-/* Assignment of array variables */
+/* 数组变量赋值 */
 $arr = array(1);
-$a =& $arr[0]; //$a and $arr[0] are in the same reference set
-$arr2 = $arr; //not an assignment-by-reference!
+$a =& $arr[0]; //$a 和 $arr[0] 设置了相同的引用
+$arr2 = $arr; //不是引用赋值！
 $arr2[0]++;
 /* $a == 2, $arr == array(2) */
-/* The contents of $arr are changed even though it's not a reference! */
+/* 尽量 $arr 不是引用，但是它的内容已经更改！ */
 ?>
 ]]>
         </programlisting>
       </informalexample>
-      In other words, the reference behavior of arrays is defined in an
-      element-by-element basis; the reference behavior of individual elements
-      is dissociated from the reference status of the array container.
+      换句话说，数组的引用行为是在逐个元素的基础上定义；
+      单个元素的引用行为与数组容器的引用状态分离。
     </para>
   </sect2>
   <sect2 xml:id="language.references.whatdo.pass">
@@ -328,7 +326,7 @@ function foo(&$var)
 {
     $var++;
 }
-function bar() // Note the missing &
+function bar() // 注意缺少 &
 {
     $a = 5;
     return $a;
@@ -342,8 +340,8 @@ class Foobar
 {
 }
 
-foo(new Foobar()) // Produces a notice as of PHP 7.0.7
-                  // Notice: Only variables should be passed by reference
+foo(new Foobar()) // 自 PHP 7.0.7 起生成通知
+                  // 注意：只有变量应该通过引用传递
 ?>
 ]]>
      </programlisting>
@@ -371,9 +369,9 @@ class foo {
 }
 
 $obj = new foo;
-$myValue = &$obj->getValue(); // $myValue is a reference to $obj->value, which is 42.
+$myValue = &$obj->getValue(); // $myValue 是对 $obj->value 的引用，即 42。
 $obj->value = 2;
-echo $myValue;                // prints the new value of $obj->value, i.e. 2.
+echo $myValue;                // 打印 $obj->value 的新值，即 2。
 ?> 
 ]]>
      </programlisting>
@@ -397,7 +395,7 @@ echo $myValue;                // prints the new value of $obj->value, i.e. 2.
    </simpara>
   </note>
    <para>
-     To use the returned reference, you must use reference assignment:
+     要使用返回的引用，必须使用引用赋值：
      <informalexample>
        <programlisting role="php">
          <![CDATA[
@@ -412,8 +410,7 @@ $collection[] = 'foo';
 ]]>
        </programlisting>
      </informalexample>
-     To pass the returned reference to another function expecting a reference
-     you can use this syntax:
+     要将返回的引用传递给另外一个需要引用的函数，可以使用如下语法：
      <informalexample>
        <programlisting role="php">
          <![CDATA[
@@ -430,8 +427,8 @@ array_push(collector(), 'foo');
    </para>
    <note>
      <simpara>
-       Note that <literal>array_push(&amp;collector(), 'foo');</literal> will
-       <emphasis>not</emphasis> work, it results in a fatal error.
+       注意 <literal>array_push(&amp;collector(), 'foo');</literal> 将 
+       <emphasis>不</emphasis> 起作用，它会导致 Fatal 错误。
      </simpara>
    </note>
  </sect1>
