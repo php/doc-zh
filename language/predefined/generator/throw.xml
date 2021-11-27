@@ -12,9 +12,16 @@
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <modifier>public</modifier> <type>void</type><methodname>Generator::throw</methodname>
-   <methodparam><type>Exception</type><parameter>exception</parameter></methodparam>
+   <modifier>public</modifier> <type>mixed</type><methodname>Generator::throw</methodname>
+   <methodparam><type>Throwable</type><parameter>exception</parameter></methodparam>
   </methodsynopsis>
+  <para>
+   抛出一个异常到生成器并恢复生成器的执行。
+   与当前 &yield; 表达式被 <literal>throw $exception</literal> 语句替换是一样的行为。
+  </para>
+  <para>
+   如果调用此方法时生成器已经关闭，则将会在调用者的上下文中抛出异常。
+  </para>
  </refsect1>
 
  <refsect1 role="parameters">
@@ -24,7 +31,7 @@
     <term><parameter>exception</parameter></term>
     <listitem>
      <para>
-      
+      抛出异常到生成器。
      </para>
     </listitem>
    </varlistentry>
@@ -38,7 +45,41 @@
   </para>
  </refsect1>
 
-
+  <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title>抛出异常到生成器</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+function gen() {
+    echo "Foo\n";
+    try {
+        yield;
+    } catch (Exception $e) {
+        echo "Exception: {$e->getMessage()}\n";
+    }
+    echo "Bar\n";
+}
+ 
+$gen = gen();
+$gen->rewind();
+$gen->throw(new Exception('Test'));
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+Foo
+Exception: Test
+Bar
+]]>
+    </screen>
+   </example>
+  </para>
+ </refsect1>
 </refentry>
 
 <!-- Keep this comment at the end of the file
