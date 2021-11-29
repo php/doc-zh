@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: bc655954b94d30c9ce98ae6a526c5c1df9703cc6 Maintainer: HonestQiao Status: ready -->
+<!-- EN-Revision: 8cdc6621f9826d04abc3e50438c010804d7e8683 Maintainer: HonestQiao Status: ready -->
   <refentry xml:id="function.isset" xmlns="http://docbook.org/ns/docbook">
    <refnamediv>
     <refname>isset</refname>
-    <refpurpose>检测变量是否已设置并且非 &null;</refpurpose>
+    <refpurpose>检测变量是否已声明并且其值不为 &null;</refpurpose>
    </refnamediv>
    
  <refsect1 role="description">
@@ -12,20 +12,25 @@
   <methodsynopsis>
    <type>bool</type><methodname>isset</methodname>
    <methodparam><type>mixed</type><parameter>var</parameter></methodparam>
-   <methodparam choice="opt"><type>mixed</type><parameter>...</parameter></methodparam>
+   <methodparam rep="repeat"><type>mixed</type><parameter>vars</parameter></methodparam>
   </methodsynopsis>
     <para>
-     检测变量是否设置，并且不是 &null;。
+   判断一个变量是否已设置,
+   即变量已被声明，且其值不为 &null;。
+  </para>
+  <para>
+   如果一个变量已经被使用 <function>unset</function> 
+   释放，它将不再被认为已设置。
+  </para>
+  <para>
+   若使用 <function>isset</function>
+   测试一个被赋值为 &null; 的变量，将返回 &false;。
+   同时要注意的是 null 字符（<literal>"\0"</literal>）并不等同于
+   PHP 的  &null; 常量。
   </para>
     <para>
-     如果一个变量已经被使用 <function>unset</function> 
-     释放，它将不再被认为已设置。若使用 <function>isset</function>
-     测试一个被赋值为 &null; 的变量，将返回 &false;。同时要注意的是 null 字符（<literal>"\0"</literal>）并不等同于
-     PHP 的  &null; 常量。
-    </para>
-    <para>
    如果一次传入多个参数，那么
-     <function>isset</function> 只有在全部参数都以被设置时返回 &true; 计算过程从左至右，中途遇到没有设置的变量时就会立即停止。
+     <function>isset</function> 只有在全部参数都已被设置时返回 &true;。 计算过程从左至右，中途遇到未设置的变量时就会立即停止。
   </para>
  </refsect1>
 
@@ -42,7 +47,7 @@
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>...</parameter></term>
+     <term><parameter>vars</parameter></term>
      <listitem>
       <para>
        其他变量。
@@ -57,32 +62,6 @@
   &reftitle.returnvalues;
   <para>
     如果 <parameter>var</parameter> 存在并且值不是 &null; 则返回 &true;，否则返回 &false;。
-  </para>
- </refsect1>
-
- <refsect1 role="changelog">
-  &reftitle.changelog;
-  <para>
-   <informaltable>
-    <tgroup cols="2">
-     <thead>
-      <row>
-       <entry>&Version;</entry>
-       <entry>&Description;</entry>
-      </row>
-     </thead>
-     <tbody>
-      <row>
-       <entry>5.4.0</entry>
-       <entry>
-        <para>
-         检查字符的非数字偏移量将会返回 &false;。
-        </para>
-       </entry>
-      </row>
-     </tbody>
-    </tgroup>
-   </informaltable>
   </para>
  </refsect1>
 
@@ -153,9 +132,6 @@ var_dump(isset($a['cake']['a']['b']));  // FALSE
   </para>
   <example>
    <title>在字符串位移中使用 <function>isset</function></title>
-   <para>
-    PHP 5.4 改变了传入字符串位移时 <function>isset</function> 的行为。
-   </para>
    <programlisting role="php">
 <![CDATA[
 <?php
@@ -169,18 +145,7 @@ var_dump(isset($expected_array_got_string['0 Mostel']));
 ?>
 ]]>
    </programlisting>
-   &example.outputs.53;
-   <screen>
-<![CDATA[
-bool(true)
-bool(true)
-bool(true)
-bool(true)
-bool(true)
-bool(true)
-]]>
-   </screen>
-   &example.outputs.54;
+   &example.outputs;
    <screen>
 <![CDATA[
 bool(false)
