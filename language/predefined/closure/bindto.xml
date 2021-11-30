@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: cbe13b0842d4094c0a837c669b5dfaab9b66ede1 Maintainer: anonymous #29387 Status: partial -->
+<!-- EN-Revision: c44475e1fafcbee203ed4935a6d5d7a01379fcdc Maintainer: anonymous #29387 Status: partial -->
 <!-- Reviewed: no -->
 
 <refentry xml:id="closure.bindto" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -14,10 +14,9 @@
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <modifier>public</modifier> <type>Closure</type><methodname>Closure::bindTo</methodname>
-   <methodparam><type>object</type><parameter>newthis</parameter></methodparam>
-   <methodparam choice="opt"><type>mixed</type><parameter>newscope</parameter>
-   <initializer>'static'</initializer></methodparam>
+   <modifier>public</modifier> <type class="union"><type>Closure</type><type>null</type></type><methodname>Closure::bindTo</methodname>
+   <methodparam><type class="union"><type>object</type><type>null</type></type><parameter>newThis</parameter></methodparam>
+   <methodparam choice="opt"><type class="union"><type>object</type><type>string</type><type>null</type></type><parameter>newScope</parameter><initializer>"static"</initializer></methodparam>
   </methodsynopsis>
   <para>
    创建并返回一个 <link linkend="functions.anonymous">匿名函数</link>，
@@ -26,22 +25,20 @@
 
   <para>
    “绑定的对象”决定了函数体中的 <literal>$this</literal>
-   的取值，“类作用域”代表一个类型、决定在这个匿名函数中能够调用哪些 私有 和 保护 的方法。
-   也就是说，此时 $this 可以调用的方法，与 <parameter>newscope</parameter> 类的成员函数是相同的。
+   的取值，“类作用域”代表一个类型、决定在这个匿名函数中能够调用哪些 private 和 protected 的方法。
+   也就是说，此时 $this 可以调用的方法，与 <parameter>newScope</parameter> 类的成员函数是相同的。
   </para>
 
   <para>
    静态闭包不能有绑定的对象（
-   <parameter>newthis</parameter> 参数的值应该设为
+   <parameter>newThis</parameter> 参数的值应该设为
    &null;）不过仍然可以用 bindTo 方法来改变它们的类作用域。
   </para>
 
   <para>
-   This function will ensure that for a non-static closure, having a bound
-   instance will imply being scoped and vice-versa. To this end,
-   non-static closures that are given a scope but a &null; instance are made
-   static and non-static non-scoped closures that are given a non-null
-   instance are scoped to an unspecified class.
+   此函数确保对于非静态闭包，拥有绑定实例也意味着被限定作用域，反之亦然。
+   为此，非静态闭包给定一个 &null; 实例的作用域可以使其变为静态，
+   非静态无作用域的闭包给定一个非 null 的实例作用在一个非指定类。
   </para>
 
   <note>
@@ -57,7 +54,7 @@
   &reftitle.parameters;
   <variablelist>
    <varlistentry>
-    <term><parameter>newthis</parameter></term>
+    <term><parameter>newThis</parameter></term>
     <listitem>
      <para>
       绑定给匿名函数的一个对象，或者
@@ -66,12 +63,13 @@
     </listitem>
    </varlistentry>
    <varlistentry>
-    <term><parameter>newscope</parameter></term>
+    <term><parameter>newScope</parameter></term>
     <listitem>
      <para>
       关联到匿名函数的类作用域，或者
       'static' 保持当前状态。如果是一个对象，则使用这个对象的类型为新的类作用域。
       这会决定绑定的对象的 保护、私有成员 方法的可见性。
+      不允许内部类（的对象）作为参数传递。
      </para>
     </listitem>
    </varlistentry>
@@ -81,8 +79,8 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   返回新创建的 <classname>Closure</classname> 对象
-   &return.falseforfailure;
+   返回新创建的 <classname>Closure</classname> 对象，
+   或者失败时返回 &null; 。
   </para>
  </refsect1>
 
@@ -99,7 +97,7 @@ class A {
         $this->val = $val;
     }
     function getClosure() {
-        //returns closure bound to this object and scope
+        // 返回绑定到此对象和作用域的闭包
         return function() { return $this->val; };
     }
 }
