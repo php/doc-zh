@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: cb0630b14901459c0bf1556e7d68f1b4c0d3796e Maintainer: daijie Status: ready -->
+<!-- EN-Revision: a7f535a32ba19f7e8236b9d87f3d84552c5f9b64 Maintainer: daijie Status: ready -->
 
 <phpdoc:varentry xmlns:phpdoc="http://php.net/ns/phpdoc" xml:id="reserved.variables.globals" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" role="noversion">
  <refnamediv>
@@ -44,6 +44,28 @@ $foo in current scope: local variable
     </screen>
    </example>
   </para>
+  <warning>
+   <para>
+    从 PHP 8.1.0 起，不再支持对整个 <varname>$GLOBALS</varname> 数组的写访问：
+    <example xml:id="variable.globals.entire_write_error">
+     <title>写入整个 <varname>$GLOBALS</varname> 将会导致错误。</title>
+     <programlisting role="php">
+ <![CDATA[
+ <?php
+ // 生成编译时错误：
+ $GLOBALS = [];
+ $GLOBALS += [];
+ $GLOBALS =& $x;
+ $x =& $GLOBALS;
+ unset($GLOBALS);
+ array_pop($GLOBALS);
+ // ...以及对 $GLOBALS 的任何其他写入/读写操作
+ ?>
+ ]]>
+     </programlisting>
+    </example>
+   </para>
+  </warning>
  </refsect1>
  
  <refsect1 role="notes">
@@ -53,6 +75,36 @@ $foo in current scope: local variable
    <title>变量可用性</title>
    <para>
     与所有其他<link linkend="language.variables.superglobals">超全局变量</link>不同，<varname>$GLOBALS</varname>在PHP中总是可用的。
+    </para>
+  </note>
+  <note>
+   <para>
+     从 PHP 8.1.0 起， <varname>$GLOBALS</varname> 现在全局符号表的支付副本。
+     也就是说，全局变量不能通过副本进行修改。
+     Previously, <varname>$GLOBALS</varname> array is excluded from the usual by-value behavior of PHP arrays and global variables can be modified via its copy.
+     <informalexample>
+     <programlisting role="php">
+<![CDATA[
+<?php
+// Before PHP 8.1.0
+$a = 1;
+$globals = $GLOBALS; // 表面意义的按值复制
+$globals['a'] = 2;
+var_dump($a); // int(2)
+
+// 从 PHP 8.1.0 起
+// 这不再修改 $a 。先前的行为违反了按值语义。
+$globals = $GLOBALS;
+$globals['a'] = 1;
+
+// 要恢复以前的行为，请迭代其副本并将每个属性分配回 $GLOBALS 。
+foreach ($globals as $key => $value) {
+    $GLOBALS[$key] = $value;
+}
+?>
+]]>
+     </programlisting>
+    </informalexample>
    </para>
   </note>
  </refsect1>
