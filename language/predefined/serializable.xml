@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
+<!-- $Author: Avenger $ -->
+<!-- EN-Revision: 65782e9ec67361638f95b2c99648d9954c0dcdc2 Maintainer: mowangjuanzi Status: ready -->
 
 <phpdoc:classref xml:id="class.serializable" xmlns:phpdoc="http://php.net/ns/phpdoc" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude">
 
- <title>序列化接口</title>
- <titleabbrev>序列化</titleabbrev>
+ <title>Serializable 接口</title>
+ <titleabbrev>Serializable</titleabbrev>
 
  <partintro>
 
@@ -16,8 +18,21 @@
    </para>
 
    <para>
-    实现此接口的类将不再支持 <link linkend="language.oop5.magic.sleep">__sleep()</link> 和 <link linkend="language.oop5.magic.sleep">__wakeup()</link>。不论何时，只要有实例需要被序列化，serialize 方法都将被调用。它将不会调用 __destruct() 或有其他影响，除非程序化地调用此方法。当数据被反序列化时，类将被感知并且调用合适的 unserialize() 方法而不是调用 __construct()。如果需要执行标准的构造器，你应该在这个方法中进行处理。
+    实现此接口的类将不再支持 <link linkend="object.sleep">__sleep()</link> 和 
+    <link linkend="object.wakeup">__wakeup()</link> 。
+    不论何时，只要有实例需要被序列化， serialize 方法都将被调用。它不会调用 
+    __destruct()，除非在该方法中编写了相关功能，否则它也不会有副作用（side effect）。
+    当数据被反序列化时，类将被感知并且调用合适的 unserialize() 
+    方法而不是调用 __construct()。如果需要执行标准的构造器，应该在这个方法中进行处理。
    </para>
+
+   <warning>
+    <para>
+     从 PHP 8.1.0 起，实现 <interfacename>Serializable</interfacename> 接口的类如果没有同时实现 
+     <link linkend="object.serialize">__serialize()</link>、<link linkend="object.unserialize">__unserialize()</link> 
+     方法，将产生弃用警告。    
+    </para>
+   </warning>
   </section>
 <!-- }}} -->
 
@@ -30,9 +45,9 @@
 
 <!-- {{{ Class synopsis -->
     <classsynopsisinfo>
-     <ooclass>
-      <classname>Serializable</classname>
-     </ooclass>
+     <oointerface>
+      <interfacename>Serializable</interfacename>
+     </oointerface>
     </classsynopsisinfo>
 <!-- }}} -->
     
@@ -45,7 +60,7 @@
 
   <section xml:id="serializable.examples">
    <example xml:id="serializable.example.basic"><!-- {{{ -->
-    <title>Basic usage</title>
+    <title>基础用法</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -68,6 +83,8 @@ class obj implements Serializable {
 $obj = new obj;
 $ser = serialize($obj);
 
+var_dump($ser);
+
 $newobj = unserialize($ser);
 
 var_dump($newobj->getData());
@@ -77,6 +94,7 @@ var_dump($newobj->getData());
     &example.outputs.similar;
     <screen>
 <![CDATA[
+string(38) "C:3:"obj":23:{s:15:"My private data";}"
 string(15) "My private data"
 ]]>
     </screen>

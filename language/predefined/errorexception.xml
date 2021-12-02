@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
+<!-- EN-Revision: 8e261db16490c6cba2f01dd2a650380e6ba1e85f Maintainer: mowangjuanzi Status: ready -->
 
 <phpdoc:exceptionref xml:id="class.errorexception"
  xmlns="http://docbook.org/ns/docbook"
@@ -46,6 +47,9 @@
      <type>int</type>
      <varname linkend="errorexception.props.severity">severity</varname>
     </fieldsynopsis>
+
+    <classsynopsisinfo role="comment">&InheritedProperties;</classsynopsisinfo>
+    <xi:include xpointer="xmlns(db=http://docbook.org/ns/docbook) xpointer(id('exception.synopsis')/descendant::db:fieldsynopsis)" />
  
     <classsynopsisinfo role="comment">&Methods;</classsynopsisinfo>
     <xi:include xpointer="xmlns(db=http://docbook.org/ns/docbook) xpointer(id('class.errorexception')/db:refentry/db:refsect1[@role='description']/descendant::db:constructorsynopsis[1])" />
@@ -76,16 +80,20 @@
    &reftitle.examples;
    <para>
     <example xml:id="errorexception.example.error-handler"><!-- {{{ -->
-     <title>使用<function>set_error_handler</function>函数将错误信息托管至ErrorException</title>
+     <title>使用 <function>set_error_handler</function> 函数将错误信息托管至 ErrorException。</title>
      <programlisting role="php">
  <![CDATA[
 <?php
-function exception_error_handler($errno, $errstr, $errfile, $errline ) {
-    throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
+function exception_error_handler($severity, $message, $file, $line) {
+    if (!(error_reporting() & $severity)) {
+        // 这个错误代码未包含在 error_reporting 中
+        return;
+    }
+    throw new ErrorException($message, 0, $severity, $file, $line);
 }
 set_error_handler("exception_error_handler");
 
-/* Trigger exception */
+/* 触发异常 */
 strpos();
 ?>
 ]]>
@@ -93,12 +101,12 @@ strpos();
      &example.outputs.similar;
      <screen>
 <![CDATA[
-Fatal error: Uncaught exception 'ErrorException' with message 'Wrong parameter count for strpos()' in /home/bjori/tmp/ex.php:8
+Fatal error: Uncaught exception 'ErrorException' with message 'strpos() expects at least 2 parameters, 0 given' in /home/bjori/tmp/ex.php:12
 Stack trace:
-#0 [internal function]: exception_error_handler(2, 'Wrong parameter...', '/home/bjori/php...', 8, Array)
-#1 /home/bjori/php/cleandocs/test.php(8): strpos()
+#0 [internal function]: exception_error_handler(2, 'strpos() expect...', '/home/bjori/php...', 12, Array)
+#1 /home/bjori/php/cleandocs/test.php(12): strpos()
 #2 {main}
-  thrown in /home/bjori/tmp/ex.php on line 8
+  thrown in /home/bjori/tmp/ex.php on line 12
 ]]>
      </screen>
     </example><!-- }}} -->
