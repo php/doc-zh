@@ -898,6 +898,99 @@ array(3) {
   </para>
  </sect2>
 
+ <sect2 xml:id="language.types.array.unpacking">
+  <title>数组解包</title>
+
+  <para>
+   在 array 定义时，用 <code>...</code> 前缀的一个 array 可以被展开到当前位置。
+   只有实现了 <interfacename>Traversable</interfacename> 的数组和对象才能被展开。
+   PHP 7.4.0 开始可以使用 <code>...</code> 解包 array。
+  </para>
+
+  <para>
+   它可以多次使用，在 <code>...</code> 操作符前后都可以添加常规元素：
+   <example>
+    <title>简单的数组解包</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+// 使用简短的数组语法。
+// 亦可用于 array() 语法
+$arr1 = [1, 2, 3];
+$arr2 = [...$arr1]; //[1, 2, 3]
+$arr3 = [0, ...$arr1]; //[0, 1, 2, 3]
+$arr4 = [...$arr1, ...$arr2, 111]; //[1, 2, 3, 1, 2, 3, 111]
+$arr5 = [...$arr1, ...$arr1]; //[1, 2, 3, 1, 2, 3]
+
+function getArr() {
+  return ['a', 'b'];
+}
+$arr6 = [...getArr(), 'c' => 'd']; //['a', 'b', 'c' => 'd']
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+
+  <para>
+   <code>...</code> 操作符解包 array 时也遵守函数 <function>array_merge</function> 的语义。
+   也就是说，key 为字符时，后面的字符键会覆盖之前的字符键；key 为 integer 时则会重新编号：
+
+   <example>
+    <title>重复 key 的数组解包</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+// string key
+$arr1 = ["a" => 1];
+$arr2 = ["a" => 2];
+$arr3 = ["a" => 0, ...$arr1, ...$arr2];
+var_dump($arr3); // ["a" => 2]
+
+// integer key
+$arr4 = [1, 2, 3];
+$arr5 = [4, 5, 6];
+$arr6 = [...$arr4, ...$arr5];
+var_dump($arr6); // [1, 2, 3, 4, 5, 6]
+// 即 [0 => 1, 1 => 2, 2 => 3, 3 => 4, 4 => 5, 5 => 6]
+// 也就是原始的 integer key 不再保留
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+
+  <note>
+   <para>
+    既不是 integer 也不是 string 的 key 会抛出 <classname>TypeError</classname>。
+    这类 key 只能通过 <interfacename>Traversable</interfacename> 对象生成。
+   </para>
+  </note>
+  <note>
+   <para>
+    在 PHP 8.1 之前，带有 string 键的 array 无法解包：
+   </para>
+   <informalexample>
+    <programlisting role="php">
+<![CDATA[
+<?php
+
+$arr1 = [1, 2, 3];
+$arr2 = ['a' => 4];
+$arr3 = [...$arr1, ...$arr2];
+// Fatal error: Uncaught Error: Cannot unpack array with string keys in example.php:5
+
+$arr4 = [1, 2, 3];
+$arr5 = [4, 5];
+$arr6 = [...$arr4, ...$arr5]; // works. [1, 2, 3, 4, 5]
+?>
+]]>
+    </programlisting>
+   </informalexample>
+  </note>
+
+ </sect2>
+
  <sect2 xml:id="language.types.array.examples">
   <title>示例</title>
 
