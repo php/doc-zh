@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
 <!-- $Author$ -->
-<!-- EN-Revision: 829b469622ca0f00bcf2c44caf5252b232528c22 Maintainer: dallas Status: ready -->
+<!-- EN-Revision: 9ee9eccf455188ab6eb352194eb6f9eb99e15606 Maintainer: dallas Status: ready -->
 <sect1 xml:id="language.oop5.autoload" xmlns="http://docbook.org/ns/docbook">
  <title>类的自动加载</title>
  <para>
@@ -9,36 +9,16 @@
   这会带来一个烦恼：每个脚本的开头，都需要包含（include）一个长长的列表（每个类都有个文件）。
  </para>
  <para>
-  在 PHP 5 中，已经不再需要这样了。
-   <function>spl_autoload_register</function> 函数可以注册任意数量的自动加载器，当使用尚未被定义的类（class）和接口（interface）时自动去加载。通过注册自动加载器，脚本引擎在
+  <function>spl_autoload_register</function> 函数可以注册任意数量的自动加载器，当使用尚未被定义的类（class）和接口（interface）时自动去加载。通过注册自动加载器，脚本引擎在
   PHP 出错失败前有了最后一个机会加载所需的类。
  </para>
-  <tip>
+ <caution>
    <para>
-    尽管 <function>__autoload</function> 函数也能自动加载类和接口，但更建议使用 <function>spl_autoload_register</function> 函数。
-    <function>spl_autoload_register</function> 提供了一种更加灵活的方式来实现类的自动加载（同一个应用中，可以支持任意数量的加载器，比如第三方库中的）。因此，不再建议使用 <function>__autoload</function> 函数，在以后的版本中它可能被弃用。
+    PHP 8.0.0 之前，可以使用 <function>__autoload</function> 自动加载类和接口。然而，它是
+    <function>spl_autoload_register</function> 的一种不太灵活的替代方法，并且
+    <function>__autoload</function> 在 PHP 7.2.0 起弃用，在 PHP 8.0.0 起移除。
    </para>
-  </tip>
- <note>
-  <para>
-    在 PHP 5.3 之前，__autoload 函数抛出的异常不能被 <link linkend="language.exceptions">catch</link>
-    语句块捕获并会导致一个致命错误（Fatal Error）。
-   自 PHP 5.3 起，能够 thrown 自定义的异常（Exception），随后自定义异常类即可使用。
-   __autoload
-    函数可以递归的自动加载自定义异常类。
-  </para>
- </note>
- <note>
-  <para>
-   自动加载不可用于 PHP 的 CLI <link linkend="features.commandline">交互模式</link>。
-  </para>
- </note>
-  <note>
-   <para>
-    如果类名比如被用于 <function>call_user_func</function>，则它可能包含一些危险的字符，比如 <literal>../</literal>。
-    建议您在这样的函数中不要使用用户的输入，起码需要在 <function>__autoload</function> 时验证下输入。
-   </para>
-  </note>
+  </caution>
  <para>
   <example>
    <title>自动加载示例</title>
@@ -87,7 +67,7 @@ Fatal error: Interface 'ITest' not found in ...
    </programlisting>
   </example>
   <example>
-   <title>自动加载在 PHP 5.3.0+ 中的异常处理</title>
+   <title>自动加载异常处理</title>
    <para>
     本例抛出一个异常并在 try/catch 语句块中演示。
    </para>
@@ -116,7 +96,7 @@ Unable to load NonLoadableClass.
    </screen>
   </example>
   <example>
-   <title>自动加载在 PHP 5.3.0+ 中的异常处理 - 没有自定义异常机制</title>
+   <title>自动加载异常处理 - 没有自定义异常机制</title>
    <para>
     本例将一个异常抛给不存在的自定义异常处理函数。
    </para>
