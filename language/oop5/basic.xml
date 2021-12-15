@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
 <!-- $Author$ -->
-<!-- EN-Revision: 5d1673b7a0e1a941111595d25cda663d8667a015 Maintainer: avenger Status: ready -->
+<!-- EN-Revision: c36ce0b514faa2efce1427ae87ba9ea25cc038ad Maintainer: avenger Status: ready -->
 <sect1 xml:id="language.oop5.basic" xmlns="http://docbook.org/ns/docbook">
  <title>基本概念</title>
 
@@ -158,6 +158,51 @@ $instance = new $className(); // new SimpleClass()
    </programlisting>
   </example>
   <para>
+    PHP 8.0.0 起，支持使用任意表达式中使用 <literal>new</literal>。如果表达式生成一个 
+    <type>string</type>，这将允许更复杂的实例化。表达式必须使用括号括起来。
+   </para>
+   <example>
+    <title>使用任意表达式创建实例</title>
+    <para>
+     在下列示例中，我们展示了多个生成类名的任意有效表达式的示例。展示了函数调用，string 连接和 <constant>::class</constant> 常量。
+    </para>
+    <programlisting role="php">
+     <![CDATA[
+<?php
+
+class ClassA extends \stdClass {}
+class ClassB extends \stdClass {}
+class ClassC extends ClassB {}
+class ClassD extends ClassA {}
+
+function getSomeClass(): string
+{
+    return 'ClassA';
+}
+
+var_dump(new (getSomeClass()));
+var_dump(new ('Class' . 'B'));
+var_dump(new ('Class' . 'C'));
+var_dump(new (ClassD::class));
+?>
+]]>
+    </programlisting>
+    &example.outputs.8;
+    <screen>
+     <![CDATA[
+object(ClassA)#1 (0) {
+}
+object(ClassB)#1 (0) {
+}
+object(ClassC)#1 (0) {
+}
+object(ClassD)#1 (0) {
+}
+
+]]>
+    </screen>
+   </example>
+   <para>
    在类定义内部，可以用 <literal>new self</literal> 和 <literal>new parent</literal> 创建新对象。
   </para>
   <para>
