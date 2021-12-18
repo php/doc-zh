@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: e4b889a3e8b9d87ab605aac9bbe85d2c16c69a1b Maintainer: jhdxr Status: ready -->
+<!-- EN-Revision: c36ce0b514faa2efce1427ae87ba9ea25cc038ad Maintainer: jhdxr Status: ready -->
  <chapter xml:id="language.operators" xmlns="http://docbook.org/ns/docbook">
   <title>运算符</title>
   <simpara>
@@ -2579,6 +2579,44 @@ var_dump(FALSE instanceof stdClass);
     <screen>
 <![CDATA[
 bool(false)
+]]>
+     </screen>
+    </example>
+   </para>
+   <para>
+    PHP 8.0.0 起， <literal>instanceof</literal> 可以与任何表达式一起使用。表达式必须使用括号括起来并且生成
+    <type>string</type>。
+    <!-- RFC: https://wiki.php.net/rfc/variable_syntax_tweaks -->
+    <example>
+     <title>将 <literal>instanceof</literal> 与任意表达式一起使用</title>
+     <programlisting role="php">
+      <![CDATA[
+<?php
+
+class ClassA extends \stdClass {}
+class ClassB extends \stdClass {}
+class ClassC extends ClassB {}
+class ClassD extends ClassA {}
+
+function getSomeClass(): string
+{
+    return ClassA::class;
+}
+
+var_dump(new ClassA instanceof ('std' . 'Class'));
+var_dump(new ClassB instanceof ('Class' . 'B'));
+var_dump(new ClassC instanceof ('Class' . 'A'));
+var_dump(new ClassD instanceof (getSomeClass()));
+?>
+]]>
+     </programlisting>
+     &example.outputs.8;
+     <screen>
+      <![CDATA[
+bool(true)
+bool(true)
+bool(false)
+bool(true)
 ]]>
      </screen>
     </example>
