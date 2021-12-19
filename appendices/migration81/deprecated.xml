@@ -15,7 +15,7 @@
    </title>
 
    <para>
-    如果不用对 7.4 以前的 PHP 版本提供支持，要么就只需要实现新的方法即可，否则需要同时实现两个方法。
+    如果不用兼容 PHP 7.4 以前的版本，就只需要实现新的方法，否则需要同时实现两个方法。
    </para>
   </sect3>
 
@@ -43,7 +43,8 @@ var_dump(str_contains("foobar", null));
    <title>不兼容从 &float; 到 &integer; 的隐式转换</title>
 
    <para>
-    从 &float; 隐式转换为 &integer; 将会导致精度的丢失，目前这种行为已被废弃。这将影响到 &array; 中的键、严格模式下 &integer; 类型的声明以及对多个 &integer; 的操作。
+    从 &float; 隐式转换为 &integer; 将会导致精度的丢失，目前这种行为已被废弃。
+    这将影响到 &array; 中的键、严格模式下 &integer; 类型的声明以及对 &integer; 的操作。
 
     <informalexample>
      <programlisting role="php">
@@ -63,7 +64,7 @@ $a[15.0]; // OK，因为 15.0 == 15
    <title>在 trait 上调用 <modifier>static</modifier> 元素</title>
 
    <para>
-    在 trait 上直接调用 <modifier>static</modifier> 方法，或者访问
+    在 trait 上直接调用 <modifier>static</modifier> 方法、直接访问
     <modifier>static</modifier>
     属性的行为已被废弃。静态方法和属性只能在使用了 trait 的类上被访问。
    </para>
@@ -96,10 +97,10 @@ function &test(): void {}
   </sect3>
 
   <sect3 xml:id="migration81.deprecated.core.autovivification-false">
-   <title>对 &false; 进行自动代入</title>
+   <title>对 &false; 进行自动代入（Autovivification）</title>
 
    <para>
-    自动代入（Autovivification）指的是追加一个值时创建出新 &array; 的过程。对于标量值而言，自动代入是不被允许的；然而 false 是一个例外。现在这将会被废弃。
+    自动代入指的是追加一个值时创建出新 &array; 的过程。对于标量值而言，自动代入是不被允许的；然而 false 是一个例外。现在这将会被废弃。
 
     <informalexample>
      <programlisting role="php">
@@ -143,8 +144,8 @@ $arr[] = 2;
 
    <para>
     传递一个非字符串类型参数的行为已被废弃。在将来，参数将被解释为一个字符串而不是 ASCII 编码。根据可预期的行为，参数需要被转化为 &string; 或者对
-    <function>chr</function> 进行一次显式调用。所有的 <literal>ctype_*()</literal>
-    函数都会受到影响。
+    <function>chr</function> 进行一次显式调用。这会影响所有的 <literal>ctype_*()</literal>
+    函数。
    </para>
   </sect3>
  </sect2>
@@ -160,15 +161,15 @@ $arr[] = 2;
   <para>
    <function>strptime</function> 已被废弃。请使用
    <function>date_parse_from_format</function>
-   （不依赖本地的解析）或者 <methodname>IntlDateFormatter::parse</methodname>
-   （依赖本地的解析）代替。
+   （不依赖 locale 的解析）或者 <methodname>IntlDateFormatter::parse</methodname>
+   （依赖 locale 的解析）代替。
   </para>
 
   <para>
    <function>strftime</function> 和 <function>gmstrftime</function>
-   已被废弃。请使用<function>date</function>（不依赖本地的格式化）或者
+   已被废弃。请使用<function>date</function>（不依赖 locale 的格式化）或者
    <methodname>IntlDateFormatter::format</methodname>
-   （依赖本地的格式化）代替。
+   （依赖 locale 的格式化）代替。
   </para>
  </sect2>
 
@@ -200,12 +201,12 @@ $arr[] = 2;
   <title>Hash</title>
 
   <para>
-   <function>mhash</function>,
-   <function>mhash_keygen_s2k</function>,
-   <function>mhash_count</function>,
-   <function>mhash_get_block_size</function>,
-   和 <function>mhash_get_hash_name</function> 已被废弃。 请使用
-   <literal>hash_*()</literal> 函数代替。
+   <function>mhash</function>、
+   <function>mhash_keygen_s2k</function>、
+   <function>mhash_count</function>、
+   <function>mhash_get_block_size</function>、
+   <function>mhash_get_hash_name</function> 已被废弃。 请使用
+   <literal>hash_*()</literal> 系列函数代替。
   </para>
  </sect2>
 
@@ -228,7 +229,7 @@ $arr[] = 2;
  </sect2>
 
  <sect2 xml:id="migration81.deprecated.mbstring">
-  <title>Multibyte String</title>
+  <title>多字节字符串</title>
 
   <para>
    无参数调用 <function>mb_check_encoding</function> 已被废弃。
@@ -246,7 +247,7 @@ $arr[] = 2;
   <para>
    使用 <parameter>mysqli</parameter> 参数来调用
    <methodname>mysqli::get_client_info</methodname>
-   或 <function>mysqli_get_client_info</function> 已被废弃。请无参数调用
+   或 <function>mysqli_get_client_info</function> 已被废弃。请不带任何参数调用
    <function>mysqli_get_client_info</function>
    来获取客户端类库的版本信息。
   </para>
@@ -305,12 +306,12 @@ $arr[] = 2;
  </sect2>
 
  <sect2 xml:id="migration81.deprecated.standard">
-  <title>Standard</title>
+  <title>常规</title>
 
   <para>
-   对一个对象调用 <function>key</function>，<function>current</function>，
-   <function>next</function>，<function>prev</function>，
-   <function>reset</function> 或 <function>end</function>
+   对一个对象调用 <function>key</function>、<function>current</function>、
+   <function>next</function>、<function>prev</function>、
+   <function>reset</function>、<function>end</function>
    已被废弃。对一个对象应优先使用 <function>get_mangled_object_vars</function>，或使用
    <classname>ArrayIterator</classname>。
   </para>
@@ -323,7 +324,7 @@ $arr[] = 2;
 
   <para>
    <constant>FILE_BINARY</constant> 和 <constant>FILE_TEXT</constant>
-   常量已被废弃。他们从未产生过任何作用。
+   常量已被废弃。它们从未产生过任何作用。
   </para>
  </sect2>
 
