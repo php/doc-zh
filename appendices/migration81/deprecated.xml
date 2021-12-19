@@ -1,0 +1,351 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision$ -->
+<!-- EN-Revision: 9b7ab9bc8e78b1201b8b8c71eac051256d433993 Maintainer: Rytia Status: ready -->
+
+<sect1 xml:id="migration81.deprecated">
+ <title>PHP 8.1.x 废弃的功能</title>
+
+ <sect2 xml:id="migration81.deprecated.core">
+  <title>PHP 核心中废弃的功能</title>
+
+  <sect3 xml:id="migration81.deprecated.core.serialize-interface">
+   <title>
+    实现无 <function>__serialize</function> 和 <function>__unserialize</function>
+    的 <interfacename>Serializable</interfacename>
+   </title>
+
+   <para>
+    如果不用兼容 PHP 7.4 以前的版本，就只需要实现新的方法，否则需要同时实现两个方法。
+   </para>
+  </sect3>
+
+  <sect3 xml:id="migration81.deprecated.core.null-not-nullable-internal">
+   <title>将 &null; 传递给内置函数的非 null 值参数</title>
+
+   <para>
+    为了与用户定义的函数行为保持一致，标量类型需要被明确标记为允许为 null，内置函数的标量类型默认情况下允许为 null 的行为已被废弃。
+
+    <informalexample>
+     <programlisting role="php">
+<![CDATA[
+<?php
+var_dump(str_contains("foobar", null));
+// Deprecated: Passing null to parameter #2 ($needle) of type string
+//             is deprecated
+?>
+]]>
+     </programlisting>
+    </informalexample>
+   </para>
+  </sect3>
+
+  <sect3 xml:id="migration81.deprecated.core.implicit-float-conversion">
+   <title>不兼容从 &float; 到 &integer; 的隐式转换</title>
+
+   <para>
+    从 &float; 隐式转换为 &integer; 将会导致精度的丢失，目前这种行为已被废弃。
+    这将影响到 &array; 中的键、严格模式下 &integer; 类型的声明以及对 &integer; 的操作。
+
+    <informalexample>
+     <programlisting role="php">
+<![CDATA[
+<?php
+$a = [];
+$a[15.5]; // 废弃，作为键值将会丢失 0.5
+$a[15.0]; // OK，因为 15.0 == 15
+?>
+]]>
+     </programlisting>
+    </informalexample>
+   </para>
+  </sect3>
+
+  <sect3 xml:id="migration81.deprecated.core.static-trait">
+   <title>在 trait 上调用 <modifier>static</modifier> 元素</title>
+
+   <para>
+    在 trait 上直接调用 <modifier>static</modifier> 方法、直接访问
+    <modifier>static</modifier>
+    属性的行为已被废弃。静态方法和属性只能在使用了 trait 的类上被访问。
+   </para>
+  </sect3>
+
+  <sect3 xml:id="migration81.deprecated.core.magic-sleep">
+   <title>在 <function>__sleep</function> 中返回非 &array; 类型值</title>
+
+   <para>
+    在 <link linkend="object.sleep">__sleep()</link> 中返回一个非 &array; 类型的值现在将会产生一个诊断。
+   </para>
+  </sect3>
+
+  <sect3 xml:id="migration81.deprecated.core.void-by-ref">
+   <title>在返回值为 void 的函数中通过引用进行返回</title>
+
+   <para>
+    <informalexample>
+     <programlisting role="php">
+<![CDATA[
+<?php
+function &test(): void {}
+?>
+]]>
+     </programlisting>
+    </informalexample>
+    这种函数是相互矛盾的，在调用时已经发出了 <constant>E_NOTICE</constant>
+    提示：<literal>Only variable references should be returned by reference</literal>。
+   </para>
+  </sect3>
+
+  <sect3 xml:id="migration81.deprecated.core.autovivification-false">
+   <title>对 &false; 进行自动代入（Autovivification）</title>
+
+   <para>
+    自动代入指的是追加一个值时创建出新 &array; 的过程。对于标量值而言，自动代入是不被允许的；然而 false 是一个例外。现在这将会被废弃。
+
+    <informalexample>
+     <programlisting role="php">
+<![CDATA[
+<?php
+$arr = false;
+$arr[] = 2;   // 废弃
+?>
+]]>
+     </programlisting>
+    </informalexample>
+   </para>
+   <note>
+    <para>
+     对 &null; 或者未定义的值进行自动代入仍然是被允许的：
+     <informalexample>
+      <programlisting role="php">
+<![CDATA[
+<?php
+// 从未定义的值
+$arr[] = 'some value';
+$arr['doesNotExist'][] = 2;
+// 从 null
+$arr = null;
+$arr[] = 2;
+?>
+]]>
+      </programlisting>
+     </informalexample>
+    </para>
+   </note>
+  </sect3>
+
+ </sect2>
+
+ <sect2 xml:id="migration81.deprecated.ctype">
+  <title>ctype</title>
+
+  <sect3 xml:id="migration81.deprecated.ctype.nonstring-arguments">
+   <title>校验非字符串类型的参数</title>
+
+   <para>
+    传递一个非字符串类型参数的行为已被废弃。在将来，参数将被解释为一个字符串而不是 ASCII 编码。根据可预期的行为，参数需要被转化为 &string; 或者对
+    <function>chr</function> 进行一次显式调用。这会影响所有的 <literal>ctype_*()</literal>
+    函数。
+   </para>
+  </sect3>
+ </sect2>
+
+ <sect2 xml:id="migration81.deprecated.date">
+  <title>Date</title>
+
+  <para>
+   在 <function>date_sun_info</function> 的支持下，<function>date_sunrise</function>
+   和 <function>date_sunset</function> 已被废弃。
+  </para>
+
+  <para>
+   <function>strptime</function> 已被废弃。请使用
+   <function>date_parse_from_format</function>
+   （不依赖 locale 的解析）或者 <methodname>IntlDateFormatter::parse</methodname>
+   （依赖 locale 的解析）代替。
+  </para>
+
+  <para>
+   <function>strftime</function> 和 <function>gmstrftime</function>
+   已被废弃。请使用<function>date</function>（不依赖 locale 的格式化）或者
+   <methodname>IntlDateFormatter::format</methodname>
+   （依赖 locale 的格式化）代替。
+  </para>
+ </sect2>
+
+ <sect2 xml:id="migration81.deprecated.filter">
+  <title>Filter</title>
+
+  <para>
+   <constant>FILTER_SANITIZE_STRING</constant> 和
+   <constant>FILTER_SANITIZE_STRIPPED</constant> 过滤器已被废弃。
+  </para>
+  <para>
+   INI 设置项 <link linkend="ini.filter.default">filter.default</link>
+   已被废弃
+   <!-- TODO Check that filter.default_flags -->
+  </para>
+ </sect2>
+
+ <sect2 xml:id="migration81.deprecated.gd">
+  <title>GD</title>
+
+  <para>
+   <function>imageopenpolygon</function> 和
+   <function>imagefilledpolygon</function>
+   的 <parameter>num_points</parameter> 参数已被废弃。
+  </para>
+ </sect2>
+
+ <sect2 xml:id="migration81.deprecated.hash">
+  <title>Hash</title>
+
+  <para>
+   <function>mhash</function>、
+   <function>mhash_keygen_s2k</function>、
+   <function>mhash_count</function>、
+   <function>mhash_get_block_size</function>、
+   <function>mhash_get_hash_name</function> 已被废弃。 请使用
+   <literal>hash_*()</literal> 系列函数代替。
+  </para>
+ </sect2>
+
+ <sect2 xml:id="migration81.deprecated.imap">
+  <title>IMAP</title>
+
+  <para>
+   <constant>NIL</constant> 常量已被废弃。请使用 <literal>0</literal> 代替。
+  </para>
+ </sect2>
+
+ <sect2 xml:id="migration81.deprecated.intl">
+  <title>Intl</title>
+
+  <para>
+   使用 &boolean; 参数调用 <methodname>IntlCalendar::roll</methodname>
+   已被废弃。请分别使用 <literal>1</literal> 和
+   <literal>-1</literal> 来代替 &true; and &false;。
+  </para>
+ </sect2>
+
+ <sect2 xml:id="migration81.deprecated.mbstring">
+  <title>多字节字符串</title>
+
+  <para>
+   无参数调用 <function>mb_check_encoding</function> 已被废弃。
+  </para>
+ </sect2>
+
+ <sect2 xml:id="migration81.deprecated.mysqli">
+  <title>MySQLi</title>
+
+  <para>
+   <property>mysqli_driver::$driver_version</property> 属性已被废弃。它是无意义且过时的，使用
+   <constant>PHP_VERSION_ID</constant> 来代替。
+  </para>
+
+  <para>
+   使用 <parameter>mysqli</parameter> 参数来调用
+   <methodname>mysqli::get_client_info</methodname>
+   或 <function>mysqli_get_client_info</function> 已被废弃。请不带任何参数调用
+   <function>mysqli_get_client_info</function>
+   来获取客户端类库的版本信息。
+  </para>
+
+  <para>
+   <methodname>mysqli::init</methodname> 方法已被废弃。使用 <methodname>parent::__construct</methodname>
+   来代替对 <methodname>parent::init</methodname> 的调用。
+  </para>
+ </sect2>
+
+ <sect2 xml:id="migration81.deprecated.oci8">
+  <title>OCI8</title>
+
+  <para>
+   INI 设置项
+   <link linkend="ini.oci8.old-oci-close-semantics">oci8.old_oci_close_semantics</link>
+   已被废弃。
+  </para>
+ </sect2>
+
+ <sect2 xml:id="migration81.deprecated.odbc">
+  <title>ODBC</title>
+
+  <para>
+   <function>odbc_result_all</function> 已被废弃。
+  </para>
+ </sect2>
+
+ <sect2 xml:id="migration81.deprecated.pdo">
+  <title>PDO</title>
+
+  <para>
+   <constant>PDO::FETCH_SERIALIZE</constant> 获取模式已被废弃。
+  </para>
+ </sect2>
+
+ <sect2 xml:id="migration81.deprecated.pgsql">
+  <title>PgSQL</title>
+
+  <para>
+   对于所有 <literal>pgsql_*()</literal> 函数不传递连接参数的方式已被废弃。
+  </para>
+ </sect2>
+
+ <sect2 xml:id="migration81.deprecated.soap">
+  <title>SOAP</title>
+
+  <para>
+   在 SSL 流上下文参数的代替下，
+   <methodname>SoapClient::__construct</methodname> 的
+   <literal>ssl_method</literal> 选项已被废弃。
+   <!-- The direct equivalent would be
+    crypto_method, but min_proto_version/max_proto_version are recommended
+    instead. -->
+  </para>
+ </sect2>
+
+ <sect2 xml:id="migration81.deprecated.standard">
+  <title>常规</title>
+
+  <para>
+   对一个对象调用 <function>key</function>、<function>current</function>、
+   <function>next</function>、<function>prev</function>、
+   <function>reset</function>、<function>end</function>
+   已被废弃。对一个对象应优先使用 <function>get_mangled_object_vars</function>，或使用
+   <classname>ArrayIterator</classname>。
+  </para>
+
+  <para>
+   INI 配置项
+   <link linkend="ini.auto-detect-line-endings">auto_detect_line_endings</link>
+   已被废弃。如有必要，可以手动处理 <literal>"\r"</literal> 换行符。
+  </para>
+
+  <para>
+   <constant>FILE_BINARY</constant> 和 <constant>FILE_TEXT</constant>
+   常量已被废弃。它们从未产生过任何作用。
+  </para>
+ </sect2>
+
+</sect1>
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
