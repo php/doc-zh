@@ -1,46 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: lm92 Status: ready -->
-<!-- CREDITS: dallas -->
+<!-- EN-Revision: c5d92fd7127e059d448d43ba339f19956f83b05a Maintainer: lm92 Status: ready -->
+<!-- CREDITS: dallas, mowangjuanzi -->
   <chapter xml:id="security.filesystem" xmlns="http://docbook.org/ns/docbook">
    <title>文件系统安全</title>
    <simpara>
-    PHP 遵从大多数服务器系统中关于文件和目录权限的安全机制。这就使管理员可以控制哪些文件在文件系统内是可读的。必须特别注意的是全局的可读文件，并确保每一个有权限的用户对这些文件的读取动作都是安全的。
+    <acronym>PHP</acronym> 取决于大多数服务器系统中关于文件和目录权限的内置安全机制。
+    这允许控制文件系统中那些文件是可读的。应该小心对待任何全局可读的文件，
+    确保所有有权访问文件系统的用户都可以安全的读取。
    </simpara>
    <simpara>
-    PHP 被设计为以用户级别来访问文件系统，所以完全有可能通过编写一段
-    PHP 代码来读取系统文件如
-    /etc/passwd，更改网络连接以及发送大量打印任务等等。因此必须确保
-    PHP 代码读取和写入的是合适的文件。
+    自 <acronym>PHP</acronym> 被设计为允许用户级别访问文件系统以来，
+    编写 <acronym>PHP</acronym> 脚本完全有可能，允许读取系统文件，例如 /etc/passwd，
+    修改网络连接，发送大量打印任务等。这有一些明显的影响，因为需要确保读写的是合适的文件。
    </simpara>
    <simpara>
-    请看下面的代码，用户想要删除自己主目录中的一个文件。假设此情形是通过
-    web 界面来管理文件系统，因此 Apache 用户有权删除用户目录下的文件。
+    请看下面的脚本，用户表示想要删除家目录下的一个文件。
+    假设一个情况， <acronym>PHP</acronym> web 界面经常用于文件管理，
+    因此 Apache 用户允许删除用户家目录中的文件。
    </simpara>
    <para>
     <example>
-     <title>不对变量进行安全检查会导致……</title>
+     <title>差的变量检查会导致....</title>
      <programlisting role="php">
 <![CDATA[
 <?php
-// 从用户目录中删除指定的文件
+// 从用户家目录移除一个文件
 $username = $_POST['user_submitted_name'];
 $userfile = $_POST['user_submitted_filename'];
-$homedir = "/home/$username";
-unlink ("$homedir/$userfile");
+$homedir  = "/home/$username";
+
+unlink("$homedir/$userfile");
+
 echo "The file has been deleted!";
 ?>
 ]]>
      </programlisting>
     </example>
-    既然 username 和 filename 变量可以通过用户表单来提交，那就可以提交别人的用户名和文件名，甚至可以删掉本来不应该让他们删除的文件。这种情况下，就要考虑其它方式的认证。想想看如果提交的变量是“../etc/”和“passwd”会发生什么。上面的代码就等同于：
+   由于 username 和 filename 由用户表单中提交，那就能提交属于其他人的 username
+   和 filename 并删除它们，即使不应该也不允许这么做。在这种情况下，
+   想使用一些其他的身份验证表单。考虑一下，如果提交的变量是 "../etc/" 和 "passwd"。
+   然后代码将会有效的读取：
     <example>
-     <title>……文件系统攻击</title>
+     <title>... 文件系统攻击</title>
      <programlisting role="php">
 <![CDATA[
 <?php
-// 删除硬盘中任何 PHP 有访问权限的文件。如果 PHP 有 root 权限：
+// 从 PHP 用户有权访问的磁盘驱动器上任何位置删除一个文件。
+// 如果 PHP 有 root 访问权限：
 $username = $_POST['user_submitted_name']; // "../etc"
 $userfile = $_POST['user_submitted_filename']; // "passwd"
 $homedir  = "/home/$username"; // "/home/../etc"
@@ -52,32 +59,31 @@ echo "The file has been deleted!";
 ]]>
      </programlisting>
     </example>
-    有两个重要措施来防止此类问题。
+    应该采取两项重要措施来防止这类问题。
     <itemizedlist>
      <listitem>
       <simpara>
-       只给 PHP 的 web 用户很有限的权限。
+       <acronym>PHP</acronym> web 用户二进制文件仅允许有限的权限。
       </simpara>
      </listitem>
      <listitem>
       <simpara>
-       检查所有提交上来的变量。
+       检查所有提交的变量。
       </simpara>
      </listitem>
     </itemizedlist>
-    下面是改进的脚本：
+    这是改进的脚本：
     <example>
      <title>更安全的文件名检查</title>
      <programlisting role="php">
 <![CDATA[
 <?php
-// 删除硬盘中 PHP 有权访问的文件
+// 从 PHP 用户有权访问的磁盘驱动器上删除一个文件。
 $username = $_SERVER['REMOTE_USER']; // 使用认证机制
 $userfile = basename($_POST['user_submitted_filename']);
-$homedir = "/home/$username";
+$homedir  = "/home/$username";
 
 $filepath = "$homedir/$userfile";
-
 
 if (file_exists($filepath) && unlink($filepath)) {
     $logstring = "Deleted $filepath\n";
@@ -85,75 +91,77 @@ if (file_exists($filepath) && unlink($filepath)) {
     $logstring = "Failed to delete $filepath\n";
 }
 $fp = fopen("/home/logging/filedelete.log", "a");
-fwrite ($fp, $logstring);
+fwrite($fp, $logstring);
 fclose($fp);
 
 echo htmlentities($logstring, ENT_QUOTES);
+
 ?>
 ]]>
      </programlisting>
     </example>
-    然而，这样做仍然是有缺陷的。如果认证系统允许用户建立自己的登录用户名，而用户选择用“../etc/”作为用户名，系统又一次沦陷了。所以，需要加强检查：
+    然而，这样做也是有缺陷的。如果认证系统允许用户创建自己的登录用户名，
+    而用户选择 "../etc/" 作为登录名，系统将再次暴露。
+    出于这个原因，宁愿编写更自定义的检查：
     <example>
      <title>更安全的文件名检查</title>
      <programlisting role="php">
 <![CDATA[
 <?php
-$username = $_SERVER['REMOTE_USER']; // 使用认证机制
+$username     = $_SERVER['REMOTE_USER']; // 使用认证机制
 $userfile     = $_POST['user_submitted_filename'];
-$homedir = "/home/$username";
+$homedir      = "/home/$username";
 
 $filepath     = "$homedir/$userfile";
+
 if (!ctype_alnum($username) || !preg_match('/^(?:[a-z0-9_-]|\.(?!\.))+$/iD', $userfile)) {
     die("Bad username/filename");
 }
-//后略……
+
+//等等...
 ?>
 ]]>
      </programlisting>
     </example>
    </para>
    <para>
-    根据操作系统的不同，存在着各种各样需要注意的文件，包括联系到系统的设备（/dev/
-    或者 COM1）、配置文件（/ect/ 文件和 .ini文件）、常用的存储区域（/home/ 或者 My
-    Documents）等等。由于此原因，建立一个策略禁止所有权限而只开放明确允许的通常更容易些。
+    根据操作系统的不同，需要关心各种各样的文件，包含设备条目（/dev/ 或 COM1）、配置文件（/etc/ 文件和 .ini 文件）、
+    众所周知的文件存储区域（/home/， My Documents）等等。出于这个原因，创建一个禁止除明确允许之外所有内容的策略通常更容易。
    </para>
    <sect1 xml:id="security.filesystem.nullbytes">
-    <title>Null 字符问题</title>
+    <title>Null 字节相关问题</title>
     <simpara>
-     由于 PHP 的文件系统操作是基于 C 语言的函数的，所以它可能会以您意想不到的方式处理
-     Null 字符。
-     Null字符在 C 语言中用于标识字符串结束，一个完整的字符串是从其开头到遇见
-     Null 字符为止。
+     由于 <acronym>PHP</acronym> 使用底层 C 函数进行文件系统相关操作，因此它可能会以完全意想不到的方式处理 null 字节。
+     由于 null 字节在 C 中表示字符串的结尾，包含 null 的字符串不会被完整的考虑，但是确切的说仅考虑出现在 null 字节之前的字符串。
 
-     以下代码演示了类似的攻击：
+     下面的示例程序展示了易受攻击的代码，演示了这个问题：
     </simpara>
     <example>
-     <title>会被 Null 字符问题攻击的代码</title>
+     <title>会被 null 字节攻击的代码</title>
      <programlisting role="php">
 <![CDATA[
 <?php
 $file = $_GET['file']; // "../../etc/passwd\0"
 if (file_exists('/home/wwwrun/'.$file.'.php')) {
-    // file_exists will return true as the file /home/wwwrun/../../etc/passwd exists
+    // 当 /home/wwwrun/../../etc/passwd 文件存在的时候 file_exists 将会返回 true
     include '/home/wwwrun/'.$file.'.php';
-    // the file /etc/passwd will be included
+    // /etc/passwd 文件将会被包括在内
 }
 ?>
 ]]>
      </programlisting>
     </example>
     <para>
-     因此，任何用于操作文件系统的字符串（译注：特别是程序外部输入的字符串）都必须经过适当的检查。以下是上述例子的改进版本：
+     因此，在文件系统操作中都应该正确验证任何被污染的字符串。这时上个示例的更好版本：
     </para>
     <example>
-     <title>验证输入的正确做法</title>
+     <title>正确验证输入</title>
      <programlisting role="php">
 <![CDATA[
 <?php
 $file = $_GET['file']; 
 
-// 对字符串进行白名单检查
+// 白名单可能值
 switch ($file) {
     case 'main':
     case 'foo':
@@ -168,6 +176,7 @@ switch ($file) {
      </programlisting>
     </example>
    </sect1>
+
   </chapter>
 
 <!-- Keep this comment at the end of the file
