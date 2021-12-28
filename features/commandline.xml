@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 8e732e84a1425cf0ab3a5b0da8fe113c7a6da85e Maintainer: HonestQiao Status: ready -->
+<!-- EN-Revision: a2fc23851f710d7f0de3dceb23dc68ee34d17b32 Maintainer: HonestQiao Status: ready -->
 <!-- Reviewed: Haohappy  Maintainer: HonestQiao -->
-<!-- CREDITS: HonestQiao, Haohappy, Luffy -->
+<!-- CREDITS: HonestQiao, Haohappy, Luffy, mowangjuanzi -->
 <chapter xml:id="features.commandline" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <title>PHP 的命令行模式</title>
 
@@ -979,104 +979,104 @@ date.sunrise_zenith => 90.583333 => 90.583333
  <!--}}}-->
 
  <!--Usage: {{{-->
-<section xml:id="features.commandline.usage">
-<title>Executing PHP files</title>
-<titleabbrev>Usage</titleabbrev>
-
- <para>
-  &cli.sapi; 模块有以下三种不同的方法来获取要运行的 PHP 代码：
-  <orderedlist>
-   <listitem>
-    <para>
-     让 PHP 运行指定文件。
-    </para>
-    <para>
-     <screen>
+ <section xml:id="features.commandline.usage">
+  <title>执行 PHP 文件</title>
+  <titleabbrev>用法</titleabbrev>
+  
+  <para>
+   &cli.sapi; 模块有以下三种不同的方法来获取要运行的 PHP 代码：
+   <orderedlist>
+    <listitem>
+     <para>
+      让 PHP 运行指定文件。
+     </para>
+     <informalexample>
+      <screen>
 <![CDATA[
-php my_script.php
+$ php my_script.php
 
-php -f my_script.php
+$ php -f my_script.php
 ]]>
-     </screen>
-    </para>
-    <para>
+      </screen>
+     </informalexample>
+     <para>
      以上两种方法（使用或不使用 <option>-f</option> 参数）都能够运行给定的
      <filename>my_script.php</filename> 文件。可以选择任何文件来运行，指定的
      PHP 脚本并非必须要以 <literal>.php</literal>
      为扩展名，它们可以有任意的文件名和扩展名。
-    </para>
-    <note>
-     <para>
-      If arguments need to be passed to the script when using
-      <option>-f</option>, the first argument must be <literal>--</literal>.
      </para>
-    </note>
-   </listitem>
-   <listitem>
-    <para>
-     在命令行直接运行 PHP 代码。
-    </para>
-    <para>
-     <screen>
-<![CDATA[
-php -r 'print_r(get_defined_constants());'
-]]>
-     </screen>
-    </para>
-    <para>
-     在使用这种方法时，请注意外壳变量的替代及引号的使用。
-    </para>
-    <note>
+     <note>
+      <para>
+       如果在使用 <option>-f</option> 时需要将参数传递给脚本，则第一个参数必须是 <literal>--</literal>。
+      </para>
+     </note>
+    </listitem>
+    <listitem>
      <para>
-      请仔细阅读以上范例，在运行代码时没有开始和结束的标记符！加上
+      在命令行直接运行 PHP 代码。
+     </para>
+     <informalexample>
+      <screen>
+<![CDATA[
+$ php -r 'print_r(get_defined_constants());'
+]]>
+      </screen>
+     </informalexample>
+     <para>
+      必须特别注意外壳变量的替代及引号的使用。
+     </para>
+     <note>
+      <para>
+       请仔细阅读以上范例，在运行代码时没有开始和结束的标记符！加上
       <option>-r</option> 参数后，这些标记符是不需要的，加上它们会导致语法错误。
+      </para>
+     </note>
+    </listitem>
+    <listitem>
+     <para>
+      通过标准输入（<literal>stdin</literal>）提供需要运行的 PHP 代码。
      </para>
-    </note>
-   </listitem>
-   <listitem>
-    <para>
-     通过标准输入（<literal>stdin</literal>）提供需要运行的 PHP 代码。
-    </para>
-    <para>
-     以上用法提供了非常强大的功能，使得可以如下范例所示，动态地生成
-     PHP 代码并通过命令行运行这些代码：
-     <screen>
+     <para>
+      以上用法提供了非常强大的功能，使得可以如下范例所示，动态地生成
+      PHP 代码并通过命令行运行这些代码：
+     </para>
+     <informalexample>
+      <screen>
 <![CDATA[
-$ some_application | some_filter | php | sort -u >final_output.txt
+$ some_application | some_filter | php | sort -u > final_output.txt
 ]]>
-     </screen>
-    </para>
-   </listitem>
-  </orderedlist>
-  以上三种运行代码的方法不能同时使用。
- </para>
-
- <para>
+      </screen>
+     </informalexample>
+    </listitem>
+   </orderedlist>
+   以上三种运行代码的方法不能同时使用。
+  </para>
+  
+  <para>
   和所有的外壳应用程序一样，PHP 的二进制文件及其运行的 PHP 脚本能够接受一系列的参数。PHP
   没有限制传送给脚本程序的参数的个数（外壳程序对命令行的字符数有限制，但通常都不会超过该限制）。传递给脚本的参数可在全局变量
   <varname>$argv</varname> 中获取。该数组中下标为零的成员 <varname>$argv[0]</varname> 为脚本的名称（当
   PHP 代码来自标准输入获直接用 <option>-r</option>
-  参数以命令行方式运行时，该名称为“<literal>-</literal>”）。The same is true if the code is
-  executed via a pipe from <literal>STDIN</literal>.
- </para>
+  参数以命令行方式运行时，该名称为“<literal>-</literal>”）。如果代码是通过来自 <literal>STDIN</literal> 的管道执行的，同样如此。
+  </para>
 
- <para>
- 另外，全局变量
+  <para>
+   另外，全局变量
  <varname>$argc</varname> 存有 <varname>$argv</varname>
  数组中成员变量的个数（而<emphasis role="strong">非</emphasis>传送给脚本程序的参数的个数）。
- </para>
-
- <para>
-  只要传送给脚本的参数不是以 <literal>-</literal>
+  </para>
+  
+  <para>
+   只要传送给脚本的参数不是以 <literal>-</literal>
   符号开头，就无需过多的注意什么。向脚本传送以
   <literal>-</literal> 开头的参数会导致错误，因为 PHP
   会认为应该由它自身来处理这些参数。可以用参数列表分隔符
   <literal>--</literal> 来解决这个问题。在 PHP
   解析完参数后，该符号后所有的参数将会被原样传送给脚本程序。
- </para>
-
-<informalexample>
-  <screen>
+  </para>
+  
+  <informalexample>
+   <screen>
 <![CDATA[
 # 以下命令将不会运行 PHP 代码，而只显示 PHP 命令行模式的使用说明：
 $ php -r 'var_dump($argv);' -h
@@ -1092,31 +1092,29 @@ array(2) {
   string(2) "-h"
 }
 ]]>
- </screen>
-</informalexample>
-
- <para>
-  除此之外，还有另一个方法将 PHP 用于外壳脚本。可以在写一个脚本，并在第一行以
-  <literal>#!/usr/bin/php</literal> 开头，在其后加上以 PHP
-  开始和结尾标记符包含的正常的 PHP
-  代码，然后为该文件设置正确的运行属性（例如：<command>chmod +x test</command>）。
-  该方法可以使得该文件能够像外壳脚本或 PERL 脚本一样被直接执行。
- </para>
-
-<example>
- <title>Execute PHP script as shell script</title>
-  <programlisting role="php">
+   </screen>
+  </informalexample>
+  
+  <para>
+   然而，在 Unix 系统中还有另一个方法将 PHP 用于外壳脚本：写一个使用 <literal>#!/usr/bin/php</literal>
+   作为第一行开头的脚本（即便 PHP &cli; 二进制文件的路径跟默认不同）。文件的剩余部分应该包含通用 PHP 开始标签，正常的 PHP 代码，结束标签。
+   一旦恰当设置了文件的执行属性（例如 <command>chmod +x test</command>），脚本就像是其他 shell/perl 脚本一样执行：
+  </para>
+  
+  <example>
+   <title>执行 PHP 脚本作为外壳脚本</title>
+   <programlisting role="php">
 <![CDATA[
 #!/usr/bin/php
 <?php
-    var_dump($argv);
+var_dump($argv);
 ?>
 ]]>
-  </programlisting>
- <para>
-  假设改文件名为 <filename>test</filename> 并被放置在当前目录下，可以做如下操作：
- </para>
-  <screen>
+   </programlisting>
+   <para>
+    假设改文件名为 <filename>test</filename> 并被放置在当前目录下，可以做如下操作：
+   </para>
+   <screen>
 <![CDATA[
 $ chmod +x test
 $ ./test -h -- foo
@@ -1131,28 +1129,27 @@ array(4) {
   string(3) "foo"
 }
 ]]>
-  </screen>
-</example>
-
- <para>
-  正如所看到的，在向该脚本传送以 <literal>-</literal> 开头的参数时，脚本仍然能够正常运行。
- </para>
-
- <para>
-  PHP 的命令行模式能使得 PHP 脚本能完全独立于 web 服务器单独运行。如果使用
-  Unix 系统，需要在 PHP
-  脚本的最前面加上一行特殊的代码，使得它能够被执行，这样系统就能知道用哪个程序去运行该脚本。在
-  Windows 平台下可以将 <filename>php.exe</filename> 和 <literal>.php</literal>
-  文件的双击属性相关联，也可以编写一个批处理文件来用 PHP
-  执行脚本。为 Unix 系统增加的第一行代码不会影响该脚本在
-  Windows 下的运行，因此也可以用该方法编写跨平台的脚本程序。以下是一个简单的
-  PHP 命令行程序的范例。
- </para>
-
- <para>
-  <example>
-   <title>试图以命令行方式运行的 PHP 脚本（script.php）</title>
-   <programlisting role="php">
+   </screen>
+  </example>
+  
+  <para>
+   正如所看到的，在向该脚本传送以 <literal>-</literal> 开头的参数时，脚本仍然能够正常运行。
+  </para>
+  
+  <para>
+   PHP 可执行文件可用于运行完全独立于 web 服务器的 PHP 脚本。在 Unix 系统上，需要在 PHP 脚本的第一行指定
+   <literal>#!</literal>（或者说 “shebang”）以便系统可以自动判断用哪个程序运行脚本。
+   在 Windows 平台下可以将 <filename>php.exe</filename> 和 <literal>.php</literal>
+   文件的双击属性相关联，也可以编写一个批处理文件来用 PHP
+   执行脚本。为 Unix 系统增加的第一行代码不会影响该脚本在 Windows
+   下的运行，因此也可以用该方法编写跨平台的脚本程序。以下是一个简单的
+   PHP 命令行程序的范例。
+  </para>
+  
+  <para>
+   <example>
+    <title>试图以命令行方式运行的 PHP 脚本（script.php）</title>
+    <programlisting role="php">
 <![CDATA[
 #!/usr/bin/php
 <?php
@@ -1175,189 +1172,178 @@ This is a command line PHP script with one option.
 }
 ?>
 ]]>
-   </programlisting>
-  </example>
- </para>
-
- <para>
-  在以上脚本中，用第一行特殊的代码来指明该文件应该由 PHP
-  来执行。在这里使用 &cli; 的版本，因此不会有 HTTP 头信息输出。
- </para>
-
- <para>
-  以上程序中检查了参数的个数是大于 1 个还是小于 1
-  个。此外如果参数是 <option>--help</option>，<option>-help</option>，<option>-h</option>
-  或 <option>-?</option>
-  时，打印出帮助信息，并同时用 <varname>$argv[0]</varname> 动态输出脚本的名称。如果还收到了其它参数，将其显示出来。
- </para>
-
- <para>
-  如果希望在 Unix 下运行以上脚本，需要使其属性为可执行文件，然后简单的运行
-  <command>script.php echothis</command> 或 <command>script.php -h</command>。在
-  Windows 下，可以为此编写一个批处理文件：
- </para>
-
- <para>
-  <example>
-   <title>运行 PHP 命令行脚本的批处理文件（script.bat）</title>
-   <programlisting role="shell">
+    </programlisting>
+   </example>
+  </para>
+  
+  <para>
+   在以上脚本中，用第一行包含 Unix shebang 的代码来指明该文件应该由 PHP
+   来执行。这里使用 &cli; 的版本，因此不会有 <acronym>HTTP</acronym> 头信息输出。
+  </para>
+  
+  <para>
+   程序首先检查是否有需要的参数（除了被计算在内的脚本名之外）。如果没有参数或者参数是 <option>--help</option>、
+   <option>-help</option>、 <option>-h</option>、 <option>-?</option>，将会打印出帮助消息，
+   使用 <varname>$argv[0]</varname> 在命令行上动态输出脚本的名称。否则参数将按照接收的方式进行准确回显。
+  </para>
+  
+  <para>
+   如果在 Unix 下运行以上脚本，必须是可执行的，并简单的运行 <command>script.php echothis</command> 或者
+   <command>script.php -h</command>。在
+   Windows 下，可以为此类任务编写类似与以下内容的批处理文件：
+  </para>
+  
+  <para>
+   <example>
+    <title>运行 PHP 命令行脚本的批处理文件（script.bat）</title>
+    <programlisting role="shell">
 <![CDATA[
 @echo OFF
 "C:\php\php.exe" script.php %*
 ]]>
-   </programlisting>
-  </example>
- </para>
-
- <para>
-  假设将上述程序命名为 <filename>script.php</filename>，且
-  &cli; 版的 <filename>php.exe</filename> 文件放置在
-  <filename>c:\php\cli\php.exe</filename>，该批处理文件会帮助将附加的参数传给脚本程序：<command>script.bat
-  echothis</command> 或 <command>script.bat -h</command>。
- </para>
-
- <para>
-  请参阅 <link linkend="ref.readline">Readline</link>
-  扩展模块的有关文档，以获取更多的函数的信息。这些函数可以帮助完善 PHP 命令行应用程序。
- </para>
-
- <para>
-  On Windows, PHP can be configured to run without the need to
-  supply the <filename>C:\php\php.exe</filename> or the <literal>.php</literal>
-  extension, as described in <link linkend="install.windows.commandline">Command
-  Line PHP on Microsoft Windows</link>.
- </para>
-
- <note>
-  <para>
-   On Windows it is recommended to run PHP under an actual user account.
-   When running under a network service certain operations will fail, because
-   "No mapping between account names and security IDs was done".
+    </programlisting>
+   </example>
   </para>
- </note>
-</section>
+  
+  <para>
+   假设将上述程序命名为 <filename>script.php</filename>，且
+   &cli; 版的 <filename>php.exe</filename> 位于 <filename>C:\php\php.exe</filename>，
+   该批处理文件将会运行它，传递所有附加选项：
+   <command>script.bat echothis</command> 或者 <command>script.bat -h</command>。
+  </para>
+  
+  <para>
+   参阅 <link linkend="ref.readline">Readline</link> 扩展文档获取更多函数，在 PHP
+   中用于增强命令行应用程序。
+  </para>
+  
+  <para>
+   在 Windows 上， PHP可以配置为无需提供 <filename>C:\php\php.exe</filename> 或者
+   <literal>.php</literal> 扩展运行，如 
+   <link linkend="install.windows.commandline">PHP 在 Microsoft Windows 下的命令行方式</link>中所述。
+  </para>
+
+  <note>
+   <para>
+    在 Windows 上，推荐在真实用户账户下运行 PHP。因为在网络服务下运行某些操作将会失败，
+    因为“帐户名与安全标识间无任何映射完成”。
+   </para>
+  </note>
+ </section>
  <!--}}}-->
 
 
  <!--I/O Streams: {{{-->
-<section xml:id="features.commandline.io-streams">
-<title>Input/output streams</title>
-<titleabbrev>I/O streams</titleabbrev>
-
-<para>
- The &cli.sapi; defines a few constants for I/O streams to make programming
- for the command line a bit easier.
-</para>
-
-<para>
- <table>
-  <title>CLI 专用常量</title>
-  <tgroup cols="2">
-   <thead>
-    <row>
-     <entry>常量名称</entry>
-     <entry>描述</entry>
-    </row>
-   </thead>
-   <tbody>
-    <row>
-     <entry><constant>STDIN</constant></entry>
-     <entry>
-      <para>An already opened stream to <literal>stdin</literal>. This saves
-       opening it with
+ <section xml:id="features.commandline.io-streams">
+  <title>输入输出流</title>
+  <titleabbrev>I/O 流</titleabbrev>
+  
+  <para>
+   &cli.sapi; 为 I/O 流定义了一些常量，以使命令行变量编程更容易一些。
+  </para>
+  
+  <para>
+   <table>
+    <title>CLI 特定常量</title>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>常量</entry>
+       <entry>描述</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry><constant>STDIN</constant></entry>
+       <entry>
+        <para>一个已经打开的流到 <literal>stdin</literal>。使用如下方式节省打开它
        <programlisting role="php">
-        <![CDATA[
+<![CDATA[
 <?php
 $stdin = fopen('php://stdin', 'r');
 ?>
 ]]>
        </programlisting>
-       If you want to read single line from <literal>stdin</literal>, you can
-       use
+       如果想从 <literal>stdin</literal> 中读取单行，可以使用
        <programlisting role="php">
-        <![CDATA[
+<![CDATA[
 <?php
-$line = trim(fgets(STDIN)); // reads one line from STDIN
-fscanf(STDIN, "%d\n", $number); // reads number from STDIN
+$line = trim(fgets(STDIN)); // 从 STDIN 读取一行
+fscanf(STDIN, "%d\n", $number); // 从 STDIN 读取数字
 ?>
 ]]>
        </programlisting>
-      </para></entry>
-    </row>
-    <row>
-     <entry><constant>STDOUT</constant></entry>
-     <entry><para>
-      An already opened stream to <literal>stdout</literal>. This saves
-      opening it with
-      <programlisting role="php">
-       <![CDATA[
+       </para></entry>
+      </row>
+      <row>
+       <entry><constant>STDOUT</constant></entry>
+       <entry><para>
+       一个已经打开的流到 <literal>stdout</literal>。使用如下方式节省打开它
+       <programlisting role="php">
+<![CDATA[
 <?php
 $stdout = fopen('php://stdout', 'w');
 ?>
 ]]>
-      </programlisting>
-     </para></entry>
-    </row>
-    <row>
-     <entry><constant>STDERR</constant></entry>
-     <entry>
-      <para>
-       An already opened stream to <literal>stderr</literal>.
-       This saves opening it with
-       <programlisting role="php">
-        <![CDATA[
+       </programlisting>
+       </para></entry>
+      </row>
+      <row>
+       <entry><constant>STDERR</constant></entry>
+       <entry>
+        <para>
+         一个已经打开的流到 <literal>stderr</literal>。使用如下方式节省打开它
+         <programlisting role="php">
+<![CDATA[
 <?php
 $stderr = fopen('php://stderr', 'w');
 ?>
 ]]>
-       </programlisting>
-      </para>
-     </entry>
-    </row>
-   </tbody>
-  </tgroup>
- </table>
-</para>
-
-<para>
- 有了以上常量，就无需自己建立指向诸如 <literal>stderr</literal>
- 的流，只需简单的使用这些常量来代替流指向：
- <programlisting role="shell">
-  <![CDATA[
+         </programlisting>
+        </para>
+       </entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </table>
+  </para>
+  
+  <para>
+   综上所述，就无需打开例如指向 <literal>stderr</literal> 的流，只需使用常量代替流资源：
+   <programlisting role="shell">
+<![CDATA[
 php -r 'fwrite(STDERR, "stderr\n");'
 ]]>
- </programlisting>
- 无需自己来关闭这些流，PHP 会在脚本结束时自动完成这些操作。
-</para>
-
-<note>
- <para>
-  These constants are not available if reading the PHP script from
-  <literal>stdin</literal>.
- </para>
-</note>
-</section>
+   </programlisting>
+   无须显式关闭这些流，因为它们会在脚本结束时由 PHP 自动关闭。
+  </para>
+  
+  <note>
+   <para>
+    如果从 <literal>stdin</literal> 中读取 PHP 脚本，则这些常量不可用。
+   </para>
+  </note>
+ </section>
  <!--}}}-->
 
  <!--Interactive shell: {{{-->
-<section xml:id="features.commandline.interactive">
-<title>Interactive shell</title>
+ <section xml:id="features.commandline.interactive">
+  <title>交互式 shell</title>
 
-<para>
- The &cli.sapi; provides an interactive shell using the
- <option>-a</option> option if PHP is compiled with the <option
- role="configure">--with-readline</option> option.
-</para>
+  <para>
+   如果 PHP 使用 <option role="configure">--with-readline</option> 选项编译的，则使用 <option>-a</option>
+   选项时， &cli.sapi; 提供了交互式 shell。自 PHP 7.1.0 起，如果启用了 <link linkend="book.readline">readline extension</link>
+   ，交互式 shell 也可以在 Windows 上使用。
+  </para>
 
-<para>
- Using the interactive shell you are able to type PHP code and have it
- executed directly.
-</para>
+  <para>
+   使用交互式 shell，你可以输入 PHP 代码并直接执行。
+  </para>
 
-<example>
- <title>Executing code using the interactive shell</title>
- <programlisting role="shell">
-  <![CDATA[
+  <example>
+   <title>使用交互式 shell 执行代码</title>
+   <programlisting role="shell">
+<![CDATA[
 $ php -a
 Interactive shell
 
@@ -1371,168 +1357,153 @@ php > var_dump(addtwo(2));
 int(4)
 php >
 ]]>
- </programlisting>
-</example>
+   </programlisting>
+  </example>
 
-<para>
- The interactive shell also features tab completion for functions,
- constants, class names, variables, static method calls and class
- constants.
-</para>
+  <para>
+   交互式 shell 还具有对函数、常量、类名、变量、静态方法调用和类常量的 Tab 键补全功能。
+  </para>
 
-<example>
- <title>Tab completion</title>
- <simpara>
-  Pressing the tab key twice when there are multiple possible completions
-  will result in a list of these completions:
- </simpara>
- <programlisting role="shell">
-  <![CDATA[
+  <example>
+   <title>Tab 键补全</title>
+   <simpara>
+    当可能有多个补全时，按两次 tab 键将会得到补全列表：
+   </simpara>
+   <programlisting role="shell">
+<![CDATA[
 php > strp[TAB][TAB]
-strpbrk   strpos    strptime
+strpbrk   strpos    strptime  
 php > strp
 ]]>
- </programlisting>
- <simpara>
-  When there is only one possible completion, pressing tab once will
-  complete the rest on the same line:
- </simpara>
- <programlisting role="shell">
-  <![CDATA[
+   </programlisting>
+   <simpara>
+    当仅可能有一个补全的，按一次 Tab 键将在同一行中完成补全：
+   </simpara>
+   <programlisting role="shell">
+<![CDATA[
 php > strpt[TAB]ime(
 ]]>
- </programlisting>
- <simpara>
-  Completion will also work for names that have been defined
-  during the current interactive shell session:
- </simpara>
- <programlisting role="shell">
-  <![CDATA[
+   </programlisting>
+   <simpara>
+    补全也适用于当前交互式 shell 会话期间定义的名称：
+   </simpara>
+   <programlisting role="shell">
+<![CDATA[
 php > $fooThisIsAReallyLongVariableName = 42;
 php > $foo[TAB]ThisIsAReallyLongVariableName
 ]]>
- </programlisting>
-</example>
+   </programlisting>
+  </example>
 
-<para>
- The interactive shell stores your history which can be accessed using the up
- and down keys. The history is saved in the
- <filename>~/.php_history</filename> file.
-</para>
+  <para>
+   交互式 shell 存储你的历史记录，可以通过上下键访问。历史记录存储于 <filename>~/.php_history</filename> 文件。
+  </para>
 
-<para>
- The &cli.sapi; provides
- the &php.ini; settings <parameter>cli.pager</parameter> and
- <parameter>cli.prompt</parameter>. The <parameter>cli.pager</parameter>
- setting allows an external program (such as <filename>less</filename>) to
- act as a pager for the output instead of being displayed directly on the
- screen. The <parameter>cli.prompt</parameter> setting makes it possible to
- change the <literal>php &gt;</literal> prompt.
-</para>
+  <para>
+   &cli.sapi; 提供了 &php.ini; 设置： <parameter>cli.pager</parameter> 和
+   <parameter>cli.prompt</parameter>。 <parameter>cli.pager</parameter>
+   设置语序外部程序（例如 <filename>less</filename>)）充当分页器输出而不是直接显示在屏幕上。
+   <parameter>cli.prompt</parameter> 设置可以更改 <literal>php &gt;</literal> 提示符。
+  </para>
 
-<para>
- It is also possible to set
- &php.ini; settings in the interactive shell using a shorthand notation.
-</para>
+  <para>
+   在交互式 shell 中还可以使用缩写符号设置 &php.ini; 设置。
+  </para>
 
-<example>
- <title>Setting &php.ini; settings in the interactive shell</title>
- <simpara>
-  The <parameter>cli.prompt</parameter> setting:
- </simpara>
- <programlisting role="shell">
-  <![CDATA[
-php > #cli.prompt=hello world :>
-hello world :>
+  <example>
+   <title>在交互式 shell 中设置 &php.ini; 设置</title>
+   <simpara>
+    <parameter>cli.prompt</parameter> 设置：
+   </simpara>
+   <programlisting role="shell">
+<![CDATA[
+php > #cli.prompt=hello world :> 
+hello world :> 
 ]]>
- </programlisting>
- <simpara>
-  Using backticks it is possible to have PHP code executed in the prompt:
- </simpara>
- <programlisting role="shell">
-  <![CDATA[
-php > #cli.prompt=`echo date('H:i:s');` php >
+   </programlisting>
+   <simpara>
+    使用反引号可以在提示中执行 PHP 代码：
+   </simpara>
+   <programlisting role="shell">
+<![CDATA[
+php > #cli.prompt=`echo date('H:i:s');` php > 
 15:49:35 php > echo 'hi';
 hi
 15:49:43 php > sleep(2);
-15:49:45 php >
+15:49:45 php > 
 ]]>
- </programlisting>
- <simpara>
-  Setting the pager to <filename>less</filename>:
- </simpara>
- <programlisting role="shell">
-  <![CDATA[
+   </programlisting>
+   <simpara>
+    设置分页器为 <filename>less</filename>：
+   </simpara>
+   <programlisting role="shell">
+<![CDATA[
 php > #cli.pager=less
 php > phpinfo();
 (output displayed in less)
-php >
+php > 
 ]]>
- </programlisting>
-</example>
+   </programlisting>
+  </example>
 
-<para>
- The <parameter>cli.prompt</parameter> setting supports a few escape
- sequences:
- <table>
-  <title><parameter>cli.prompt</parameter> escape sequences</title>
-  <tgroup cols="2">
-   <thead>
-    <row>
-     <entry>Sequence</entry>
-     <entry>Description</entry>
-    </row>
-   </thead>
-   <tbody>
-    <row>
-     <entry><literal>\e</literal></entry>
-     <entry>
-      Used for adding colors to the prompt. An example could be
-      <literal>\e[032m\v \e[031m\b \e[34m\> \e[0m</literal>
-     </entry>
-    </row>
-    <row>
-     <entry><literal>\v</literal></entry>
-     <entry>The PHP version.</entry>
-    </row>
-    <row>
-     <entry><literal>\b</literal></entry>
-     <entry>
-      Indicates which block PHP is in. For instance <literal>/*</literal> to
-      indicate being inside a multi-line comment. The outer scope is denoted by
-      <literal>php</literal>.
-     </entry>
-    </row>
-    <row>
-     <entry><literal>\&gt;</literal></entry>
-     <entry>
-      Indicates the prompt character. By default this is
-      <literal>&gt;</literal>, but changes when the shell is inside an
-      unterminated block or string. Possible characters are: <literal>' " {
-      ( &gt;</literal>
-     </entry>
-    </row>
-   </tbody>
-  </tgroup>
- </table>
-</para>
+  <para>
+   <parameter>cli.prompt</parameter> 设置支持一些转义字符：
+   <table>
+    <title><parameter>cli.prompt</parameter> 转义字符</title>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>字符</entry>
+       <entry>描述</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry><literal>\e</literal></entry>
+       <entry>
+        用于添加提示颜色。一个例子可能是 <literal>\e[032m\v \e[031m\b \e[34m\> \e[0m</literal>
+       </entry>
+      </row>
+      <row>
+       <entry><literal>\v</literal></entry>
+       <entry>PHP 版本</entry>
+      </row>
+      <row>
+       <entry><literal>\b</literal></entry>
+       <entry>
+        指明 PHP 所在的块。例如 <literal>/*</literal> 表示在多行注释中。外部作用域用 <literal>php</literal> 来表示。
+       </entry>
+      </row>
+      <row>
+       <entry><literal>\&gt;</literal></entry>
+       <entry>
+        指明提示字符。默认情况下是 <literal>&gt;</literal>，但 shell 位于未结束的块或者字符串时会发生变化。可能的字符有
+        <literal>' " { ( &gt;</literal>
+       </entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </table>
+  </para>
 
-<note>
- <para>
-  Files included through <link
-  linkend="ini.auto-prepend-file">auto_prepend_file</link> and <link
-  linkend="ini.auto-append-file">auto_append_file</link> are parsed in
-  this mode but with some restrictions - e.g. functions have to be
-  defined before called.
- </para>
-</note>
+  <note>
+   <para>
+    在该模式下，通过 <link linkend="ini.auto-prepend-file">auto_prepend_file</link> 和 <link
+    linkend="ini.auto-append-file">auto_append_file</link> 解析文件包含会有一些限制 —— 例如函数必须在调用前定义。
+   </para>
+  </note>
 
-<note>
- <para>
-  <link linkend="language.oop5.autoload">Autoloading</link> is not
-  available if using PHP in &cli; interactive mode.
- </para>
-</note>
+  <section xml:id="features.commandline.interactive.mode">
+   <title>交互模式</title>
+   <para>
+    如果 readline 扩展不可用，在 PHP 8.1.0 之前，使用 <option>-a</option> 选项调用 &cli.sapi; 会提供交互模式。
+    在此模式中，一个完整的 PHP 脚本应该通过 STDIN 给出，并用 <literal>CRTL+d</literal> （POSIX） 或者 <literal>CTRL+z</literal>
+    接着是 <literal>ENTER</literal> （Windows）后停止，脚本执行。这与不加 <option>-a</option> 选项调用 &cli.sapi; 基本相同。
+   </para>
+   <para>
+    自 PHP 8.1.0 起，如果 readline 扩展不可用，使用 <option>-a</option> 调用 &cli.sapi; 会失败。
+   </para>
+  </section>
 </section>
  <!--}}}-->
 
