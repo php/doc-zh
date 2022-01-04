@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
 <!-- EN-Revision: n/a Maintainer: lm92 Status: ready -->
 <!-- CREDITS: dallas -->
   <chapter xml:id="security.errors" xmlns="http://docbook.org/ns/docbook">
@@ -9,9 +8,10 @@
     对于 PHP 的安全性来说错误报告是一把双刃剑。一方面可以提高安全性，另一方面又有害。
    </para>
    <para>
-    攻击系统时经常使用的手法就是输入不正确的数据，然后查看错误提示的类型及上下文。这样做有利于攻击者收集服务器的信息以便寻找弱点。比如说，如果一个攻击者知道了一个页面所基于的表单信息，那么他就会尝试修改变量：
+    标准的攻击策略是通过输入不正确的数据来分析系统，然后查看返回的错误的类型及上下文。这样做有利于攻击者收集服务器的信息以便寻找弱点。
+    比如说，如果攻击者根据先前的表单提交收集了有关页面的信息，那么他就会尝试覆盖或者修改变量：
     <example>
-     <title>用自定义的 HTML 页面攻击变量</title>
+     <title>使用自定义 HTML 页面攻击变量</title>
      <programlisting role="html">
 <![CDATA[
 <form method="post" action="attacktarget?username=badfoo&amp;password=badfoo">
@@ -23,14 +23,14 @@
     </example>
    </para>
    <para>
-    通常 PHP
-    所返回的错误提示都能帮助开发者调试程序，它会提出哪个文件的哪些函数或代码出错，并指出错误发生的在文件的第几行，这些就是
-    PHP 本身所能给出的信息。很多 PHP 开发者会使用
-    <function>show_source</function>、<function>highlight_string</function>
-    或者 <function>highlight_file</function>
-    函数来调试代码，但是在正式运行的网站中，这种做法可能会暴露出隐藏的变量、未检查的语法和其它的可能危及系统安全的信息。在运行一些具有内部调试处理的程序，或者使用通用调试技术是很危险的。如果让攻击者确定了程序是使用了哪种具体的调试技术，他们会尝试发送变量来打开调试功能：
+    通常返回的 PHP 错误对于尝试调试脚本的开发人员非常有帮助，指出失败发生的函数，行号等信息。
+    这是所有可以利用的信息。PHP 开发人员使用 <function>show_source</function> 、
+    <function>highlight_string</function> 、 <function>highlight_file</function>
+    作为调试办法并不少见，但在运行的网站中，这可能会暴露隐藏的变量、未检查的语法和其他危险的信息。
+    使用内置调试处理程序或者常见调试方法来运行已知来源的代码尤其危险。
+    如果攻击者可以确定使用的哪种常规方法，他们可能会尝试通过发送各种常见的调试字符串来暴力破解页面：
     <example>
-     <title>利用变量打开调式功能</title>
+     <title>利用常见的调试变量</title>
      <programlisting role="html">
 <![CDATA[
 <form method="post" action="attacktarget?errors=Y&amp;showerrors=1&amp;debug=1">
@@ -43,33 +43,53 @@
     </example>
    </para>
    <para>
-    不管错误处理机制如何，可以探测系统错误的能力会给攻击者提供更多信息。
+    不管错误处理方法如何，探测系统错误的能力会给攻击者提供更多信息。
    </para>
    <para>
-    比如说，PHP 的独有的错误提示风格可以说明系统在运行 PHP。如果攻击者在寻找一个 .html
-    为页面，想知道其后台的技术（为了寻找系统弱点），他们就会把错误的数据提交上去，然后就有可以得知系统是基于
-    PHP 的了。
+    例如，通用的 PHP 错误风格表明系统正在运行 PHP。如果攻击者正在寻找 .html 
+    页面，想要探查后端（以查找系统中的已知弱点），
+    通过提供错误的数据，它们可能能够确定系统是使用 PHP 构建的。
    </para>
    <para>
-    一个函数错误就可能暴露系统正在使用的数据库，或者为攻击者提供有关网页、程序或设计方面的有用信息。攻击者往往会顺藤摸瓜地找到开放的数据库端口，以及页面上某些 bug
-    或弱点等。比如说，攻击者可以一些不正常的数据使程序出错，来探测脚本中认证的顺序（通过错误提示的行号数字）以及脚本中其它位置可能泄露的信息。
+    A function error can indicate whether a system may be running a
+    specific database engine, or give clues as to how a web page or
+    programmed or designed. This allows for deeper investigation into
+    open database ports, or to look for specific bugs or weaknesses
+    in a web page. By feeding different pieces of bad data, for example,
+    an attacker can determine the order of authentication in a script,
+    (from the line number errors) as well as probe for exploits that
+    may be exploited in different locations in the script.
    </para>
    <para>
-    一个文件系统或者 PHP 的错误就会暴露 web
-    服务器具有什么权限，以及文件在服务器上的组织结构。开发者自己写的错误代码会加剧此问题，导致泄漏了原本隐藏的信息。
+    A filesystem or general PHP error can indicate what permissions
+    the web server has, as well as the structure and organization of
+    files on the web server. Developer written error code can aggravate
+    this problem, leading to easy exploitation of formerly "hidden"
+    information.
    </para>
    <para>
-    有三个常用的办法处理这些问题。第一个是彻底地检查所有函数，并尝试弥补大多数错误。第二个是对在线系统彻底关闭错误报告。第三个是使用
-    PHP 自定义的错误处理函数创建自己的错误处理机制。根据不同的安全策略，三种方法可能都适用。
+    There are three major solutions to this issue. The first is to
+    scrutinize all functions, and attempt to compensate for the bulk
+    of the errors. The second is to disable error reporting entirely
+    on the running code. The third is to use PHP's custom error
+    handling functions to create your own error handler. Depending
+    on your security policy, you may find all three to be applicable
+    to your situation.
    </para>
    <para>
-    一个能提前阻止这个问题发生的方法就是利用
-    <function>error_reporting</function> 来帮助使代码更安全并发现变量使用的危险之处。在发布程序之前，先打开
-    E_ALL 测试代码，可以帮你很快找到变量使用不当的地方。一旦准备正式发布，就应该把
-    <function>error_reporting</function> 的参数设为 0 来彻底关闭错误报告或者把 &php.ini;
-    中的 <literal>display_errors</literal> 设为 off
-    来关闭所有的错误显示以将代码隔绝于探测。当然，如果要迟一些再这样做，就不要忘记打开 ini 文件内的
-    <literal>log_errors</literal> 选项，并通过 <literal>error_log</literal> 指定用于记录错误信息的文件。
+    One way of catching this issue ahead of time is to make use of
+    PHP's own <function>error_reporting</function>, to help you
+    secure your code and find variable usage that may be dangerous.
+    By testing your code, prior to deployment, with <constant>E_ALL</constant>,
+    you can quickly find areas where your variables may be open to poisoning
+    or modification in other ways. Once you are ready for deployment,
+    you should either disable error reporting completely by setting
+    <function>error_reporting</function> to 0, or turn off the error
+    display using the &php.ini; option <literal>display_errors</literal>,
+    to insulate your code from probing. If you choose to do the latter,
+    you should also define the path to your log file using the
+    <literal>error_log</literal> ini directive, and turn
+    <literal>log_errors</literal> on.
     <example>
      <title>用 E_ALL 来查找危险的变量</title>
      <programlisting role="php">
