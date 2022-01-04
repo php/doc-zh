@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: a44dc91a4dd2f8ff98f195f8b22621ec91aba1d5 Maintainer: Gregory Status: ready -->
+<!-- EN-Revision: 41c8533ff5a8f93ba9fdf0732d05dd5ab79864c9 Maintainer: Gregory Status: ready -->
 <!-- Reviewed: yes -->
 <!-- CREDITS: dallas -->
 <!-- 请保持此文件与英文文件中相应的每个 ENTITY 行号一一对应以便于对照，修改与更新！ -->
@@ -37,9 +37,8 @@
 <function>clearstatcache</function> 以获得更多细节。</simpara></note>'>
 
 
-<!ENTITY note.context-support '<note xmlns="http://docbook.org/ns/docbook"><simpara>在 PHP 5.0.0
-中增加了对上下文（Context）的支持。有关<literal>上下文（Context）</literal>的说明参见
-<xref linkend="book.stream"/>。</simpara></note>'>
+<!ENTITY note.context-support '<para xmlns="http://docbook.org/ns/docbook"><link linkend="stream.contexts">上下文流（context stream）</link>
+<type>resource</type>.</para>'>
 
 <!ENTITY note.exec-bg '<note xmlns="http://docbook.org/ns/docbook"><para>如何程序使用此函数启动，为了能保持在后台运行，此程序必须将输出重定向到文件或其它输出流。否则会导致
 PHP 挂起，直至程序执行结束。</para></note>'>
@@ -49,6 +48,11 @@ PHP 挂起，直至程序执行结束。</para></note>'>
 <!ENTITY note.exec-bypass-shell '<note xmlns="http://docbook.org/ns/docbook"><para>在 Windows 下，<function>exec</function>
 函数会先启动 cmd.exe 来执行指定的命令。如果你希望启动一个额外的应用而不用先启动 cmd.exe
 可使用 <function>proc_open</function> 函数加上 <parameter>bypass_shell</parameter> 参数。</para></note>'>
+
+<!ENTITY note.extractto-windows '<note xmlns="http://docbook.org/ns/docbook"><para>Windows NTFS file systems
+do not support some characters in filenames, namely <literal>&lt;|&gt;*?":</literal>. Filenames with a trailing dot
+are not supported either. Contrary to some extraction tools, this method does not replace these characters with
+an underscore, but instead fails to extract such files.</para></note>'>
 
 <!ENTITY note.func-callback '<note xmlns="http://docbook.org/ns/docbook"><simpara>除了函数名，含有对象引用的数组和方法名也可以作为参数。</simpara></note>'>
 
@@ -137,7 +141,15 @@ is used, this function uses internal output buffering prior to PHP 7.1.0, so it 
 
 <!ENTITY note.sort-unstable '<note xmlns="http://docbook.org/ns/docbook">
  <para>
-  如果两个成员完全相同，那么它们在排序数组中的相对顺序是未定义的。
+  如果两个成员完全相同，那么它们将保持原来的顺序。
+  在 PHP 8.0.0 之前，它们在排序数组中的相对顺序是未定义的。
+ </para>
+</note>
+'>
+
+<!ENTITY note.resource-migration-8.0-dead-function '<note xmlns="http://docbook.org/ns/docbook">
+ <para>
+  This function has no effect. Prior to PHP 8.0.0, this function was used to close the resource.
  </para>
 </note>
 '>
@@ -222,6 +234,12 @@ xmlns="http://docbook.org/ns/docbook"><simpara>本函数已自 PHP 7.1.0
 起<emphasis>废弃</emphasis>。强烈建议不要使用本函数。</simpara></warning>'>
 
 
+<!ENTITY warn.deprecated.function-7-0-0.removed-8-0-0 '<warning
+xmlns="http://docbook.org/ns/docbook"><simpara>This function has been
+<emphasis>DEPRECATED</emphasis> as of PHP 7.0.0 and
+<emphasis>REMOVED</emphasis> as of PHP 8.0.0. Relying on this function
+is highly discouraged.</simpara></warning>'>
+
 <!ENTITY warn.deprecated.function-7-1-0.removed-7-2-0 '<warning
 xmlns="http://docbook.org/ns/docbook"><simpara>本函数已自 PHP 7.1.0 起<emphasis>废弃</emphasis>并将自
 PHP 7.2.0 起<emphasis>移除</emphasis>。强烈建议不要使用本函数。</simpara></warning>'>
@@ -277,6 +295,11 @@ is highly discouraged.</simpara></warning>'>
 <!ENTITY warn.deprecated.function-8-0-0 '<warning
  xmlns="http://docbook.org/ns/docbook"><simpara>本函数已自 PHP 8.0.0
  起被<emphasis>废弃</emphasis>。强烈建议不要依赖本函数。</simpara></warning>'>
+
+<!ENTITY warn.deprecated.function-8-1-0 '<warning
+xmlns="http://docbook.org/ns/docbook"><simpara>This function has been
+<emphasis>DEPRECATED</emphasis> as of PHP 8.1.0. Relying on this function
+is highly discouraged.</simpara></warning>'>
 
 <!ENTITY removed.php.future '本过时特性<emphasis
 xmlns="http://docbook.org/ns/docbook">将</emphasis>肯定会在未来被<emphasis xmlns="http://docbook.org/ns/docbook">移除</emphasis>。'>
@@ -653,6 +676,8 @@ xmlns="http://docbook.org/ns/docbook" linkend="context">上下文（context）</
 
 <!ENTITY return.void '没有返回值。'>
 
+<!ENTITY return.true.always '总是返回 &true; 。'>
+
 <!ENTITY return.callbacksort '在第一个参数小于，等于或大于第二个参数时，该比较函数必须相应地返回一个小于，等于或大于 0 的整数。'>
 
 <!ENTITY return.falseproblem '<warning xmlns="http://docbook.org/ns/docbook"><simpara>此函数可能返回布尔值
@@ -662,6 +687,15 @@ linkend="language.types.boolean">布尔类型</link>章节以获取更多信息�
 运算符</link>来测试此函数的返回值。</simpara></warning>'>
 
 
+<!-- FileInfo -->
+<!ENTITY fileinfo.parameters.finfo '<para xmlns="http://docbook.org/ns/docbook">An <classname>finfo</classname> instance, returned by <function>finfo_open</function>.</para>'>
+<!ENTITY fileinfo.changelog.finfo-object '<row xmlns="http://docbook.org/ns/docbook">
+ <entry>8.1.0</entry>
+ <entry>
+  The <parameter>finfo</parameter> parameter expects an <classname>finfo</classname>
+  instance now; previously, a &resource; was expected.
+ </entry>
+</row>'>
 
 <!-- OpenSSL -->
 <!ENTITY openssl.param.x509 '<varlistentry xmlns="http://docbook.org/ns/docbook">
@@ -709,10 +743,17 @@ PHP 编译时加入 freetype 支持时有效（<option role="configure">--with-f
 
 
 <!ENTITY gd.font.description '<varlistentry xmlns="http://docbook.org/ns/docbook"><term><parameter>
-font</parameter></term><listitem><para>取值对于内建的 latin2 编码字体可以是：1、2、3、4、5(更高的数字对应更大的字体)，或是其他由
-<function>imageloadfont</function> 注册的字体标识符。</para></listitem></varlistentry>'>
+font</parameter></term><listitem><para>取值对于内建的 latin2 编码字体可以是：1、2、3、4、5(更高的数字对应更大的字体)，
+或是通过 <function>imageloadfont</function> 返回的 <classname>GdFont</classname> 实例。</para></listitem></varlistentry>'>
 
 
+<!ENTITY gd.changelog.gdfont-instance '<row xmlns="http://docbook.org/ns/docbook">
+  <entry>8.1.0</entry>
+  <entry>
+  The <parameter>font</parameter> parameter now accepts both an <classname>GdFont</classname> instance
+  and an &integer;; previously only &integer; was accepted.
+  </entry>
+</row>'>
 
 <!ENTITY gd.ttf.fontfile "
     <varlistentry xmlns='http://docbook.org/ns/docbook'>
@@ -776,7 +817,8 @@ $font = 'SomeFont';
 
 <!ENTITY gd.source.width '源图象的宽度。'>
 
-<!ENTITY gd.image.path '文件保存的路径，如果未设置或为 &null;，将会直接输出原始图象流。'>
+<!ENTITY gd.image.path '文件保存的路径或者已打开的流资源（此方法返回后自动关闭该流资源），如果未设置或为 
+&null;，将会直接输出原始图象流。'>
 
 <!ENTITY gd.image.new '由文件或 URL 创建一个新图象。'>
 
@@ -979,6 +1021,18 @@ dbm_identifier</parameter></term><listitem><para>DBM 链接标识符，由 <func
 
 <!-- IMAP notes -->
 
+<!ENTITY imap.changelog.imap-param '<row xmlns="http://docbook.org/ns/docbook">
+ <entry>8.1.0</entry>
+ <entry>
+  The <parameter>imap</parameter> parameter expects an <classname>IMAP\Connection</classname>
+  instance now; previously, a &resource; was expected.
+ </entry>
+</row>'>
+
+<!ENTITY imap.imap-parameter.imap '<varlistentry xmlns="http://docbook.org/ns/docbook"><term><parameter>
+imap</parameter></term><listitem><para>An <classname>IMAP\Connection</classname> instance.</para></listitem></varlistentry>'>
+
+<!-- Deprecated -->
 <!ENTITY imap.imap-stream.description '<varlistentry xmlns="http://docbook.org/ns/docbook"><term><parameter>
 imap</parameter></term><listitem><para>由 <function>imap_open</function> 返回的 IMAP 流。</para></listitem></varlistentry>'>
 
@@ -1002,6 +1056,9 @@ Passing untrusted data to this parameter is <emphasis>insecure</emphasis>, unles
 </simpara></warning>'>
 
 <!-- intl notes -->
+<!ENTITY intl.parameter.intl-calendar '<para xmlns="http://docbook.org/ns/docbook">An <classname>IntlCalendar</classname> instance.</para>'>
+
+<!ENTITY intl.error.intl-calendar '<para xmlns="http://docbook.org/ns/docbook">On failure &false; is also returned. To detect error conditions use <function>intl_get_error_code</function>, or set up Intl to throw <link linkend="ini.intl.use-exceptions">exceptions</link>.</para>'>
 
 <!ENTITY intl.codepoint.parameter '<para xmlns="http://docbook.org/ns/docbook">The <type>int</type> codepoint value (e.g. <literal>0x2603</literal> for <emphasis>U+2603 SNOWMAN</emphasis>), or the character encoded as a UTF-8 <type>string</type> (e.g. <literal>"\u{2603}"</literal>)</para>'>
 
@@ -1009,14 +1066,18 @@ Passing untrusted data to this parameter is <emphasis>insecure</emphasis>, unles
 
 <!ENTITY intl.codepoint.example 'Testing different code points'>
 
+<!ENTITY intl.locale-len.return '<para xmlns="http://docbook.org/ns/docbook">Returns &null; when the length of <parameter>locale</parameter> exceeds <constant>INTL_MAX_LOCALE_LEN</constant>.</para>'>
+
 <!ENTITY intl.property.parameter '<para xmlns="http://docbook.org/ns/docbook">The Unicode property to lookup (see the <literal>IntlChar::PROPERTY_*</literal> constants).</para>'>
 
 <!ENTITY intl.property.example 'Testing different properties'>
 
 <!-- LDAP notes -->
-<!ENTITY ldap.parameter.ldap 'An LDAP resource, returned by <function xmlns="http://docbook.org/ns/docbook">ldap_connect</function>.'>
+<!ENTITY ldap.parameter.ldap 'An <classname xmlns="http://docbook.org/ns/docbook">LDAP\Connection</classname> instance, returned by <function xmlns="http://docbook.org/ns/docbook">ldap_connect</function>.'>
 
-<!ENTITY ldap.parameter.result 'An LDAP result resource, returned by <function xmlns="http://docbook.org/ns/docbook">ldap_list</function> or <function xmlns="http://docbook.org/ns/docbook">ldap_search</function>.'>
+<!ENTITY ldap.parameter.result 'An <classname xmlns="http://docbook.org/ns/docbook">LDAP\Result</classname> instance, returned by <function xmlns="http://docbook.org/ns/docbook">ldap_list</function> or <function xmlns="http://docbook.org/ns/docbook">ldap_search</function>.'>
+
+<!ENTITY ldap.parameter.entry 'An <classname xmlns="http://docbook.org/ns/docbook">LDAP\ResultEntry</classname> instance.'>
 
 <!ENTITY ldap.warn.control-paged '<warning xmlns="http://docbook.org/ns/docbook">
   <simpara>
@@ -1032,6 +1093,48 @@ Passing untrusted data to this parameter is <emphasis>insecure</emphasis>, unles
   <parameter>controls</parameter> is nullable now; previously, it defaulted to <literal>[]</literal>.
 </entry>
 </row>'>
+
+<!ENTITY ldap.changelog.ldap-object '<row xmlns="http://docbook.org/ns/docbook">
+ <entry>8.1.0</entry>
+ <entry>
+  The <parameter>ldap</parameter> parameter expects an <classname>LDAP\Connection</classname>
+  instance now; previously, a &resource; was expected.
+ </entry>
+</row>'>
+
+<!ENTITY ldap.changelog.entry-object '<row xmlns="http://docbook.org/ns/docbook">
+ <entry>8.1.0</entry>
+ <entry>
+  The <parameter>entry</parameter> parameter expects an <classname>LDAP\ResultEntry</classname>
+  instance now; previously, a &resource; was expected.
+ </entry>
+</row>'>
+
+<!ENTITY ldap.changelog.result-object '<row xmlns="http://docbook.org/ns/docbook">
+ <entry>8.1.0</entry>
+ <entry>
+  The <parameter>result</parameter> parameter expects an <classname>LDAP\Result</classname>
+  instance now; previously, a &resource; was expected.
+ </entry>
+</row>'>
+
+<!ENTITY ldap.changelog.return-result-object '<row xmlns="http://docbook.org/ns/docbook">
+ <entry>8.1.0</entry>
+ <entry>
+  Returns an <classname>LDAP\Result</classname> instance now;
+  previously, a &resource; was returned.
+ </entry>
+</row>'>
+
+<!ENTITY ldap.changelog.return-result-entry-object '<row xmlns="http://docbook.org/ns/docbook">
+ <entry>8.1.0</entry>
+ <entry>
+  Returns an <classname>LDAP\ResultEntry</classname> instance now;
+  previously, a &resource; was returned.
+ </entry>
+</row>'>
+
+<!ENTITY ldap.return-result 'Returns an <classname xmlns="http://docbook.org/ns/docbook">LDAP\Result</classname> instance,&return.falseforfailure;.'>
 
 <!-- mbstring notes -->
 
@@ -1055,6 +1158,13 @@ will be used as the character encoding for this function by default.</para></not
    现在 <parameter>encoding</parameter> 可以为 null。
   </entry>
  </row>'>
+
+<!ENTITY mbstring.changelog.needle-empty '<row xmlns="http://docbook.org/ns/docbook">
+ <entry>8.0.0</entry>
+ <entry>
+  <parameter>needle</parameter> now accepts an empty string.
+ </entry>
+</row>'>
 
 <!-- mcrypt notes -->
 
@@ -1097,6 +1207,46 @@ linkend="memcached.expiration" xmlns="http://docbook.org/ns/docbook">到期时�
 
 <!ENTITY password.parameter.password '用户的密码。'>
 
+<!-- pspell notes -->
+
+<!ENTITY pspell.changelog.pspell-dictionary '<row xmlns="http://docbook.org/ns/docbook">
+ <entry>8.1.0</entry>
+ <entry>
+  The <parameter>dictionary</parameter> parameter expects an <classname>PSpell\Dictionary</classname>
+  instance now; previously, a &resource; was expected.
+ </entry>
+</row>'>
+
+<!ENTITY pspell.changelog.pspell-config '<row xmlns="http://docbook.org/ns/docbook">
+ <entry>8.1.0</entry>
+ <entry>
+  The <parameter>config</parameter> parameter expects an <classname>PSpell\Config</classname>
+  instance now; previously, a &resource; was expected.
+ </entry>
+</row>'>
+
+<!ENTITY pspell.parameter.pspell-dictionary '<para xmlns="http://docbook.org/ns/docbook">An <classname>PSpell\Dictionary</classname> instance.</para>'>
+
+<!ENTITY pspell.parameter.pspell-config '<para xmlns="http://docbook.org/ns/docbook">An <classname>PSpell\Config</classname> instance.</para>'>
+
+<!-- socket entities -->
+
+<!ENTITY sockets.changelog.socket-param '<row xmlns="http://docbook.org/ns/docbook">
+  <entry>8.0.0</entry>
+  <entry>
+   <parameter>socket</parameter> is a <classname>Socket</classname> instance now;
+   previously, it was a <type>resource</type>.
+  </entry>
+ </row>'>
+
+<!ENTITY sockets.changelog.address-param '<row xmlns="http://docbook.org/ns/docbook">
+ <entry>8.0.0</entry>
+ <entry>
+  <parameter>address</parameter> is an <classname>AddressInfo</classname> instance now;
+  previously, it was a <type>resource</type>.
+ </entry>
+</row>'>
+
 <!-- geaman notes -->
 
 <!ENTITY gearman.parameter.host '任务服务器主机名。'>
@@ -1127,7 +1277,8 @@ linkend="memcached.expiration" xmlns="http://docbook.org/ns/docbook">到期时�
 
 
 <!ENTITY date.timezone.bc '<simpara xmlns="http://docbook.org/ns/docbook">在此请不要使用任何时区列表（除
-UTC 外），仅用于向后兼容，可能会引起某些错误行为。</simpara>'>
+UTC 外），仅用于向后兼容，可能会引起某些错误行为。此外，这些时区可能随时会从 IANA 时区数据库中移除。</simpara>'>
+
 
 
 <!ENTITY date.timezone.posix-signs '<simpara xmlns="http://docbook.org/ns/docbook">
@@ -1155,11 +1306,8 @@ It is strongly recommended to avoid timezone abbreviations.
 </simpara>'>
 
 <!ENTITY date.timezone.errors.description '<para xmlns="http://docbook.org/ns/docbook">
-在每 次调用日期/时间函数时，如果时区无效则会引发 <constant>E_NOTICE</constant> 错误，如果使用系统设定值或 <varname>TZ</varname>
-环境变量，则会引发 <constant>E_STRICT</constant> 或 <constant>E_WARNING</constant> 消息。参见
+在每次调用日期/时间函数时，如果时区无效则会引发 <constant>E_NOTICE</constant> 错误。参见
 <function>date_default_timezone_set</function>。</para>'>
-
-
 
 <!ENTITY date.timezone.errors.changelog '<row xmlns="http://docbook.org/ns/docbook"><entry>5.1.0</entry><entry><para>
 现在发布 <constant>E_STRICT</constant> 和 <constant>E_NOTICE</constant>
@@ -1215,7 +1363,9 @@ object</parameter></term><listitem><para>仅过程化风格：由 <function>time
 <!ENTITY dom.node.inserted '此节点出现在文档中，除非是用诸如
 <function xmlns="http://docbook.org/ns/docbook">DOMNode->appendChild</function> 等函数来将其插入。'>
 
-<!ENTITY dom.allowstatic '<para xmlns="http://docbook.org/ns/docbook">此方法<emphasis>可以</emphasis>被静态调用,但会抛出一个 <constant>E_STRICT</constant> 错误。</para>'>
+<!ENTITY dom.allowstatic '<para xmlns="http://docbook.org/ns/docbook">在 PHP 8.0.0 之前<emphasis>可以</emphasis>静态调用此方法，
+但会发出 <constant>E_DEPRECATED</constant> 错误。自 PHP 8.0.0 起，静态调用此方法会抛出 <classname>Error</classname> 异常</para>'>
+
 <!ENTITY dom.malformederror '<para xmlns="http://docbook.org/ns/docbook">尽管非正确格式化的 HTML 仍应该被成功调入，但此函数会在遇到错误标记时产生 <constant>E_WARNING</constant> 错误。<link linkend="function.libxml-use-internal-errors">libxml 错误处理函数</link>可以用来处理这类错误。</para>'>
 <!ENTITY dom.note.utf8 '<note xmlns="http://docbook.org/ns/docbook"><para>此 DOM 扩展采用 UTF-8 编码。在 ISO-8859-1 编码下，使用 <function>utf8_encode</function> 和 <function>utf8_decode</function> 来处理，其它编码下使用 <link linkend="ref.iconv">iconv</link> 函数处理。</para></note>'>
 <!ENTITY dom.note.json '<note xmlns="http://docbook.org/ns/docbook"><para>When using <function>json_encode</function> on a <classname>DOMDocument</classname> object the result will be that of encoding an empty object.</para></note>'>
@@ -1323,7 +1473,7 @@ object</parameter></term><listitem><para>仅过程化风格：由 <function>time
 </para>
 
 <para xmlns='http://docbook.org/ns/docbook'>
- 如果不指定，PHP 使用环境变量来确定连接的 <literal>Oracle 实例</literal>，诸如
+ 如果不指定或者为 &null;，PHP 使用环境变量来确定连接的 <literal>Oracle 实例</literal>，诸如
  <constant>TWO_TASK</constant>（Linux 下）或  <constant>LOCAL</constant>（Windows 下）与 <constant>ORACLE_SID</constant> 等。
 </para>
 
@@ -1585,6 +1735,56 @@ xmlns="http://docbook.org/ns/docbook">PECL</acronym> 扩展的
 <!ENTITY pecl.moved-ver '此扩展已被移至
 <link xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="&url.pecl;">PECL</link> 资源库且不再与 PHP 捆绑。'>
 
+<!-- PGSQL entities -->
+
+<!ENTITY pgsql.parameter.connection '<para xmlns="http://docbook.org/ns/docbook">An <classname>PgSql\Connection</classname> instance.</para>'>
+
+<!ENTITY pgsql.parameter.connection-with-unspecified-default '<para xmlns="http://docbook.org/ns/docbook">An <classname>PgSql\Connection</classname> instance.
+When <parameter>connection</parameter> is unspecified, the default connection is used.
+The default connection is the last connection made by <function>pg_connect</function>
+or <function>pg_pconnect</function>.</para>'>
+
+<!ENTITY pgsql.parameter.connection-with-nullable-default '<para xmlns="http://docbook.org/ns/docbook">An <classname>PgSql\Connection</classname> instance.
+When <parameter>connection</parameter> is &null;, the default connection is used.
+The default connection is the last connection made by <function>pg_connect</function>
+or <function>pg_pconnect</function>.</para>'>
+
+<!ENTITY pgsql.parameter.result '<para xmlns="http://docbook.org/ns/docbook">An <classname>PgSql\Result</classname> instance, returned by <function>pg_query</function>,
+<function>pg_query_params</function> or <function>pg_execute</function>(among others).</para>'>
+
+<!ENTITY pgsql.parameter.lob '<para xmlns="http://docbook.org/ns/docbook">An <classname>PgSql\Lob</classname> instance, returned by <function>pg_lo_open</function>.</para>'>
+
+<!ENTITY pgsql.changelog.connection-object '<row xmlns="http://docbook.org/ns/docbook">
+ <entry>8.1.0</entry>
+ <entry>
+  The <parameter>connection</parameter> parameter expects an <classname>PgSql\Connection</classname>
+  instance now; previously, a &resource; was expected.
+ </entry>
+</row>'>
+
+<!ENTITY pgsql.changelog.result-object '<row xmlns="http://docbook.org/ns/docbook">
+ <entry>8.1.0</entry>
+ <entry>
+  The <parameter>result</parameter> parameter expects an <classname>PgSql\Result</classname>
+  instance now; previously, a &resource; was expected.
+ </entry>
+</row>'>
+
+<!ENTITY pgsql.changelog.lob-object '<row xmlns="http://docbook.org/ns/docbook">
+ <entry>8.1.0</entry>
+ <entry>
+  The <parameter>lob</parameter> parameter expects an <classname>PgSql\Lob</classname>
+  instance now; previously, a &resource; was expected.
+ </entry>
+</row>'>
+
+<!ENTITY pgsql.changelog.return-result-object '<row xmlns="http://docbook.org/ns/docbook">
+ <entry>8.1.0</entry>
+ <entry>
+  Returns an <classname>PgSql\Result</classname> instance now;
+  previously, a &resource; was returned.
+ </entry>
+</row>'>
 
 <!-- Common pieces for reference part END -->
 
@@ -1621,20 +1821,15 @@ scale</parameter></term><listitem><para>此可选参数用于设置结果中小�
 
 
 
-<!-- FBSQL Notes -->
-<!ENTITY fbsql.link-identifier.description '<varlistentry xmlns="http://docbook.org/ns/docbook"><term><parameter>
-link_identifier</parameter></term><listitem><para>由
-<function>fbsql_connect</function> 或
-<function>fbsql_pconnect</function> 返回的 FrontBase 链接标识符.</para>
-<para>如可选并未指定，函数会尝试查找一个到 FrontBase 服务器的开放链接，且如没有找到这样的链接，会尝试通过不带参数调用 <function>fbsql_connect</function> 来创建一个。</para>
-</listitem></varlistentry>'>
-
-
-
-<!ENTITY fbsql.result.description '<varlistentry xmlns="http://docbook.org/ns/docbook"><term><parameter>
-result</parameter></term><listitem><para>由 <function>fbsql_query</function>
-或 <function>fbsql_db_query</function> 返回的结果标识符。</para></listitem></varlistentry>'>
-
+<!-- FTP Notes -->
+<!ENTITY ftp.changelog.ftp-param '<row xmlns="http://docbook.org/ns/docbook">
+ <entry>8.1.0</entry>
+ <entry>
+  The <parameter>ftp</parameter> parameter expects an <classname>FTP\Connection</classname>
+  instance now; previously, a &resource; was expected.
+ </entry>
+</row>'>
+<!ENTITY ftp.parameter.ftp '<para xmlns="http://docbook.org/ns/docbook">An <classname>FTP\Connection</classname> instance.</para>'>
 
 <!-- GMP Notes -->
 <!ENTITY gmp.return '<classname xmlns="http://docbook.org/ns/docbook">GMP</classname> 对象。'>
@@ -1666,6 +1861,11 @@ prepared statements</link> should be used instead. Alternatively, the
 data must be properly formatted and all strings must be escaped using 
 the <function>mysqli_real_escape_string</function>
 function.</para></warning>'>
+
+<!-- Notes for PCRE -->
+<!ENTITY pcre.pattern.warning '<para xmlns="http://docbook.org/ns/docbook">
+If the regex pattern passed does not compile to a valid regex, an <constant>E_WARNING</constant> is emitted.
+</para>'>
 
 <!-- Notes for SAPI/Apache -->
 <!ENTITY apache.req.module '<simpara xmlns="http://docbook.org/ns/docbook">仅在
