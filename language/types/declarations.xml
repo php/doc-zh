@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: b57f8f256a4773fc09d19733c70ef8816074d12d Maintainer: avenger Status: partial -->
-<!-- CREDITS: mowangjuanzi -->
+<!-- EN-Revision: 9dd74f527dc164165dee7f19058bec75a901e770 Maintainer: avenger Status: partial -->
 <sect1 xml:id="language.types.declarations">
  <title>类型声明</title>
 
@@ -159,7 +158,7 @@ Stack trace:
   <title>mixed</title>
 
   <para>
-   <type>mixed</type> 等同于 <link linkend="language.types.declarations.composite.union">联合类型</link>
+   <type>mixed</type> 等同于 <link linkend="language.types.declarations.union">联合类型</link>
    <type class="union">
     <type>object</type><type>resource</type><type>array</type><type>string</type>
     <type>int</type><type>float</type><type>bool</type><type>null</type>
@@ -374,55 +373,29 @@ NULL
   </note>
  </sect2>
 
- <sect2 xml:id="language.types.declarations.composite">
-  <title>复合类型</title>
+ <sect2 xml:id="language.types.declarations.union">
+  <title>联合类型</title>
   <para>
-   简单类型可以组合为复合类型。
-   PHP 允许使用以下方式组合类型：
+    联合类型接受多个不同的类型做为参数。声明联合类型的语法为
+    <literal>T1|T2|...</literal>。联合类型自 PHP 8.0.0 起可用。
   </para>
 
-  <itemizedlist>
-   <listitem>
-    <simpara>
-     PHP 8.0.0 起支持简单类型联合。
-    </simpara>
-   </listitem>
-   <listitem>
-    <simpara>
-     PHP 8.1.0 起支持类型类（接口（interface） 和类名）的交集。
-    </simpara>
-   </listitem>
-  </itemizedlist>
-
-  <caution>
-   <simpara>
-    不能使用联合类型组合交集。
-   </simpara>
-  </caution>
-
-  <sect3 xml:id="language.types.declarations.composite.union">
-   <title>联合类型</title>
+  <sect3 xml:id="language.types.declarations.union.nullable">
+   <title>允许为空的联合类型</title>
    <para>
-     联合类型接受多个不同的简单类型做为参数。声明联合类型的语法为
-     <literal>T1|T2|...</literal>。联合类型自 PHP 8.0.0 起可用。
+    <literal>null</literal> 类型允许在联合类型中使用，例如
+    <literal>T1|T2|null</literal> 代表接受一个空值为参数。已经存在的 <literal>?T</literal>
+    语法可以视为以下联合类型的一个简写 <literal>T|null</literal>。
    </para>
-
-    <sect4 xml:id="language.types.declarations.composite.union.nullable">
-     <title>允许为空的联合类型</title>
-     <para>
-      <literal>null</literal> 类型允许在联合类型中使用，例如
-      <literal>T1|T2|null</literal> 代表接受一个空值为参数。已经存在的 <literal>?T</literal>
-      语法可以视为以下联合类型的一个简写 <literal>T|null</literal>。
-     </para>
 
    <caution>
     <simpara>
      <literal>null</literal> 不能作为一个独立的类型使用。
     </simpara>
    </caution>
-  </sect4>
+  </sect3>
 
-  <sect4 xml:id="language.types.declarations.composite.union.false">
+  <sect3 xml:id="language.types.declarations.union.false">
    <title>false 伪类型</title>
    <para>
     通过联合类型支持字面类型（Literal Type）<literal>false</literal>，
@@ -439,25 +412,15 @@ NULL
    </caution>
    <caution>
     <simpara>
-     <literal>true</literal> 字面类型<emphasis>不</emphasis>存在。
+     <literal>true</literal> 字面类型<emphasis>不存在</emphasis>。
     </simpara>
    </caution>
-     </sect4>
   </sect3>
 
-  <sect3 xml:id="language.types.declarations.composite.intersection">
-   <title>交集类型</title>
-   <para>
-    交集类型声明接受满足多个类类型声明，而不是仅满足一个类类型声明的值。
-    交集类型需要使用 <literal>T1&amp;T2&amp;...</literal> 语法指定。
-    PHP 8.1.0 起可以使用交集类型。
-   </para>
-  </sect3>
-
-  <sect3 xml:id="language.types.declarations.composite.redundant">
+  <sect3 xml:id="language.types.declarations.union.redundant">
    <title>重复冗余的类型</title>
    <para>
-    为了能在复合类型声明中暴露简单的 bug，不需要加载 class 
+    为了能在联合类型声明中暴露简单的 bug，不需要加载 class 
     就可以在编译时让重复冗余的类型产生错误。
     包含：
 
@@ -465,51 +428,24 @@ NULL
      <listitem>
       <simpara>
        解析出来的类型只能出现一次。例如这样的类型
-       <literal>int|string|INT</literal> 或者 <literal>Countable&amp;Traversable&amp;COUNTABLE</literal> 
-       会导致错误。
+       <literal>int|string|INT</literal> 会导致错误。
       </simpara>
      </listitem>
      <listitem>
       <simpara>
-      使用 <type>mixed</type> 会导致错误。
+       使用了 <type>bool</type> 时就不能再附带使用 <type>false</type>。
       </simpara>
      </listitem>
      <listitem>
-      <simpara>联合类型：</simpara>
-      <itemizedlist>
-       <listitem>
-        <simpara>
-          使用了 <type>bool</type> 时就不能再附带使用 <type>false</type>。
-          </simpara>
-        </listitem>
-        <listitem>
-          <simpara>
-          使用了 <type>object</type> 时就不能再附带使用 class 类型。
-          </simpara>
-        </listitem>
-        <listitem>
-          <simpara>
-          使用了 <type>iterable</type> 时，<type>array</type>、
-          <classname>Traversable</classname> 都不能再附带使用。
-        </simpara>
-      </listitem>
-      </itemizedlist>
+      <simpara>
+       使用了 <type>object</type> 时就不能再附带使用 class 类型。
+      </simpara>
      </listitem>
      <listitem>
-      <simpara>交集类型：</simpara>
-      <itemizedlist>
-       <listitem>
-        <simpara>
-         使用非类型类的类型会导致错误。
-        </simpara>
-       </listitem>
-       <listitem>
-        <simpara>
-         使用 <type>self</type>、 <type>parent</type>、
-         <type>static</type> 会导致错误。
-        </simpara>
-       </listitem>
-      </itemizedlist>
+      <simpara>
+       使用了 <type>iterable</type> 时，<type>array</type>、
+       <classname>Traversable</classname> 都不能再附带使用。
+      </simpara>
      </listitem>
     </itemizedlist>
    </para>
@@ -535,22 +471,19 @@ NULL
 <?php
 function foo(): int|INT {} // 不允许
 function foo(): bool|false {} // 不允许
-function foo(): int&Traversable {} // 不允许
-function foo(): self&Traversable {} // 不允许
 
 use A as B;
 function foo(): A|B {} // 不允许 ("use" 是名称解析的一部分)
-function foo(): A&B {} // 不允许 ("use" 是名称解析的一部分)
 
 class_alias('X', 'Y');
 function foo(): X|Y {} // 允许 (运行时才能知道重复性)
-function foo(): X&Y {} // 允许 (运行时才能知道重复性)
 ?>
 ]]>
      </programlisting>
     </informalexample>
    </para>
   </sect3>
+
  </sect2>
 
  <sect2 xml:id="language.types.declarations.return-only">
@@ -899,4 +832,3 @@ vim600: syn=xml fen fdm=syntax fdl=2 si
 vim: et tw=78 syn=sgml
 vi: ts=1 sw=1
 -->
-
