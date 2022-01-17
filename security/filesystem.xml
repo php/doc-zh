@@ -124,19 +124,19 @@ if (!ctype_alnum($username) || !preg_match('/^(?:[a-z0-9_-]|\.(?!\.))+$/iD', $us
     </example>
    </para>
    <para>
-    根据操作系统的不同，需要关心各种各样的文件，包含设备条目（/dev/ 或 COM1）、配置文件（/etc/ 文件和 .ini 文件）、
+    根据操作系统的不同，需要关心各种各样的文件，比如设备条目（/dev/ 或 COM1）、配置文件（/etc/ 文件和 .ini 文件）、
     众所周知的文件存储区域（/home/， My Documents）等等。出于这个原因，创建一个策略禁止所有权限而只开放明确允许的通常更容易些。
    </para>
    <sect1 xml:id="security.filesystem.nullbytes">
-    <title>Null 字节相关问题</title>
+    <title>结束符（Null bytes）相关问题</title>
     <simpara>
-     由于 <acronym>PHP</acronym> 使用底层 C 函数进行文件系统相关操作，因此它可能会以完全意想不到的方式处理 null 字节。
-     由于 null 字节在 C 中表示字符串的结尾，包含 null 的字符串不会被完整的考虑，确切的说仅考虑出现在 null 字节之前的字符串。
+     由于 <acronym>PHP</acronym> 使用底层 C 函数进行文件系统相关操作，因此它可能会以完全意想不到的方式处理结束符。
+     在 C 语言中结束符标识字符串的结尾，所以一个完整的字符串是从其开头到遇见结束符为止。
 
      下面的示例程序展示了易受攻击的代码，演示了这个问题：
     </simpara>
     <example>
-     <title>会被 null 字节攻击的代码</title>
+     <title>会被结束符攻击的代码</title>
      <programlisting role="php">
 <![CDATA[
 <?php
@@ -144,7 +144,7 @@ $file = $_GET['file']; // "../../etc/passwd\0"
 if (file_exists('/home/wwwrun/'.$file.'.php')) {
     // 当 /home/wwwrun/../../etc/passwd 文件存在的时候 file_exists 将会返回 true
     include '/home/wwwrun/'.$file.'.php';
-    // /etc/passwd 文件将会被包括在内
+    // 将会加载 /etc/passwd 文件
 }
 ?>
 ]]>
