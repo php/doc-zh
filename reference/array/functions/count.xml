@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 8a7c2e03689cc5edf0dfb6710c9d3fe0b450849f Maintainer: daijie Status: ready -->
+<!-- EN-Revision: 3ef3e56c80f7ae6b6a7291b7eb57dc6250b50801 Maintainer: daijie Status: ready -->
   <refentry xml:id="function.count" xmlns="http://docbook.org/ns/docbook">
    <refnamediv>
     <refname>count</refname>
-    <refpurpose>计算数组中的单元数目，或对象中的属性个数</refpurpose>
+    <refpurpose>计算数组或 <interfacename>Countable</interfacename> 对象中的所有元素的数量</refpurpose>
    </refnamediv>
  <refsect1 role="description">
   &reftitle.description;
@@ -14,17 +14,8 @@
    <methodparam choice="opt"><type>int</type><parameter>mode</parameter><initializer><constant>COUNT_NORMAL</constant></initializer></methodparam>
   </methodsynopsis>
   <para>
-   统计出数组里的所有元素的数量，或者对象里的东西。
-  </para>
-    <para>
-     对于对象，如果安装了 <link linkend="ref.spl">SPL</link>，可以通过实现
-     <literal>Countable</literal> 接口对 <function>count</function>挂钩（hook）
-     。该接口只有一个方法
-     <methodname>Countable::count</methodname>，此方法为 <function>count</function>
-     函数返回值。
-    </para>
-    <para>
-     关于 PHP 中如何实现和使用数组可以参考手册中<link linkend="language.types.array">数组</link>章节中的详细描述。
+   当对数组使用时计算所有元素的数量。当对实现了 <interfacename>Countable</interfacename>
+   接口的对象使用时返回 <methodname>Countable::count</methodname> 方法的返回值。
   </para>
  </refsect1>
  <refsect1 role="parameters">
@@ -35,7 +26,7 @@
      <term><parameter>value</parameter></term>
      <listitem>
       <para>
-       数组或者 <classname>Countable</classname>  对象。
+       数组或者 <interfacename>Countable</interfacename>  对象。
       </para>
      </listitem>
     </varlistentry>
@@ -62,13 +53,10 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   返回 <parameter>value</parameter> 中的单元数目。
-   
-   如果参数既不是数组，也不是实现
-     <literal>Countable</literal> 接口的对象，将返回
-     <literal>1</literal>。
-   有个例外：如果
-     <parameter>value</parameter> 是 &null; 则结果是 <literal>0</literal>。
+   返回 <parameter>value</parameter> 中的元素的数量。在 PHP 8.0.0
+   之前，如果参数既不是数组也不是 <literal>Countable</literal> 接口的对象，将返回
+   <literal>1</literal>。当 <parameter>value</parameter> 为 null 时返回 
+   <literal>0</literal>。
   </para>
  </refsect1>
 
@@ -105,7 +93,7 @@
  <refsect1 role="examples">
   &reftitle.examples;
   <para>
-   <example>
+   <example xml:id="count.example.basic">
     <title><function>count</function> 例子</title>
     <programlisting role="php">
 <![CDATA[
@@ -132,7 +120,7 @@ int(3)
    </example>
   </para>
   <para>
-   <example>
+   <example xml:id="count.example.badexample">
     <title><function>count</function> 非 Countable|array 的例子 （这是个反例，请勿模仿）</title>
     <programlisting role="php">
      <![CDATA[
@@ -179,7 +167,7 @@ Fatal error: Uncaught TypeError: count(): Argument #1 ($var) must be of type Cou
    </example>
   </para>
   <para>
-   <example>
+   <example xml:id="count.example.recursive">
     <title>递归 <function>count</function> 例子</title>
     <programlisting role="php">
 <![CDATA[
@@ -187,15 +175,53 @@ Fatal error: Uncaught TypeError: count(): Argument #1 ($var) must be of type Cou
 $food = array('fruits' => array('orange', 'banana', 'apple'),
               'veggie' => array('carrot', 'collard', 'pea'));
 
-// recursive count
-echo count($food, COUNT_RECURSIVE); // output 8
+// 递归计数
+var_dump(count($food, COUNT_RECURSIVE));
 
-// normal count
-echo count($food); // output 2
+// 常规计数
+var_dump(count($food));
 
 ?>
 ]]>
     </programlisting>
+    &example.outputs;
+    <screen role="php">
+<![CDATA[
+int(8)
+int(2)
+]]>
+    </screen>
+   </example>
+  </para>
+  <para>
+   <example xml:id="count.example.countable">
+    <title><interfacename>Countable</interfacename> 对象</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+class CountOfMethods implements Countable
+{
+    private function someMethod()
+    {
+    }
+
+    public function count(): int
+    {
+        return count(get_class_methods($this));
+    }
+}
+
+$obj = new CountOfMethods();
+var_dump(count($obj));
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen role="php">
+<![CDATA[
+int(2)
+]]>
+    </screen>
    </example>
   </para>
  </refsect1>
@@ -209,12 +235,12 @@ echo count($food); // output 2
     <member><function>empty</function></member>
     <member><function>strlen</function></member>
     <member><function>is_countable</function></member>
+    <member><link linkend="language.types.array">Array 数组</link></member>
    </simplelist>
   </para>
  </refsect1>
 
 </refentry>
-  
 
 <!-- Keep this comment at the end of the file
 Local variables:
