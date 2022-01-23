@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 9e0f03ac354d797d1d16c0fcc1663e5e170f2727 Maintainer: daijie Status: ready -->
+<!-- EN-Revision: 43ac336818cb3a18011d9b6ba91514f3332eb46d Maintainer: daijie Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
   <refentry xml:id="function.list" xmlns="http://docbook.org/ns/docbook">
    <refnamediv>
     <refname>list</refname>
@@ -15,29 +16,14 @@
   </methodsynopsis>
     <para>
      像 <function>array</function> 一样，这不是真正的函数，而是语言结构。
-     <function>list</function>
-     可以在单次操作内就为一组变量赋值。
+     <function>list</function> 可以在单次操作内为一组变量赋值。字符串不能解包且
+     <function>list</function> 表达式不能完全为空。
     </para>
   <note>
    <para>
     在 PHP 7.1.0 之前的版本，<function>list</function> 仅能用于数字索引的数组，并假定数字索引从 0 开始。
    </para>
   </note>
-  <warning>
-   <para>
-    PHP 5 里，<function>list</function> 从最右边的参数开始赋值；
-    PHP 7 里，<function>list</function> 从最左边的参数开始赋值。
-   </para>
-   <para>
-    如果你用单纯的变量，不用担心这一点。
-    但是如果你用了具有索引的数组，通常你期望得到的结果和在
-       <function>list</function> 中写的一样是从左到右的，但在 PHP 5 里实际上不是，
-    它是以相反顺序赋值的。
-   </para>
-   <para>
-    通常而言，不建议依赖于操作的顺序，在未来可能会再次发生修改。
-   </para>
-  </warning>
    </refsect1>
    <refsect1 role="parameters">
   &reftitle.parameters;
@@ -95,24 +81,6 @@
         这就可以解构非数字键或者无顺序的数组。
        </entry>
       </row>
-      <row>
-       <entry>7.0.0</entry>
-       <entry>
-         赋值操作的顺序发生了变化。
-       </entry>
-      </row>
-      <row>
-       <entry>7.0.0</entry>
-       <entry>
-         <function>list</function> 表达式不再可以完全为空。
-       </entry>
-      </row>
-      <row>
-       <entry>7.0.0</entry>
-       <entry>
-         字符串无法再被拆包（unpack）。
-       </entry>
-      </row>
      </tbody>
     </tgroup>
    </informaltable>
@@ -154,26 +122,12 @@ var_dump($bar); // NULL
     <title><function>list</function> 用法的一个例子</title>
     <programlisting role="php">
 <![CDATA[
-<table>
- <tr>
-  <th>Employee name</th>
-  <th>Salary</th>
- </tr>
-
 <?php
-
-$result = $pdo->query("SELECT id, name, salary FROM employees");
-while (list($id, $name, $salary) = $result->fetch(PDO::FETCH_NUM)) {
-    echo " <tr>\n" .
-          "  <td><a href=\"info.php?id=$id\">$name</a></td>\n" .
-          "  <td>$salary</td>\n" .
-          " </tr>\n";
+$result = $pdo->query("SELECT id, name FROM employees");
+while (list($id, $name) = $result->fetch(PDO::FETCH_NUM)) {
+    echo "id: $id, name: $name\n";
 }
-
-
 ?>
-
-</table>
 ]]>
     </programlisting>
    </example>
@@ -197,53 +151,6 @@ var_dump($a, $b, $c);
 int(1)
 int(2)
 int(3)
-]]>
-    </screen>
-   </example>
-  </para>
-  <para>
-   <example>
-    <title>在 <function>list</function> 中使用数组索引</title>
-    <programlisting role="php">
-<![CDATA[
-<?php
-
-$info = array('coffee', 'brown', 'caffeine');
-
-list($a[0], $a[1], $a[2]) = $info;
-
-var_dump($a);
-
-?>
-]]>
-    </programlisting>
-    <para>
-     产生如下输出（注意单元顺序和 <function>list</function> 语法中所写的顺序的比较）：
-    </para>
-    &example.outputs.7;
-    <screen>
-<![CDATA[
-array(3) {
-  [0]=>
-  string(6) "coffee"
-  [1]=>
-  string(5) "brown"
-  [2]=>
-  string(8) "caffeine"
-}
-]]>
-    </screen>
-    &example.outputs.5;
-    <screen>
-<![CDATA[
-array(3) {
-  [2]=>
-  string(8) "caffeine"
-  [1]=>
-  string(5) "brown"
-  [0]=>
-  string(6) "coffee"
-}
 ]]>
     </screen>
    </example>
