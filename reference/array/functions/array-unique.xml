@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: ecc5ebb63c8de2d9076f8fddfc0eff693c48acb4 Maintainer: HonestQiao Status: ready -->
+<!-- EN-Revision: cbac1ecf71d754707d69bdc344c4031c157eaa54 Maintainer: HonestQiao Status: ready -->
+<!-- CREDITS: mowangjuanzi --> 
 <refentry xml:id="function.array-unique" xmlns="http://docbook.org/ns/docbook">
    <refnamediv>
     <refname>array_unique</refname>
@@ -8,19 +9,18 @@
    </refnamediv>
  <refsect1 role="description">
   &reftitle.description;
-     <methodsynopsis>
-      <type>array</type><methodname>array_unique</methodname>
-      <methodparam><type>array</type><parameter>array</parameter></methodparam>
-    <methodparam choice="opt"><type>int</type><parameter>sort_flags</parameter><initializer>SORT_STRING</initializer></methodparam>
-     </methodsynopsis>
+  <methodsynopsis>
+   <type>array</type><methodname>array_unique</methodname>
+   <methodparam><type>array</type><parameter>array</parameter></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>flags</parameter><initializer><constant>SORT_STRING</constant></initializer></methodparam>
+  </methodsynopsis>
     <para>
      <function>array_unique</function> 接受
      <parameter>array</parameter> 作为输入并返回没有重复值的新数组。
     </para>
     <para>
-     注意键名保留不变。<function>array_unique</function>
-     先将值作为字符串排序，然后对每个值只保留第一个遇到的键名，接着忽略所有后面的键名。这并不意味着在未排序的
-     <parameter>array</parameter> 中同一个值的第一个出现的键名会被保留。
+     注意键名保留不变。如果在指定了 <parameter>flags</parameter> 时存在多个相等的元素，
+     会保留第一个相等的元素的键（key）和值（value）。
     </para>
     <note>
      <simpara>
@@ -44,10 +44,10 @@
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>sort_flags</parameter></term>
+     <term><parameter>flags</parameter></term>
      <listitem>
       <para>
-       第二个可选参数<parameter>sort_flags</parameter> 可用于修改排序行为：
+       第二个可选参数<parameter>flags</parameter> 可用于修改排序行为：
       </para>
       <para>
        排序类型标记：
@@ -93,17 +93,11 @@
      </thead>
      <tbody>
       <row>
-       <entry>5.2.10</entry>
+       <entry>7.2.0</entry>
        <entry>
-        修改回 <parameter>sort_flags</parameter> 的默认值为
-        <constant>SORT_STRING</constant>。
-       </entry>
-      </row>
-      <row>
-       <entry>5.2.9</entry>
-       <entry>
-        增加可选选项<parameter>sort_flags</parameter>，默认值 <constant>SORT_REGULAR</constant>。
-        5.2.9 之前，此函数内部使用 <constant>SORT_STRING</constant> 排序。
+        如果 <parameter>flags</parameter> 是 <constant>SORT_STRING</constant>，
+        之前会复制 <parameter>array</parameter> 并移除非唯一数组（之后并不打包数组），
+        现在是通过添加唯一元素来生成新数组。这可能会导致不同的数字索引。
        </entry>
       </row>
      </tbody>
@@ -163,15 +157,6 @@ array(2) {
    </example>
   </para>
  </refsect1>
- 
- <refsect1 role="seealso">
-  &reftitle.seealso;
-  <para>
-   <simplelist>
-    <member><function>array_count_values</function></member>
-   </simplelist>
-  </para>
- </refsect1>
 
  <refsect1 role="notes">
   &reftitle.notes;
@@ -181,8 +166,17 @@ array(2) {
    </simpara>
   </note>
  </refsect1>
-  </refentry>
 
+<refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>array_count_values</function></member>
+   </simplelist>
+  </para>
+ </refsect1>
+
+</refentry>
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
