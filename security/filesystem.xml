@@ -10,12 +10,12 @@
     要确保所有有权限访问该文件系统的用户都可以安全的读取文件。
    </simpara>
    <simpara>
-    由于 <acronym>PHP</acronym> 被设计为以用户级别访问文件系统，
-    因此完全可以编写 <acronym>PHP</acronym> 脚本来读取系统文件（例如 /etc/passwd），
-    修改网络连接，发送大量打印任务等。这有一些明显的影响，因为需要确保读写的是合适的文件。
+    <acronym>PHP</acronym> 被设计为以用户级别访问文件系统，
+    因此完全可以编写 <acronym>PHP</acronym> 脚本来读取系统文件，例如 /etc/passwd，
+    修改网络连接，发送大量打印任务等。这有一些明显的影响，因此需要确保读写的是合适的文件。
    </simpara>
    <simpara>
-    请看下面的脚本，用户表示想要删除自己主目录下的文件。
+    请看下面的脚本，用户表示想要删除自己主目录下的一个文件。
     假设 <acronym>PHP</acronym> web 界面通常用于文件管理，
     因此 Apache 用户允许删除用户主目录中的文件。
    </simpara>
@@ -38,9 +38,9 @@ echo "The file has been deleted!";
      </programlisting>
     </example>
    由于 username 和 filename 由用户表单中提交，那就能提交属于其他人的 username
-   和 filename，并删除它们，即使不被允许这么做。在这种情况下，
-   应该使用一些其它形式的身份验证。不妨考虑一下，如果提交的变量是 "../etc/" 和 "passwd" 
-   会发生什么。然后代码将会有效的解读为：
+   和 filename，甚至可以删除不被允许的文件。这种情况下，
+   应该使用一些其它形式的身份验证。不妨考虑一下，如果提交的变量是 “../etc/” 和 “passwd” 
+   会发生什么。上面代码将等同于：
     <example>
      <title>... 文件系统攻击</title>
      <programlisting role="php">
@@ -100,8 +100,8 @@ echo htmlentities($logstring, ENT_QUOTES);
      </programlisting>
     </example>
     然而，这样做也是有缺陷的。如果认证系统允许用户创建自己的登录用户名，
-    而用户选择 "../etc/" 作为登录名，系统将再次暴露。
-    出于这个原因，可能更愿意编写自定义的检查：
+    而用户选择 “../etc/” 作为登录名，系统将再次暴露。
+    出于这个原因，需要编写自定义检查：
     <example>
      <title>更安全的文件名检查</title>
      <programlisting role="php">
@@ -125,15 +125,15 @@ if (!ctype_alnum($username) || !preg_match('/^(?:[a-z0-9_-]|\.(?!\.))+$/iD', $us
    </para>
    <para>
     根据操作系统的不同，需要关心各种各样的文件，比如设备条目（/dev/ 或 COM1）、配置文件（/etc/ 文件和 .ini 文件）、
-    众所周知的文件存储区域（/home/， My Documents）等等。出于这个原因，创建一个策略禁止所有权限而只开放明确允许的通常更容易些。
+    众所周知的文件存储区域（/home/， My Documents）等等。出于这个原因，创建一个禁止所有权限而只开放明确允许的策略通常更容易些。
    </para>
    <sect1 xml:id="security.filesystem.nullbytes">
     <title>空字符（Null bytes）相关问题</title>
     <simpara>
      由于 <acronym>PHP</acronym> 使用底层 C 函数进行文件系统相关操作，因此它可能会以完全意想不到的方式处理空字符。
-     在 C 语言中空字符标识字符串的结尾，所以一个完整的字符串是从其开头到遇见空字符为止。
+     在 C 语言中空字符标识字符串的结束，所以一个完整的字符串是从其开头到遇见空字符为止。
 
-     下面的示例程序展示了易受攻击的代码，演示了这个问题：
+     下面的示例展示了易受攻击的代码，演示了这个问题：
     </simpara>
     <example>
      <title>会被空字符攻击的代码</title>
@@ -151,10 +151,10 @@ if (file_exists('/home/wwwrun/'.$file.'.php')) {
      </programlisting>
     </example>
     <para>
-     因此，在文件系统操作中都应该正确检查任何被污染的字符串。这是上个示例的更好版本：
+     因此，在文件系统操作中都应该正确检查任何被污染的字符串。这是上个示例的改进版本：
     </para>
     <example>
-     <title>正确验证输入</title>
+     <title>验证输入的正确性</title>
      <programlisting role="php">
 <![CDATA[
 <?php
