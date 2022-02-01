@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: a049ea0cfbd4bf2554f0a134d4f0696d3d419b9b Maintainer: zhonglang Status: ready -->
+<!-- EN-Revision: 9c21d93b4c2659081f995fcf63b7b7133b753f84 Maintainer: zhonglang Status: ready -->
 
 <sect1 xml:id="migration81.incompatible" xmlns:xlink="http://www.w3.org/1999/xlink">
  <title>不向后兼容的变更</title>
@@ -14,8 +14,8 @@
    <para>
     现在访问 <varname>$GLOBALS</varname> 数组受到一些限制。
     对单个数组元素的读写访问 <code>$GLOBALS['var']</code> 与之前一样。
-    对整个数组 <varname>$GLOBALS</varname> 的只读访问也将继续支持。
-    但是，对整个 <varname>$GLOBALS</varname> 数组的写访问不再被支持。
+    也将继续支持对整个数组 <varname>$GLOBALS</varname> 的只读访问。
+    但是，不再支持对整个 <varname>$GLOBALS</varname> 数组的写访问。
     例如，<code>array_pop($GLOBALS)</code> 将返回错误。
    </para>
   </sect3>
@@ -41,8 +41,8 @@ class A {
 class B extends A {}
 var_dump(A::counter()); // int(1)
 var_dump(A::counter()); // int(2)
-var_dump(B::counter()); // int(3), previously int(1)
-var_dump(B::counter()); // int(4), previously int(2)
+var_dump(B::counter()); // int(3)，之前是 int(1)
+var_dump(B::counter()); // int(4)，之前是 int(2)
 ?>
 ]]>
      </programlisting>
@@ -57,7 +57,7 @@ var_dump(B::counter()); // int(4), previously int(2)
 
    <para>
     大多数非 Final 的内部方法现在要求重写方法声明一个可兼容的返回类型，否则在继承时会给出方法废弃的提示。
-    如果由于 PHP 跨版本兼容性的问题，导致不能为重写方法声明返回类型，则可以添加 <code>#[ReturnTypeWillChange]</code> 属性来取消废弃提示。
+    如果由于 PHP 跨版本兼容性的问题，导致不能为重写方法声明返回类型，则可以添加 <code>#[ReturnTypeWillChange]</code> 注解来取消废弃提示。
    </para>
   </sect3>
 
@@ -74,7 +74,7 @@ var_dump(B::counter()); // int(4), previously int(2)
 
   <para>
    一些 &resource; 类型已被迁移到 &object; 类型。
-   返回值检查应该从  <function>is_resource</function> 检查是否是一个资源更改为检查返回值是否等于 &false;。
+   要检查返回值，应该从  <function>is_resource</function> 检查是否为资源，更改为检查返回值是否等于 &false;。
   </para>
   <itemizedlist>
    <listitem>
@@ -150,9 +150,9 @@ var_dump(B::counter()); // int(4), previously int(2)
   <title>MySQLi</title>
 
   <para>
-   现在 <function>mysqli_fetch_fields</function>，和
+   现在 <function>mysqli_fetch_fields</function> 和
    <function>mysqli_fetch_field_direct</function> 对于 <property>max_length</property> 将返回 <literal>0</literal> 值。
-   这一信息将会通过结果集来计算，并获取最大长度。这就是之前 PHP 内部的做法。
+   这一信息可以迭代结果集来计算，并获取最大长度。这是之前 PHP 内部的做法。
   </para>
 
   <para>
@@ -175,7 +175,7 @@ var_dump(B::counter()); // int(4), previously int(2)
   </para>
 
   <para>
-   现在，扩展 <methodname>mysqli_stmt::execute</methodname> 类需要指定额外的强制参数。
+   现在，扩展 <methodname>mysqli_stmt::execute</methodname> 类需要指定额外的可选参数。
   </para>
  </sect2>
 
@@ -210,8 +210,8 @@ var_dump(B::counter()); // int(4), previously int(2)
    <literal>"1"</literal>。之前的 &boolean; 类型没有被字符串化。
   </para>
   <para>
-   现在当 <constant>PDO::ATTR_STRINGIFY_FETCHES</constant> 被禁用时，调用 <methodname>PDOStatement::bindColumn</methodname> 和
-   <constant>PDO::PARAM_LOB</constant> 结果将持续绑定一个流。
+   现在当 <constant>PDO::ATTR_STRINGIFY_FETCHES</constant> 被禁用时，
+   以 <constant>PDO::PARAM_LOB</constant> 为参数调用 <methodname>PDOStatement::bindColumn</methodname> 结果将总是绑定一个流。
    以前，结果要么是一个流，要么是一个字符串，这取决于所用的数据库驱动及其执行的时间。
   </para>
 
@@ -219,7 +219,7 @@ var_dump(B::counter()); // int(4), previously int(2)
    <title>MySQL 驱动</title>
 
    <para>
-    现在，当使用模拟预处理时，结果集中的整数及浮点数将会以 PHP 原始类型返回，而不是以字符串类型返回。
+    现在，当使用模拟预处理时，结果集中的整数及浮点数将会以 PHP 原始类型返回，而不是以 &string; 类型返回。
     这与原生的预处理方式一样。
     之前的行为方式可以通过 <constant>PDO::ATTR_STRINGIFY_FETCHES</constant> 恢复。
    </para>
@@ -253,14 +253,14 @@ var_dump(B::counter()); // int(4), previously int(2)
   </para>
 
   <para>
-   现在 <function>htmlspecialchars</function>，
-   <function>htmlentities</function>，
-   <function>htmlspecialchars_decode</function>，
-   <function>html_entity_decode</function>，
-   和 <function>get_html_translation_table</function>
-   使用 <literal>ENT_QUOTES | ENT_SUBSTITUTE</literal> 而不是 <constant>ENT_COMPAT</constant> 作为默认值。
+   现在 <function>htmlspecialchars</function>、
+   <function>htmlentities</function>、
+   <function>htmlspecialchars_decode</function>、
+   <function>html_entity_decode</function>、
+   <function>get_html_translation_table</function>
+   使用 <literal>ENT_QUOTES | ENT_SUBSTITUTE</literal> 作为默认值，而不再是 <constant>ENT_COMPAT</constant>。
    这意味着 <literal>'</literal> 被转义为 <literal>&amp;#039;</literal> 而不像之前那样不作处理。
-   此外，有缺陷的 UTF-8 将被 Unicode 字符替换，而不是产生一个空字符串。
+   此外，有缺陷的 UTF-8 将被 Unicode 替代字符（substitute character）替换，而不是产生一个空字符串。
   </para>
 
   <para>
