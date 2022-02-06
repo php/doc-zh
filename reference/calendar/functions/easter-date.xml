@@ -1,27 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
+<!-- EN-Revision: 789af834328bf5d492ed174a4fedb226ccaf4b27 Maintainer: mowangjuanzi Status: ready -->
 <refentry xml:id="function.easter-date" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>easter_date</refname>
-  <refpurpose>得到指定年份的复活节午夜时的Unix时间戳。</refpurpose>
+  <refpurpose>得到指定年份的复活节午夜时的 Unix 时间戳。</refpurpose>
  </refnamediv>
 
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
    <type>int</type><methodname>easter_date</methodname>
-   <methodparam choice="opt"><type>int</type><parameter>year</parameter></methodparam>
+   <methodparam choice="opt"><type class="union"><type>int</type><type>null</type></type><parameter>year</parameter><initializer>&null;</initializer></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>mode</parameter><initializer><constant>CAL_EASTER_DEFAULT</constant></initializer></methodparam>
   </methodsynopsis>
   <para>
-   返回指定年份的复活节午夜时的Unix时间戳。
+   返回指定年份的复活节午夜时的 Unix 时间戳。
   </para>
   <warning>
    <para>
-    如果给定的年份超出Unix时间戳的范围（比如1970年以前或2037年以后），该函数将返回一个警告。
+    如果给定的年份超出 Unix 时间戳的范围（即在 32 位系统上，通常在 1970 年以前或 2037 年以后），该函数将返回一个警告。
    </para>
   </warning>
   <para>
-   复活节的日期是由尼西亚议会在AD325年确定的为每年春分月圆后的第一个星期日。春分一般是在3月21日，这就简化为只要计算满月的日期和紧挨的星期日的日期。这里所用的算法是在532年由Dionysius Exiguus所介绍的，参考了Julian历法和Gregorian历法这两个历法来提高精确度。（在1753年以前用Julian历法计算，该历法是一个以19年为周期来确定月亮的相位的历法。在1753年以后用Gregorian历法计算，该历法由Clavius和Lilius发明，由Pope Gregory 8世在1582年推广）
+   复活节的日期是由尼西亚议会在 AD325 年确定的为每年春分月圆后的第一个星期日。春分一般是在 3 月 21 
+   日，这就简化为只要计算满月的日期和紧挨的星期日的日期。这里所用的算法是在 532 年由 Dionysius Exiguus
+   所介绍的，参考了儒略历和公历这两个来提高精确度。（在 1753 年以前用儒略历计算，该是一个以
+   19 年为周期来确定月亮的相位的。在 1753 年以后用公历计算，该由 Clavius 和 Lilius 发明，由 
+   Pope Gregory 8 世在 1582 年推广）。
   </para>
  </refsect1>
 
@@ -33,8 +39,18 @@
      <term><parameter>year</parameter></term>
      <listitem>
       <para>
-       1970年至2037年之间的数字形式的年份。
+       1970 年至 2037 年之间的数字形式的年份。如果省略或者为 
+       &null;，则根据本地时间默认为当前年份。
       </para>
+     </listitem>
+    </varlistentry>  
+    <varlistentry>
+     <term><parameter>mode</parameter></term>
+     <listitem>
+      <para>
+       当设置为 <constant>CAL_EASTER_ALWAYS_JULIAN</constant> 时，允许基于儒略历计算复活节时间。参见 
+       <link linkend="calendar.constants">日历常量</link>。
+       </para>
      </listitem>
     </varlistentry>  
    </variablelist>
@@ -44,39 +60,37 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   复活节日期的Unix时间戳。
+   复活节日期的 Unix 时间戳。
   </para>
  </refsect1>
 
  <refsect1 role="changelog">
   &reftitle.changelog;
-  <para>
-   <informaltable>
-    <tgroup cols="2">
-     <thead>
-      <row>
-       <entry>&Version;</entry>
-       <entry>&Description;</entry>
-      </row>
-     </thead>
-     <tbody>
-      <row>
-       <entry>Since 4.3.0</entry>
-       <entry>
-        <parameter>year</parameter>参数可选，缺省的默认值是当年。
-       </entry>
-      </row>
-     </tbody>
-    </tgroup>
-   </informaltable>
-  </para>
+  <informaltable>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>&Version;</entry>
+      <entry>&Description;</entry>
+     </row>
+    </thead>
+    <tbody>
+     <row>
+      <entry>8.0.0</entry>
+      <entry>
+       <parameter>year</parameter> 现在可为空（nullable）。
+      </entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </informaltable>
  </refsect1>
 
  <refsect1 role="examples">
   &reftitle.examples;
   <para>
    <example>
-    <title><function>easter_date</function> example</title>
+    <title><function>easter_date</function> 示例</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -92,13 +106,59 @@ echo date("M-d-Y", easter_date(2001));        // Apr-15-2001
   </para>
  </refsect1>
 
+ <refsect1 role="notes">
+  &reftitle.notes;
+  <note>
+   <para>
+    <function>easter_date</function> 依赖于系统的 C 库时间函数，而不是使用 PHP
+    的内置 date 和 time 函数。因此 <function>easter_date</function> 使用
+    <literal>TZ</literal> 环境变量来确定应该运行的时区，而不是 PHP 的
+    <link linkend="ini.date.timezone">默认时区</link>
+    ，此函数与 PHP 其他 date 函数一起使用时会出现意外行为。
+   </para>
+   <para>
+    作为一种解决方案，可以使用带 <classname>DateTime</classname> 和
+    <classname>DateInterval</classname> 的 <function>easter_days</function>
+    来计算 PHP 时区中的复活节开始时间，如下所示：
+   </para>
+   <informalexample>
+    <programlisting role="php">
+<![CDATA[
+<?php
+function get_easter_datetime($year) {
+    $base = new DateTime("$year-03-21");
+    $days = easter_days($year);
+
+    return $base->add(new DateInterval("P{$days}D"));
+}
+
+foreach (range(2012, 2015) as $year) {
+    printf("Easter in %d is on %s\n",
+           $year,
+           get_easter_datetime($year)->format('F j'));
+}
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+Easter in 2012 is on April 8
+Easter in 2013 is on March 31
+Easter in 2014 is on April 20
+Easter in 2015 is on April 5
+]]>
+    </screen>
+   </informalexample>
+  </note>
+ </refsect1>
+
  <refsect1 role="seealso">
   &reftitle.seealso;
   <para>
    <simplelist>
     <member>
-     <function>easter_days</function> for calculating Easter 
-     before 1970 or after 2037
+     <function>easter_days</function> 用于计算 1970 年之前或 2037 年之后的复活节。
     </member>
    </simplelist>
   </para>

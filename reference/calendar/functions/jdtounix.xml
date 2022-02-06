@@ -1,19 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
+<!-- EN-Revision: 789af834328bf5d492ed174a4fedb226ccaf4b27 Maintainer: mowangjuanzi Status: ready -->
 <refentry xml:id="function.jdtounix" xmlns="http://docbook.org/ns/docbook"> 
  <refnamediv>
   <refname>jdtounix</refname>
-  <refpurpose>转变Julian Day计数为一个Unix时间戳</refpurpose>
+  <refpurpose>将儒略日计数转为 Unix 时间戳</refpurpose>
  </refnamediv>
 
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
    <type>int</type><methodname>jdtounix</methodname>
-   <methodparam><type>int</type><parameter>jday</parameter></methodparam>
+   <methodparam><type>int</type><parameter>julian_day</parameter></methodparam>
   </methodsynopsis>
   <para>
-   这个函数根据给定的julian天数返回一个Unix时间戳，或如果参数<parameter>jday</parameter>不在Unix时间（Gregorian历法的1970年至2037年，或2440588 &lt;= <parameter>jday</parameter> &lt;= 2465342）范围内返回 &false; 。返回的时间是本地时间（不是GMT）。
+   这个函数将返回与 <parameter>julian_day</parameter>
+   给出的儒略日相对应的 Unix 时间戳。返回的时间是本地时间 UTC。
   </para>
  </refsect1>
 
@@ -22,10 +24,11 @@
   <para>
    <variablelist>
     <varlistentry>
-     <term><parameter>jday</parameter></term>
+     <term><parameter>julian_day</parameter></term>
      <listitem>
       <para>
-       一个在 2440588 到 2465342 之间的julian天数
+       儒略日在 64 位系统上是 <literal>2440588</literal> 到 <literal>106751993607888</literal>
+       之间，在 32 位系统上是 <literal>2440588</literal> 到 <literal>2465443</literal> 之间。
       </para>
      </listitem>
     </varlistentry>
@@ -36,8 +39,44 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   指定的julian天数的开始时的时间戳。
+   指定儒略日的开始时（午夜，而非中午）的 unix 时间戳。
   </para>
+ </refsect1>
+
+ <refsect1 role="errors">
+  &reftitle.errors;
+  <para>
+   <parameter>julian_day</parameter> 超出允许的范围值，抛出 <classname>ValueError</classname>。
+  </para>
+ </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <informaltable>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>&Version;</entry>
+      <entry>&Description;</entry>
+     </row>
+    </thead>
+    <tbody>
+     <row>
+      <entry>8.0.0</entry>
+      <entry>
+       此函数在失败时不再返回 &false;，而是引发 <classname>ValueError</classname>。
+      </entry>
+     </row>
+     <row>
+      <entry>7.3.24, 7.4.12</entry>
+      <entry>
+       扩充了 <parameter>julian_day</parameter> 的上限。以前无论计算机体系结构如何，都是
+       <literal>2465342</literal>。
+      </entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </informaltable>
  </refsect1>
 
  <refsect1 role="seealso">

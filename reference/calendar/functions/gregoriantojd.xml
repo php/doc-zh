@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
+<!-- EN-Revision: cca0f0ce480de21a3fe73bb3369de36129873496 Maintainer: mowangjuanzi Status: ready -->
 <refentry xml:id="function.gregoriantojd" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
-  <refname>GregorianToJD</refname> 
-  <refpurpose>转变一个Gregorian历法日期到Julian Day计数</refpurpose>
+  <refname>gregoriantojd</refname> 
+  <refpurpose>将公历转为儒略日计数</refpurpose>
  </refnamediv>
 
  <refsect1 role="description">
@@ -15,9 +16,11 @@
    <methodparam><type>int</type><parameter>year</parameter></methodparam>
   </methodsynopsis>
   <para>
-   Gregorian历法的合理范围是4714 B.C. 至 9999 A.D.</para>
+   公历的有效范围是从公元前 4714 年 11 月 25 日开始。至少到公元 9999 年 12 月 31 日</para>
   <para>
-   虽然这个函数可以处理4714 B.C.以前的日期，但是没有意义。Gregorian历法直到1582年10年15日（或是Julian历法的1582年10月5日）才被发明，很久以后一些国家也没有接受它。比如，英国是在1752年开始使用Gregorian历法，苏联是在1918年，希腊是在1923年，大部分的欧洲国家使用Julian历法。
+   虽然这个函数可以处理公元前 4714 年以前的日期，但是没有意义。公历直到 1582年 10 年 15 日（或是儒略历的
+   1582 年 10 月 5 日）才被发明，很久以后一些国家也没有接受它。比如，英国是在 1752 年开始使用公历，苏联是在
+   1918 年，希腊是在 1923 年，大部分的欧洲国家使用儒略历。
   </para>
  </refsect1>
 
@@ -29,7 +32,7 @@
      <term><parameter>month</parameter></term>
      <listitem>
       <para>
-       月份的范围是 1（January）到 12（December）。
+       月份的范围是 1（January）到 12（December）之间的数字。
       </para>
      </listitem>
     </varlistentry>
@@ -37,7 +40,8 @@
      <term><parameter>day</parameter></term>
      <listitem>
       <para>
-       日期的范围是 1到 31。
+       日期的范围是 1 到 31 之间的数字。如果该月的天数小于指定的天数，
+       则会发生溢出。请参考下面的示例。
       </para>
      </listitem>
     </varlistentry>
@@ -45,7 +49,8 @@
      <term><parameter>year</parameter></term>
      <listitem>
       <para>
-       年份的范围是 -4714 到 9999。
+       年份的范围是 -4714 到 9999 之间的数字。负数表示公元前，正数表示公元。注意没有公元
+       <literal>0</literal> 年，公元前 1 年 12 月 31 日紧跟其后的是公元 1 年 1月 1 日。
       </para>
      </listitem>
     </varlistentry>  
@@ -56,7 +61,7 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   给定gregorian历法日期的julian天数。
+   指定公历日期的儒略日，int 类型。日期超出范围值返回 <literal>0</literal>。
   </para>
  </refsect1>
 
@@ -64,17 +69,42 @@
   &reftitle.examples;
   <para>
    <example>
-    <title>Calendar functions</title>
+    <title>日历函数</title>
     <programlisting role="php">
 <![CDATA[
 <?php
-$jd = GregorianToJD(10, 11, 1970);
+$jd = gregoriantojd(10, 11, 1970);
 echo "$jd\n";
-$gregorian = JDToGregorian($jd);
+$gregorian = jdtogregorian($jd);
 echo "$gregorian\n";
 ?>
 ]]>
     </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+2440871
+10/11/1970
+]]>
+    </screen>
+   </example>
+   <example>
+    <title>溢出行为</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+echo gregoriantojd(2, 31, 2018), PHP_EOL,
+     gregoriantojd(3,  3, 2018), PHP_EOL;
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+2458181
+2458181
+]]>
+    </screen>
    </example>
   </para>
  </refsect1>

@@ -1,20 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<refentry xmlns="http://docbook.org/ns/docbook" xml:id="function.jdtojewish">
+<!-- EN-Revision: 789af834328bf5d492ed174a4fedb226ccaf4b27 Maintainer: mowangjuanzi Status: ready -->
+<refentry xml:id="function.jdtojewish" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>jdtojewish</refname>
-  <refpurpose>转换一个julian天数为Jewish历法的日期</refpurpose>
+  <refpurpose>儒略日计数转为犹太历日期</refpurpose>
  </refnamediv>
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
    <type>string</type><methodname>jdtojewish</methodname>
-   <methodparam><type>int</type><parameter>juliandaycount</parameter></methodparam>
-   <methodparam choice="opt"><type>bool</type><parameter>hebrew</parameter><initializer>false</initializer></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter>fl</parameter><initializer>0</initializer></methodparam>
+   <methodparam><type>int</type><parameter>julian_day</parameter></methodparam>
+   <methodparam choice="opt"><type>bool</type><parameter>hebrew</parameter><initializer>&false;</initializer></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>flags</parameter><initializer>0</initializer></methodparam>
   </methodsynopsis>
   <para>
-    转换一个julian天数为Jewish历法的日期。
+    儒略日计数转为犹太历日期。
   </para>
  </refsect1>
 
@@ -26,7 +27,7 @@
      <term><parameter>julianday</parameter></term>
      <listitem>
       <para>
-       一个julian天数
+       int 类型的儒略日。
       </para>
      </listitem>
     </varlistentry>
@@ -34,18 +35,19 @@
      <term><parameter>hebrew</parameter></term>
      <listitem>
       <para>
-       如果参数 <parameter>hebrew</parameter>设置为 &true;，参数<parameter>fl</parameter>可用于希伯莱语的格式。  
+       如果参数 <parameter>hebrew</parameter> 设置为 &true;，参数 <parameter>flags</parameter>
+       可用于希伯莱语、基于 ISO-8859-8 字符串编码格式的输出。  
       </para>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>fl</parameter></term>
+     <term><parameter>flags</parameter></term>
      <listitem>
       <para>
-       可用的格式有：  
-       <constant>CAL_JEWISH_ADD_ALAFIM_GERESH</constant>,
-       <constant>CAL_JEWISH_ADD_ALAFIM</constant>,
-       <constant>CAL_JEWISH_ADD_GERESHAYIM</constant>.
+       可能由
+       <constant>CAL_JEWISH_ADD_ALAFIM_GERESH</constant>、
+       <constant>CAL_JEWISH_ADD_ALAFIM</constant>、
+       <constant>CAL_JEWISH_ADD_GERESHAYIM</constant> 组成的位掩码。
       </para>
      </listitem>
     </varlistentry>
@@ -56,37 +58,8 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-  以“月/日/年”的格式显示jewish日期。
-  </para>
- </refsect1>
-
- <refsect1 role="changelog">
-  &reftitle.changelog;
-  <para>
-   <informaltable>
-    <tgroup cols="2">
-     <thead>
-      <row>
-       <entry>&Version;</entry>
-       <entry>&Description;</entry>
-      </row>
-     </thead>
-     <tbody>
-      <row>
-       <entry>5.0.0</entry>
-       <entry>
-        增加了参数 <parameter>fl</parameter>。
-       </entry>
-      </row>
-      <row>
-       <entry>4.3.0</entry>
-       <entry>
-        增加了参数 <parameter>hebrew</parameter> 。
-       </entry>
-      </row>
-     </tbody>
-    </tgroup>
-   </informaltable>
+  根据 <parameter>hebrew</parameter> 参数，犹太日期为“月/日/年”形式或者
+  ISO-8859-8 编码的希伯来日期的字符串。。
   </para>
  </refsect1>
 
@@ -94,15 +67,26 @@
   &reftitle.examples;
   <para>
    <example>
-    <title><function>jdtojewish</function> Example</title>
+    <title><function>jdtojewish</function> 示例</title>
     <programlisting role="php">
 <![CDATA[
 <?php
-echo jdtojewish(gregoriantojd(10, 8, 2002), true,
-       CAL_JEWISH_ADD_GERESHAYIM + CAL_JEWISH_ADD_ALAFIM + CAL_JEWISH_ADD_ALAFIM_GERESH); 
-?>
+$jd = gregoriantojd(10, 8, 2002);
+echo jdtojewish($jd, true), PHP_EOL,
+     jdtojewish($jd, true, CAL_JEWISH_ADD_GERESHAYIM), PHP_EOL,
+     jdtojewish($jd, true, CAL_JEWISH_ADD_ALAFIM), PHP_EOL,
+     jdtojewish($jd, true,CAL_JEWISH_ADD_ALAFIM_GERESH), PHP_EOL;
 ]]>
     </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+ב חשון התשסג
+ב' חשון התשס"ג
+ב חשון ה אלפים תשסג
+ב חשון ה'תשסג
+]]>
+    </screen>
    </example>
   </para>
  </refsect1>
@@ -117,8 +101,6 @@ echo jdtojewish(gregoriantojd(10, 8, 2002), true,
   </para>
  </refsect1>
 </refentry>
-
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
