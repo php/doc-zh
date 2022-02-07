@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 7f569e1f175adf1fbd0e462eba8d6bc82214c939 Maintainer: HonestQiao Status: ready -->
-<!-- Reviewed: no Maintainer: HonestQiao -->
+<!-- EN-Revision: 2b56c905fb0d6fcab44cc0c2abdbf393fc2b69ea Maintainer: HonestQiao Status: ready -->
+<!-- CREDITS: Luffy -->
 <refentry xml:id="function.touch" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>touch</refname>
@@ -14,10 +14,12 @@
    <methodparam><type>string</type><parameter>filename</parameter></methodparam>
    <methodparam choice="opt"><type>int</type><parameter>time</parameter><initializer>time()</initializer></methodparam>
    <methodparam choice="opt"><type>int</type><parameter>atime</parameter></methodparam>
+   <methodparam choice="opt"><type class="union"><type>int</type><type>null</type></type><parameter>mtime</parameter><initializer>&null;</initializer></methodparam>
+   <methodparam choice="opt"><type class="union"><type>int</type><type>null</type></type><parameter>atime</parameter><initializer>&null;</initializer></methodparam>
   </methodsynopsis>
   <para>
    尝试将由 <parameter>filename</parameter>
-   给出的文件的访问和修改时间设定为给出的 <parameter>time</parameter>。
+   给出的文件的访问和修改时间设定为给出的 <parameter>mtime</parameter>。
    注意访问时间总是会被修改的，不论有几个参数。
   </para>
   <para>
@@ -38,10 +40,10 @@
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>time</parameter></term>
+     <term><parameter>mtime</parameter></term>
      <listitem>
       <para>
-       要设定的时间。如果没有提供参数 <parameter>time</parameter> 则会使用当前系统的时间。
+       要设定的时间。如果参数 <parameter>mtime</parameter> 为 &null;，则会使用当前系统的 <function>time</function>。
       </para>
      </listitem>
     </varlistentry>
@@ -49,15 +51,39 @@
      <term><parameter>atime</parameter></term>
      <listitem>
       <para>
-       如果给出了这个参数，则给定文件的访问时间会被设为
-   <parameter>atime</parameter>，否则会设置 为<parameter>time</parameter>。如果没有给出这两个参数，则使用当前系统时间。
+       如果这个参数不是 &null;，则给定文件的访问时间会被设为 <parameter>atime</parameter>。
+       否则会设置为 <parameter>mtime</parameter>。
+       如果没有给出这两个参数，则使用当前系统时间。
       </para>
      </listitem>
     </varlistentry>
    </variablelist>
   </para>
  </refsect1>
- 
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <informaltable>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>&Version;</entry>
+      <entry>&Description;</entry>
+     </row>
+    </thead>
+    <tbody>
+     <row>
+      <entry>8.0.0</entry>
+      <entry>
+       <parameter>mtime</parameter> 和 <parameter>atime</parameter>
+       现在可以为 &null;。
+      </entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </informaltable>
+ </refsect1>
+
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
@@ -85,7 +111,7 @@ if (touch($filename)) {
   </para>
   <para>
    <example>
-    <title>使用 <parameter>time</parameter> 参数的 <function>touch</function></title>
+    <title>使用 <parameter>mtime</parameter> 参数的 <function>touch</function></title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -108,11 +134,6 @@ if (!touch('some_file.txt', $time)) {
  <refsect1 role="notes">
   &reftitle.notes;
   &note.filesystem-time-res;
-  <warning>
-   <para>
-    在 PHP 5.3.0 之前无法修改 Windows 下目录的最后修改时间。
-   </para>
-  </warning>
  </refsect1>
 </refentry>
 
