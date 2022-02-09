@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 91e0557e2fc9b15e985d3372a080663fd7d0aeb0 Maintainer: HonestQiao Status: ready -->
+<!-- EN-Revision: d6fbec8b2161d13e51af9763bbd1487b0b25bd42 Maintainer: HonestQiao Status: ready -->
 <refentry xml:id="function.get-class" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>get_class</refname>
@@ -8,9 +8,9 @@
  </refnamediv>
  <refsect1 role="description">
   &reftitle.description;
-<methodsynopsis>
+  <methodsynopsis>
    <type>string</type><methodname>get_class</methodname>
-   <methodparam choice="opt"><type>object</type><parameter>object</parameter><initializer>&null;</initializer></methodparam>
+   <methodparam choice="opt"><type>object</type><parameter>object</parameter></methodparam>
   </methodsynopsis>
   <para>
    返回对象实例 <parameter>object</parameter> 所属类的名字。
@@ -26,6 +26,14 @@
       <para>
        要测试的对象。如果在类里，此参数可以省略。
       </para>
+      <note>
+       <simpara>
+        Explicitly passing &null; as the <parameter>object</parameter> is no
+        longer allowed as of PHP 7.2.0 and emits an <constant>E_WARNING</constant>.
+        As of PHP 8.0.0, a <classname>TypeError</classname> is emitted when
+        &null; is used.
+       </simpara>
+      </note>
      </listitem>
     </varlistentry>
    </variablelist>
@@ -36,7 +44,6 @@
   <para>
    返回对象实例 <parameter>object</parameter>
    所属类的名字。
-   如果 <parameter>object</parameter> 不是一个对象则返回 &false;。
   </para>
   <para>
    如果在一个类里，省略了参数 <parameter>object</parameter>，
@@ -49,7 +56,14 @@
  <refsect1 role="errors">
   &reftitle.errors;
   <para>
-   如果用其他类型调用 <function>get_class</function>，而不是一个对象的话，就会产生 <constant>E_WARNING</constant> 级别的错误。
+   如果用其他类型调用 <function>get_class</function>，而不是一个对象的话，
+   <classname>TypeError</classname> is raised. Prior to PHP 8.0.0,
+   an <constant>E_WARNING</constant> level error was raised.
+  </para>
+  <para>
+   If <function>get_class</function> is called with no arguments from outside a class,
+   <classname>Error</classname> is raised. Prior to PHP 8.0.0,
+   an <constant>E_WARNING</constant> level error was raised.
   </para>
  </refsect1>
  <refsect1 role="changelog">
@@ -65,9 +79,21 @@
      </thead>
      <tbody>
       <row>
-       <entry>5.3.0 起</entry>
+       <entry>8.0.0</entry>
        <entry>
-        <parameter>object</parameter> 默认参数现在是 &null; ，所以，现在传入 &null; 到 <parameter>object</parameter> 参数时，和没传参数的结果一样。
+        Calling this function from outside a class, without any arguments, will
+        trigger an <classname>Error</classname>. Previously,
+        an <constant>E_WARNING</constant> was raised
+        and the function returned &false;.
+       </entry>
+      </row>
+      <row>
+       <entry>7.2.0</entry>
+       <entry>
+        Prior to this version the default value for <parameter>object</parameter>
+        was &null; and it had the same effect as not passing any value. Now
+        &null; has been removed as the default value for <parameter>object</parameter>,
+        and is no longer a valid input.
        </entry>
       </row>
      </tbody>
@@ -178,6 +204,7 @@ string(11) "Foo\Bar\Baz"
     <member><function>get_called_class</function></member>
     <member><function>get_parent_class</function></member>
     <member><function>gettype</function></member>
+    <member><function>get_debug_type</function></member>
     <member><function>is_subclass_of</function></member>
    </simplelist>
   </para>
