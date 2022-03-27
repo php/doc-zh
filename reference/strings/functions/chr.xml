@@ -1,24 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 0b4c5897dd4f9ca3ec78ac7e1be64ffe82b27d32 Maintainer: HonestQiao Status: ready -->
+<!-- EN-Revision: 4d3d1ebea1eeecb7f76fb2fa8ecb55ef35d1d518 Maintainer: HonestQiao Status: ready -->
 <!-- Reviewed: no Maintainer: HonestQiao -->
-<refentry xml:id="function.chr" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+<!-- CREDITS: LI XiangChen -->
+<refentry xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://docbook.org/ns/docbook" xml:id="function.chr">
  <refnamediv>
   <refname>chr</refname>
-  <refpurpose>返回指定的字符</refpurpose>
+  <refpurpose>从数字生成一个单字节字符串</refpurpose>
  </refnamediv>
+ 
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
    <type>string</type><methodname>chr</methodname>
-   <methodparam><type>int</type><parameter>ascii</parameter></methodparam>
+   <methodparam><type>int</type><parameter>codepoint</parameter></methodparam>
   </methodsynopsis>
   <para>
-   返回相对应于 <parameter>ascii</parameter>
-   所指定的单个字符。
+   返回一个单字符字符串，含有通过将 <parameter>codepoint</parameter> 按无符号整数解释而指定的字符。
   </para>
   <para>
-   此函数与 <function>ord</function> 是互补的。
+   这可用于在一种单字节编码（像是 ASCII、ISO-8859 或 Windows 1252）中通过传递想要的字符在编码映射表中的位置来创建一个单字符字符串。但是，注意此函数并不清楚任何字符串编码，特别是无法通过传递一个 Unicode 码位值来生成一个多字节编码（像是 UTF-8 或 UTF-16）字符串。
+  </para>
+  <para>
+   此函数与 <function>ord</function> 互补。
   </para>
  </refsect1>
 
@@ -27,10 +31,21 @@
   <para>
    <variablelist>
     <varlistentry>
-     <term><parameter>ascii</parameter></term>
+     <term><parameter>codepoint</parameter></term>
      <listitem>
       <para>
-       Ascii 码。
+       一个介于 0 与 255 之间的整数。
+      </para>
+      <para>
+       超过有效范围（0..255）的值将和 255“按位与”，与以下算法等效：
+       <programlisting role="php">
+<![CDATA[
+while ($bytevalue < 0) {
+    $bytevalue += 256;
+}
+$bytevalue %= 256;
+]]>
+       </programlisting>
       </para>
      </listitem>
     </varlistentry>
@@ -41,34 +56,32 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   返回规定的字符。
+   一个含有所指定字节的单字符字符串。
   </para>
  </refsect1>
-<!-- FIXME PHP_6
+
  <refsect1 role="changelog">
   &reftitle.changelog;
-  <para>
-   <informaltable>
-    <tgroup cols="2">
-     <thead>
-      <row>
-       <entry>&Version;</entry>
-       <entry>&Description;</entry>
-      </row>
-     </thead>
-     <tbody>
-      <row>
-       <entry>6.0.0</entry>
-       <entry>
-        This function now uses codepoint as input.
-       </entry>
-      </row>
-     </tbody>
-    </tgroup>
-   </informaltable>
-  </para>
+  <informaltable>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>&Version;</entry>
+      <entry>&Description;</entry>
+     </row>
+    </thead>
+    <tbody>
+     <row>
+      <entry>7.4.0</entry>
+      <entry>
+       此函数不再静默接受不支持的 <parameter>codepoint</parameter>，并会将它们转为 <literal>0</literal>。
+      </entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </informaltable>
  </refsect1>
--->
+
  <refsect1 role="examples">
   &reftitle.examples;
   <para>
@@ -77,8 +90,10 @@
     <programlisting role="php">
 <![CDATA[
 <?php
+// 假设该字符串将被作为 ASCII 或是一个与 ASCII 兼容的编码使用
+
 $str = "The string ends in escape: ";
-$str .= chr(27); /* 在 $str 后边增加换码符 */
+$str .= chr(27); /* 在 $str 末尾添加一个转义字符 */
 
 /* 通常这样更有用 */
 
@@ -87,6 +102,39 @@ $str = sprintf("The string ends in escape: %c", 27);
 ]]>
     </programlisting>
    </example>
+   <example>
+    <title>溢出行为</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+echo chr(-159), chr(833), PHP_EOL;
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+aA
+]]>
+    </screen>
+   </example>
+  </para>
+  <para> 
+   <example>
+    <title>从单个的字节构建一个 UTF-8 字符串</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$str = chr(240) . chr(159) . chr(144) . chr(152);
+echo $str;
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+🐘
+    </screen>
+   </example>
   </para>
  </refsect1>
 
@@ -94,14 +142,16 @@ $str = sprintf("The string ends in escape: %c", 27);
   &reftitle.seealso;
   <para>
    <simplelist>
-    <member><function>sprintf</function> 如何使用格式字符串 <literal>%c</literal>。</member>
+    <member><function>sprintf</function> 如何使用格式字符串 <literal>%c</literal></member>
     <member><function>ord</function></member>
-    <member>可以在此处找到 ASCII 码表：<link xlink:href="&url.asciitable;">&url.asciitable;</link>。</member>
+    <member>一个 <link xlink:href="&url.asciitable;">ASCII 表</link></member>
+    <member><function>mb_chr</function></member>
+    <member><function>IntlChar::chr</function></member>
    </simplelist>
   </para>
  </refsect1>
-</refentry>
 
+</refentry>
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
