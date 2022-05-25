@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 67b64521e46bd2e010fbe0f1611d6b749e669665 Maintainer: zhoumengkang Status: ready -->
+<!-- EN-Revision: 2eb43ad4f41a8c62516abd804721786e50717af6 Maintainer: zhoumengkang Status: ready -->
+<!-- CREDITS: Luffy -->
 <refentry xml:id="function.call-user-func" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>call_user_func</refname>
@@ -12,8 +13,7 @@
   <methodsynopsis>
    <type>mixed</type><methodname>call_user_func</methodname>
    <methodparam><type>callable</type><parameter>callback</parameter></methodparam>
-   <methodparam choice="opt"><type>mixed</type><parameter>parameter</parameter></methodparam>
-   <methodparam choice="opt"><type>mixed</type><parameter>...</parameter></methodparam>
+   <methodparam rep="repeat"><type>mixed</type><parameter>args</parameter></methodparam>
   </methodsynopsis>
   <para>
    第一个参数 <parameter>callback</parameter> 是被调用的回调函数，其余参数是回调函数的参数。
@@ -33,7 +33,7 @@
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>parameter</parameter></term>
+     <term><parameter>args</parameter></term>
      <listitem>
       <para>
        0个或以上的参数，被传入回调函数。
@@ -56,7 +56,13 @@ $a = 0;
 call_user_func('increment', $a);
 echo $a."\n";
 
-call_user_func_array('increment', array(&$a)); // You can use this instead before PHP 5.3
+// it is possible to use this instead
+call_user_func_array('increment', array(&$a));
+echo $a."\n";
+
+// it is also possible to use a variable function
+$increment = 'increment';
+$increment($a);
 echo $a."\n";
 ?>
 ]]>
@@ -64,8 +70,10 @@ echo $a."\n";
          &example.outputs;
          <screen>
 <![CDATA[
+Warning: Parameter 1 to increment() expected to be a reference, value given in …
 0
 1
+2
 ]]>
          </screen>
         </example>
@@ -81,30 +89,6 @@ echo $a."\n";
   &reftitle.returnvalues;
   <para>
    返回回调函数的返回值。
-  </para>
- </refsect1>
-
- <refsect1 role="changelog">
-  &reftitle.changelog;
-  <para>
-   <informaltable>
-    <tgroup cols="2">
-     <thead>
-      <row>
-       <entry>&Version;</entry>
-       <entry>&Description;</entry>
-      </row>
-     </thead>
-     <tbody>
-      <row>
-       <entry>5.3.0</entry>
-       <entry>
-        对面向对象里面的关键字的解析有所增强。在此之前，使用两个冒号来连接一个类和里面的一个方法，把它作为参数来作为回调函数的话，将会发出一个<constant>E_STRICT</constant>的警告，因为这个传入的参数被视为静态方法。
-       </entry>
-      </row>
-     </tbody>
-    </tgroup>
-   </informaltable>
   </para>
  </refsect1>
 
@@ -147,8 +131,8 @@ class Foo {
     }
 }
 
-call_user_func(__NAMESPACE__ .'\Foo::test'); // As of PHP 5.3.0
-call_user_func(array(__NAMESPACE__ .'\Foo', 'test')); // As of PHP 5.3.0
+call_user_func(__NAMESPACE__ .'\Foo::test');
+call_user_func(array(__NAMESPACE__ .'\Foo', 'test'));
 
 ?>
 ]]>
@@ -177,7 +161,7 @@ class myclass {
 $classname = "myclass";
 
 call_user_func(array($classname, 'say_hello'));
-call_user_func($classname .'::say_hello'); // As of 5.2.3
+call_user_func($classname .'::say_hello');
 
 $myobject = new myclass();
 
@@ -200,7 +184,7 @@ Hello!
     <programlisting role="php">
 <![CDATA[
 <?php
-call_user_func(function($arg) { print "[$arg]\n"; }, 'test'); /* As of PHP 5.3.0 */
+call_user_func(function($arg) { print "[$arg]\n"; }, 'test');
 ?>
 ]]>
     </programlisting>
@@ -225,6 +209,7 @@ call_user_func(function($arg) { print "[$arg]\n"; }, 'test'); /* As of PHP 5.3.0
    <simplelist>
     <member><function>call_user_func_array</function></member>
     <member><function>is_callable</function></member>
+    <member><link linkend="functions.variable-functions">Variable functions</link></member>
     <member><methodname>ReflectionFunction::invoke</methodname></member>
     <member><methodname>ReflectionMethod::invoke</methodname></member>
    </simplelist>
