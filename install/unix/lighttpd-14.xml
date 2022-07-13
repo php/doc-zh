@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 4c8603d1c114c20d9ee6142f508da396affc83a8  Maintainer: dallas Status: ready -->
-
+<!-- EN-Revision: 7006df7c1fbc64457ac4011ae33309c3f3e5b202 Maintainer: dallas Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <sect1 xml:id="install.unix.lighttpd-14" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <title>Unix 平台的 Lighttpd 1.4</title>
 
@@ -15,23 +15,19 @@
  </para>
  
  <para>
-  推荐使用 Fastcgi 作为 SAPI 模块来连接 PHP 和 Lighttpd。在 PHP 5.3
-  中自动激活了 Fastcgi，对于旧版本则在配置时使用
-  --enable-fastcgi。要确认 PHP 已激活 Fastcgi 可以使用命令
-  <literal>php -v</literal>，应该显示 <literal>PHP 5.2.5 (cgi-fcgi)</literal>。在
-  PHP 5.2.3 之前，Fastcgi 是包含在 php 可执行文件中（没有 php-cgi 文件）。
+  推荐使用 FastCGI 作为 SAPI 模块来连接 PHP 和 Lighttpd。在 php-cgi 中自动启用 FastCGI。
  </para>
  
  <sect2 xml:id="install.unix.lighttpd-14.lighttpd-spawn">
   <title>使 Lighttpd 产生 php 进程</title>
 
   <para>
-   要配置 Lighttpd 连接到 php 并产生 fastcgi 进程，编辑
-   lighttpd.conf。推荐使用套接字在本机连接 fastcgi 进程。
+   要配置 Lighttpd 连接到 PHP 并产生 FastCGI 进程，编辑
+   <filename>lighttpd.conf</filename>。推荐使用套接字在本机连接 FastCGI 进程。
   </para>
 
   <example>
-   <title>Partial lighttpd.conf</title>
+   <title>部分 lighttpd.conf</title>
    <screen>
 <![CDATA[
 server.modules += ( "mod_fastcgi" )
@@ -55,14 +51,14 @@ fastcgi.server = ( ".php" =>
   </example>
 
   <para>
-   bin-path 指令允许 lighttpd 动态产生 fastcgi 进程。PHP
-   会根据 PHP_FCGI_CHILDREN
-   环境变量产生子进程。“bin-environment”指令设定了所产生的进行的环境。PHP
-   会在达到 PHP_FCGI_MAX_REQUESTS 所指定的请求数目之后杀死一个子进程。在
-   PHP 中通常应避免“min-procs”和“max-procs”指令。PHP
+   <filename>bin-path</filename> 指令允许 lighttpd 动态产生 FastCGI 进程。PHP
+   会根据 <envar>PHP_FCGI_CHILDREN</envar>
+   环境变量产生子进程。<literal>bin-environment</literal> 指令设定了所产生的进行的环境。PHP
+   会在达到 <envar>PHP_FCGI_MAX_REQUESTS</envar> 所指定的请求数目之后杀死一个子进程。在
+   PHP 中通常应避免 <literal>min-procs</literal> 和 <literal>max-procs</literal> 指令。PHP
    自己管理其子进程，并且例如 APC 之类的 opcode 缓存仅在 PHP
-   管理下的子进程之间共享。如果“min-procs”被设定成某个大于 1
-   的值，则 PHP 应答器的总数目为该值乘以 PHP_FCGI_CHILDREN（如 min-procs 为
+   管理下的子进程之间共享。如果 <literal>min-procs</literal> 被设定成某个大于 <literal>1</literal>
+   的值，则 PHP 应答器的总数目为该值乘以 <envar>PHP_FCGI_CHILDREN</envar>（如 min-procs 为
    2，PHP_FCGI_CHILDREN 为 16 则会产生 32 个应答器）。
   </para>
  </sect2>
@@ -71,7 +67,7 @@ fastcgi.server = ( ".php" =>
   <title>通过 spawn-fcgi 产生进程</title>  
 
   <para>
-   Lighttpd 提供一个名为 spawn-fcgi 的程序来简化产生 fastcgi 进程的手续。
+   Lighttpd 提供一个名为 spawn-fcgi 的程序来简化产生 FastCGI 进程的手续。
   </para>
  </sect2>
 
@@ -82,8 +78,8 @@ fastcgi.server = ( ".php" =>
 
   <para>
    有可能不通过 spawn-fcgi 来产生进程，但需要做些工作。设定
-   PHP_FCGI_CHILDREN 环境变量控制了 PHP 产生多少个子进程来处理请求。设定
-   PHP_FCGI_MAX_REQUESTS 将决定每个子进程存活多久（以请求数目决定）。以下为一个简单的
+   <envar>PHP_FCGI_CHILDREN</envar> 环境变量控制了 PHP 产生多少个子进程来处理请求。设定
+   <envar>PHP_FCGI_MAX_REQUESTS</envar> 将决定每个子进程存活多久（以请求数目决定）。以下为一个简单的
    bash 脚本来帮助产生 php 应答器。
   </para>
      
@@ -122,7 +118,7 @@ echo $! > "$PHP_PID"
   <title>连接远程 FCGI 实例</title>
 
   <para>
-   Fastcgi 实例可被产生于多个远程机器以分散应用程序。
+   FastCGI 实例可被产生于多个远程机器以分散应用程序。
   </para>
    
   <example>
@@ -138,7 +134,6 @@ fastcgi.server = ( ".php" =>
   </example>
  </sect2>
 </sect1>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
