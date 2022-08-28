@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 4d616f071c284231855ac508ca0fd008308ed6fa Maintainer: zhoumengkang Status: ready -->
+<!-- EN-Revision: 21a6e32de516563e314a7f1177312bec4737b291 Maintainer: zhoumengkang Status: ready -->
+<!-- CREDITS: Luffy -->
 <refentry xml:id="function.call-user-func-array" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>call_user_func_array</refname>
@@ -12,10 +13,10 @@
   <methodsynopsis>
    <type>mixed</type><methodname>call_user_func_array</methodname>
    <methodparam><type>callable</type><parameter>callback</parameter></methodparam>
-   <methodparam><type>array</type><parameter>param_arr</parameter></methodparam>
+   <methodparam><type>array</type><parameter>args</parameter></methodparam>
   </methodsynopsis>
   <para>
-      把第一个参数作为回调函数（<parameter>callback</parameter>）调用，把参数数组作（<parameter>param_arr</parameter>）为回调函数的的参数传入。
+   把第一个参数作为回调函数（<parameter>callback</parameter>）调用，把参数数组作（<parameter>args</parameter>）为回调函数的的参数传入。
   </para>
  </refsect1>
 
@@ -27,15 +28,15 @@
      <term><parameter>callback</parameter></term>
      <listitem>
       <para>
-          被调用的回调函数。
+       被调用的回调函数。
       </para>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>param_arr</parameter></term>
+     <term><parameter>args</parameter></term>
      <listitem>
       <para>
-          要被传入回调函数的数组，这个数组得是索引数组。
+       要被传入回调函数的数组，这个数组得是索引数组。
       </para>
      </listitem>
     </varlistentry>
@@ -46,7 +47,7 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-      返回回调函数的结果。如果出错的话就返回&false;
+   返回回调函数的结果。如果出错的话就返回 &false; 。
   </para>
  </refsect1>
 
@@ -63,9 +64,9 @@
      </thead>
      <tbody>
       <row>
-       <entry>5.3.0</entry>
+       <entry>8.0.0</entry>
        <entry>
-           对面向对象里面的关键字的解析有所增强。在此之前，使用两个冒号来连接一个类和里面的一个方法，把它作为参数来作为回调函数的话，将会发出一个<constant>E_STRICT</constant>的警告，因为这个传入的参数被视为静态方法。
+        <parameter>args</parameter> 键现在将被解释为参数名称，而不是被默默地忽略。
        </entry>
       </row>
      </tbody>
@@ -123,10 +124,8 @@ class Foo {
     }
 }
 
-// As of PHP 5.3.0
 call_user_func_array(__NAMESPACE__ .'\Foo::test', array('Hannes'));
 
-// As of PHP 5.3.0
 call_user_func_array(array(__NAMESPACE__ .'\Foo', 'test'), array('Philip'));
 
 ?>
@@ -150,7 +149,7 @@ $func = function($arg1, $arg2) {
     return $arg1 * $arg2;
 };
 
-var_dump(call_user_func_array($func, array(2, 4))); /* As of PHP 5.3.0 */
+var_dump(call_user_func_array($func, array(2, 4)));
 
 ?>
 ]]>
@@ -192,11 +191,6 @@ global $bar=55
 
  <refsect1 role="notes">
   &reftitle.notes;
-  <note>
-   <para>
-       PHP 5.4之前，如果<parameter>param_arr</parameter>里面的参数是引用传值，那么不管原函数默认的各个参数是不是引用传值，都会以引用方式传入到回调函数。虽然以引用传值这种方式来传递参数给回调函数，不会发出不支持的警告，但是不管怎么说，这样做还是不被支持的。并且在PHP 5.4里面被去掉了。而且，这也不适用于内部函数，for which the function signature is honored。如果回调函数默认设置需要接受的参数是引用传递的时候，按值传递，结果将会输出一个警告。<function>call_user_func</function> 将会返回 &false;（there is, however, an exception for passed values with reference count = 1, such as in literals, as these can be turned into references without ill effects — but also without writes to that value having any effect —; do not rely in this behavior, though, as the reference count is an implementation detail and the soundness of this behavior is questionable）。
-   </para>
-  </note>
   &note.func-callback-exceptions;
  </refsect1>
 
@@ -212,7 +206,6 @@ global $bar=55
  </refsect1>
 
 </refentry>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml

@@ -1,80 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 5169e9e846f49a06a47a0223a7b5487f1a1c65d2 Maintainer: HonestQiao Status: ready -->
-<!-- Reviewed: no Maintainer: HonestQiao -->
-<!-- splitted from ./en/functions/classobj.xml, last change in rev 1.4 -->
+<!-- EN-Revision: f004f576e7329b583dd41cf7e393efd5139bd5a3 Maintainer: HonestQiao Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="function.get-parent-class" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>get_parent_class</refname>
-  <refpurpose>返回对象或类的父类名</refpurpose>
+  <refpurpose>检索对象或者类的父级类名</refpurpose>
  </refnamediv>
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <type>string</type><methodname>get_parent_class</methodname>
-   <methodparam choice="opt"><type>mixed</type><parameter>obj</parameter></methodparam>
+   <type class="union"><type>string</type><type>false</type></type><methodname>get_parent_class</methodname>
+   <methodparam choice="opt"><type class="union"><type>object</type><type>string</type></type><parameter>object_or_class</parameter></methodparam>
   </methodsynopsis>
   <para>
-   如果 <parameter>obj</parameter>
-   是对象，则返回对象实例 <parameter>obj</parameter>
-   所属类的父类名。
-  </para>
-  <para>
-   如果 <parameter>obj</parameter>
-   是字符串，则返回以此字符串为名的类的父类名。此功能是在
-   PHP 4.0.5 中增加的。
-  </para>
-  <note>
-   <para>
-    自 PHP 5 起，如果在对象的方法内调用，则 <parameter>obj</parameter> 为可选项。
-   </para>
-  </note>
-  <para>
-   <example>
-    <title>使用 <function>get_parent_class</function></title>
-    <programlisting role="php">
-<![CDATA[
-<?php
-
-class dad {
-    function dad()
-    {
-    // implements some logic
-    }
-}
-
-class child extends dad {
-    function child()
-    {
-        echo "I'm " , get_parent_class($this) , "'s son\n";
-    }
-}
-
-class child2 extends dad {
-    function child2()
-    {
-        echo "I'm " , get_parent_class('child2') , "'s son too\n";
-    }
-}
-
-$foo = new child();
-$bar = new child2();
-
-?>
-]]>
-    </programlisting>
-    &example.outputs;
-    <screen>
-<![CDATA[
-I'm dad's son
-I'm dad's son too
-]]>
-    </screen>
-   </example>
-  </para>
-  <para>
-   参见 <function>get_class</function> 和
-   <function>is_subclass_of</function>。
+   检索对象或者类的父级类名。
   </para>
  </refsect1>
  <refsect1 role="parameters">
@@ -82,10 +22,10 @@ I'm dad's son too
   <para>
    <variablelist>
     <varlistentry>
-     <term><parameter>object</parameter></term>
+     <term><parameter>object_or_class</parameter></term>
      <listitem>
       <para>
-       The tested object or class name
+       检查的对象或者类名。如果是从对象内的方法中调用此函数，则此参数可选。
       </para>
      </listitem>
     </varlistentry>
@@ -95,81 +35,65 @@ I'm dad's son too
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   Returns the name of the parent class of the class of which
-   <parameter>object</parameter> is an instance or the name.
+   返回 <parameter>object_or_class</parameter> 是类名或者类实例的父类名称。
   </para>
   <note>
    <para>
-    If the object does not have a parent or the class given does not exist &false; will be returned.
+    如果对象没有父类或者指定的类名不存在，则返回 &false;。
    </para>
   </note>
   <para>
-   If called without parameter outside object, this function returns &false;.
+   如果在对象外部不带参数调用，则返回 &false;。
   </para>
  </refsect1>
+
  <refsect1 role="changelog">
   &reftitle.changelog;
-  <para>
-   <informaltable>
-    <tgroup cols="2">
-     <thead>
-      <row>
-       <entry>&Version;</entry>
-       <entry>&Description;</entry>
-      </row>
-     </thead>
-     <tbody>
-      <row>
-       <entry>Before 5.1.0</entry>
-       <entry>
-        If called without parameter outside object, this function would have
-        returned &null; with a warning.
-       </entry>
-      </row>
-      <row>
-       <entry>Since 5.0.0</entry>
-       <entry>
-        The <parameter>object</parameter> parameter is optional if called
-        from the object's method.
-       </entry>
-      </row>
-      <row>
-       <entry>Since 4.0.5</entry>
-       <entry>
-        If <parameter>object</parameter> is a string, returns the name of the
-        parent class of the class with that name.
-       </entry>
-      </row>
-     </tbody>
-    </tgroup>
-   </informaltable>
-  </para>
+  <informaltable>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>&Version;</entry>
+      <entry>&Description;</entry>
+     </row>
+    </thead>
+    <tbody>
+     <row>
+      <entry>8.0.0</entry>
+      <entry>
+       <parameter>object_or_class</parameter> 参数现在仅接受对象或者有效的类名。
+      </entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </informaltable>
  </refsect1>
+
  <refsect1 role="examples">
   &reftitle.examples;
   <para>
    <example>
-    <title>Using <function>get_parent_class</function></title>
+    <title>使用 <function>get_parent_class</function></title>
     <programlisting role="php">
 <![CDATA[
 <?php
 
-class dad {
-    function dad()
+class Dad {
+    function __construct()
     {
     // implements some logic
     }
 }
 
-class child extends dad {
-    function child()
+class Child extends Dad {
+    function __construct()
     {
         echo "I'm " , get_parent_class($this) , "'s son\n";
     }
 }
 
-class child2 extends dad {
-    function child2()
+class Child2 extends Dad {
+    function __construct()
     {
         echo "I'm " , get_parent_class('child2') , "'s son too\n";
     }
@@ -184,8 +108,8 @@ $bar = new child2();
     &example.outputs;
     <screen>
 <![CDATA[
-I'm dad's son
-I'm dad's son too
+I'm Dad's son
+I'm Dad's son too
 ]]>
     </screen>
    </example>
@@ -197,6 +121,7 @@ I'm dad's son too
    <simplelist>
     <member><function>get_class</function></member>
     <member><function>is_subclass_of</function></member>
+    <member><function>class_parents</function></member>
    </simplelist>
   </para>
  </refsect1>
