@@ -1,48 +1,70 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
+<!-- EN-Revision: cf3707c0f4aab3f7d4d9bfef40827375a6007c0b Maintainer: mowangjuanzi Status: ready -->
 <refentry xml:id="function.stream-get-meta-data" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>stream_get_meta_data</refname>
-  <refpurpose>从封装协议文件指针中取得报头／元数据</refpurpose>
+  <refpurpose>从流或文件指针中获取 header/meta 数据</refpurpose>
  </refnamediv>
- <refsect1>
-  <title>说明</title>
+ <refsect1 role="description">
+  &reftitle.description;
   <methodsynopsis>
    <type>array</type><methodname>stream_get_meta_data</methodname>
-   <methodparam><type>int</type><parameter>fp</parameter></methodparam>
+   <methodparam><type>resource</type><parameter>stream</parameter></methodparam>
   </methodsynopsis>
-  <simpara>
-   返回现有 <parameter>stream</parameter> 的信息。可以是任何通过
-   <function>fopen</function>，<function>fsockopen</function>
-   和 <function>pfsockopen</function> 建立的流。返回的数组包含以下项目：
-  </simpara>
+  <para>
+   返回现有 <parameter>stream</parameter> 的有关信息。
+  </para>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>stream</parameter></term>
+     <listitem>
+      <para>
+       流可以是通过 <function>fopen</function>、<function>fsockopen</function>、
+        <function>pfsockopen</function>、<function>stream_socket_client</function>
+       创建的任何流。
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   返回的数组包含以下元素：
+  </para>
   <itemizedlist>
    <listitem>
     <para>
-     <parameter>timed_out</parameter> (bool) - 如果在上次调用
-     <function>fread</function> 或者 <function>fgets</function>
-     中等待数据时流超时了则为 &true;。
+     <literal>timed_out</literal>（bool）——如果流在最后调用 
+     <function>fread</function> 或 <function>fgets</function> 
+     时等待超时，则为 &true;。
     </para>
    </listitem>
    <listitem>
     <para>
-     <parameter>blocked</parameter> (bool) - 如果流处于阻塞
-     IO 模式时为 &true;。参见 <function>stream_set_blocking</function>。
+     <literal>blocked</literal>（bool）——如果流是堵塞 IO 
+     模式，则为 &true;。参见 <function>stream_set_blocking</function>。
     </para>
    </listitem>
    <listitem>
     <para>
-     <parameter>eof</parameter> (bool) - 如果流到达文件末尾时为
-     &true;。注意对于 socket 流甚至当 <parameter>unread_bytes</parameter>
-     为非零值时也可以为 &true;。要测定是否有更多数据可读，用
-     <function>feof</function> 替代读取本项目的值。
+     <literal>eof</literal>（bool）——如果流已经到达文件结尾（end-of-file），则为 &true;。
+     注意套接字流即使 <literal>unread_bytes</literal> 
+     不为零也可以为 &true;。确定是否还可以读取更多数据，使用 
+     <function>feof</function> 而不是读取此值。
     </para>
    </listitem>
    <listitem>
     <para>
-     <parameter>unread_bytes</parameter> (int) - 当前在 PHP 自己的内部缓冲区中的字节数。
+     <literal>unread_bytes</literal>（int）——当前在 PHP 内部缓冲区的字节数。
     </para>
     <note>
      <simpara>
@@ -50,74 +72,219 @@
      </simpara>
     </note>
    </listitem>
-  </itemizedlist>
-  <simpara>
-   以下项目是 PHP 4.3 新加的：
-  </simpara>
-  <itemizedlist>
    <listitem>
     <para>
-     <parameter>stream_type</parameter> (string) - 一个描述流底层实现的标注。
+     <literal>stream_type</literal>（string）——描述了流底层实现的标记。
     </para>
    </listitem>
    <listitem>
     <para>
-     <parameter>wrapper_type</parameter> (string) -
-     一个描述流的分层协议封装实现的标注。更多关于封装协议的信息见
-     <xref linkend="wrappers"/>。
+     <literal>wrapper_type</literal>（string）——描述了在流之上的协议封装实现的标记。更多关于封装协议的信息见
+    <xref linkend="wrappers"/>。
     </para>
    </listitem>
    <listitem>
     <para>
-     <parameter>wrapper_data</parameter> (mixed) -
-     当前流附加的封装协议数据。更多封装协议及其数据的信息见
-     <xref linkend="wrappers"/>。
+     <literal>wrapper_data</literal>（mixed）——当前流附加的封装协议数据。更多封装协议及其数据的信息见
+      <xref linkend="wrappers"/>。
+    </para>
+   </listitem>
+   <!-- {{{ needs updating when stream filters are included again
+   <listitem>
+    <para>
+     <literal>filters</literal> (array) - 
+     包含有被叠加在当前流的任何过滤器名的数组。在<link linkend="filters">过滤器附录</link> 中可以找到过滤器的文档。
+    </para>
+   </listitem>
+   -->
+   <listitem>
+    <para>
+     <literal>mode</literal>（string）——对当前流所要求的访问类型（见
+     <link linkend="function.fopen">fopen()</link> 参考中的表格 1）。
     </para>
    </listitem>
    <listitem>
     <para>
-     <parameter>filters</parameter> (array) - 
-     包含有被叠加在当前流的任何过滤器名的数组。过滤器的文档见附录中的<link linkend="filters">可用过滤器列表</link>。
-    </para>
-   </listitem>
-  </itemizedlist>
-  <note>
-   <para>
-    本函数是 PHP 4.3 引进的，在此版本之前，可以用 <function>socket_get_status</function>
-    来取得前四个项目并且<emphasis>仅能用于基于 socket 的流</emphasis>。
-   </para>
-   <para>
-    在 PHP 4.3 及以后版本中，<function>socket_get_status</function>
-    是本函数的别名。
-   </para>
-  </note>
-  <note>
-   <simpara>
-    本函数不能作用于通过 <link linkend="ref.sockets">Socket 扩展库</link>创建的流。
-   </simpara>
-  </note>
-  <simpara>
-   以下项目为 PHP 5.0 新加：
-  </simpara>
-  <itemizedlist>
-   <listitem>
-    <para>
-     <parameter>mode</parameter> (string) - 对当前流所要求的访问类型（见
-     <link linkend="function.fopen">fopen()</link> 中的表格 1）。
+     <literal>seekable</literal>（bool）——是否可以在当前流中定位。
     </para>
    </listitem>
    <listitem>
     <para>
-     <parameter>seekable</parameter> (bool) - 是否可以在当前流中定位。
+     <literal>uri</literal>（string）——与当前流关联的 URI 或文件名。
     </para>
    </listitem>
    <listitem>
     <para>
-     <parameter>uri</parameter> (string) - 与当前流关联的 URI 或文件名。
+     <literal>crypto</literal>（array）——当前流的 TLS 
+     连接元数据。（注意：仅在资源流使用 TLS 时提供。）
     </para>
    </listitem>
   </itemizedlist>
  </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title><function>stream_get_meta_data</function> 示例，对 http 使用 <function>fopen</function></title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$url = 'http://www.example.com/';
+
+if (!$fp = fopen($url, 'r')) {
+    trigger_error("Unable to open URL ($url)", E_USER_ERROR);
+}
+
+$meta = stream_get_meta_data($fp);
+
+var_dump($meta);
+
+fclose($fp);
+?>
+]]>
+    </programlisting>
+    &example.outputs.similar;
+    <screen>
+<![CDATA[
+array(10) {
+  'timed_out' =>
+  bool(false)
+  'blocked' =>
+  bool(true)
+  'eof' =>
+  bool(false)
+  'wrapper_data' =>
+  array(13) {
+    [0] =>
+    string(15) "HTTP/1.1 200 OK"
+    [1] =>
+    string(11) "Age: 244629"
+    [2] =>
+    string(29) "Cache-Control: max-age=604800"
+    [3] =>
+    string(38) "Content-Type: text/html; charset=UTF-8"
+    [4] =>
+    string(35) "Date: Sat, 20 Nov 2021 18:17:57 GMT"
+    [5] =>
+    string(24) "Etag: "3147526947+ident""
+    [6] =>
+    string(38) "Expires: Sat, 27 Nov 2021 18:17:57 GMT"
+    [7] =>
+    string(44) "Last-Modified: Thu, 17 Oct 2019 07:18:26 GMT"
+    [8] =>
+    string(22) "Server: ECS (chb/0286)"
+    [9] =>
+    string(21) "Vary: Accept-Encoding"
+    [10] =>
+    string(12) "X-Cache: HIT"
+    [11] =>
+    string(20) "Content-Length: 1256"
+    [12] =>
+    string(17) "Connection: close"
+  }
+  'wrapper_type' =>
+  string(4) "http"
+  'stream_type' =>
+  string(14) "tcp_socket/ssl"
+  'mode' =>
+  string(1) "r"
+  'unread_bytes' =>
+  int(1256)
+  'seekable' =>
+  bool(false)
+  'uri' =>
+  string(23) "http://www.example.com/"
+}
+]]>
+    </screen>
+   </example>
+   <example>
+    <title><function>stream_get_meta_data</function> 示例，对 https 使用 <function>stream_socket_client</function></title>
+    <programlisting role="php">
+     <![CDATA[
+<?php
+$streamContext = stream_context_create(
+    [
+        'ssl' => [
+            'capture_peer_cert' => true,
+            'capture_peer_cert_chain' => true,
+            'disable_compression' => true,
+        ],
+    ]
+);
+
+$client = stream_socket_client(
+    'ssl://www.example.com:443',
+    $errorNumber,
+    $errorDescription,
+    40,
+    STREAM_CLIENT_CONNECT,
+    $streamContext
+);
+
+
+$meta = stream_get_meta_data($client);
+
+var_dump($meta);
+?>
+]]>
+    </programlisting>
+    &example.outputs.similar;
+    <screen>
+     <![CDATA[
+array(8) {
+  'crypto' =>
+  array(4) {
+    'protocol' =>
+    string(7) "TLSv1.3"
+    'cipher_name' =>
+    string(22) "TLS_AES_256_GCM_SHA384"
+    'cipher_bits' =>
+    int(256)
+    'cipher_version' =>
+    string(7) "TLSv1.3"
+  }
+  'timed_out' =>
+  bool(false)
+  'blocked' =>
+  bool(true)
+  'eof' =>
+  bool(false)
+  'stream_type' =>
+  string(14) "tcp_socket/ssl"
+  'mode' =>
+  string(2) "r+"
+  'unread_bytes' =>
+  int(0)
+  'seekable' =>
+  bool(false)
+}
+]]>
+    </screen>
+   </example>
+  </para>
+ </refsect1>
+
+ <refsect1 role="notes">
+  &reftitle.notes;
+  <note>
+   <para>
+     本函数不能用于通过 <link linkend="ref.sockets">Socket 扩展</link>创建的 socket。
+   </para>
+  </note>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>get_headers</function></member>
+    <member><link linkend="reserved.variables.httpresponseheader">$http_response_header</link></member>
+   </simplelist>
+  </para>
+ </refsect1>
+
 </refentry>
 
 <!-- Keep this comment at the end of the file
