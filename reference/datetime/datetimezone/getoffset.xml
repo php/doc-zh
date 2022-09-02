@@ -1,29 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 086dc12715921d77fe42d7cf578b6254c743aa3e Maintainer:duanxiaoqiang Status: ready -->
-<!-- Reviewed: no -->
-
+<!-- EN-Revision: 5fabd07880ab15b0ad2cf7eb055c7c2b36d7120f Maintainer:duanxiaoqiang Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="datetimezone.getoffset" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
   <refname>DateTimeZone::getOffset</refname>
   <refname>timezone_offset_get</refname>
-  <refpurpose>返回相对于 GMT 的时差。</refpurpose>
+  <refpurpose>返回相对于 GMT 的时差</refpurpose>
  </refnamediv>
  <refsect1 role="description">
   &reftitle.description;
   <para>&style.oop;</para>
   <methodsynopsis role="oop">
    <modifier>public</modifier> <type>int</type><methodname>DateTimeZone::getOffset</methodname>
-   <methodparam><type>DateTime</type><parameter>datetime</parameter></methodparam>
+   <methodparam><type>DateTimeInterface</type><parameter>datetime</parameter></methodparam>
   </methodsynopsis>
   <para>&style.procedural;</para>
   <methodsynopsis role="procedural">
    <type>int</type><methodname>timezone_offset_get</methodname>
    <methodparam><type>DateTimeZone</type><parameter>object</parameter></methodparam>
-   <methodparam><type>DateTime</type><parameter>datetime</parameter></methodparam>
+   <methodparam><type>DateTimeInterface</type><parameter>datetime</parameter></methodparam>
   </methodsynopsis>
   <para>
-   该函数返回 <parameter>datetime</parameter>日期 相对于 GMT 的时差。 GMT 时差是通过 DateTimeZone 对象的时区信息计算出来的。
+   该函数返回参数 <parameter>datetime</parameter> 中指定的日期/时间相对于 GMT
+   的时差。GMT 时差是通过 DateTimeZone 对象的时区信息计算出来的。
   </para>
  </refsect1>
 
@@ -36,7 +36,7 @@
      <term><parameter>datetime</parameter></term>
      <listitem>
       <para>
-       用来计算时差的日期对象。 
+       用来计算时差的 DateTime，其包含日期/时间。
       </para>
      </listitem>
     </varlistentry>
@@ -51,6 +51,30 @@
   </para>
  </refsect1>
 
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <para>
+   <informaltable>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>&Version;</entry>
+       <entry>&Description;</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>8.0.0</entry>
+       <entry>
+        在此之前的版本，失败时返回 &false;。
+       </entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </informaltable>
+  </para>
+ </refsect1>
+
  <refsect1 role="examples">
   &reftitle.examples;
   <para>
@@ -59,22 +83,18 @@
     <programlisting role="php">
 <![CDATA[
 <?php
-// Create two timezone objects, one for Taipei (Taiwan) and one for
-// Tokyo (Japan)
+// 创建两个时区对象，分别是台北（台湾）和东京（日本）
 $dateTimeZoneTaipei = new DateTimeZone("Asia/Taipei");
 $dateTimeZoneJapan = new DateTimeZone("Asia/Tokyo");
 
-// Create two DateTime objects that will contain the same Unix timestamp, but
-// have different timezones attached to them.
+// 创建两个 包含相同 Unix 时间戳的 DateTime 对象。区别是对应的时区不同。
 $dateTimeTaipei = new DateTime("now", $dateTimeZoneTaipei);
 $dateTimeJapan = new DateTime("now", $dateTimeZoneJapan);
 
-// Calculate the GMT offset for the date/time contained in the $dateTimeTaipei
-// object, but using the timezone rules as defined for Tokyo
-// ($dateTimeZoneJapan).
+// 计算包含日期/时间的 $dateTimeTaipei 对象与时区规则定义为东京的 $dateTimeZoneJapan 对象的 GMT 时差
 $timeOffset = $dateTimeZoneJapan->getOffset($dateTimeTaipei);
 
-// Should show int(32400) (for dates after Sat Sep 8 01:00:00 1951 JST).
+// 应该展示 int(32400)（Sat Sep 8 01:00:00 1951 JST 之后的日期）。
 var_dump($timeOffset);
 ?>
 ]]>
@@ -84,7 +104,6 @@ var_dump($timeOffset);
  </refsect1>
 
 </refentry>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
