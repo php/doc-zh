@@ -48,39 +48,34 @@
     <programlisting role="php">
 <![CDATA[
 <?php
-class Obj implements ArrayAccess {
-    private $container = array();
-
-    public function __construct() {
-        $this->container = array(
+namespace Test;
+class Obj implements \ArrayAccess {
+    public $data = array(
             "one"   => 1,
             "two"   => 2,
             "three" => 3,
         );
+    public function __construct() {
     }
-
-    public function offsetSet($offset, $value) {
-        if (is_null($offset)) {
-            $this->container[] = $value;
-        } else {
-            $this->container[$offset] = $value;
-        }
+    #需要定义 :void 返回类型,不然报错
+    public function offsetSet($offset, $value):void{
+        $this->data[$offset] = $value;
     }
-
-    public function offsetExists($offset) {
-        return isset($this->container[$offset]);
+    #需要定义 :bool 返回类型,不然报错
+    public function offsetExists($offset):bool{
+        return isset($this->data[$offset]);
     }
-
-    public function offsetUnset($offset) {
-        unset($this->container[$offset]);
+    #需要定义 :void 返回类型,不然报错
+    public function offsetUnset($offset):void {
+        unset($this->data[$offset]);
     }
-
-    public function offsetGet($offset) {
-        return isset($this->container[$offset]) ? $this->container[$offset] : null;
+    #需要定义 :mixed 返回类型,不然报错
+    public function offsetGet($offset):mixed {
+        return isset($this->data[$offset]) ? $this->data[$offset] : '';
     }
 }
 
-$obj = new Obj;
+$obj = new Test\Obj;
 
 var_dump(isset($obj["two"]));
 var_dump($obj["two"]);
