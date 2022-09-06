@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: b96ede557f04c5102301ebdcaa65e2f8393692cb Maintainer: daijie Status: ready -->
-<!-- $Author$ -->
-
+<!-- EN-Revision: 1a9ee818e554e116b4721d432c6d671e14281ea0 Maintainer: daijie Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <phpdoc:classref xml:id="class.datetimeinterface" xmlns:phpdoc="http://php.net/ns/phpdoc" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude">
 
  <title>The DateTimeInterface interface</title>
@@ -14,25 +13,32 @@
   <section xml:id="datetimeinterface.intro">
    &reftitle.intro;
    <para>
-    DateTimeInterface 的意思是可以约束类型为 DateTime 或 DateTimeImmutable。此接口不能让用户自己的 class 去实现（implements）。
+    创建 <interfacename>DateTimeInterface</interfacename> 是为了让参数，返回值，属性类型声明能够接受
+    <classname>DateTimeImmutable</classname> 或 <classname>DateTime</classname>
+    作为值。使用用户定义的类实现该接口是不可能的。
+   </para>
+   <para>
+    此接口也定义了公共常量，允许通过 <methodname>DateTimeImmutable::format</methodname>
+    和 <methodname>DateTime::format</methodname> 格式化 <classname>DateTimeImmutable</classname>
+    或 <classname>DateTime</classname> 对象。
    </para>
   </section>
 <!-- }}} -->
 
   <section xml:id="datetimeinterface.synopsis">
-   &reftitle.classsynopsis;
+   &reftitle.interfacesynopsis;
 
 <!-- {{{ Synopsis -->
    <classsynopsis>
-    <ooclass><classname>DateTimeInterface</classname></ooclass>
+    <ooclass>
+     <classname>DateTimeInterface</classname>
+    </ooclass>
 
-<!-- {{{ Class synopsis -->
     <classsynopsisinfo>
-     <ooclass>
-      <classname>DateTimeInterface</classname>
-     </ooclass>
+     <oointerface>
+      <interfacename>DateTimeInterface</interfacename>
+     </oointerface>
     </classsynopsisinfo>
-<!-- }}} -->
 
     <classsynopsisinfo role="comment">&Constants;</classsynopsisinfo>
     <fieldsynopsis>
@@ -52,6 +58,12 @@
      <type>string</type>
      <varname linkend="datetime.constants.iso8601">DateTimeInterface::ISO8601</varname>
      <initializer>"Y-m-d\TH:i:sO"</initializer>
+    </fieldsynopsis>
+    <fieldsynopsis>
+     <modifier>const</modifier>
+     <type>string</type>
+     <varname linkend="datetime.constants.iso8601_expanded">DateTimeInterface::ISO8601_EXPANDED</varname>
+     <initializer>"X-m-d\TH:i:sP"</initializer>
     </fieldsynopsis>
     <fieldsynopsis>
      <modifier>const</modifier>
@@ -78,10 +90,10 @@
      <initializer>"D, d M Y H:i:s O"</initializer>
     </fieldsynopsis>
     <fieldsynopsis>
-      <modifier>const</modifier>
-      <type>string</type>
-      <varname linkend="datetime.constants.rfc7231">DateTimeInterface::RFC7231</varname>
-      <initializer>"D, d M Y H:i:s \G\M\T"</initializer>
+     <modifier>const</modifier>
+     <type>string</type>
+     <varname linkend="datetime.constants.rfc7231">DateTimeInterface::RFC7231</varname>
+     <initializer>"D, d M Y H:i:s \G\M\T"</initializer>
     </fieldsynopsis>
     <fieldsynopsis>
      <modifier>const</modifier>
@@ -113,9 +125,11 @@
      <varname linkend="datetime.constants.w3c">DateTimeInterface::W3C</varname>
      <initializer>"Y-m-d\TH:i:sP"</initializer>
     </fieldsynopsis>
-    
+
     <classsynopsisinfo role="comment">&Methods;</classsynopsisinfo>
-    <xi:include xpointer="xmlns(db=http://docbook.org/ns/docbook) xpointer(id('class.datetimeinterface')/db:refentry/db:refsect1[@role='description']/descendant::db:methodsynopsis[@role='DateTimeInterface'])" />
+    <xi:include xpointer="xmlns(db=http://docbook.org/ns/docbook) xpointer(id('class.datetimeinterface')/db:refentry/db:refsect1[@role='description']/descendant::db:methodsynopsis[@role='DateTimeInterface'])">
+     <xi:fallback/>
+    </xi:include>
    </classsynopsis>
 <!-- }}} -->
 
@@ -156,8 +170,25 @@
        <simpara>
         这种格式和 ISO-8601 的格式并不兼容，只是出于向后兼容的原因才保留的。
         如果要使用和 ISO-8601 兼容的格式，
-        请使用 <constant>DateTime::ATOM</constant>
-        或 <constant>DATE_ATOM</constant> 两个常量。
+        请使用 <constant>DateTimeInterface::ISO8601_EXPANDED</constant>
+        或 <constant>DateTimeInterface::ATOM</constant> 两个常量。
+       </simpara>
+      </note>
+     </listitem>
+    </varlistentry>
+
+    <varlistentry xml:id="datetime.constants.iso8601_expanded">
+     <term><constant>DateTimeInterface::ISO8601_EXPANDED</constant></term>
+     <term><constant>DATE_ISO8601_EXPANDED</constant></term>
+     <listitem>
+      <simpara>
+       ISO-8601 扩大版（示例：+10191-07-26T08:59:52+01:00）
+      </simpara>
+      <note>
+       <simpara>
+        此格式允许年份超出 ISO-8601
+        的正常年份范围（<literal>0000</literal>-<literal>9999</literal>），且一直包含符号字符。还解决了时区部分（<literal>+01:00</literal>）与 
+        ISO-8601 兼容的问题。
        </simpara>
       </note>
      </listitem>
@@ -238,7 +269,7 @@
      <term><constant>DATE_RFC3339_EXTENDED</constant></term>
      <listitem>
       <simpara>
-       RFC 3339 EXTENDED 格式（自 PHP 7.0.0 可用）（示例：2005-08-15T15:52:01.000+00:00）
+       RFC 3339 EXTENDED 格式（示例：2005-08-15T15:52:01.000+00:00）
       </simpara>
      </listitem>
     </varlistentry>
@@ -280,16 +311,16 @@
      </thead>
      <tbody>
       <row>
+       <entry>8.2.0</entry>
+       <entry>
+        新增常量 <varname
+        linkend="datetime.constants.iso8601_expanded">DateTimeInterface::ISO8601_EXPANDED</varname>。
+       </entry>
+      </row>     
+      <row>
        <entry>7.2.0</entry>
        <entry>
        <classname>DateTime</classname> 的类常量现在定义在了 <classname>DateTimeInterface</classname> 上。
-       </entry>
-      </row>
-      <row>
-       <entry>5.5.8</entry>
-       <entry>
-        尝试实现（implement）<classname>DateTimeInterface</classname> 时，会抛出严重错误。
-        之前此举不会产生错误，但这种做法是不对的。
        </entry>
       </row>
      </tbody>
@@ -303,7 +334,6 @@
  &reference.datetime.entities.datetimeinterface;
 
 </phpdoc:classref>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
