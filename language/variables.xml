@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 165718f97f983da66504dbe547900b7e5d54fdb5 Maintainer: HonestQiao Status: ready -->
-<!-- CREDITS: dallas, Gregory, verdana -->
+<!-- EN-Revision: 61cfd00858115c6fe029df05829b04c1ec5bc9c2 Maintainer: HonestQiao Status: ready -->
+<!-- CREDITS: dallas, Gregory, verdana, mowangjuanzi -->
  <chapter xml:id="language.variables" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
   <title>变量</title>
 
@@ -411,9 +411,9 @@ function test()
 <![CDATA[
 <?php
 function foo(){
-    static $int = 0;          // correct
-    static $int = 1+2;        // correct 
-    static $int = sqrt(121);  // wrong  (as it is a function)
+    static $int = 0;          // 正确
+    static $int = 1+2;        // 正确
+    static $int = sqrt(121);  // 错误（因为它是函数）
 
     $int++;
     echo $int;
@@ -424,10 +424,39 @@ function foo(){
       </example>
     </para>
      
+   <para>
+    从 PHP 8.1.0
+    开始，当继承（不是覆盖）使用有静态变量的方法时，继承的方法将会跟父级方法共享静态变量。这意味着方法中的静态变量现在跟静态属性有相同的行为。
+   </para>
+
+   <example>
+    <title>在继承方法中使用静态变量</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+class Foo {
+    public static function counter() {
+        static $counter = 0;
+        $counter++;
+        return $counter;
+    }
+}
+class Bar extends Foo {}
+var_dump(Foo::counter()); // int(1)
+var_dump(Foo::counter()); // int(2)
+var_dump(Bar::counter()); // int(3)，PHP 8.1.0 之前 int(1)
+var_dump(Bar::counter()); // int(4)，PHP 8.1.0 之前 int(2)
+?>
+]]>
+    </programlisting>
+   </example>
+
+   <note>
     <para>
-     静态声明是在编译时解析的。
+     静态声明在编译时解析。
     </para>
-   </sect2>
+   </note>
+  </sect2>
 
    <sect2 xml:id="language.variables.scope.references">
     <title>全局和静态变量的引用</title>
