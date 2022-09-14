@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 0e75cfe1a9c5339e4d7e227f714ded06f088a2fd Maintainer: daijie Status: ready -->
-
+<!-- EN-Revision: 8cdc6621f9826d04abc3e50438c010804d7e8683 Maintainer: daijie Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="function.json-last-error" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>json_last_error</refname>
@@ -15,7 +15,7 @@
    <void />
   </methodsynopsis>
   <para>
-   如果有，返回 JSON 编码解码时最后发生的错误。
+   没有指定 <constant>JSON_THROW_ON_ERROR</constant>时，返回上一次 JSON 编码解码时发生的最后一个错误（如果有）。
   </para>
  </refsect1>
 
@@ -68,12 +68,12 @@
      <row>
       <entry><constant>JSON_ERROR_UTF8</constant></entry>
       <entry>异常的 UTF-8 字符，也许是因为不正确的编码。</entry>
-      <entry>PHP 5.3.3</entry>
+      <entry></entry>
      </row>
      <row>
       <entry><constant>JSON_ERROR_RECURSION</constant></entry>
       <entry>One or more recursive references in the value to be encoded</entry>
-      <entry>PHP 5.5.0</entry>
+      <entry></entry>
      </row>
      <row>
       <entry><constant>JSON_ERROR_INF_OR_NAN</constant></entry>
@@ -83,22 +83,22 @@
        or <link linkend="function.is-infinite"><constant>INF</constant></link>
        values in the value to be encoded
       </entry>
-      <entry>PHP 5.5.0</entry>
+      <entry></entry>
      </row>
      <row>
       <entry><constant>JSON_ERROR_UNSUPPORTED_TYPE</constant></entry>
       <entry>指定的类型，值无法编码。</entry>
-      <entry>PHP 5.5.0</entry>
+      <entry></entry>
      </row>
      <row>
       <entry><constant>JSON_ERROR_INVALID_PROPERTY_NAME</constant></entry>
       <entry>指定的属性名无法编码。</entry>
-      <entry>PHP 7.0.0</entry>
+      <entry></entry>
      </row>
      <row>
       <entry><constant>JSON_ERROR_UTF16</constant></entry>
       <entry>畸形的 UTF-16 字符，可能因为字符编码不正确。</entry>
-      <entry>PHP 7.0.0</entry>
+      <entry></entry>
      </row>
     </tbody>
    </tgroup>
@@ -182,6 +182,31 @@ var_dump($json, $error === JSON_ERROR_UTF8);
     <screen>
 <![CDATA[
 string(4) "null"
+bool(true)
+]]>
+    </screen>
+   </example>
+  </para>
+  <para>
+   <example>
+    <title><function>json_last_error</function> 和 <constant>JSON_THROW_ON_ERROR</constant></title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+// 导致 JSON_ERROR_UTF8 的无效 UTF8 序列
+json_encode("\xB1\x31");
+
+// 以下不会导致 JSON 错误
+json_encode('okay', JSON_THROW_ON_ERROR);
+
+// 前者的 json_encode() 不会改变全局错误状态
+var_dump(json_last_error() === JSON_ERROR_UTF8);
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
 bool(true)
 ]]>
     </screen>
