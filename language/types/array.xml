@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
 <!-- EN-Revision: 2ff6e6bcad9700adaf50f9e1639c6d7d7d1f059d Maintainer: HonestQiao Status: ready -->
-<!-- CREDITS: Geogory, dallas, jwj -->
+<!-- CREDITS: Geogory, dallas, jwj, mowangjuanzi -->
 <sect1 xml:id="language.types.array">
  <title>Array 数组</title>
 
@@ -365,9 +365,6 @@ function getArray() {
 }
 
 $secondElement = getArray()[1];
-
-// 或
-list(, $secondElement) = getArray();
 ?>
 ]]>
     </programlisting>
@@ -376,7 +373,9 @@ list(, $secondElement) = getArray();
    <note>
     <para>
      试图访问一个未定义的数组键名与访问任何未定义变量一样：会导致
-     <constant>E_NOTICE</constant> 级别错误信息，其结果为 &null;。
+     <constant>E_WARNING</constant>
+     级别错误信息（在 PHP 8.0.0 之前是 <constant>E_NOTICE</constant>
+     级别），其结果为 &null;。
     </para>
    </note>
    <note>
@@ -515,11 +514,136 @@ Array
 )
 ]]>
      </screen>
-    </informalexample>       
+    </informalexample>
 
    </note>
 
   </sect3>
+
+  <sect3 xml:id="language.types.array.syntax.destructuring">
+   <title>数组解构</title>
+
+   <para>
+    可以使用 <literal>[]</literal>（自 PHP 7.1.0 起）或者 <function>list</function>
+    语言结构结构数组。这些结构可用于将数组解构为不同的变量。
+   </para>
+
+   <informalexample>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$source_array = ['foo', 'bar', 'baz'];
+
+[$foo, $bar, $baz] = $source_array;
+
+echo $foo;    // 打印 "foo"
+echo $bar;    // 打印 "bar"
+echo $baz;    // 打印 "baz"
+?>
+]]>
+    </programlisting>
+   </informalexample>
+
+   <para>
+    数组解构可用于 &foreach; 在迭代多维数组时对其进行解构。
+   </para>
+
+   <informalexample>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$source_array = [
+    [1, 'John'],
+    [2, 'Jane'],
+];
+
+foreach ($source_array as [$id, $name]) {
+    // 这里是 $id 和 $name 的逻辑
+}
+?>
+]]>
+    </programlisting>
+   </informalexample>
+
+   <para>
+    如果变量未提供，数组元素将会被忽略。数组解构始终从索引 <literal>0</literal> 开始。
+   </para>
+
+   <informalexample>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$source_array = ['foo', 'bar', 'baz'];
+
+// 将索引 2 的元素分配给变量 $baz
+[, , $baz] = $source_array;
+
+echo $baz;    // 打印 "baz"
+?>
+]]>
+    </programlisting>
+   </informalexample>
+
+   <para>
+    自 PHP 7.1.0 起，也可以解构关联数组。这在数字索引数组中更容易选择正确的元素，因为可以显式指定索引。
+   </para>
+
+   <informalexample>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$source_array = ['foo' => 1, 'bar' => 2, 'baz' => 3];
+
+// 将索引 'baz' 处的元素分配给变量 $three
+['baz' => $three] = $source_array;
+
+echo $three;    // 打印 3
+
+$source_array = ['foo', 'bar', 'baz'];
+
+// 将索引 2 处的元素分配给变量 $baz
+[2 => $baz] = $source_array;
+
+echo $baz;    // 打印 "baz"
+?>
+]]>
+    </programlisting>
+   </informalexample>
+
+   <para>
+    数组解构可以方便的用于两个变量交换。
+   </para>
+
+   <informalexample>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$a = 1;
+$b = 2;
+
+[$b, $a] = [$a, $b];
+
+echo $a;    // 打印 2
+echo $b;    // 打印 1
+?>
+]]>
+    </programlisting>
+   </informalexample>
+
+   <note>
+    <para>
+      分配时不支持展开运算符（<literal>...</literal>）。
+    </para>
+   </note>
+
+   <note>
+    <para>
+      尝试访问未定义的数组键与访问任何未定义的变量相同：都将发出 <constant>E_WARNING</constant>
+      级别的错误消息（PHP 8.0.0 之前是 <constant>E_NOTICE</constant> 级别），结果将是 &null;。
+    </para>
+   </note>
+  </sect3>
+
  </sect2><!-- end syntax -->
  
  <sect2 xml:id="language.types.array.useful-funcs">
@@ -558,7 +682,7 @@ $b = array_values($a);
 
   <para>
    &foreach; 控制结构是专门用于
-   <type>array</type>的。它提供了一个简单的方法来遍历 <type>array</type>。
+   <type>array</type> 的。它提供了一个简单的方法来遍历 <type>array</type>。
   </para>
  </sect2>
  
