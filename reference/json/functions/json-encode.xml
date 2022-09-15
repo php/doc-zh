@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: b95d28e6ec86e4a71e012737d36ebdc1cf009180 Maintainer: daijie Status: ready -->
+<!-- EN-Revision: 29fcbf994781acc66c4ae16d6c1999880721bd64 Maintainer: daijie Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="function.json-encode" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>json_encode</refname>
@@ -13,14 +13,18 @@
   <methodsynopsis>
    <type class="union"><type>string</type><type>false</type></type><methodname>json_encode</methodname>
    <methodparam><type>mixed</type><parameter>value</parameter></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter>options</parameter><initializer>0</initializer></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>flags</parameter><initializer>0</initializer></methodparam>
    <methodparam choice="opt"><type>int</type><parameter>depth</parameter><initializer>512</initializer></methodparam>
   </methodsynopsis>
   <para>
-   返回字符串，包含了 <parameter>value</parameter> 值 JSON 形式的表示。
+   返回字符串，包含了 <parameter>value</parameter> 值 JSON 形式的表示。如果参数是 &array; 或 &object;，则会递归序列化。
   </para>
   <para>
-   编码受传入的 <parameter>options</parameter> 参数影响，此外浮点值的编码依赖于  <link linkend="ini.serialize-precision">serialize_precision</link>。
+   如果要序列化的值是对象，则默认仅包含公开可见的属性，或者类可以实现 <interfacename>JsonSerializable</interfacename>
+   控制其值如何序列化为 <acronym>JSON</acronym>。
+  </para>
+  <para>
+   编码受传入的 <parameter>flags</parameter> 参数影响，此外浮点值的编码依赖于 <link linkend="ini.serialize-precision">serialize_precision</link>。
   </para>
  </refsect1>
 
@@ -42,24 +46,24 @@
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>options</parameter></term>
+     <term><parameter>flags</parameter></term>
      <listitem>
       <para>
        由以下常量组成的二进制掩码：
-       <constant>JSON_FORCE_OBJECT</constant>,
-       <constant>JSON_HEX_QUOT</constant>,
-       <constant>JSON_HEX_TAG</constant>,
-       <constant>JSON_HEX_AMP</constant>,
-       <constant>JSON_HEX_APOS</constant>,
-       <constant>JSON_INVALID_UTF8_IGNORE</constant>,
-       <constant>JSON_INVALID_UTF8_SUBSTITUTE</constant>,
-       <constant>JSON_NUMERIC_CHECK</constant>,
-       <constant>JSON_PARTIAL_OUTPUT_ON_ERROR</constant>,
-       <constant>JSON_PRESERVE_ZERO_FRACTION</constant>,
-       <constant>JSON_PRETTY_PRINT</constant>,
-       <constant>JSON_UNESCAPED_LINE_TERMINATORS</constant>,
-       <constant>JSON_UNESCAPED_SLASHES</constant>,
-       <constant>JSON_UNESCAPED_UNICODE</constant>,
+       <constant>JSON_FORCE_OBJECT</constant>、
+       <constant>JSON_HEX_QUOT</constant>、
+       <constant>JSON_HEX_TAG</constant>、
+       <constant>JSON_HEX_AMP</constant>、
+       <constant>JSON_HEX_APOS</constant>、
+       <constant>JSON_INVALID_UTF8_IGNORE</constant>、
+       <constant>JSON_INVALID_UTF8_SUBSTITUTE</constant>、
+       <constant>JSON_NUMERIC_CHECK</constant>、
+       <constant>JSON_PARTIAL_OUTPUT_ON_ERROR</constant>、
+       <constant>JSON_PRESERVE_ZERO_FRACTION</constant>、
+       <constant>JSON_PRETTY_PRINT</constant>、
+       <constant>JSON_UNESCAPED_LINE_TERMINATORS</constant>、
+       <constant>JSON_UNESCAPED_SLASHES</constant>、
+       <constant>JSON_UNESCAPED_UNICODE</constant>、
        <constant>JSON_THROW_ON_ERROR</constant>。
        关于 JSON 常量详情参考
        <link linkend="json.constants">JSON 常量</link>页面。
@@ -101,7 +105,7 @@
       <row>
        <entry>7.3.0</entry>
        <entry>
-        <parameter>options</parameter> 参数新增
+        <parameter>flags</parameter> 参数新增
         <constant>JSON_THROW_ON_ERROR</constant>
         常量。
        </entry>
@@ -109,7 +113,7 @@
       <row>
        <entry>7.2.0</entry>
        <entry>
-        <parameter>options</parameter> 参数新增
+        <parameter>flags</parameter> 参数新增
         <constant>JSON_INVALID_UTF8_IGNORE</constant> 和
         <constant>JSON_INVALID_UTF8_SUBSTITUTE</constant>
         常量。
@@ -118,7 +122,7 @@
       <row>
        <entry>7.1.0</entry>
        <entry>
-        <parameter>options</parameter> 参数新增
+        <parameter>flags</parameter> 参数新增
         <constant>JSON_UNESCAPED_LINE_TERMINATORS</constant>
         常量。
        </entry>
@@ -159,7 +163,7 @@ echo json_encode($arr);
    </example>
    
    <example>
-    <title> <function>json_encode</function> 函数中 <parameter>options</parameter> 参数的用法</title>
+    <title> <function>json_encode</function> 函数中 flags 参数的用法</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -365,13 +369,10 @@ string(2) "12"
   
   <note>
    <para>
-    Like the reference JSON encoder, <function>json_encode</function> will
-    generate JSON that is a simple value (that is, neither an object nor an
-    array) if given a <type>string</type>, <type>integer</type>,
-    <type>float</type> or <type>boolean</type> as an input
-    <parameter>value</parameter>. While most decoders will accept these values
-    as valid JSON, some may not, as the specification is ambiguous on this
-    point.
+    参考 JSON 解析器，如果指定简单的 <type>string</type>、<type>integer</type>、<type>float</type> 或
+    <type>boolean</type> 作为输入 <parameter>value</parameter>，<function>json_encode</function>
+    将生成简单的值的 JSON（既不是对象又不是数组）。虽然大多数解码器会接受这些值作为有效的
+    JSON，但有些可能不会，因为在这一点上规范是模棱两可的。
    </para>
    <para>
     总而言之，应该测试下 JSON decoder 能否处理 <function>json_encode</function> 生成的数据。
@@ -391,7 +392,6 @@ string(2) "12"
   </para>
  </refsect1>
 </refentry>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
