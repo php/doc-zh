@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: 9ee9eccf455188ab6eb352194eb6f9eb99e15606 Maintainer: lm92 Status: ready -->
+<!-- EN-Revision: 18b39f03ef77080a349f6cd2d82112dd43f904c2 Maintainer: lm92 Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <sect1 xml:id="language.oop5.decon" xmlns="http://docbook.org/ns/docbook">
  <title>构造函数和析构函数</title>
 
@@ -151,6 +151,51 @@ class Point {
      </para>
     </note>
    </sect3>
+
+   <sect3 xml:id="language.oop5.decon.constructor.new">
+    <title>初始化新功能</title>
+    <para>
+     自 PHP 8.1.0 起，对象可以用于默认参数值，静态变量，全局常量，以及属性参数。<function>define</function>
+     现在也接受对象。
+    </para>
+    <note>
+     <para>
+      禁止使用动态类名、非字符串类名以及匿名类。禁止使用参数解包。禁止使用不支持的表达式作为参数。
+     </para>
+    </note>
+    <example>
+     <title>初始化中使用 new</title>
+     <programlisting role="php">
+<![CDATA[
+<?php
+
+// 全部允许：
+static $x = new Foo;
+
+const C = new Foo;
+ 
+function test($param = new Foo) {}
+ 
+#[AnAttribute(new Foo)]
+class Test {
+    public function __construct(
+        public $prop = new Foo,
+    ) {}
+}
+
+// 全部禁止（编译时错误）:
+function test(
+    $a = new (CLASS_NAME_CONSTANT)(), // 动态类名
+    $b = new class {}, // 匿名类
+    $c = new A(...[]), // 参数解包
+    $d = new B($abc), // 不支持的常量表达式
+) {}
+?>
+]]>
+     </programlisting>
+    </example>
+   </sect3>
+   
    <sect3 xml:id="language.oop5.decon.constructor.static">
     <title>Static 创造方法</title>
     <para>
