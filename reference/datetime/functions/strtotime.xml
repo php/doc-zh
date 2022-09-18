@@ -1,40 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 53bdffa6b9f8ce5ffdaf476c9d450f7cd0d1afa2 Maintainer: Avenger Status: ready -->
+<!-- EN-Revision: 5c951013ca04161992efed8b86fb40f55669958e Maintainer: Avenger Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <!-- splitted from ./en/functions/datetime.xml, last change in rev 1.8 -->
 <refentry xml:id="function.strtotime" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
   <refname>strtotime</refname>
-  <refpurpose>将任何字符串的日期时间描述解析为 Unix 时间戳</refpurpose>
+  <refpurpose>将任何英文文本日期时间描述解析为 Unix 时间戳</refpurpose>
  </refnamediv>
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <type>int</type><methodname>strtotime</methodname>
+   <type class="union"><type>int</type><type>false</type></type><methodname>strtotime</methodname>
    <methodparam><type>string</type><parameter>datetime</parameter></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter>now</parameter><initializer>time()</initializer></methodparam>
+   <methodparam choice="opt"><type class="union"><type>int</type><type>null</type></type><parameter>baseTimestamp</parameter><initializer>&null;</initializer></methodparam>
   </methodsynopsis>
   <simpara>
-   本函数预期接受一个包含美国英语日期格式的字符串并尝试将其解析为
-   Unix 时间戳（自 January 1 1970 00:00:00 UTC 起的秒数），其值相对于
-   <parameter>now</parameter> 参数给出的时间，如果没有提供
-   <parameter>now</parameter> 参数则用系统当前时间。
+   本函数期望接受包含英文日期格式的字符串并尝试将其解析为
+   Unix 时间戳（自 January 1 1970 00:00:00 UTC 起的秒数），其值跟
+   <parameter>baseTimestamp</parameter> 参数给出的时间相关，如果没有提供
+   <parameter>baseTimestamp</parameter> 参数则为当前时间。在<link
+   linkend="datetime.formats">日期和时间格式</link>中定义了日期字符串解析，并且有几个微秒的注意事项，强烈建议查看完整详细信息。
   </simpara>
   <warning>
-  <para>
-    本函数返回的 Unix 时间戳不包含时区信息，为了实现对 "日期/时间"
-    进行计算，推荐使用功能更强大的
-    <classname>DateTimeImmutable</classname> 类。
+   <para>
+    本函数返回的 Unix 时间戳不包含时区信息，为了实现对日期/时间信息进行计算，推荐使用功能更强大的
+    <classname>DateTimeImmutable</classname>。
    </para>
   </warning>
   <para>
-    本函数将使用 <envar>TZ</envar> 环境变量（如果有的话）来计算时间戳。自
-    PHP 5.1.0 起有更容易的方法来定义时区用于所有的日期／时间函数。此过程在
-    <function>date_default_timezone_get</function> 函数页面中有说明。
+   本函数的每个参数都使用默认时区，除非在该参数指定了时区。注意不要在每个参数中使用不同的时区，除非是故意的。参考
+   <function>date_default_timezone_get</function> 获取定义默认时区的各种方法。
   </para>
  </refsect1>
-
-
 
  <refsect1 role="parameters">
   &reftitle.parameters;
@@ -47,10 +45,10 @@
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>now</parameter></term>
+     <term><parameter>baseTimestamp</parameter></term>
      <listitem>
       <para>
-       用来计算返回值的时间戳。
+       时间戳，用作计算相对日期的基础。
       </para>
      </listitem>
     </varlistentry>
@@ -58,12 +56,10 @@
   </para>
  </refsect1>
 
- 
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   成功则返回时间戳，否则返回 &false;。在 PHP 5.1.0
-   之前本函数在失败时返回 <literal>-1</literal>。
+   成功则返回时间戳，否则返回 &false;。
   </para>
  </refsect1>
  
@@ -72,6 +68,30 @@
    
    &date.timezone.errors.description;
  
+ </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <para>
+   <informaltable>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>&Version;</entry>
+       <entry>&Description;</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>8.0.0</entry>
+       <entry>
+        现在 <parameter>baseTimestamp</parameter> 允许为 null。
+       </entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </informaltable>
+  </para>
  </refsect1>
 
  <refsect1 role="examples">
@@ -102,11 +122,10 @@ echo strtotime("last Monday"), "\n";
 <?php
 $str = 'Not Good';
 
-// PHP 5.1.0 之前的版本中和应该改成和 -1 进行比较
 if (($timestamp = strtotime($str)) === false) {
     echo "The string ($str) is bogus";
 } else {
-    echo "$str == " . date('l dS of F Y h:i:s A', $timestamp);
+    echo "$str == " . date('l dS \o\f F Y h:i:s A', $timestamp);
 }
 ?>
 ]]>
@@ -117,71 +136,54 @@ if (($timestamp = strtotime($str)) === false) {
 
  <refsect1 role="notes">
   &reftitle.notes;
-   <note>
+  <note>
    <para>
-    如果给定的年份是两位数字的格式，则其值 0-69 表示 2000-2069，70-100
-    表示 1970-2000。 See the notes
-    below for possible differences on 32bit systems (possible dates might end on 
-    2038-01-19 03:14:07).
+    在这种情况下，“相对”日期还意味着，如果未提供日期/时间的特定组成部分，则将从 <parameter>baseTimestamp</parameter>
+    逐字获取。也就是说如果在 2022 年 5 月 31 日运行 <code>strtotime('February')</code>，将被解释为
+    <literal>31 February 2022</literal>，它将溢出到 <literal>3 March</literal> 的时间戳。（在闰年，应该是
+    <literal>2 March</literal>。）使用 <code>strtotime('1 February')</code> 或者
+    <code>strtotime('first day of February')</code> 可以避免这个问题。
    </para>
   </note>
   <note>
    <para>
-    有效的时间戳通常从 Fri, 13 Dec
-    1901 20:45:54 UTC 到 Tue, 19 Jan 2038 03:14:07 UTC（对应于 32
+    如果年份数字是两位数字，则其值 0-69 表示 2000-2069，70-99 表示 1970-1999。参阅下面的注释了解
+    32 位系统上可能的差异（结束日期可能是 2038-01-19 03:14:07 ）。
+   </para>
+  </note>
+  <note>
+   <para>
+    时间戳的有效范围通常从 Fri, 13 Dec 1901 20:45:54 UTC
+    到 Tue, 19 Jan 2038 03:14:07 UTC（这些日期对应 32
     位有符号整数的最小值和最大值）。
    </para>
-   
-   <para>
-    PHP 5.1.0 之前，不是所有的平台都支持负的时间戳，那么日记范围就被限制为不能早于
-    Unix 纪元。这意味着在 1970 年 1 月 1 日之前的日期将不能用在 Windows，一些
-    Linux 版本，以及几个其它的操作系统中。
-   </para>
-
    <para>
     在 64 位的 PHP 版本中，时间戳的有效范围实际上是无限的，因为
-    64 位可以覆盖最多
-    2930 亿年的范围。
+    64 位在任一方向上都可以代表大约 2930 亿年。
    </para>
   </note>
   <note>
    <para>
-    不同的分隔符，比如 <literal>m/d/y</literal> 或 <literal>d-m-y</literal>
-    会影响到解析结果：若以反斜线 (<literal>/</literal>) 为分隔，将会做为美洲日期
-    <literal>m/d/y</literal> 来解析；而当分隔符为短横线 (<literal>-</literal>) 或点
-    (<literal>.</literal>) 时，则将做为欧洲日期 <literal>d-m-y</literal>
-    格式来解析。当年份只有两位数字，且分隔符为短横线 (<literal>-</literal>时，日期字符串将被解析为
-    <literal>y-m-d</literal> 格式。
-   </para>
-   <para>
-    为了避免潜在的歧义，最好使用 ISO 8601 标准格式
-    (<literal>YYYY-MM-DD</literal>) 或
-    <methodname>DateTime::createFromFormat</methodname> 来表达。
-   </para>
-  </note>
-  <note>
-   <para>
-    不建议使用此函数对日期进行数学运算。在 PHP 5.3 及以后版本中，推荐使用
+    不建议使用此函数对日期进行数学运算。推荐使用
     <methodname>DateTime::add</methodname> 和
-    <methodname>DateTime::sub</methodname> 函数，PHP 5.2 中可以使用
-    <methodname>DateTime::modify</methodname>。
+    <methodname>DateTime::sub</methodname> 函数。
    </para>
   </note>
  </refsect1>
 
-<refsect1 role="seealso">
+ <refsect1 role="seealso">
   &reftitle.seealso;
   <para>
    <simplelist>
-    <member><link linkend="datetime.formats">日期时间格式</link></member>
-    <member><methodname>DateTime::createFromFormat</methodname></member>
+    <member><classname>DateTimeImmutable</classname></member>
+    <member><methodname>DateTimeImmutable::createFromFormat</methodname></member>
+    <member><link linkend="datetime.formats">日期和时间格式</link></member>
     <member><function>checkdate</function></member>
     <member><function>strptime</function></member>
    </simplelist>
   </para>
  </refsect1>
 </refentry>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
