@@ -1,58 +1,73 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
+<!-- EN-Revision: 5c951013ca04161992efed8b86fb40f55669958e Maintainer: mowangjuanzi Status: ready -->
 <refentry xml:id="function.microtime" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>microtime</refname>
   <refpurpose>返回当前 Unix 时间戳和微秒数</refpurpose>
  </refnamediv>
- <refsect1>
-  <title>说明</title>
+
+ <refsect1 role="description">
+  &reftitle.description;
   <methodsynopsis>
-   <type>mixed</type><methodname>microtime</methodname>
-   <methodparam choice="opt"><type>bool</type><parameter>get_as_float</parameter></methodparam>
+   <type class="union"><type>string</type><type>float</type></type><methodname>microtime</methodname>
+   <methodparam choice="opt"><type>bool</type><parameter>as_float</parameter><initializer>&false;</initializer></methodparam>
   </methodsynopsis>
   <para>
-   <function>microtime</function> 当前 Unix
+   <function>microtime</function> 返回当前 Unix
    时间戳以及微秒数。本函数仅在支持 gettimeofday()
    系统调用的操作系统下可用。
   </para>
   <para>
-   如果调用时不带可选参数，本函数以 "msec sec"
-   的格式返回一个字符串，其中 sec 是自 Unix 纪元（0:00:00 January 1,
-   1970 GMT）起到现在的秒数，msec 是微秒部分。字符串的两部分都是以秒为单位返回的。
+   对于性能测量，建议使用 <function>hrtime</function>。
+  </para>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>as_float</parameter></term>
+     <listitem>
+      <para>
+       如果使用并设置为 &true;，<function>microtime</function>
+       将返回浮点数而不是字符串，具体查看下面的返回值相关描述。
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   默认情况下，<function>microtime</function> 返回“msec sec”形式的 <type>string</type>，其中
+   <literal>sec</literal> 是自 Unix 纪元（格林威治标准时间 1970 年 1 月 1 日
+   0:00:00）以来的秒数，<literal>msec</literal> 是自 <literal>sec</literal>
+   以来经过的微秒，表示为秒数的小数部分。
   </para>
   <para>
-   如果给出了 <parameter>get_as_float</parameter> 参数并且其值等价于
-   &true;，<function>microtime</function> 将返回一个浮点数。
+   如果 <parameter>as_float</parameter> 设置为 &true;，然后 <function>microtime</function>
+   返回 <type>float</type>，表示自 Unix 纪元以来的当前时间，以秒为单位，精确到最接近的微秒。
   </para>
-  <note>
-   <simpara>
-    <parameter>get_as_float</parameter> 参数是 PHP 5.0.0 新加的。
-   </simpara>
-  </note>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
   <para>
    <example>
-    <title>用 <function>microtime</function> 对脚本的运行计时</title>
+    <title>计时脚本执行时间</title>
     <programlisting role="php">
 <![CDATA[
 <?php
-/**
- * Simple function to replicate PHP 5 behaviour
- */
-function microtime_float()
-{
-    list($usec, $sec) = explode(" ", microtime());
-    return ((float)$usec + (float)$sec);
-}
+$time_start = microtime(true);
 
-$time_start = microtime_float();
-
-// Sleep for a while
+// Sleep 一会
 usleep(100);
 
-$time_end = microtime_float();
+$time_end = microtime(true);
 $time = $time_end - $time_start;
 
 echo "Did nothing in $time seconds\n";
@@ -60,13 +75,36 @@ echo "Did nothing in $time seconds\n";
 ]]>
     </programlisting>
    </example>
+   <example>
+    <title><function>microtime</function> 和 <literal>REQUEST_TIME_FLOAT</literal></title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+// 随机 sleep 时间
+usleep(mt_rand(100, 10000));
+
+// 在 $_SERVER 超全局数组中 REQUEST_TIME_FLOAT 是有效的。
+// 包含请求开始的时间戳，精度为微秒。
+$time = microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"];
+
+echo "Did nothing in $time seconds\n";
+?>
+]]>
+    </programlisting>
+   </example>
   </para>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
   <para>
-   参见 <function>time</function>。
+   <simplelist>
+    <member><function>time</function></member>
+    <member><function>hrtime</function></member>
+   </simplelist>
   </para>
  </refsect1>
 </refentry>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
