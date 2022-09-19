@@ -1,24 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 14af302c9c0e561fa6f9cdd956268758ba9a89c5 Maintainer: HonestQiao Status: ready -->
-<!-- Reviewed: no Maintainer: HonestQiao -->
-<refentry xml:id="function.date-sunset" xmlns="http://docbook.org/ns/docbook">
+<!-- EN-Revision: 5c951013ca04161992efed8b86fb40f55669958e Maintainer: HonestQiao Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
+<refentry xml:id="function.date-sunset" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
   <refname>date_sunset</refname>
-  <refpurpose>返回给定的日期与地点的日落时间</refpurpose>
+  <refpurpose>
+   返回给定的日期与地点的日落时间
+  </refpurpose>
  </refnamediv>
+
+ <refsynopsisdiv>
+  <warning>
+   <para>
+    该函数自 PHP 8.1.0 起<emphasis>弃用</emphasis>。强烈建议不要依赖此函数。请改用 <function>date_sun_info</function>。
+   </para>
+  </warning>
+ </refsynopsisdiv>
+
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <type>mixed</type><methodname>date_sunset</methodname>
+   <type class="union"><type>string</type><type>int</type><type>float</type><type>false</type></type><methodname>date_sunset</methodname>
    <methodparam><type>int</type><parameter>timestamp</parameter></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter>format</parameter><initializer>SUNFUNCS_RET_STRING</initializer></methodparam>
-   <methodparam choice="opt"><type>float</type><parameter>latitude</parameter><initializer>ini_get("date.default_latitude")</initializer></methodparam>
-   <methodparam choice="opt"><type>float</type><parameter>longitude</parameter><initializer>ini_get("date.default_longitude")</initializer></methodparam>
-   <methodparam choice="opt"><type>float</type><parameter>zenith</parameter><initializer>ini_get("date.sunset_zenith")</initializer></methodparam>
-   <methodparam choice="opt"><type>float</type><parameter>gmt_offset</parameter><initializer>0</initializer></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>returnFormat</parameter><initializer><constant>SUNFUNCS_RET_STRING</constant></initializer></methodparam>
+   <methodparam choice="opt"><type class="union"><type>float</type><type>null</type></type><parameter>latitude</parameter><initializer>&null;</initializer></methodparam>
+   <methodparam choice="opt"><type class="union"><type>float</type><type>null</type></type><parameter>longitude</parameter><initializer>&null;</initializer></methodparam>
+   <methodparam choice="opt"><type class="union"><type>float</type><type>null</type></type><parameter>zenith</parameter><initializer>&null;</initializer></methodparam>
+   <methodparam choice="opt"><type class="union"><type>float</type><type>null</type></type><parameter>utcOffset</parameter><initializer>&null;</initializer></methodparam>
   </methodsynopsis>
-  <para>
+   <para>
    <function>date_sunset</function> 返回给定的日期（以
    <parameter>timestamp</parameter> 指定）与地点的日落时间。
   </para>
@@ -38,11 +49,11 @@
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>format</parameter></term>
+     <term><parameter>returnFormat</parameter></term>
      <listitem>
       <para>
        <table>
-        <title><parameter>format</parameter> 常量</title>
+        <title><parameter>returnFormat</parameter> 常量</title>
         <tgroup cols="2">
          <thead>
           <row>
@@ -64,7 +75,7 @@
           </row>
           <row>
            <entry>SUNFUNCS_RET_TIMESTAMP</entry>
-           <entry>以 <type>integer</type> 格式（时间戳）返回结果</entry>
+           <entry>以 <type>int</type> 格式（时间戳）返回结果</entry>
            <entry>1095034606</entry>
           </row>
          </tbody>
@@ -77,7 +88,7 @@
      <term><parameter>latitude</parameter></term>
      <listitem>
       <para>
-       默认是指北纬。因此如果要指定南纬，必须传递一个负值。参见： <literal>date.default_latitude</literal>。
+       默认是指北纬。因此如果要指定南纬，必须传递一个负值。参见：<link linkend="ini.date.default-latitude">date.default_latitude</link>
       </para>
      </listitem>
     </varlistentry>
@@ -85,7 +96,7 @@
      <term><parameter>longitude</parameter></term>
      <listitem>
       <para>
-       默认是指东经。因此如果要指定西经，必须传递一个负值。参见： <literal>date.default_longitude</literal>
+       默认是指东经。因此如果要指定西经，必须传递一个负值。参见：<link linkend="ini.date.default-longitude">date.default_longitude</link>
       </para>
      </listitem>
     </varlistentry>
@@ -93,27 +104,71 @@
      <term><parameter>zenith</parameter></term>
      <listitem>
       <para>
-       默认： <literal>date.sunset_zenith</literal>。
+       <parameter>zenith</parameter> is the angle between the center of the sun
+       and a line perpendicular to earth's surface. It defaults to
+       <link linkend="ini.date.sunrise-zenith">date.sunrise_zenith</link>
+       <table>
+        <title>Common <parameter>zenith</parameter> angles</title>
+        <tgroup cols="2">
+         <thead>
+          <row>
+           <entry>Angle</entry>
+           <entry>Description</entry>
+          </row>
+         </thead>
+         <tbody>
+          <row>
+           <entry>90°50'</entry>
+           <entry>Sunrise: the point where the sun becomes visible.</entry>
+          </row>
+          <row>
+           <entry>96°</entry>
+           <entry>Civil twilight: conventionally used to signify the start of dawn.</entry>
+          </row>
+          <row>
+           <entry>102°</entry>
+           <entry>Nautical twilight: the point at which the horizon starts being visible at sea.</entry>
+          </row>
+          <row>
+           <entry>108°</entry>
+           <entry>Astronomical twilight: the point at which the sun starts being the source of any illumination.</entry>
+          </row>
+         </tbody>
+        </tgroup>
+       </table>
       </para>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>gmtoffset</parameter></term>
+     <term><parameter>utcOffset</parameter></term>
      <listitem>
       <para>
        单位是小时。
+       The <parameter>utcOffset</parameter> is ignored, if
+       <parameter>returnFormat</parameter> is
+       <constant>SUNFUNCS_RET_TIMESTAMP</constant>.
       </para>
      </listitem>
     </varlistentry>
    </variablelist>
   </para>
  </refsect1>
- 
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   用指定的格式 <parameter>returnFormat</parameter> 返回日落时间，&return.falseforfailure;。
+   One potential reason for failure is that the
+   sun does not rise at all, which happens inside the polar circles for part of
+   the year.
+  </para>
+ </refsect1>
+
  <refsect1 role="errors">
   &reftitle.errors;
-  
-  &date.timezone.errors.description;
-  
+   
+   &date.timezone.errors.description;
+ 
  </refsect1>
  
  <refsect1 role="changelog">
@@ -128,19 +183,22 @@
       </row>
      </thead>
      <tbody>
-      
-      &date.timezone.errors.changelog;
-      
+      <row>
+       <entry>8.1.0</entry>
+       <entry>
+        此函数已弃用，请改用 <function>date_sun_info</function>。
+       </entry>
+      </row>
+      <row>
+       <entry>8.0.0</entry>
+       <entry>
+        <parameter>latitude</parameter>, <parameter>longitude</parameter>,
+        <parameter>zenith</parameter> and <parameter>utcOffset</parameter> are nullable now.
+       </entry>
+      </row>
      </tbody>
     </tgroup>
    </informaltable>
-  </para>
- </refsect1>
- 
- <refsect1 role="returnvalues">
-  &reftitle.returnvalues;
-  <para>
-   用指定的格式 <parameter>format</parameter> 返回日落时间，&return.falseforfailure;。
   </para>
  </refsect1>
  
@@ -172,6 +230,23 @@ Mon Dec 20 2004, sunset time : 18:13
 ]]>
     </screen>
    </example>
+   <example>
+    <title>No sunrise</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$solstice = strtotime('2017-12-21');
+var_dump(date_sunrise($solstice, SUNFUNCS_RET_STRING, 69.245833, -53.537222));
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+bool(false)
+]]>
+    </screen>
+   </example>
   </para>
  </refsect1>
  
@@ -179,12 +254,11 @@ Mon Dec 20 2004, sunset time : 18:13
   &reftitle.seealso;
   <para>
    <simplelist>
-    <member><function>date_sunrise</function></member>
+    <member><function>date_sun_info</function></member>
    </simplelist>
   </para>
  </refsect1>
 </refentry>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
