@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
  <!-- $Revision$ -->
- <!-- EN-Revision: 34188f8256bdc6f0e6e1965c2be94247997165b6 Maintainer:  Status: ready -->
- <!-- Reviewed: no -->
+ <!-- EN-Revision: 5c951013ca04161992efed8b86fb40f55669958e Maintainer: mowangjuanzi Status: ready -->
 <refentry xml:id="function.date-parse" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>date_parse</refname>
@@ -13,6 +12,19 @@
    <type>array</type><methodname>date_parse</methodname>
    <methodparam><type>string</type><parameter>datetime</parameter></methodparam>
   </methodsynopsis>
+  <para>
+   <function>date_parse</function> 根据与 <function>strtotime</function>
+   和 <function>DateTimeImmutable::__construct</function> 相同的规则解析指定
+   <parameter>datetime</parameter> 字符串。它不返回 Unix 时间戳（使用
+   <function>strtotime</function>）或者 <classname>DateTimeImmutable</classname>
+   对象（使用 <function>DateTimeImmutable::__construct</function>），而是返回包含在指定
+   <parameter>datetime</parameter> 字符串中检测到相关信息的关联数组。
+  </para>
+  <para>
+   如果找不到某组元素的信息，那么这些数组元素将会设置为 &false; 或缺失。如果需要从相同的
+   <parameter>datetime</parameter> 字符串构建时间戳或者 <classname>DateTimeImmutable</classname>
+   对象，需要将更多字段设置为非 &false; 值。查看以下示例以了解情况。
+  </para>
  </refsect1>
 
  <refsect1 role="parameters">
@@ -23,7 +35,7 @@
      <term><parameter>datetime</parameter></term>
      <listitem>
       <para>
-       Date/time 接受的格式以 <function>DateTimeImmutable::__construct</function> 为准。
+       <function>DateTimeImmutable::__construct</function> 接受的日期/时间格式。
       </para>
      </listitem>
     </varlistentry>
@@ -34,17 +46,50 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   成功时返回 <type>array</type>，数组中包含指定日期/时间的信息。&return.falseforfailure;。
+   成功时返回 <type>array</type>，数组中包含解析日期/时间的信息。&return.falseforfailure;。
   </para>
+  <para>
+   返回的数组存在以下键 
+   <literal>year</literal>、<literal>month</literal>、<literal>day</literal>、<literal>hour</literal>、<literal>minute</literal>、<literal>second</literal>、<literal>fraction</literal>
+   和 <literal>is_localtime</literal>。
+  </para>
+  <para>
+   如果存在 <literal>is_localtime</literal>，则 <literal>zone_type</literal> 表示时区类型。类型
+   <literal>1</literal>（UTC 时差），添加 <literal>zone</literal>、<literal>is_dst</literal>；类型
+   <literal>2</literal>（时区缩写），添加 <literal>tz_abbr</literal>、<literal>is_dst</literal>；类型
+   <literal>3</literal>（时区标识符），添加 <literal>tz_abbr</literal>、<literal>tz_id</literal>。
+  </para>
+  <para>
+   如果 <parameter>datetime</parameter> 字符串存在类似 <literal>+3 days</literal>
+   这样的相对时间元素，则返回的数组则包含键为 <literal>relative</literal> 的嵌套数组。然后此数组将包含如下键
+   <literal>year</literal>、<literal>month</literal>、<literal>day</literal>、<literal>hour</literal>、<literal>minute</literal>、<literal>second</literal>，如果必要还会包含
+   <literal>weekday</literal> 和 <literal>weekdays</literal>，具体取决于传入的字符串。
+  </para>
+  <para>
+   数组包含 <literal>warning_count</literal> 和 <literal>warnings</literal>
+   字段。第一个表示发现了多少警告。元素 <literal>warnings</literal> 的键表示指定
+   <parameter>datetime</parameter> 发生警告的位置，值为字符串，描述警告本身。
+  </para>
+  <para>
+   数组也包含 <literal>error_count</literal> 和 <literal>errors</literal>
+   字段。第一个表示发现了多少错误。元素 <literal>errors</literal> 的键表示指定
+   <parameter>datetime</parameter> 发生错误的位置，值为字符串，描述错误本身。
+  </para>
+  <warning>
+   <para>
+    如果同一个位置存在多个警告/错误，那么 <literal>warnings</literal> 和 <literal>errors</literal>
+    数组中元素的数量可能会少于 <literal>warning_count</literal> 或者 <literal>error_count</literal>。
+   </para>
+  </warning>
  </refsect1>
 
  <refsect1 role="errors">
   &reftitle.errors;
   <para>
-   如果 date/time 的格式有错误，则返回数组的 'errors' 键将包含错误信息。
+   date/time 的格式有错误时，返回数组的 'errors' 键将包含错误信息。
   </para>
  </refsect1>
-
+ 
  <refsect1 role="changelog">
   &reftitle.changelog;
   <informaltable>
@@ -59,8 +104,9 @@
      <row>
       <entry>7.2.0</entry>
       <entry>
-       返回数组的 <literal>zone</literal> 键现在代表秒，而不是分钟。
-       并且正负符号已反转，例如：之前是 <literal>-120</literal> 现在是 <literal>7200</literal>。
+       返回数组的 <literal>zone</literal> 
+       键现在代表秒，而不是分钟。并且正负符号已反转，例如：之前是
+       <literal>-120</literal> 现在是 <literal>7200</literal>。
       </entry>
      </row>
     </tbody>
@@ -72,81 +118,230 @@
   &reftitle.examples;
   <para>
    <example>
-    <title><function>date_parse</function> 示例</title>
+    <title>具有全面的 <parameter>datetime</parameter> 字符串的 <function>date_parse</function> 示例</title>
     <programlisting role="php">
 <![CDATA[
 <?php
-print_r(date_parse("2006-12-12 10:00:00.5"));
+var_dump(date_parse("2006-12-12 10:00:00.5"));
 ?>
 ]]>
     </programlisting>
     &example.outputs;
     <screen>
 <![CDATA[
-Array
-(
-    [year] => 2006
-    [month] => 12
-    [day] => 12
-    [hour] => 10
-    [minute] => 0
-    [second] => 0
-    [fraction] => 0.5
-    [warning_count] => 0
-    [warnings] => Array()
-    [error_count] => 0
-    [errors] => Array()
-    [is_localtime] =>
-)
+array(12) {
+  'year' => int(2006)
+  'month' => int(12)
+  'day' => int(12)
+  'hour' => int(10)
+  'minute' => int(0)
+  'second' => int(0)
+  'fraction' => double(0.5)
+  'warning_count' => int(0)
+  'warnings' => array(0) {
+  }
+  'error_count' => int(0)
+  'errors' => array(0) {
+  }
+  'is_localtime' => bool(false)
+}
 ]]>
     </screen>
    </example>
   </para>
+
   <para>
-   解析后返回的关联数组不受 <link linkend="datetime.formats.relative">相对格式</link> 影响，相对格式的信息会被解析到 "relative" 键。
+   如果在指定 <parameter>datetime</parameter>
+   字符串中出现时区元素，那才会展示。在这种情况下，总会存在
+   <literal>zone_type</literal> 和更多元素，具体取决于其值。
    <example>
-    <title><function>date_parse</function> 使用相对格式</title>
+    <title>带时区缩写信息的 <function>date_parse</function></title>
     <programlisting role="php">
 <![CDATA[
 <?php
-print_r(date_parse("2006-12-12 10:00:00.5 +1 week +1 hour"));
+var_dump(date_parse("June 2nd, 2022, 10:28:17 BST"));
 ?>
 ]]>
     </programlisting>
     &example.outputs;
     <screen>
 <![CDATA[
-Array
-(
-    [year] => 2006
-    [month] => 12
-    [day] => 12
-    [hour] => 10
-    [minute] => 0
-    [second] => 0
-    [fraction] => 0.5
-    [warning_count] => 0
-    [warnings] => Array
-        (
-        )
+array(16) {
+  'year' => int(2022)
+  'month' => int(6)
+  'day' => int(2)
+  'hour' => int(10)
+  'minute' => int(28)
+  'second' => int(17)
+  'fraction' => double(0)
+  'warning_count' => int(0)
+  'warnings' => array(0) {
+  }
+  'error_count' => int(0)
+  'errors' => array(0) {
+  }
+  'is_localtime' => bool(true)
+  'zone_type' => int(2)
+  'zone' => int(0)
+  'is_dst' => bool(true)
+  'tz_abbr' => string(3) "BST"
+}]]>
+    </screen>
+   </example>
+   <example>
+    <title>带时区标识符信息的 <function>date_parse</function></title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+var_dump(date_parse("June 2nd, 2022, 10:28:17 Europe/London"));
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+array(14) {
+  'year' => int(2022)
+  'month' => int(6)
+  'day' => int(2)
+  'hour' => int(10)
+  'minute' => int(28)
+  'second' => int(17)
+  'fraction' => double(0)
+  'warning_count' => int(0)
+  'warnings' => array(0) {
+  }
+  'error_count' => int(0)
+  'errors' => array(0) {
+  }
+  'is_localtime' => bool(true)
+  'zone_type' => int(3)
+  'tz_id' => string(13) "Europe/London"
+}]]>
+    </screen>
+   </example>
+  </para>
 
-    [error_count] => 0
-    [errors] => Array
-        (
-        )
+  <para>
+   如果解析的 <parameter>datetime</parameter> 字符串越小，那么可用的信息就越少。再本示例中，所有时间部分都返回为 &false;。
+   <example>
+    <title>带最小字符串的 <function>date_parse</function></title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+var_dump(date_parse("June 2nd, 2022"));
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+array(12) {
+  'year' => int(2022)
+  'month' => int(6)
+  'day' => int(2)
+  'hour' => bool(false)
+  'minute' => bool(false)
+  'second' => bool(false)
+  'fraction' => bool(false)
+  'warning_count' => int(0)
+  'warnings' => array(0) {
+  }
+  'error_count' => int(0)
+  'errors' => array(0) {
+  }
+  'is_localtime' => bool(false)
+}]]>
+    </screen>
+   </example>
+  </para>
 
-    [is_localtime] =>
-    [relative] => Array
-        (
-            [year] => 0
-            [month] => 0
-            [day] => 7
-            [hour] => 1
-            [minute] => 0
-            [second] => 0
-        )
+  <para>
+   <link linkend="datetime.formats.relative">相对格式</link>不会影响从绝对格式格式化的值，但会被解析为“relative”元素。
+   <example>
+    <title>带相对格式的 <function>date_parse</function></title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+var_dump(date_parse("2006-12-12 10:00:00.5 +1 week +1 hour"));
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+array(13) {
+  'year' => int(2006)
+  'month' => int(12)
+  'day' => int(12)
+  'hour' => int(10)
+  'minute' => int(0)
+  'second' => int(0)
+  'fraction' => double(0.5)
+  'warning_count' => int(0)
+  'warnings' => array(0) {
+  }
+  'error_count' => int(0)
+  'errors' => array(0) {
+  }
+  'is_localtime' => bool(false)
+  'relative' =>
+  array(6) {
+    'year' => int(0)
+    'month' => int(0)
+    'day' => int(7)
+    'hour' => int(1)
+    'minute' => int(0)
+    'second' => int(0)
+  }
+}]]>
+    </screen>
+   </example>
+  </para>
 
-)]]>
+  <para>
+   在某些时候，比如 <literal>Thursday</literal> 将会设置字符串的时间部分设置为
+   <literal>0</literal>。如果 <literal>Thursday</literal> 传递给
+   <function>DateTimeImmutable::__construct</function> 也会导致小时，分钟，秒和小数部分设置为
+   <literal>0</literal>。下面的示例中，year 元素将设置为 &false;。
+   <example>
+    <title><function>date_parse</function> with side-effects</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+var_dump(date_parse("Thursday, June 2nd"));
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+array(13) {
+  'year' => bool(false)
+  'month' => int(6)
+  'day' => int(2)
+  'hour' => int(0)
+  'minute' => int(0)
+  'second' => int(0)
+  'fraction' => double(0)
+  'warning_count' => int(0)
+  'warnings' => array(0) {
+  }
+  'error_count' => int(0)
+  'errors' => array(0) {
+  }
+  'is_localtime' => bool(false)
+  'relative' =>
+  array(7) {
+    'year' => int(0)
+    'month' => int(0)
+    'day' => int(0)
+    'hour' => int(0)
+    'minute' => int(0)
+    'second' => int(0)
+    'weekday' => int(4)
+  }
+}]]>
     </screen>
    </example>
   </para>
@@ -156,7 +351,8 @@ Array
   &reftitle.seealso;
   <para>
    <simplelist>
-    <member><function>checkdate</function></member>
+    <member><function>date_parse_from_format</function>，以解析具有特定格式的<parameter>datetime</parameter></member>
+    <member><function>checkdate</function>，以便于公历日期验证</member>
     <member><function>getdate</function></member>
    </simplelist>
   </para>
