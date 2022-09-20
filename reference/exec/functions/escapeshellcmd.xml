@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: df31a39eb140567bc4651360fa627bcd6a96fcb8 Maintainer: yuanyuqiang Status: ready -->
-<!-- Reviewed: no -->
+<!-- EN-Revision: 1ea4e4f5769f1a173303f95074a91e8537f65133 Maintainer: yuanyuqiang Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <!-- splitted from ./en/functions/exec.xml, last change in rev 1.2 -->
 <refentry xml:id="function.escapeshellcmd" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
@@ -24,11 +24,10 @@
    linkend="language.operators.execution">执行操作符</link> 之前进行转义。
   </para>
   <para>
-    反斜线（\）会在以下字符之前插入：
-   <literal>&amp;#;`|*?~&lt;&gt;^()[]{}$\</literal>, <literal>\x0A</literal>
+   反斜线（\）会在以下字符之前插入：<literal>&amp;#;`|*?~&lt;&gt;^()[]{}$\</literal>、<literal>\x0A</literal>
    和 <literal>\xFF</literal>。 <literal>'</literal> 和 <literal>"</literal>
-   仅在不配对儿的时候被转义。
-   在 Windows 平台上，所有这些字符以及 <literal>%</literal> 和 <literal>!</literal> 字符都会被空格代替。
+   仅在不配对儿的时候被转义。在 Windows 平台上，所有这些字符以及 <literal>%</literal>
+   和 <literal>!</literal> 字符前面都有一个插入符号（<literal>^</literal>）。
   </para>
  </refsect1>
 
@@ -85,30 +84,19 @@ system($escaped_command);
      对单个参数进行转义。
     </para>
    </warning>
- </refsect1>
- 
- <refsect1 role="changelog">
-  &reftitle.changelog;
-  <para>
-   <informaltable>
-    <tgroup cols="2">
-     <thead>
-      <row>
-       <entry>&Version;</entry>
-       <entry>&Description;</entry>
-      </row>
-     </thead>
-     <tbody>
-      <row>
-       <entry>5.4.43, 5.5.27, 5.6.11</entry>
-       <entry>
-        感叹号会被空格所替换。
-       </entry>
-      </row>
-     </tbody>
-    </tgroup>
-   </informaltable>
-  </para>
+   <warning xmlns="http://docbook.org/ns/docbook">
+    <para>
+     <function>escapeshellcmd</function> 不会对空格专一，这在 Windows
+     上对这样的路径（比如<literal>C:\Program
+     Files\ProgramName\program.exe</literal>）可能会有出现问题。这可以使用如下代码暂时解决：
+    <programlisting role="php">
+<![CDATA[
+<?php
+$cmd = preg_replace('`(?<!^) `', '^ ', escapeshellcmd($cmd));
+]]>
+    </programlisting>
+    </para>
+   </warning>
  </refsect1>
  
  <refsect1 role="seealso">
