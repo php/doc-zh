@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: dec1f8445ab2af7fbafef012fb7907ab2cd349b5 Maintainer: yuanyuqiang Status: ready -->
-<!-- Reviewed: no -->
+<!-- EN-Revision: 0c9c2dd669fe9395eaa73d487fbd160f9057429a Maintainer: yuanyuqiang Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <!-- splitted from ./en/functions/exec.xml, last change in rev 1.2 -->
 <refentry xml:id="function.exec" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
@@ -12,10 +12,10 @@
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <type>string</type><methodname>exec</methodname>
+   <type class="union"><type>string</type><type>false</type></type><methodname>exec</methodname>
    <methodparam><type>string</type><parameter>command</parameter></methodparam>
-   <methodparam choice="opt"><type>array</type><parameter role="reference">output</parameter></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter role="reference">return_var</parameter></methodparam>
+   <methodparam choice="opt"><type>array</type><parameter role="reference">output</parameter><initializer>&null;</initializer></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter role="reference">result_code</parameter><initializer>&null;</initializer></methodparam>
   </methodsynopsis>
   <para>
    <function>exec</function> 执行
@@ -51,12 +51,12 @@
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>return_var</parameter></term>
+     <term><parameter>result_code</parameter></term>
      <listitem>
       <para>
         如果同时提供 
         <parameter>output</parameter>  和 
-        <parameter>return_var</parameter> 参数，
+        <parameter>result_code</parameter> 参数，
         命令执行后的返回状态会被写入到此变量。
       </para>
      </listitem>
@@ -71,6 +71,10 @@
     命令执行结果的最后一行内容。
     如果你需要获取未经处理的全部输出数据，
     请使用 <function>passthru</function> 函数。
+  </para>
+  <para>
+   失败时返回 &false;。
+  </para>
   </para>
   <para>
     如果想要获取命令的输出内容，
@@ -88,10 +92,24 @@
 <?php
 // 输出运行中的 php/httpd 进程的创建者用户名
 // （在可以执行 "whoami" 命令的系统上）
-echo exec('whoami');
+$output=null;
+$retval=null;
+exec('whoami', $output, $retval);
+echo "Returned with status $retval and output:\n";
+print_r($output);
 ?>
 ]]>
     </programlisting>
+    &example.outputs.similar;
+    <screen>
+<![CDATA[
+Returned with status 0 and output:
+Array
+(
+    [0] => cmb
+)
+]]>
+    </screen>
    </example>
   </para>
  </refsect1>
@@ -116,7 +134,6 @@ echo exec('whoami');
   </para>
  </refsect1>
 </refentry>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
