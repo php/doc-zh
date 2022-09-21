@@ -52,6 +52,60 @@ var_dump(B::counter()); // int(4)，之前是 int(2)
    </para>
   </sect3>
 
+  <sect3 xml:id="migration81.incompatible.core.optional-before-required">
+   <title>在强制参数之前指定可选参数</title>
+
+   <para>
+    现在在强制参数之前指定<link 
+    linkend="functions.arguments.default">可选参数</link>都被视为强制参数，即使是使用<link
+    linkend="functions.named-arguments">命名参数</link>调用也是如此。自 PHP 8.0.0 起至 PHP
+    8.1.0 之前，在定义时会发出弃用通知，但能成功调用。自 PHP 8.1.0 起，会抛出类为
+    <classname>ArgumentCountError</classname> 的错误，就跟使用位置参数调用一样。
+
+    <informalexample>
+     <programlisting role="php">
+<![CDATA[
+<?php
+function makeyogurt($container = "bowl", $flavour)
+{
+    return "Making a $container of $flavour yogurt.\n";
+}
+try
+{
+    echo makeyogurt(flavour: "raspberry");
+}
+catch (Error $e)
+{
+    echo get_class($e), ' - ', $e->getMessage(), "\n";
+}
+?>
+]]>
+     </programlisting>
+     &example.outputs.80;
+     <screen>
+<![CDATA[
+Deprecated: Required parameter $flavour follows optional parameter $container
+ in example.php on line 3
+Making a bowl of raspberry yogurt.
+]]>
+     </screen>
+     &example.outputs.81;
+     <screen>
+<![CDATA[
+Deprecated: Optional parameter $container declared before required parameter
+ $flavour is implicitly treated as a required parameter in example.php on line 3
+ArgumentCountError - makeyogurt(): Argument #1 ($container) not passed
+]]>
+     </screen>
+    </informalexample>
+   </para>
+   <para>
+    Note that a default value of &null; can be used before required parameters to
+    specify a <link linkend="language.types.declarations.nullable">nullable type</link>,
+    but the parameter will still be required.
+   </para>
+  </sect3>
+
   <sect3 xml:id="migration81.incompatible.core.type-compatibility-internal">
    <title>返回类型与内部类的兼容性</title>
 
@@ -65,6 +119,10 @@ var_dump(B::counter()); // int(4)，之前是 int(2)
    <title>新的关键词</title>
    <para>
     现在 <literal>readonly</literal> 是一个关键词。不过，它仍然可以被用作函数名。
+   </para>
+   <para>
+    <literal>never</literal> 现在是保留字，所以不能用于类，接口或者
+    trait，也禁止在命名空间中使用。
    </para>
   </sect3>
  </sect2>
