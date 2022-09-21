@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
 <!-- EN-Revision: 5c2678e02f0eb135946799eed02d884de1bcf4ad Maintainer: avenger Status: ready -->
 <!-- CREDITS: Gregory, dallas, Luffy -->
 <chapter xml:id="language.functions" xmlns="http://docbook.org/ns/docbook">
@@ -206,26 +205,6 @@ function takes_many_args(
 ]]>
     </programlisting>
    </example>
-   <para>
-    从 PHP 8.0.0 开始，废弃在可选参数后声明强制参数。可以通过删除默认值来解决。
-    此规则一个例外是 <code>Type $param = null</code> 形式的参数，
-    其中 &null; 默认值使类型隐性允许为空。
-    这种做法依然允许，但是推荐使用显性可为 null 的类型代替。
-   </para>
-   <example>
-    <title>强制参数后声明可选参数</title>
-    <programlisting role="php">
-<![CDATA[
-<?php
-function foo($a = [], $b) {} // 之前
-function foo($a, $b) {}      // 之后
-
-function bar(A $a = null, $b) {} // 同时可用
-function bar(?A $a, $b) {}       // 官方推荐的写法
-?>
-]]>
-    </programlisting>
-   </example>
 
    <sect2 xml:id="functions.arguments.by-reference">
     <title>通过引用传递参数</title>
@@ -259,7 +238,8 @@ echo $str;    // 输出 'This is a string, and something extra.'
     <title>默认参数的值</title>
 
     <para>
-     函数可以定义 C++ 风格的标量参数默认值，如下所示：
+     函数可以使用类似分配变量的语法定义参数的默认值。仅当参数未指定时才使用默认值；需要注意的是传递
+     &null; <emphasis>不会</emphasis>分配默认值。
     </para>
     <para>
      <example>
@@ -288,7 +268,8 @@ Making a cup of espresso.
      </example>
     </para>
     <para>
-     PHP 还允许使用数组 <type>array</type> 和特殊类型 &null; 作为默认参数，例如：
+     默认参数值可以是标量值、<type>array</type>、特殊类型 &null;，以及从 PHP 8.1.0 开始，使用
+     <link linkend="language.oop5.basic.new">new ClassName()</link> 语法的对象。
     </para>
     <para>
      <example>
@@ -302,7 +283,33 @@ function makecoffee($types = array("cappuccino"), $coffeeMaker = NULL)
     return "Making a cup of ".join(", ", $types)." with $device.\n";
 }
 echo makecoffee();
-echo makecoffee(array("cappuccino", "lavazza"), "teapot");
+echo makecoffee(array("cappuccino", "lavazza"), "teapot");?>
+]]>
+      </programlisting>
+     </example>
+    </para>
+    <para>
+     <example>
+      <title>使用对象作为默认值（自 PHP 8.1.0 起）</title>
+      <programlisting role="php">
+<![CDATA[
+<?php
+class DefaultCoffeeMaker {
+    public function brew() {
+        return 'Making coffee.';
+    }
+}
+class FancyCoffeeMaker {
+    public function brew() {
+        return 'Crafting a beautiful coffee just for you.';
+    }
+}
+function makecoffee($coffeeMaker = new DefaultCoffeeMaker)
+{
+    return $coffeeMaker->brew();
+}
+echo makecoffee();
+echo makecoffee(new FancyCoffeeMaker);
 ?>
 ]]>
       </programlisting>
@@ -312,7 +319,7 @@ echo makecoffee(array("cappuccino", "lavazza"), "teapot");
      默认值必须是常量表达式，不能是诸如变量，类成员，或者函数调用等。
     </simpara>
     <para>
-     注意当使用默认参数时，任何默认参数必须放在任何非默认参数的右侧；否则，函数将不会按照预期的情况工作。考虑下面的代码片断：
+     注意任何可选参数都应在强制参数之后指定，否则可选参数不能在调用时。考虑以下示例：
     </para>
     <para>
      <example>
@@ -320,21 +327,20 @@ echo makecoffee(array("cappuccino", "lavazza"), "teapot");
       <programlisting role="php">
 <![CDATA[
 <?php
-function makeyogurt($type = "acidophilus", $flavour)
+function makeyogurt($container = "bowl", $flavour)
 {
-    return "Making a bowl of $type $flavour.\n";
+    return "Making a $container of $flavour yogurt.\n";
 }
-
-echo makeyogurt("raspberry");   // 不会按照预期工作
+ 
+echo makeyogurt("raspberry"); // "raspberry" 是 $container, 不是 $flavour
 ?>
 ]]>
       </programlisting>
       &example.outputs;
       <screen>
 <![CDATA[
-Warning: Missing argument 2 in call to makeyogurt() in
-/usr/local/etc/httpd/htdocs/phptest/functest.html on line 41
-Making a bowl of raspberry .
+Fatal error: Uncaught ArgumentCountError: Too few arguments
+ to function makeyogurt(), 1 passed in example.php on line 42
 ]]>
       </screen>
      </example>
@@ -348,23 +354,74 @@ Making a bowl of raspberry .
       <programlisting role="php">
 <![CDATA[
 <?php
-function makeyogurt($flavour, $type = "acidophilus")
+function makeyogurt($flavour, $container = "bowl")
 {
-    return "Making a bowl of $type $flavour.\n";
+    return "Making a $container of $flavour yogurt.\n";
 }
-
-echo makeyogurt("raspberry");   // 按预期工作
+ 
+echo makeyogurt("raspberry"); // "raspberry" 是 $flavour
 ?>
 ]]>
       </programlisting>
       &example.outputs;
       <screen>
 <![CDATA[
-Making a bowl of acidophilus raspberry.
+Making a bowl of raspberry yogurt.
 ]]>
       </screen>
      </example>
     </para>
+    <para>
+     自 PHP 8.0.0 起，<link linkend="functions.named-arguments">命名参数</link>可用于跳过多个可选参数。
+    </para>
+    <para>
+     <example>
+      <title>函数默认参数正确的用法</title>
+      <programlisting role="php">
+<![CDATA[
+<?php
+function makeyogurt($container = "bowl", $flavour = "raspberry", $style = "Greek")
+{
+    return "Making a $container of $flavour $style yogurt.\n";
+}
+
+echo makeyogurt(style: "natural");
+?>
+]]>
+      </programlisting>
+      &example.outputs;
+      <screen>
+<![CDATA[
+Making a bowl of raspberry natural yogurt.
+]]>
+      </screen>
+     </example>
+    </para>
+    <para>
+     自 PHP 8.0.0 起，<emphasis>弃用</emphasis>在可选参数之后声明强制参数。这通常可以通过删除默认值来解决，因为它永远不会被使用。唯一的例外是
+     <code>Type $param = null</code> 类型的参数，其中默认 &null; 使得该类型可以隐性为
+     null。这种做法依然允许，但是推荐使用显性<link linkend="language.types.declarations.nullable">可为 null 类型</link>代替。
+     <example>
+      <title>强制参数后声明可选参数</title>
+      <programlisting role="php">
+<![CDATA[
+ <?php
+ function foo($a = [], $b) {} // 默认不使用;自 PHP 8.0.0 起弃用
+ function foo($a, $b) {}      // 功能相同，无弃用通知
+
+ function bar(A $a = null, $b) {} // 仍然允许；但 $a 强制但可以为 null
+ function bar(?A $a, $b) {}       // 推荐
+ ?>
+ ]]>
+      </programlisting>
+     </example>
+    </para>
+    <note>
+     <simpara>
+      自 PHP 7.1.0 起，省略未指定默认值的参数会原因发
+      <classname>ArgumentCountError</classname>；在此之前的版本会引发警告。
+     </simpara>
+    </note>
     <note>
      <simpara>
       传引用的参数也可以有默认值。
@@ -557,7 +614,7 @@ echo sum(1, 2, 3, 4);
     <example>
      <title>命名参数的语法</title>
      <programlisting role="php">
-      <![CDATA[
+<![CDATA[
 <?php
 myFunction(paramName: $value);
 array_foobar(array: $value);
@@ -572,7 +629,7 @@ function_name($variableStoringParamName: $value);
     <example>
      <title>通过位置传参与命名参数的对比</title>
      <programlisting role="php">
-      <![CDATA[
+<![CDATA[
 <?php
 // 使用顺序传递参数：
 array_fill(0, 100, 50);
@@ -591,7 +648,7 @@ array_fill(start_index: 0, count: 100, value: 50);
     <example>
      <title>参数顺序不同的示例（同上例）</title>
      <programlisting role="php">
-      <![CDATA[
+<![CDATA[
 <?php
 array_fill(value: 50, count: 100, start_index: 0);
 ?>
@@ -606,7 +663,7 @@ array_fill(value: 50, count: 100, start_index: 0);
     <example>
      <title>命名参数与位置参数结合使用</title>
      <programlisting role="php">
-      <![CDATA[
+<![CDATA[
 <?php
 htmlspecialchars($string, double_encode: false);
 // 等价于
@@ -617,11 +674,11 @@ htmlspecialchars($string, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401, 'UTF-8', fa
     </example>
 
     <para>
-     Passing the same parameter multiple times results in an Error exception.
+     传递多个相同参数将会导致 Error 异常。
     </para>
 
     <example>
-     <title>Error exception when passing the same parameter multiple times</title>
+     <title>传递多个相同参数将会导致 Error 异常</title>
      <programlisting role="php">
       <![CDATA[
 <?php
@@ -631,6 +688,28 @@ foo(param: 1, param: 2);
 // 错误：命名参数 $param 覆盖了之前的参数
 foo(1, param: 2);
 // 错误：命名参数 $param 覆盖了之前的参数
+?>
+]]>
+     </programlisting>
+    </example>
+
+    <para>
+     自 PHP 8.1.0 起，可以在解包参数后面使用命名参数。命名参数<emphasis>不能t</emphasis>覆盖已解包的参数。
+    </para>
+
+    <example>
+     <title>解包后使用命名参数</title>
+     <programlisting role="php">
+<![CDATA[
+<?php
+function foo($a, $b, $c = 3, $d = 4) {
+  return $a + $b + $c + $d;
+}
+
+var_dump(foo(...[1, 2], d: 40)); // 46
+var_dump(foo(...['b' => 2, 'a' => 1], d: 40)); // 46
+
+var_dump(foo(...[1, 2], b: 20)); // Fatal error。命名参数 $b 覆盖之前的参数
 ?>
 ]]>
      </programlisting>
@@ -898,6 +977,34 @@ $func(); // 打印 "bar"
      传递给一个 <type>string</type> 类型的变量，那么函数的返回值是不确定的。在这种情况下，通常函数会返回
      &null;。但这仅仅是一个惯例，并不一定如此。从 PHP 8.0.0 起，这种情况下应抛出 <classname>TypeError</classname> 异常。
     </simpara>
+   </note>
+   <note>
+    <para>
+     默认情况下，内置函数的标量类型在强制模式下可以为 null。自 PHP 8.1.0 起，弃用传递 &null;到未声明可以为 null
+     的内部函数参数，并在强制类型下发出弃用通知，与用户定义函数的行为保持一致，其中标量类型需要显式标记为可以为 null。
+    </para>
+
+    <para>
+     例如，<function>strlen</function> 函数接受参数 <literal>$string</literal> 为非 null 的
+     &string;。由于历史原因，在强制模式下 PHP 允许此参数接受 &null;，并将参数隐式转化为
+     <type>string</type>，从而产生 <literal>""</literal> 值。相比之下，严格模式会抛出 <classname>TypeError</classname>。
+    </para>
+
+    <example>
+     <programlisting role="php">
+<![CDATA[
+<?php
+var_dump(strlen(null));
+// "Deprecated: Passing null to parameter #1 ($string) of type string is deprecated" as of PHP 8.1.0
+// int(0)
+
+var_dump(str_contains("foobar", null));
+// "Deprecated: Passing null to parameter #2 ($needle) of type string is deprecated" as of PHP 8.1.0
+// bool(true)
+?> 
+]]>
+     </programlisting>
+    </example>
    </note>
 
    <sect2 role="seealso">
