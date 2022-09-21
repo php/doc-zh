@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 12b1d4704ea448b55ec155619be1e50c0e67e9f9 Maintainer: avenger Status: partial -->
-<!-- Reviewed: no -->
-
+<!-- EN-Revision: 05a2d4c535c375d64da54934238c28fc978c2884 Maintainer: avenger Status: partial -->
+<!-- CREDITS: mowangjuanzi -->
 <sect1 xml:id="migration80.incompatible" xmlns:xlink="http://www.w3.org/1999/xlink">
  <title>不向后兼容的变更</title>
 
@@ -76,6 +75,12 @@
      <para>
      断言（Assertion）失败现在默认抛出异常。如果想要改回之前的行为，可以在 INI 设置中设置
       <code>assert.exception=0</code> 。
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      <literal>mixed</literal> 现在是保留字，所以不能用于类，接口或者
+      trait，也禁止在命名空间中使用。
      </para>
     </listitem>
     <listitem>
@@ -200,7 +205,7 @@
 // Replace
 function my_error_handler($err_no, $err_msg, $filename, $linenum) {
     if (error_reporting() == 0) {
-        return false; // Silenced
+        return false;
     }
     // ...
 }
@@ -208,7 +213,7 @@ function my_error_handler($err_no, $err_msg, $filename, $linenum) {
 // With
 function my_error_handler($err_no, $err_msg, $filename, $linenum) {
     if (!(error_reporting() & $err_no)) {
-        return false; // Silenced
+        return false;
     }
     // ...
 }
@@ -685,13 +690,12 @@ $array["key"];
     </para>
    </listitem>
    <listitem>
-     <para>
-      <function>shmop_open</function> will now return a <classname>Shmop</classname> object rather than
-      a &resource;. The <function>shmop_close</function> function no longer has an effect, and is
-      deprecated; instead the <classname>Shmop</classname> instance is automatically destroyed if it is
-      no longer referenced.
-     </para>
-    </listitem>
+    <para>
+     <function>shmop_open</function> 现在将返回 <classname>Shmop</classname> 对象而不是
+     &resource;。<function>shmop_close</function> 函数将不再有效，已弃用；如果不在引用 
+     <classname>Shmop</classname> 实例，其将会自动销毁。
+    </para>
+   </listitem>
    <listitem>
     <para>
      <function>socket_create</function>, <function>socket_create_listen</function>,
@@ -791,15 +795,34 @@ $array["key"];
   </para>
   <para>
    <simplelist>
-    <member>DOMNameList</member>
-    <member>DomImplementationList</member>
-    <member>DOMConfiguration</member>
-    <member>DomError</member>
-    <member>DomErrorHandler</member>
-    <member>DOMImplementationSource</member>
-    <member>DOMLocator</member>
-    <member>DOMUserDataHandler</member>
-    <member>DOMTypeInfo</member>
+    <member><classname>DOMNameList</classname></member>
+    <member><classname>DomImplementationList</classname></member>
+    <member><classname>DOMConfiguration</classname></member>
+    <member><classname>DomError</classname></member>
+    <member><classname>DomErrorHandler</classname></member>
+    <member><classname>DOMImplementationSource</classname></member>
+    <member><classname>DOMLocator</classname></member>
+    <member><classname>DOMUserDataHandler</classname></member>
+    <member><classname>DOMTypeInfo</classname></member>
+    <member><classname>DOMStringExtend</classname></member>
+   </simplelist>
+  </para>
+  <para>
+   DOM 扩展中没有实现行为的方法已被删除：
+  </para>
+  <para>
+   <simplelist>
+    <member><methodname>DOMNamedNodeMap::setNamedItem</methodname></member>
+    <member><methodname>DOMNamedNodeMap::removeNamedItem</methodname></member>
+    <member><methodname>DOMNamedNodeMap::setNamedItemNS</methodname></member>
+    <member><methodname>DOMNamedNodeMap::removeNamedItemNS</methodname></member>
+    <member><methodname>DOMText::replaceWholeText</methodname></member>
+    <member><methodname>DOMNode::compareDocumentPosition</methodname></member>
+    <member><methodname>DOMNode::isEqualNode</methodname></member>
+    <member><methodname>DOMNode::getFeature</methodname></member>
+    <member><methodname>DOMNode::setUserData</methodname></member>
+    <member><methodname>DOMNode::getUserData</methodname></member>
+    <member><methodname>DOMDocument::renameNode</methodname></member>
    </simplelist>
   </para>
  </sect2>
@@ -843,7 +866,7 @@ $array["key"];
      The <constant>INPUT_REQUEST</constant> and <constant>INPUT_SESSION</constant> source for
      <function>filter_input</function> etc. have been removed. These were never implemented and their
      use always generated a warning.
-    </para> 
+    </para>
    </listitem>
   </itemizedlist>
  </sect2>
@@ -854,14 +877,13 @@ $array["key"];
   <itemizedlist>
    <listitem>
     <para>
-     The deprecated functions <function>image2wbmp</function> has been removed.
+     移除弃用函数 <function>image2wbmp</function>。
      <!-- RFC: https://wiki.php.net/rfc/image2wbmp -->
     </para>
    </listitem>
    <listitem>
     <para>
-     The deprecated functions <function>png2wbmp</function> and <function>jpeg2wbmp</function> have
-     been removed.
+     移除弃用函数 <function>png2wbmp</function> 和 <function>jpeg2wbmp</function>。
      <!-- RFC: https://wiki.php.net/rfc/deprecate-png-jpeg-2wbmp -->
     </para>
    </listitem>
@@ -927,9 +949,9 @@ $array["key"];
     </para>
    </listitem>
    <listitem>
-   <para>
-    The deprecated <constant>Normalizer::NONE</constant> constant has been removed.
-   </para>
+    <para>
+     移除弃用常量 <constant>Normalizer::NONE</constant>。
+    </para>
    </listitem>
   </itemizedlist>
  </sect2>
@@ -939,18 +961,16 @@ $array["key"];
 
   <itemizedlist>
    <listitem>
-   <para>
-    The deprecated functions <function>ldap_sort</function>,
-    <function>ldap_control_paged_result</function> and
-    <function>ldap_control_paged_result_response</function> have been removed.
-   </para>
-  </listitem>
-  <listitem>
-   <para>
-    The interface of <function>ldap_set_rebind_proc</function> has changed; the
-    <parameter>callback</parameter> parameter does not accept empty strings anymore; &null; should be
-    used instead.
-   </para>
+    <para>
+     移除弃用函数 <function>ldap_sort</function>、<function>ldap_control_paged_result</function>
+     和 <function>ldap_control_paged_result_response</function>。
+    </para>
+   </listitem>
+   <listitem>
+    <para>
+     <function>ldap_set_rebind_proc</function> 的接口已修改；<parameter>callback</parameter>
+     不再接受空字符串；应该使用 &null; 代替。
+    </para>
    </listitem>
   </itemizedlist>
  </sect2>
@@ -1295,8 +1315,8 @@ $array["key"];
    </listitem>
    <listitem>
     <para>
-     <methodname>SplFileObject::seek</methodname> now always seeks to the beginning of the line.
-     Previously, positions <literal>=1</literal> sought to the beginning of the next line.
+     <methodname>SplFileObject::seek</methodname> 总是寻找到一行的开头。之前，位置 <literal>&gt;=1</literal>
+     会搜索到下一行的开头。
     </para>
    </listitem>
    <listitem>
