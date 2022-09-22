@@ -1,141 +1,220 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
+<!-- EN-Revision: 5c951013ca04161992efed8b86fb40f55669958e Maintainer: dallas Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="function.idate" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>idate</refname>
-  <refpurpose>将本地时间日期格式化为整数</refpurpose>
+  <refpurpose>将本地日期/时间格式化为整数</refpurpose>
  </refnamediv>
- <refsect1>
-  <title>说明</title>
+
+ <refsect1 role="description">
+  &reftitle.description;
   <methodsynopsis>
-   <type>int</type><methodname>idate</methodname>
+   <type class="union"><type>int</type><type>false</type></type><methodname>idate</methodname>
    <methodparam><type>string</type><parameter>format</parameter></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter>timestamp</parameter></methodparam>
+   <methodparam choice="opt"><type class="union"><type>int</type><type>null</type></type><parameter>timestamp</parameter><initializer>&null;</initializer></methodparam>
   </methodsynopsis>
   <para>
-   根据给定的格式字符对 <parameter>timestamp</parameter>
-   格式化并返回数字结果。<parameter>timestamp</parameter>
-   为可选项，默认值为本地当前时间，即 <function>time</function> 的值。
+   使用明确的 int 类型 <parameter>timestamp</parameter>
+   或者当前本地时间（如果没有确定时间戳），根据明确的格式化字符串返回格式化后的数字。换句话说，<parameter>timestamp</parameter>
+   是可选的，默认值是 <function>time</function> 的值。
   </para>
   <para>
-   和 <function>date</function> 不同，<function>idate</function>
-   只接受一个字符作为 <parameter>format</parameter> 参数。
+   跟 <function>date</function> 不同，<function>idate</function>
+   只接受一个字符作为 <parameter>format</parameter> 的参数。
+  </para>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>format</parameter></term>
+     <listitem>
+      <para>
+       <table>
+        <title><parameter>format</parameter> 参数字符串仅识别以下字符</title>
+        <tgroup cols="2">
+         <thead>
+          <row>
+           <entry><parameter>format</parameter> 字符</entry>
+           <entry>说明</entry>
+          </row>
+         </thead>
+         <tbody>
+          <row>
+           <entry><literal>B</literal></entry>
+           <entry>Swatch Beat/互联网时间</entry>
+          </row>
+          <row>
+           <entry><literal>d</literal></entry>
+           <entry>月份中的第几天</entry>
+          </row>
+          <row>
+           <entry><literal>h</literal></entry>
+           <entry>小时（12 小时制）</entry>
+          </row>
+          <row>
+           <entry><literal>H</literal></entry>
+           <entry>小时（24 小时制）</entry>
+          </row>
+          <row>
+           <entry><literal>i</literal></entry>
+           <entry>分钟</entry>
+          </row>
+          <row>
+           <entry><literal>I</literal>（大写 i）</entry>
+           <entry>如果启用夏令时则返回 <literal>1</literal>，否则返回 <literal>0</literal></entry>
+          </row>
+          <row>
+           <entry><literal>L</literal>（大写 l）</entry>
+           <entry>如果是闰年则返回 <literal>1</literal>，否则返回 <literal>0</literal></entry>
+          </row>
+          <row>
+           <entry><literal>m</literal></entry>
+           <entry>月份的数字</entry>
+          </row>
+          <row>
+           <entry><literal>N</literal></entry>
+           <entry>ISO-8601 格式的周几（<literal>1</literal> 表示周一到 <literal>7</literal> 表示周日）</entry>
+          </row>
+          <row>
+           <entry><literal>o</literal></entry>
+           <entry>ISO-8601 格式的年份（4位）</entry>
+          </row>
+          <row>
+           <entry><literal>s</literal></entry>
+           <entry>秒数</entry>
+          </row>
+          <row>
+           <entry><literal>t</literal></entry>
+           <entry>本月的总天数</entry>
+          </row>
+          <row>
+           <entry><literal>U</literal></entry>
+           <entry>自 Unix 纪元（January 1 1970 00:00:00 GMT）起的秒数——这和 <function>time</function> 相同</entry>
+          </row>
+          <row>
+           <entry><literal>w</literal></entry>
+           <entry>周几（<literal>0</literal> 是周日）</entry>
+          </row>
+          <row>
+           <entry><literal>W</literal></entry>
+           <entry>ISO-8601 格式的年份中第几个星期，每星期从星期一开始</entry>
+          </row>
+          <row>
+           <entry><literal>y</literal></entry>
+           <entry>年份（1 或 2 位数字——见下面说明）</entry>
+          </row>
+          <row>
+           <entry><literal>Y</literal></entry>
+           <entry>年份（4 位数字）</entry>
+          </row>
+          <row>
+           <entry><literal>z</literal></entry>
+           <entry>年份中的第几天</entry>
+          </row>
+          <row>
+           <entry><literal>Z</literal></entry>
+           <entry>以秒为单位的时差</entry>
+          </row>
+         </tbody>
+        </tgroup>
+       </table>
+      </para>
+     </listitem>
+    </varlistentry>
+    
+    &date.timestamp.description;
+      
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   成功时返回 <type>int</type>，&return.falseforfailure;。
   </para>
   <para>
-   <table>
-    <title><parameter>format</parameter> 参数可识别以下字符</title>
+   由于 <function>idate</function> 始终返回不以“0”开头的
+   <type>int</type>，因此 <function>idate</function>
+   返回的数字可能位数要比期望的小。查看以下示例。
+  </para>
+ </refsect1>
+
+ <refsect1 role="errors">
+  &reftitle.errors;
+   
+   &date.timezone.errors.description;
+ 
+ </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <para>
+   <informaltable>
     <tgroup cols="2">
      <thead>
       <row>
-       <entry><parameter>format</parameter> 字符</entry>
-       <entry>说明</entry>
+       <entry>&Version;</entry>
+       <entry>&Description;</entry>
       </row>
      </thead>
      <tbody>
       <row>
-       <entry><literal>B</literal></entry>
-       <entry>Swatch Beat/Internet Time</entry>
+       <entry>8.2.0</entry>
+       <entry>
+        添加 <literal>N</literal>（ISO-8601 格式的周几）和
+        <literal>o</literal>（ISO-8601 格式的年份）格式字符。
+       </entry>
       </row>
       <row>
-       <entry><literal>d</literal></entry>
-       <entry>月份中的第几天</entry>
-      </row>
-      <row>
-       <entry><literal>h</literal></entry>
-       <entry>小时（12 小时格式）</entry>
-      </row>
-      <row>
-       <entry><literal>H</literal></entry>
-       <entry>小时（24 小时格式）</entry>
-      </row>
-      <row>
-       <entry><literal>i</literal></entry>
-       <entry>分钟</entry>
-      </row>
-      <row>
-       <entry><literal>I</literal></entry>
-       <entry>如果启用夏时制则返回 <literal>1</literal>，否则返回 <literal>0</literal></entry>
-      </row>
-      <row>
-       <entry><literal>L</literal></entry>
-       <entry>如果是闰年则返回 <literal>1</literal>，否则返回 <literal>0</literal></entry>
-      </row>
-      <row>
-       <entry><literal>m</literal></entry>
-       <entry>月份的数字</entry>
-      </row>
-      <row>
-       <entry><literal>s</literal></entry>
-       <entry>秒数</entry>
-      </row>
-      <row>
-       <entry><literal>t</literal></entry>
-       <entry>本月的总天数</entry>
-      </row>
-      <row>
-       <entry><literal>U</literal></entry>
-       <entry>自 Unix 纪元（January 1 1970 00:00:00
-       GMT）起的秒数——这和 <function>time</function> 作用相同</entry>
-      </row>
-      <row>
-       <entry><literal>w</literal></entry>
-       <entry>星期中的第几天（星期天是 <literal>0</literal>）</entry>
-      </row>
-      <row>
-       <entry><literal>W</literal></entry>
-       <entry>ISO-8601 格式年份中的第几个星期，每星期从星期一开始</entry>
-      </row>
-      <row>
-       <entry><literal>y</literal></entry>
-       <entry>年份（1 或 2 位数字——见下面说明）</entry>
-      </row>
-      <row>
-       <entry><literal>Y</literal></entry>
-       <entry>年份（4 位数字）</entry>
-      </row>
-      <row>
-       <entry><literal>z</literal></entry>
-       <entry>年份中的第几天</entry>
-      </row>
-      <row>
-       <entry><literal>Z</literal></entry>
-       <entry>以秒为单位的时区偏移量</entry>
+       <entry>8.0.0</entry>
+       <entry>
+        现在 <parameter>timestamp</parameter> 允许为 null。
+       </entry>
       </row>
      </tbody>
     </tgroup>
-   </table>
+   </informaltable>
   </para>
-  <note>
-   <para>
-    因为 <function>idate</function> 总是返回
-    <type>integer</type>，不能以“0”开头，因此 <function>idate</function>
-    可能会返回比用户期望中要少的数字。见下面例子：
-   </para>
-  </note>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
   <para>
-   <informalexample>
+   <example>
+    <title><function>idate</function> example</title>
     <programlisting role="php">
 <![CDATA[
 <?php
 $timestamp = strtotime('1st January 2004'); //1072915200
 
-// 下面以两位数字格式显示年份，但是因为
-// 以“0”打头，因此只会显示“4”
+// 下面以两位数字格式打印年份，但是因为
+// 以“0”打头，因此只会打印“4”
 echo idate('y', $timestamp);
 ?>
 ]]>
     </programlisting>
-   </informalexample>
+   </example>
   </para>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
   <para>
-   参见 <function>date</function> 和
-   <function>time</function>。
+   <simplelist>
+    <member><methodname>DateTimeInterface::format</methodname></member>
+    <member><function>date</function></member>
+    <member><function>getdate</function></member>
+    <member><function>time</function></member>
+   </simplelist>
   </para>
  </refsect1>
 </refentry>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
