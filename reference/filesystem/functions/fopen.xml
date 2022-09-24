@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: fdccfb5a6462d4fe522a0c445094f7529690e04e Maintainer: HonestQiao Status: ready -->
-<!-- CREDITS: lm92 -->
+<!-- EN-Revision: ea62fb83196997032641b50fe44420305466195e Maintainer: HonestQiao Status: ready -->
+<!-- CREDITS: lm92, mowangjuanzi -->
 <refentry xml:id="function.fopen" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>fopen</refname>
@@ -11,11 +11,11 @@
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <type>resource</type><methodname>fopen</methodname>
+   <type class="union"><type>resource</type><type>false</type></type><methodname>fopen</methodname>
    <methodparam><type>string</type><parameter>filename</parameter></methodparam>
    <methodparam><type>string</type><parameter>mode</parameter></methodparam>
-   <methodparam choice="opt"><type>bool</type><parameter>use_include_path</parameter><initializer>false</initializer></methodparam>
-   <methodparam choice="opt"><type>resource</type><parameter>context</parameter></methodparam>
+   <methodparam choice="opt"><type>bool</type><parameter>use_include_path</parameter><initializer>&false;</initializer></methodparam>
+   <methodparam choice="opt"><type class="union"><type>resource</type><type>null</type></type><parameter>context</parameter><initializer>&null;</initializer></methodparam>
   </methodsynopsis>
   <para>
    <function>fopen</function> 将
@@ -119,19 +119,21 @@ $handle = fopen("c:\\folder\\resource.txt", "r");
           <row>
            <entry><literal>'w+'</literal></entry>
            <entry>
-            读写方式打开，将文件指针指向文件头并将文件大小截为零。如果文件不存在则尝试创建之。
+            读写方式打开，否则行为同 <literal>'w'</literal>。
            </entry>
           </row>
           <row>
            <entry><literal>'a'</literal></entry>
            <entry>
-            写入方式打开，将文件指针指向文件末尾。如果文件不存在则尝试创建之。
+            写入方式打开，将文件指针指向文件末尾。如果文件不存在则尝试创建之。在这种情况下，<function>fseek</function>
+            没有效果，写入总是追加。
            </entry>
           </row>
           <row>
            <entry><literal>'a+'</literal></entry>
            <entry>
-            读写方式打开，将文件指针指向文件末尾。如果文件不存在则尝试创建之。
+            读写方式打开，将文件指针指向文件末尾。如果文件不存在则尝试创建之。在这种情况下，<function>fseek</function>
+            只相应读取位置，写入总是追加。
            </entry>
           </row>
           <row>
@@ -173,6 +175,13 @@ $handle = fopen("c:\\folder\\resource.txt", "r");
             behavior as <literal>'c'</literal>.
            </entry>
           </row>
+          <row>
+           <entry><literal>'e'</literal></entry>
+           <entry>
+            Set close-on-exec flag on the opened file descriptor. Only
+            available in PHP compiled on POSIX.1-2008 conform systems.
+           </entry>
+          </row>
          </tbody>
         </tgroup>
        </table>
@@ -182,7 +191,7 @@ $handle = fopen("c:\\folder\\resource.txt", "r");
         不同的操作系统家族具有不同的行结束习惯。当写入一个文本文件并想插入一个新行时，需要使用符合操作系统的行结束符号。基于
         Unix 的系统使用 <literal>\n</literal>
         作为行结束字符，基于 Windows 的系统使用 <literal>\r\n</literal>
-        作为行结束字符，基于 Macintosh 的系统使用 <literal>\r</literal>
+        作为行结束字符，基于 Macintosh 的系统（传统 Mac OS）使用 <literal>\r</literal>
         作为行结束字符。
        </para>
        <para>
@@ -197,30 +206,31 @@ $handle = fopen("c:\\folder\\resource.txt", "r");
         <parameter>mode</parameter> 参数的最后一个字符。
        </para>
        <para>
-        默认的转换模式依赖于 SAPI 和所使用的 PHP
-        版本，因此为了便于移植鼓励总是指定恰当的标记。如果是操作纯文本文件并在脚本中使用了
+        默认的转换模式是 <literal>'b'</literal>。如果是操作纯文本文件并在脚本中使用了
         <literal>\n</literal> 作为行结束符，但还要期望这些文件可以被其它应用程序例如
-        Notepad 读取，则在 mode 中使用
+        旧版本的 Notepad 读取，则在 mode 中使用
         <literal>'t'</literal>。在所有其它情况下使用 <literal>'b'</literal>。
        </para>
        <para>
-        在操作二进制文件时如果没有指定 <literal>'b'</literal>
+        在操作二进制文件时如果指定 <literal>'t'</literal>
         标记，可能会碰到一些奇怪的问题，包括坏掉的图片文件以及关于
         <literal>\r\n</literal> 字符的奇怪问题。
        </para>
       </note>
       <note>
        <para>
-        为移植性考虑，强烈建议在用 <function>fopen</function>
-        打开文件时总是使用 <literal>'b'</literal> 标记。
-       </para>
-      </note>
-      <note>
-       <para>
-        再一次，为移植性考虑，强烈建议你重写那些依赖于
+        为移植性考虑，强烈建议重写那些依赖于
         <literal>'t'</literal> 模式的代码使其使用正确的行结束符并改成
         <literal>'b'</literal> 模式。
        </para>
+      </note>
+      <note>
+       <simpara>
+        The <parameter>mode</parameter> is ignored for <filename>php://output</filename>,
+        <filename>php://input</filename>, <filename>php://stdin</filename>,
+        <filename>php://stdout</filename>, <filename>php://stderr</filename> and
+        <filename>php://fd</filename> stream wrappers.
+       </simpara>
       </note>
      </listitem>
     </varlistentry>
@@ -249,16 +259,13 @@ $handle = fopen("c:\\folder\\resource.txt", "r");
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   成功时返回文件指针资源，如果打开失败，本函数返回 &false;。
+   成功时返回文件指针资源，&return.falseforfailure;。
   </para>
  </refsect1>
  
  <refsect1 role="errors">
   &reftitle.errors;
-  <para>
-   如果打开失败，会产生一个 <constant>E_WARNING</constant> 错误。可以通过 <link
-   linkend="language.operators.errorcontrol">@</link> 来屏蔽错误。
-  </para>
+  &fs.emits.warning.on.failure;
  </refsect1>
  
  <refsect1 role="changelog">
@@ -274,23 +281,9 @@ $handle = fopen("c:\\folder\\resource.txt", "r");
      </thead>
      <tbody>
       <row>
-       <entry>4.3.2</entry>
+       <entry>7.0.16, 7.1.2</entry>
        <entry>
-        自 PHP 4.3.2
-        起，对所有区别二进制和文本模式的平台默认模式都被设为二进制模式。如果在升级后脚本碰到问题，尝试暂时使用
-        <literal>'t'</literal> 标记，直到所有的脚本都照以下所说的改为更具移植性以后。
-       </entry>
-      </row>
-      <row>
-       <entry>4.3.2</entry>
-       <entry>
-        增加了选项 <literal>'x'</literal> 和 <literal>'x+'</literal>
-       </entry>
-      </row>
-      <row>
-       <entry>5.2.6</entry>
-       <entry>
-        增加了选项 <literal>'c'</literal> 和 <literal>'c+'</literal>
+        The <literal>'e'</literal> option was added.
        </entry>
       </row>
      </tbody>
