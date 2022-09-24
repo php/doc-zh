@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: e542303a31ecc2f696efd74028ab2eb2bc96cd31 Maintainer: yuanyuqiang Status: ready -->
-<!-- Reviewed: no -->
-
+<!-- EN-Revision: c249f3bc56fcdb3ea3f64b1fa0c4fd96a7dcd5a4 Maintainer: yuanyuqiang Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <phpdoc:classref xml:id="class.dateinterval" xmlns:phpdoc="http://php.net/ns/phpdoc" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude">
 
  <title>DateInterval 类</title>
@@ -14,12 +13,23 @@
   <section xml:id="dateinterval.intro">
    &reftitle.intro;
    <para>
-      表示一个时间周期的类。
+    表示时间间隔。
    </para>
    <para>
-    一个时间周期表示固定量的时间（多少年，月，天，小时等），
-    也可以表示一个字符串格式的相对时间，
-    当表示相对时间的时候，字符串格式是 <classname>DateTime</classname> 类的构造函数所支持的格式。
+    时间间隔表示固定量的时间（多少年，月，天，小时等），也可以表示一个字符串格式的相对时间，当表示相对时间的时候，字符串格式是
+    <classname>DateTimeImmutable</classname> 和 <classname>DateTime</classname> 类的构造函数所支持的格式。
+   </para>
+   <para>
+    更具体的说，<classname>DateInterval</classname>
+    类的对象中的信息是从一个日期/时间到另一个日期/时间的指令。这个过程并不始终可逆。
+   </para>
+   <para>
+    创建 <classname>DateInterval</classname> 对象的常用方法是通过
+    <methodname>DateTimeInterface::diff</methodname> 计算两个日期/时间对象之间的差异。
+   </para>
+   <para>
+    由于没有明确定义的方法来比较日期间隔，因此 <classname>DateInterval</classname>
+    实例是<link linkend="language.operators.comparison.incomparable">无法比较</link>的。
    </para>
   </section>
 <!-- }}} -->
@@ -29,45 +39,45 @@
 
 <!-- {{{ Synopsis -->
    <classsynopsis>
-    <ooclass><classname>DateInterval</classname></ooclass>
+    <ooclass>
+     <classname>DateInterval</classname>
+    </ooclass>
 
-<!-- {{{ Class synopsis -->
     <classsynopsisinfo>
      <ooclass>
       <classname>DateInterval</classname>
      </ooclass>
     </classsynopsisinfo>
-<!-- }}} -->
 
     <classsynopsisinfo role="comment">&Properties;</classsynopsisinfo>
     <fieldsynopsis>
      <modifier>public</modifier>
-     <type>integer</type>
+     <type>int</type>
      <varname linkend="dateinterval.props.y">y</varname>
     </fieldsynopsis>
     <fieldsynopsis>
      <modifier>public</modifier>
-     <type>integer</type>
+     <type>int</type>
      <varname linkend="dateinterval.props.m">m</varname>
     </fieldsynopsis>
     <fieldsynopsis>
      <modifier>public</modifier>
-     <type>integer</type>
+     <type>int</type>
      <varname linkend="dateinterval.props.d">d</varname>
     </fieldsynopsis>
     <fieldsynopsis>
      <modifier>public</modifier>
-     <type>integer</type>
+     <type>int</type>
      <varname linkend="dateinterval.props.h">h</varname>
     </fieldsynopsis>
     <fieldsynopsis>
      <modifier>public</modifier>
-     <type>integer</type>
+     <type>int</type>
      <varname linkend="dateinterval.props.i">i</varname>
     </fieldsynopsis>
     <fieldsynopsis>
      <modifier>public</modifier>
-     <type>integer</type>
+     <type>int</type>
      <varname linkend="dateinterval.props.s">s</varname>
     </fieldsynopsis>
     <fieldsynopsis>
@@ -77,7 +87,7 @@
     </fieldsynopsis>
     <fieldsynopsis>
      <modifier>public</modifier>
-     <type>integer</type>
+     <type>int</type>
      <varname linkend="dateinterval.props.invert">invert</varname>
     </fieldsynopsis>
     <fieldsynopsis>
@@ -85,20 +95,24 @@
      <type>mixed</type>
      <varname linkend="dateinterval.props.days">days</varname>
     </fieldsynopsis>
+    <fieldsynopsis>
+     <modifier>public</modifier>
+     <type>bool</type>
+     <varname linkend="dateinterval.props.from-string">from_string</varname>
+    </fieldsynopsis>
+    <fieldsynopsis>
+     <modifier>public</modifier>
+     <type>string</type>
+     <varname linkend="dateinterval.props.date-string">date_string</varname>
+    </fieldsynopsis>
     
     <classsynopsisinfo role="comment">&Methods;</classsynopsisinfo>
     <xi:include xpointer="xmlns(db=http://docbook.org/ns/docbook) xpointer(id('class.dateinterval')/db:refentry/db:refsect1[@role='description']/descendant::db:constructorsynopsis[not(@role='procedural')])">
-     <xi:fallback />
+     <xi:fallback/>
     </xi:include>
-    <!--
-    <xi:include xpointer="xmlns(db=http://docbook.org/ns/docbook) xpointer(id('class.dateinterval')/db:refentry/db:refsect1[@role='description']/descendant::db:destructorsynopsis[not(@role='procedural')])">
-     <xi:fallback />
-    </xi:include>
-    -->
     <xi:include xpointer="xmlns(db=http://docbook.org/ns/docbook) xpointer(id('class.dateinterval')/db:refentry/db:refsect1[@role='description']/descendant::db:methodsynopsis[not(@role='procedural')])">
-     <xi:fallback />
+     <xi:fallback/>
     </xi:include>
-
    </classsynopsis>
 <!-- }}} -->
 
@@ -106,6 +120,11 @@
   
   <section xml:id="dateinterval.props">
    &reftitle.properties;
+   <warning>
+    <para>
+     下列列出的有效属性依赖 PHP 版本，应视为 <emphasis>readonly</emphasis>。
+    </para>
+   </warning>
    <variablelist>
     <varlistentry xml:id="dateinterval.props.y">
      <term><varname>y</varname></term>
@@ -167,9 +186,8 @@
      <term><varname>invert</varname></term>
      <listitem>
       <para>
-       <literal>1</literal> 表示一个负的时间周期，
-       <literal>0</literal> 表示一个正的时间周期。
-       请参见： <methodname>DateInterval::format</methodname>.
+       如果是负的时间段，则为 <literal>1</literal>，否则为 
+       <literal>0</literal>。请参见 <methodname>DateInterval::format</methodname>。
       </para>
      </listitem>
     </varlistentry>
@@ -177,14 +195,28 @@
      <term><varname>days</varname></term>
      <listitem>
       <para>
-       如果 DateInterval 对象是由
-       <function>DateTime::diff</function> 函数创建的，
-       那么它表示开始日期和结束日期之间包含了多少天。
-       否则，<varname>days</varname> 属性为 &false;。
+       如果 DateInterval 对象是由 <methodname>DateTimeImmutable::diff</methodname>
+       或者 <function>DateTime::diff</function>
+       函数创建的，那么它表示开始日期和结束日期之间的完整天数。否则，<varname>days</varname> 属性为 &false;。
       </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry xml:id="dateinterval.props.from-string">
+     <term><varname>from_string</varname></term>
+     <listitem>
       <para>
-       在 PHP 5.4.20/5.5.4 之前版本中，此属性不会为 &false;，
-       而是 -99999。
+       如果 DateInterval 对象是通过 <methodname>DateInterval::createFromDateString</methodname>
+       创建，则此属性值设为 &true; 并且 <varname>date_string</varname> 属性将填充数据。否则，此值设为
+       &false; 且为从 <varname>y</varname> 到 <varname>f</varname>、<varname>invert</varname> 和
+       <varname>days</varname> 属性填充数据。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry xml:id="dateinterval.props.date-string">
+     <term><varname>date_string</varname></term>
+     <listitem>
+      <para>
+       字符串，用作 <methodname>DateInterval::createFromDateString</methodname> 的参数。
       </para>
      </listitem>
     </varlistentry>
@@ -204,6 +236,28 @@
       </thead>
       <tbody>
        <row>
+        <entry>8.2.0</entry>
+        <entry>
+         为使用 <methodname>DateInterval::createFromDateString</methodname>
+         方法创建的 <classname>DateInterval</classname> 实例添加了
+         <varname>from_string</varname> 和 <varname>date_string</varname> 属性。
+        </entry>
+       </row>
+       <row>
+        <entry>8.2.0</entry>
+        <entry>
+         仅从 <literal>y</literal> 到 <literal>f</literal>、<literal>invert</literal>
+         和 <literal>days</literal> 将可见。
+        </entry>
+       </row>
+       <row>
+        <entry>7.4.0</entry>
+        <entry>
+         现在 <classname>DateInterval</classname> 无法比较；之前所有的
+         <classname>DateInterval</classname> 实例都认为相等。
+        </entry>
+       </row>
+       <row>
         <entry>7.1.0</entry>
         <entry>增加 <varname>f</varname> 属性。</entry>
        </row>
@@ -218,7 +272,6 @@
  &reference.datetime.entities.dateinterval;
 
 </phpdoc:classref>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
