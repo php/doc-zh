@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: b824e2b1086e94a1077bd071964547283616030a Maintainer: HonestQiao Status: ready -->
-<!-- Reviewed: no Maintainer: HonestQiao -->
+<!-- EN-Revision: ea62fb83196997032641b50fe44420305466195e Maintainer: HonestQiao Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="function.fgets" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>fgets</refname>
@@ -10,9 +10,9 @@
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <type>string</type><methodname>fgets</methodname>
-   <methodparam><type>resource</type><parameter>handle</parameter></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter>length</parameter></methodparam>
+   <type class="union"><type>string</type><type>false</type></type><methodname>fgets</methodname>
+   <methodparam><type>resource</type><parameter>stream</parameter></methodparam>
+   <methodparam choice="opt"><type class="union"><type>int</type><type>null</type></type><parameter>length</parameter><initializer>&null;</initializer></methodparam>
   </methodsynopsis>
   <para>
    从文件指针中读取一行。
@@ -24,7 +24,7 @@
   <para>
    <variablelist>
     <varlistentry>
-     <term><parameter>handle</parameter></term>
+     <term><parameter>stream</parameter></term>
      <listitem>
       &fs.validfp.all;
      </listitem>
@@ -34,10 +34,10 @@
      <listitem>
       <para>
        从 <parameter>handle</parameter>
-   指向的文件中读取一行并返回长度最多为 <parameter>length</parameter> - 1
-   字节的字符串。碰到换行符（包括在返回值中）、EOF 或者已经读取了 length - 1
-   字节后停止（看先碰到那一种情况）。如果没有指定
-   <parameter>length</parameter>，则默认为 1K，或者说 1024 字节。
+       指向的文件中读取一行并返回长度最多为 <parameter>length</parameter> - 1
+       字节的字符串。碰到换行符（包括在返回值中）、EOF 或者已经读取了 length - 1
+       字节后停止（看先碰到那一种情况）。如果没有指定
+       <parameter>length</parameter>，则默认为 1K，或者说 1024 字节。
       </para>
      </listitem>
     </varlistentry>
@@ -48,7 +48,7 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   从指针 <parameter>handle</parameter> 指向的文件中读取了 <parameter>length</parameter> - 1 字节后返回字符串。 
+   从指针 <parameter>stream</parameter> 指向的文件中读取了 <parameter>length</parameter> - 1 字节后返回字符串。 
    如果文件指针中没有更多的数据了则返回 &false;。
   </para>
   <para>
@@ -64,15 +64,15 @@
     <programlisting role="php">
 <![CDATA[
 <?php
-$handle = @fopen("/tmp/inputfile.txt", "r");
-if ($handle) {
-    while (($buffer = fgets($handle, 4096)) !== false) {
+$fp = @fopen("/tmp/inputfile.txt", "r");
+if ($fp) {
+    while (($buffer = fgets($fp, 4096)) !== false) {
         echo $buffer;
     }
-    if (!feof($handle)) {
+    if (!feof($fp)) {
         echo "Error: unexpected fgets() fail\n";
     }
-    fclose($handle);
+    fclose($fp);
 }
 ?>
 ]]>

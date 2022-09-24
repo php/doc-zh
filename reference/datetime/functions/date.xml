@@ -1,694 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 12bf2afc48d28a80298b70facdfff3a3654b0dd1 Maintainer: HonestQiao Status: ready -->
-<!-- Reviewed: no Maintainer: HonestQiao -->
+<!-- EN-Revision: 5c951013ca04161992efed8b86fb40f55669958e Maintainer: HonestQiao Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="function.date" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
   <refname>date</refname>
-  <refpurpose>格式化一个本地时间／日期</refpurpose>
+  <refpurpose>格式化 Unix 时间戳</refpurpose>
  </refnamediv>
+
  <refsect1 role="description">
   &reftitle.description;
-   <methodsynopsis>
-    <type>string</type><methodname>date</methodname>
-    <methodparam><type>string</type><parameter>format</parameter></methodparam>
-    <methodparam choice="opt"><type>int</type><parameter>timestamp</parameter></methodparam>
-   </methodsynopsis>
+  <methodsynopsis>
+   <type>string</type><methodname>date</methodname>
+   <methodparam><type>string</type><parameter>format</parameter></methodparam>
+   <methodparam choice="opt"><type class="union"><type>int</type><type>null</type></type><parameter>timestamp</parameter><initializer>&null;</initializer></methodparam>
+  </methodsynopsis>
   <para>
-   返回将整数 <parameter>timestamp</parameter>
-   按照给定的格式字串而产生的字符串。如果没有给出时间戳则使用本地当前时间。换句话说，<parameter>timestamp</parameter>
-   是可选的，默认值为 <function>time</function>。
+   使用指定整数 <parameter>timestamp</parameter>（Unix 时间戳），或者使用当前时间（如果没有指定时间戳），返回相应的指定格式的格式化字符串。换句话说，<parameter>timestamp</parameter>
+   是可选的，默认值是 <function>time</function>。
   </para>
-  <tip>
+  <warning>
    <para>
-    自 PHP 5.1.1 起有几个有用的<link
-    linkend="datetime.constants">常量</link>可用作标准的日期／时间格式来指定
-    <parameter>format</parameter> 参数。
+    Unix 时间戳不处理时区。使用 <classname>DateTimeImmutable</classname> 及其
+    <methodname>DateTimeInterface::format</methodname> 格式化方法来格式化携带时区的日期/时间信息。
    </para>
-  </tip>
-  <tip>
-   <para>
-    自 PHP 5.1 起在 <varname>$_SERVER['REQUEST_TIME']</varname>
-    中保存了发起该请求时刻的时间戳。
-   </para>
-  </tip>
-  <note>
-   <para>
-    有效的时间戳典型范围是格林威治时间 1901 年 12 月 13 日 20:45:54
-    到 2038 年 1 月 19 日 03:14:07。（此范围符合 32
-    位有符号整数的最小值和最大值）。不过在 PHP 5.1 之前此范围在某些系统（如
-    Windows）中限制为从 1970 年 1 月 1 日到 2038 年 1 月 19 日。
-   </para>
-  </note>
-  <note>
-   <para>
-    要将字符串表达的时间转换成时间戳，应该使用
-    <function>strtotime</function>。此外一些数据库有一些函数将其时间格式转换成时间戳（例如
-    MySQL 的 <link xlink:href="&url.mysql.docs.date;">UNIX_TIMESTAMP</link> 函数）。
-   </para>
-  </note>
-  <para>
-   <table>
-    <title>格式字串可以识别以下 <parameter>format</parameter> 参数的字符串</title>
-    <tgroup cols="3">
-     <thead>
-      <row>
-       <entry><parameter>format</parameter> 字符</entry>
-       <entry>说明</entry>
-       <entry>返回值例子</entry>
-      </row>
-     </thead>
-     <tbody>
-      <row>
-       <entry align="center"><emphasis>日</emphasis></entry>
-       <entry>---</entry>
-       <entry>---</entry>
-      </row>
-      <row>
-       <entry><literal>d</literal></entry>
-       <entry>月份中的第几天，有前导零的 2 位数字</entry>
-       <entry><literal>01</literal> 到 <literal>31</literal></entry>
-      </row>
-      <row>
-       <entry><literal>D</literal></entry>
-       <entry>星期中的第几天，文本表示，3 个字母</entry>
-       <entry><literal>Mon</literal> 到 <literal>Sun</literal></entry>
-      </row>
-      <row>
-       <entry><literal>j</literal></entry>
-       <entry>月份中的第几天，没有前导零</entry>
-       <entry><literal>1</literal> 到 <literal>31</literal></entry>
-      </row>
-      <row>
-       <entry><literal>l</literal>（“L”的小写字母）</entry>
-       <entry>星期几，完整的文本格式</entry>
-       <entry><literal>Sunday</literal> 到 <literal>Saturday</literal></entry>
-      </row>
-      <row>
-       <entry><literal>N</literal></entry>
-       <entry>ISO-8601 格式数字表示的星期中的第几天（PHP 5.1.0 新加）</entry>
-       <entry><literal>1</literal>（表示星期一）到 <literal>7</literal>（表示星期天）</entry>
-      </row>
-      <row>
-       <entry><literal>S</literal></entry>
-       <entry>每月天数后面的英文后缀，2 个字符</entry>
-       <entry><literal>st</literal>，<literal>nd</literal>，<literal>rd</literal>
-        或者 <literal>th</literal>。可以和 <literal>j</literal> 一起用</entry>
-      </row>
-      <row>
-       <entry><literal>w</literal></entry>
-       <entry>星期中的第几天，数字表示</entry>
-       <entry><literal>0</literal>（表示星期天）到 <literal>6</literal>（表示星期六）</entry>
-      </row>
-      <row>
-       <entry><literal>z</literal></entry>
-       <entry>年份中的第几天</entry>
-       <entry><literal>0</literal> 到 <literal>365</literal></entry>
-      </row>
-      <row>
-       <entry align="center"><emphasis>星期</emphasis></entry>
-       <entry>---</entry>
-       <entry>---</entry>
-      </row>
-      <row>
-       <entry><literal>W</literal></entry>
-       <entry>ISO-8601 格式年份中的第几周，每周从星期一开始（PHP 4.1.0 新加的）</entry>
-       <entry>例如：<literal>42</literal>（当年的第 42 周）</entry>
-      </row>
-      <row>
-       <entry align="center"><emphasis>月</emphasis></entry>
-       <entry>---</entry>
-       <entry>---</entry>
-      </row>
-      <row>
-       <entry><literal>F</literal></entry>
-       <entry>月份，完整的文本格式，例如 January 或者 March</entry>
-       <entry><literal>January</literal> 到 <literal>December</literal></entry>
-      </row>
-      <row>
-       <entry><literal>m</literal></entry>
-       <entry>数字表示的月份，有前导零</entry>
-       <entry><literal>01</literal> 到 <literal>12</literal></entry>
-      </row>
-      <row>
-       <entry><literal>M</literal></entry>
-       <entry>三个字母缩写表示的月份</entry>
-       <entry><literal>Jan</literal> 到 <literal>Dec</literal></entry>
-      </row>
-      <row>
-       <entry><literal>n</literal></entry>
-       <entry>数字表示的月份，没有前导零</entry>
-       <entry><literal>1</literal> 到 <literal>12</literal></entry>
-      </row>
-      <row>
-       <entry><literal>t</literal></entry>
-       <entry>指定的月份有几天</entry>
-       <entry><literal>28</literal> 到 <literal>31</literal></entry>
-      </row>
-      <row>
-       <entry align="center"><emphasis>年</emphasis></entry>
-       <entry>---</entry>
-       <entry>---</entry>
-      </row>
-      <row>
-       <entry><literal>L</literal></entry>
-       <entry>是否为闰年</entry>
-       <entry>如果是闰年为 <literal>1</literal>，否则为 <literal>0</literal></entry>
-      </row>
-      <row>
-       <entry><literal>o</literal></entry>
-       <entry>ISO-8601 格式年份数字。这和
-        <literal>Y</literal> 的值相同，只除了如果 ISO
-        的星期数（<literal>W</literal>）属于前一年或下一年，则用那一年。（PHP 5.1.0 新加）</entry>
-       <entry>Examples: <literal>1999</literal> or <literal>2003</literal></entry>
-      </row>
-      <row>
-       <entry><literal>Y</literal></entry>
-       <entry>4 位数字完整表示的年份</entry>
-       <entry>例如：<literal>1999</literal> 或 <literal>2003</literal></entry>
-      </row>
-      <row>
-       <entry><literal>y</literal></entry>
-       <entry>2 位数字表示的年份</entry>
-       <entry>例如：<literal>99</literal> 或 <literal>03</literal></entry>
-      </row>
-      <row>
-       <entry align="center"><emphasis>时间</emphasis></entry>
-       <entry>---</entry>
-       <entry>---</entry>
-      </row>
-      <row>
-       <entry><literal>a</literal></entry>
-       <entry>小写的上午和下午值</entry>
-       <entry><literal>am</literal> 或 <literal>pm</literal></entry>
-      </row>
-      <row>
-       <entry><literal>A</literal></entry>
-       <entry>大写的上午和下午值</entry>
-       <entry><literal>AM</literal> 或 <literal>PM</literal></entry>
-      </row>
-      <row>
-       <entry><literal>B</literal></entry>
-       <entry>Swatch Internet 标准时</entry>
-       <entry><literal>000</literal> 到 <literal>999</literal></entry>
-      </row>
-      <row>
-       <entry><literal>g</literal></entry>
-       <entry>小时，12 小时格式，没有前导零</entry>
-       <entry><literal>1</literal> 到 <literal>12</literal></entry>
-      </row>
-      <row>
-       <entry><literal>G</literal></entry>
-       <entry>小时，24 小时格式，没有前导零</entry>
-       <entry><literal>0</literal> 到 <literal>23</literal></entry>
-      </row>
-      <row>
-       <entry><literal>h</literal></entry>
-       <entry>小时，12 小时格式，有前导零</entry>
-       <entry><literal>01</literal> 到 <literal>12</literal></entry>
-      </row>
-      <row>
-       <entry><literal>H</literal></entry>
-       <entry>小时，24 小时格式，有前导零</entry>
-       <entry><literal>00</literal> 到 <literal>23</literal></entry>
-      </row>
-      <row>
-       <entry><literal>i</literal></entry>
-       <entry>有前导零的分钟数</entry>
-       <entry><literal>00</literal> 到 <literal>59</literal>></entry>
-      </row>
-      <row>
-       <entry><literal>s</literal></entry>
-       <entry>秒数，有前导零</entry>
-       <entry><literal>00</literal> 到 <literal>59</literal>></entry>
-      </row>
-      <row>
-           <entry><literal>u</literal></entry>
-           <entry>
-            毫秒 （PHP 5.2.2 新加）。需要注意的是
-            <function>date</function> 函数总是返回
-            <literal>000000</literal> 因为它只接受 <type>integer</type>
-            参数， 而 <methodname>DateTime::format</methodname> 才支持毫秒。
-           </entry>
-           <entry>示例: <literal>654321</literal></entry>
-          </row>
-      <row>
-       <entry align="center"><emphasis>时区</emphasis></entry>
-       <entry>---</entry>
-       <entry>---</entry>
-      </row>
-      <row>
-       <entry><literal>e</literal></entry>
-       <entry>时区标识（PHP 5.1.0 新加）</entry>
-       <entry>例如：<literal>UTC</literal>，<literal>GMT</literal>，<literal>Atlantic/Azores</literal></entry>
-      </row>
-      <row>
-       <entry><literal>I</literal></entry>
-       <entry>是否为夏令时</entry>
-       <entry>如果是夏令时为 <literal>1</literal>，否则为 <literal>0</literal></entry>
-      </row>
-      <row>
-       <entry><literal>O</literal></entry>
-       <entry>与格林威治时间相差的小时数</entry>
-       <entry>例如：<literal>+0200</literal></entry>
-      </row>
-      <row>
-       <entry><literal>P</literal></entry>
-       <entry>与格林威治时间（GMT）的差别，小时和分钟之间有冒号分隔（PHP 5.1.3 新加）</entry>
-       <entry>例如：<literal>+02:00</literal></entry>
-      </row>
-      <row>
-       <entry><literal>T</literal></entry>
-       <entry>本机所在的时区</entry>
-       <entry>例如：<literal>EST</literal>，<literal>MDT</literal>（【译者注】在 Windows
-       下为完整文本格式，例如“Eastern Standard Time”，中文版会显示“中国标准时间”）。</entry>
-      </row>
-      <row>
-       <entry><literal>Z</literal></entry>
-       <entry>时差偏移量的秒数。UTC 西边的时区偏移量总是负的，UTC 东边的时区偏移量总是正的。</entry>
-       <entry><literal>-43200</literal> 到 <literal>43200</literal></entry>
-      </row>
-      <row>
-       <entry align="center"><emphasis>完整的日期／时间</emphasis></entry>
-       <entry>---</entry>
-       <entry>---</entry>
-      </row>
-      <row>
-       <entry><literal>c</literal></entry>
-       <entry>ISO 8601 格式的日期（PHP 5 新加）</entry>
-       <entry>2004-02-12T15:19:21+00:00</entry>
-      </row>
-      <row>
-       <entry><literal>r</literal></entry>
-       <entry>RFC 822 格式的日期</entry>
-       <entry>例如：<literal>Thu, 21 Dec 2000 16:01:07 +0200</literal></entry>
-      </row>
-      <row>
-       <entry><literal>U</literal></entry>
-       <entry>从 Unix 纪元（January 1 1970 00:00:00 GMT）开始至今的秒数</entry>
-       <entry>参见 <function>time</function></entry>
-      </row>
-     </tbody>
-    </tgroup>
-   </table>
-  </para>
-  <para>
-   格式字串中不能被识别的字符将原样显示。<literal>Z</literal> 格式在使用
-   <function>gmdate</function> 时总是返回 <literal>0</literal>。
-  </para>
-  <para>
-   <example>
-    <title><function>date</function> 例子</title>
-    <programlisting role="php">
-<![CDATA[
-<?php
-// 设定要用的默认时区。自 PHP 5.1 可用
-date_default_timezone_set('UTC');
-
-
-// 输出类似：Monday
-echo date("l");
-
-// 输出类似：Monday 15th of August 2005 03:12:46 PM
-echo date('l dS \of F Y h:i:s A');
-
-// 输出：July 1, 2000 is on a Saturday
-echo "July 1, 2000 is on a " . date("l", mktime(0, 0, 0, 7, 1, 2000));
-
-/* 在格式参数中使用常量 */
-// 输出类似：Wed, 25 Sep 2013 15:28:57 -0700
-echo date(DATE_RFC2822);
-
-// 输出类似：2000-07-01T00:00:00+00:00
-echo date(DATE_ATOM, mktime(0, 0, 0, 7, 1, 2000));
-?>
-]]>
-    </programlisting>
-   </example>
-  </para>
-  <para>
-   在格式字串中的字符前加上反斜线来转义可以避免它被按照上表解释。如果加上反斜线后的字符本身就是一个特殊序列，那还要转义反斜线。
-   <example>
-    <title>在 <function>date</function> 中转义字符</title>
-    <programlisting role="php">
-<![CDATA[
-<?php
-// prints something like: Wednesday the 15th
-echo date("l \\t\h\e jS");
-?>
-]]>
-    </programlisting>
-   </example>
-  </para>
-  <para>
-   可以把 <function>date</function> 和
-   <function>mktime</function> 函数结合使用来得到未来或过去的日期。
-   <example>
-    <title><function>date</function> 和 <function>mktime</function> 例子</title>
-    <programlisting role="php">
-<![CDATA[
-<?php
-$tomorrow  = mktime(0, 0, 0, date("m")  , date("d")+1, date("Y"));
-$lastmonth = mktime(0, 0, 0, date("m")-1, date("d"),   date("Y"));
-$nextyear  = mktime(0, 0, 0, date("m"),   date("d"),   date("Y")+1);
-?>
-]]>
-    </programlisting>
-   </example>
-   <note>
-    <para>
-     由于夏令时的缘故，这种方法比简单地在时间戳上加减一天或者一个月的秒数更可靠。
-    </para>
-   </note>
-  </para>
-  <para>
-   一些使用 <function>date</function>
-   格式化日期的例子。注意要转义所有其它的字符，因为目前有特殊含义的字符会产生不需要的结果，而其余字符在
-   PHP 将来的版本中可能会被用上。当转义时，注意用单引号以避免类似 \n 的字符变成了换行符。
-   <example>
-    <title><function>date</function> 格式举例</title>
-    <programlisting role="php">
-<![CDATA[
-<?php
-// 假定今天是：March 10th, 2001, 5:16:18 pm
-$today = date("F j, Y, g:i a");                 // March 10, 2001, 5:16 pm
-$today = date("m.d.y");                         // 03.10.01
-$today = date("j, n, Y");                       // 10, 3, 2001
-$today = date("Ymd");                           // 20010310
-$today = date('h-i-s, j-m-y, it is w Day z ');  // 05-16-17, 10-03-01, 1631 1618 6 Fripm01
-$today = date('\i\t \i\s \t\h\e jS \d\a\y.');   // It is the 10th day.
-$today = date("D M j G:i:s T Y");               // Sat Mar 10 15:16:08 MST 2001
-$today = date('H:m:s \m \i\s\ \m\o\n\t\h');     // 17:03:17 m is month
-$today = date("H:i:s");                         // 17:16:17
-$today = date("Y-m-d H:i:s");                   // 2001-03-10 17:16:18 （MySQL DATETIME 格式）
-?>
-]]>
-    </programlisting>
-   </example>
-  </para>
-  <para>
-   要格式化其它语种的日期，应该用 <function>setlocale</function> 和
-   <function>strftime</function> 函数来代替 <function>date</function>。
-  </para>
-  <para>
-   参见 <function>getlastmod</function>，<function>gmdate</function>，<function>mktime</function>，<function>strftime</function>
-   和 <function>time</function>。
-  </para>
+  </warning>
  </refsect1>
 
  <refsect1 role="parameters">
   &reftitle.parameters;
-  <para>
-   <variablelist>
-    <varlistentry>
-     <term><parameter>format</parameter></term>
-     <listitem>
-      <para>
-       输出的日期 <type>string</type> 格式。 参见下文中的
-       格式化选项。 同时，还可以使用
-       <link linkend="datetime.constants.types">预定义日期常量</link>
-       ，例如：常量 <constant>DATE_RSS</constant>
-       表示格式化字符串 <literal>'D, d M Y H:i:s'</literal>。
-      </para>
-      <para>
-       <table>
-        <title>
-        <parameter>format</parameter> 参数字符串中可识别下列字符</title>
-        <tgroup cols="3">
-         <thead>
-          <row>
-           <entry><parameter>format</parameter> 字符</entry>
-           <entry>描述</entry>
-           <entry>返回值示例</entry>
-          </row>
-         </thead>
-         <tbody>
-          <row>
-           <entry align="center"><emphasis>天</emphasis></entry>
-           <entry>---</entry>
-           <entry>---</entry>
-          </row>
-          <row>
-           <entry><literal>d</literal></entry>
-           <entry>一个月中的第几天，有前导 0 的 2 位数字</entry>
-           <entry>从 <literal>01</literal> 到 <literal>31</literal></entry>
-          </row>
-          <row>
-           <entry><literal>D</literal></entry>
-           <entry>3 个字符表示的星期几</entry>
-           <entry>从 <literal>Mon</literal> 到 <literal>Sun</literal></entry>
-          </row>
-          <row>
-           <entry><literal>j</literal></entry>
-           <entry>一个月中的第几天，无前导 0</entry>
-           <entry>从 <literal>1</literal> 到 <literal>31</literal></entry>
-          </row>
-          <row>
-           <entry><literal>l</literal> (lowercase 'L')</entry>
-           <entry>星期几，英文全称</entry>
-           <entry>从 <literal>Sunday</literal> 到 <literal>Saturday</literal></entry>
-          </row>
-          <row>
-           <entry><literal>N</literal></entry>
-           <entry>ISO-8601 规定的数字表示的星期几（PHP 5.1.0 
-            新加
-            ）</entry>
-           <entry>从 <literal>1</literal> （表示星期一）到 <literal>7</literal> （表示星期日）</entry>
-          </row>
-          <row>
-           <entry><literal>S</literal></entry>
-           <entry>一个月中的第几天，带有 2 个字符表示的英语序数词。</entry>
-           <entry>
-            <literal>st</literal>， <literal>nd</literal>， <literal>rd</literal> 或者
-            <literal>th</literal>。  可以和 <literal>j</literal> 联合使用。
-           </entry>
-          </row>
-          <row>
-           <entry><literal>w</literal></entry>
-           <entry>数字表示的星期几</entry>
-           <entry>从 <literal>0</literal> （星期日） 到 <literal>6</literal> （星期六）</entry>
-          </row>
-          <row>
-           <entry><literal>z</literal></entry>
-           <entry>一年中的第几天，从 0 开始计数</entry>
-           <entry>从 <literal>0</literal> 到 <literal>365</literal></entry>
-          </row>
-          <row>
-           <entry align="center"><emphasis>周</emphasis></entry>
-           <entry>---</entry>
-           <entry>---</entry>
-          </row>
-          <row>
-           <entry><literal>W</literal></entry>
-           <entry>ISO-8601 规范的一年中的第几周，周一视为一周开始。（PHP 4.1.0 新加）</entry>
-           <entry>示例： <literal>42</literal> （本年第42周）</entry>
-          </row>
-          <row>
-           <entry align="center"><emphasis>月</emphasis></entry>
-           <entry>---</entry>
-           <entry>---</entry>
-          </row>
-          <row>
-           <entry><literal>F</literal></entry>
-           <entry>月份英文全拼，例如：January 或 March</entry>
-           <entry>从 <literal>January</literal> 到 <literal>December</literal></entry>
-          </row>
-          <row>
-           <entry><literal>m</literal></entry>
-           <entry>带有 0 前导的数字表示的月份</entry>
-           <entry>从 <literal>01</literal> 到 <literal>12</literal></entry>
-          </row>
-          <row>
-           <entry><literal>M</literal></entry>
-           <entry>3 个字符表示的月份的英文简拼</entry>
-           <entry>从 <literal>Jan</literal> 到 <literal>Dec</literal></entry>
-          </row>
-          <row>
-           <entry><literal>n</literal></entry>
-           <entry>月份的数字表示，无前导 0 </entry>
-           <entry><literal>1</literal> through <literal>12</literal></entry>
-          </row>
-          <row>
-           <entry><literal>t</literal></entry>
-           <entry>给定月份中包含多少天</entry>
-           <entry>从 <literal>28</literal> 到 <literal>31</literal></entry>
-          </row>
-          <row>
-           <entry align="center"><emphasis>年</emphasis></entry>
-           <entry>---</entry>
-           <entry>---</entry>
-          </row>
-          <row>
-           <entry><literal>L</literal></entry>
-           <entry>是否为闰年</entry>
-           <entry>如果是闰年，则返回 <literal>1</literal>，反之返回 <literal>0</literal>。</entry>
-          </row>
-          <row>
-           <entry><literal>o</literal></entry>
-           <entry>ISO-8601 规范的年份，同
-            <literal>Y</literal> 格式。有一种情况除外：当 ISO 的周数（<literal>W</literal>）属于前一年或者后一年时，会返回前一年或者后一年的年份数字表达。
-            属于前一年或者后一年时，会返回前一年或者后一年的年份数字表达。
-            （PHP 5.1.0 新加）</entry>
-           <entry>示例：<literal>1999</literal> 或 <literal>2003</literal></entry>
-          </row>
-          <row>
-           <entry><literal>Y</literal></entry>
-           <entry>4 位数字的年份</entry>
-           <entry>示例：<literal>1999</literal> 或 <literal>2003</literal></entry>
-          </row>
-          <row>
-           <entry><literal>y</literal></entry>
-           <entry>2 位数字的年份</entry>
-           <entry>示例： <literal>99</literal> 或 <literal>03</literal></entry>
-          </row>
-          <row>
-           <entry align="center"><emphasis>时间</emphasis></entry>
-           <entry>---</entry>
-           <entry>---</entry>
-          </row>
-          <row>
-           <entry><literal>a</literal></entry>
-           <entry>上午还是下午，2 位小写字符</entry>
-           <entry><literal>am</literal> 或 <literal>pm</literal></entry>
-          </row>
-          <row>
-           <entry><literal>A</literal></entry>
-           <entry>上午还是下午，2 位大写字符</entry>
-           <entry><literal>AM</literal> 或 <literal>PM</literal></entry>
-          </row>
-          <row>
-           <entry><literal>B</literal></entry>
-           <entry>斯沃琪因特网时间</entry>
-           <entry>从 <literal>000</literal> 到 <literal>999</literal></entry>
-          </row>
-          <row>
-           <entry><literal>g</literal></entry>
-           <entry>小时，12时制，无前导 0 </entry>
-           <entry>从 <literal>1</literal> 到 <literal>12</literal></entry>
-          </row>
-          <row>
-           <entry><literal>G</literal></entry>
-           <entry>小时，24时制，无前导 0 </entry>
-           <entry>从 <literal>0</literal> 到 <literal>23</literal></entry>
-          </row>
-          <row>
-           <entry><literal>h</literal></entry>
-           <entry>小时，12时制，有前导 0 的 2 位数字</entry>
-           <entry>从 <literal>01</literal> 到 <literal>12</literal></entry>
-          </row>
-          <row>
-           <entry><literal>H</literal></entry>
-           <entry>小时，24时制，有前导 0 的 2 位数字</entry>
-           <entry><literal>00</literal> through <literal>23</literal></entry>
-          </row>
-          <row>
-           <entry><literal>i</literal></entry>
-           <entry>分钟，有前导 0 的 2 位数字</entry>
-           <entry>从 <literal>00</literal> 到 <literal>59</literal></entry>
-          </row>
-          <row>
-           <entry><literal>s</literal></entry>
-           <entry>秒，有前导 0 的 2 位数字</entry>
-           <entry>从 <literal>00</literal> 到 <literal>59</literal></entry>
-          </row>
-          <row>
-           <entry><literal>u</literal></entry>
-           <entry>毫秒 （PHP 5.2.2 新加）</entry>
-           <entry>示例： <literal>654321</literal></entry>
-          </row>
-          <row>
-           <entry align="center"><emphasis>时区</emphasis></entry>
-           <entry>---</entry>
-           <entry>---</entry>
-          </row>
-          <row>
-           <entry><literal>e</literal></entry>
-           <entry>时区标识（PHP 5.1.0 新加）</entry>
-           <entry>示例: <literal>UTC</literal>, <literal>GMT</literal>, <literal>Atlantic/Azores</literal></entry>
-          </row>
-          <row>
-           <entry><literal>I</literal> （大写字母 i）</entry>
-           <entry>是否夏令时</entry>
-           <entry>如果是夏令时则返回 <literal>1</literal>，反之返回 <literal>0</literal>。</entry>
-          </row>
-          <row>
-           <entry><literal>O</literal></entry>
-           <entry>和格林威治时间（GMT）的时差，以小时为单位</entry>
-           <entry>示例： <literal>+0200</literal></entry>
-          </row>
-          <row>
-           <entry><literal>P</literal></entry>
-           <entry>和格林威治时间（GMT）的时差，包括小时和分钟，小时和分钟之间使用冒号（:）分隔（PHP 5.1.3 新加）</entry>
-           <entry>示例： <literal>+02:00</literal></entry>
-          </row>
-          <row>
-           <entry><literal>T</literal></entry>
-           <entry>时区缩写</entry>
-           <entry>示例：<literal>EST</literal>, <literal>MDT</literal> ...</entry>
-          </row>
-          <row>
-           <entry><literal>Z</literal></entry>
-           <entry>以秒为单位的时区偏移量。UTC 以西的时区返回负数，UTC 以东的时区返回正数。</entry>
-           <entry>从 <literal>-43200</literal> 到 <literal>50400</literal></entry>
-          </row>
-          <row>
-           <entry align="center"><emphasis>完整的日期/时间</emphasis></entry>
-           <entry>---</entry>
-           <entry>---</entry>
-          </row>
-          <row>
-           <entry><literal>c</literal></entry>
-           <entry>ISO 8601 日期及时间（PHP 5 新加）</entry>
-           <entry>2004-02-12T15:19:21+00:00</entry>
-          </row>
-          <row>
-           <entry><literal>r</literal></entry>
-           <entry><link xlink:href="&url.rfc;2822">RFC 2822</link> 格式的日期和时间</entry>
-           <entry>示例：<literal>Thu, 21 Dec 2000 16:01:07 +0200</literal></entry>
-          </row>
-          <row>
-           <entry><literal>U</literal></entry>
-           <entry>自 1970 年 1 月 1 日 0 时 0 分 0 秒（GMT 时间）以来的时间，以秒为单位</entry>
-           <entry>参见<function>time</function></entry>
-          </row>
-         </tbody>
-        </tgroup>
-       </table>
-      </para>
-      <para>
-       格式化字符串中的不可识别字符将原样输出。
-       当使用 <function>gmdate</function> 函数时， <literal>Z</literal> 格式永远返回 <literal>0</literal>。
-      </para>       
-      <note>
-       <para>
-        由于本函数仅接受 <type>integer</type> 类型的时间戳参数，所以
-        <literal>u</literal> 格式仅在使用 <function>date_format</function> 函数并且使用
-        <function>date_create</function> 函数创建时间戳时才是有用的。
-       </para>
-      </note>
-     </listitem>
-    </varlistentry>
-    
-    &date.timestamp.description;
-   
-   </variablelist>
-  </para>
+  <variablelist>
+   <varlistentry>
+    <term><parameter>format</parameter></term>
+    <listitem>
+     <para>
+      <methodname>DateTimeInterface::format</methodname> 接受的格式。
+     </para>
+    </listitem>
+   </varlistentry>
+
+   &date.timestamp.description;
+
+  </variablelist>
  </refsect1>
 
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   返回格式化后的日期时间的字符串表达。
-   如果 <parameter>timestamp</parameter> 参数不是一个有效数值，则返回 &false; 
+   返回格式化后的日期字符串。如果 <parameter>timestamp</parameter> 参数不是有效数值，则返回 &false; 
    并引发 <constant>E_WARNING</constant> 级别的错误。
   </para>
  </refsect1>
 
  <refsect1 role="errors">
   &reftitle.errors;
-   
+
    &date.timezone.errors.description;
- 
+
  </refsect1>
 
  <refsect1 role="changelog">
@@ -704,20 +72,9 @@ $today = date("Y-m-d H:i:s");                   // 2001-03-10 17:16:18 （MySQL 
      </thead>
      <tbody>
       <row>
-       <entry>5.1.0</entry>
+       <entry>8.0.0</entry>
        <entry>
-        时间戳的有效取值范围为 GMT 时间的 1901 年 12 月 13 日至 GMT 时间的 2038 年 1 月 19 日。
-        （32 位有符号整数的取值范围）。
-        但是，在 PHP 5.1.0 之前的版本，在某些系统（例如 Windows）上有效取值范围为 1970 年 1 月 1 日至 2038 年 1 月 19 日。
-       </entry>
-      </row>
-      
-      &date.timezone.errors.changelog;
-
-      <row>
-       <entry>5.1.1</entry>
-       <entry>
-        <parameter>format</parameter> 参数标准的可用日期/时间格式常量见： <link linkend="datetime.constants">常量</link> 
+        现在 <parameter>timestamp</parameter> 允许为 null。
        </entry>
       </row>
      </tbody>
@@ -730,28 +87,28 @@ $today = date("Y-m-d H:i:s");                   // 2001-03-10 17:16:18 （MySQL 
   &reftitle.examples;
   <para>
    <example>
-    <title><function>date</function> 函数示例</title>
+    <title><function>date</function> 示例</title>
     <programlisting role="php">
 <![CDATA[
 <?php
-// 设置默认时区。PHP 5.1 之后版本可用
+// 设置要使用的默认时区。
 date_default_timezone_set('UTC');
 
 
-// 输出类似： Monday
+// 打印类似：Monday
 echo date("l");
 
-// 输出类似：Monday 8th of August 2005 03:12:46 PM
+// 打印类似：Monday 8th of August 2005 03:12:46 PM
 echo date('l jS \of F Y h:i:s A');
 
-// 输出：July 1, 2000 is on a Saturday
+// 打印：July 1, 2000 is on a Saturday
 echo "July 1, 2000 is on a " . date("l", mktime(0, 0, 0, 7, 1, 2000));
 
-/* 使用格式常量 */
-// 输出类似： Mon, 15 Aug 2005 15:12:46 UTC
-echo date(DATE_RFC822);
+/* 使用格式化参数中的常量 */
+// 打印类似：Wed, 25 Sep 2013 15:28:57 -0700
+echo date(DATE_RFC2822);
 
-// 输出类似：2000-07-01T00:00:00+00:00
+// 打印类似：2000-07-01T00:00:00+00:00
 echo date(DATE_ATOM, mktime(0, 0, 0, 7, 1, 2000));
 ?>
 ]]>
@@ -759,15 +116,13 @@ echo date(DATE_ATOM, mktime(0, 0, 0, 7, 1, 2000));
    </example>
   </para>
   <para>
-   可以使用反斜线进行转义来阻止函数解析格式字符串中的可识别字符。
-   如果反斜线和要转义的字符连在一起依然是一个有效的字符序列，那么需要对
-   反斜线再次进行转义。
+   可以对格式化字符串中的解析字符，在其前面添加反斜线来防止解析。如果带有反斜线的字符已经是特殊字符，需要对反斜线进行再次转义。
    <example>
-    <title>对 <function>date</function> 函数中的格式字符串进行转义</title>
+    <title><function>date</function> 中的转义字符</title>
     <programlisting role="php">
 <![CDATA[
 <?php
-// 输出类似： Wednesday the 15th
+// 打印类似： Wednesday the 15th
 echo date('l \t\h\e jS');
 ?>
 ]]>
@@ -775,11 +130,10 @@ echo date('l \t\h\e jS');
    </example>
   </para>
   <para>
-   可以联合使用 <function>date</function> 
-   和 <function>mktime</function> 函数
-   来构造之前或者之后的日期时间。
+   可以一起使用 <function>date</function> 和 <function>mktime</function> 
+   来查找过去或未来的日期时间。
    <example>
-    <title><function>date</function> 和 <function>mktime</function> 联合使用示例</title>
+    <title><function>date</function> 和 <function>mktime</function> 示例</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -792,20 +146,16 @@ $nextyear  = mktime(0, 0, 0, date("m"),   date("d"),   date("Y")+1);
    </example>
    <note>
     <para>
-     由于存在夏令时时间，
-     所以此方案相对于直接在时间戳上加/减秒数
-     要更加可靠。
+     由于存在夏令时时间，所以此方案相对于直接在时间戳上加/减秒数要更加可靠。
     </para>
    </note>
   </para>
   <para>
-   <function>date</function> 函数格式化的一些示例。
-   需要注意的是，即使是对于当前来说并不具有特殊含义的字符，
-   也要像对待具有特殊含义的字符那样进行转义，以避免函数返回非预期的值。
-   因为可能在将来的 PHP 版本中，这些字符会被赋予特殊的含义。
-   进行转义的时候，请确保使用单引号，以避免 \n 被解释为换行符号。
+   <function>date</function> 
+   格式化的一些示例。请注意，即使是对于当前来说并不具有特殊含义的字符，也要像对待具有特殊含义的字符那样进行转义，以避免产生非预期的值，因为可能在将来的
+   PHP 版本中，这些字符会被赋予特殊的含义。进行转义的时候，请确保使用单引号，以避免 \n 这样的字符被解释为换行符号。
    <example>
-    <title><function>date</function> 函数格式化</title>
+    <title><function>date</function> 格式化</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -821,15 +171,16 @@ $today = date('\i\t \i\s \t\h\e jS \d\a\y.');   // it is the 10th day.
 $today = date("D M j G:i:s T Y");               // Sat Mar 10 17:16:18 MST 2001
 $today = date('H:m:s \m \i\s\ \m\o\n\t\h');     // 17:03:18 m is month
 $today = date("H:i:s");                         // 17:16:18
+$today = date("Y-m-d H:i:s");                   // 2001-03-10 17:16:18（MySQL DATETIME 格式）
 ?>
 ]]>
     </programlisting>
    </example>
   </para>
   <para>
-   如果需要将日期时间格式化为其他语言，你应该使用
-   <function>setlocale</function> 和 <function>strftime</function> 函数
-   来替代 <function>date</function> 函数。
+   如果需要将日期时间格式化为其他语言，使用
+   <methodname>IntlDateFormatter::format</methodname>
+   而不是 <function>date</function>。
   </para>
  </refsect1>
 
@@ -837,16 +188,14 @@ $today = date("H:i:s");                         // 17:16:18
   &reftitle.notes;
   <note>
    <para>
-    使用 <function>strtotime</function> 函数将一个字符串表达的日期时间转换为时间戳。
-    另外，一些数据库产品也提供了将日期时间格式转换为时间戳的函数。
-    （例如 MySQL 中的
-    <link xlink:href="&url.mysql.docs.date;">UNIX_TIMESTAMP</link> 函数）。
+    使用 <function>strtotime</function>
+    将字符串表示的日期转换为时间戳。另外，一些数据库产品也提供了将日期格式转换为时间戳的函数（例如 
+    MySQL 中的 <link xlink:href="&url.mysql.docs.date;">UNIX_TIMESTAMP</link> 函数）。
    </para>
   </note>
   <tip>
    <para>
-    从 PHP 5.1 版本开始，请求的开始时间可以从变量
-    <varname>$_SERVER['REQUEST_TIME']</varname> 中获取。
+    请求的开始时间可以从变量 <varname>$_SERVER['REQUEST_TIME']</varname> 中获取。
    </para>
   </tip>
  </refsect1>
@@ -855,20 +204,20 @@ $today = date("H:i:s");                         // 17:16:18
   &reftitle.seealso;
   <para>
    <simplelist>
+    <member><methodname>DateTimeImmutable::__construct</methodname></member>
+    <member><methodname>DateTimeInterface::format</methodname></member>
     <member><function>gmdate</function></member>
     <member><function>idate</function></member>
     <member><function>getdate</function></member>
     <member><function>getlastmod</function></member>
     <member><function>mktime</function></member>
-    <member><function>strftime</function></member>
+    <member><methodname>IntlDateFormatter::format</methodname></member>
     <member><function>time</function></member>
-    <member><function>strtotime</function></member>
-    <member><link linkend="datetime.constants.types">预定义的日期时间常量</link></member>
+    <member><link linkend="datetime.constants.types">预定义 DateTime 常量</link></member>
    </simplelist>
   </para>
  </refsect1>
 </refentry>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml

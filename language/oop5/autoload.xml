@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: 9ee9eccf455188ab6eb352194eb6f9eb99e15606 Maintainer: dallas Status: ready -->
+<!-- EN-Revision: fca50d321ce57036f3786f278887abe58cd41de8 Maintainer: dallas Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <sect1 xml:id="language.oop5.autoload" xmlns="http://docbook.org/ns/docbook">
  <title>类的自动加载</title>
  <para>
@@ -12,6 +12,9 @@
   <function>spl_autoload_register</function> 函数可以注册任意数量的自动加载器，当使用尚未被定义的类（class）和接口（interface）时自动去加载。通过注册自动加载器，脚本引擎在
   PHP 出错失败前有了最后一个机会加载所需的类。
  </para>
+  <para>
+   像 class 一样的结构都可以以相同方式自动加载。包括类、接口、trait 和枚举。
+  </para>
  <caution>
    <para>
     PHP 8.0.0 之前，可以使用 <function>__autoload</function> 自动加载类和接口。然而，它是
@@ -19,8 +22,14 @@
     <function>__autoload</function> 在 PHP 7.2.0 起弃用，在 PHP 8.0.0 起移除。
    </para>
   </caution>
- <para>
-  <example>
+  <note>
+   <para>
+    <function>spl_autoload_register</function>
+    可以多次调用以便注册多个自动加载器。但从自动加载函数中抛出异常会中断该过程并且禁止继续执行。因此强烈建议不要从自动加载函数中抛出异常。
+   </para>
+  </note>
+  <para>
+   <example>
    <title>自动加载示例</title>
    <para>
     本例尝试分别从 <filename>MyClass1.php</filename>
@@ -64,69 +73,9 @@ Fatal error: Interface 'ITest' not found in ...
 */
 ?>
 ]]>
-   </programlisting>
-  </example>
-  <example>
-   <title>自动加载异常处理</title>
-   <para>
-    本例抛出一个异常并在 try/catch 语句块中演示。
-   </para>
-   <programlisting role="php">
-<![CDATA[
-<?php
-spl_autoload_register(function ($name) {
-    echo "Want to load $name.\n";
-    throw new Exception("Unable to load $name.");
-});
-
-try {
-    $obj = new NonLoadableClass();
-} catch (Exception $e) {
-    echo $e->getMessage(), "\n";
-}
-?>
-]]>
-   </programlisting>
-   &example.outputs;
-   <screen>
-<![CDATA[
-Want to load NonLoadableClass.
-Unable to load NonLoadableClass.
-]]>
-   </screen>
-  </example>
-  <example>
-   <title>自动加载异常处理 - 没有自定义异常机制</title>
-   <para>
-    本例将一个异常抛给不存在的自定义异常处理函数。
-   </para>
-   <programlisting role="php">
-<![CDATA[
-<?php
-spl_autoload_register(function ($name) {
-    echo "Want to load $name.\n";
-    throw new MissingException("Unable to load $name.");
-});
-
-try {
-    $obj = new NonLoadableClass();
-} catch (Exception $e) {
-    echo $e->getMessage(), "\n";
-}
-?>
-]]>
-   </programlisting>
-   &example.outputs;
-   <screen>
-<![CDATA[
-Want to load NonLoadableClass.
-Want to load MissingException.
-
-Fatal error: Class 'MissingException' not found in testMissingException.php on line 4
-]]>
-   </screen>
-  </example>
- </para>
+    </programlisting>
+   </example>
+  </para>
 
  <simplesect role="seealso">
   &reftitle.seealso;

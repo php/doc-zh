@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: c3342c460791e533729e201e3cbe77064ae2e6eb Maintainer: yuanyuqiang Status: ready -->
-<!-- Reviewed: no -->
-
+<!-- EN-Revision: c249f3bc56fcdb3ea3f64b1fa0c4fd96a7dcd5a4 Maintainer: yuanyuqiang Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <phpdoc:classref xml:id="class.dateperiod" xmlns:phpdoc="http://php.net/ns/phpdoc" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude">
 
  <title>DatePeriod 类</title>
@@ -17,8 +16,7 @@
     DatePeriod 类表示一个时间周期。
    </para>
    <para>
-    一个时间周期可以用来在给定的一段时间之内，
-    以一定的时间间隔进行迭代。
+    时间周期内允许对一组日期和时间进行迭代，在指定的时间间隔内定期重复。
    </para>
   </section>
 <!-- }}} -->
@@ -28,36 +26,48 @@
 
 <!-- {{{ Synopsis -->
    <classsynopsis>
-    <ooclass><classname>DatePeriod</classname></ooclass>
+    <ooclass>
+     <classname>DatePeriod</classname>
+    </ooclass>
 
-<!-- {{{ Class synopsis -->
     <classsynopsisinfo>
      <ooclass>
       <classname>DatePeriod</classname>
      </ooclass>
-     
+
      <oointerface>
-      <interfacename>Traversable</interfacename>
+      <interfacename>IteratorAggregate</interfacename>
      </oointerface>
     </classsynopsisinfo>
-<!-- }}} -->
+
     <classsynopsisinfo role="comment">&Constants;</classsynopsisinfo>
     <fieldsynopsis>
      <modifier>const</modifier>
-     <type>integer</type>
+     <type>int</type>
      <varname linkend="dateperiod.constants.exclude-start-date">DatePeriod::EXCLUDE_START_DATE</varname>
      <initializer>1</initializer>
+    </fieldsynopsis>
+    <fieldsynopsis>
+     <modifier>const</modifier>
+     <type>int</type>
+     <varname linkend="dateperiod.constants.include-end-date">DatePeriod::INCLUDE_END_DATE</varname>
+     <initializer>2</initializer>
     </fieldsynopsis>
 
     <classsynopsisinfo role="comment">&Properties;</classsynopsisinfo>
     <fieldsynopsis>
      <modifier>public</modifier>
-     <type>integer</type>
+     <type>int</type>
      <varname linkend="dateperiod.props.recurrences">recurrences</varname>
     </fieldsynopsis>
     <fieldsynopsis>
      <modifier>public</modifier>
-     <type>boolean</type>
+     <type>bool</type>
+     <varname linkend="dateperiod.props.include_end_date">include_end_date</varname>
+    </fieldsynopsis>
+    <fieldsynopsis>
+     <modifier>public</modifier>
+     <type>bool</type>
      <varname linkend="dateperiod.props.include_start_date">include_start_date</varname>
     </fieldsynopsis>
     <fieldsynopsis>
@@ -83,17 +93,11 @@
 
     <classsynopsisinfo role="comment">&Methods;</classsynopsisinfo>
     <xi:include xpointer="xmlns(db=http://docbook.org/ns/docbook) xpointer(id('class.dateperiod')/db:refentry/db:refsect1[@role='description']/descendant::db:constructorsynopsis[not(@role='procedural')])">
-     <xi:fallback />
+     <xi:fallback/>
     </xi:include>
-    <!--
-    <xi:include xpointer="xmlns(db=http://docbook.org/ns/docbook) xpointer(id('class.dateperiod')/db:refentry/db:refsect1[@role='description']/descendant::db:destructorsynopsis[not(@role='procedural')])">
-     <xi:fallback />
-    </xi:include>
-    -->
     <xi:include xpointer="xmlns(db=http://docbook.org/ns/docbook) xpointer(id('class.dateperiod')/db:refentry/db:refsect1[@role='description']/descendant::db:methodsynopsis[not(@role='procedural')])">
-     <xi:fallback />
+     <xi:fallback/>
     </xi:include>
-
    </classsynopsis>
 <!-- }}} -->
 
@@ -106,7 +110,14 @@
     <varlistentry xml:id="dateperiod.constants.exclude-start-date">
      <term><constant>DatePeriod::EXCLUDE_START_DATE</constant></term>
      <listitem>
-      <para>在 <function>DatePeriod::__construct</function> 构造函数中使用，表示不包含开始时间。</para>
+      <para>在 <function>DatePeriod::__construct</function> 构造函数中使用，排除开始时间。</para>
+     </listitem>
+    </varlistentry>
+
+    <varlistentry xml:id="dateperiod.constants.include-end-date">
+     <term><constant>DatePeriod::INCLUDE_END_DATE</constant></term>
+     <listitem>
+      <para>在 <function>DatePeriod::__construct</function> 构造函数中使用，包含结束时间。</para>
      </listitem>
     </varlistentry>
 
@@ -124,6 +135,14 @@
        如果通过显式的传入 <literal>$recurrences</literal> 来创建的 <classname>DatePeriod</classname> 实例，
        那么这个参数表示循环次数。
        参见：<methodname>DatePeriod::getRecurrences</methodname>。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry xml:id="dateperiod.props.include_end_date">
+     <term><varname>include_end_date</varname></term>
+     <listitem>
+      <para>
+       在循环过程中，是否包含结束时间。
       </para>
      </listitem>
     </varlistentry>
@@ -170,31 +189,35 @@
    </variablelist>
   </section>
 
-  <section role="changelog" xml:id="dateperiod.changelog">
+  <section role="changelog">
    &reftitle.changelog;
-   <para>
-    <informaltable>
-     <tgroup cols="2">
-      <thead>
-       <row>
-        <entry>&Version;</entry>
-        <entry>&Description;</entry>
-       </row>
-      </thead>
-      <tbody>
-       <row>
-        <entry>5.3.27, 5.4.17</entry>
-        <entry>
-         公开以下属性：<varname>recurrences</varname>，
-         <varname>include_start_date</varname>，<varname>start</varname>，
-         <varname>current</varname>，<varname>end</varname> 和
-         <varname>interval</varname>。
-        </entry>
-       </row>
-      </tbody>
-     </tgroup>
-    </informaltable>
-   </para>
+   <informaltable>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>&Version;</entry>
+       <entry>&Description;</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>8.2.0</entry>
+       <entry>
+        新增 <constant>DatePeriod::INCLUDE_END_DATE</constant> 常量和
+        <property>include_end_date</property> 属性。
+       </entry>
+      </row>
+      <row>
+       <entry>8.0.0</entry>
+       <entry>
+        现在 <classname>DatePeriod</classname> 实现了（implement）
+        <interfacename>IteratorAggregate</interfacename>。之前实现的是
+        <interfacename>Traversable</interfacename>。
+       </entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </informaltable>
   </section>
 
  </partintro>
