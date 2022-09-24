@@ -1,31 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 63533b05593c38442e9c46133a740812b4d63da9 Maintainer: HonestQiao Status: ready -->
-<!-- Reviewed: no Maintainer: HonestQiao -->
-<!-- CREDITS: lm92 -->
+<!-- EN-Revision: 0bfb0eb957e0468912af86bba09fae588010c1df Maintainer: HonestQiao Status: ready -->
+<!-- CREDITS: lm92, mowangjuanzi -->
 <refentry xml:id="function.flock" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>flock</refname>
-  <refpurpose>轻便的咨询文件锁定</refpurpose>
+  <refpurpose>可移植的协同文件锁定</refpurpose>
  </refnamediv>
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
    <type>bool</type><methodname>flock</methodname>
-   <methodparam><type>resource</type><parameter>handle</parameter></methodparam>
+   <methodparam><type>resource</type><parameter>stream</parameter></methodparam>
    <methodparam><type>int</type><parameter>operation</parameter></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter role="reference">wouldblock</parameter></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter role="reference">would_block</parameter><initializer>&null;</initializer></methodparam>
   </methodsynopsis>
-    <para>
-     <function>flock</function> 允许执行一个简单的可以在任何平台中使用的读取/写入模型（包括大部分的
-   Unix 派生版和甚至是 Windows）。
-  </para>
-    <para>
-     在 PHP 5.3.2版本之前，锁也会被 <function>fclose</function> 释放（在脚本结束后会自动调用）。
+  <para>
+   <function>flock</function> 允许执行简单的读取/写入模型,该模型可以在任何平台（包括大部分
+   Unix 衍生产品，甚至是 Windows）上使用。
   </para>
   <para>
-   PHP 支持以咨询方式（也就是说所有访问程序必须使用同一方式锁定, 否则它不会工作）锁定全部文件的一种轻便方法。
-    默认情况下，这个函数会阻塞到获取锁；这可以通过下面文档中 <constant>LOCK_NB</constant> 选项来控制（在非 Windows 平台上）。
+   当调用 <function>fclose</function> 或者对 <parameter>stream</parameter> 垃圾收集时，锁会释放。
+  </para>
+  <para>
+   PHP 支持以协同且可移植的方式锁定完整文件（也就是说所有访问程序必须使用相同锁定方式, 否则将无法工作）。默认情况下，该函数将堵塞直到获得锁；这可以通过下面文档中
+   <constant>LOCK_NB</constant> 选项来控制。
   </para>
  </refsect1>
  
@@ -34,7 +33,7 @@
   <para>
    <variablelist>
     <varlistentry>
-     <term><parameter>handle</parameter></term>
+     <term><parameter>stream</parameter></term>
      <listitem>
       &fs.file.pointer;
      </listitem>
@@ -43,8 +42,7 @@
      <term><parameter>operation</parameter></term>
      <listitem>
       <para>
-       <parameter>operation</parameter>
-   可以是以下值之一：
+       <parameter>operation</parameter> 可以是以下值之一：
        <itemizedlist>
         <listitem>
          <simpara>
@@ -64,18 +62,18 @@
        </itemizedlist>
       </para>
       <para>
-       如果不希望 <function>flock</function> 在锁定时堵塞，则是
-       <constant>LOCK_NB</constant>（Windows 上还不支持）。
-
+       It is also possible to add <constant>LOCK_NB</constant> as a bitmask to one 
+       of the above operations, if <function>flock</function> should not
+       block during the locking attempt.
       </para>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>wouldblock</parameter></term>
+     <term><parameter>would_block</parameter></term>
      <listitem>
       <para>
-       如果锁定会堵塞的话（EWOULDBLOCK
-   错误码情况下），可选的第三个参数会被设置为 &true;。（Windows 上不支持）
+       如果锁将堵塞（EWOULDBLOCK
+       错误码情况下），第三个可选参数会设置为 1。
       </para>
      </listitem>
     </varlistentry>
@@ -89,40 +87,7 @@
    &return.success;
   </para>
  </refsect1>
- 
- <refsect1 role="changelog">
-  &reftitle.changelog;
-  <para>
-   <informaltable>
-    <tgroup cols="2">
-     <thead>
-      <row>
-       <entry>&Version;</entry>
-       <entry>&Description;</entry>
-      </row>
-     </thead>
-     <tbody>
-      <row>
-       <entry>5.3.2</entry>
-       <entry>
-        在文件资源句柄关闭时不再自动解锁。现在要解锁必须手动进行。
-       </entry>
-      </row>
-      <row>
-       <entry>4.0.1</entry>
-       <entry>
-        增加了常量 <literal>LOCK_XXX</literal>。
-        之前你必须使用 1 代表 <constant>LOCK_SH</constant>，2 代表
-        <constant>LOCK_EX</constant>，3 代表<constant>LOCK_UN</constant>，4 代表
-         <constant>LOCK_NB</constant>。
-       </entry>
-      </row>
-     </tbody>
-    </tgroup>
-   </informaltable>
-  </para>
- </refsect1>
- 
+
  <refsect1 role="examples">
   &reftitle.examples;
   <para>
@@ -178,8 +143,8 @@ fclose($fp);
   &reftitle.notes;
   <note>
    <para>
-    <function>flock</function> uses mandatory locking instead of advisory
-    locking on Windows. Mandatory locking is also supported on Linux and
+    在 Windows 上，<function>flock</function> 使用的是强制锁而不是协同锁。
+    Mandatory locking is also supported on Linux and
     System V based operating systems via the usual mechanism supported by the
     fcntl() system call: that is, if the file in question has the setgid
     permission bit set and the group execution bit cleared. On Linux, the file
@@ -195,32 +160,34 @@ fclose($fp);
   </note>
   <note>
    <para>
-    May only be used on file pointers returned by <function>fopen</function>
-    for local files, or file pointers pointing to userspace streams that
-    implement the <function>streamWrapper::stream_lock</function> method.
+    只能用于 <function>fopen</function> 返回本地文件的文件指针，或指向实现
+    <function>streamWrapper::stream_lock</function> 方法的用户空间流的文件指针。
    </para>
   </note>
   <warning>
    <para>
-    Assigning another value to <parameter>handle</parameter> argument in
-    subsequent code will release the lock.
+    在后续代码中为 <parameter>stream</parameter> 分配另一个值将释放锁。
    </para>
   </warning>
   <warning>
    <para>
-    在部分操作系统中 <function>flock</function> 以进程级实现。当用一个多线程服务器
-    API（比如 ISAPI）时，可能不可以依靠
-    <function>flock</function> 来保护文件，因为运行于同一服务器实例中其它并行线程的
-    PHP 脚本可以对该文件进行处理。
+    在部分操作系统中 <function>flock</function> 以进程级实现。当用多线程服务器
+    API 时，可能无法依靠 <function>flock</function>
+    来保护文件，因为运行于同一服务器实例中其它并行线程的 PHP 脚本可以对该文件进行处理！
    </para>
    <para>
-    <function>flock</function> 不支持旧的文件系统，如 <literal>FAT</literal>
-    以及它的派生系统。因此，此环境下总是返回 &false;（尤其是对 Windows 98 用户来说）。
+    旧的文件系统（如 <literal>FAT</literal> 及其衍生）不支持
+    <function>flock</function>，也因此在这些环境下总是返回 &false;。
    </para>
   </warning>
+  <note>
+   <para>
+    在 Windows 上，如果锁进程再次打开文件，那么在解锁文件之前，无法通过第二个句柄访问文件。
+   </para>
+  </note>
  </refsect1>
-</refentry>
 
+</refentry>
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
