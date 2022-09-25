@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- $Revision: 348018 $ -->
-<!-- $Author: hytest $ -->
-<!-- EN-Revision: e61d2217d58d7135abd368baa1089e58c626fbcc Maintainer: Avenger Status: partial -->
+<!-- $Revision$ -->
+<!-- EN-Revision: 68dfe9740823ed1d229e5e79b7018fe71237c665 Maintainer: Avenger Status: partial -->
+<!-- CREDITS: mowangjuanzi -->
 <sect1 xml:id="migration74.incompatible" xmlns:xlink="http://www.w3.org/1999/xlink">
  <title>不向后兼容的变更</title>
 
@@ -82,7 +82,7 @@
    <itemizedlist>
     <listitem>
      <simpara>
-      <constant>PASSWORD_DEFAULT</constant> 之前是 int 1; 现在是 &null;
+      <constant>PASSWORD_DEFAULT</constant> 之前是 int 1; 现在是“2y”（在 PHP 7.4.0、7.4.1、7.4.2 中是 &null;）
      </simpara>
     </listitem>
     <listitem>
@@ -241,28 +241,30 @@
  </sect2>
 
  <sect2 xml:id="migration74.incompatible.reflection">
-  <title>Reflection</title>
+  <title>反射</title>
 
   <para>
-   Reflection objects will now generate an exception if an attempt is made
-   to serialize them. Serialization for reflection objects was never
-   supported and resulted in corrupted reflection objects. It has been
-   explicitly prohibited now.
+   现在如果尝试对 Reflection 对象序列化将会生成异常。反射对象序列化从未支持并会导致反射对象错误。现在已明确禁止。
+  </para>
+
+  <para>
+   <classname>ReflectionClassConstant</classname>、<classname>ReflectionMethod</classname> 和
+   <classname>ReflectionProperty</classname> 类常量的值发生了变化。
   </para>
  </sect2>
 
  <sect2 xml:id="migration74.incompatible.spl">
-  <title>Standard PHP Library (SPL)</title>
+  <title>PHP 标准库（SPL）</title>
 
   <para>
-   Calling <function>get_object_vars</function> on an <classname>ArrayObject</classname>
-   instance will now always return the properties of the <classname>ArrayObject</classname>
-   itself (or a subclass). Previously it returned the values of the wrapped
+   现在对 <classname>ArrayObject</classname> 实例调用 <function>get_object_vars</function>
+   将始终返回 <classname>ArrayObject</classname> 本身（或子类）的属性。
+   Previously it returned the values of the wrapped
    array/object unless the <constant>ArrayObject::STD_PROP_LIST</constant>
    flag was specified.
   </para>
   <para>
-   Other affected operations are:
+   其它受到影响的操作有：
   </para>
   <itemizedlist>
    <listitem>
@@ -272,13 +274,13 @@
    </listitem>
    <listitem>
     <simpara>
-     <function>reset</function>, <function>current</function>, etc.
-     Use <interfacename>Iterator</interfacename> methods instead.
+     <function>reset</function>、<function>current</function> 等等。
+     改用 <interfacename>Iterator</interfacename> 方法。
     </simpara>
    </listitem>
    <listitem>
     <simpara>
-     Potentially others working on object properties as a list.
+     可能将对象属性作为列表处理的其它情况。比如 <function>array_walk</function>。
     </simpara>
    </listitem>
   </itemizedlist>
