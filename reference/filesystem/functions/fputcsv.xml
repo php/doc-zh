@@ -1,25 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: fc9e379fd822e0731859b056db368fa59f7f14b9 Maintainer: HonestQiao Status: ready -->
-<!-- Reviewed: no Maintainer: HonestQiao -->
+<!-- EN-Revision: 291d60430d25f2b508bebb5720b41cc68f9a6ec1 Maintainer: HonestQiao Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="function.fputcsv" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>fputcsv</refname>
   <refpurpose>将行格式化为 CSV 并写入文件指针</refpurpose>
  </refnamediv>
+ 
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <type>int</type><methodname>fputcsv</methodname>
-   <methodparam><type>resource</type><parameter>handle</parameter></methodparam>
+   <type class="union"><type>int</type><type>false</type></type><methodname>fputcsv</methodname>
+   <methodparam><type>resource</type><parameter>stream</parameter></methodparam>
    <methodparam><type>array</type><parameter>fields</parameter></methodparam>
-   <methodparam choice="opt"><type>string</type><parameter>delimiter</parameter><initializer>','</initializer></methodparam>
-   <methodparam choice="opt"><type>string</type><parameter>enclosure</parameter><initializer>'"'</initializer></methodparam>
+   <methodparam choice="opt"><type>string</type><parameter>separator</parameter><initializer>","</initializer></methodparam>
+   <methodparam choice="opt"><type>string</type><parameter>enclosure</parameter><initializer>"\""</initializer></methodparam>
+   <methodparam choice="opt"><type>string</type><parameter>escape</parameter><initializer>"\\"</initializer></methodparam>
+   <methodparam choice="opt"><type>string</type><parameter>eol</parameter><initializer>"\n"</initializer></methodparam>
   </methodsynopsis>
   <para>
    <function>fputcsv</function> 将一行（用
    <parameter>fields</parameter> 数组传递）格式化为 CSV
-   格式并写入由 <parameter>handle</parameter>
+   格式并写入由 <parameter>stream</parameter>
    指定的文件。
   </para>
  </refsect1>
@@ -29,7 +32,7 @@
   <para>
    <variablelist>
     <varlistentry>
-     <term><parameter>handle</parameter></term>
+     <term><parameter>stream</parameter></term>
      <listitem>
       &fs.validfp.all;
      </listitem>
@@ -38,16 +41,16 @@
      <term><parameter>fields</parameter></term>
      <listitem>
       <para>
-       值的一个数组。
+       <type>string</type> 数组。
       </para>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>delimiter</parameter></term>
+     <term><parameter>separator</parameter></term>
      <listitem>
       <para>
-       可选的 <parameter>delimiter</parameter>
-   参数设定字段分界符（只允许一个字符）。
+       可选的 <parameter>separator</parameter>
+       参数设定字段分界符（只允许一个单字节字符）。
       </para>
      </listitem>
     </varlistentry>
@@ -56,18 +59,72 @@
      <listitem>
       <para>
        可选的 <parameter>enclosure</parameter>
-   参数设定字段字段环绕符（只允许一个字符）。
+       参数设定字段字段环绕符（只允许一个单字节字符）。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>escape</parameter></term>
+     <listitem>
+      <para>
+       可选的 <parameter>escape</parameter>
+       参数设置转义字符（只允许一个单字节字符）。空字符串（<literal>""</literal>）禁用专有转义机制。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>eol</parameter></term>
+     <listitem>
+      <para>
+       可选的 <parameter>eol</parameter> 参数设置自定义行尾序列。
       </para>
      </listitem>
     </varlistentry>
    </variablelist>
   </para>
+  <note>
+   <para>
+    If an <parameter>enclosure</parameter> character is contained in a field,
+    it will be escaped by doubling it, unless it is immediately preceded by an
+    <parameter>escape</parameter>.
+   </para>
+  </note> 
  </refsect1>
 
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
    返回写入字符串的长度，&return.falseforfailure;。
+  </para>
+ </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <para>
+   <informaltable>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>&Version;</entry>
+       <entry>&Description;</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>8.1.0</entry>
+       <entry>
+        新增可选的 <parameter>eol</parameter> 参数。
+       </entry>
+      </row>
+      <row>
+       <entry>7.4.0</entry>
+       <entry>
+        <parameter>escape</parameter> 参数现在接受空字符串来禁用专有转义机制。
+       </entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </informaltable>
   </para>
  </refsect1>
 
@@ -123,7 +180,6 @@ aaa,bbb,ccc,dddd
   </para>
  </refsect1>
 </refentry>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
