@@ -1,30 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 18303121bc5ebbd696f8444b69eca93c974c25ac Maintainer: mowangjuanzi Status: ready -->
+<!-- EN-Revision: da4977f316e4a05be800e865b979c10d19436112 Maintainer: mowangjuanzi Status: ready -->
 <appendix xml:id="filters" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-  <title>可用过滤器列表</title>
-  <para>下面列出了用在 <function>stream_filter_append</function> 中的几个内置的流过滤器。用户的 PHP 版本中的过滤器也许比这里列出的更多（或更少）。</para>
-  <para>值得指出 
-  <function>stream_filter_append</function> 与 
-  <function>stream_filter_prepend</function> 之间有少许不平衡。每个 PHP 流都含有一个小的
-  <emphasis>读取缓冲区</emphasis>，它存储了来自文件系统或其它资源的几段数据以便更有效率地处理。数据一从资源进入流的内部缓冲区，立刻被附上的过滤器处理而不管 PHP 程序是否真的已经准备好接收数据。当过滤器是 
+ <title>可用过滤器列表</title>
+ <para>
+  下面列出了用在 <function>stream_filter_append</function> 中的几个内置的流过滤器。用户的 PHP 版本中的过滤器也许比这里列出的更多（或更少）。
+ </para>
+
+ <para>
+  值得指出 <function>stream_filter_append</function> 与 <function>stream_filter_prepend</function> 之间有少许不平衡。每个 PHP 流都含有一个小的
+  <emphasis>读取缓冲区</emphasis>，它存储了来自文件系统或其它资源的几段数据以便更有效率地处理。数据一从资源进入流的内部缓冲区，立刻被附上的过滤器处理而不管PHP 程序是否真的已经准备好接收数据。当过滤器是 
   <emphasis>appended</emphasis> 时如果数据等待在读取缓冲区，数据将被立即通过过滤器处理，使其效果看上去是透明的。然而当过滤器是 
   <emphasis>prepended</emphasis> 时如果数据等待在读取缓冲区，数据将
-  <emphasis>不会</emphasis>被该过滤器处理。该数据将会等到从资源取得下一段数据后才会被处理。</para>
-  <para>用 
-  <function>stream_get_filters</function> 来列出 PHP 中已安装的过滤器。</para>
-  <section xml:id="filters.string">
-    <title>字符串过滤器</title>
-    <simpara>每个过滤器都正如其名字暗示的那样工作并与内置的 PHP 字符串函数的行为相对应。对于指定过滤器的更多信息，请参考该函数的手册页。</simpara>
-   <section xml:id="filters.string.rot13">
+  <emphasis>不会</emphasis>被该过滤器处理。该数据将会等到从资源取得下一段数据后才会被处理。
+ </para>
+
+ <para> 
+  用 <function>stream_get_filters</function> 来列出 PHP 中已安装的过滤器。
+ </para>
+
+ <section xml:id="filters.string">
+  <title>字符串过滤器</title>
+
+  <simpara>
+   每个过滤器都正如其名字暗示的那样工作并与内置的 PHP 字符串函数的行为相对应。对于指定过滤器的更多信息，请参考该函数的手册页。
+  </simpara>
+
+  <section xml:id="filters.string.rot13">
+   <title>string.rot13</title>
+   <simpara>
+    使用该过滤器也就是用 <function>str_rot13</function> 函数处理所有的流数据。
+   </simpara>
+   <example>
     <title>string.rot13</title>
-    <simpara>
-     使用该过滤器也就是用 <function>str_rot13</function> 函数处理所有的流数据。
-    </simpara>
-    <example>
-      <title>string.rot13</title>
-      <programlisting role="php">
-        <![CDATA[
+    <programlisting role="php">
+<![CDATA[
 <?php
 $fp = fopen('php://output', 'w');
 stream_filter_append($fp, 'string.rot13');
@@ -32,9 +42,9 @@ fwrite($fp, "This is a test.\n");
 /* 输出： Guvf vf n grfg.   */
 ?>
 ]]>
-</programlisting>
-    </example>
-   </section>
+    </programlisting>
+   </example>
+  </section>
 
    <section xml:id="filters.string.toupper">
     <title>string.toupper</title>
@@ -94,13 +104,13 @@ $fp = fopen('php://output', 'w');
 stream_filter_append($fp, 'string.strip_tags', STREAM_FILTER_WRITE, "<b><i><u>");
 fwrite($fp, "<b>bolded text</b> enlarged to a <h1>level 1 heading</h1>\n");
 fclose($fp);
-/* 输出： <b>bolded text</b> enlarged to a level 1 heading   */
+/* 输出： bolded text enlarged to a level 1 heading   */
 
 $fp = fopen('php://output', 'w');
 stream_filter_append($fp, 'string.strip_tags', STREAM_FILTER_WRITE, array('b','i','u'));
 fwrite($fp, "<b>bolded text</b> enlarged to a <h1>level 1 heading</h1>\n");
 fclose($fp);
-/* 输出： <b>bolded text</b> enlarged to a level 1 heading   */
+/* 输出： bolded text enlarged to a level 1 heading   */
 ?>
 ]]>
     </programlisting>
@@ -151,27 +161,28 @@ fclose($fp);
 /* 输出： This is a test.  */
 ?>
 ]]>
-</programlisting>
-    </example>
- </section>
+    </programlisting>
+   </example>
+  </section>
 
- <section xml:id="filters.covert.quoted-printable">
-  <title>convert.quoted-printable-encode 和 convert.quoted-printable-decode</title>
-  <simpara>
-   使用此过滤器的 decode 版本等同于用
-    <function>quoted_printable_decode</function> 函数处理所有的流数据。没有和 
-    <literal>convert.quoted-printable-encode</literal> 
-    相对应的函数。<literal>convert.quoted-printable-encode</literal> 支持以一个关联数组给出的参数。除了支持和 
-    <literal>convert.base64-encode</literal> 一样的附加参数外，
-    <literal>convert.quoted-printable-encode</literal> 还支持布尔参数 
-    <parameter>binary</parameter> 和 
-    <parameter>force-encode-first</parameter>。
-    <literal>convert.base64-decode</literal> 只支持 
-    <parameter>line-break-chars</parameter> 参数作为从编码载荷中剥离的类型提示。</simpara>
-    <example>
-      <title>convert.quoted-printable-encode &amp; convert.quoted-printable-decode</title>
-      <programlisting role="php">
-        <![CDATA[
+  <section xml:id="filters.covert.quoted-printable">
+   <title>convert.quoted-printable-encode 和 convert.quoted-printable-decode</title>
+   <simpara>
+    使用此过滤器的 decode 版本等同于用 <function>quoted_printable_decode</function>
+    函数处理所有的流数据。没有和 <literal>convert.quoted-printable-encode</literal> 
+    相对应的函数。<literal>convert.quoted-printable-encode</literal> 
+    支持以一个关联数组给出的参数。除了支持和 <literal>convert.base64-encode</literal> 
+    一样的附加参数外，<literal>convert.quoted-printable-encode</literal> 还支持布尔参数 
+    <parameter>binary</parameter> 和
+    <parameter>force-encode-first</parameter>。<literal>convert.base64-decode</literal>
+    只支持 <parameter>line-break-chars</parameter> 参数作为从编码载荷中剥离的类型提示。
+   </simpara>
+   <example>
+    <title>
+     convert.quoted-printable-encode &amp; convert.quoted-printable-decode
+    </title>
+    <programlisting role="php">
+<![CDATA[
 <?php
 $fp = fopen('php://output', 'w');
 stream_filter_append($fp, 'convert.quoted-printable-encode');
@@ -179,13 +190,12 @@ fwrite($fp, "This is a test.\n");
 /* 输出： =This is a test.=0A  */
 ?>
 ]]>
-</programlisting>
-    </example>
+    </programlisting>
+   </example>
   </section>
 
-
-   <section xml:id="filters.convert.iconv">
-    <title>convert.iconv.*</title>
+  <section xml:id="filters.convert.iconv">
+   <title>convert.iconv.*</title>
     <simpara>
      在激活 <link linkend="book.iconv">iconv</link>
      的前提下可以使用 <literal>convert.iconv.*</literal> 压缩过滤器，
@@ -375,7 +385,7 @@ echo "The compressed file is " . filesize('LICENSE.compressed') . " bytes long.\
 
 /* 生成的输出：
 
-The original text is 3288 characters long.
+The original file is 3288 bytes long.
 The compressed file is 1488 bytes long.
 
  */
