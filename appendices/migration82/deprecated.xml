@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- EN-Revision: 65716f4761484e314ee86fa23493f00f7823ace1 Maintainer: mowangjuanzi Status: ready -->
+<sect1 xml:id="migration82.deprecated">
+ <title>弃用的功能</title>
+
+ <sect2 xml:id="migration82.deprecated.core">
+  <title>PHP 核心</title>
+
+  <sect3 xml:id="migration82.deprecated.core.dynamic-properties">
+   <title>动态属性的使用</title>
+
+   <para>
+    弃用动态属性创建，除非类选择使用 <code>#[\AllowDynamicProperties]</code>
+    属性。<classname>stdClass</classname> 允许动态属性。<link
+    linkend="object.get">__get()</link>/<link linkend="object.set">__set()</link>
+    魔术方法不受此更改的影响。解决动态属性弃用警告，可以通过以下方式：
+    <simplelist>
+     <member>声明属性（首选）。</member>
+     <member>
+      将 <code>#[\AllowDynamicProperties]</code> 添加到
+      <code>#[\AllowDynamicProperties]</code>（这也适用于所有子类）。
+     </member>
+     <member>
+      如果需要将附加数据于不属于自己的对象相关联，则使用 <classname>WeakMap</classname>。
+     </member>
+    </simplelist>
+   </para>
+  </sect3>
+
+  <sect3 xml:id="migration82.deprecated.core.relative-callables">
+   <title>Relative callables</title>
+
+   <para>
+    弃用使用 <code>$callable()</code> 语法（但 <function>call_user_func</function>
+    接受）不接受的可调用对象。尤其是：
+    <simplelist>
+     <member><code>"self::method"</code></member>
+     <member><code>"parent::method"</code></member>
+     <member><code>"static::method"</code></member>
+     <member><code>["self", "method"]</code></member>
+     <member><code>["parent", "method"]</code></member>
+     <member><code>["static", "method"]</code></member>
+     <member><code>["Foo", "Bar::method"]</code></member>
+     <member><code>[new Foo, "Bar::method"]</code></member>
+    </simplelist>
+
+    这不会影响正常方法调用，比如 <code>"A::method"</code> 或
+    <code>["A", "method"]</code>。
+   </para>
+   <!-- RFC: https://wiki.php.net/rfc/deprecate_partially_supported_callables -->
+   <!-- RFC: https://wiki.php.net/rfc/partially-supported-callables-expand-deprecation-notices -->
+  </sect3>
+
+  <sect3 xml:id="migration82.deprecated.core.dollar-brace-interpolation">
+   <title><code>"${var}"</code> 和 <code>"${expr}"</code> 样式插值</title>
+
+   <para>
+    弃用字符串插值的 <code>"${var}"</code> 和 <code>"${expr}"</code> 样式。
+    Use <code>"$var"/"{$var}"</code> and <code>"{${expr}}"</code>, respectively.
+    <!-- RFC: https://wiki.php.net/rfc/deprecate_dollar_brace_string_interpolation -->
+   </para>
+  </sect3>
+
+ </sect2>
+
+ <sect2 xml:id="migration82.deprecated.mbstring">
+  <title>MBString</title>
+
+  <para>
+   Usage of the <literal>QPrint</literal>, <literal>Base64</literal>,
+   <literal>Uuencode</literal>, and <literal>HTML-ENTITIES</literal>
+   'text encodings' is deprecated for all MBString functions.
+
+   Unlike all the other text encodings supported by MBString,
+   these do not encode a sequence of Unicode codepoints, but rather a sequence of raw bytes.
+   It is not clear what the correct return values for most MBString functions
+   should be when one of these non-encodings is specified.
+   Moreover, PHP has separate, built-in implementations of all of them;
+   for example, UUencoded data can be handled using
+   <function>convert_uuencode</function>/<function>convert_uudecode</function>.
+  </para>
+ </sect2>
+
+ <sect2 xml:id="migration82.deprecated.spl">
+  <title>SPL</title>
+
+  <para>
+   弃用内部方法 <methodname>SplFileInfo::_bad_state_ex</methodname>。
+  </para>
+ </sect2>
+
+ <sect2 xml:id="migration82.deprecated.standard">
+  <title>标准</title>
+
+  <para>
+   弃用 <function>utf8_encode</function> 和 <function>utf8_decode</function>。
+  </para>
+ </sect2>
+
+</sect1>
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
