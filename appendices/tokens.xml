@@ -1,638 +1,856 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision:288721 Maintainer: haohappy Status: ready -->
-<!-- CREDITS: class007 -->
+<!-- EN-Revision:464ffb22895d623a848edb42949d10c9ca5b95bf Maintainer: haohappy Status: ready -->
+<!-- CREDITS: class007, mowangjuanzi -->
 <appendix xml:id="tokens" xmlns="http://docbook.org/ns/docbook">
- <title>解析器代号列表</title>
+ <title>解析器记号（token）列表</title>
  <para>
-  PHP 语言的不同部分在内部被表示为类似 T_SR 的类型。PHP 在解析错误时输出这样的标识符，例如
-  <literal>"Parse error: unexpected T_SR, expecting ',' or ';' in script.php on line 10."</literal>。
+  PHP 语言的各个部分在内部使用记号表示。包含无效序列的代码片段可能会导致错误。例如 <literal>Parse error: 
+  syntax error, unexpected token "==", expecting "(" in script.php on line
+  10."</literal>。其中记号 <code>==</code> 在内部由 <constant>T_IS_EQUAL</constant>
+  表示。
  </para>
+
  <para>
-  应该知道 T_SR 的含义。对于所有不知道的人，下表列出了这些标识符，PHP 语法和在手册中适当位置的参考。
+  下表列出的所有记号。也可以用作 PHP 常量。
  </para>
+
+ <note>
+  <title>T_* 常量用法</title>
+  <para>
+   T_* 常量是根据 PHP 底层解析器数据结构自动生成的。这意味着记号的具体值可能会在不同的 PHP
+   版本之间发生变更。这也意味着代码不应直接从 PHP X.Y.Z 版本中获取原始 T_* 值，提供跨越多个版本的兼容性。
+  </para>
+
+  <para>
+   为了在多个 PHP 版本中使用 T_* 常量，用户可以对 PHP 版本和 T_* 值使用适当的策略（使用类似
+   <literal>10000</literal> 的大数），来定义未定义的常量。
+   <programlisting role="php">
+<![CDATA[
+<?php
+// 在 PHP 7.4.0 之前，未定义 T_FN。
+defined('T_FN') || define('T_FN', 10001);
+]]>
+   </programlisting>
+  </para>
+ </note>
+
  <table>
-  <title>代号</title>
+  <title>记号</title>
   <tgroup cols="3">
    <thead>
     <row>
-     <entry>代号</entry>
+     <entry>记号</entry>
      <entry>语法</entry>
      <entry>参考</entry>
     </row>
    </thead>
    <tbody>
     <row>
-     <entry>T_ABSTRACT</entry>
+     <entry><constant>T_ABSTRACT</constant></entry>
      <entry>abstract</entry>
-     <entry><xref linkend="language.oop5.abstract"/>（自 PHP 5.0.0 起可用）</entry>
+     <entry><xref linkend="language.oop5.abstract"/></entry>
     </row>
     <row>
-     <entry>T_AND_EQUAL</entry>
+     <entry><constant>T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG</constant></entry>
+     <entry>&amp;</entry>
+     <entry><xref linkend="language.types.declarations"/>（自 PHP 8.1.0 起有效）</entry>
+    </row>
+    <row>
+     <entry><constant>T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG</constant></entry>
+     <entry>&amp;</entry>
+     <entry><xref linkend="language.types.declarations"/>（自 PHP 8.1.0 起有效）</entry>
+    </row>
+    <row>
+     <entry><constant>T_AND_EQUAL</constant></entry>
      <entry>&amp;=</entry>
      <entry><link linkend="language.operators.assignment">赋值运算符</link></entry>
     </row>
     <row>
-     <entry>T_ARRAY</entry>
+     <entry><constant>T_ARRAY</constant></entry>
      <entry>array()</entry>
      <entry><function>array</function>，<link
      linkend="language.types.array.syntax">数组语法</link></entry>
     </row>
     <row>
-     <entry>T_ARRAY_CAST</entry>
+     <entry><constant>T_ARRAY_CAST</constant></entry>
      <entry>(array)</entry>
      <entry><link linkend="language.types.typecasting">类型转换</link></entry>
     </row>
-     <row>
-     <entry>T_AS</entry>
+    <row>
+     <entry><constant>T_AS</constant></entry>
      <entry>as</entry>
-     <entry><link linkend="control-structures.foreach">foreach</link></entry>
+     <entry>&foreach;</entry>
     </row>
     <row>
-     <entry>T_BAD_CHARACTER</entry>
+     <entry><constant>T_ATTRIBUTE</constant></entry>
+     <entry>#[</entry>
+     <entry><link linkend="language.attributes">属性</link>（自 PHP 8.0.0 起有效）</entry>
+    </row>
+    <row>
+     <entry><constant>T_BAD_CHARACTER</constant></entry>
      <entry></entry>
-     <entry>在 ASCII 32 之前除了 \t (0x09), \n (0x0a) 和 \r (0x0d) 以外的任何字符</entry>
+     <entry>
+      除了 \t（0x09）、\n（0x0a）、\r（0x0d）之外所有低于 ASCII 32 的内容（自 PHP 7.4.0 起有效）
+     </entry>
     </row>
     <row>
-     <entry>T_BOOLEAN_AND</entry>
+     <entry><constant>T_BOOLEAN_AND</constant></entry>
      <entry>&amp;&amp;</entry>
      <entry><link linkend="language.operators.logical">逻辑运算符</link></entry>
     </row>
     <row>
-     <entry>T_BOOLEAN_OR</entry>
+     <entry><constant>T_BOOLEAN_OR</constant></entry>
      <entry>||</entry>
      <entry><link linkend="language.operators.logical">逻辑运算符</link></entry>
     </row>
     <row>
-     <entry>T_BOOL_CAST</entry>
+     <entry><constant>T_BOOL_CAST</constant></entry>
      <entry>(bool) 或 (boolean)</entry>
      <entry><link linkend="language.types.typecasting">类型转换</link></entry>
     </row>
     <row>
-     <entry>T_BREAK</entry>
+     <entry><constant>T_BREAK</constant></entry>
      <entry>break</entry>
      <entry><link linkend="control-structures.break">break</link></entry>
     </row>
     <row>
-     <entry>T_CASE</entry>
+     <entry><constant>T_CALLABLE</constant></entry>
+     <entry>callable</entry>
+     <entry><link linkend="language.types.callable">callable</link></entry>
+    </row>
+    <row>
+     <entry><constant>T_CASE</constant></entry>
      <entry>case</entry>
      <entry><link linkend="control-structures.switch">switch</link></entry>
     </row>
     <row>
-     <entry>T_CATCH</entry>
+     <entry><constant>T_CATCH</constant></entry>
      <entry>catch</entry>
-     <entry><xref linkend="language.exceptions"/>（自 PHP 5.0.0 起可用）</entry>
+     <entry><xref linkend="language.exceptions"/></entry>
     </row>
     <row>
-     <entry>T_CHARACTER</entry>
-     <entry></entry>
-     <entry></entry>
-    </row>
-    <row>
-     <entry>T_CLASS</entry>
+     <entry><constant>T_CLASS</constant></entry>
      <entry>class</entry>
      <entry><link linkend="language.oop5">类和对象</link></entry>
     </row>
     <row>
-      <entry>T_CLONE</entry>
+     <entry><constant>T_CLASS_C</constant></entry>
+     <entry>__CLASS__</entry>
+     <entry>
+      <link linkend="language.constants.predefined">魔术常量</link>
+     </entry>
+    </row>
+    <row>
+     <entry><constant>T_CLONE</constant></entry>
      <entry>clone</entry>
-     <entry><link linkend="language.oop5">类和对象</link>。仅用于 PHP 5。</entry>
+     <entry>
+      <link linkend="language.oop5">类和对象</link>
+     </entry>
     </row>
     <row>
-    <entry>T_CLOSE_TAG</entry>
-     <entry>?> 或 %></entry>
-     <entry></entry>
+     <entry><constant>T_CLOSE_TAG</constant></entry>
+     <entry>?&gt; 或 %&gt;</entry>
+     <entry><link linkend="language.basic-syntax.phpmode">从 HTML 中转义</link></entry>
     </row>
     <row>
-     <entry>T_COMMENT</entry>
-     <entry>// 或 #，以及 PHP 5 下的 /* */</entry>
+     <entry><constant>T_COALESCE</constant></entry>
+     <entry>??</entry>
+     <entry>
+      <link linkend="language.operators.comparison.coalesce">比较运算符</link>
+     </entry>
+    </row>
+    <row>
+     <entry><constant>T_COALESCE_EQUAL</constant></entry>
+     <entry>??=</entry>
+     <entry>
+      <link linkend="language.operators.assignment">赋值运算符</link>
+      （自 PHP 7.4.0 起有效）
+     </entry>
+    </row>
+    <row>
+     <entry><constant>T_COMMENT</constant></entry>
+     <entry>// 或 # 以及 /* */</entry>
      <entry><link linkend="language.basic-syntax.comments">注释</link></entry>
     </row>
     <row>
-     <entry>T_CONCAT_EQUAL</entry>
+     <entry><constant>T_CONCAT_EQUAL</constant></entry>
      <entry>.=</entry>
      <entry><link linkend="language.operators.assignment">赋值运算符</link></entry>
     </row>
     <row>
-     <entry>T_CONST</entry>
+     <entry><constant>T_CONST</constant></entry>
      <entry>const</entry>
-     <entry></entry>
+     <entry><link linkend="language.constants">类常量</link></entry>
     </row>
     <row>
-     <entry>T_CONSTANT_ENCAPSED_STRING</entry>
+     <entry><constant>T_CONSTANT_ENCAPSED_STRING</constant></entry>
      <entry>"foo" 或 'bar'</entry>
      <entry><link linkend="language.types.string.syntax">字符串语法</link></entry>
     </row>
     <row>
-     <entry>T_CONTINUE</entry>
+     <entry><constant>T_CONTINUE</constant></entry>
      <entry>continue</entry>
-     <entry></entry>
+     <entry><link linkend="control-structures.continue">continue</link></entry>
     </row>
     <row>
-     <entry>T_CURLY_OPEN</entry>
-     <entry></entry>
-     <entry></entry>
+     <entry><constant>T_CURLY_OPEN</constant></entry>
+     <entry>{$</entry>
+     <entry><link linkend="language.types.string.parsing.complex">复杂变量解析语法</link></entry>
     </row>
     <row>
-     <entry>T_DEC</entry>
+     <entry><constant>T_DEC</constant></entry>
      <entry>--</entry>
      <entry><link
      linkend="language.operators.increment">递增/递减运算符</link></entry>
     </row>
     <row>
-     <entry>T_DECLARE</entry>
+     <entry><constant>T_DECLARE</constant></entry>
      <entry>declare</entry>
      <entry><link linkend="control-structures.declare">declare</link></entry>
     </row>
     <row>
-     <entry>T_DEFAULT</entry>
+     <entry><constant>T_DEFAULT</constant></entry>
      <entry>default</entry>
      <entry><link linkend="control-structures.switch">switch</link></entry>
     </row>
     <row>
-     <entry>T_DIV_EQUAL</entry>
+     <entry><constant>T_DIR</constant></entry>
+     <entry>__DIR__</entry>
+     <entry><link linkend="language.constants.predefined">逻辑常量</link></entry>
+    </row>
+    <row>
+     <entry><constant>T_DIV_EQUAL</constant></entry>
      <entry>/=</entry>
      <entry><link linkend="language.operators.assignment">赋值运算符</link></entry>
     </row>
     <row>
-     <entry>T_DNUMBER</entry>
-     <entry>0.12，等等</entry>
+     <entry><constant>T_DNUMBER</constant></entry>
+     <entry>0.12 等</entry>
      <entry><link linkend="language.types.float">浮点数</link></entry>
     </row>
     <row>
-     <entry>T_DOC_COMMENT</entry>
-     <entry>/** */</entry>
-     <entry><link linkend="language.basic-syntax.comments">PHPDoc 风格的注释</link>（仅用于 PHP 5）</entry>
-    </row>
-    <row>
-     <entry>T_DO</entry>
+     <entry><constant>T_DO</constant></entry>
      <entry>do</entry>
      <entry><link linkend="control-structures.do.while">do..while</link></entry>
     </row>
     <row>
-     <entry>T_DOLLAR_OPEN_CURLY_BRACES</entry>
+     <entry><constant>T_DOC_COMMENT</constant></entry>
+     <entry>/** */</entry>
+     <entry>
+      <link linkend="language.basic-syntax.comments">PHPDoc 风格注释</link>
+     </entry>
+    </row>
+    <row>
+     <entry><constant>T_DOLLAR_OPEN_CURLY_BRACES</constant></entry>
      <entry>${</entry>
      <entry><link linkend="language.types.string.parsing.complex">复杂变量解析语法</link></entry>
     </row>
     <row>
-     <entry>T_DOUBLE_ARROW</entry>
+     <entry><constant>T_DOUBLE_ARROW</constant></entry>
      <entry>=&gt;</entry>
      <entry><link linkend="language.types.array.syntax">数组语法</link></entry>
     </row>
     <row>
-     <entry>T_DOUBLE_CAST</entry>
-     <entry>(real), (double) 或 (float)</entry>
+     <entry><constant>T_DOUBLE_CAST</constant></entry>
+     <entry>(real)、(double) 或 (float)</entry>
      <entry><link linkend="language.types.typecasting">类型转换</link></entry>
     </row>
     <row>
-     <entry>T_DOUBLE_COLON</entry>
+     <entry><constant>T_DOUBLE_COLON</constant></entry>
      <entry>::</entry>
      <entry>见下面的 <constant>T_PAAMAYIM_NEKUDOTAYIM</constant></entry>
     </row>
     <row>
-     <entry>T_ECHO</entry>
+     <entry><constant>T_ECHO</constant></entry>
      <entry>echo</entry>
      <entry><function>echo</function></entry>
     </row>
     <row>
-     <entry>T_ELSE</entry>
+     <entry><constant>T_ELLIPSIS</constant></entry>
+     <entry>...</entry>
+     <entry>
+      <link linkend="functions.variable-arg-list">函数参数</link>
+     </entry>
+    </row>
+    <row>
+     <entry><constant>T_ELSE</constant></entry>
      <entry>else</entry>
      <entry><link linkend="control-structures.else">else</link></entry>
     </row>
     <row>
-     <entry>T_ELSEIF</entry>
+     <entry><constant>T_ELSEIF</constant></entry>
      <entry>elseif</entry>
      <entry><link linkend="control-structures.elseif">elseif</link></entry>
     </row>
     <row>
-     <entry>T_EMPTY</entry>
+     <entry><constant>T_EMPTY</constant></entry>
      <entry>empty</entry>
      <entry><function>empty</function></entry>
     </row>
     <row>
-     <entry>T_ENCAPSED_AND_WHITESPACE</entry>
-     <entry></entry>
-     <entry></entry>
+     <entry><constant>T_ENCAPSED_AND_WHITESPACE</constant></entry>
+     <entry>" $a"</entry>
+     <entry><link linkend="language.types.string.parsing">带变量字符串的常量部分</link></entry>
     </row>
     <row>
-     <entry>T_ENDDECLARE</entry>
+     <entry><constant>T_ENDDECLARE</constant></entry>
      <entry>enddeclare</entry>
-     <entry><link linkend="control-structures.declare">declare</link>，<link
+     <entry><link linkend="control-structures.declare">declare</link>、<link
      linkend="control-structures.alternative-syntax">替代语法</link></entry>
     </row>
     <row>
-     <entry>T_ENDFOR</entry>
+     <entry><constant>T_ENDFOR</constant></entry>
      <entry>endfor</entry>
-     <entry><link linkend="control-structures.for">for</link>，<link
+     <entry><link linkend="control-structures.for">for</link>、<link
      linkend="control-structures.alternative-syntax">替代语法</link></entry>
     </row>
     <row>
-     <entry>T_ENDFOREACH</entry>
+     <entry><constant>T_ENDFOREACH</constant></entry>
      <entry>endforeach</entry>
-     <entry><link linkend="control-structures.foreach">foreach</link>，<link
+     <entry>&foreach;、<link
      linkend="control-structures.alternative-syntax">替代语法</link></entry>
     </row>
     <row>
-     <entry>T_ENDIF</entry>
+     <entry><constant>T_ENDIF</constant></entry>
      <entry>endif</entry>
-     <entry><link linkend="control-structures.if">if</link>，<link
+     <entry><link linkend="control-structures.if">if</link>、<link
      linkend="control-structures.alternative-syntax">替代语法</link></entry>
     </row>
     <row>
-     <entry>T_ENDSWITCH</entry>
+     <entry><constant>T_ENDSWITCH</constant></entry>
      <entry>endswitch</entry>
-     <entry><link linkend="control-structures.switch">switch</link>，<link
+     <entry><link linkend="control-structures.switch">switch</link>、<link
      linkend="control-structures.alternative-syntax">替代语法</link></entry>
     </row>
     <row>
-     <entry>T_ENDWHILE</entry>
+     <entry><constant>T_ENDWHILE</constant></entry>
      <entry>endwhile</entry>
-     <entry><link linkend="control-structures.while">while</link>，<link
+     <entry><link linkend="control-structures.while">while</link>、<link
      linkend="control-structures.alternative-syntax">替代语法</link></entry>
     </row>
     <row>
-     <entry>T_END_HEREDOC</entry>
+     <entry><constant>T_ENUM</constant></entry>
+     <entry>enum</entry>
+     <entry><link linkend="language.types.enumerations">枚举</link>（自 PHP 8.1.0 起有效）</entry>
+    </row>
+    <row>
+     <entry><constant>T_END_HEREDOC</constant></entry>
      <entry></entry>
      <entry><link linkend="language.types.string.syntax.heredoc">heredoc
      语法</link></entry>
     </row>
     <row>
-     <entry>T_EVAL</entry>
+     <entry><constant>T_EVAL</constant></entry>
      <entry>eval()</entry>
      <entry><function>eval</function></entry>
     </row>
     <row>
-     <entry>T_EXIT</entry>
+     <entry><constant>T_EXIT</constant></entry>
      <entry>exit 或 die</entry>
-     <entry><function>exit</function>, <function>die</function></entry>
+     <entry><function>exit</function>、<function>die</function></entry>
     </row>
     <row>
-     <entry>T_EXTENDS</entry>
+     <entry><constant>T_EXTENDS</constant></entry>
      <entry>extends</entry>
-     <entry><link linkend="language.oop5.basic.extends">extends</link>，<link
+     <entry><link linkend="language.oop5.basic.extends">extends</link>、<link
      linkend="language.oop5">类和对象</link></entry>
     </row>
     <row>
-     <entry>T_FILE</entry>
+     <entry><constant>T_FILE</constant></entry>
      <entry>__FILE__</entry>
-     <entry><link linkend="language.constants">常量</link></entry>
+     <entry><link linkend="language.constants.predefined">魔法常量</link></entry>
     </row>
     <row>
-     <entry>T_FINAL</entry>
+     <entry><constant>T_FINAL</constant></entry>
      <entry>final</entry>
-     <entry><xref linkend="language.oop5.final"/>（自 PHP 5.0.0 起可用）</entry>
+     <entry><xref linkend="language.oop5.final"/></entry>
     </row>
     <row>
-     <entry>T_FOR</entry>
+     <entry><constant>T_FINALLY</constant></entry>
+     <entry>finally</entry>
+     <entry><xref linkend="language.exceptions"/></entry>
+    </row>
+    <row>
+     <entry><constant>T_FN</constant></entry>
+     <entry>fn</entry>
+     <entry>
+      <link linkend="functions.arrow">箭头函数</link>
+      （自 PHP 7.4.0 起有效）
+     </entry>
+    </row>
+    <row>
+     <entry><constant>T_FOR</constant></entry>
      <entry>for</entry>
      <entry><link linkend="control-structures.for">for</link></entry>
     </row>
     <row>
-     <entry>T_FOREACH</entry>
+     <entry><constant>T_FOREACH</constant></entry>
      <entry>foreach</entry>
-     <entry><link linkend="control-structures.foreach">foreach</link></entry>
+     <entry>&foreach;</entry>
     </row>
     <row>
-     <entry>T_FUNCTION</entry>
-     <entry>function 或 cfunction</entry>
+     <entry><constant>T_FUNCTION</constant></entry>
+     <entry>function</entry>
      <entry><link linkend="language.functions">函数</link></entry>
     </row>
     <row>
-     <entry>T_GLOBAL</entry>
+     <entry><constant>T_FUNC_C</constant></entry>
+     <entry>__FUNCTION__</entry>
+     <entry>
+      <link linkend="language.constants.predefined">魔法常量</link>
+     </entry>
+    </row>
+    <row>
+     <entry><constant>T_GLOBAL</constant></entry>
      <entry>global</entry>
-     <entry><link linkend="language.variables.scope">变量范围</link></entry>
+     <entry><link linkend="language.variables.scope">变量作用域</link></entry>
     </row>
     <row>
-     <entry>T_HALT_COMPILER</entry>
+     <entry><constant>T_GOTO</constant></entry>
+     <entry>goto</entry>
+     <entry><link linkend="control-structures.goto">goto</link></entry>
+    </row>
+    <row>
+     <entry><constant>T_HALT_COMPILER</constant></entry>
      <entry>__halt_compiler()</entry>
-     <entry><xref linkend="function.halt-compiler"/>（自 PHP 5.1.0 起可用）</entry>
+     <entry><xref linkend="function.halt-compiler"/></entry>
     </row>
     <row>
-     <entry>T_IF</entry>
+     <entry><constant>T_IF</constant></entry>
      <entry>if</entry>
      <entry><link linkend="control-structures.if">if</link></entry>
     </row>
     <row>
-     <entry>T_IMPLEMENTS</entry>
+     <entry><constant>T_IMPLEMENTS</constant></entry>
      <entry>implements</entry>
-     <entry><xref linkend="language.oop5.interfaces"/>（自 PHP 5.0.0 起可用）</entry>
+     <entry><xref linkend="language.oop5.interfaces"/></entry>
     </row>
     <row>
-     <entry>T_INC</entry>
+     <entry><constant>T_INC</constant></entry>
      <entry>++</entry>
      <entry><link
-     linkend="language.operators.increment">递增／递减运算符</link></entry>
+     linkend="language.operators.increment">递增/递减运算符</link></entry>
     </row>
     <row>
-     <entry>T_INCLUDE</entry>
+     <entry><constant>T_INCLUDE</constant></entry>
      <entry>include()</entry>
      <entry><function>include</function></entry>
     </row>
     <row>
-     <entry>T_INCLUDE_ONCE</entry>
+     <entry><constant>T_INCLUDE_ONCE</constant></entry>
      <entry>include_once()</entry>
      <entry><function>include_once</function></entry>
     </row>
     <row>
-     <entry>T_INLINE_HTML</entry>
+     <entry><constant>T_INLINE_HTML</constant></entry>
      <entry></entry>
-     <entry></entry>
+     <entry><link linkend="language.basic-syntax.phpmode">text outside PHP</link></entry>
     </row>
     <row>
-     <entry>T_INSTANCEOF</entry>
+     <entry><constant>T_INSTANCEOF</constant></entry>
      <entry>instanceof</entry>
-     <entry><link linkend="language.operators.type">type operators</link>（仅
-     PHP5）</entry>
-      </row>
+     <entry>
+      <link linkend="language.operators.type">类型运算符</link>
+     </entry>
+    </row>
     <row>
-     <entry>T_INT_CAST</entry>
+     <entry><constant>T_INSTEADOF</constant></entry>
+     <entry>insteadof</entry>
+     <entry><xref linkend="language.oop5.traits"/></entry>
+    </row>
+    <row>
+     <entry><constant>T_INTERFACE</constant></entry>
+     <entry>interface</entry>
+     <entry><xref linkend="language.oop5.interfaces"/></entry>
+    </row>
+    <row>
+     <entry><constant>T_INT_CAST</constant></entry>
      <entry>(int) 或 (integer)</entry>
      <entry><link linkend="language.types.typecasting">类型转换</link></entry>
     </row>
     <row>
-     <entry>T_INTERFACE</entry>
-     <entry>interface</entry>
-     <entry><xref linkend="language.oop5.interfaces"/>（自 PHP 5.0.0 起可用）</entry>
-    </row>
-    <row>
-     <entry>T_ISSET</entry>
+     <entry><constant>T_ISSET</constant></entry>
      <entry>isset()</entry>
      <entry><function>isset</function></entry>
     </row>
     <row>
-     <entry>T_IS_EQUAL</entry>
+     <entry><constant>T_IS_EQUAL</constant></entry>
      <entry>==</entry>
      <entry><link linkend="language.operators.comparison">比较运算符</link></entry>
     </row>
     <row>
-     <entry>T_IS_GREATER_OR_EQUAL</entry>
+     <entry><constant>T_IS_GREATER_OR_EQUAL</constant></entry>
      <entry>&gt;=</entry>
      <entry><link linkend="language.operators.comparison">比较运算符</link></entry>
     </row>
     <row>
-     <entry>T_IS_IDENTICAL</entry>
+     <entry><constant>T_IS_IDENTICAL</constant></entry>
      <entry>===</entry>
      <entry><link linkend="language.operators.comparison">比较运算符</link></entry>
     </row>
     <row>
-     <entry>T_IS_NOT_EQUAL</entry>
+     <entry><constant>T_IS_NOT_EQUAL</constant></entry>
      <entry>!= or &lt;&gt;</entry>
      <entry><link linkend="language.operators.comparison">比较运算符</link></entry>
     </row>
     <row>
-     <entry>T_IS_NOT_IDENTICAL</entry>
+     <entry><constant>T_IS_NOT_IDENTICAL</constant></entry>
      <entry>!==</entry>
      <entry><link linkend="language.operators.comparison">比较运算符</link></entry>
     </row>
     <row>
-     <entry>T_IS_SMALLER_OR_EQUAL</entry>
+     <entry><constant>T_IS_SMALLER_OR_EQUAL</constant></entry>
      <entry>&lt;=</entry>
      <entry><link linkend="language.operators.comparison">比较运算符</link></entry>
     </row>
     <row>
-     <entry>T_LINE</entry>
+     <entry><constant>T_LINE</constant></entry>
      <entry>__LINE__</entry>
-     <entry><link linkend="language.constants">常量</link></entry>
+     <entry><link linkend="language.constants.predefined">魔术常量</link></entry>
     </row>
     <row>
-     <entry>T_LIST</entry>
+     <entry><constant>T_LIST</constant></entry>
      <entry>list()</entry>
      <entry><function>list</function></entry>
     </row>
     <row>
-     <entry>T_LNUMBER</entry>
-     <entry>123，012，0x1ac，等等</entry>
+     <entry><constant>T_LNUMBER</constant></entry>
+     <entry>123、012、0x1ac 等</entry>
      <entry><link linkend="language.types.integer">整型</link></entry>
     </row>
     <row>
-     <entry>T_LOGICAL_AND</entry>
+     <entry><constant>T_LOGICAL_AND</constant></entry>
      <entry>and</entry>
      <entry><link linkend="language.operators.logical">逻辑运算符</link></entry>
     </row>
     <row>
-     <entry>T_LOGICAL_OR</entry>
+     <entry><constant>T_LOGICAL_OR</constant></entry>
      <entry>or</entry>
      <entry><link linkend="language.operators.logical">逻辑运算符</link></entry>
     </row>
     <row>
-     <entry>T_LOGICAL_XOR</entry>
+     <entry><constant>T_LOGICAL_XOR</constant></entry>
      <entry>xor</entry>
      <entry><link linkend="language.operators.logical">逻辑运算符</link></entry>
     </row>
     <row>
-     <entry>T_MINUS_EQUAL</entry>
+     <entry><constant>T_MATCH</constant></entry>
+     <entry>match</entry>
+     <entry>
+      <link linkend="control-structures.match">match</link>（自 PHP 8.0.0 起有效）
+     </entry>
+    </row>
+    <row>
+     <entry><constant>T_METHOD_C</constant></entry>
+     <entry>__METHOD__</entry>
+     <entry>
+      <link linkend="language.constants.predefined">魔术常量</link>
+     </entry>
+    </row>
+    <row>
+     <entry><constant>T_MINUS_EQUAL</constant></entry>
      <entry>-=</entry>
      <entry><link linkend="language.operators.assignment">赋值运算符</link></entry>
     </row>
     <row>
-     <entry>T_ML_COMMENT</entry>
-     <entry>/* 和 */</entry>
-     <entry><link linkend="language.basic-syntax.comments">注释</link>（仅用于 PHP 4）</entry>
-    </row>
-    <row>
-     <entry>T_MOD_EQUAL</entry>
+     <entry><constant>T_MOD_EQUAL</constant></entry>
      <entry>%=</entry>
      <entry><link linkend="language.operators.assignment">赋值运算符</link></entry>
     </row>
     <row>
-     <entry>T_MUL_EQUAL</entry>
+     <entry><constant>T_MUL_EQUAL</constant></entry>
      <entry>*=</entry>
      <entry><link linkend="language.operators.assignment">赋值运算符</link></entry>
     </row>
     <row>
-     <entry>T_NEW</entry>
+     <entry><constant>T_NAMESPACE</constant></entry>
+     <entry>namespace</entry>
+     <entry>
+      <link linkend="language.namespaces">命名空间</link>
+     </entry>
+    </row>
+    <row>
+     <entry><constant>T_NAME_FULLY_QUALIFIED</constant></entry>
+     <entry>\App\Namespace</entry>
+     <entry>
+      <link linkend="language.namespaces">命名空间</link>（自 PHP 8.0.0 起有效）
+     </entry>
+    </row>
+    <row>
+     <entry><constant>T_NAME_QUALIFIED</constant></entry>
+     <entry>App\Namespace</entry>
+     <entry>
+      <link linkend="language.namespaces">命名空间</link>（自 PHP 8.0.0 起有效）
+     </entry>
+    </row>
+    <row>
+     <entry><constant>T_NAME_RELATIVE</constant></entry>
+     <entry>namespace\Namespace</entry>
+     <entry>
+      <link linkend="language.namespaces">命名空间</link>（自 PHP 8.0.0 起有效）
+     </entry>
+    </row>
+    <row>
+     <entry><constant>T_NEW</constant></entry>
      <entry>new</entry>
      <entry><link linkend="language.oop5">类和对象</link></entry>
     </row>
     <row>
-     <entry>T_NUM_STRING</entry>
-     <entry></entry>
-     <entry></entry>
+     <entry><constant>T_NS_C</constant></entry>
+     <entry>__NAMESPACE__</entry>
+     <entry>
+      <link linkend="language.namespaces">命名空间</link>
+     </entry>
     </row>
     <row>
-     <entry>T_OBJECT_CAST</entry>
+     <entry><constant>T_NS_SEPARATOR</constant></entry>
+     <entry>\</entry>
+     <entry>
+      <link linkend="language.namespaces">命名空间</link>
+     </entry>
+    </row>
+    <row>
+     <entry><constant>T_NUM_STRING</constant></entry>
+     <entry>"$a[0]"</entry>
+     <entry><link linkend="language.types.string.parsing">字符串内的数组数字索引</link></entry>
+    </row>
+    <row>
+     <entry><constant>T_OBJECT_CAST</constant></entry>
      <entry>(object)</entry>
      <entry><link linkend="language.types.typecasting">类型转换</link></entry>
     </row>
     <row>
-     <entry>T_OBJECT_OPERATOR</entry>
-     <entry>-></entry>
+     <entry><constant>T_OBJECT_OPERATOR</constant></entry>
+     <entry>-&gt;</entry>
      <entry><link linkend="language.oop5">类和对象</link></entry>
-    </row>    
+    </row>
     <row>
-     <entry>T_OPEN_TAG</entry>
+     <entry><constant>T_NULLSAFE_OBJECT_OPERATOR</constant></entry>
+     <entry>?-&gt;</entry>
+     <entry><link linkend="language.oop5">类和对象</link></entry>
+    </row>
+    <row>
+     <entry><constant>T_OPEN_TAG</constant></entry>
      <entry>&lt;?php, &lt;? 或 &lt;%</entry>
-     <entry><link linkend="language.basic-syntax.phpmode">从 HTML 转义</link></entry>
+     <entry><link linkend="language.basic-syntax.phpmode">从 HTML 中转义</link></entry>
     </row>
     <row>
-     <entry>T_OPEN_TAG_WITH_ECHO</entry>
-     <entry>&lt;?= or &lt;%=</entry>
-     <entry><link linkend="language.basic-syntax.phpmode">从 HTML 转义</link></entry>
+     <entry><constant>T_OPEN_TAG_WITH_ECHO</constant></entry>
+     <entry>&lt;?= 或 &lt;%=</entry>
+     <entry><link linkend="language.basic-syntax.phpmode">从 HTML 中转义</link></entry>
     </row>
     <row>
-     <entry>T_OR_EQUAL</entry>
+     <entry><constant>T_OR_EQUAL</constant></entry>
      <entry>|=</entry>
      <entry><link linkend="language.operators.assignment">赋值运算符</link></entry>
     </row>
     <row>
-     <entry>T_PAAMAYIM_NEKUDOTAYIM</entry>
+     <entry><constant>T_PAAMAYIM_NEKUDOTAYIM</constant></entry>
      <entry>::</entry>
      <entry><link linkend="language.oop5.paamayim-nekudotayim">::</link>。也定义为
       <constant>T_DOUBLE_COLON</constant>。</entry>
     </row>
     <row>
-     <entry>T_PLUS_EQUAL</entry>
+     <entry><constant>T_PLUS_EQUAL</constant></entry>
      <entry>+=</entry>
      <entry><link linkend="language.operators.assignment">赋值运算符</link></entry>
     </row>
     <row>
-     <entry>T_PRINT</entry>
+     <entry><constant>T_POW</constant></entry>
+     <entry>**</entry>
+     <entry>
+      <link linkend="language.operators.arithmetic">算术运算符</link>
+     </entry>
+    </row>
+    <row>
+     <entry><constant>T_POW_EQUAL</constant></entry>
+     <entry>**=</entry>
+     <entry>
+      <link linkend="language.operators.assignment">赋值运算符</link>
+     </entry>
+    </row>
+    <row>
+     <entry><constant>T_PRINT</constant></entry>
      <entry>print()</entry>
      <entry><function>print</function></entry>
     </row>
     <row>
-     <entry>T_PRIVATE</entry>
+     <entry><constant>T_PRIVATE</constant></entry>
      <entry>private</entry>
-     <entry><link linkend="language.oop5">类和对象</link>。仅用于 PHP 5。</entry>
+     <entry>
+      <link linkend="language.oop5">类和对象</link>
+     </entry>
     </row>
     <row>
-     <entry>T_PUBLIC</entry>
-     <entry>public</entry>
-     <entry><link linkend="language.oop5">类和对象</link>。仅用于 PHP 5。</entry>
-    </row>
-    <row>
-     <entry>T_PROTECTED</entry>
+     <entry><constant>T_PROTECTED</constant></entry>
      <entry>protected</entry>
-     <entry><link linkend="language.oop5">类和对象</link>。仅用于 PHP 5。</entry>
+     <entry>
+      <link linkend="language.oop5">类和对象</link>
+     </entry>
     </row>
     <row>
-     <entry>T_REQUIRE</entry>
+     <entry><constant>T_PUBLIC</constant></entry>
+     <entry>public</entry>
+     <entry>
+      <link linkend="language.oop5">类和对象</link>
+     </entry>
+    </row>
+    <row>
+     <entry><constant>T_READONLY</constant></entry>
+     <entry>readonly</entry>
+     <entry>
+      <link linkend="language.oop5">类和对象</link>（自 PHP 8.1.0 起有效）
+     </entry>
+    </row>
+    <row>
+     <entry><constant>T_REQUIRE</constant></entry>
      <entry>require()</entry>
      <entry><function>require</function></entry>
     </row>
     <row>
-     <entry>T_REQUIRE_ONCE</entry>
+     <entry><constant>T_REQUIRE_ONCE</constant></entry>
      <entry>require_once()</entry>
      <entry><function>require_once</function></entry>
     </row>
     <row>
-     <entry>T_RETURN</entry>
+     <entry><constant>T_RETURN</constant></entry>
      <entry>return</entry>
      <entry><link linkend="functions.returning-values">返回值</link></entry>
     </row>
     <row>
-     <entry>T_SL</entry>
+     <entry><constant>T_SL</constant></entry>
      <entry>&lt;&lt;</entry>
      <entry><link linkend="language.operators.bitwise">位运算符</link></entry>
     </row>
     <row>
-     <entry>T_SL_EQUAL</entry>
+     <entry><constant>T_SL_EQUAL</constant></entry>
      <entry>&lt;&lt;=</entry>
      <entry><link linkend="language.operators.assignment">赋值运算符</link></entry>
     </row>
     <row>
-     <entry>T_SR</entry>
+     <entry><constant>T_SPACESHIP</constant></entry>
+     <entry>&lt;=&gt;</entry>
+     <entry>
+      <link linkend="language.operators.comparison">比较运算符</link>
+     </entry>
+    </row>
+    <row>
+     <entry><constant>T_SR</constant></entry>
      <entry>&gt;&gt;</entry>
      <entry><link linkend="language.operators.bitwise">位运算符</link></entry>
     </row>
     <row>
-     <entry>T_SR_EQUAL</entry>
+     <entry><constant>T_SR_EQUAL</constant></entry>
      <entry>&gt;&gt;=</entry>
      <entry><link linkend="language.operators.assignment">赋值运算符</link></entry>
     </row>
     <row>
-     <entry>T_START_HEREDOC</entry>
+     <entry><constant>T_START_HEREDOC</constant></entry>
      <entry>&lt;&lt;&lt;</entry>
      <entry><link linkend="language.types.string.syntax.heredoc">heredoc
      语法</link></entry>
     </row>
     <row>
-     <entry>T_STATIC</entry>
+     <entry><constant>T_STATIC</constant></entry>
      <entry>static</entry>
-     <entry><link linkend="language.variables.scope">变量范围</link></entry>
+     <entry><link linkend="language.variables.scope">变量作用域</link></entry>
     </row>
     <row>
-     <entry>T_STRING</entry>
-     <entry></entry>
-     <entry></entry>
+     <entry><constant>T_STRING</constant></entry>
+     <entry>parent、self 等</entry>
+     <entry>
+      标识符，比如像 <literal>parent</literal> 和
+      <literal>self</literal>、函数名，类名等等的关键字。参阅
+      <constant>T_CONSTANT_ENCAPSED_STRING</constant>.
+     </entry>
     </row>
     <row>
-     <entry>T_STRING_CAST</entry>
+     <entry><constant>T_STRING_CAST</constant></entry>
      <entry>(string)</entry>
      <entry><link linkend="language.types.typecasting">类型转换</link></entry>
     </row>
     <row>
-     <entry>T_STRING_VARNAME</entry>
-     <entry></entry>
-     <entry></entry>
+     <entry><constant>T_STRING_VARNAME</constant></entry>
+     <entry>"${a</entry>
+     <entry><link linkend="language.types.string.parsing.complex">复杂变量解析语法</link></entry>
     </row>
     <row>
-     <entry>T_SWITCH</entry>
+     <entry><constant>T_SWITCH</constant></entry>
      <entry>switch</entry>
      <entry><link linkend="control-structures.switch">switch</link></entry>
     </row>
     <row>
-     <entry>T_THROW</entry>
+     <entry><constant>T_THROW</constant></entry>
      <entry>throw</entry>
-     <entry><xref linkend="language.exceptions"/>（自 PHP 5.0.0 起可用）</entry>
+     <entry><xref linkend="language.exceptions"/></entry>
     </row>
     <row>
-     <entry>T_TRY</entry>
+     <entry><constant>T_TRAIT</constant></entry>
+     <entry>trait</entry>
+     <entry><xref linkend="language.oop5.traits"/></entry>
+    </row>
+    <row>
+     <entry><constant>T_TRAIT_C</constant></entry>
+     <entry>__TRAIT__</entry>
+     <entry><link linkend="constant.trait">__TRAIT__</link></entry>
+    </row>
+    <row>
+     <entry><constant>T_TRY</constant></entry>
      <entry>try</entry>
-     <entry><xref linkend="language.exceptions"/>（自 PHP 5.0.0 起可用）</entry>
+     <entry><xref linkend="language.exceptions"/></entry>
     </row>
     <row>
-     <entry>T_UNSET</entry>
+     <entry><constant>T_UNSET</constant></entry>
      <entry>unset()</entry>
      <entry><function>unset</function></entry>
     </row>
     <row>
-     <entry>T_UNSET_CAST</entry>
+     <entry><constant>T_UNSET_CAST</constant></entry>
      <entry>(unset)</entry>
-     <entry>（无文档; 类型为 &null;）</entry>
+     <entry><link linkend="language.types.typecasting">类型转换</link></entry>
     </row>
     <row>
-     <entry>T_USE</entry>
+     <entry><constant>T_USE</constant></entry>
      <entry>use</entry>
-     <entry>（未实现）</entry>
+     <entry><link linkend="language.namespaces">命名空间</link></entry>
     </row>
     <row>
-     <entry>T_VAR</entry>
+     <entry><constant>T_VAR</constant></entry>
      <entry>var</entry>
      <entry><link linkend="language.oop5">类和对象</link></entry>
     </row>
     <row>
-     <entry>T_VARIABLE</entry>
+     <entry><constant>T_VARIABLE</constant></entry>
      <entry>$foo</entry>
      <entry><link linkend="language.variables">变量</link></entry>
     </row>
     <row>
-     <entry>T_WHILE</entry>
+     <entry><constant>T_WHILE</constant></entry>
      <entry>while</entry>
-     <entry><link linkend="control-structures.while">while</link>，<link
+     <entry><link linkend="control-structures.while">while</link>、<link
      linkend="control-structures.do.while">do..while</link></entry>
     </row>
     <row>
-     <entry>T_WHITESPACE</entry>
-     <entry></entry>
+     <entry><constant>T_WHITESPACE</constant></entry>
+     <entry>\t \r\n</entry>
      <entry></entry>
     </row>
     <row>
-     <entry>T_XOR_EQUAL</entry>
+     <entry><constant>T_XOR_EQUAL</constant></entry>
      <entry>^=</entry>
      <entry><link linkend="language.operators.assignment">赋值运算符</link></entry>
     </row>
     <row>
-     <entry>T_FUNC_C</entry>
-     <entry>__FUNCTION__</entry>
-     <entry><link linkend="language.constants">常量</link>，自 PHP 4.3.0 起可用</entry>
+     <entry><constant>T_YIELD</constant></entry>
+     <entry>yield</entry>
+     <entry><link linkend="control-structures.yield">生成器</link></entry>
     </row>
     <row>
-     <entry>T_CLASS_C</entry>
-     <entry>__CLASS__</entry>
-     <entry><link linkend="language.constants">常量</link>，自 PHP 4.3.0 起可用</entry>
-    </row>
+     <entry><constant>T_YIELD_FROM</constant></entry>
+     <entry>yield from</entry>
+     <entry><link linkend="control-structures.yield.from">生成器</link></entry>
+    </row>    
    </tbody>
   </tgroup>
  </table>
