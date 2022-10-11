@@ -1,11 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- Reviewed: no Maintainer: avenger -->
-<!-- $EN-Revision: cd09fab47b40563cb8b2316d817efc973d991713 $ -->
-
-<chapter xml:id="faq.build"
-xmlns="http://docbook.org/ns/docbook"
-xmlns:xlink="http://www.w3.org/1999/xlink">
+<!-- $EN-Revision: cd09fab47b40563cb8b2316d817efc973d991713 Maintainer: mowangjuanzi Status: ready -->
+<chapter xml:id="faq.build" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <title>编译问题</title>
  <titleabbrev>编译问题</titleabbrev>
  <para>本节汇集了大多数编译时出现的常见错误。</para>
@@ -116,52 +112,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
       <filename>libphp4.a</filename>之后加上“-ldl”。</para>
     </answer>
    </qandaentry>
-   <qandaentry xml:id="faq.build.apache">
-    <question>
-     <para>我不知道怎样把 PHP 和 Apache 1.3 一起编译。</para>
-    </question>
-    <answer>
-     <para>这其实很简单。小心地照着以下步骤来： 
-      <itemizedlist>
-       <listitem>
-        <simpara>从 
-         <link xlink:href="&url.apache.source;">&url.apache.source;</link>下载最新版的 Apache 1.3。</simpara>
-       </listitem>
-       <listitem>
-        <simpara>解压缩到某处，例如 
-         <filename>/usr/local/src/apache-1.3</filename>。</simpara>
-       </listitem>
-       <listitem>
-        <simpara>编译 PHP，先运行 
-         <command>./configure --with-apache=/&lt;path&gt;/apache-1.3</command>（用你 apache-1.3 所在的真实路径替换掉 &lt;path&gt;。）</simpara>
-       </listitem>
-       <listitem>
-        <simpara>输入 
-         <command>make</command>接着是 
-         <command>make install</command>来编译 PHP 并把必要的文件拷贝到 Apache 的源程序目录树中。</simpara>
-       </listitem>
-       <listitem>
-        <simpara>改变当前目录到 
-         <filename>/&lt;path&gt;/apache-1.3/src</filename>目录并编辑 
-         <filename>Configuration</filename>文件。添加这一行：
-         <literal>AddModule modules/php4/libphp4.a</literal>。</simpara>
-       </listitem>
-       <listitem>
-        <simpara>输入 
-         <command>./configure</command>接着是 
-         <literal>make</literal>。</simpara>
-       </listitem>
-       <listitem>
-        <simpara>你现在应该有一个包括 PHP 支持的 httpd 可执行程序了！</simpara>
-       </listitem>
-      </itemizedlist></para>
-     <para>
-      <emphasis>注意：</emphasis>也可以用新的 Apache 
-      <literal>./configure</literal>脚本。参见 Apache 发行包中 
-      <literal>README.configure</literal>文件中的说明。也看看 PHP 发行包中的 
-      <filename>INSTALL</filename>文件。</para>
-    </answer>
-   </qandaentry>
+
    <qandaentry xml:id="faq.build.not-running">
     <question>
      <para>我按照所有的步骤在 UNIX 下安装了PHP 的 Apache 模块版本，但我的 PHP 脚本被显示在浏览器中或者提示保存此文件。</para>
@@ -272,33 +223,44 @@ make[1]: *** [all-recursive] Error 1
 make[1]: Leaving directory `/home/master/php-4.0.1/ext'
 make: *** [all-recursive] Error 1
 ]]>
-         </programlisting></para>
-       <para>你的系统坏了。你需要安装一个符合你的 glibc 的 glibc-devel 包来修复 
-        <filename>/usr/include</filename>中的文件。这和 PHP 绝对没有任何关系。要证实这一点，试试这个简单的测试： 
-         <programlisting>
+      </programlisting>
+     </para>
+     <para>
+      你的系统坏了。你需要安装一个符合你的 glibc 的 glibc-devel 包来修复 
+      <filename>/usr/include</filename> 中的文件。这和 PHP 绝对没有任何关系。要证实这一点，试试这个简单的测试： 
+     <programlisting>
 <![CDATA[
 $ cat >test.c <<X
 #include <sys/resource.h>
 X
 $ gcc -E test.c >/dev/null
 ]]>
-         </programlisting>如果出现错误，那你就知道头文件坏了。</para>
-     </answer>
+      </programlisting>
+      如果出现错误，那你就知道头文件坏了。
+     </para>
+    </answer>
    </qandaentry>
+   
    <qandaentry xml:id="faq.build.mysql.tempnam">
     <question>
-     <para>当带 MySQL 编译 PHP 时，可以正确地运行configure，但是在
-      <literal>make</literal>的过程中出现了类似以下的错误信息： 
-      <emphasis>ext/mysql/ libmysqlclient /my_tempnam.o(.text+0x46): In function 
-       my_tempnam': /php4/ext/mysql/ libmysqlclient /my_tempnam.c:103: the 
-       use of tempnam' is dangerous, better use mkstemp'</emphasis>，这是怎么回事</para>
+     <para>
+      当带 MySQL 编译 PHP 时，可以正确地运行 configure，但是在
+      <literal>make</literal> 的过程中出现了类似以下的错误信息： 
+      <emphasis>ext/mysql/libmysqlclient/my_tempnam.o(.text+0x46): In function 
+      my_tempnam': /php4/ext/mysql/libmysqlclient/my_tempnam.c:103: the 
+      use of tempnam' is dangerous, better use mkstemp'</emphasis>，这是怎么回事？
+     </para>
     </question>
     <answer>
-     <para>首先，我们需要认识到这只是个
-      <literal>警告</literal>，而非致命错误。由于这条信息通常是在 
-      <literal>make</literal>的最后输出的，所以看起来它可能像是一个致命错误，但实际上不是。当然，如果将编译器设置成遇见警告信息时停止，则这也可以算是致命错误。另外值得一提的是，MySQL 的支持是默认打开的。</para>
+     <para>
+      首先，我们需要认识到这只是个<literal>警告</literal>，而非致命错误。由于这条信息通常是在 
+      <literal>make</literal> 的最后输出的，所以看起来它可能像是一个致命错误，但实际上不是。当然，如果将编译器设置成遇见警告信息时停止，则这也可以算是致命错误。另外值得一提的是，MySQL
+      的支持是默认打开的。
+     </para>
      <note>
-      <para>自 PHP 4.3.2 起，你将在编译（make）结束后看到下面的文字：</para>
+      <para>
+       自 PHP 4.3.2 起，你将在编译（make）结束后看到下面的文字：
+      </para>
       <para>
        <screen>
         Build complete.
@@ -308,6 +270,7 @@ $ gcc -E test.c >/dev/null
      </note>
     </answer>
    </qandaentry>
+   
    <qandaentry xml:id="faq.build.upgrade">
     <question>
      <para>我想升级我的 PHP。上哪里找到我用来配置目前的 PHP 的 
