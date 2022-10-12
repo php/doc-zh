@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 84b8fca68fc762fefe85acde180a38b2e77a28b9 Maintainer: zhoumengkang Status: ready -->
+<!-- EN-Revision: de42b5016e8d9cbfd245d70f65354a86f4e2f031 Maintainer: zhoumengkang Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="function.func-get-args" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>func_get_args</refname>
@@ -23,44 +24,15 @@
   </para>
  </refsect1>
 
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  &no.function.parameters;
+ </refsect1>
+
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
    返回一个数组，其中每个元素都是目前用户自定义函数的参数列表的相应元素的副本。
-  </para>
- </refsect1>
-
- <refsect1 role="changelog">
-  &reftitle.changelog;
-  <para>
-   <informaltable>
-    <tgroup cols="2">
-     <thead>
-      <row>
-       <entry>&Version;</entry>
-       <entry>&Description;</entry>
-      </row>
-     </thead>
-     <tbody>
-      <row>
-       <entry>5.3.0</entry>
-       <entry>
-         该函数可以在参数列表中使用。
-       </entry>
-      </row>
-      <row>
-       <entry>5.3.0</entry>
-       <entry>
-        If this function is called from the outermost scope of a file
-        which has been included by calling <function>include</function>
-        or <function>require</function> from within a function in the
-        calling file, it now generates a warning and returns &false;.
-           （不知道如何翻译跟好，直接参考例2即可明白）
-       </entry>
-      </row>
-     </tbody>
-    </tgroup>
-   </informaltable>
   </para>
  </refsect1>
 
@@ -82,13 +54,13 @@
 function foo()
 {
     $numargs = func_num_args();
-    echo "Number of arguments: $numargs<br />\n";
+    echo "Number of arguments: $numargs \n";
     if ($numargs >= 2) {
-        echo "Second argument is: " . func_get_arg(1) . "<br />\n";
+        echo "Second argument is: " . func_get_arg(1) . "\n";
     }
     $arg_list = func_get_args();
     for ($i = 0; $i < $numargs; $i++) {
-        echo "Argument $i is: " . $arg_list[$i] . "<br />\n";
+        echo "Argument $i is: " . $arg_list[$i] . "\n";
     }
 }
 
@@ -99,61 +71,16 @@ foo(1, 2, 3);
     &example.outputs;
     <screen>
 <![CDATA[
-Number of arguments: 3<br />
-Second argument is: 2<br />
-Argument 0 is: 1<br />
-Argument 1 is: 2<br />
-Argument 2 is: 3<br />
+Number of arguments: 3 
+Second argument is: 2
+Argument 0 is: 1
+Argument 1 is: 2
+Argument 2 is: 3
 ]]>
     </screen>
    </example>
   </para>
-  <para>
-   <example>
-    <title> PHP 5.3 前后使用 <function>func_get_args</function> 在的对比</title>
-    <programlisting role="php">
-<![CDATA[
-test.php
-<?php
-function foo() {
-    include './fga.inc';
-}
 
-foo('First arg', 'Second arg');
-?>
-
-fga.inc
-<?php
-
-$args = func_get_args();
-var_export($args);
-
-?>
-]]>
-    </programlisting>
-    <para>
-     PHP 5.3 版本之前的输出：
-    </para>
-    <screen>
-<![CDATA[
-array (
-  0 => 'First arg',
-  1 => 'Second arg',
-)
-]]>
-    </screen>
-    <para>
-     PHP 5.3 和之后的版本的输出:
-    </para>
-    <screen>
-<![CDATA[
-Warning: func_get_args():  Called from the global scope - no function
-context in /home/torben/Desktop/code/ml/fga.inc on line 3
-false
-]]>
-    </screen>
-   </example>
-  </para>
   <para>
    <example>
     <title><function>func_get_args</function> example of byref and byval arguments</title>
@@ -178,13 +105,13 @@ byRef($arg);
 ?>
 ]]>
     </programlisting>
-     &example.outputs;
+    &example.outputs;
     <screen>
 As passed     : array (
   0 => 'bar',
 )
 After change  : array (
-  0 => 'bar',
+  0 => 'baz',
 )
 As passed     : array (
   0 => 'bar',
@@ -200,7 +127,7 @@ After change  : array (
 
  <refsect1 role="notes">
   &reftitle.notes;
-  &note.funcnoparam;
+  &note.func-named-params;
   &note.funcbyref;
   <note>
    <simpara>
@@ -213,6 +140,7 @@ After change  : array (
   &reftitle.seealso;
   <para>
    <simplelist>
+    <member><link linkend="functions.variable-arg-list"><literal>...</literal> 语法</link></member>
     <member><function>func_get_arg</function></member>
     <member><function>func_num_args</function></member>
     <member><methodname>ReflectionFunctionAbstract::getParameters</methodname></member>
