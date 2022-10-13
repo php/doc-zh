@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 96c9d88bad9a7d7d44bfb7f26c226df7ee9ddf26 Maintainer: daijie Status: ready -->
-<!-- Reviewed: no -->
-
+<!-- EN-Revision: bbd4f6a100b48cd3390590037088fe7c5c5cc0e7 Maintainer: daijie Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="function.assert-options" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>assert_options</refname>
@@ -19,6 +18,14 @@
   <para>
    设置 <function>assert</function> 的各种控制选项，或者是仅仅查询当前的设置。
   </para>
+  <note>
+   <simpara>
+    自 PHP 7.0.0 起，不鼓励使用 <function>assert_options</function>，而是分别使用
+    <function>ini_set</function> 和 <function>ini_get</function> 设置和获取
+    &php.ini; 指令 <link linkend="ini.zend.assertions">zend.assertions</link> 和
+    <link linkend="ini.assert.exception">assert.exception</link>。
+   </simpara>
+  </note>
  </refsect1>
 
  <refsect1 role="parameters">
@@ -83,11 +90,56 @@
      <term><parameter>value</parameter></term>
      <listitem>
       <para>
-       标志的新值。
+       可选的新选项值。
+      </para>
+      <para>
+       通过 <constant>ASSERT_CALLBACK</constant> 和 assert.callback 设置的回调函数应该有以下签名：
+       <methodsynopsis role="procedural">
+        <type>void</type><methodname>assert_callback</methodname>
+        <methodparam><type>string</type><parameter>file</parameter></methodparam>
+        <methodparam><type>int</type><parameter>line</parameter></methodparam>
+        <methodparam><type>string</type><parameter>assertion</parameter></methodparam>
+        <methodparam choice="opt"><type>string</type><parameter>description</parameter></methodparam>
+       </methodsynopsis>
+       <variablelist>
+        <varlistentry>
+         <term><parameter>file</parameter></term>
+         <listitem>
+          <simpara>
+           调用 <function>assert</function> 的文件。
+          </simpara>
+         </listitem>
+        </varlistentry>
+        <varlistentry>
+         <term><parameter>line</parameter></term>
+         <listitem>
+          <simpara>
+           调用 <function>assert</function> 的行数。
+          </simpara>
+         </listitem>
+        </varlistentry>
+        <varlistentry>
+         <term><parameter>assertion</parameter></term>
+         <listitem>
+          <simpara>
+           传递给 <function>assert</function> 的短信，转换为字符串。
+          </simpara>
+         </listitem>
+        </varlistentry>
+        <varlistentry>
+         <term><parameter>description</parameter></term>
+         <listitem>
+          <simpara>
+           传递给 <function>assert</function> 的描述。
+          </simpara>
+         </listitem>
+        </varlistentry>
+       </variablelist>
       </para>
      </listitem>
     </varlistentry>
    </variablelist>
+   向 <parameter>value</parameter> 传递空字符串会重置断言回调。
   </para>
  </refsect1>
 
@@ -107,9 +159,9 @@
 <![CDATA[
 <?php
 // 处理断言失败时的函数
-function assert_failure()
+function assert_failure($file, $line, $assertion, $message)
 {
-    echo 'Assert failed';
+    echo "The assertion $assertion in $file on line $line has failed: $message";
 }
 
 // 我们的测试函数
