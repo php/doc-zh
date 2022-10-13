@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: b8758b0605e80c4e3610137b7502a6abeea5c69b Maintainer: yuanyuqiang Status: ready -->
-<!-- Reviewed: no -->
-
-<refentry xml:id="function.hash-pbkdf2" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+<!-- EN-Revision: 8ad9c12d9bf30c0a0c06f150643c0669d02c3125 Maintainer: yuanyuqiang Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
+<refentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="function.hash-pbkdf2">
  <refnamediv>
   <refname>hash_pbkdf2</refname>
   <refpurpose>生成所提供密码的 PBKDF2 密钥导出</refpurpose>
@@ -11,14 +10,14 @@
 
  <refsect1 role="description">
   &reftitle.description;
-  <methodsynopsis role="procedural">
+  <methodsynopsis>
    <type>string</type><methodname>hash_pbkdf2</methodname>
    <methodparam><type>string</type><parameter>algo</parameter></methodparam>
    <methodparam><type>string</type><parameter>password</parameter></methodparam>
    <methodparam><type>string</type><parameter>salt</parameter></methodparam>
    <methodparam><type>int</type><parameter>iterations</parameter></methodparam>
    <methodparam choice="opt"><type>int</type><parameter>length</parameter><initializer>0</initializer></methodparam>
-   <methodparam choice="opt"><type>bool</type><parameter>raw_output</parameter><initializer>&false;</initializer></methodparam>
+   <methodparam choice="opt"><type>bool</type><parameter>binary</parameter><initializer>&false;</initializer></methodparam>
   </methodsynopsis>
  </refsect1>
 
@@ -64,8 +63,8 @@
      <term><parameter>length</parameter></term>
      <listitem>
       <para>
-       密钥导出数据的长度。如果 <parameter>raw_output</parameter> 为 &true;，
-       此参数为密钥导出数据的字节长度。如果 <parameter>raw_output</parameter> 为 &false;，
+       密钥导出数据的长度。如果 <parameter>binary</parameter> 为 &true;，
+       此参数为密钥导出数据的字节长度。如果 <parameter>binary</parameter> 为 &false;，
        此参数为密钥导出数据的字节长度的 2 倍，因为 1 个字节数据对应的 2 个 16 进制的字符。
       </para>
       <para>
@@ -74,7 +73,7 @@
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>raw_output</parameter></term>
+     <term><parameter>binary</parameter></term>
      <listitem>
       <para>
        设置为 &true; 输出原始二进制数据，
@@ -89,7 +88,7 @@
  <refsect1 role="returnvalues"><!-- {{{ -->
   &reftitle.returnvalues;
   <para>
-   如果 <parameter>raw_output</parameter> 设置为 &true;， 
+   如果 <parameter>binary</parameter> 设置为 &true;， 
    则返回原始二进制数据表示的信息摘要，
    否则返回 16 进制小写字符串格式表示的信息摘要。
   </para>
@@ -144,14 +143,19 @@ $iterations = 1000;
 $salt = openssl_random_pseudo_bytes(16, MCRYPT_DEV_URANDOM);
 
 $hash = hash_pbkdf2("sha256", $password, $salt, $iterations, 20);
-echo $hash;
+var_dump($hash);
+
+// 对于原始二进制，$length 需要减半以获得相同的结果
+$hash = hash_pbkdf2("sha256", $password, $salt, $iterations, 10, true);
+var_dump(bin2hex($hash));?>
 ?>
 ]]>
     </programlisting>
     &example.outputs.similar;
     <screen>
 <![CDATA[
-120fb6cffcf8b32c43e7
+string(20) "120fb6cffcf8b32c43e7"
+string(20) "120fb6cffcf8b32c43e7"
 ]]>
     </screen>
    </example>
@@ -187,7 +191,6 @@ echo $hash;
  </refsect1>
 
 </refentry>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
