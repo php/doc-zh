@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 96c9d88bad9a7d7d44bfb7f26c226df7ee9ddf26 Maintainer: HonestQiao Status: ready -->
-<!-- Reviewed: no Maintainer: HonestQiao -->
+<!-- EN-Revision: 0c9c2dd669fe9395eaa73d487fbd160f9057429a Maintainer: HonestQiao Status: partial -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="function.mail" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
   <refname>mail</refname>
@@ -15,8 +15,8 @@
    <methodparam><type>string</type><parameter>to</parameter></methodparam>
    <methodparam><type>string</type><parameter>subject</parameter></methodparam>
    <methodparam><type>string</type><parameter>message</parameter></methodparam>
-   <methodparam choice="opt"><type>string</type><parameter>additional_headers</parameter></methodparam>
-   <methodparam choice="opt"><type>string</type><parameter>additional_parameters</parameter></methodparam>
+   <methodparam choice="opt"><type class="union"><type>array</type><type>string</type></type><parameter>additional_headers</parameter><initializer>[]</initializer></methodparam>
+   <methodparam choice="opt"><type>string</type><parameter>additional_params</parameter><initializer>""</initializer></methodparam>
   </methodsynopsis>
   <para>
    发送一封电子邮件。
@@ -65,7 +65,7 @@
        所要发送的消息。
       </para>
       <para>
-       行之间必须以一个 LF（\n）分隔。每行不能超过 70 个字符。
+       行之间必须以一个 CRLF（\r\n）分隔。每行不能超过 70 个字符。
       </para>
       <caution>
        <para>
@@ -85,16 +85,30 @@ $text = str_replace("\n.", "\n..", $text);
      <term><parameter>additional_headers</parameter>（可选项）</term>
      <listitem>
       <para>
-       String to be inserted at the end of the email header.
+       <type>String</type> or <type>array</type> to be inserted at the end of the email header.
       </para>
       <para>
        This is typically used to add extra headers (From, Cc, and Bcc).
        Multiple extra headers should be separated with a CRLF (\r\n).
+       If outside data are used to compose this header, the data should be sanitized
+       so that no unwanted headers could be injected. 
+      </para>
+      <para>
+       If an <type>array</type> is passed, its keys are the header names and its
+       values are the respective header values.
       </para>
       <note>
        <para>
+        Before PHP 5.4.42 and 5.5.27, repectively, <parameter>additional_headers</parameter> did not have mail header
+        injection protection. Therefore, users must make sure specified headers
+        are safe and contains headers only. i.e. Never start mail body by putting
+        multiple newlines.
+       </para>
+      </note>      
+      <note>
+       <para>
         When sending mail, the mail <emphasis>must</emphasis> contain
-        a <literal>From</literal> header. This can be set with the 
+        a <literal>From</literal> header. This can be set with the
         <parameter>additional_headers</parameter> parameter, or a default
         can be set in &php.ini;.
        </para>
@@ -102,12 +116,15 @@ $text = str_replace("\n.", "\n..", $text);
         Failing to do this will result in an error
         message similar to <literal>Warning: mail(): "sendmail_from" not
         set in php.ini or custom "From:" header missing</literal>.
+        The <literal>From</literal> header sets also
+        <literal>Return-Path</literal> when sending directly via SMTP (Windows only).
        </para>
       </note>
       <note>
        <para>
         If messages are not received, try using a LF (\n) only.
-        Some poor quality Unix mail transfer agents replace LF by CRLF
+        Some Unix mail transfer agents (most notably
+        <link xlink:href="&url.qmail;">qmail</link>) replace LF by CRLF
         automatically (which leads to doubling CR if CRLF is used).
         This should be a last resort, as it does not comply with
         <link xlink:href="&url.rfc;2822">RFC 2822</link>.
@@ -116,15 +133,29 @@ $text = str_replace("\n.", "\n..", $text);
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>additional_parameters</parameter> (optional)</term>
+     <term><parameter>additional_params</parameter> (optional)</term>
      <listitem>
       <para>
-       The <parameter>additional_parameters</parameter> parameter
-       can be used to pass an additional parameter to the program configured
-       to use when sending mail using the <literal>sendmail_path</literal>
-       configuration setting. For example, this can be used to set the
-       envelope sender address when using sendmail with the
-       <literal>-f</literal> sendmail option.
+       The <parameter>additional_params</parameter> parameter
+       can be used to pass additional flags as command line options to the
+       program configured to be used when sending mail, as defined by the
+       <literal>sendmail_path</literal> configuration setting. For example,
+       this can be used to set the envelope sender address when using
+       sendmail with the <literal>-f</literal> sendmail option.
+      </para>
+      <para>
+       This parameter is escaped by <function>escapeshellcmd</function> internally
+       to prevent command execution. <function>escapeshellcmd</function> prevents
+       command execution, but allows to add additional parameters. For security reasons,
+       it is recommended for the user to sanitize this parameter to avoid adding unwanted
+       parameters to the shell command.
+      </para>
+      <para>
+       Since <function>escapeshellcmd</function> is applied automatically, some characters
+       that are allowed as email addresses by internet RFCs cannot be used. 
+       <function>mail</function> can not allow such characters, so in programs where the use of
+       such characters is required, alternative means of sending emails (such as using a framework
+       or a library) is recommended. 
       </para>
       <para>
        The user that the webserver runs as should be added as a trusted user to the
@@ -148,8 +179,6 @@ $text = str_replace("\n.", "\n..", $text);
    it does NOT mean the mail will actually reach the intended destination.
   </para>
  </refsect1>
-
- 
 
  <refsect1 role="changelog">
   &reftitle.changelog;
@@ -187,13 +216,13 @@ $text = str_replace("\n.", "\n..", $text);
 <![CDATA[
 <?php
 // The message
-$message = "Line 1\nLine 2\nLine 3";
+$message = "Line 1\r\nLine 2\r\nLine 3";
 
 // In case any of our lines are larger than 70 characters, we should use wordwrap()
-$message = wordwrap($message, 70);
+$message = wordwrap($message, 70, "\r\n");
 
 // Send
-mail('caffinated@example.com', 'My Subject', $message);
+mail('caffeinated@example.com', 'My Subject', $message);
 ?>
 ]]>
     </programlisting>
@@ -220,9 +249,32 @@ mail($to, $subject, $message, $headers);
     </programlisting>
    </example>
    <example>
+    <title>Sending mail with extra headers as <type>array</type></title>
+    <para>
+     This example sends the same mail as the example immediately above, but
+     passes the additional headers as array (available as of PHP 7.2.0).
+    </para>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$to      = 'nobody@example.com';
+$subject = 'the subject';
+$message = 'hello';
+$headers = array(
+    'From' => 'webmaster@example.com',
+    'Reply-To' => 'webmaster@example.com',
+    'X-Mailer' => 'PHP/' . phpversion()
+);
+
+mail($to, $subject, $message, $headers);
+?>
+]]>
+    </programlisting>
+   </example>
+   <example>
     <title>Sending mail with an additional command line parameter.</title>
     <para>
-     The <parameter>additional_parameters</parameter> parameter
+     The <parameter>additional_params</parameter> parameter
      can be used to pass an additional parameter to the program configured
      to use when sending mail using the <literal>sendmail_path</literal>.
     </para>
@@ -243,14 +295,13 @@ mail('nobody@example.com', 'the subject', 'the message', null,
     <programlisting role="php">
 <![CDATA[
 <?php
-// multiple recipients
-$to  = 'aidan@example.com' . ', '; // note the comma
-$to .= 'wez@example.com';
+// Multiple recipients
+$to = 'johny@example.com, sally@example.com'; // note the comma
 
-// subject
+// Subject
 $subject = 'Birthday Reminders for August';
 
-// message
+// Message
 $message = '
 <html>
 <head>
@@ -263,7 +314,7 @@ $message = '
       <th>Person</th><th>Day</th><th>Month</th><th>Year</th>
     </tr>
     <tr>
-      <td>Joe</td><td>3rd</td><td>August</td><td>1970</td>
+      <td>Johny</td><td>10th</td><td>August</td><td>1970</td>
     </tr>
     <tr>
       <td>Sally</td><td>17th</td><td>August</td><td>1973</td>
@@ -274,17 +325,17 @@ $message = '
 ';
 
 // To send HTML mail, the Content-type header must be set
-$headers  = 'MIME-Version: 1.0' . "\r\n";
-$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
+$headers[] = 'MIME-Version: 1.0';
+$headers[] = 'Content-type: text/html; charset=iso-8859-1';
 
 // Additional headers
-$headers .= 'To: Mary <mary@example.com>, Kelly <kelly@example.com>' . "\r\n";
-$headers .= 'From: Birthday Reminder <birthday@example.com>' . "\r\n";
-$headers .= 'Cc: birthdayarchive@example.com' . "\r\n";
-$headers .= 'Bcc: birthdaycheck@example.com' . "\r\n";
+$headers[] = 'To: Mary <mary@example.com>, Kelly <kelly@example.com>';
+$headers[] = 'From: Birthday Reminder <birthday@example.com>';
+$headers[] = 'Cc: birthdayarchive@example.com';
+$headers[] = 'Bcc: birthdaycheck@example.com';
 
 // Mail it
-mail($to, $subject, $message, $headers);
+mail($to, $subject, $message, implode("\r\n", $headers));
 ?>
 ]]>
     </programlisting>
@@ -304,8 +355,8 @@ mail($to, $subject, $message, $headers);
   &reftitle.notes;
   <note>
    <para>
-    The Windows implementation of <function>mail</function> differs in many
-    ways from the Unix implementation. First, it doesn't use a local binary
+    The SMTP implementation (Windows only) of <function>mail</function> differs in many
+    ways from the sendmail implementation. First, it doesn't use a local binary
     for composing messages but only operates on direct sockets which means a
     <literal>MTA</literal> is needed listening on a network socket (which
     can either on the localhost or a remote machine).
@@ -358,6 +409,7 @@ mail($to, $subject, $message, $headers);
   &reftitle.seealso;
   <para>
    <simplelist>
+    <member><function>mb_send_mail</function></member>
     <member><function>imap_mail</function></member>
     <member><link xlink:href="&url.pear.package;Mail">PEAR::Mail</link></member>
     <member><link xlink:href="&url.pear.package;Mail_Mime">PEAR::Mail_Mime</link></member>
@@ -365,8 +417,6 @@ mail($to, $subject, $message, $headers);
   </para>
  </refsect1>
 </refentry>
-
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
