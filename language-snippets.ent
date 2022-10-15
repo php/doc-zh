@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 734bafeaf071b78b15d375f9af583befddd8c2a2 Maintainer: Gregory Status: ready -->
+<!-- EN-Revision: 9e9578a5c4288bf10c1675da131c79c4e28252a8 Maintainer: Gregory Status: ready -->
 <!-- CREDITS: dallas,mowangjuanzi -->
 <!-- 请保持此文件与英文文件中相应的每个 ENTITY 行号一一对应以便于对照，修改与更新！ -->
 
@@ -743,6 +743,15 @@ linkend="language.types.boolean">布尔类型</link>章节以获取更多信息�
  </entry>
 </row>
 '>
+
+<!ENTITY standard.changelog.binary-safe-string-comparison '<row xmlns="http://docbook.org/ns/docbook">
+ <entry>8.2.0</entry>
+ <entry>
+  现在此函数返回 <literal>-1</literal> 或者 <literal>1</literal>，之前返回负数或正数。
+ </entry>
+</row>
+'>
+
 
 <!-- FileInfo -->
 <!ENTITY fileinfo.parameters.finfo '<para xmlns="http://docbook.org/ns/docbook">经 <function>finfo_open</function> 返回的 <classname>finfo</classname> 实例。</para>'>
@@ -2818,6 +2827,142 @@ local: {
           </entry>
          </row>
 '>
+<!ENTITY mongodb.option.encryption.masterKey-options-by-provider '
+  <para xmlns="http://docbook.org/ns/docbook">
+   <table>
+    <title><literal>"aws"</literal> provider options</title>
+    <tgroup cols="3">
+     <thead>
+      <row>
+       <entry>Option</entry>
+       <entry>Type</entry>
+       <entry>Description</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>region</entry>
+       <entry>string</entry>
+       <entry>Required.</entry>
+      </row>
+      <row>
+       <entry>key</entry>
+       <entry>string</entry>
+       <entry>Required. The Amazon Resource Name (ARN) to the AWS customer master key (CMK).</entry>
+      </row>
+      <row>
+       <entry>endpoint</entry>
+       <entry>string</entry>
+       <entry>Optional. An alternate host identifier to send KMS requests to. May include port number.</entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </table>
+  </para>
+  <para xmlns="http://docbook.org/ns/docbook">
+   <table>
+    <title><literal>"azure"</literal> provider options</title>
+    <tgroup cols="3">
+     <thead>
+      <row>
+       <entry>Option</entry>
+       <entry>Type</entry>
+       <entry>Description</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>keyVaultEndpoint</entry>
+       <entry>string</entry>
+       <entry>Required. Host with optional port (e.g. "example.vault.azure.net").</entry>
+      </row>
+      <row>
+       <entry>keyName</entry>
+       <entry>string</entry>
+       <entry>Required.</entry>
+      </row>
+      <row>
+       <entry>keyVersion</entry>
+       <entry>string</entry>
+       <entry>Optional. A specific version of the named key. Defaults to using the key&apos;s primary version.</entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </table>
+  </para>
+  <para xmlns="http://docbook.org/ns/docbook">
+   <table>
+    <title><literal>"gcp"</literal> provider options</title>
+    <tgroup cols="3">
+     <thead>
+      <row>
+       <entry>Option</entry>
+       <entry>Type</entry>
+       <entry>Description</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>projectId</entry>
+       <entry>string</entry>
+       <entry>Required.</entry>
+      </row>
+      <row>
+       <entry>location</entry>
+       <entry>string</entry>
+       <entry>Required.</entry>
+      </row>
+      <row>
+       <entry>keyRing</entry>
+       <entry>string</entry>
+       <entry>Required.</entry>
+      </row>
+      <row>
+       <entry>keyName</entry>
+       <entry>string</entry>
+       <entry>Required.</entry>
+      </row>
+      <row>
+       <entry>keyVersion</entry>
+       <entry>string</entry>
+       <entry>Optional. A specific version of the named key. Defaults to using the key&apos;s primary version.</entry>
+      </row>
+      <row>
+       <entry>endpoint</entry>
+       <entry>string</entry>
+       <entry>Optional. Host with optional port. Defaults to "cloudkms.googleapis.com".</entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </table>
+  </para>
+  <para xmlns="http://docbook.org/ns/docbook">
+   <table>
+    <title><literal>"kmip"</literal> provider options</title>
+    <tgroup cols="3">
+     <thead>
+      <row>
+       <entry>Option</entry>
+       <entry>Type</entry>
+       <entry>Description</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>keyId</entry>
+       <entry>string</entry>
+       <entry>Optional. Unique identifier to a 96-byte KMIP secret data managed object. If unspecified, the driver creates a random 96-byte KMIP secret data managed object.</entry>
+      </row>
+      <row>
+       <entry>endpoint</entry>
+       <entry>string</entry>
+       <entry>Optional. Host with optional port.</entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </table>
+  </para>
+'>
 <!ENTITY mongodb.option.encryption.tlsOptions '
          <row xmlns="http://docbook.org/ns/docbook">
           <entry>tlsOptions</entry>
@@ -3563,58 +3708,58 @@ local: {
 <!-- csprng snippets -->
 <!ENTITY csprng.sources '
 <para xmlns="http://docbook.org/ns/docbook">
- The sources of randomness used for this function are as follows:
+ 此函数使用的随机性来源如下：
 </para>
 <itemizedlist xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <listitem>
   <simpara>
-   On Windows,
-   <link xlink:href="&url.csprng.crypt-gen-random;"><function>CryptGenRandom</function></link>
-   will always be used. As of PHP 7.2.0, the
-   <link xlink:href="&url.csprng.cng-api;">CNG-API</link>
-   will always be used instead.
+   在 Windows 上始终使用 <link
+   xlink:href="&url.csprng.crypt-gen-random;"><function>CryptGenRandom</function></link>。在
+   PHP 7.2.0 起，将始终使用
+   <link xlink:href="&url.csprng.cng-api;">CNG-API</link> 代替。
   </simpara>
  </listitem>
  <listitem>
   <simpara>
-   On Linux, the
+   在 Linux 上，如果有效，将使用
    <link xlink:href="&url.csprng.get-random-2;">getrandom(2)</link>
-   syscall will be used if available.
+   系统调用。
   </simpara>
  </listitem>
  <listitem>
   <simpara>
-   On other platforms, <filename>/dev/urandom</filename> will be used.
+   其它平台将使用 <filename>/dev/urandom</filename>。
   </simpara>
  </listitem>
  <listitem>
   <simpara>
-   If none of the aforementioned sources are available, then an
-   <classname>Exception</classname> will be thrown.
+   如果上述来源均不可用，然后会抛出 <classname>\Random\RandomException</classname>。
   </simpara>
  </listitem>
 </itemizedlist>
 '>
+
+
 <!ENTITY csprng.errors '
  <listitem xmlns="http://docbook.org/ns/docbook">
   <simpara>
-   If an appropriate source of randomness cannot be found,
-   an <classname>Exception</classname> will be thrown.
+   如果没有找到合适的随机性来源，将会抛出 <classname>\Random\RandomException</classname>。
   </simpara>
  </listitem>
  <listitem xmlns="http://docbook.org/ns/docbook">
   <simpara>
-    If invalid parameters are given, a <classname>TypeError</classname>
-    will be thrown.
+    如果指定的参数无效，将会抛出 <classname>TypeError</classname>。
   </simpara>
  </listitem>
 '>
+
+
 <!ENTITY csprng.function.backport '
  <note xmlns="http://docbook.org/ns/docbook">
   <simpara>
-   Although this function was added to PHP in PHP 7.0, a
-   <link xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="&url.csprng.compat;">userland implementation</link>
-   is available for PHP 5.2 to 5.6, inclusive.
+   虽然此函数是 PHP 7.0 添加到 PHP 中，但是从 PHP 5.2 到
+   PHP 5.6 都可以用 <link xmlns:xlink="http://www.w3.org/1999/xlink"
+   xlink:href="&url.csprng.compat;">用户级实现</link>。
   </simpara>
  </note>
 '>
