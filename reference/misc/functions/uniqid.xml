@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: e70ff3675687c8633e2df1a93705d9018b5aab66 Maintainer: daijie Status: ready -->
+<!-- EN-Revision: b8758b0605e80c4e3610137b7502a6abeea5c69b Maintainer: daijie Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="function.uniqid" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>uniqid</refname>
@@ -12,7 +13,7 @@
   <methodsynopsis>
    <type>string</type><methodname>uniqid</methodname>
    <methodparam choice="opt"><type>string</type><parameter>prefix</parameter><initializer>""</initializer></methodparam>
-   <methodparam choice="opt"><type>bool</type><parameter>more_entropy</parameter><initializer>false</initializer></methodparam>
+   <methodparam choice="opt"><type>bool</type><parameter>more_entropy</parameter><initializer>&false;</initializer></methodparam>
   </methodsynopsis>
   <para>
    获取一个带前缀、基于当前时间微秒数的唯一ID。
@@ -20,10 +21,9 @@
   &caution.cryptographically-insecure;
   <warning>
     <para>
-     此函数不保证返回值的唯一性。
-     由于绝大多数系统使用 NTP 或者类似服务调整系统的时间，所以系统时间经常发生变化。
-     此外，进程/线程可能不会返回唯一的 ID。
-     用 <parameter>more_entropy</parameter> 来增加唯一性的概率。
+     此函数不保证返回值的唯一性。由于绝大多数系统使用 NTP
+     或者类似服务调整系统的时间，所以系统时间经常发生变化。此外，进程/线程可能不会返回唯一的 
+     ID。用 <parameter>more_entropy</parameter> 来增加唯一性的概率。
     </para>
   </warning>
  </refsect1>
@@ -39,8 +39,8 @@
        有用的参数。例如：如果在多台主机上可能在同一微秒生成唯一ID。
       </para>
       <para>
-       <parameter>prefix</parameter>为空，则返回的字符串长度为13。<parameter>more_entropy</parameter> 为
-       &true;，则返回的字符串长度为23。
+       <parameter>prefix</parameter>为空，则返回的字符串长度为
+       13。<parameter>more_entropy</parameter> 为 &true;，则返回的字符串长度为 23。
       </para>
      </listitem>
     </varlistentry>
@@ -48,7 +48,8 @@
      <term><parameter>more_entropy</parameter></term>
      <listitem>
       <para>
-       如果设置为 &true;，<function>uniqid</function> 会在返回的字符串结尾增加额外的熵（使用combined linear congruential generator）。
+       如果设置为 &true;，<function>uniqid</function>
+       会在返回的字符串结尾增加额外的熵（使用线性同余组合发生器）。
        使得唯一ID更具唯一性。
       </para>
      </listitem>
@@ -77,20 +78,19 @@
     <programlisting role="php">
 <![CDATA[
 <?php
-/* A uniqid, like: 4b3403665fea6 */
+/* 一个 uniqid，像：4b3403665fea6 */
 printf("uniqid(): %s\r\n", uniqid());
 
-/* We can also prefix the uniqid, this the same as 
- * doing:
+/* 也可以为uniqid 添加前缀，以下两种方式相同：
  *
  * $uniqid = $prefix . uniqid();
  * $uniqid = uniqid($prefix);
  */
 printf("uniqid('php_'): %s\r\n", uniqid('php_'));
 
-/* We can also activate the more_entropy parameter, which is 
- * required on some systems, like Cygwin. This makes uniqid()
- * produce a value like: 4b340550242239.64159797
+/* 还可以启用 more_entropy 参数，在 
+ * 某些系统上是必须的，比如 Cygwin。这使得 uniqid()
+ * 产生如下值：4b340550242239.64159797
  */
 printf("uniqid('', true): %s\r\n", uniqid('', true));
 ?>
@@ -104,7 +104,7 @@ printf("uniqid('', true): %s\r\n", uniqid('', true));
   &reftitle.notes;
   <note>
    <para>
-    在Cygwin环境下，为了使此函数能够工作，<parameter>more_entropy</parameter> 必须设置为 &true;。
+    在 Cygwin 环境下，为了使此函数能够工作，<parameter>more_entropy</parameter> 必须设置为 &true;。
    </para>
   </note>
  </refsect1>
