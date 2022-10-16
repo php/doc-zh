@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: e41806c30bf6975e452c0d4ce35ab0984c2fa68c Maintainer: daijie Status: ready -->
+<!-- EN-Revision: 0abd79a0d9d783d492a2c61b834a4ded74bc7145 Maintainer: daijie Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="function.sleep" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>sleep</refname>
@@ -16,6 +17,12 @@
   <simpara>
    程序延迟执行指定的 <parameter>seconds</parameter> 的秒数。
   </simpara>
+  <note>
+   <para>
+    为了让程序执行延迟几分之一秒，应使用 <function>usleep</function>，因为 <function>sleep</function>
+    需要 &integer;。例如 <code>sleep(0.25)</code> 会使程序暂停 <literal>0</literal> 秒。
+   </para>
+  </note>
  </refsect1>
 
  <refsect1 role="parameters">
@@ -26,7 +33,7 @@
      <term><parameter>seconds</parameter></term>
      <listitem>
       <para>
-       暂停的秒数。
+       暂停的秒数（必须大于或等于 <literal>0</literal>）。
       </para>
      </listitem>
     </varlistentry>
@@ -37,36 +44,61 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   成功时返回 0，错误时返回 &false;。
+   成功时返回 0。
   </para>
   <para>
-   如果函数的调用被一个信号中止，<function>sleep</function> 会返回一个非零的值。在Windows上，该值总是 <literal>192</literal>（即Windows API常量<constant>WAIT_IO_COMPLETION</constant>的值）。其他平台上，该返回值是剩余未sleep的秒数。
+   如果函数的调用被一个信号中止，<function>sleep</function> 会返回一个非零的值。在
+   Windows 上，该值总是 <literal>192</literal>（即 Windows API 常量
+   <constant>WAIT_IO_COMPLETION</constant> 的值）。其他平台上，该返回值是剩余未 sleep 的秒数。
   </para>
  </refsect1>
 
  <refsect1 role="errors">
   &reftitle.errors;
   <para>
-   如果指定的 <parameter>seconds</parameter> 是负数，该函数会产生一个 <constant>E_WARNING</constant> 级别的错误。
+   如果指定的 <parameter>seconds</parameter> 是负数，该函数会抛出 <classname>ValueError</classname>。
   </para>
+ </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <informaltable>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>&Version;</entry>
+      <entry>&Description;</entry>
+     </row>
+    </thead>
+    <tbody>
+     <row>
+      <entry>8.0.0</entry>
+      <entry>
+       此函数在负数 <parameter>seconds</parameter> 时抛出 <classname>ValueError</classname>，之前会引发
+       <constant>E_WARNING</constant> 且函数返回 &false;。
+      </entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </informaltable>
  </refsect1>
 
  <refsect1 role="examples">
   &reftitle.examples;
   <para>
    <example>
-    <title><function>sleep</function> 的例子</title>
+    <title><function>sleep</function> 示例</title>
     <programlisting role="php">
 <![CDATA[
 <?php
 
-// current time
+// 当前时间
 echo date('h:i:s') . "\n";
 
-// sleep for 10 seconds
+// 睡眠 10 秒
 sleep(10);
 
-// wake up !
+// 醒来！
 echo date('h:i:s') . "\n";
 
 ?>
