@@ -1,35 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: c52553f522dc7079e48898b0d3d6ce715e25e5c6 Maintainer: zhoumengkang Status: ready -->
-<!-- Reviewed: no -->
-
-<refentry xmlns="http://docbook.org/ns/docbook" xml:id="function.fsockopen">
+<!-- EN-Revision: 4e6f0774f03131cbeeb8c21019a690bf97fd22b6 Maintainer: zhoumengkang Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
+<refentry xml:id="function.fsockopen" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>fsockopen</refname>
-  <refpurpose>打开一个网络连接或者一个Unix套接字连接</refpurpose>
+  <refpurpose>打开 Internet 或者 Unix 套接字连接</refpurpose>
  </refnamediv>
  
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <type>resource</type><methodname>fsockopen</methodname>
+   <type class="union"><type>resource</type><type>false</type></type><methodname>fsockopen</methodname>
    <methodparam><type>string</type><parameter>hostname</parameter></methodparam>
    <methodparam choice="opt"><type>int</type><parameter>port</parameter><initializer>-1</initializer></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter role="reference">errno</parameter></methodparam>
-   <methodparam choice="opt"><type>string</type><parameter role="reference">errstr</parameter></methodparam>
-   <methodparam choice="opt"><type>float</type><parameter>timeout</parameter><initializer>ini_get("default_socket_timeout")</initializer></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter role="reference">error_code</parameter><initializer>&null;</initializer></methodparam>
+   <methodparam choice="opt"><type>string</type><parameter role="reference">error_message</parameter><initializer>&null;</initializer></methodparam>
+   <methodparam choice="opt"><type class="union"><type>float</type><type>null</type></type><parameter>timeout</parameter><initializer>&null;</initializer></methodparam>
   </methodsynopsis>
   <para>
-   初始化一个套接字连接到指定主机（<parameter>hostname</parameter>）。
+   初始化套接字连接到指定 <parameter>hostname</parameter> 资源。
   </para>
   <para>
-   PHP支持以下的套接字传输器类型列表
-   <xref linkend="transports"/>。也可以通过<function>stream_get_transports</function>来获取套接字传输器支持类型。
+   如<xref linkend="transports"/>所述，PHP 支持 Internet 和 Unix 域中的目标。也可以通过
+   <function>stream_get_transports</function> 获取支持的传输器列表。
   </para>
   <para>
-   默认情况下将以阻塞模式开启套接字连接。当然你可以通过<function>stream_set_blocking</function>将它转换到非阻塞模式。
+   默认情况下将以阻塞模式开启套接字连接。可以通过 <function>stream_set_blocking</function> 将它转换到非阻塞模式。
   </para>
-  <para><function>stream_socket_client</function>与之非常相似，而且提供了更加丰富的参数设置，包括非阻塞模式和提供上下文的的设置。
+  <para>
+   <function>stream_socket_client</function> 与之非常相似，而且提供了更加丰富的参数设置，包括非阻塞连接和提供流上下文的能力。
   </para>
  </refsect1>
  <refsect1 role="parameters">
@@ -40,7 +40,8 @@
      <term><parameter>hostname</parameter></term>
      <listitem>
       <para>
-       如果安装了<link linkend="openssl.installation">OpenSSL</link>，那么你也许应该在你的主机名地址前面添加访问协议<literal>ssl://</literal>或者是<literal>tls://</literal>，从而可以使用基于TCP/IP协议的SSL或者TLS的客户端连接到远程主机。
+       如果安装了 <link linkend="openssl.installation">OpenSSL</link>，那么可以在主机名地址前面添加 <literal>ssl://</literal>
+       或者是 <literal>tls://</literal>，从而可以使用基于 TCP/IP 协议的 SSL 或者 TLS 的客户端连接到远程主机。
       </para>
      </listitem>
     </varlistentry>
@@ -48,24 +49,25 @@
      <term><parameter>port</parameter></term>
      <listitem>
       <para>
-       端口号。如果对该参数传一个-1，则表示不使用端口，例如<literal>unix://</literal>。
+       端口号。可以省略该参数或传 -1，则表示传输器不使用端口，例如 <literal>unix://</literal>。
       </para>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>errno</parameter></term>
+     <term><parameter>error_code</parameter></term>
      <listitem>
       <para>
-       如果传入了该参数，holds the system level error number that occurred in the
-       system-level <literal>connect()</literal> call。
+       如果提供该参数，则会保存调用系统级别 <literal>connect()</literal> 发生的系统级错误号。
       </para>
       <para>
-       如果<parameter>errno</parameter>的返回值为<literal>0</literal>，而且这个函数的返回值为&false;，那么这表明该错误发生在套接字连接（<literal>connect()</literal>）调用之前，导致连接失败的原因最大的可能是初始化套接字的时候发生了错误。
+       如果 <parameter>error_code</parameter> 的返回值为 <literal>0</literal>，且函数的返回值为
+       &false;，则表明错误发生在 <literal>connect()</literal>
+       调用之前。这很可能是由于初始化套接字的问题。
       </para>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>errstr</parameter></term>
+     <term><parameter>error_message</parameter></term>
      <listitem>
       <para>
        错误信息将以字符串的信息返回。
@@ -76,11 +78,14 @@
      <term><parameter>timeout</parameter></term>
      <listitem>
       <para>
-       设置连接的时限，单位为秒。
+       设置连接的时限，单位为秒。当为 &null; 时，使用 <link
+       linkend="ini.default-socket-timeout">default_socket_timeout</link> &php.ini; 设置。
       </para>
       <note>
        <para>
-        注意：如果你要对建立在套接字基础上的读写操作设置操作时间设置连接时限，请使用<function>stream_set_timeout</function>，<function>fsockopen</function>的连接时限（<parameter>timeout</parameter>）的参数仅仅在套接字连接的时候生效。
+        如果需要对为套接字读/写数据数据操作设置超时，请使用
+        <function>stream_set_timeout</function>，<function>fsockopen</function> 的
+        <parameter>timeout</parameter> 参数仅仅在连接套接字时适用。
        </para>
       </note>
      </listitem>
@@ -91,49 +96,45 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   <function>fsockopen</function>将返回一个文件句柄，之后可以被其他文件类函数调用（例如：<function>fgets</function>，<function>fgetss</function>，<function>fwrite</function>，<function>fclose</function>还有<function>feof</function>）。如果调用失败，将返回&false;。
+   <function>fsockopen</function> 返回文件指针，可以跟其他文件函数（比如
+   <function>fgets</function>、<function>fgetss</function>、<function>fwrite</function>、<function>fclose</function>
+   和 <function>feof</function>）一起使用。如果调用失败，将返回 &false;。
   </para>
  </refsect1>
  <refsect1 role="errors">
   &reftitle.errors;
   <para>
-   如果主机（<parameter>hostname</parameter>）不可访问，将会抛出一个警告级别（<constant>E_WARNING</constant>）的错误提示。
+   如果 <parameter>hostname</parameter> 不是有效域，则抛出 <constant>E_WARNING</constant>。
   </para>
  </refsect1>
- <refsect1 role="changelog">
+
+ <refsect1 role="changelog"><!-- {{{ -->
   &reftitle.changelog;
-  <para>
-   <informaltable>
-    <tgroup cols="2">
-     <thead>
-      <row>
-       <entry>&Version;</entry>
-       <entry>&Description;</entry>
-      </row>
-     </thead>
-     <tbody>
-      <row>
-       <entry>4.3.0</entry>
-       <entry>
-        在win32系统上增加了对时限设置（<parameter>timeout</parameter>）参数的支持。
-       </entry>
-      </row>
-      <row>
-       <entry>4.3.0</entry>
-       <entry>
-        在TCP/IP协议的基础上增加了SSL和TLS。
-       </entry>
-      </row>
-     </tbody>
-    </tgroup>
-   </informaltable>
-  </para>
+  <informaltable>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>&Version;</entry>
+      <entry>&Description;</entry>
+     </row>
+    </thead>
+    <tbody>
+     <row>
+      <entry>8.0.0</entry>
+      <entry>
+       <parameter>timeout</parameter> 现在可以为 null。
+      </entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </informaltable>
  </refsect1>
+
  <refsect1 role="examples">
   &reftitle.examples;
   <para>
    <example>
-    <title><function>fsockopen</function>的例子</title>
+    <title><function>fsockopen</function> 示例</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -157,9 +158,9 @@ if (!$fp) {
   </para>
   <para>
    <example>
-    <title>使用UDP连接</title>
+    <title>使用 UDP 连接</title>
     <para>
-     下面这个例子展示了怎么样在自己的机器上通过UDP套接字连接（端口号13）来检索日期和时间。
+     下面这个例子展示了怎么样在自己的机器上通过 UDP 服务“daytime”（端口号 13）中来检索日期和时间。
     </para>
     <programlisting role="php">
 <![CDATA[
@@ -182,12 +183,14 @@ if (!$fp) {
   &reftitle.notes;
   <note>
    <para>
-    因为环境的不同，某些情况下在Unix套接字连接或者自定义的连接设置连接时限（<parameter>timeout</parameter>）可能不会生效。
+    根据环境的不同，Unix 域或可选的连接超时可能无效。
    </para>
   </note>
   <warning>
    <para>
-    UDP套接字有些时候在即使远程主机未知的情况，也能打开，并且不发生任何错误。只有当你通过该套接字进行读写的时候才会发现错误。之所以会这样，是因为UDP是一个“非连接状态”的协议，那么这就意味着当前操作系统直到它（套接字）真正需要发送和接受数据的时候才会去尝试为其去建立连接。
+    即使远程主机无法访问，UDP
+    套接字有时候也能打开且无错误。只有当从套接字读/写数据的时候才会出现错误。这样的原因是
+    UDP 是“无连接”协议，这意味着在真正发送/接收数据之前，操作系统不会尝试为套接字创建连接。
    </para>
   </warning>
   &ipv6.brackets;
@@ -206,7 +209,7 @@ if (!$fp) {
     <member><function>fclose</function></member>
     <member><function>feof</function></member>
     <member><function>socket_connect</function></member>
-    <member>The <link linkend="ref.curl">Curl extension</link></member>
+    <member><link linkend="ref.curl">Curl 扩展</link></member>
    </simplelist>
   </para>
  </refsect1>
