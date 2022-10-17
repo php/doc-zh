@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 62e49c2b1beec1ecad6d2fd2a65639c2965362fc Maintainer: WeijianZhang Status: ready -->
-<!-- Reviewed: no -->
-
-<refentry xml:id="function.ip2long" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+<!-- EN-Revision: 184f3f7bd45643cb80f828d0bb001991ec3a5fad Maintainer: WeijianZhang Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
+<refentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="function.ip2long">
  <refnamediv>
   <refname>ip2long</refname>
   <refpurpose>将 IPV4 的字符串互联网协议转换成长整型数字</refpurpose>
@@ -12,15 +11,15 @@
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <type>int</type><methodname>ip2long</methodname>
-   <methodparam><type>string</type><parameter>ip_address</parameter></methodparam>
+   <type class="union"><type>int</type><type>false</type></type><methodname>ip2long</methodname>
+   <methodparam><type>string</type><parameter>ip</parameter></methodparam>
   </methodsynopsis>
   <para>
    函数 <function>ip2long</function> 返回 IPV4 网络地址的长整型格式，从标准网络地址格式(点字符串)转化得到。
   </para>
   <para>
-   <function>ip2long</function> 还可以与非完整IP进行工作。
-   阅读 <link xlink:href="&url.ip2long.tech;">&url.ip2long.tech;</link>
+   <function>ip2long</function> 还可以与非完整IP进行工作。阅读
+   <link xlink:href="&url.ip2long.tech;">&url.ip2long.tech;</link>
    获得更多信息。
   </para>
  </refsect1>
@@ -30,7 +29,7 @@
   <para>
    <variablelist>
     <varlistentry>
-     <term><parameter>ip_address</parameter></term>
+     <term><parameter>ip</parameter></term>
      <listitem>
       <para>
       一个标准格式的地址。
@@ -44,40 +43,7 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   返回IP地址转换后的数字 或 &false; 如果 <parameter>ip_address</parameter>
-   是无效的。
-  </para>
- </refsect1>
-
- <refsect1 role="changelog">
-  &reftitle.changelog;
-  <para>
-   <informaltable>
-    <tgroup cols="2">
-     <thead>
-      <row>
-       <entry>&Version;</entry>
-       <entry>&Description;</entry>
-      </row>
-     </thead>
-     <tbody>
-      <row>
-       <entry>5.5.0</entry>
-       <entry>
-        Prior to this version, on Windows <function>ip2long</function> would sometimes return
-        a valid number even if passed a value which was not an (IPv4) Internet Protocol
-        dotted address.
-       </entry>
-      </row>
-      <row>
-       <entry>5.2.10</entry>
-       <entry>
-        再此之前的版本, <function>ip2long</function> 有时会返回即使这不是一个IPV4的标准地址的数字地址。
-       </entry>
-      </row>
-     </tbody>
-    </tgroup>
-   </informaltable>
+   返回IP地址转换后的数字，如果 <parameter>ip</parameter> 无效，则为 &false;。
   </para>
  </refsect1>
 
@@ -100,10 +66,9 @@ echo $out;
   </para>
   <para>
    <example>
-    <title>显示IP地址</title>
+    <title>显示 IP 地址</title>
     <para>
-     第二个例子说明打印一个转换后的地址使用
-     <function>printf</function> 在PHP4和PHP5的功能:
+     第二个例子说明使用 <function>printf</function> 打印转换后的地址：
     </para>
     <programlisting role="php">
 <![CDATA[
@@ -114,8 +79,8 @@ $long = ip2long($ip);
 if ($long == -1 || $long === FALSE) {
     echo 'Invalid IP, please try again';
 } else {
-    echo $ip   . "\n";           // 192.0.34.166
-    echo $long . "\n";           // -1073732954
+    echo $ip   . "\n";            // 192.0.34.166
+    echo $long . "\n";            // 3221234342 (-1073732954 on 32-bit systems, due to integer overflow)
     printf("%u\n", ip2long($ip)); // 3221234342
 }
 ?>
@@ -129,15 +94,15 @@ if ($long == -1 || $long === FALSE) {
   &reftitle.notes;
   <note>
    <para>
-    因为PHP的 <type>integer</type> 类型是有符号，并且有许多的IP地址讲导致在32位系统的情况下为负数， 你需要使用 "%u" 进行转换通过 <function>sprintf</function> 或
-    <function>printf</function> 得到的字符串来表示无符号的IP地址。
+    因为 PHP 的 <type>int</type> 类型是有符号，并且有许多的 IP 地址讲导致在 32
+    位系统的情况下为负数，你需要使用“%u”进行转换通过 <function>sprintf</function> 或
+    <function>printf</function> 得到的字符串来表示无符号的 IP 地址。
    </para>
   </note>
   <note>
    <para>
-    <function>ip2long</function> 将返回 &false; 在IP是
-    <literal>255.255.255.255</literal> 的情况，版本为 PHP 5 &lt;= 5.0.2. 在修复后
-    PHP 5.0.3 会返回 <literal>-1</literal> (与PHP4相同).
+    由于整数值溢出，<function>ip2long</function> 将为 32 位系统上的 IP
+    <literal>255.255.255.255</literal> 返回 <literal>-1</literal>。
    </para>
   </note>
  </refsect1>
@@ -153,7 +118,6 @@ if ($long == -1 || $long === FALSE) {
  </refsect1>
 
 </refentry>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
