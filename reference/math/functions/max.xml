@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 26a93ee76caae16995bc663220131d685f3b5c0b Maintainer: dallas Status: ready -->
-<!-- CREDITS: mowangjuanzi -->
+<!-- $Author$ -->
+<!-- EN-Revision: aa742af0b78990a4e431dc3ba2452c2d75c99968 Maintainer: dallas Status: ready -->
 <refentry xml:id="function.max" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>max</refname>
@@ -11,13 +11,13 @@
   &reftitle.description;
   <methodsynopsis>
    <type>mixed</type><methodname>max</methodname>
-   <methodparam><type>mixed</type><parameter>value</parameter></methodparam>
-   <methodparam rep="repeat"><type>mixed</type><parameter>values</parameter></methodparam>
+   <methodparam><type>array</type><parameter>values</parameter></methodparam>
   </methodsynopsis>
-  <simpara>替代签名（不支持命名参数）：</simpara>
   <methodsynopsis>
    <type>mixed</type><methodname>max</methodname>
-   <methodparam><type>array</type><parameter>value_array</parameter></methodparam>
+   <methodparam><type>mixed</type><parameter>value1</parameter></methodparam>
+   <methodparam><type>mixed</type><parameter>value2</parameter></methodparam>
+   <methodparam choice="opt"><type>mixed</type><parameter>...</parameter></methodparam>
   </methodsynopsis>
   <para>
    如果仅有一个参数且为数组，<function>max</function>
@@ -26,42 +26,49 @@
   </para>
   <note>
    <para>
-    不同类型的值将使用<link linkend="language.operators.comparison">标准比较规则</link>进行比较。例如，一个非数字
-    <type>string</type> 与 <type>int</type> 比较，就好像它是 <literal>0</literal>，但多个非数字
-    <type>string</type> 值将会按照字母数字比较。返回的实际值是未应用转换的原始类型。
+    PHP 会将非数值的 <type>string</type> 当成
+    <literal>0</literal>，但如果这个正是最大的数值则仍然会返回一个字符串。如果多个参数都求值为
+    <literal>0</literal> 且是最大值，<function>max</function> 会返回其中数值的
+    <literal>0</literal>，如果参数中没有数值的 <literal>0</literal>，则返回按字母表顺序最大的字符串。
    </para>
   </note>
-  <caution>
-   <simpara>
-    传递不同类型的参数时要小心，因为 <function>max</function> 会产生不可预测的结果。
-   </simpara>
-  </caution>
  </refsect1>
  <refsect1 role="parameters">
   &reftitle.parameters;
   <para>
    <variablelist>
     <varlistentry>
-     <term><parameter>value</parameter></term>
-     <listitem>
-      <para>
-       任何<link linkend="language.operators.comparison">可比较</link>的值。
-      </para>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
      <term><parameter>values</parameter></term>
      <listitem>
       <para>
-       任何<link linkend="language.operators.comparison">可比较</link>的值。
+       包含了多个值的数组。
       </para>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>value_array</parameter></term>
+     <term><parameter>value1</parameter></term>
      <listitem>
       <para>
-       包含值的数组。
+       Any <link linkend="language.operators.comparison">comparable</link>
+       value.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>value2</parameter></term>
+     <listitem>
+      <para>
+       Any <link linkend="language.operators.comparison">comparable</link>
+       value.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>...</parameter></term>
+     <listitem>
+      <para>
+       Any <link linkend="language.operators.comparison">comparable</link>
+       value.
       </para>
      </listitem>
     </varlistentry>
@@ -71,11 +78,19 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   <function>max</function> 根据标准比较返回认为是“最高”的参数值。如果不同类型的多个值认为相等（比如
-   <literal>0</literal> 与 <literal>'abc'</literal>），则将会提供给函数的第一个值。
+   <function>max</function> 返回参数中数值最大的值。
+   If multiple values can be considered of the same size,
+   the one that is listed first will be returned.
   </para>
   <para>
-   如果传递空数组，然后将会返回 &false;，并发出 <constant>E_WARNING</constant> 错误。
+   When <function>max</function> is given multiple <type>array</type>s, the
+   longest array is returned. If all the arrays have the same length,
+   <function>max</function> will use lexicographic ordering to find the return
+   value.
+  </para>
+  <para>
+   When given a <type>string</type> it will be cast as an <type>integer</type>
+   when comparing.
   </para>
  </refsect1>
  <refsect1 role="examples">
@@ -86,35 +101,29 @@
     <programlisting role="php">
 <![CDATA[
 <?php
-echo max(2, 3, 1, 6, 7);  // 7
+echo max(1, 3, 5, 6, 7);  // 7
 echo max(array(2, 4, 5)); // 5
 
-// The string 'hello' when compared to an int is treated as 0
-// Since the two values are equal, the order they are provided determines the result
+// When 'hello' is cast as integer it will be 0. Both the parameters are equally
+// long, so the order they are given in determines the result
 echo max(0, 'hello');     // 0
 echo max('hello', 0);     // hello
 
-// Here we are comparing -1 < 0, so 'hello' is the highest value
-echo max('hello', -1);    // hello
+echo max('42', 3); // '42'
+
+// Here 0 > -1, so 'hello' is the return value.
+echo max(-1, 'hello');    // hello
 
 // With multiple arrays of different lengths, max returns the longest
 $val = max(array(2, 2, 2), array(1, 1, 1, 1)); // array(1, 1, 1, 1)
 
-// Multiple arrays of the same length are compared from left to right
-// so in our example: 2 == 2, but 5 > 4
-$val = max(array(2, 4, 8), array(2, 5, 1)); // array(2, 5, 1)
+// 对多个数组，max 从左向右比较。
+   // 因此在本例中：2 == 2，但 4 < 5
+$val = max(array(2, 4, 8), array(2, 5, 7)); // array(2, 5, 7)
 
-// If both an array and non-array are given, the array will be returned
-// as comparisons treat arrays as greater than any other value
+// 如果同时给出数组和非数组作为参数，则总是将数组视为
+   // 最大值返回
 $val = max('string', array(2, 5, 7), 42);   // array(2, 5, 7)
-
-// If one argument is NULL or a boolean, it will be compared against
-// other values using the rule FALSE < TRUE regardless of the other types involved
-// In the below example, -10 is treated as TRUE in the comparison
-$val = max(-10, FALSE); // -10
-
-// 0, on the other hand, is treated as FALSE, so is "lower than" TRUE
-$val = max(0, TRUE); // TRUE
 ?>
 ]]>
     </programlisting>
@@ -131,6 +140,7 @@ $val = max(0, TRUE); // TRUE
   </para>
  </refsect1>
 </refentry>
+
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
