@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 4a7ddddc27271967b616ad3400cfbe2a9b48212b Maintainer: daijie Status: ready -->
-<!-- Reviewed: no -->
-
+<!-- EN-Revision: a64d62cdd778ffa40493eae8dde024ff1c169573 Maintainer: daijie Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="function.setcookie" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
   <refname>setcookie</refname>
@@ -11,31 +10,31 @@
  
  <refsect1 role="description">
   &reftitle.description;
-  <methodsynopsis role="procedural">
+  <methodsynopsis>
    <type>bool</type><methodname>setcookie</methodname>
    <methodparam><type>string</type><parameter>name</parameter></methodparam>
    <methodparam choice="opt"><type>string</type><parameter>value</parameter><initializer>""</initializer></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter>expires</parameter><initializer>0</initializer></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>expires_or_options</parameter><initializer>0</initializer></methodparam>
    <methodparam choice="opt"><type>string</type><parameter>path</parameter><initializer>""</initializer></methodparam>
    <methodparam choice="opt"><type>string</type><parameter>domain</parameter><initializer>""</initializer></methodparam>
    <methodparam choice="opt"><type>bool</type><parameter>secure</parameter><initializer>&false;</initializer></methodparam>
    <methodparam choice="opt"><type>bool</type><parameter>httponly</parameter><initializer>&false;</initializer></methodparam>
   </methodsynopsis>
-  <para>PHP 7.3.0 起有效的签名：</para>
-  <methodsynopsis role="procedural">
+  <para>自 PHP 7.3.0 起可用的替代签名（不支持命名参数）：</para>
+  <methodsynopsis>
    <type>bool</type><methodname>setcookie</methodname>
    <methodparam><type>string</type><parameter>name</parameter></methodparam>
    <methodparam choice="opt"><type>string</type><parameter>value</parameter><initializer>""</initializer></methodparam>
    <methodparam choice="opt"><type>array</type><parameter>options</parameter><initializer>[]</initializer></methodparam>
   </methodsynopsis>
   <para>
-   <function>setcookie</function> 定义了 Cookie，会和剩下的 HTTP 头一起发送给客户端。
-   和其他 HTTP 头一样，必须在脚本产生任意输出<emphasis>之前</emphasis>发送 Cookie（由于协议的限制）。
-   请在产生任何输出之前（包括 <literal>&lt;html&gt;</literal> 和 <literal>&lt;head&gt;</literal> 或者空格）调用本函数。
+   <function>setcookie</function> 定义了
+   Cookie，会和剩下的消息头一起发送给客户端。和其他消息头一样，必须在脚本产生任意输出<emphasis>之前</emphasis>发送
+   Cookie（由于协议的限制）。请在产生任何输出之前（包括 <literal>&lt;html&gt;</literal> 和 <literal>&lt;head&gt;</literal> 或者空格）调用本函数。
   </para>
   <para>
-   一旦设置 Cookie 后，下次打开页面时可以使用 <varname>$_COOKIE</varname> 读取。
-   Cookie 值同样也存在于 <varname>$_REQUEST</varname>。
+   一旦设置 Cookie 后，下次打开页面时可以使用 <varname>$_COOKIE</varname>
+   读取。Cookie 值同样也存在于 <varname>$_REQUEST</varname>。
   </para>
  </refsect1>
 
@@ -56,28 +55,26 @@
      <term><parameter>value</parameter></term>
      <listitem>
       <para>
-       Cookie 值。
-       这个值储存于用户的电脑里，请勿储存敏感信息。
-       比如 <parameter>name</parameter> 是 <literal>'cookiename'</literal>，
-       可通过 <varname>$_COOKIE['cookiename']</varname> 获取它的值。
+       Cookie 值。这个值储存于用户的电脑里，请勿储存敏感信息。比如
+       <parameter>name</parameter> 是 <literal>'cookiename'</literal>，可通过
+       <varname>$_COOKIE['cookiename']</varname> 获取它的值。
       </para>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>expires</parameter></term>
+     <term><parameter>expires_or_options</parameter></term>
      <listitem>
       <para>
-       Cookie 的过期时间。
-       这是个 Unix 时间戳，即 Unix 纪元以来（格林威治时间 1970 年 1 月 1 日 00:00:00）的秒数。
-       也就是说，基本可以用 <function>time</function> 函数的结果加上希望过期的秒数。
-       或者也可以用 <function>mktime</function>。
-       <literal>time()+60*60*24*30</literal> 就是设置 Cookie 30 天后过期。
-       如果设置成零，或者忽略参数， Cookie 会在会话结束时过期（也就是关掉浏览器时）。
+       Cookie 的过期时间。这是 Unix 时间戳，即纪元以来的秒数。一种设置此值的方式是将
+       cookie 过期前的秒数与调用 <function>time</function>
+       的结果相加。例如，<literal>time()+60*60*24*30</literal>
+       就是设置 Cookie 30 天后过期。还有一种选择就是使用 <function>mktime</function>
+       函数。如果设置为 <literal>0</literal> 或者忽略，Cookie 会在会话结束时过期（关掉浏览器时）。
       </para>
       <para>
        <note>
         <para>
-          你可能注意到了，<parameter>expires</parameter> 使用 Unix 时间戳而非 <literal>Wdy, DD-Mon-YYYY
+         可能会注意到，<parameter>expires_or_options</parameter> 使用 Unix 时间戳而非 <literal>Wdy, DD-Mon-YYYY
          HH:MM:SS GMT</literal> 这样的日期格式，是因为 PHP 内部作了转换。
         </para>
        </note>
@@ -88,11 +85,10 @@
      <term><parameter>path</parameter></term>
      <listitem>
       <para>
-       Cookie 有效的服务器路径。
-       设置成 <literal>'/'</literal> 时，Cookie 对整个域名 <parameter>domain</parameter> 有效。
-       
-       如果设置成 <literal>'/foo/'</literal>， Cookie 仅仅对 <parameter>domain</parameter> 中 <literal>/foo/</literal> 目录及其子目录有效（比如 <literal>/foo/bar/</literal>）。
-       默认值是设置 Cookie 时的当前目录。
+       Cookie 有效的服务器路径。设置成 <literal>'/'</literal> 时，Cookie 对整个域名
+       <parameter>domain</parameter> 有效。如果设置成 <literal>'/foo/'</literal>，Cookie
+       仅仅对 <parameter>domain</parameter> 中 <literal>/foo/</literal>
+       目录及其子目录有效（比如 <literal>/foo/bar/</literal>）。默认值是设置 Cookie 时的当前目录。
       </para>
      </listitem>
     </varlistentry>
@@ -100,13 +96,13 @@
      <term><parameter>domain</parameter></term>
      <listitem>
       <para>
-       Cookie 的有效域名/子域名。
-       设置成子域名（例如 <literal>'www.example.com'</literal>），会使 Cookie 对这个子域名和它的三级域名有效（例如 w2.www.example.com）。
-       要让 Cookie 对整个域名有效（包括它的全部子域名），只要设置成域名就可以了（这个例子里是 <literal>'example.com'</literal>）。
+       Cookie 的有效域名/子域名。设置成子域名（例如 <literal>'www.example.com'</literal>），会使
+       Cookie 对这个子域名和它的三级域名有效（例如 w2.www.example.com）。要让 Cookie
+       对整个域名有效（包括它的全部子域名），只要设置成域名就可以了（这个例子里是 <literal>'example.com'</literal>）。
       </para>
       <para>
-       旧版浏览器仍然在使用废弃的 <link xlink:href="&url.rfc;2109">RFC 2109</link>，
-       需要一个前置的点 <literal>.</literal> 来匹配所有子域名。
+       旧版浏览器仍然在使用废弃的 <link xlink:href="&url.rfc;2109">RFC 2109</link>，需要一个前置的点
+       <literal>.</literal> 来匹配所有子域名。
       </para>
      </listitem>
     </varlistentry>
@@ -114,10 +110,9 @@
      <term><parameter>secure</parameter></term>
      <listitem>
       <para>
-       设置这个 Cookie 是否仅仅通过安全的 HTTPS 连接传给客户端。
-       设置成 &true; 时，只有安全连接存在时才会设置 Cookie。
-       如果是在服务器端处理这个需求，程序员需要仅仅在安全连接上发送此类 Cookie
-       （通过 <varname>$_SERVER["HTTPS"]</varname> 判断）。
+       设置这个 Cookie 是否仅仅通过安全的 HTTPS 连接传给客户端。设置成 &true; 时，只有安全连接存在时才会设置
+       Cookie。如果是在服务器端处理这个需求，程序员需要仅仅在安全连接上发送此类 Cookie（通过
+       <varname>$_SERVER["HTTPS"]</varname> 判断）。
       </para>
      </listitem>
     </varlistentry>
@@ -125,32 +120,26 @@
      <term><parameter>httponly</parameter></term>
      <listitem>
       <para>
-       设置成 &true;，Cookie 仅可通过 HTTP 协议访问。
-       这意思就是 Cookie 无法通过类似 JavaScript 这样的脚本语言访问。
-       要有效减少 XSS 攻击时的身份窃取行为，可建议用此设置（虽然不是所有浏览器都支持），不过这个说法经常有争议。
+       设置成 &true;，Cookie 仅可通过 HTTP 协议访问。这意思就是 Cookie 无法通过类似 JavaScript
+       这样的脚本语言访问。要有效减少 XSS 攻击时的身份窃取行为，可建议用此设置（虽然不是所有浏览器都支持），不过这个说法经常有争议。
        &true; 或 &false;
       </para>
      </listitem>
     </varlistentry>
     <varlistentry>
-        <term><parameter>options</parameter></term>
-        <listitem>
-            <para>
-                An associative <type>array</type> which may have any of the keys
-                <literal>expires</literal>, <literal>path</literal>, <literal>domain</literal>,
-                <literal>secure</literal>, <literal>httponly</literal> and <literal>samesite</literal>.
-                If any other key is present an error of level <constant>E_WARNING</constant>
-                is generated. The values have the same meaning as described for the 
-                parameters with the same name. The value of the <literal>samesite</literal>
-                element should be either <literal>None</literal>, <literal>Lax</literal>
-                or <literal>Strict</literal>.
-                If any of the allowed options are not given, their default values are the
-                same as the default values of the explicit parameters. If the
-                <literal>samesite</literal> element is omitted, no SameSite cookie
-                attribute is set.
-            </para>
-        </listitem>
-       </varlistentry>
+     <term><parameter>options</parameter></term>
+     <listitem>
+      <para>
+       关联 <type>array</type>，可能会存在以下键
+       <literal>expires</literal>、<literal>path</literal>、<literal>domain</literal>、<literal>secure</literal>、<literal>httponly</literal> 和
+       <literal>samesite</literal>。如果存在其它的键，会生成 <constant>E_WARNING</constant>
+       级别的错误。这些值的含义跟同名参数的描述相同。<literal>samesite</literal> 元素的值应该是
+       <literal>None</literal>、<literal>Lax</literal> 或
+       <literal>Strict</literal>。如果没有指定任何允许的选项，它们的默认值与显式参数的默认值相同。如果省略
+       <literal>samesite</literal> 元素，则不设置 SameSite cookie 属性。
+      </para>
+     </listitem>
+    </varlistentry>
    </variablelist>
   </para>
  </refsect1>
@@ -158,15 +147,39 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   如果在调用本函数以前就产生了输出，<function>setcookie</function> 会调用失败并返回 &false;。
-   如果 <function>setcookie</function> 成功运行，返回 &true;。当然，它的意思并非用户是否已接受 Cookie。
+   如果在调用本函数以前就产生了输出，<function>setcookie</function> 会失败并返回 &false;。如果
+   <function>setcookie</function> 成功运行，返回 &true;。当然，它的意思并非用户是否已接受 Cookie。
+  </para>
+ </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <para>
+   <informaltable>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>&Version;</entry>
+       <entry>&Description;</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>7.3.0</entry>
+       <entry>
+        新增对替代签名 <parameter>options</parameter> 数组的支持。此签名还支持 SameSite cookie 属性的设置。
+       </entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </informaltable>
   </para>
  </refsect1>
 
  <refsect1 role="examples">
   &reftitle.examples;
   <para>
-   发送 Cookie 的几个例子：
+   发送 cookie 的几个例子：
    <example>
     <title><function>setcookie</function> 发送例子</title>
     <programlisting role="php">
@@ -183,9 +196,9 @@ setcookie("TestCookie", $value, time()+3600, "/~rasmus/", "example.com", 1);
    </example>
   </para>
   <para>
-   注意：在发送 Cookie 时，值的部分会被自动 urlencode 编码。收到 Cookie 时，会自动解码，并赋值到可变的 Cookie 名称上。
-   如果不想被编码，可以使用 <function>setrawcookie</function> 代替。
-   在脚本里查看我们的测试 Cookie 的内容，使用下面的一个例子：
+   注意：在发送 Cookie 时，值的部分会被自动 urlencode 编码。收到 Cookie 时，会自动解码，并赋值到可变的
+   Cookie 名称上。如果不想被编码，可以使用 <function>setrawcookie</function>
+   代替。在脚本里查看我们的测试 Cookie 的内容，使用下面的一个例子：
   </para>
   <para>
    <informalexample>
@@ -206,8 +219,7 @@ print_r($_COOKIE);
    <example>
     <title><function>setcookie</function> 删除例子</title>
     <para>
-     要删除一个 Cookie，应该设置过期时间为过去，以触发浏览器的删除机制。
-     下面的例子展示了如何删除上个例子里的 Cookie：
+     要删除一个 Cookie，应该设置过期时间为过去，以触发浏览器的删除机制。下面的例子展示了如何删除上个例子里的 Cookie：
     </para>
     <programlisting role="php">
 <![CDATA[
@@ -224,9 +236,8 @@ setcookie("TestCookie", "", time() - 3600, "/~rasmus/", "example.com", 1);
    <example>
     <title><function>setcookie</function> 和数组</title>
     <para>
-     通过带 array 标记的 Cookie 名称，也可以把 Cookie 设置成数组。
-     如果有数组元素，可以把它放进 Cookie 里；
-     脚本接收到时，Cookie 名称里的值会是一个数组：
+     通过带 array 标记的 Cookie 名称，也可以把 Cookie 设置成数组。如果有数组元素，可以把它放进 Cookie
+     里；脚本接收到时，Cookie 名称里的值会是一个数组：
     </para>
     <programlisting role="php">
 <![CDATA[
@@ -258,37 +269,10 @@ one : cookieone
    </example>
    <note>
     <simpara>
-     Using separator characters such as <literal>[</literal> and <literal>]</literal>
-     as part of the cookie name is not compliant to RFC 6265, section 4, but supposed
-     to be supported by user agents according to RFC 6265, section 5.
+     使用 <literal>[</literal> 和 <literal>]</literal> 分隔符作为 cookie 名称的一部分不符合
+     RFC 6265 第 4 节。但根据 RFC 6265 第 5 节应该由 user agent 支持。
     </simpara>
    </note>
-  </para>
- </refsect1>
-
- <refsect1 role="changelog">
-  &reftitle.changelog;
-  <para>
-   <informaltable>
-    <tgroup cols="2">
-     <thead>
-      <row>
-       <entry>&Version;</entry>
-       <entry>&Description;</entry>
-      </row>
-     </thead>
-     <tbody>
-      <row>
-        <entry>7.3.0</entry>
-        <entry>
-         An alternative signature supporting an <parameter>options</parameter>
-         array has been added. This signature supports also setting of the
-         SameSite cookie attribute.
-        </entry>
-       </row>
-     </tbody>
-    </tgroup>
-   </informaltable>
   </para>
  </refsect1>
 
@@ -296,10 +280,9 @@ one : cookieone
   &reftitle.notes;
   <note>
    <para>
-    要在调用本函数前输出内容，可以使用输出缓冲：让输出的内容在服务器里缓冲起来，
-    直至真正发送给浏览器。
-    可在脚本里调用 <function>ob_start</function> 和 <function>ob_end_flush</function>，
-    或设置 <literal>output_buffering</literal> &php.ini; 或服务器配置文件里的配置指令。
+    要在调用本函数前输出内容，可以使用输出缓冲，让输出的内容在服务器里缓冲起来，直至真正发送给浏览器。可在脚本里调用
+    <function>ob_start</function> 和 <function>ob_end_flush</function>，或设置
+    <literal>output_buffering</literal> &php.ini; 或服务器配置文件里的配置指令。
    </para>
   </note>
   <para>
@@ -307,18 +290,18 @@ one : cookieone
    <itemizedlist>
     <listitem>
      <simpara>
-      在页面（ Cookie 可见的页面）下次刷新前，Cookie 不会生效。
+      在页面（Cookie 可见的页面）下次刷新前，Cookie 不会生效。
       测试 Cookie 是否已经成功设置，需要在下次页面加载时、Cookie 过期前检测。
-      过期时间是通过 <parameter>expires</parameter> 参数设置的。
+      过期时间是通过 <parameter>expires_or_options</parameter> 参数设置的。
       直接调用 <literal>print_r($_COOKIE);</literal> 调试检测 Cookie 是个很好的方式。
      </simpara>
     </listitem>
     <listitem>
      <simpara>
       为同一个参数再次设置 Cookie 前，必须先把它删掉。
-      如果参数的值是空 string 或 &false;，并且其他参数和上次调用 setcookie 仍旧一样，
+      如果参数的值是空 string，并且其他参数和上次调用 setcookie 仍旧一样，
       则指定的名称会被远程客户端删除。
-      内部的实现是：将值设置成 'deleted'，并且过期时间是一年前。
+      内部的实现是：将值设置成 <literal>'deleted'</literal>，且过去的过期时间。
      </simpara>
     </listitem>
     <listitem>
