@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $EN-Revision: 79dcbe011fb254dcd92c597064571fe313362a09 $ -->
+<!-- $EN-Revision: 65a007a4c04dd0793d07a1a067880dde9b39167a Maintainer: mowangjuanzi Status: ready -->
 <appendix xml:id="outcontrol.examples" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
   &reftitle.examples;
+
   <section xml:id="outcontrol.examples.basic">
   <title>基本用法</title>
   <para>
@@ -25,10 +26,61 @@ ob_end_flush();
    </example>
   </para>
   <para>
-   在上面的例子中，<function>echo</function>函数的输出将一直被保存在输出缓冲区中直到调用
-   <function>ob_end_flush</function> 。同时，对<function>setcookie</function>的调用也成功存储了一个cookie,而不会引起错误。（正常情况下，在数据被发送到浏览器后，就不能再发送http头信息了。）
+   在上面的例子中，<function>echo</function> 函数的输出将一直被保存在输出缓冲区中直到调用
+   <function>ob_end_flush</function>。同时对 <function>setcookie</function>
+   的调用也成功存储了 cookie，而不会引起错误。（数据已发送到浏览器后，消息头通常无法发送。）
   </para>
  </section>
+
+  <section xml:id="outcontrol.examples.rewrite">
+  <title>输出重写用法</title>
+  <para>
+   自 PHP 7.1.0 起，<function>output_add_rewrite_var</function>、<function>output_reset_rewrite_vars</function>
+   使用专用的输出缓冲区。即不使用 <link linkend="ini.session.use-trans-sid">trans sid</link> 输出缓冲区。
+  </para>
+  <para>
+   <example>
+    <title>输出重写示例</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+// 此代码仅适用于 PHP 7.1.0、7.0.10、5.6.25 及更高版本。
+
+// HTTP_HOST 是默认目标主机。手动设置以使示例代码工作。
+$_SERVER['HTTP_HOST'] = 'php.net';
+
+// 输出重写仅重写表单。添加 a=href.
+// 可以指定标签 tag_name=url_attr, e.g. img=src,iframe=src
+// 设置间不允许有空格。
+// 表单标签是添加隐藏输入的特殊标签。
+ini_set('url_rewriter.tags','a=href,form=');
+var_dump(ini_get('url_rewriter.tags'));
+
+// This is added to URL and form
+output_add_rewrite_var('test', 'value');
+?>
+<a href="//php.net/index.php?bug=1234">bug1234</a>
+<form action="https://php.net/?bug=1234&edit=1" action="post">
+ <input type="text" name="title" />
+</form>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+<a href="//php.net/?bug=1234&test=value">bug1234</a>
+<form action="https://php.net/?bug=1234&edit=1" method="post"><input type="hidden" name="test" value="value" />
+ <input type="text" name="title" />
+</form>
+]]>
+    </screen>
+   </example>
+  </para>
+  <para>
+   自 PHP 7.1.0 起，输出重写函数有自己的 INI 设置：<link linkend="ini.url-rewriter.tags">url_rewriter.tags</link> 和 <link linkend="ini.url-rewriter.hosts">url_rewriter.hosts</link>。
+  </para>
+ </section>
+
 </appendix>
 
 <!-- Keep this comment at the end of the file
