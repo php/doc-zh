@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: c249f3bc56fcdb3ea3f64b1fa0c4fd96a7dcd5a4 Maintainer: yuanyuqiang Status: ready -->
+<!-- EN-Revision: c401af11b147e38be7ec09d8267f377269beeba3 Maintainer: yuanyuqiang Status: ready -->
 <!-- CREDITS: mowangjuanzi -->
 <phpdoc:classref xml:id="class.dateperiod" xmlns:phpdoc="http://php.net/ns/phpdoc" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude">
 
@@ -132,8 +132,58 @@
      <term><varname>recurrences</varname></term>
      <listitem>
       <para>
-       如果通过显式的传入 <literal>$recurrences</literal> 来创建的 <classname>DatePeriod</classname> 实例，
-       那么这个参数表示循环次数。
+       迭代器返回的最小实例数。
+      </para>
+      <para>
+       如果在 <classname>DatePeriod</classname> 实例的构造函数中显式通过 <literal>$recurrences</literal>
+       参数传递重复次数，然后此属性将包含该值，如果开始时间没有通过 <constant>DatePeriod::EXCLUDE_START_DATE</constant>
+       禁用，则该属性<emphasis>加</emphasis> 1，如果结束时间已经通过 <constant>DatePeriod::INCLUDE_END_DATE</constant>
+       弃用，则该属性<emphasis>加</emphasis> 1。
+      </para>
+      <para>
+       如果没有显式传递重复次数，则此属性包含返回实例的最小数量。这将是 
+       <literal>0</literal>，如果开始时间没有通过 <constant>DatePeriod::EXCLUDE_START_DATE</constant>
+       禁用，则该属性<emphasis>加</emphasis> 1，如果结束时间已经通过 <constant>DatePeriod::INCLUDE_END_DATE</constant>
+       弃用，则该属性<emphasis>加</emphasis> 1。
+      </para>
+      <para>
+       <example>
+        <programlisting role="php">
+<![CDATA[<?php
+$start = new DateTime('2018-12-31 00:00:00');
+$end   = new DateTime('2021-12-31 00:00:00');
+$interval = new DateInterval('P1M');
+$recurrences = 5;
+
+// 通过构造函数显式设置重复次数
+$period = new DatePeriod($start, $interval, $recurrences, DatePeriod::EXCLUDE_START_DATE);
+echo $period->recurrences, "\n";
+
+$period = new DatePeriod($start, $interval, $recurrences);
+echo $period->recurrences, "\n";
+
+$period = new DatePeriod($start, $interval, $recurrences, DatePeriod::INCLUDE_END_DATE);
+echo $period->recurrences, "\n";
+
+// 构造函数中没有设置重复次数
+$period = new DatePeriod($start, $interval, $end);
+echo $period->recurrences, "\n";
+
+$period = new DatePeriod($start, $interval, $end, DatePeriod::EXCLUDE_START_DATE);
+echo $period->recurrences, "\n";
+?>]]>
+         </programlisting>
+         &example.outputs;
+         <screen role="php">
+5
+6
+7
+1
+0
+         </screen>
+        </example>
+       </para>
+      <para>
        参见：<methodname>DatePeriod::getRecurrences</methodname>。
       </para>
      </listitem>
