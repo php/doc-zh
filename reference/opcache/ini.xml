@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 9e34a0a4732c6dae4befd79efd7de3f728c77fa5 Maintainer: yuanyuqiang Status: ready -->
+<!-- EN-Revision: fe64ac9a1ed0852a413f07c1847cfa6a9ab970e5 Maintainer: yuanyuqiang Status: partial -->
 <!-- CREDITS: mowangjuanzi -->
 <sect1 xml:id="opcache.configuration" xmlns="http://docbook.org/ns/docbook">
  &reftitle.runtime;
@@ -28,7 +28,7 @@
       <entry><link linkend="ini.opcache.enable-cli">opcache.enable_cli</link></entry>
       <entry>"0"</entry>
       <entry>PHP_INI_SYSTEM</entry>
-      <entry>在 PHP 7.1.2 至 7.1.6 （含）的版本，默认值是"1"</entry>
+      <entry>在 PHP 7.1.2 至 7.1.6（含）的版本，默认值是“1”</entry>
      </row>
      <row>
       <entry><link
@@ -918,7 +918,9 @@
     </term>
     <listitem>
      <para>
-      考虑到安全因素，禁止以 root 用户预加载代码。该指令方便以其他用户预加载。
+      预加载以指定系统用户身份运行。这对于切换到非特权系统用户之前以 root
+      身份启动的服务器很有用。考虑到安全因素，默认禁止以 root
+      身份预加载代码，除非该指令明确设置为 <literal>root</literal>。
      </para>
     </listitem>
    </varlistentry>
@@ -948,51 +950,50 @@
     </term>
     <listitem>
      <para>
-      For typical usage, this option accepts one of four string values:
+      针对经典用法，此选项接受以下四个字符串值之一：
      </para>
      <simplelist>
-      <member><literal>disable</literal>: Completely disabled, cannot be enabled at runtime.</member>
-      <member><literal>off</literal>:  Disabled, but can be enabled at runtime.</member>
+      <member><literal>disable</literal>：完全禁用，无法在运行时启用。</member>
+      <member><literal>off</literal>：禁用，但可以在运行时启用。</member>
       <member>
-       <literal>tracing</literal>/<literal>on</literal>: Use tracing JIT.
-       Enabled by default and recommended for most users.
+       <literal>tracing</literal>/<literal>on</literal>：使用追踪 JIT。默认启用并推荐给大部分用户。
       </member>
-      <member><literal>function</literal>: Use function JIT.</member>
+      <member><literal>function</literal>：使用函数 JIT。</member>
      </simplelist>
      <para>
-      For advanced usage, this option accepts a 4-digit integer <literal>CRTO</literal>, where the digits mean:
+      针对高级用法，此选项接受 4 位整数 <literal>CRTO</literal>，其中的位分别是：
       <variablelist>
        <varlistentry>
-        <term><literal>C</literal> (CPU-specific optimization flags)</term>
+        <term><literal>C</literal>（特定 CPU 优化 flag）</term>
         <listitem>
          <simplelist>
-          <member><literal>0</literal>: Disable CPU-specific optimization.</member>
-          <member><literal>1</literal>: Enable use of AVX, if the CPU supports it.</member>
+          <member><literal>0</literal>：禁用特定 CPU 优化。</member>
+          <member><literal>1</literal>：如果 CPU 支持则启用 AVX。</member>
          </simplelist>
         </listitem>
        </varlistentry>
        <varlistentry>
-        <term><literal>R</literal> (register allocation)</term>
+        <term><literal>R</literal>（寄存器分配）</term>
         <listitem>
          <simplelist>
-          <member><literal>0</literal>: Don't perform register allocation.</member>
-          <member><literal>1</literal>: Perform block-local register allocation.</member>
-          <member><literal>2</literal>: Perform global register allocation.</member>
+          <member><literal>0</literal>：不执行寄存器分配。</member>
+          <member><literal>1</literal>：执行局部域寄存器分配。</member>
+          <member><literal>2</literal>：执行全局寄存器分配。</member>
          </simplelist>
         </listitem>
        </varlistentry>
        <varlistentry>
-        <term><literal>T</literal> (trigger)</term>
+        <term><literal>T</literal>（触发）</term>
         <listitem>
          <simplelist>
-          <member><literal>0</literal>: Compile all functions on script load.</member>
-          <member><literal>1</literal>: Compile functions on first execution.</member>
+          <member><literal>0</literal>: 在脚本加载时编译所有函数。</member>
+          <member><literal>1</literal>: 在第一次执行时编译函数。</member>
           <member>
            <literal>2</literal>: Profile functions on first request and compile
            the hottest functions afterwards.
           </member>
           <member><literal>3</literal>: Profile on the fly and compile hot functions.</member>
-          <member><literal>4</literal>: Currently unused.</member>
+          <member><literal>4</literal>：目前未使用。</member>
           <member>
            <literal>5</literal>: Use tracing JIT. Profile on the fly and
            compile traces for hot code segments.
@@ -1001,21 +1002,21 @@
         </listitem>
        </varlistentry>
        <varlistentry>
-        <term><literal>O</literal> (optimization level)</term>
+        <term><literal>O</literal>（优化级别）</term>
         <listitem>
          <simplelist>
-          <member><literal>0</literal>: No JIT.</member>
-          <member><literal>1</literal>: Minimal JIT (call standard VM handlers).</member>
-          <member><literal>2</literal>: Inline VM handlers.</member>
-          <member><literal>3</literal>: Use type inference.</member>
-          <member><literal>4</literal>: Use call graph.</member>
-          <member><literal>5</literal>: Optimize whole script.</member>
+          <member><literal>0</literal>：不 JIT。</member>
+          <member><literal>1</literal>：最小 JIT（调用标准 VM 处理程序）。</member>
+          <member><literal>2</literal>：内联 VM 处理程序。</member>
+          <member><literal>3</literal>：使用类型推断。</member>
+          <member><literal>4</literal>：使用调用图。</member>
+          <member><literal>5</literal>：优化整个脚本。</member>
          </simplelist>
         </listitem>
        </varlistentry>
       </variablelist>
-      The <literal>"tracing"</literal> mode corresponds to <code>CRTO = 1254</code>,
-      the <literal>"function"</literal> mode corresponds to <code>CRTO = 1205</code>.
+      <literal>"tracing"</literal> 模式对应 <code>CRTO = 1254</code>，<literal>"function"</literal>
+      模式对应 <code>CRTO = 1205</code>。
      </para>
     </listitem>
    </varlistentry>
@@ -1026,7 +1027,7 @@
     </term>
     <listitem>
      <para>
-      The amount of shared memory to reserve for compiled JIT code. A zero value disables the JIT.
+      为编译 JIT 代码保留的共享内存量。值 0 表示禁用 JIT。
      </para>
      &ini.shorthandbytes;
     </listitem>

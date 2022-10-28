@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: ab63bd1f266ba472763935036683a3e89174985e Maintainer: HonestQiao Status: ready -->
-<!-- Reviewed: no Maintainer: HonestQiao -->
+<!-- EN-Revision: 4754397753fd79f1c846868b66a2448babab1c54 Maintainer: HonestQiao Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="function.mt-rand" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-   <refnamediv>
-    <refname>mt_rand</refname>
-    <refpurpose>生成更好的随机数</refpurpose>
-   </refnamediv>
+ <refnamediv>
+  <refname>mt_rand</refname>
+   <refpurpose>通过梅森旋转（Mersenne Twister）随机数生成器生成随机值</refpurpose>
+ </refnamediv>
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
@@ -18,24 +18,22 @@
    <methodparam><type>int</type><parameter>min</parameter></methodparam>
    <methodparam><type>int</type><parameter>max</parameter></methodparam>
   </methodsynopsis>
-    <simpara>
-     很多老的 libc
-     的随机数发生器具有一些不确定和未知的特性而且很慢。PHP
-     的 <function>rand</function> 函数默认使用
-     libc 随机数发生器。<function>mt_rand</function>
-     函数是非正式用来替换它的。该函数用了
-     <link xlink:href="&url.mersenne;">Mersenne Twister</link>
-     中已知的特性作为随机数发生器，它可以产生随机数值的平均速度比
-     libc 提供的 rand() 快四倍。
-    </simpara>
-    <simpara>
-     如果没有提供可选参数 <parameter>min</parameter> 和
-     <parameter>max</parameter>，<function>mt_rand</function>
-     返回 0 到 <function>mt_getrandmax</function>
-     之间的伪随机数。例如想要 5 到 15（包括 5 和 15）之间的随机数，用
-     <literal>mt_rand(5, 15)</literal>。
-    </simpara>
-   </refsect1>
+  &caution.cryptographically-insecure;
+  <simpara>
+   很多老的 libc
+   的随机数发生器具有一些不确定和未知的特性而且很慢。<function>mt_rand</function>
+   函数是旧的 <function>rand</function> 的临时替代。该函数用了<link
+   xlink:href="&url.mersenne;">梅森旋转</link>中已知的特性作为随机数发生器，它可以产生随机数值的平均速度比
+   libc 提供的 rand() 快四倍。
+  </simpara>
+  <simpara>
+   如果没有提供可选参数 <parameter>min</parameter> 和
+   <parameter>max</parameter>，<function>mt_rand</function>
+   返回 0 到 <function>mt_getrandmax</function>
+   之间的伪随机数。例如想要 5 到 15（包括 5 和 15）之间的随机数，用
+   <literal>mt_rand(5, 15)</literal>。
+  </simpara>
+ </refsect1>
  <refsect1 role="parameters">
   &reftitle.parameters;
   <para>
@@ -62,8 +60,9 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   返回 <parameter>min</parameter> （或者 0） 到 <parameter>max</parameter> （或者是到  <function>mt_getrandmax</function>
-     ，包含这个值）之间的随机整数。
+   返回 <parameter>min</parameter>（或者 0）到 <parameter>max</parameter>（或者是到
+   <function>mt_getrandmax</function>，包含这个值）之间的随机整数，如果
+   <parameter>max</parameter> 小于 <parameter>min</parameter> 则返回 &false;。
   </para>
  </refsect1>
  <refsect1 role="changelog">
@@ -78,7 +77,29 @@
       </row>
      </thead>
      <tbody>
-      &changelog.randomseed;
+      <row>
+       <entry>7.2.0</entry>
+       <entry>
+        <function>rand</function> 已收到模偏差的 <link
+        linkend="migration72.incompatible.rand-mt_rand-output">错误修复</link>。这意味着使用特定种子生成的序列可能与
+        64 位机器上的 PHP 7.1.0 不同。
+        </entry>
+      </row>
+      <row>
+       <entry>7.1.0</entry>
+       <entry>
+        <function>rand</function> <link linkend="migration71.incompatible.rand-srand-aliases">成为</link> <function>mt_rand</function> 的别名。
+       </entry>
+      </row>
+      <row>
+       <entry>7.1.0</entry>
+       <entry>
+        <function>mt_rand</function> <link
+        linkend="migration71.incompatible.fixes-to-mt_rand-algorithm">成为</link>使用梅森旋转（Mersenne
+        Twister）算法的固定、正确版本。要使用旧行为，请使用 <function>mt_srand</function> 并将
+        <constant>MT_RAND_PHP</constant> 作为第二个参数。
+       </entry>
+      </row>
      </tbody>
     </tgroup>
    </informaltable>
@@ -112,13 +133,13 @@ echo mt_rand(5, 15);
  </refsect1>
  <refsect1 role="notes">
   &reftitle.notes;
-  <caution>
+  <warning>
    <para>
-    The distribution of <function>mt_rand</function> return values is biased
-    towards even numbers on 64-bit builds of PHP when
-    <parameter>max</parameter> is beyond <literal>2^32</literal>.
+    <parameter>min</parameter> <parameter>max</parameter> 的范围必须在 <function>getrandmax</function>
+    范围内。即 (<parameter>max</parameter> - <parameter>min</parameter>) &lt;=
+    <function>getrandmax</function>。否则，<function>rand</function> 可能会返回质量差的随机数。
    </para>
-  </caution>
+  </warning>
  </refsect1>
  <refsect1 role="seealso">
   &reftitle.seealso;
@@ -126,11 +147,14 @@ echo mt_rand(5, 15);
    <simplelist>
     <member><function>mt_srand</function></member>
     <member><function>mt_getrandmax</function></member>
+    <member><function>random_int</function></member>
+    <member><function>random_bytes</function></member>
+    <member><function>openssl_random_pseudo_bytes</function></member>
     <member><function>rand</function></member>
    </simplelist>
   </para>
  </refsect1>
-  </refentry>
+</refentry>
 
 <!-- Keep this comment at the end of the file
 Local variables:
