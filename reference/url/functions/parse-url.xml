@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 7e6843088bfd4961eebcfa40a29a8a4b2b917ba3 Maintainer: HonestQiao Status: ready -->
-<!-- Reviewed: no Maintainer: HonestQiao -->
-<!-- CREDITS: dallas -->
+<!-- EN-Revision: 195fde0082f2771a210a2818d3d4fa09c7ee785d Maintainer: HonestQiao Status: ready -->
+<!-- CREDITS: dallas, mowangjuanzi -->
 <refentry xml:id="function.parse-url" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
   <refname>parse_url</refname>
@@ -12,17 +11,17 @@
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <type>mixed</type><methodname>parse_url</methodname>
+   <type class="union"><type>int</type><type>string</type><type>array</type><type>null</type><type>false</type></type><methodname>parse_url</methodname>
    <methodparam><type>string</type><parameter>url</parameter></methodparam>
    <methodparam choice="opt"><type>int</type><parameter>component</parameter><initializer>-1</initializer></methodparam>
   </methodsynopsis>
   <para>
-   本函数解析一个 URL 并返回一个关联数组，包含在 URL 中出现的各种组成部分。
+   本函数解析 URL 并返回关联数组，包含在 URL 中出现的各种组成部分。数组的元素值<emphasis>不会</emphasis>
+   URL 解码。
   </para>
   <para>
    本函数<emphasis role="strong">不是</emphasis>用来验证给定 URL
-   的合法性的，只是将其分解为下面列出的部分。不完整的 URL
-   也被接受，<function>parse_url</function> 会尝试尽量正确地将其解析。
+   的有效性的，只是将其分解为下面列出的部分。也会接受不完整或无效的 URL，<function>parse_url</function> 会尝试尽量正确解析。
   </para>
  </refsect1>
 
@@ -34,8 +33,7 @@
      <term><parameter>url</parameter></term>
      <listitem>
       <para>
-       要解析的 URL。无效字符将使用
-       <literal>_</literal> 来替换。
+       要解析的 URL。
       </para>
      </listitem>
     </varlistentry>
@@ -45,11 +43,9 @@
      <term><parameter>component</parameter></term>
      <listitem>
       <para>
-       指定 <constant>PHP_URL_SCHEME</constant>、
-       <constant>PHP_URL_HOST</constant>、 <constant>PHP_URL_PORT</constant>、
-       <constant>PHP_URL_USER</constant>、 <constant>PHP_URL_PASS</constant>、
-       <constant>PHP_URL_PATH</constant>、 <constant>PHP_URL_QUERY</constant>
-       或 <constant>PHP_URL_FRAGMENT</constant> 的其中一个来获取 URL 中指定的部分的 <type>string</type>。 （除了指定为 <constant>PHP_URL_PORT</constant> 后，将返回一个 <type>integer</type> 的值）。
+       指定 <constant>PHP_URL_SCHEME</constant>、<constant>PHP_URL_HOST</constant>、<constant>PHP_URL_PORT</constant>、<constant>PHP_URL_USER</constant>、<constant>PHP_URL_PASS</constant>、<constant>PHP_URL_PATH</constant>、<constant>PHP_URL_QUERY</constant>
+       或 <constant>PHP_URL_FRAGMENT</constant> 的其中一个来获取 URL 中指定的部分的
+       <type>string</type>。（当指定为 <constant>PHP_URL_PORT</constant> 时，返回值将是 <type>int</type>）。
       </para>
      </listitem>
     </varlistentry>
@@ -60,15 +56,14 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   对严重不合格的 URL，<function>parse_url</function> 可能会返回
-   &false;。 
+   对严重不合格的 URL，<function>parse_url</function> 可能会返回 &false;。 
   </para>  
    <para>
-    如果省略了 <parameter>component</parameter> 参数，将返回一个关联数组 <type>array</type>，在目前至少会有一个元素在该数组中。数组中可能的键有以下几种：
+    如果省略了 <parameter>component</parameter> 参数，将返回关联数组 <type>array</type>。至少会有一个元素出现在数组中。数组中可能的键有以下几种：
    <itemizedlist>
     <listitem>
      <simpara>
-      <varname remap="structfield">scheme</varname> - 如 http
+      <varname remap="structfield">scheme</varname>——如 http
      </simpara>
     </listitem>
     <listitem>
@@ -98,55 +93,63 @@
     </listitem>
     <listitem>
      <simpara>
-      <varname remap="structfield">query</varname>  - 在问号 <literal>?</literal> 之后
+      <varname remap="structfield">query</varname>——在问号 <literal>?</literal> 之后
      </simpara>
     </listitem>
     <listitem>
      <simpara>
-      <varname remap="structfield">fragment</varname> -  在散列符号 <literal>#</literal> 之后
+      <varname remap="structfield">fragment</varname>——在注释符号 <literal>#</literal> 之后
      </simpara>
     </listitem>
    </itemizedlist>
   </para>
   <para>
-   如果指定了 <parameter>component</parameter> 参数，
-   <function>parse_url</function> 返回一个 <type>string</type> （或在指定为 <constant>PHP_URL_PORT</constant> 时返回一个 <type>integer</type>）而不是 <type>array</type>。如果 URL 中指定的组成部分不存在，将会返回 &null;。
+   如果指定 <parameter>component</parameter> 参数，<function>parse_url</function> 返回 <type>string</type> （或在指定为
+   <constant>PHP_URL_PORT</constant> 时返回 <type>int</type>）而不是 <type>array</type>。如果 URL
+   中指定的组成部分不存在，将会返回 &null;。自 PHP 8.0.0 起，<function>parse_url</function> 开始对 query 和 fragment
+   区分不存在和空值。
+  </para>
+  <para>
+   <informalexample>
+    <screen>
+<![CDATA[
+http://example.com/foo → query = null, fragment = null
+http://example.com/foo? → query = "",   fragment = null
+http://example.com/foo# → query = null, fragment = ""
+http://example.com/foo?# → query = "",   fragment = ""
+]]>
+    </screen>
+   </informalexample>
+  </para>
+  <para>
+    之前所有的情况都会导致 query 和 fragment 为 &null;。
+  </para>
+  <para>
+   注意组件中的控制字符（参见 <function>ctype_cntrl</function>）替换为下划线（<literal>_</literal>）。
   </para>
  </refsect1>
 
-
  <refsect1 role="changelog">
   &reftitle.changelog;
-  <para>
-   <informaltable>
-    <tgroup cols="2">
-     <thead>
-      <row>
-       <entry>&Version;</entry>
-       <entry>&Description;</entry>
-      </row>
-     </thead>
-     <tbody>
-      <row>
-       <entry>5.4.7</entry>
-       <entry>
-        修复了 <emphasis>host</emphasis> 在 <emphasis>协议</emphasis> 省略时的识别。
-       </entry>
-      </row>
-      <row>
-       <entry>5.3.3</entry>
-       <entry>
-        在 URL 解析失败时将不会产生 <constant>E_WARNING</constant> 级别的错误。
-       </entry>
-      </row>
-      <row>
-       <entry>5.1.2</entry>
-       <entry>增加了参数 <parameter>component</parameter>。</entry>
-      </row>
-     </tbody>
-    </tgroup>
-   </informaltable>
-  </para>
+  <informaltable>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>&Version;</entry>
+      <entry>&Description;</entry>
+     </row>
+    </thead>
+    <tbody>
+     <row>
+      <entry>8.0.0</entry>
+      <entry>
+       <function>parse_url</function> 现在对 query 和 fragment
+   区分不存在和空值。
+      </entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </informaltable>
  </refsect1>
 
  <refsect1 role="examples">
@@ -157,28 +160,49 @@
    <programlisting role="php">
 <![CDATA[
 <?php
-$url = 'http://username:password@hostname/path?arg=value#anchor';
+$url = 'http://username:password@hostname:9090/path?arg=value#anchor';
 
-print_r(parse_url($url));
-
-echo parse_url($url, PHP_URL_PATH);
+var_dump(parse_url($url));
+var_dump(parse_url($url, PHP_URL_SCHEME));
+var_dump(parse_url($url, PHP_URL_USER));
+var_dump(parse_url($url, PHP_URL_PASS));
+var_dump(parse_url($url, PHP_URL_HOST));
+var_dump(parse_url($url, PHP_URL_PORT));
+var_dump(parse_url($url, PHP_URL_PATH));
+var_dump(parse_url($url, PHP_URL_QUERY));
+var_dump(parse_url($url, PHP_URL_FRAGMENT));
 ?>
 ]]>
     </programlisting>
     &example.outputs;
    <screen>
 <![CDATA[
-Array
-(
-    [scheme] => http
-    [host] => hostname
-    [user] => username
-    [pass] => password
-    [path] => /path
-    [query] => arg=value
-    [fragment] => anchor
-)
-/path
+array(8) {
+  ["scheme"]=>
+  string(4) "http"
+  ["host"]=>
+  string(8) "hostname"
+  ["port"]=>
+  int(9090)
+  ["user"]=>
+  string(8) "username"
+  ["pass"]=>
+  string(8) "password"
+  ["path"]=>
+  string(5) "/path"
+  ["query"]=>
+  string(9) "arg=value"
+  ["fragment"]=>
+  string(6) "anchor"
+}
+string(4) "http"
+string(8) "username"
+string(8) "password"
+string(8) "hostname"
+int(9090)
+string(5) "/path"
+string(9) "arg=value"
+string(6) "anchor"
 ]]>
    </screen>
   </example>
@@ -215,11 +239,12 @@ array(3) {
 
  <refsect1 role="notes">
   &reftitle.notes;
-  <note>
+  <caution>
    <para>
-    本函数不能用于相对 URL。
+    此函数可能无法对相对和无效 URL 提供正确的结果，结果甚至可能会跟常见的 HTTP 客户端行为不匹配。如果需要解析来自不受信任输入的
+    URL，则需要另外验证，例如，使用带 <constant>FILTER_VALIDATE_URL</constant>过滤器的 <function>filter_var</function>。
    </para>
-  </note>
+  </caution>
   <note>
    <para>
     <function>parse_url</function> 是专门用来解析 URL 而不是 URI 的。不过为遵从 PHP
@@ -235,7 +260,6 @@ array(3) {
     <member><function>pathinfo</function></member>
     <member><function>parse_str</function></member>
     <member><function>http_build_query</function></member>
-    <member><function>http_build_url</function></member>
     <member><function>dirname</function></member>
     <member><function>basename</function></member>
     <member><link xlink:href="&url.rfc;3986">RFC 3986</link></member>
@@ -243,7 +267,6 @@ array(3) {
   </para>
  </refsect1>
 </refentry>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
