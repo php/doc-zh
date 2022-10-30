@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: a56106f69198dfe88c6084593c78a71c26b24353 Maintainer: ichenshy Status: ready -->
-<!-- Reviewed: no -->
-
+<!-- EN-Revision: eae19eb5fe0f5bebcbce382ea7a505cedeb5a883 Maintainer: ichenshy Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <chapter xml:id="pdo.connections" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <title>连接与连接管理</title>
  <para>
-  连接是通过创建 PDO 基类的实例而建立的。不管使用哪种驱动程序，都是用 PDO 类名。构造函数接收用于指定数据库源（所谓的 DSN）以及可能还包括用户名和密码（如果有的话）的参数。
+  连接是通过创建 PDO 基类的实例而建立的。使用哪种驱动程序并不重要，始终都会用 PDO
+  类名。构造函数接受用于指定数据库源（也称为 DSN）以及可选的用户名和密码（如果有）的参数。
  </para>
  <para>
   <example>
@@ -21,7 +21,8 @@ $dbh = new PDO('mysql:host=localhost;dbname=test', $user, $pass);
   </example>
  </para>
  <para>
-  如果有任何连接错误，将抛出一个 <literal>PDOException</literal> 异常对象。如果想处理错误状态，可以捕获异常，或者选择留给通过 <function>set_exception_handler</function> 设置的应用程序全局异常处理程序。
+  如果有任何连接错误，将抛出 <literal>PDOException</literal> 对象。如果想处理错误状态，可以捕获异常，或者选择将其留给
+  <function>set_exception_handler</function> 设置的应用程序全局异常处理程序。
  </para>
  <para>
   <example><title>处理连接错误</title>
@@ -45,23 +46,34 @@ try {
  </para>
  <warning>
   <para>
-  如果应用程序不在 PDO 构造函数中捕获异常，zend 引擎采取的默认动作是结束脚本并显示一个回溯跟踪，此回溯跟踪可能泄漏完整的数据库连接细节，包括用户名和密码。因此有责任去显式（通过 <literal>catch</literal> 语句）或隐式（通过 <function>set_exception_handler</function> ）地捕获异常。
+  如果应用程序没有捕获 PDO 构造函数抛出的异常，zend
+  引擎采取的默认操作是终止脚本并显示回溯。此回溯可能泄漏完整的数据库连接详细信息，包括用户名和密码。因此有责任去显式（通过
+  <literal>catch</literal> 语句）或通过 <function>set_exception_handler</function> 隐式捕获异常。
   </para>
  </warning>
  <para>
- 连接数据成功后，返回一个 PDO 类的实例给脚本，此连接在 PDO 对象的生存周期中保持活动。要想关闭连接，需要销毁对象以确保所有剩余到它的引用都被删除，可以赋一个 &null;  值给对象变量。如果不明确地这么做，PHP 在脚本结束时会自动关闭连接。
+  连接数据库成功后，返回 PDO 类的实例给脚本。此连接在 PDO
+  对象的生存周期中保持有效状态。要关闭连接，需要确保删除它的所有剩余引用来销毁对象——可以通过对对象变量赋值 &null;
+  来实现。如果没有明确这么做，PHP 在脚本结束时会自动关闭连接。
  </para>
+ <note>
+  <simpara>
+   如果还有其它对此 PDO 实例的引用（比如来自 PDOStatement 实例，或来自其它同一 PDO 实例的其它变量），也必须删除这些引用（例如，通过将
+   &null; 赋值给引用 PDOStatement 的变量）。
+  </simpara>
+ </note>
  <para>
   <example>
-   <title>关闭一个连接</title>
+   <title>关闭连接</title>
    <programlisting role="php">
 <![CDATA[
 <?php
 $dbh = new PDO('mysql:host=localhost;dbname=test', $user, $pass);
 // 在此使用连接
+$sth = $dbh->query('SELECT * FROM foo');
 
-
-// 现在运行完成，在此关闭连接
+// 使用完毕，关闭连接
+$sth = null;
 $dbh = null;
 ?>
 ]]>
@@ -69,7 +81,9 @@ $dbh = null;
   </example>
  </para>
  <para>
-  很多 web 应用程序通过使用到数据库服务的持久连接获得好处。持久连接在脚本结束后不会被关闭，且被缓存，当另一个使用相同凭证的脚本连接请求时被重用。持久连接缓存可以避免每次脚本需要与数据库回话时建立一个新连接的开销，从而让 web 应用程序更快。
+  很多 web 
+  应用程序通过与数据库建立持久连接获得好处。持久连接不会在脚本结束时关闭，而是会缓存，且当另一个脚本使用相同凭证请求连接时重用。持久连接缓存可以避免每次脚本需要与数据库通信时建立新连接的开销，从而让
+  web 应用程序更快。
  </para>
  <para>
   <example>
@@ -85,14 +99,23 @@ $dbh = new PDO('mysql:host=localhost;dbname=test', $user, $pass, array(
    </programlisting>
   </example>
  </para>
+ <para>
+  <constant>PDO::ATTR_PERSISTENT</constant> 选项的值转换为 &boolean;（启用/禁用持久连接），除非它不是数字
+  &string;，在这种情况下允许使用多个持久连接池。如果不同的链接使用不兼容的设置，非常有用，例如
+  <constant>PDO::MYSQL_ATTR_USE_BUFFERED_QUERY</constant> 的值不同。
+ </para>
  <note>
   <para>
-   如果想使用持久连接，必须在传递给 PDO 构造函数的驱动选项数组中设置 <constant>PDO::ATTR_PERSISTENT</constant> 。如果是在对象初始化之后用 <function>PDO::setAttribute</function> 设置此属性，则驱动程序将不会使用持久连接。
+   如果想使用持久连接，必须在传递给 PDO 构造函数的驱动程序选项数组中设置
+   <constant>PDO::ATTR_PERSISTENT</constant>。如果在对象实例化后用
+   <methodname>PDO::setAttribute</methodname> 设置此属性，驱动程序将不会使用持久连接。
   </para>
  </note>
  <note>
   <para>
-   如果使用 PDO ODBC 驱动且 ODBC 库支持 ODBC 连接池（有unixODBC 和 Windows 两种做法；可能会有更多），建议不要使用持久的 PDO 连接，而是把连接缓存留给 ODBC 连接池层处理。 ODBC 连接池在进程中与其他模块共享；如果要求 PDO 缓存连接，则此连接绝不会被返回到 ODBC 连接池，导致创建额外的连接来服务其他模块。
+   如果使用 PDO ODBC 驱动程序且 ODBC 库支持 ODBC 连接池（有 unixODBC 和 Windows 是其中的两个；可能会有更多），建议不要使用持久
+   PDO 连接，而是把连接缓存留给 ODBC 连接池层。ODBC 连接池在进程中与其它模块共享；如果 PDO 缓存连接，则此连接永远不会被返回到
+   ODBC 连接池，从而导致创建额外的连接来服务其它模块。
   </para>
  </note>
 </chapter>
