@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: c36ce0b514faa2efce1427ae87ba9ea25cc038ad Maintainer: jhdxr Status: ready -->
+<!-- EN-Revision: 3d9dad29c75a70e7985ed595dfa2a836e61418da Maintainer: jhdxr Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
  <chapter xml:id="language.operators" xmlns="http://docbook.org/ns/docbook">
   <title>运算符</title>
   <simpara>
@@ -1599,9 +1600,8 @@ echo $a <=> $b; // 1
        <entry><type>object</type></entry>
        <entry><type>object</type></entry>
        <entry>
-        内置类可以定义自己的比较，不同类不能比较，相同类和数组同样方式比较属性（PHP
-        4 中），PHP 5 有其自己的<link
-        linkend="language.oop5.object-comparison">说明</link>
+        内置类可以定义自己的比较，不同类不能比较，相同的类查看<link
+        linkend="language.oop5.object-comparison">对象比较</link>
        </entry>
       </row>
       <row>
@@ -1613,7 +1613,7 @@ echo $a <=> $b; // 1
        <entry><type>array</type></entry>
        <entry><type>array</type></entry>
        <entry>
-        具有较少成员的数组较小，如果运算数 1 中的键不存在于运算数
+        成员越少的数组越小，如果运算数 1 中的键不存在于运算数
         2 中则数组无法比较，否则挨个值比较（见下例）
        </entry>
       </row>
@@ -1649,14 +1649,13 @@ var_dump(min(-100, -10, NULL, 10, 100)); // NULL - (bool)NULL < (bool)-100 is FA
     </example>
    </para>
 
-
    <para>
     <example>
      <title>标准数组比较代码</title>
      <programlisting role="php">
 <![CDATA[
 <?php
-// 数组是用标准比较运算符这样比较的
+// 数组是用标准比较运算符或者太空船运算符进行比较的
 function standard_array_compare($op1, $op2)
 {
     if (count($op1) < count($op2)) {
@@ -1666,7 +1665,7 @@ function standard_array_compare($op1, $op2)
     }
     foreach ($op1 as $key => $val) {
         if (!array_key_exists($key, $op2)) {
-            return null; // uncomparable
+            return 1;
         } elseif ($val < $op2[$key]) {
             return -1;
         } elseif ($val > $op2[$key]) {
@@ -1692,6 +1691,22 @@ function standard_array_compare($op1, $op2)
      更多信息参见 <type>float</type>。
     </para>
    </warning>
+
+   <note>
+    <simpara>
+     请注意，在比较不同类型的值时，类型转换并不总是很明显，尤其是比较 &integer; 与 &boolean; 或者
+     &integer; 与 &string;。因此，在大多数情况下，通常建议使用 <literal>===</literal> 和
+     <literal>!==</literal> 进行比较而不是 <literal>==</literal> 和 <literal>!=</literal>。
+    </simpara>
+   </note>
+
+   <sect2 xml:id="language.operators.comparison.incomparable">
+    <title>不能比较的值</title>
+    <simpara>
+     虽然恒等比较（<literal>===</literal> 和
+     <literal>!==</literal>）可以应用于任意值，其它比较运算符应该仅用于可比较的值。不能比较的值的比较的结果是不确定的，不应依赖。
+    </simpara>
+   </sect2>
 
    <sect2 role="seealso">
     &reftitle.seealso;
@@ -1723,7 +1738,6 @@ if (empty($_POST['action'])) {
 } else {
     $action = $_POST['action'];
 }
-
 ?>
 ]]>
       </programlisting>
@@ -1736,10 +1750,10 @@ if (empty($_POST['action'])) {
     </para>
     <para>
      可以省略三元运算符中间那部分。表达式
-     <literal>expr1 ?: expr3</literal> 在
+     <literal>expr1 ?: expr3</literal> 等同于如果
      <replaceable>expr1</replaceable> 求值为 &true; 时返回
-     <replaceable>expr1</replaceable>，否则返回
-     <replaceable>expr3</replaceable>。
+     <replaceable>expr1</replaceable> 的结果，否则返回
+     <replaceable>expr3</replaceable>。<replaceable>expr1</replaceable> 在这里仅执行一次。
     </para>
     <note>
      <simpara>
@@ -1778,12 +1792,29 @@ echo ((true ? 'true' : 'false') ? 't' : 'f');
       </example>
      </para>
     </note>
+    <note>
+     <para>
+      然而，短三元运算符（<literal>?:</literal>）的链接是稳定且合理的。他将第一个参数进行求值，结果为非假值。注意，未定义的值将会引发警告。
+      <example>
+       <title>Short-ternary chaining</title>
+       <programlisting role="php">
+<![CDATA[
+<?php
+echo 0 ?: 1 ?: 2 ?: 3, PHP_EOL; //1
+echo 0 ?: 0 ?: 2 ?: 3, PHP_EOL; //2
+echo 0 ?: 0 ?: 0 ?: 3, PHP_EOL; //3
+?>
+]]>
+       </programlisting>
+      </example>
+     </para>
+    </note>
    </sect2>
 
    <sect2 xml:id="language.operators.comparison.coalesce">
     <title>NULL 合并运算符</title>
     <para>
-     而且存在 "??" （NULL 合并）运算符。
+     另一个简略运算符是 "??" （NULL 合并）运算符。
      <example>
       <title>设置默认值</title>
       <programlisting role="php">
@@ -1798,7 +1829,6 @@ if (isset($_POST['action'])) {
 } else {
     $action = 'default';
 }
-
 ?>
 ]]>
       </programlisting>
@@ -1816,6 +1846,22 @@ if (isset($_POST['action'])) {
       返回引用变量时需要强调这一点。
       因此，在返回引用的函数里就无法使用这样的语句：<literal>return $foo ?? $bar;</literal>，还会提示警告。
      </simpara>
+    </note>
+    <note>
+     <para>
+      null 合并运算符的优先级较低。这意味着如果将它与其它运算符（比如字符串链接或者算术运算符）混合使用，可能需要括号。
+     </para>
+     <programlisting role="php">
+<![CDATA[
+<?php
+// $name 未定义，引发警告。
+print 'Mr. ' . $name ?? 'Anonymous';
+
+// 打印 "Mr. Anonymous"
+print 'Mr. ' . ($name ?? 'Anonymous');
+?>
+]]>
+     </programlisting>
     </note>
     <note>
      <para>
@@ -1850,29 +1896,13 @@ echo $foo ?? $bar ?? $baz ?? $qux; // 输出 1
    </simpara>
    <para>
     如果用 <function>set_error_handler</function>
-    设定了自定义的错误处理函数，即使诊断信息被抑制，也仍然会被调用，因此自定义错误处理函数应该调用
-    <function>error_reporting</function>，并验证 <literal>@</literal> 操作符是否按照如下方式使用：
-
-    <informalexample>
-     <programlisting role="php">
-<![CDATA[
-<?php
-function my_error_handler($err_no, $err_msg, $filename, $linenum) {
-    if (!(error_reporting() & $err_no)) {
-        return false; // 静默
-    }
-    // ...
-}
-?>
-]]>
-     </programlisting>
-    </informalexample>
+    设定了自定义的错误处理函数，即使诊断信息被抑制，也仍然会被调用。
    </para>
 
    <warning>
     <para>
-     PHP 8.0.0 之前，如果诊断被抑制，则传递给自定义错误处理函数的严重性值则始终为 <literal>0</literal> 。
-     PHP 8.0.0 起，情况则不再如此。
+     PHP 8.0.0 之前，如果错误被 <literal>@</literal> 运算符抑制，则在自定义错误处理程序中调用 <function>error_reporting</function> 将始终返回
+     <literal>0</literal>。PHP 8.0.0 起，返回值为 <literal>E_ERROR | E_CORE_ERROR | E_COMPILE_ERROR | E_USER_ERROR | E_RECOVERABLE_ERROR | E_PARSE</literal>。
     </para>
    </warning>
 

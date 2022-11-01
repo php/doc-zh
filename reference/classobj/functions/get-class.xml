@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 91e0557e2fc9b15e985d3372a080663fd7d0aeb0 Maintainer: HonestQiao Status: ready -->
+<!-- EN-Revision: d6fbec8b2161d13e51af9763bbd1487b0b25bd42 Maintainer: HonestQiao Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="function.get-class" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>get_class</refname>
@@ -8,12 +9,12 @@
  </refnamediv>
  <refsect1 role="description">
   &reftitle.description;
-<methodsynopsis>
+  <methodsynopsis>
    <type>string</type><methodname>get_class</methodname>
-   <methodparam choice="opt"><type>object</type><parameter>object</parameter><initializer>&null;</initializer></methodparam>
+   <methodparam choice="opt"><type>object</type><parameter>object</parameter></methodparam>
   </methodsynopsis>
   <para>
-   返回对象实例 <parameter>object</parameter> 所属类的名字。
+   返回指定 <parameter>object</parameter> 的类名。
   </para>
  </refsect1>
  <refsect1 role="parameters">
@@ -26,6 +27,13 @@
       <para>
        要测试的对象。如果在类里，此参数可以省略。
       </para>
+      <note>
+       <simpara>
+        自 PHP 7.2.0 起，<parameter>object</parameter> 不再允许显式传递 &null;
+        并抛出 <constant>E_WARNING</constant>。自 PHP 8.0.0 起，传递 &null;
+        会抛出 <classname>TypeError</classname>。
+       </simpara>
+      </note>
      </listitem>
     </varlistentry>
    </variablelist>
@@ -34,12 +42,11 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   返回对象实例 <parameter>object</parameter>
-   所属类的名字。
-   如果 <parameter>object</parameter> 不是一个对象则返回 &false;。
+   返回 <parameter>object</parameter>
+   实例的类名。
   </para>
   <para>
-   如果在一个类里，省略了参数 <parameter>object</parameter>，
+   如果在类中省略 <parameter>object</parameter>，
    则返回当前所在类的名称。
   </para>
   <para>
@@ -49,7 +56,14 @@
  <refsect1 role="errors">
   &reftitle.errors;
   <para>
-   如果用其他类型调用 <function>get_class</function>，而不是一个对象的话，就会产生 <constant>E_WARNING</constant> 级别的错误。
+   如果用除对象外的其它类型调用 <function>get_class</function>，则会引发
+   <classname>TypeError</classname>。在 PHP 8.0.0 之前，会引发
+   <constant>E_WARNING</constant> 级别的错误。
+  </para>
+  <para>
+   如果在类外不带任何参数调用 <function>get_class</function>，会引发
+   <classname>Error</classname>。在 PHP 8.0.0 之前，会引发
+   <constant>E_WARNING</constant> 级别的错误。
   </para>
  </refsect1>
  <refsect1 role="changelog">
@@ -65,9 +79,18 @@
      </thead>
      <tbody>
       <row>
-       <entry>5.3.0 起</entry>
+       <entry>8.0.0</entry>
        <entry>
-        <parameter>object</parameter> 默认参数现在是 &null; ，所以，现在传入 &null; 到 <parameter>object</parameter> 参数时，和没传参数的结果一样。
+        在类外不带任何参数调用此函数将会触发 <classname>Error</classname>。之前会引发
+        <constant>E_WARNING</constant> 并且函数会返回 &false;。
+       </entry>
+      </row>
+      <row>
+       <entry>7.2.0</entry>
+       <entry>
+        在此版本之前，<parameter>object</parameter> 的默认值是 
+        &null;，它与不传递任何值有相同的效果。<parameter>object</parameter>
+        已经移除了默认值 &null; 且不再是有效的输入。
        </entry>
       </row>
      </tbody>
@@ -91,13 +114,13 @@ class foo {
     }
 }
 
-// create an object
+// 创建对象
 $bar = new foo();
 
-// external call
+// 类外调用
 echo "Its name is " , get_class($bar) , "\n";
 
-// internal call
+// 类内调用
 $bar->name();
 
 ?>
@@ -112,7 +135,7 @@ My name is foo
     </screen>
    </example>
    <example>
-    <title>超类中使用 <function>get_class</function></title>
+    <title>父类中使用 <function>get_class</function></title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -142,7 +165,7 @@ string(3) "bar"
     </screen>
    </example>
    <example>
-    <title>命名空间中的类使用 <function>get_class</function></title>
+    <title>命名空间中的类中使用 <function>get_class</function></title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -178,6 +201,7 @@ string(11) "Foo\Bar\Baz"
     <member><function>get_called_class</function></member>
     <member><function>get_parent_class</function></member>
     <member><function>gettype</function></member>
+    <member><function>get_debug_type</function></member>
     <member><function>is_subclass_of</function></member>
    </simplelist>
   </para>

@@ -1,68 +1,70 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 62d53f70bd8d83c2b5abf2b6d39b53657a2f41ae Maintainer: daijie Status: ready -->
-<!-- Reviewed: no -->
-
-
+<!-- EN-Revision: 6f11457f11d91834e1240c3351d8c4e289371b6d Maintainer: daijie Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <appendix xml:id="classobj.examples">
  &reftitle.examples;
  <para>
-  在这个例子中，我们首先定义了一个基类和该类的扩展。
-  这个基类描述了普通的蔬菜，关于它是否可食用及其颜色。
-  子类 <varname>Spinach</varname> 添加了烹饪的方法和另一个检查是否已烹饪的方法。
+  在这个例子中，首先定义了一个基类和该类的扩展。基类描述了普通的蔬菜，
+  是否可食用及其颜色。子类 <varname>Spinach</varname> 
+  添加了烹饪的方法和检查是否已烹饪的方法。
  </para>
  <para>
   <example>
-   <title>classes.inc</title>
+   <title>定义类</title>
+   <para><varname>Vegetable</varname></para>
    <programlisting role="php">
 <![CDATA[
 <?php
 
-// base class with member properties and methods
 class Vegetable {
+    public $edible;
 
-   var $edible;
-   var $color;
+    public $color;
 
-   function __construct($edible, $color="green")
-   {
-       $this->edible = $edible;
-       $this->color = $color;
-   }
+    public function __construct($edible, $color = "green")
+    {
+        $this->edible = $edible;
+        $this->color = $color;
+    }
 
-   function is_edible() 
-   {
-       return $this->edible;
-   }
+    public function isEdible()
+    {
+        return $this->edible;
+    }
 
-   function what_color() 
-   {
-       return $this->color;
-   }
-   
-} // end of class Vegetable
+    public function getColor()
+    {
+        return $this->color;
+    }
+}
 
-// extends the base class
+?>
+]]>
+   </programlisting>
+   <para><varname>Spinach</varname></para>
+   <programlisting role="php">
+<![CDATA[
+<?php
+
 class Spinach extends Vegetable {
+    public $cooked = false;
 
-   var $cooked = false;
+    public function __construct()
+    {
+        parent::__construct(true, "green");
+    }
 
-   function __construct()
-   {
-       parent::__construct(true, "green");
-   }
+    public function cook()
+    {
+        $this->cooked = true;
+    }
 
-   function cook_it() 
-   {
-       $this->cooked = true;
-   }
-
-   function is_cooked() 
-   {
-       return $this->cooked;
-   }
-   
-} // end of class Spinach
+    public function isCooked()
+    {
+        return $this->cooked;
+    }
+}
 
 ?>
 ]]>
@@ -70,48 +72,45 @@ class Spinach extends Vegetable {
   </example>
  </para>
  <para>
-  接下来我们从这些类中实例化了两个对象，并打印了他们的信息，包括了他们类的继承关系。
-  同时我们也定了一些实用函数，主要为了漂亮地打印出这些变量。
+  接下来从这些类中实例化了两个对象并打印了它们的信息，包括了他们类的继承关系。
+  同时也定义了一些实用函数，主要为了漂亮地打印出这些变量。
  </para>
  <para>
   <example>
    <title>test_script.php</title>
    <programlisting role="php">
 <![CDATA[
-<pre>
 <?php
 
-include "classes.inc";
+// 注册自动加载器以加载类
+spl_autoload_register();
 
-// 实用函数
-
-function print_vars($obj) 
+function printProperties($obj)
 {
-foreach (get_object_vars($obj) as $prop => $val) {
-    echo "\t$prop = $val\n";
-}
-}
-
-function print_methods($obj) 
-{
-$arr = get_class_methods(get_class($obj));
-foreach ($arr as $method) {
-    echo "\tfunction $method()\n";
-}
+    foreach (get_object_vars($obj) as $prop => $val) {
+        echo "\t$prop = $val\n";
+    }
 }
 
-function class_parentage($obj, $class) 
+function printMethods($obj)
 {
-if (is_subclass_of($GLOBALS[$obj], $class)) {
-    echo "Object $obj belongs to class " . get_class($GLOBALS[$obj]);
-    echo " a subclass of $class\n";
-} else {
-    echo "Object $obj does not belong to a subclass of $class\n";
+    $arr = get_class_methods(get_class($obj));
+    foreach ($arr as $method) {
+        echo "\tfunction $method()\n";
+    }
 }
+
+function objectBelongsTo($obj, $class)
+{
+    if (is_subclass_of($obj, $class)) {
+        echo "Object belongs to class " . get_class($obj);
+        echo ", a subclass of $class\n";
+    } else {
+        echo "Object does not belong to a subclass of $class\n";
+    }
 }
 
 // 实例化 2 对象
-
 $veggie = new Vegetable(true, "blue");
 $leafy = new Spinach();
 
@@ -122,30 +121,45 @@ echo ", PARENT " . get_parent_class($leafy) . "\n";
 
 // 显示蔬菜的属性
 echo "\nveggie: Properties\n";
-print_vars($veggie);
+printProperties($veggie);
 
-// and leafy methods
+// 和 leafy 的方法
 echo "\nleafy: Methods\n";
-print_methods($leafy);
+printMethods($leafy);
 
 echo "\nParentage:\n";
-class_parentage("leafy", "Spinach");
-class_parentage("leafy", "Vegetable");
+objectBelongsTo($leafy, Spinach::class);
+objectBelongsTo($leafy, Vegetable::class);
+
 ?>
-</pre>
 ]]>
    </programlisting>
-   <para>
-    一个重要的东西是注意在上面的例子中，对象 <varname>$leafy</varname> 是 <classname>Spinach</classname> 的实例（<classname>Vegetable</classname> 的子类），另外脚本的最后部分会输出以下信息：
-   </para>
+   &examples.outputs;
    <screen>
 <![CDATA[
-   [...]
+veggie: CLASS Vegetable
+leafy: CLASS Spinach, PARENT Vegetable
+
+veggie: Properties
+        edible = 1
+        color = blue
+
+leafy: Methods
+        function __construct()
+        function cook()
+        function isCooked()
+        function isEdible()
+        function getColor()
+
 Parentage:
-Object leafy does not belong to a subclass of Spinach
-Object leafy belongs to class spinach, a subclass of Vegetable
+Object does not belong to a subclass of Spinach
+Object belongs to class Spinach, a subclass of Vegetable
 ]]>
    </screen>
+   <para>
+    一个重要的事情是需要注意在上面的例子中，对象 <varname>$leafy</varname> 是 
+    <classname>Spinach</classname> 的实例（<classname>Vegetable</classname> 的子类）。
+   </para>
   </example>
  </para>
 </appendix>
@@ -170,4 +184,3 @@ vim600: syn=xml fen fdm=syntax fdl=2 si
 vim: et tw=78 syn=sgml
 vi: ts=1 sw=1
 -->
-

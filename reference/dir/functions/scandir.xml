@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: c9c117546e1bf4d9237ad360b3cdde60cff03761 Maintainer: HonestQiao Status: ready -->
-<!-- Reviewed: no Maintainer: HonestQiao -->
+<!-- EN-Revision: b0b19b66183b28cebc1ffbcf1e2b8763f9d9c7b3 Maintainer: HonestQiao Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="function.scandir" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>scandir</refname>
@@ -11,13 +11,13 @@
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <type>array</type><methodname>scandir</methodname>
+   <type class="union"><type>array</type><type>false</type></type><methodname>scandir</methodname>
    <methodparam><type>string</type><parameter>directory</parameter></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter>sorting_order</parameter></methodparam>
-   <methodparam choice="opt"><type>resource</type><parameter>context</parameter></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>sorting_order</parameter><initializer><constant>SCANDIR_SORT_ASCENDING</constant></initializer></methodparam>
+   <methodparam choice="opt"><type class="union"><type>resource</type><type>null</type></type><parameter>context</parameter><initializer>&null;</initializer></methodparam>
   </methodsynopsis>
   <para>
-   返回一个 <type>array</type>，包含有
+   返回 <type>array</type>，包含有
    <parameter>directory</parameter> 中的文件和目录。
   </para>
 
@@ -70,34 +70,31 @@
 
  <refsect1 role="changelog">
   &reftitle.changelog;
-  <para>
-   <informaltable>
-    <tgroup cols="2">
-     <thead>
-      <row>
-       <entry>&Version;</entry>
-       <entry>&Description;</entry>
-      </row>
-     </thead>
-     <tbody>
-      <row>
-       <entry>5.4.0</entry>
-       <entry>
-        <parameter>sorting_order</parameter> now accepts constants. Any
-        nonzero value caused descending order in previous versions.
-       </entry>
-      </row>
-     </tbody>
-    </tgroup>
-   </informaltable>
-  </para>
+  <informaltable>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>&Version;</entry>
+      <entry>&Description;</entry>
+     </row>
+    </thead>
+    <tbody>
+     <row>
+      <entry>8.0.0</entry>
+      <entry>
+       现在 <parameter>context</parameter> 允许为 null。
+      </entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </informaltable>
  </refsect1>
 
  <refsect1 role="examples">
   &reftitle.examples;
   <para>
    <example>
-    <title>一个简单的 <function>scandir</function> 例子</title>
+    <title>简单的 <function>scandir</function> 示例</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -107,52 +104,6 @@ $files2 = scandir($dir, 1);
 
 print_r($files1);
 print_r($files2);
-?>
-]]>
-    </programlisting>
-    &example.outputs.similar;
-    <screen>
-<![CDATA[
-Array
-(
-    [0] => .
-    [1] => ..
-    [2] => bar.php
-    [3] => foo.txt
-    [4] => somedir
-)
-Array
-(
-    [0] => somedir
-    [1] => foo.txt
-    [2] => bar.php
-    [3] => ..
-    [4] => .
-)
-]]>
-    </screen>
-   </example>
-  </para>
-  <para>
-   <example>
-    <title><function>scandir</function> 在 PHP 4 中的实现</title>
-    <programlisting role="php">
-<![CDATA[
-<?php
-$dir = "/tmp";
-$dh  = opendir($dir);
-while (false !== ($filename = readdir($dh))) {
-    $files[] = $filename;
-}
-
-sort($files);
-
-print_r($files);
-
-rsort($files);
-
-print_r($files);
-
 ?>
 ]]>
     </programlisting>
@@ -199,7 +150,6 @@ Array
   </para>
  </refsect1>
 </refentry>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml

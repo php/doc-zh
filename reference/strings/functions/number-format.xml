@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: d5e7ae6c6ada11b9576df9c14802be4eef35a87f Maintainer: daijie Status: ready -->
-<!-- Reviewed: no -->
-
-<refentry xmlns="http://docbook.org/ns/docbook" xml:id="function.number-format" xmlns:xlink="http://www.w3.org/1999/xlink">
+<!-- EN-Revision: 2a7c919451f9a536431ba2117f8f90ae814c1c5f Maintainer: daijie Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
+<refentry xml:id="function.number-format" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
   <refname>number_format</refname>
   <refpurpose>以千位分隔符方式格式化一个数字</refpurpose>
@@ -13,30 +12,13 @@
   &reftitle.description;
   <methodsynopsis>
    <type>string</type><methodname>number_format</methodname>
-   <methodparam><type>float</type><parameter>number</parameter></methodparam>
+   <methodparam><type>float</type><parameter>num</parameter></methodparam>
    <methodparam choice="opt"><type>int</type><parameter>decimals</parameter><initializer>0</initializer></methodparam>
-  </methodsynopsis>
-  <methodsynopsis>
-   <type>string</type><methodname>number_format</methodname>
-   <methodparam><type>float</type><parameter>number</parameter></methodparam>
-   <methodparam><type>int</type><parameter>decimals</parameter><initializer>0</initializer></methodparam>
-   <methodparam><type>string</type><parameter>dec_point</parameter><initializer>"."</initializer></methodparam>
-   <methodparam><type>string</type><parameter>thousands_sep</parameter><initializer>","</initializer></methodparam>
+   <methodparam choice="opt"><type class="union"><type>string</type><type>null</type></type><parameter>decimal_separator</parameter><initializer>"."</initializer></methodparam>
+   <methodparam choice="opt"><type class="union"><type>string</type><type>null</type></type><parameter>thousands_separator</parameter><initializer>","</initializer></methodparam>
   </methodsynopsis>
   <para>
-   本函数可以接受1个、2个或者4个参数（注意：不能是3个）:
-  </para>
-  <para>
-   如果只提供第一个参数，<parameter>number</parameter>的小数部分会被去掉
-   并且每个千位分隔符都是英文小写逗号","
-  </para>
-  <para>
-   如果提供两个参数，<parameter>number</parameter>将保留小数点后的位数到你设定的值，其余同楼上
-  </para>
-  <para>
-   如果提供了四个参数，<parameter>number</parameter>
-   将保留<parameter>decimals</parameter>个长度的小数部分,
-   小数点被替换为<parameter>dec_point</parameter>，千位分隔符替换为<parameter>thousands_sep</parameter>
+   使用分组的千位和可选的小数位数格式化数字。
   </para>
  </refsect1>
 
@@ -45,10 +27,10 @@
   <para>
    <variablelist>
     <varlistentry>
-     <term><parameter>number</parameter></term>
+     <term><parameter>num</parameter></term>
      <listitem>
       <para>
-       你要格式化的数字
+       要格式化的数字。
       </para>
      </listitem>
     </varlistentry>
@@ -56,23 +38,23 @@
      <term><parameter>decimals</parameter></term>
      <listitem>
       <para>
-       要保留的小数位数
+       设置小数位数。如果为 <literal>0</literal>，则从返回值中忽略 <parameter>decimal_separator</parameter>。
       </para>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>dec_point</parameter></term>
+     <term><parameter>decimal_separator</parameter></term>
      <listitem>
       <para>
-       指定小数点显示的字符
+       指定小数点的分隔符。
       </para>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>thousands_sep</parameter></term>
+     <term><parameter>thousands_separator</parameter></term>
      <listitem>
       <para>
-       指定千位分隔符显示的字符
+       设置千位分隔符。
       </para>
      </listitem>
     </varlistentry>
@@ -83,7 +65,7 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   格式化以后的 <parameter>number</parameter>.
+   <parameter>num</parameter> 的格式化版本。
   </para>
  </refsect1>
 
@@ -100,12 +82,16 @@
      </thead>
      <tbody>
       <row>
-       <entry>5.4.0</entry>
+       <entry>8.0.0</entry>
        <entry>
-        This function now supports multiple bytes in
-        <parameter>dec_point</parameter> and
-        <parameter>thousands_sep</parameter>. Only the first byte of each
-        separator was used in older versions.
+        在此版本之前，<function>number_format</function> 接受一个、两个或四个参数（不会是三个）。
+       </entry>
+      </row>
+      <row>
+       <entry>7.2.0</entry>
+       <entry>
+        <function>number_format</function> 现在再也不会返回 <literal>-0</literal>，之前
+        <parameter>num</parameter> 为 <literal>-0.01</literal> 的情况下可以返回 <literal>-0</literal>。
        </entry>
       </row>
      </tbody>
@@ -118,11 +104,9 @@
   &reftitle.examples;
   <para>
    <example>
-    <title><function>number_format</function> Example</title>
+    <title><function>number_format</function> 示例</title>
     <para>
-     For instance, French notation usually use two decimals,
-     comma (',') as decimal separator, and space (' ') as
-     thousand separator.  The following example demonstrates various way to format a number:
+     例如，法语计数通常使用两位小数，逗号（“,”）作为小数分隔符，空格（“ ”）作为千位分隔符。以下示例展示了格式化数字的各种方法：
     </para>
     <programlisting role="php">
 <![CDATA[
@@ -130,17 +114,17 @@
 
 $number = 1234.56;
 
-// english notation (default)
+// 英文计数（默认）
 $english_format_number = number_format($number);
 // 1,235
 
-// French notation
+// 法语计数
 $nombre_format_francais = number_format($number, 2, ',', ' ');
 // 1 234,56
 
 $number = 1234.5678;
 
-// english notation without thousands separator
+// 没有千位分隔符的英文计数
 $english_format_number = number_format($number, 2, '.', '');
 // 1234.57
 
@@ -151,30 +135,6 @@ $english_format_number = number_format($number, 2, '.', '');
   </para>
  </refsect1>
  
- <refsect1 role="changelog">
-  &reftitle.changelog;
-  <para>
-   <informaltable>
-    <tgroup cols="2">
-     <thead>
-      <row>
-       <entry>&Version;</entry>
-       <entry>&Description;</entry>
-      </row>
-     </thead>
-     <tbody>
-      <row>
-       <entry>7.2.0</entry>
-       <entry>
-        <function>number_format</function> 现在无法返回 <literal>-0</literal>，之前可能返回 <literal>-0</literal>，因为 <parameter>number</parameter> 可能会是 <literal>-0.01</literal>。
-       </entry>
-      </row>
-     </tbody>
-    </tgroup>
-   </informaltable>
-  </para>
- </refsect1>
-
  <refsect1 role="seealso">
   &reftitle.seealso;
   <para>

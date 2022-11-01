@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: b71e8b802f19ebed1067898d628e8a03b0550a11 Maintainer: 谢毅斌 Status: ready -->
-<!-- Reviewed: no -->
-
+<!-- EN-Revision: 7b6a20ed5d1f1bec158b0c57b69bf021a9ed2799 Maintainer: 谢毅斌 Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="reflectionmethod.setaccessible" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
   <refname>ReflectionMethod::setAccessible</refname>
-  <refpurpose>设置方法是否访问</refpurpose>
+  <refpurpose>设置方法是否可访问</refpurpose>
  </refnamediv>
 
  <refsect1 role="description">
@@ -16,8 +15,13 @@
    <methodparam><type>bool</type><parameter>accessible</parameter></methodparam>
   </methodsynopsis>
   <para>
-   设置方法是否可以访问，例如通过设置可以访问能够执行私有方法和保护方法
+   通过 <methodname>ReflectionMethod::invoke</methodname> 方法启用对 protected 或 private 方法的调用。
   </para>
+  <note>
+   <simpara>
+    自 PHP 8.1.0 起，调用此方法无效；默认情况下，所有方法都可调用。
+   </simpara>
+  </note>
  </refsect1>
 
  <refsect1 role="parameters">
@@ -28,7 +32,7 @@
      <term><parameter>accessible</parameter></term>
      <listitem>
       <para>
-       可以访问设置 &true;，否则设置 &false;
+       可以访问设置 &true;，否则设置 &false;。
       </para>
      </listitem>
     </varlistentry>
@@ -41,6 +45,40 @@
   <para>
    &return.void;
   </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <example>
+   <title>简单类定义</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+class MyClass
+{
+    private function foo()
+    {
+        return 'bar';
+    }
+}
+
+$method = new ReflectionMethod("MyClass", "foo");
+$method->setAccessible(true);
+
+$obj = new MyClass();
+echo $method->invoke($obj);
+echo $obj->foo();
+?>
+]]>
+   </programlisting>
+   &example.outputs.similar;
+   <screen>
+<![CDATA[
+bar
+Fatal error: Uncaught Error: Call to private method MyClass::foo() from global scope in /in/qdaZS:16
+]]>
+   </screen>
+  </example>
  </refsect1>
 
  <refsect1 role="seealso">

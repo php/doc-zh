@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 8a058e9acded067eaa1bd445ed6943158e7311df Maintainer: daijie Status: ready -->
+<!-- EN-Revision: 72e81bd314be5212f713f6cffafff6f5f5e4e85d Maintainer: daijie Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <!-- splitted from ./en/functions/pcre.xml, last change in rev 1.2 -->
 <chapter xml:id="reference.pcre.pattern.syntax" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <title>模式语法</title>
@@ -90,7 +91,7 @@
  <section xml:id="regexp.reference.meta">
   <title>元字符</title>
   <para>  
-  正则表达式的威力源于它可以在模式中拥有选择和重复的能力。 一些字符被赋予
+  正则表达式的魔力源于它可以在模式中拥有选择和重复的能力。 一些字符被赋予
   特殊的涵义，使其不再单纯的代表自己，模式中的这种有特殊涵义的编码字符
   称为 <emphasis>元字符</emphasis>。
   </para>
@@ -532,9 +533,10 @@
   </para>
   
   <para>
-   <literal>\Q</literal> 和 <literal>\E</literal> 可以用于在模式中忽略正则表达式元字符。比如：
-  <literal>\w+\Q.$.\E$</literal> 会匹配一个或多个单词字符，紧接着 <literal>.$.</literal>，
-  最后锚向字符串末尾。
+   <literal>\Q</literal> 和 <literal>\E</literal> 可以用于在模式中忽略正则表达式元字符。比如：<literal>\w+\Q.$.\E$</literal>
+   会匹配一个或多个单词字符，紧接着 <literal>.$.</literal>，最后锚向字符串末尾。注意这不会改变分隔符的行为；例如模式
+   <literal>#\Q#\E#$</literal> 无效，因为第二个 <literal>#</literal>
+   标记了模式的结束，而 <literal>\E#</literal> 解释为无效的修饰符。
   </para>
   
   <para>
@@ -1529,14 +1531,13 @@
   反斜线紧跟一个大于 0 (可能还有一位数)的数字就是一个到模式中之前出现的某个捕获组的后向引用。
   </para>
   <para>
-  如果紧跟反斜线的数字小于 10， 它总是一个后向引用，
-  并且如果在模式中没有足够多的捕获组，将会引发一个错误。换而言之，
-  被引用的括号不能少于被引用的小于 10 的数量。
-
+   如果紧跟反斜线的数字小于
+   10，它总是一个后向引用，并且如果在模式中没有足够多的捕获组，将会引发一个错误。换而言之，被引用的括号不能少于被引用的小于
+   10 的数量。
    A "forward back reference" can make sense when a repetition
    is involved and the subpattern to the right has participated
    in an earlier iteration.
-  查看上面的”反斜线”部分查看具体的数字处理方式。
+   查看<link linkend="regexp.reference.escape">转义序列</link>查看具体的数字处理方式。
   </para>
   <para>
   一个后向引用会直接匹配被引用捕获组在目标字符串中实际捕获到的内容，
@@ -1896,6 +1897,41 @@
   <para>
   如果设置了 <link linkend="reference.pcre.pattern.modifiers">PCRE_EXTENDED</link> 选项，
   一个字符类外部的未转义的 # 字符就代表本行剩余部分为注释。
+  </para>
+  <para>
+   <example>
+    <title>PCRE 模式中注释的用法</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+
+$subject = 'test';
+
+/* (?# 可用于添加注释而不启用 PCRE_EXTENDED */
+$match = preg_match('/te(?# this is a comment)st/', $subject);
+var_dump($match);
+
+/* 除非启用 PCRE_EXTENDED，否则空格和 # 视为模式的一部分 */
+$match = preg_match('/te   #~~~~
+st/', $subject);
+var_dump($match);
+
+/* 启用 PCRE_EXTENDED 后，所有空白数据字符以及
+   同一行未转义的 # 后面的任何内容都将会忽略 */
+$match = preg_match('/te    #~~~~
+st/x', $subject);
+var_dump($match);
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+int(1)
+int(0)
+int(1)
+]]>
+    </screen>
+   </example>
   </para>
  </section>
  

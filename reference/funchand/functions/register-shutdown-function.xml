@@ -1,26 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 8b5940cadeb4f1c8492f4a7f70743a2be807cf39 Maintainer:  Status: ready -->
+<!-- EN-Revision: 8d7f21b1c19fcde59b32d5496eaeed1784692f63 Maintainer: mowangjuanzi Status: ready -->
 <refentry xml:id="function.register-shutdown-function" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>register_shutdown_function</refname>
-  <refpurpose>注册一个会在php中止时执行的函数</refpurpose>
+  <refpurpose>注册在关闭时执行的函数</refpurpose>
  </refnamediv>
  
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <type>void</type><methodname>register_shutdown_function</methodname>
+   <type class="union"><type>bool</type><type>null</type></type><methodname>register_shutdown_function</methodname>
    <methodparam><type>callable</type><parameter>callback</parameter></methodparam>
-   <methodparam choice="opt"><type>mixed</type><parameter>parameter</parameter></methodparam>
-   <methodparam choice="opt"><type>mixed</type><parameter>...</parameter></methodparam>
+   <methodparam rep="repeat"><type>mixed</type><parameter>args</parameter></methodparam>
   </methodsynopsis>
   <para>
-  注册一个 <parameter>callback</parameter> ，它会在脚本执行完成或者 <function>exit</function> 后被调用。
+   注册一个 <parameter>callback</parameter> ，它会在脚本执行完成或者 <function>exit</function> 后被调用。
   </para>
   <para>
-   可以多次调用 <function>register_shutdown_function</function> ，这些被注册的回调会按照他们注册时的顺序被依次调用。
-   如果你在注册的方法内部调用 <function>exit</function>， 那么所有处理会被中止，并且其他注册的中止回调也不会再被调用。
+   可以多次调用
+   <function>register_shutdown_function</function>，这些被注册的回调会按照他们注册时的顺序被依次调用。如果你在注册的方法内部调用
+   <function>exit</function>，那么所有处理会被中止，并且其他注册的中止回调也不会再被调用。
+  </para>
+  <para>
+   关闭函数也可以调用 <function>register_shutdown_function</function> 来将关闭函数添加到队列的末尾。
   </para>
  </refsect1>
 
@@ -32,7 +35,7 @@
      <term><parameter>callback</parameter></term>
      <listitem>
       <para>
-       待注册的中止回调
+       待注册的中止回调。
       </para>
       <para>
        中止回调是作为请求的一部分被执行的，因此可以在它们中进行输出或者读取输出缓冲区。
@@ -40,17 +43,10 @@
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>parameter</parameter></term>
+     <term><parameter>args</parameter></term>
      <listitem>
       <para>
-       可以通过传入额外的参数来将参数传给中止函数
-      </para>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
-     <term><parameter>...</parameter></term>
-     <listitem>
-      <para>
+       可以通过传入额外的参数来将参数传给中止函数。
       </para>
      </listitem>
     </varlistentry>
@@ -68,7 +64,7 @@
  <refsect1 role="errors">
   &reftitle.errors;
   <para>
-   如果传入的callback不是可调用的，那么将会产生一个 <constant>E_WARNING</constant>
+   如果传入的 callback 不能调用，那么将会产生 <constant>E_WARNING</constant>
    级别的错误。
   </para>
  </refsect1>
@@ -83,9 +79,7 @@
 <?php
 function shutdown()
 {
-    // This is our shutdown function, in 
-    // here we can do any last operations
-    // before the script is complete.
+    // 这是关闭函数，在脚本完成前可以进行任何最后的操作。
 
     echo 'Script executed with success', PHP_EOL;
 }
@@ -102,12 +96,21 @@ register_shutdown_function('shutdown');
   &reftitle.notes;
   <note>
    <para>
-    在某些web server（如Apache）上，可以在中止函数内对脚本的工作目录进行修改。
+    在某些 web 服务器（如 Apache）上，可以在中止函数内对脚本的工作目录进行修改。
    </para>
   </note>
   <note>
    <para>
-    如果进程被信号SIGTERM或SIGKILL杀死，那么中止函数将不会被调用。尽管你无法中断SIGKILL，但你可以通过<function>pcntl_signal</function> 来捕获SIGTERM，通过在其中调用<function>exit</function>来进行一个正常的中止。
+    如果进程被信号 SIGTERM 或 SIGKILL 杀死，那么中止函数将不会被调用。尽管你无法中断
+    SIGKILL，但你可以通过 <function>pcntl_signal</function> 来捕获
+    SIGTERM，通过在其中调用 <function>exit</function> 来进行一个正常的中止。
+   </para>
+  </note>
+  <note>
+   <para>
+    关闭函数与 <link linkend="ini.max-execution-time">max_execution_time</link>
+    追踪的时间分开运行。这意味着即使进程因为运行时间过长而终止，仍会调用关闭函数。此外，如果关闭函数运行时正好
+    <literal>max_execution_time</literal> 用完，也会被终止。
    </para>
   </note>
  </refsect1>
@@ -118,8 +121,8 @@ register_shutdown_function('shutdown');
    <simplelist>
     <member><link linkend="ini.auto-append-file">auto_append_file</link></member>
     <member><function>exit</function></member>
-    <member><link
-    linkend="features.connection-handling">连接处理</link> 章节</member>
+    <member><function>fastcgi_finish_request</function></member>
+    <member><link linkend="features.connection-handling">连接处理</link>节</member>
    </simplelist>
   </para>
  </refsect1>
