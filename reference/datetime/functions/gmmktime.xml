@@ -1,62 +1,164 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
+<!-- EN-Revision: 5c951013ca04161992efed8b86fb40f55669958e Maintainer: mowangjuanzi Status: ready -->
 <refentry xml:id="function.gmmktime" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>gmmktime</refname>
   <refpurpose>取得 GMT 日期的 UNIX 时间戳</refpurpose>
  </refnamediv>
- <refsect1>
-  <title>说明</title>
+
+ <refsect1 role="description">
+  &reftitle.description;
   <methodsynopsis>
-   <type>int</type><methodname>gmmktime</methodname>
-   <methodparam choice="opt"><type>int</type><parameter>hour</parameter></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter>minute</parameter></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter>second</parameter></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter>month</parameter></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter>day</parameter></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter>year</parameter></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter>is_dst</parameter></methodparam>
+   <type class="union"><type>int</type><type>false</type></type><methodname>gmmktime</methodname>
+   <methodparam><type>int</type><parameter>hour</parameter></methodparam>
+   <methodparam choice="opt"><type class="union"><type>int</type><type>null</type></type><parameter>minute</parameter><initializer>&null;</initializer></methodparam>
+   <methodparam choice="opt"><type class="union"><type>int</type><type>null</type></type><parameter>second</parameter><initializer>&null;</initializer></methodparam>
+   <methodparam choice="opt"><type class="union"><type>int</type><type>null</type></type><parameter>month</parameter><initializer>&null;</initializer></methodparam>
+   <methodparam choice="opt"><type class="union"><type>int</type><type>null</type></type><parameter>day</parameter><initializer>&null;</initializer></methodparam>
+   <methodparam choice="opt"><type class="union"><type>int</type><type>null</type></type><parameter>year</parameter><initializer>&null;</initializer></methodparam>
   </methodsynopsis>
   <para>
-   和 <function>mktime</function> 完全一样，只除了返回值是格林威治标准时的时间戳。
-  </para>
-  <para>
-   参数总是表示 GMT 日期，因此 <parameter>is_dst</parameter>
-   对结果没有影响。
+   和 <function>mktime</function> 相同，但传递的参数是 GMT 日期。
+   <function>gmmktime</function> internally uses <function>mktime</function>
+   so only times valid in derived local time can be used.
   </para>
   <para>
    和 <function>mktime</function>
-   一样，参数可以从右到左依次空着，空着的参数会被设为相应的当前 GMT 值。
+   一样，参数可以从右到左的顺序省略，省略的参数会被设为当前对应的 GMT 值。
   </para>
-  <note>
-   <para>
-    自 5.1.0 起，<parameter>is_dst</parameter> 参数被废弃。因此应该用新的时区处理特性。
-   </para>
-  </note>
+  <simpara>
+   弃用不带参数调用 <function>gmmktime</function>。<function>time</function> 可用于获取当前时间戳。
+  </simpara>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
   <para>
-   <note>
-    <simpara>
-     <function>gmmktime</function> 内部使用了
-     <function>mktime</function>，因此只有转换成本地时间也合法的时间才能用在其中。
-     so only times valid in derived local time can be used.
-    </simpara>
-   </note>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>hour</parameter></term>
+     <listitem>
+      <para>
+       相对于一天开始的小时数，由 <parameter>month</parameter>、<parameter>day</parameter> 和
+       <parameter>year</parameter> 确定。负值是指当天零点前的小时。值大于 23 是指接下来几天的适当小时。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>minute</parameter></term>
+     <listitem>
+      <para>
+       相对于 <parameter>hour</parameter> 开始的分钟数。负值指的是上个小时的分钟。大于 59
+       的值将指向接下来几个小时的适当分钟。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>second</parameter></term>
+     <listitem>
+      <para>
+       相对于 <parameter>minute</parameter> 开始的秒数。负值是指前一分钟的秒数。大于 59
+       的值是指接下来几分钟的适当秒。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>month</parameter></term>
+     <listitem>
+      <para>
+       相对于去年年底的月份数。值 1 到 12 是指相关年份的正常日历月份。小于 1
+       的值（包括负值）按相反的顺序指向去年的月份，因此 0 是 12 月，-1 是 11
+       月，以此类推。值大于 12 是指接下来几年的适当月份。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>day</parameter></term>
+     <listitem>
+      <para>
+       相对于上个月月底的天数。值 1 到 28、29、30 或 31（取决于月份）是指相关月份的正常天数。小于
+       1 的值（包括负值）是指上个月的天数，因此 0 是上个月的最后一天，-1 
+       是倒数第二天，以此类推。大于相关月份天数的值是指接下来几个月的适当某一天。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>year</parameter></term>
+     <listitem>
+      <para>
+       年份
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   成功时返回 <type>int</type> Unix 时间戳，&return.falseforfailure;。
+  </para>
+ </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <para>
+   <informaltable>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>&Version;</entry>
+       <entry>&Description;</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>8.0.0</entry>
+       <entry>
+        <parameter>hour</parameter> 不再可选。
+       </entry>
+      </row>
+      <row>
+       <entry>8.0.0</entry>
+       <entry>
+        现在 <parameter>minute</parameter>、<parameter>second</parameter>、<parameter>month</parameter>、<parameter>day</parameter>
+        和 <parameter>year</parameter> 可以为 null。
+       </entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </informaltable>
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
    <example>
-    <title><function>gmmktime</function> 在 Windows 中的边界</title>
+    <title><function>gmmktime</function> 基础示例</title>
     <programlisting role="php">
 <![CDATA[
 <?php
-gmmktime(0, 0, 0, 1, 1, 1970); // 在 GMT 和西方合法，在东方不合法
+// 打印： July 1, 2000 is on a Saturday
+echo "July 1, 2000 is on a " . date("l", gmmktime(0, 0, 0, 7, 1, 2000));
 ?>
 ]]>
     </programlisting>
    </example>
   </para>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
   <para>
-   参见 <function>mktime</function>，<function>date</function>
-   和 <function>time</function>。
+   <simplelist>
+    <member><classname>DateTimeImmutable</classname> 类</member>
+    <member><function>mktime</function></member>
+    <member><function>date</function></member>
+    <member><function>time</function></member>
+   </simplelist>
   </para>
  </refsect1>
 </refentry>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: 8a058e9acded067eaa1bd445ed6943158e7311df Maintainer: daijie Status: ready -->
+<!-- EN-Revision: 18c86650bd4e134e164c4b4e358c63482840b00a Maintainer: daijie Status: partial -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="function.preg-replace" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>preg_replace</refname>
@@ -83,6 +83,9 @@
         如果 <parameter>subject</parameter> 是一个数组，搜索和替换回在
         <parameter>subject</parameter> 的每一个元素上进行, 并且返回值也会是一个数组。
       </para>
+      <para>
+       如果 <parameter>subject</parameter> 是关联数组，则键会保留在返回值中。
+      </para>
      </listitem>
     </varlistentry>
     <varlistentry>
@@ -124,6 +127,7 @@
    "\e" 会并忽略，并产生
    <constant>E_WARNING</constant> 错误。
   </para>
+  &pcre.pattern.warning;
  </refsect1>
 
  <refsect1 role="examples">
@@ -266,6 +270,29 @@ xp***to
    如果你期望使用索引对等方式用<parameter>replacement</parameter>对<parameter>pattern</parameter>
    进行替换, 你可以在调用<function>preg_replace</function>之前对两个数组各进行一次<function>ksort</function>排序.
    </para>
+  </note>
+  <note>
+   <para>
+    当 <parameter>pattern</parameter> 和 <parameter>replacement</parameter>
+    都是数组时，匹配规则将按顺序执行。也就是说第二个 <parameter>pattern</parameter>/<parameter>replacement</parameter>
+    将作用于第一个 <parameter>pattern</parameter>/<parameter>replacement</parameter>
+    生成的字符串，而不是原始字符串。
+    If you want to simulate replacements operating in parallel,
+    such as swapping two values, replace one pattern by an intermediary placeholder, then in a
+    later pair replace that intermediary placeholder with the desired replacement.
+   </para>
+   <example>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$p = array('/a/', '/b/', '/c/');
+$r = array('b', 'c', 'd');
+print_r(preg_replace($p, $r, 'a'));
+// 打印 d
+?>
+]]>
+    </programlisting>
+   </example>
   </note>
  </refsect1>
 

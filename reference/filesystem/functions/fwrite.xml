@@ -1,42 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: 96c9d88bad9a7d7d44bfb7f26c226df7ee9ddf26 Maintainer: dallas Status: ready -->
+<!-- EN-Revision: bb6247b68128cab1b166b49a3a73a87f40333267 Maintainer: dallas Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="function.fwrite" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>fwrite</refname>
   <refpurpose>写入文件（可安全用于二进制文件）</refpurpose>
  </refnamediv>
  
-  <refsect1 role="description">
+ <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <type>int</type><methodname>fwrite</methodname>
-   <methodparam><type>resource</type><parameter>handle</parameter></methodparam>
-   <methodparam><type>string</type><parameter>string</parameter></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter>length</parameter></methodparam>
+   <type class="union"><type>int</type><type>false</type></type><methodname>fwrite</methodname>
+   <methodparam><type>resource</type><parameter>stream</parameter></methodparam>
+   <methodparam><type>string</type><parameter>data</parameter></methodparam>
+   <methodparam choice="opt"><type class="union"><type>int</type><type>null</type></type><parameter>length</parameter><initializer>&null;</initializer></methodparam>
   </methodsynopsis>
   <simpara>
-   <function>fwrite</function> 把 <parameter>string</parameter> 的内容写入
-   文件指针 <parameter>handle</parameter> 处。 
+   <function>fwrite</function> 把 <parameter>data</parameter> 的内容写入
+   文件指针 <parameter>stream</parameter> 处。 
   </simpara>
  </refsect1>
- 
+
  <refsect1 role="parameters">
   &reftitle.parameters;
   <para>
    <variablelist>
     <varlistentry>
-     <term><parameter>handle</parameter></term>
+     <term><parameter>stream</parameter></term>
      <listitem>
       &fs.file.pointer;
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>string</parameter></term>
+     <term><parameter>data</parameter></term>
      <listitem>
       <para>
-       The string that is to be written.
+       要写入的字符串。
       </para>
      </listitem>
     </varlistentry>
@@ -44,32 +44,94 @@
      <term><parameter>length</parameter></term>
      <listitem>
       <para>
-       如果指定了
-   <parameter>length</parameter>，当写入了
-   <parameter>length</parameter> 个字节或者写完了 <parameter>string</parameter>
-   以后，写入就会停止，视乎先碰到哪种情况。
-      </para>
-      <para>
-        注意如果给出了
-   <parameter>length</parameter>
-   参数，则 <link
-   linkend="ini.magic-quotes-runtime">magic_quotes_runtime</link>
-   配置选项将被忽略，而
-   <parameter>string</parameter> 中的斜线将不会被抽去。
+       如果 <parameter>length</parameter> 是 &integer;，当写入了
+       <parameter>length</parameter> 个字节或者写完了 <parameter>string</parameter>
+       以后，写入就会停止，看先碰到哪种情况。
       </para>
      </listitem>
     </varlistentry>
    </variablelist>
   </para>
  </refsect1>
- 
-  <refsect1 role="returnvalues">
+
+ <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <simpara>
-   <function>fwrite</function> 返回写入的字符数，出现错误时则返回 &false; 。
+   <function>fwrite</function> 返回写入的字符数，&return.falseforfailure;。
   </simpara>
  </refsect1>
  
+ <refsect1 role="errors">
+  &reftitle.errors;
+  <para>
+   <function>fwrite</function> 失败时会引发 <constant>E_WARNING</constant>。
+  </para>
+ </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <informaltable>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>&Version;</entry>
+      <entry>&Description;</entry>
+     </row>
+    </thead>
+    <tbody>
+     <row>
+      <entry>8.0.0</entry>
+      <entry>
+       现在 <parameter>length</parameter> 可以为 null。
+      </entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </informaltable>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title>简单的 <function>fwrite</function> 示例</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$filename = 'test.txt';
+$somecontent = "Add this to the file\n";
+
+// 首先确认文件存在且可写。
+if (is_writable($filename)) {
+
+    // 在示例中，使用追加模式打开 $filename。
+    // 文件指针应该在文件的末尾，
+    // 那就是使用 fwrite() 写入 $somecontent 的地方。
+    if (!$fp = fopen($filename, 'a')) {
+         echo "Cannot open file ($filename)";
+         exit;
+    }
+
+    // 将 $somecontent 写入到打开的文件。
+    if (fwrite($fp, $somecontent) === FALSE) {
+        echo "Cannot write to file ($filename)";
+        exit;
+    }
+
+    echo "Success, wrote ($somecontent) to file ($filename)";
+
+    fclose($fp);
+
+} else {
+    echo "The file $filename is not writable";
+}
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+ </refsect1>
+
  <refsect1 role="notes">
   &reftitle.notes;
   <note>
@@ -94,7 +156,7 @@ function fwrite_stream($fp, $string) {
    </para>
   </note>
   
-   <note>
+  <note>
    <para>
     在区分二进制文件和文本文件的系统上（如 Windows）
     打开文件时，<function>fopen</function> 函数的 mode 参数要加上 'b'。
@@ -102,20 +164,18 @@ function fwrite_stream($fp, $string) {
   </note>
   <note>
    <para>
-    If <parameter>handle</parameter> was <function>fopen</function>ed in
-    append mode, <function>fwrite</function>s are atomic (unless the size of
-    <parameter>string</parameter> exceeds the filesystem's block size, on some
-    platforms, and as long as the file is on a local filesystem). That is,
-    there is no need to <function>flock</function> a resource before calling
-    <function>fwrite</function>; all of the data will be written without
-    interruption.
+    如果 <parameter>stream</parameter> 是 <function>fopen</function>
+    追加模式，<function>fwrite</function> 是原子操作（unless the size of
+    <parameter>data</parameter> exceeds the filesystem's block size, on some
+    platforms, and as long as the file is on a local filesystem）。也就是说，在调用
+    <function>fwrite</function> 之前不需要 <function>flock</function>
+    资源；所有的数据都将会不间断写入。
    </para>
   </note>
     <note>
    <para>
-    If writing twice to the file pointer, then the data will be appended to 
-    the end of the file content:
-        <programlisting role="php">
+    如果向文件指针写入两次，然后数据将追加到文件内容的末尾：
+    <programlisting role="php">
 <![CDATA[
 <?php
 $fp = fopen('data.txt', 'w');
@@ -123,54 +183,12 @@ fwrite($fp, '1');
 fwrite($fp, '23');
 fclose($fp);
 
-// the content of 'data.txt' is now 123 and not 23!
-?>
-]]>
-        </programlisting>
-   </para>
-  </note>
- </refsect1>
- 
-  <refsect1 role="examples">
-  &reftitle.examples;
-  <para>
-   <example>
-    <title>一个简单的 <function>fwrite</function> 例子</title>
-    <programlisting role="php">
-<![CDATA[
-<?php
-$filename = 'test.txt';
-$somecontent = "添加这些文字到文件\n";
-
-// 首先我们要确定文件存在并且可写。
-if (is_writable($filename)) {
-
-    // 在这个例子里，我们将使用添加模式打开$filename，
-    // 因此，文件指针将会在文件的末尾，
-    // 那就是当我们使用fwrite()的时候，$somecontent将要写入的地方。
-    if (!$handle = fopen($filename, 'a')) {
-         echo "不能打开文件 $filename";
-         exit;
-    }
-
-    // 将$somecontent写入到我们打开的文件中。
-    if (fwrite($handle, $somecontent) === FALSE) {
-        echo "不能写入到文件 $filename";
-        exit;
-    }
-
-    echo "成功地将 $somecontent 写入到文件$filename";
-
-    fclose($handle);
-
-} else {
-    echo "文件 $filename 不可写";
-}
+// “data.txt”的内容是 123 而不是 23！
 ?>
 ]]>
     </programlisting>
-   </example>
-  </para>
+   </para>
+  </note>
  </refsect1>
  
  <refsect1 role="seealso">
@@ -182,6 +200,7 @@ if (is_writable($filename)) {
     <member><function>fsockopen</function></member>
     <member><function>popen</function></member>
     <member><function>file_get_contents</function></member>
+    <member><function>pack</function></member>
    </simplelist>
   </para>
  </refsect1>

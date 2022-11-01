@@ -1,23 +1,23 @@
-<?xml version='1.0' encoding='utf-8'?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: Altair Status: ready -->
+<!-- EN-Revision: 60809ebcf7d0c261b2f00e093e4fab70326ffc7b Maintainer: Altair Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="function.class-implements" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>class_implements</refname>
   <refpurpose>
-   返回指定的类实现的所有接口。
+   返回指定的类或接口实现的所有接口
   </refpurpose>
  </refnamediv>
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <type>array</type><methodname>class_implements</methodname>
-   <methodparam><type>mixed</type><parameter>class</parameter></methodparam>
-   <methodparam choice="opt"><type>bool</type><parameter>autoload</parameter></methodparam>
+   <type class="union"><type>array</type><type>false</type></type><methodname>class_implements</methodname>
+   <methodparam><type class="union"><type>object</type><type>string</type></type><parameter>object_or_class</parameter></methodparam>
+   <methodparam choice="opt"><type>bool</type><parameter>autoload</parameter><initializer>&true;</initializer></methodparam>
   </methodsynopsis>
   <para>
-   本函数返回一个数组，该数组中包含了指定类<parameter>class</parameter>及其父类所实现的所有接口的名称。
+   本函数返回数组，包含指定 <parameter>object_or_class</parameter> 及其父类所实现的所有接口的名称。
   </para>
  </refsect1>
 
@@ -26,10 +26,10 @@
   <para>
    <variablelist>
     <varlistentry>
-     <term><parameter>class</parameter></term>
+     <term><parameter>object_or_class</parameter></term>
      <listitem>
       <para>
-        对象（类实例）或字符串（类名称）。
+        对象（类实例）或字符串（类名或接口名）。
       </para>
      </listitem>
     </varlistentry>
@@ -37,8 +37,7 @@
      <term><parameter>autoload</parameter></term>
      <listitem>
       <para>
-      是否允许使用<link linkend="language.oop5.autoload">__autoload</link>
-      魔术函数来自动装载该类。默认值为&true;。
+       是否默认调用 &link.autoload;。
       </para>
      </listitem>
     </varlistentry>
@@ -50,31 +49,7 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   调用成功则返回一个数组，否则返回&false;。
-  </para>
- </refsect1>
-
- <refsect1 role="changelog">
-  &reftitle.changelog;
-  <para>
-   <informaltable>
-    <tgroup cols="2">
-     <thead>
-      <row>
-       <entry>&Version;</entry>
-       <entry>&Description;</entry>
-      </row>
-     </thead>
-     <tbody>
-      <row>
-       <entry>5.1.0</entry>
-       <entry>
-        增加了允许参数<parameter>class</parameter>为字符串的选项。增加了<parameter>autoload</parameter>参数。
-       </entry>
-      </row>
-     </tbody>
-    </tgroup>
-   </informaltable>
+   成功时为数组，当指定类不存在则为 &false;。
   </para>
  </refsect1>
 
@@ -82,7 +57,7 @@
   &reftitle.examples;
   <para>
    <example>
-    <title><function>class_implements</function> example</title>
+    <title><function>class_implements</function> 示例</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -92,15 +67,12 @@ class bar implements foo {}
 
 print_r(class_implements(new bar));
 
-// since PHP 5.1.0 you may also specify the parameter as a string
+// 可以指定参数为字符串
 print_r(class_implements('bar'));
 
+spl_autoload_register();
 
-function __autoload($class_name) {
-   require_once $class_name . '.php';
-}
-
-// use __autoload to load the 'not_loaded' class
+// 使用自动加载去加载“not_loaded”类
 print_r(class_implements('not_loaded', true));
 
 ?>
@@ -113,7 +85,10 @@ Array
 (
     [foo] => foo
 )
-
+Array
+(
+    [foo] => foo
+)
 Array
 (
     [interface_of_not_loaded] => interface_of_not_loaded
@@ -134,7 +109,6 @@ Array
   </para>
  </refsect1>
 </refentry>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml

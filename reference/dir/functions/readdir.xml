@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 99a5cc447fc5ab7c3deeeb6f7462f9891bc86852 Maintainer: HonestQiao Status: ready -->
-<!-- Reviewed: no Maintainer: HonestQiao -->
+<!-- EN-Revision: b0b19b66183b28cebc1ffbcf1e2b8763f9d9c7b3 Maintainer: HonestQiao Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="function.readdir" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>readdir</refname>
@@ -11,8 +11,8 @@
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <type>string</type><methodname>readdir</methodname>
-   <methodparam choice="opt"><type>resource</type><parameter>dir_handle</parameter></methodparam>
+   <type class="union"><type>string</type><type>false</type></type><methodname>readdir</methodname>
+   <methodparam choice="opt"><type class="union"><type>resource</type><type>null</type></type><parameter>dir_handle</parameter><initializer>&null;</initializer></methodparam>
   </methodsynopsis>
   <para>
    返回目录中下一个文件的文件名。文件名以在文件系统中的排序返回。
@@ -44,6 +44,28 @@
   &return.falseproblem;
  </refsect1>
 
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <informaltable>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>&Version;</entry>
+      <entry>&Description;</entry>
+     </row>
+    </thead>
+    <tbody>
+     <row>
+      <entry>8.0.0</entry>
+      <entry>
+       现在 <parameter>dir_handle</parameter> 可以为 null。
+      </entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </informaltable>
+ </refsect1>
+
  <refsect1 role="examples">
   &reftitle.examples;
   <para>
@@ -58,20 +80,19 @@
     <programlisting role="php">
 <![CDATA[
 <?php
-// 注意在 4.0.0-RC2 之前不存在 !== 运算符
 
 if ($handle = opendir('/path/to/files')) {
     echo "Directory handle: $handle\n";
-    echo "Files:\n";
+    echo "Entries:\n";
 
     /* 这是正确地遍历目录方法 */
-    while (false !== ($file = readdir($handle))) {
-        echo "$file\n";
+    while (false !== ($entry = readdir($handle))) {
+        echo "$entry\n";
     }
 
     /* 这是错误地遍历目录的方法 */
-    while ($file = readdir($handle)) {
-        echo "$file\n";
+    while ($entry = readdir($handle)) {
+        echo "$entry\n";
     }
 
     closedir($handle);
@@ -88,9 +109,9 @@ if ($handle = opendir('/path/to/files')) {
 <![CDATA[
 <?php
 if ($handle = opendir('.')) {
-    while (false !== ($file = readdir($handle))) {
-        if ($file != "." && $file != "..") {
-            echo "$file\n";
+    while (false !== ($entry = readdir($handle))) {
+        if ($entry != "." && $entry != "..") {
+            echo "$entry\n";
         }
     }
     closedir($handle);
@@ -114,7 +135,6 @@ if ($handle = opendir('.')) {
   </para>
  </refsect1>
 </refentry>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml

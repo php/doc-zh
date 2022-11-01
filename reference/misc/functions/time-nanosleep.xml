@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 14af302c9c0e561fa6f9cdd956268758ba9a89c5 Maintainer:  Status: ready -->
+<!-- EN-Revision: 0c9c2dd669fe9395eaa73d487fbd160f9057429a Maintainer: mowangjuanzi Status: ready -->
 <refentry xml:id="function.time-nanosleep" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>time_nanosleep</refname>
@@ -10,7 +10,7 @@
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <type>mixed</type><methodname>time_nanosleep</methodname>
+   <type class="union"><type>array</type><type>bool</type></type><methodname>time_nanosleep</methodname>
    <methodparam><type>int</type><parameter>seconds</parameter></methodparam>
    <methodparam><type>int</type><parameter>nanoseconds</parameter></methodparam>
   </methodsynopsis>
@@ -37,6 +37,11 @@
       <para>
        必须是一个小于1亿的非负整数。
       </para>
+      <note>
+       <simpara>
+        在 Windows 上，系统的睡眠时间可能会超过指定的纳秒数，具体取决于硬件。
+       </simpara>
+      </note>
      </listitem>
     </varlistentry>
    </variablelist>
@@ -53,61 +58,37 @@
    <itemizedlist>
     <listitem>
      <simpara>
-      <literal>seconds</literal> - 延迟剩余未执行的秒数
+      <literal>seconds</literal>——延迟剩余未执行的秒数
      </simpara>
     </listitem>
     <listitem>
      <simpara>
-      <literal>nanoseconds</literal> - 延迟剩余未执行的纳秒数
+      <literal>nanoseconds</literal>——延迟剩余未执行的纳秒数
      </simpara>
     </listitem>
    </itemizedlist>
   </para>
  </refsect1>
- 
- <refsect1 role="changelog"><!-- {{{ -->
-  &reftitle.changelog;
-  <para>
-   <informaltable>
-    <tgroup cols="2">
-     <thead>
-      <row>
-       <entry>&Version;</entry>
-       <entry>&Description;</entry>
-      </row>
-     </thead>
-     <tbody>
-      <row>
-       <entry>5.3.0</entry>
-       <entry>
-        至此之后该函数在Windows平台下可用。
-       </entry>
-      </row>
-     </tbody>
-    </tgroup>
-   </informaltable>
-  </para>
- </refsect1><!-- }}} -->
 
  <refsect1 role="examples">
   &reftitle.examples;
   <para>
    <example>
-    <title><function>time_nanosleep</function> 的例子</title>
+    <title><function>time_nanosleep</function> 示例</title>
     <programlisting role="php">
 <![CDATA[
 <?php
-// Careful! This won't work as expected if an array is returned
+// 小心！如果返回数组，将无法按照预期工作
 if (time_nanosleep(0, 500000000)) {
     echo "Slept for half a second.\n";
 }
 
-// This is better:
+// 这个更好：
 if (time_nanosleep(0, 500000000) === true) {
     echo "Slept for half a second.\n";
 }
 
-// And this is the best:
+// 这个最好：
 $nano = time_nanosleep(2, 100000);
 
 if ($nano === true) {
@@ -140,7 +121,6 @@ if ($nano === true) {
  </refsect1>
 
 </refentry>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
