@@ -1,54 +1,110 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: fcddfb2551140fba9a14a4c44dc9fa60004440c8 Maintainer: HonestQiao Status: ready -->
-<!-- Reviewed: no Maintainer: HonestQiao -->
-<!-- splitted from ./en/functions/var.xml, last change in rev 1.2 -->
-  <refentry xml:id="function.unserialize" xmlns="http://docbook.org/ns/docbook">
-   <refnamediv>
-    <refname>unserialize</refname>
-    <refpurpose>
-     从已存储的表示中创建 PHP 的值
-    </refpurpose>
-   </refnamediv>
-   
+<!-- EN-Revision: ce3a2d381693ccbc10cc4a808c3eb853f3c85c9e Maintainer: HonestQiao Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
+<refentry xml:id="function.unserialize" xmlns="http://docbook.org/ns/docbook">
+ <refnamediv>
+  <refname>unserialize</refname>
+  <refpurpose>
+   从已存储的表示中创建 PHP 的值
+  </refpurpose>
+ </refnamediv>
+ 
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
    <type>mixed</type><methodname>unserialize</methodname>
-   <methodparam><type>string</type><parameter>str</parameter></methodparam>
+   <methodparam><type>string</type><parameter>data</parameter></methodparam>
+   <methodparam choice="opt"><type>array</type><parameter>options</parameter><initializer>[]</initializer></methodparam>
   </methodsynopsis>
-    <simpara>
-     <function>unserialize</function> 对单一的已序列化的变量进行操作，将其转换回 
-     PHP 的值。
-    </simpara>
-   </refsect1>
+  <simpara>
+   <function>unserialize</function> 对单一的已序列化的变量进行操作，将其转换回 
+   PHP 的值。
+  </simpara>
+  <warning>
+   <para>
+    无论 <literal>allowed_classes</literal> 的 <parameter>options</parameter>
+    值如何，都不要将不受信任的用户输入传递给
+    <function>unserialize</function>。由于对象实例化和自动加载，反序列化可能会导致加载代码并执行，恶意用户可能会利用这一点。如果需要将序列化数据传递给用户，请使用安全、标准的数据交换格式，例如
+    JSON（通过 <function>json_decode</function> 和 <function>json_encode</function>）。
+   </para>
+   <para>
+    如果需要反序列化外部存储的序列化数据，请考虑使用 <function>hash_hmac</function> 做数据验证。确保数据不会被任何人修改。
+   </para>
+  </warning>
+ </refsect1>
 
  <refsect1 role="parameters">
   &reftitle.parameters;
   <para>
    <variablelist>
     <varlistentry>
-     <term><parameter>str</parameter></term>
+     <term><parameter>data</parameter></term>
      <listitem>
       <para>
        序列化后的字符串。
       </para>
       <para>
-       若被反序列化的变量是一个对象，在成功地重新构造对象之后，PHP
-     会自动地试图去调用 <link linkend="object.wakeup">__wakeup()</link>
-     成员函数（如果存在的话）。
+       若被反序列化的变量是一个对象，在成功地重新构造对象之后，PHP 会自动地试图去调用
+       <link linkend="object.unserialize">__unserialize()</link> 或
+       <link linkend="object.wakeup">__wakeup()</link> 方法（如果存在）。
       </para>
       <para>
        <note>
         <title>unserialize_callback_func 指令</title>
         <para>
-        如果在反序列化的时候需要实例化一个未定义类，则可以设置回调函数以供调用（以免得到的是不完整的
-      <type>object</type> “__PHP_Incomplete_Class”）。可通过
-      &php.ini;、<function>ini_set</function> 或 &htaccess; 
-      定义‘unserialize_callback_func’。每次实例化一个未定义类时它都会被调用。若要禁止这个特性，只需置空此设定。
+         如果在反序列化时需要实例化未定义类，则可以设置回调函数以供调用（以免得到的是不完整的 <type>object</type> 
+         “__PHP_Incomplete_Class”）。可通过 &php.ini;、<function>ini_set</function> 或 &htaccess; 定义 <link
+         linkend="ini.unserialize-callback-func">unserialize_callback_func</link>。每次实例化未定义类时它都会被调用。若要禁止这个特性，只需置空此设定。
         </para>
        </note>
       </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>options</parameter></term>
+     <listitem>
+      <para>
+       使用关联数组提供给 <function>unserialize</function> 的任何选项。
+      </para>
+      <table>
+       <title>可用选项</title>
+       <tgroup cols="3">
+        <thead>
+         <row>
+          <entry>名称</entry>
+          <entry>类型</entry>
+          <entry>说明</entry>
+         </row>
+        </thead>
+        <tbody>
+         <row>
+          <entry><literal>allowed_classes</literal></entry>
+          <entry><type>mixed</type></entry>
+          <entry>
+           <simpara>
+            应该接受的类名数组，&false; 表示不接受任何类，或者 &true; 表示接受所有类。如果定义此选项且
+            <function>unserialize</function> 遇到不接受的类的对象，则该对象将会实例化为
+            <classname>__PHP_Incomplete_Class</classname>。
+           </simpara>
+           <simpara>
+            省略此选项等同于定义为 &true;：PHP 将会尝试实例化任何类的对象。
+           </simpara>
+          </entry>
+         </row>
+         <row>
+          <entry><literal>max_depth</literal></entry>
+          <entry><type>int</type></entry>
+          <entry>
+           <simpara>
+            反序列时允许的最大结构深度，主要为了防止栈溢出。默认深度限制为 <literal>4096</literal>，可以通过将
+            <literal>max_depth</literal> 设置为 <literal>0</literal> 来禁用。
+           </simpara>
+          </entry>
+         </row>
+        </tbody>
+       </tgroup>
+      </table>
      </listitem>
     </varlistentry>
    </variablelist>
@@ -58,12 +114,18 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   返回的是转换之后的值，可为 
-     <type>integer</type>、<type>float</type>、<type>string</type>、<type>array</type>
-     或 <type>object</type>。
-     </para>
+   返回的是转换之后的值，可为 <type>bool</type>、<type>int</type>、<type>float</type>、<type>string</type>、<type>array</type>
+   或 <type>object</type>。
+  </para>
   <para>
-   如果传递的字符串不可反序列化，则返回 &false;，并产生一个 <constant>E_NOTICE</constant>。
+   如果传递的字符串不可反序列化，则返回 &false;，并产生 <constant>E_NOTICE</constant>。
+  </para>
+ </refsect1>
+
+ <refsect1 role="errors">
+  &reftitle.errors;
+  <para>
+   对象可能会在反序列化处理程序中抛出 <classname>Throwable</classname>。
   </para>
  </refsect1>
 
@@ -80,9 +142,17 @@
      </thead>
      <tbody>
       <row>
-       <entry>4.2.0</entry>
+       <entry>7.4.0</entry>
        <entry>
-        添加了 unserialize_callback_func 指令。
+        新增 <parameter>options</parameter> 的 <literal>max_depth</literal> 元素，设置反序列化时允许的最大结构深度。
+       </entry>
+      </row>
+      <row>
+       <entry>7.1.0</entry>
+       <entry>
+        <parameter>options</parameter> 的 <literal>allowed_classes</literal> 元素现在是严格类型，即如果给出
+        <type>array</type> 或 <type>bool</type> 以外的任何内容，则 <function>unserialize</function> 返回
+        &false; 并发出 <constant>E_WARNING</constant>。
        </entry>
       </row>
      </tbody>
@@ -129,7 +199,6 @@ if (!odbc_execute($stmt, $sqldata) || !odbc_fetch_into($stmt, $tmp)) {
 <?php
 $serialized_object='O:1:"a":1:{s:5:"value";s:3:"100";}';
 
-// unserialize_callback_func 从 PHP 4.2.0 起可用
 ini_set('unserialize_callback_func', 'mycallback'); // 设置您的回调函数
 
 function mycallback($classname) 
@@ -148,8 +217,8 @@ function mycallback($classname)
   &reftitle.notes;
   <warning>
    <para>
-    如果反序列化了 &false; 的值，或者在过程中发生了错误，都会返回 &false;。
-    可以通过 <parameter>str</parameter> 和 <literal>serialize(false)</literal> 进行比较，或者捕捉 <constant>E_NOTICE</constant> 错误来判断这种特殊情况。
+    如果发生了错误或反序列化了已序列化的 &false; 值，则会返回 &false;。可以通过 <parameter>data</parameter> 和
+    <literal>serialize(false)</literal> 进行比较，或者捕捉 <constant>E_NOTICE</constant> 错误来判断这种特殊情况。
    </para>
   </warning>
  </refsect1>
@@ -158,15 +227,21 @@ function mycallback($classname)
   &reftitle.seealso;
   <para>
    <simplelist>
+    <member><function>json_encode</function></member>
+    <member><function>json_decode</function></member>
+    <member><function>hash_hmac</function></member>
     <member><function>serialize</function></member>
-    <member><link linkend="language.oop5.autoload">自动加载对象</link></member>
-    <member><link linkend="unserialize-callback-func">unserialize_callback_func</link></member>
+    <member><link linkend="language.oop5.autoload">自动加载类</link></member>
+    <member><link linkend="ini.unserialize-callback-func">unserialize_callback_func</link></member>
+    <member><link linkend="ini.unserialize-max-depth">unserialize_max_depth</link></member>
     <member><link linkend="object.wakeup">__wakeup()</link></member>
+    <member><link linkend="object.serialize">__serialize()</link></member>
+    <member><link linkend="object.unserialize">__unserialize()</link></member>
    </simplelist>
   </para>
  </refsect1>
-  </refentry>
 
+</refentry>
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
