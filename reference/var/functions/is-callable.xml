@@ -1,27 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 5faa7a6747bca628b3bdcc9f93aec5603b65581f Maintainer: HonestQiao Status: ready -->
-<!-- Reviewed: no Maintainer: HonestQiao -->
-<!-- splitted from ./en/functions/var.xml, last change in rev 1.87 -->
-  <refentry xml:id="function.is-callable" xmlns="http://docbook.org/ns/docbook">
-   <refnamediv>
-    <refname>is_callable</refname>
-    <refpurpose>
-     检测参数是否为合法的可调用结构
-    </refpurpose>
-   </refnamediv>
- 
+<!-- EN-Revision: 83a17a7324c2597bd6385148abf19f76127229f5 Maintainer: HonestQiao Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
+<refentry xml:id="function.is-callable" xmlns="http://docbook.org/ns/docbook">
+ <refnamediv>
+  <refname>is_callable</refname>
+  <refpurpose>
+   验证值是否可以在当前范围内作为函数调用。
+  </refpurpose>
+ </refnamediv>
+
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
    <type>bool</type><methodname>is_callable</methodname>
-   <methodparam><type>callable</type><parameter>name</parameter></methodparam>
-   <methodparam choice="opt"><type>bool</type><parameter>syntax_only</parameter><initializer>false</initializer></methodparam>
-   <methodparam choice="opt"><type>string</type><parameter role="reference">callable_name</parameter></methodparam>
+   <methodparam><type>mixed</type><parameter>value</parameter></methodparam>
+   <methodparam choice="opt"><type>bool</type><parameter>syntax_only</parameter><initializer>&false;</initializer></methodparam>
+   <methodparam choice="opt"><type>string</type><parameter role="reference">callable_name</parameter><initializer>&null;</initializer></methodparam>
   </methodsynopsis>
   <para>
-   验证变量的内容能否作为函数调用。
-   这可以检查包含有效函数名的变量，或者一个数组，包含了正确编码的对象以及函数名。
+   验证值是 <type>callable</type>。
   </para>
  </refsect1>
 
@@ -30,10 +28,10 @@
   <para>
    <variablelist>
     <varlistentry>
-     <term><parameter>name</parameter></term>
+     <term><parameter>value</parameter></term>
      <listitem>
       <para>
-       要检查的回调函数。
+       要验证的值
       </para>
      </listitem>
     </varlistentry>
@@ -41,8 +39,9 @@
      <term><parameter>syntax_only</parameter></term>
      <listitem>
       <para>
-       如果设置为 &true;，这个函数仅仅验证 <parameter>name</parameter> 可能是函数或方法。
-       它仅仅拒绝非字符，或者未包含能用于回调函数的有效结构。有效的应该包含两个元素，第一个是一个对象或者字符，第二个元素是个字符。
+       如果设置为 &true;，则函数仅验证 <parameter>value</parameter>
+       可能是函数或方法。它仅仅拒绝不是字符串的简单变量，或者不能用作回调的有效结构的数组。只有
+       2 个条目有效，第一个是对象或者字符串，第二个是字符串。
       </para>
      </listitem>
     </varlistentry>
@@ -50,8 +49,8 @@
      <term><parameter>callable_name</parameter></term>
      <listitem>
       <para>
-       接受“可调用的名称”。下面的例子是“someClass::someMethod”。
-       注意，尽管 someClass::SomeMethod() 的含义是可调用的静态方法，但例子的情况并不是这样的。
+       接受“可调用的名称”。下面的例子是“someClass::someMethod”。注意，尽管 
+       someClass::SomeMethod() 暗示是可调用的静态方法，但事实并非如此。
       </para>
      </listitem>
     </varlistentry>
@@ -62,7 +61,7 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   如果 <parameter>name</parameter> 可调用则返回 &true;，否则返回 &false;。
+   如果 <parameter>value</parameter> 可调用则返回 &true;，否则返回 &false;。
   </para>
  </refsect1>
 
@@ -74,11 +73,10 @@
     <programlisting role="php">
 <![CDATA[
 <?php
-//  How to check a variable to see if it can be called
-//  as a function.
+//  如何检测变量以查看是否可以作为函数调用。
 
 //
-//  Simple variable containing a function
+//  包含函数的简单变量
 //
 
 function someFunction() 
@@ -92,7 +90,7 @@ var_dump(is_callable($functionVariable, false, $callable_name));  // bool(true)
 echo $callable_name, "\n";  // someFunction
 
 //
-//  Array containing a method
+//  包含方法的数组
 //
 
 class someClass {
@@ -115,7 +113,55 @@ echo $callable_name, "\n";  //  someClass::someMethod
 ]]>
     </programlisting>
    </example>   
+   <example>
+    <title><function>is_callable</function> 和构造函数</title>
+    <simpara>
+     <function>is_callable</function> 报告构造函数不可调用。
+    </simpara>
+    <programlisting role="php">
+<![CDATA[
+<?php
+
+class Foo
+{
+    public function __construct() {}
+    public function foo() {}
+}
+
+var_dump(
+    is_callable(array('Foo', '__construct')),
+    is_callable(array('Foo', 'foo'))
+);
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+bool(false)
+bool(false)
+]]>
+    </screen>
+   </example>
   </para>   
+ </refsect1>
+
+ <refsect1 role="notes">
+  &reftitle.notes;
+  <simplelist>
+   <member>
+    如果对象实现了 <link linkend="object.invoke">__invoke()</link>，则始终可调用，且该方法在当前作用域可见。
+   </member>
+   <member>
+    如果类名实现了 <link linkend="object.callstatic">__callStatic()</link>，则可调用。
+   </member>
+   <member>
+    如果对象实现 <link linkend="object.call">__call()</link>，则此函数对该对象的任何方法将返回
+    &true;，即使该方法没有定义。
+   </member>
+   <member>
+    如果使用类名调用此函数，则会触发自动加载。
+   </member>
+  </simplelist>
  </refsect1>
 
  <refsect1 role="seealso">
@@ -127,8 +173,7 @@ echo $callable_name, "\n";  //  someClass::someMethod
    </simplelist>
   </para>
  </refsect1>
-  </refentry>
-
+</refentry>
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
