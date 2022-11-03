@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: eac82849b3c30b0779c0397391f5776bceb2da0a Maintainer: HonestQiao Status: ready -->
-<!-- Reviewed: no Maintainer: HonestQiao -->
-<!-- splitted from ./en/functions/var.xml, last change in rev 1.2 -->
-  <refentry xml:id="function.empty" xmlns="http://docbook.org/ns/docbook">
-   <refnamediv>
-    <refname>empty</refname>
-    <refpurpose>检查一个变量是否为空</refpurpose>
-   </refnamediv>
+<!-- EN-Revision: 4a07033f7ac5ab121357051cc94ec48b9f6f58fc Maintainer: HonestQiao Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
+<refentry xml:id="function.empty" xmlns="http://docbook.org/ns/docbook">
+ <refnamediv>
+  <refname>empty</refname>
+  <refpurpose>检查变量是否为空</refpurpose>
+ </refnamediv>
  <refsect1 role="description">
   &reftitle.description;
-     <methodsynopsis>
-      <type>bool</type><methodname>empty</methodname>
-      <methodparam><type>mixed</type><parameter>var</parameter></methodparam>
-     </methodsynopsis>
-    <para>
-     判断一个变量是否被认为是空的。当一个变量并不存在，或者它的值等同于&false;，那么它会被认为不存在。如果变量不存在的话，<function>empty</function>并不会产生警告。
-     </para>
+  <methodsynopsis>
+   <type>bool</type><methodname>empty</methodname>
+   <methodparam><type>mixed</type><parameter>var</parameter></methodparam>
+  </methodsynopsis>
+  <para>
+   判断变量是否为是空。当变量不存在或者它的值等同于
+   &false;，那么视为空。如果变量不存在，<function>empty</function> 不会产生警告。
+  </para>
  </refsect1>
  <refsect1 role="parameters">
   &reftitle.parameters;
@@ -28,15 +28,9 @@
       <para>
        待检查的变量
       </para>
-      <note>
-       <para>
-        在 PHP 5.5 之前，<function>empty</function> 仅支持变量；任何其他东西将会导致一个解析错误。换言之，下列代码不会生效： <command>empty(trim($name))</command>。
-        作为替代，应该使用<command>trim($name) == false</command>.
-       </para>
-      </note>
       <para>
-       没有警告会产生，哪怕变量并不存在。
-       这意味着 <function>empty</function> 本质上与 <command>!isset($var) || $var == false</command> 等价。
+       没有警告会产生，哪怕变量并不存在。这意味着 <function>empty</function> 本质上与
+       <command>!isset($var) || $var == false</command> 等价。
       </para>
      </listitem>
     </varlistentry>
@@ -46,54 +40,9 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   当<parameter>var</parameter>存在，并且是一个非空非零的值时返回 &false; 
+   当 <parameter>var</parameter> 不存在或者值为空或者等于 0，返回 &true;。参阅 <link
+   linkend="language.types.boolean.casting">转换为 boolean</link>。否则返回 &false;。
    否则返回 &true;.
-  </para>
-  <para>
-   以下的东西被认为是空的：
-   <simplelist>
-    <member><literal>""</literal> (空字符串)</member>
-    <member><literal>0</literal> (作为整数的0)</member>
-    <member><literal>0.0</literal> (作为浮点数的0)</member>
-    <member><literal>"0"</literal> (作为字符串的0)</member>
-    <member>&null;</member>
-    <member>&false;</member>
-    <member><literal>array()</literal> (一个空数组)</member>
-    <member><literal>$var;</literal> (一个声明了，但是没有值的变量)</member>
-   </simplelist>
-  </para>
- </refsect1>
- <refsect1 role="changelog">
-  &reftitle.changelog;
-  <para>
-   <informaltable>
-    <tgroup cols="2">
-     <thead>
-      <row>
-       <entry>&Version;</entry>
-       <entry>&Description;</entry>
-      </row>
-     </thead>
-     <tbody>
-      <row>
-       <entry>5.5.0</entry>
-       <entry>
-        <para>
-         <function>empty</function> 现在支持表达式了，而不仅仅是变量。
-        </para>
-       </entry>
-      </row>
-      <row>
-       <entry>5.4.0</entry>
-       <entry>
-        <para>
-         检查非数字的字符串偏移量会返回 &true;.
-        </para>
-       </entry>
-      </row>
-     </tbody>
-    </tgroup>
-   </informaltable>
   </para>
  </refsect1>
  <refsect1 role="examples">
@@ -123,10 +72,7 @@ if (isset($var)) {
    </example>
   </para>
   <example>
-   <title>在字符串偏移量上使用<function>empty</function></title>
-   <para>
-    PHP 5.4 修改了当传入的是字符串偏移量时， <function>empty</function> 的行为
-   </para>
+   <title>在字符串偏移量上使用 <function>empty</function></title>
    <programlisting role="php">
 <![CDATA[
 <?php
@@ -142,16 +88,7 @@ var_dump(empty($expected_array_got_string['0 Mostel']));
    </programlisting>
    &example.outputs.53;
    <screen>
-<![CDATA[
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-]]>
-   </screen>
-   &example.outputs.54;
+   &example.outputs;
    <screen>
 <![CDATA[
 bool(true)
@@ -169,9 +106,8 @@ bool(true)
   &note.language-construct;
   <note>
    <para>
-    当对一个不可见的对象属性使用 <function>empty</function> 时，
-    <link linkend="object.isset">__isset()</link>
-    方法如果存在的话，它将会被调用。
+    当对一个不可见的对象属性使用 <function>empty</function> 时，如果存在
+    <link linkend="object.isset">__isset()</link> 方法，它将会被调用。
    </para>
   </note>
  </refsect1>
@@ -185,7 +121,7 @@ bool(true)
     <member><function>array_key_exists</function></member>
     <member><function>count</function></member> 
     <member><function>strlen</function></member>
-    <member><link linkend="types.comparisons">The type comparison tables</link></member>
+    <member><link linkend="types.comparisons">类型比较表</link></member>
    </simplelist>
   </para>
  </refsect1>
