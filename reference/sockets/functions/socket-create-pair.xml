@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision$ -->
+<!-- EN-Revision: 14dc7c47365f2b71f6c907a5ba5bccf42534d5a9 Maintainer: songmeifeng Status: ready -->
+<refentry xml:id="function.socket-create-pair" xmlns="http://docbook.org/ns/docbook">
+ <refnamediv>
+  <refname>socket_create_pair</refname>
+  <refpurpose>创建一对无法区分的套接字，并用数组存储</refpurpose>
+ </refnamediv>
+ 
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <type>bool</type><methodname>socket_create_pair</methodname>
+   <methodparam><type>int</type><parameter>domain</parameter></methodparam>
+   <methodparam><type>int</type><parameter>type</parameter></methodparam>
+   <methodparam><type>int</type><parameter>protocol</parameter></methodparam>
+   <methodparam><type>array</type><parameter role="reference">pair</parameter></methodparam>
+  </methodsynopsis>
+  <para>
+   <function>socket_create_pair</function> 创建两个已连接的，无法区分的套接字，并存储在 <parameter>pair</parameter> 
+   中。此函数通常在 IPC（进程间通信）使用。
+  </para>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>domain</parameter></term>
+     <listitem>
+      <para>
+       <parameter>domain</parameter> 参数指定套接字使用的协议族。完整列表参见 <function>socket_create</function>。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>type</parameter></term>
+     <listitem>
+      <para>
+       <parameter>type</parameter> 参数选择套接字使用的通信类型。完整列表参见 <function>socket_create</function>。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>protocol</parameter></term>
+     <listitem>
+      <para>
+       <parameter>domain</parameter> 参数指定套接字在 <parameter>domain</parameter> 
+       协议族下通信时使用的具体协议。这个值可以通过 <function>getprotobyname</function> 
+       获取。如果所需的协议是 TCP 或 UDP，可以直接使用常量 <constant>SOL_TCP</constant> 和 <constant>SOL_UDP</constant>。
+      </para>
+      <para>
+       有关支持协议的完整列表，参见 <function>socket_create</function>。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>pair</parameter></term>
+     <listitem>
+      <para>
+       包含两个 <classname>Socket</classname> 实例的引用数组。
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   &return.success;
+  </para>
+ </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <informaltable>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>&Version;</entry>
+      <entry>&Description;</entry>
+     </row>
+    </thead>
+    <tbody>
+     <row>
+      <entry>8.0.0</entry>
+      <entry>
+       <parameter>pair</parameter> 现在是 <classname>Socket</classname> 实例的引用数组；在这之前是 <type>resource</type> 的引用数组。
+      </entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </informaltable>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title><function>socket_create_pair</function> 示例</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$sockets = array();
+
+/* On Windows we need to use AF_INET */
+$domain = (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN' ? AF_INET : AF_UNIX);
+
+/* Setup socket pair */
+if (socket_create_pair($domain, SOCK_STREAM, 0, $sockets) === false) {
+    echo "socket_create_pair failed. Reason: ".socket_strerror(socket_last_error());
+}
+/* Send and Receive Data */
+if (socket_write($sockets[0], "ABCdef123\n", strlen("ABCdef123\n")) === false) {
+    echo "socket_write() failed. Reason: ".socket_strerror(socket_last_error($sockets[0]));
+}
+if (($data = socket_read($sockets[1], strlen("ABCdef123\n"), PHP_BINARY_READ)) === false) {
+    echo "socket_read() failed. Reason: ".socket_strerror(socket_last_error($sockets[1]));
+}
+var_dump($data);
+
+/* Close sockets */
+socket_close($sockets[0]);
+socket_close($sockets[1]);
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   <example>
+    <title><function>socket_create_pair</function> IPC 示例</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$ary = array();
+$strone = 'Message From Parent.';
+$strtwo = 'Message From Child.';
+
+if (socket_create_pair(AF_UNIX, SOCK_STREAM, 0, $ary) === false) {
+    echo "socket_create_pair() failed. Reason: ".socket_strerror(socket_last_error());
+}
+$pid = pcntl_fork();
+if ($pid == -1) {
+    echo 'Could not fork Process.';
+} elseif ($pid) {
+    /*parent*/
+    socket_close($ary[0]);
+    if (socket_write($ary[1], $strone, strlen($strone)) === false) {
+        echo "socket_write() failed. Reason: ".socket_strerror(socket_last_error($ary[1]));
+    }
+    if (socket_read($ary[1], strlen($strtwo), PHP_BINARY_READ) == $strtwo) {
+        echo "Received $strtwo\n";
+    }
+    socket_close($ary[1]);
+} else {
+    /*child*/
+    socket_close($ary[1]);
+    if (socket_write($ary[0], $strtwo, strlen($strtwo)) === false) {
+        echo "socket_write() failed. Reason: ".socket_strerror(socket_last_error($ary[0]));
+    }
+    if (socket_read($ary[0], strlen($strone), PHP_BINARY_READ) == $strone) {
+        echo "Received $strone\n";
+    }
+    socket_close($ary[0]);
+}
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>socket_create</function></member>
+    <member><function>socket_create_listen</function></member>
+    <member><function>socket_bind</function></member>
+    <member><function>socket_listen</function></member>
+    <member><function>socket_last_error</function></member>
+    <member><function>socket_strerror</function></member>
+   </simplelist>
+  </para>
+ </refsect1>
+</refentry>
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
