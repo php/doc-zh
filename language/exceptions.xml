@@ -1,211 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 2e8ef0a1bd98243cb2c6c5c627a195bb53a7a440 Maintainer: daijie Status: ready -->
+<!-- EN-Revision: 491a7cc9cddf1e20cda76b16226d0bc020402476 Maintainer: daijie Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
+<chapter xml:id="language.exceptions" xmlns:phd="http://www.php.net/ns/phd">
+ <!-- we use our own DTD instead of xmlns="http://docbook.org/ns/docbook" so that we can use
+ <sect1 phd:chunk="false"> -->
+ <title>异常</title>
+ <para>
+  PHP 有一个和其他语言相似的异常模型。在 PHP 里可以 &throw; 并捕获（&catch;）异常。为了捕获潜在的异常，代码会包含在
+  &try; 块里。每个 &try; 都必须至少有一个相应的 &catch; 或 &finally; 块。
+ </para>
+ <para>
+  如果抛出异常的函数范围内没有 &catch; 块，异常会沿调用栈“向上冒泡”，直到找到匹配的 &catch; 块。沿途会执行所有遇到的
+  &finally; 块。在没有设置全局异常处理程序时，如果调用栈向上都没有遇到匹配的 &catch;，程序会抛出 fatal 错误并终止。
+ </para>
+ <para>
+  抛出的对象必须是 &instanceof; <interfacename>Throwable</interfacename>。尝试抛出其他对象会导致 PHP Fatal 错误。
+ </para>
+ <para>
+  PHP 8.0.0 起，&throw; 关键词现在开始是一个表达式，可用于任何表达式上下文。在此之前，它是一个语句，必须独占一行。
+ </para>
 
- <chapter xml:id="language.exceptions" xmlns="http://docbook.org/ns/docbook">
-  <title>异常</title>
-   
-  <sect1 xml:id="language.exceptions.extending">
-   <title>扩展（extend） 异常处理类</title>
-   <para>
-    用户可以用自定义的异常处理类来扩展 PHP
-    内置的异常处理类。以下的代码说明了在内置的异常处理类中，哪些属性和方法在子类中是可访问和可继承的。
-   </para>
-   <example>
-    <title>内置的异常处理类</title>
-    <programlisting role="php">
-<![CDATA[
-<?php
-class Exception implements Throwable
-{
-    protected $message = 'Unknown exception';   // 异常信息
-    private   $string;                          // __toString 的缓存
-    protected $code = 0;                        // 用户自定义异常错误码
-    protected $file;                            // 发生异常的源文件名
-    protected $line;                            // 发生异常的源代码行号
-    private   $trace;                           // backtrace
-    private   $previous;                        // 如果是嵌套异常，则是之前的 exception
-
-    public function __construct($message = '', $code = 0, Throwable $previous = null);
-
-    final private function __clone();           // 禁止克隆异常。
-
-    final public  function getMessage();        // 异常信息
-    final public  function getCode();           // 异常错误码
-    final public  function getFile();           // 发生异常的源文件名
-    final public  function getLine();           // 发生异常的源代码行号
-    final public  function getTrace();          // backtrace() 数组
-    final public  function getPrevious();       // 之前的 exception
-    final public  function getTraceAsString();  // 已格成化成字符串的 getTrace() 信息
-
-    // Overrideable
-    public function __toString();               // 可输出的格式化后的字符串
-}
-?>
-]]>
-    </programlisting>
-   </example>
-   <para>
-    如果使用自定义的类来扩展内置异常处理类，并且要重新定义<link
-    linkend="language.oop5.decon">构造函数</link>的话，建议同时调用
-    <link linkend="language.oop5.paamayim-nekudotayim">parent::__construct()</link>
-    来确保所有的变量已赋值。当对象要输出字符串的时候，可以重载
-    <link linkend="language.oop5.magic">__toString()</link> 并自定义输出的样式。
-   </para>
-   <note>
-    <para>
-     Exception 对象不能被复制。尝试对 Exception <link
-     linkend="language.oop5.cloning">对象复制</link> 会导致一个 <constant>E_ERROR</constant> 级别的错误。
-    </para>
-   </note>
-   <example>
-    <title>扩展 PHP 内置的异常处理类</title>
-    <programlisting role="php">
-<![CDATA[
-<?php
-/**
- * 自定义一个异常处理类
- */
-class MyException extends Exception
-{
-    // 重定义构造器使 message 变为必须被指定的属性
-    public function __construct($message, $code = 0, Throwable $previous = null) {
-        // 这里写用户的代码
-
-        // 确保所有变量都被正确赋值
-        parent::__construct($message, $code, $previous);
-    }
-
-    // 自定义字符串输出的格式
-    public function __toString() {
-        return __CLASS__ . ": [{$this->code}]: {$this->message}\n";
-    }
-
-    public function customFunction() {
-        echo "A custom function for this type of exception\n";
-    }
-}
-
-
-/**
- * 创建一个类，测试该 exception 类
- */
-class TestException
-{
-    public $var;
-
-    const THROW_NONE    = 0;
-    const THROW_CUSTOM  = 1;
-    const THROW_DEFAULT = 2;
-
-    function __construct($avalue = self::THROW_NONE) {
-
-        switch ($avalue) {
-            case self::THROW_CUSTOM:
-                // 抛出自定义异常
-                throw new MyException('1 is an invalid parameter', 5);
-                break;
-
-            case self::THROW_DEFAULT:
-                // 抛出默认的异常
-                throw new Exception('2 is not allowed as a parameter', 6);
-                break;
-
-            default: 
-                // 没有异常的情况下，创建一个对象
-                $this->var = $avalue;
-                break;
-        }
-    }
-}
-
-
-// 例子 1
-try {
-    $o = new TestException(TestException::THROW_CUSTOM);
-} catch (MyException $e) {      // 捕获异常
-    echo "Caught my exception\n", $e;
-    $e->customFunction();
-} catch (Exception $e) {        // 被忽略
-    echo "Caught Default Exception\n", $e;
-}
-
-// 继续执行后续代码
-var_dump($o); // Null
-echo "\n\n";
-
-
-// 例子 2
-try {
-    $o = new TestException(TestException::THROW_DEFAULT);
-} catch (MyException $e) {      //  不能匹配异常的种类，被忽略
-    echo "Caught my exception\n", $e;
-    $e->customFunction();
-} catch (Exception $e) {        // 捕获异常
-    echo "Caught Default Exception\n", $e;
-}
-
-// 执行后续代码
-var_dump($o); // Null
-echo "\n\n";
-
-
-// 例子 3
-try {
-    $o = new TestException(TestException::THROW_CUSTOM);
-} catch (Exception $e) {        // 捕获异常
-    echo "Default Exception caught\n", $e;
-}
-
-// 执行后续代码
-var_dump($o); // Null
-echo "\n\n";
-
-
-// 例子 4
-try {
-    $o = new TestException();
-} catch (Exception $e) {        // 没有异常，被忽略
-    echo "Default Exception caught\n", $e;
-}
-
-// 执行后续代码
-var_dump($o); // TestException
-echo "\n\n";
-?>
-]]>
-    </programlisting>
-   </example>
-  </sect1>
-
-  <simplesect xml:id="language.exceptions.introduction">
-   <para>
-    PHP 有一个和其他语言相似的异常模型。
-    在 PHP 里可以 &throw; 并 &catch; 异常。
-    为了捕获潜在的异常，可以将代码包含在 &try; 块里。
-    每个 &try; 都必须有一个相应的
-    &catch; 或 &finally; 代码块。
-   </para>
-   <para>
-    如果抛出异常的函数范围内没有 &catch; 块，异常会沿调用栈“向上冒泡”，
-    直到找到匹配的 &catch; 块。
-    沿途会执行所有遇到的 &finally; 块。
-    在没有设置全局异常处理程序（exception handler）时，
-    如果调用栈向上都没有遇到匹配的 &catch;，程序会抛出 fatal 错误并终止执行。
-   </para>
-   <para>
-   抛出的对象必须是 <classname>Exception</classname> 自身或
-   <classname>Exception</classname>的子类。
-    抛出其他对象会导致 PHP 报 Fatal 错误。
-   </para>
-   <para>
-   PHP 8.0.0 起，&throw; 关键词现在开始是一个表达式，可用于任何表达式的场景。
-   在此之前，它是一个语句，必须独占一行。
-   </para>
-
-  </simplesect>
-
-  <simplesect xml:id="language.exceptions.catch">
+  <sect1 phd:chunk="false" xml:id="language.exceptions.catch">
    <title><literal>catch</literal></title>
    <para>
     &catch; 定义了处理抛出异常的方式。
@@ -233,9 +49,9 @@ echo "\n\n";
     从 PHP 8.0.0 起，捕获的异常不再强制要求指定变量名。
     &catch; 代码块会在未指定时继续执行，只是无法访问到抛出的对象。
    </para>
-  </simplesect>
+  </sect1>
 
-  <simplesect xml:id="language.exceptions.finally">
+  <sect1 phd:chunk="false" xml:id="language.exceptions.finally">
    <title><literal>finally</literal></title>
    <para>
     &finally; 代码块可以放在 &catch; 之后，或者直接代替它。 
@@ -248,10 +64,10 @@ echo "\n\n";
     而且，遇到 &return; 语句时，会先执行 &finally; 再返回结果。
     此外，如果 &finally; 里也包含了 &return; 语句，将返回 &finally; 里的值。
    </para>
-  </simplesect>
+  </sect1>
 
- <simplesect xml:id="language.exceptions.exception-handler">
-  <title><literal>全局异常处理器</literal></title>
+ <sect1 phd:chunk="false" xml:id="language.exceptions.exception-handler">
+  <title>全局异常处理程序</title>
   <para>
    当允许异常冒泡到全局范围时，它可以被全局异常处理器捕获到。
    <function>set_exception_handler</function> 
@@ -259,9 +75,9 @@ echo "\n\n";
    在本质上，实现的效果等同于整个程序被 &try;-&catch; 包裹起来，
    而该函数就是 &catch;。
   </para>
- </simplesect>
+ </sect1>
 
- <simplesect xml:id="language.exceptions.notes">
+ <sect1 phd:chunk="false" xml:id="language.exceptions.notes">
    &reftitle.notes;
 
    <note>
@@ -293,9 +109,9 @@ set_error_handler('exceptions_error_handler');
      提供了大量的 <link linkend="spl.exceptions">标准内置异常</link>。
     </para>
    </tip>
-  </simplesect>
+ </sect1>
 
-  <simplesect xml:id="language.exceptions.examples">
+  <sect1 phd:chunk="false" xml:id="language.exceptions.examples">
    &reftitle.examples;
 
    <example>
@@ -515,7 +331,180 @@ try {
 ]]>
     </programlisting>
    </example>
-  </simplesect>
+  </sect1>
+
+ <sect1 xml:id="language.exceptions.extending">
+   <title>扩展（extend）异常处理类</title>
+   <para>
+    用户可以用自定义的异常处理类来扩展 PHP
+    内置的异常处理类。以下的代码说明了在内置的异常处理类中，哪些属性和方法在子类中是可访问和可继承的。
+   </para>
+   <example>
+    <title>内置的异常处理类</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+class Exception implements Throwable
+{
+    protected $message = 'Unknown exception';   // 异常信息
+    private   $string;                          // __toString 的缓存
+    protected $code = 0;                        // 用户自定义异常错误码
+    protected $file;                            // 发生异常的源文件名
+    protected $line;                            // 发生异常的源代码行号
+    private   $trace;                           // backtrace
+    private   $previous;                        // 如果是嵌套异常，则是之前的 exception
+
+    public function __construct($message = '', $code = 0, Throwable $previous = null);
+
+    final private function __clone();           // 禁止克隆异常。
+
+    final public  function getMessage();        // 异常信息
+    final public  function getCode();           // 异常错误码
+    final public  function getFile();           // 发生异常的源文件名
+    final public  function getLine();           // 发生异常的源代码行号
+    final public  function getTrace();          // backtrace() 数组
+    final public  function getPrevious();       // 之前的 exception
+    final public  function getTraceAsString();  // 已格成化成字符串的 getTrace() 信息
+
+    // Overrideable
+    public function __toString();               // 可输出的格式化后的字符串
+}
+?>
+]]>
+    </programlisting>
+   </example>
+   <para>
+    如果使用自定义的类来扩展内置异常处理类，并且要重新定义<link
+    linkend="language.oop5.decon">构造函数</link>的话，建议同时调用
+    <link linkend="language.oop5.paamayim-nekudotayim">parent::__construct()</link>
+    来确保所有的变量已赋值。当对象要输出字符串的时候，可以重载
+    <link linkend="language.oop5.magic">__toString()</link> 并自定义输出的样式。
+   </para>
+   <note>
+    <para>
+     不能 复制 Exception 对象。尝试对 <link linkend="language.oop5.cloning">clone</link>
+     Exception 会导致 fatal <constant>E_ERROR</constant> 错误。
+    </para>
+   </note>
+   <example>
+    <title>扩展 PHP 内置的异常处理类</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+/**
+ * 自定义一个异常处理类
+ */
+class MyException extends Exception
+{
+    // 重定义构造器使 message 变为必须被指定的属性
+    public function __construct($message, $code = 0, Throwable $previous = null) {
+        // 这里写用户的代码
+
+        // 确保所有变量都被正确赋值
+        parent::__construct($message, $code, $previous);
+    }
+
+    // 自定义字符串输出的格式
+    public function __toString() {
+        return __CLASS__ . ": [{$this->code}]: {$this->message}\n";
+    }
+
+    public function customFunction() {
+        echo "A custom function for this type of exception\n";
+    }
+}
+
+
+/**
+ * 创建一个类，测试该 exception 类
+ */
+class TestException
+{
+    public $var;
+
+    const THROW_NONE    = 0;
+    const THROW_CUSTOM  = 1;
+    const THROW_DEFAULT = 2;
+
+    function __construct($avalue = self::THROW_NONE) {
+
+        switch ($avalue) {
+            case self::THROW_CUSTOM:
+                // 抛出自定义异常
+                throw new MyException('1 is an invalid parameter', 5);
+                break;
+
+            case self::THROW_DEFAULT:
+                // 抛出默认的异常
+                throw new Exception('2 is not allowed as a parameter', 6);
+                break;
+
+            default: 
+                // 没有异常的情况下，创建一个对象
+                $this->var = $avalue;
+                break;
+        }
+    }
+}
+
+
+// 例子 1
+try {
+    $o = new TestException(TestException::THROW_CUSTOM);
+} catch (MyException $e) {      // 捕获异常
+    echo "Caught my exception\n", $e;
+    $e->customFunction();
+} catch (Exception $e) {        // 被忽略
+    echo "Caught Default Exception\n", $e;
+}
+
+// 继续执行后续代码
+var_dump($o); // Null
+echo "\n\n";
+
+
+// 例子 2
+try {
+    $o = new TestException(TestException::THROW_DEFAULT);
+} catch (MyException $e) {      //  不能匹配异常的种类，被忽略
+    echo "Caught my exception\n", $e;
+    $e->customFunction();
+} catch (Exception $e) {        // 捕获异常
+    echo "Caught Default Exception\n", $e;
+}
+
+// 执行后续代码
+var_dump($o); // Null
+echo "\n\n";
+
+
+// 例子 3
+try {
+    $o = new TestException(TestException::THROW_CUSTOM);
+} catch (Exception $e) {        // 捕获异常
+    echo "Default Exception caught\n", $e;
+}
+
+// 执行后续代码
+var_dump($o); // Null
+echo "\n\n";
+
+
+// 例子 4
+try {
+    $o = new TestException();
+} catch (Exception $e) {        // 没有异常，被忽略
+    echo "Default Exception caught\n", $e;
+}
+
+// 执行后续代码
+var_dump($o); // TestException
+echo "\n\n";
+?>
+]]>
+    </programlisting>
+   </example>
+  </sect1>
 
  </chapter>
  
