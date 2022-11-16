@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: b57f8f256a4773fc09d19733c70ef8816074d12d Maintainer: avenger Status: partial -->
+<!-- EN-Revision: b57f8f256a4773fc09d19733c70ef8816074d12d Maintainer: avenger Status: ready -->
 <sect1 xml:id="language.types.declarations">
  <title>类型声明</title>
 
@@ -287,7 +287,7 @@ object(C)#1 (0) {
  </sect2>
 
  <sect2 xml:id="language.types.declarations.nullable">
-  <title>允许为空的（Nullable）类型</title>
+  <title>允许为 null 的类型</title>
 
   <para>
     自 PHP 7.1.0 起，类型声明允许前置一个问号 (<literal>?</literal>)
@@ -296,7 +296,7 @@ object(C)#1 (0) {
 
   <para>
    <example>
-    <title>定义可空（Nullable）的参数类型</title>
+    <title>声明可为 null 的参数类型</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -322,7 +322,7 @@ NULL
    </example>
 
    <example>
-    <title>定义可空（Nullable）的返回类型</title>
+    <title>声明可为 null 的返回类型</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -341,8 +341,7 @@ function get_item(): ?string {
 
   <note>
    <para>
-    可以通过设置参数的默认值为
-    <literal>null</literal>
+    可以通过设置参数的默认值为 <literal>null</literal>
     来实现允许为空的参数。不建议这样做，因为影响到类的继承调用。
    </para>
    <example>
@@ -431,9 +430,8 @@ NULL
 
     <caution>
      <simpara>
-      <literal>false</literal> 不能单独作为类型使用（包括可空 nullable 类型）。
-      因此，不可以用 <literal>false</literal>、<literal>false|null</literal>、
-      <literal>?false</literal>。
+      <literal>false</literal> 不能单独作为类型使用（包括可为 null 独立类型）。因此，不可以用
+      <literal>false</literal>、<literal>false|null</literal>、<literal>?false</literal>。
      </simpara>
     </caution>
     <caution>
@@ -456,15 +454,12 @@ NULL
   <sect3 xml:id="language.types.declarations.composite.redundant">
    <title>重复冗余的类型</title>
    <para>
-    为了能在复合类型声明中暴露简单的 bug，不需要加载 class
-    就可以在编译时让重复冗余的类型产生错误。
-    包含：
+    为了能捕获复合类型声明中的简单错误，不需要类加载检测到的冗余类型将导致编译时错误。包含：
 
     <itemizedlist>
      <listitem>
       <simpara>
-       解析出来的类型只能出现一次。例如这样的类型
-       <literal>int|string|INT</literal>、
+       解析出来的类型只能出现一次。例如这样的类型 <literal>int|string|INT</literal> 或
        <literal>Countable&amp;Traversable&amp;COUNTABLE</literal> 会导致错误。
       </simpara>
      </listitem>
@@ -488,8 +483,8 @@ NULL
        </listitem>
        <listitem>
         <simpara>
-         使用了 <type>iterable</type> 时，<type>array</type>、
-         <classname>Traversable</classname> 都不能再附带使用。
+         使用了 <type>iterable</type> 时，不能再附带使用 <type>array</type>
+         和 <classname>Traversable</classname>。
         </simpara>
        </listitem>
       </itemizedlist>
@@ -504,8 +499,8 @@ NULL
        </listitem>
        <listitem>
         <simpara>
-         使用 <type>self</type>、<type>parent</type>、
-         <type>static</type> 都会导致错误。
+         使用 <type>self</type>、<type>parent</type>
+         或 <type>static</type> 都会导致错误。
         </simpara>
        </listitem>
       </itemizedlist>
