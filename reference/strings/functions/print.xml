@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 3d974bf87ef32d933ca1d40828711a8da4b594f1 Maintainer: daijie Status: ready -->
+<!-- EN-Revision: 7a3899eea90f3df8dcfe8fd350900162f3490bed Maintainer: daijie Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://docbook.org/ns/docbook" xml:id="function.print">
  <refnamediv>
   <refname>print</refname>
@@ -11,17 +12,18 @@
   &reftitle.description;
   <methodsynopsis>
    <type>int</type><methodname>print</methodname>
-   <methodparam><type>string</type><parameter>arg</parameter></methodparam>
+   <methodparam><type>string</type><parameter>expression</parameter></methodparam>
   </methodsynopsis>
   <para>
-   输出 <parameter>arg</parameter>。
+   输出 <parameter>expression</parameter>。
   </para>
   <para>
-   <function>print</function> 实际上不是函数（而是语言结构），所以可以不用圆括号包围参数列表。
+   <literal>print</literal> 不是函数而是语言结构。它的参数是跟在 <literal>print</literal>
+   关键字后面的表达式，并且不用括号分割。
   </para>
   <para>
-   和 <literal>echo</literal> 最主要的区别：
-   <literal>print</literal> 仅支持一个参数，并总是返回 1。
+   和 <function>echo</function> 最主要的区别是 <literal>print</literal>
+   仅接受一个参数，并总是返回 <literal>1</literal>。
   </para>
  </refsect1>
 
@@ -30,10 +32,11 @@
   <para>
    <variablelist>
     <varlistentry>
-     <term><parameter>arg</parameter></term>
+     <term><parameter>expression</parameter></term>
      <listitem>
       <para>
-       输入数据。
+       要出出的表达式。即使启用 <link linkend="language.types.declarations.strict"><literal>strict_types</literal>
+       指令</link>，非字符串也会强制转换为字符串。
       </para>
      </listitem>
     </varlistentry>
@@ -56,41 +59,36 @@
     <programlisting role="php">
 <![CDATA[
 <?php
-print("Hello World");
+print "print does not require parentheses.";
 
-print "print() also works without parentheses.";
+// 不会新增新行或者空格；下面会在一行中输出“helloworld”
+print "hello";
+print "world";
 
-print "This spans
+print "This string spans
 multiple lines. The newlines will be
 output as well";
 
-print "This spans\nmultiple lines. The newlines will be\noutput as well.";
+print "This string spans\nmultiple lines. The newlines will be\noutput as well.";
 
-print "escaping characters is done \"Like this\".";
+// 参数可以是任何产生字符串的表达式
+$foo = "example";
+print "foo is $foo"; // foo is example
 
-// 可以在打印语句中使用变量
-$foo = "foobar";
-$bar = "barbaz";
+$fruits = ["lemon", "orange", "banana"];
+print implode(" and ", $fruits); // lemon and orange and banana
 
-print "foo is $foo"; // foo is foobar
+// 即使使用了 declare(strict_types=1)，非字符串表达式也会强制转换为字符串
+print 6 * 7; // 42
 
-// 也可以使用数组
-$bar = array("value" => "foo");
+// 因为 print 有返回值，所以可以在如下表达式中使用
+// 以下输出“hello world”
+if ( print "hello" ) {
+    echo " world";
+}
 
-print "this is {$bar['value']} !"; // this is foo !
-
-// 使用单引号将打印变量名，而不是变量的值
-print 'foo is $foo'; // foo is $foo
-
-// 如果没有使用任何其他字符，可以仅打印变量
-print $foo;          // foobar
-
-print <<<END
-This uses the "here document" syntax to output
-multiple lines with $variable interpolation. Note
-that the here document terminator must appear on a
-line with just a semicolon no extra whitespace!
-END;
+// 以下输出“true”
+( 1 === 1 ) ? print 'true' : print 'false';
 ?>
 ]]>
     </programlisting>
@@ -100,6 +98,81 @@ END;
 
  <refsect1 role="notes">
   &reftitle.notes;
+
+  <note>
+   <title>使用括号</title>
+   <para>
+    用括号括住要 <literal>print</literal>
+    并不会引发语法错误，而且会产生看起来像是普通函数调用的语法。然而，这可能会产生误导，因为括号实际上是表达式的有一部分，而非
+    <literal>print</literal> 语法本身的一部分。
+   </para>
+   <para>
+    <example>
+     <title/>
+     <programlisting role="php">
+<![CDATA[
+<?php
+print "hello";
+// 输出“hello”
+
+print("hello");
+// 也会输出“hello”，因为 ("hello") 是有效的表达式
+
+print(1 + 2) * 3;
+// 输出“9”；会首先对括号内的 1+2 进行求值，然后是 3*3
+// print 语句会将整个表达式视为一个参数
+
+if ( print("hello") && false ) {
+    print " - inside if";
+}
+else {
+    print " - inside else";
+}
+// 输出“ - inside if”
+// 首先对表示 ("hello") && false 求值， false
+// 强制转换为空字符串“”且打印 print 
+// 结构，然后返回 1，所以运行 if 块中代码
+?>
+]]>
+     </programlisting>
+    </example>
+   </para>
+
+   <para>
+    当在大的表达式中使用 <literal>print</literal> 时，需要将关键字及其参数放在括号中以便得出预期的结果：
+   </para>
+
+   <para>
+    <example>
+     <title/>
+     <programlisting role="php">
+<![CDATA[
+<?php
+if ( (print "hello") && false ) {
+    print " - inside if";
+}
+else {
+    print " - inside else";
+}
+// 输出“hello - inside else”
+// 跟上个示例不同，首先对表达式 (print "hello") 求值
+// 输出“hello”之后，print 返回 1
+// 由于 1 && false 为 false，因此运行 else 块中代码
+
+print "hello " && print "world";
+// 输出“world1”；首先对 print "world" 求值，
+// 然后表达式 "hello " && 1 传递给左侧的 print
+
+(print "hello ") && (print "world");
+// 输出“hello world”；括号强制 print 表达式
+// 在 && 之前求值
+?>
+]]>
+     </programlisting>
+    </example>
+   </para>
+  </note>
+
   &note.language-construct;
  </refsect1>
 
@@ -110,7 +183,7 @@ END;
     <member><function>echo</function></member>
     <member><function>printf</function></member>
     <member><function>flush</function></member>
-    <member><link linkend="language.types.string.syntax.heredoc">Heredoc syntax</link></member>
+    <member><link linkend="language.types.string">指定字面字符串的方式</link></member>
    </simplelist>
   </para>
  </refsect1>
