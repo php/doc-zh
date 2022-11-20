@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 4b1b9be99eba5fbce2de1190b5eba692bf09da11 Maintainer: Gregory Status: ready -->
+<!-- EN-Revision: fc1e94a9c2e271c7cefd86f28a1cb5bc30a52664 Maintainer: Gregory Status: ready -->
 <!-- CREDITS: dallas, mowangjuanzi -->
 <!-- 请保持此文件与英文文件中相应的每个 ENTITY 行号一一对应以便于对照，修改与更新！ -->
 
@@ -18,19 +18,22 @@
 
 
 <!-- Cautions --> 
-<!ENTITY caution.cryptographically-insecure '<caution xmlns="http://docbook.org/ns/docbook"><para>本函数并不会生成安全加密的值，不应用于加密用途。若需要安全加密的值，考虑使用
-<function>random_int</function>、<function>random_bytes</function> 或 <function>openssl_random_pseudo_bytes</function>
-替代。</para></caution>'>
+<!ENTITY caution.cryptographically-insecure '<caution xmlns="http://docbook.org/ns/docbook">
+ <para>
+  本函数并不会生成安全加密的值，并且<emphasis>不可</emphasis>用于加密或者要求返回值不可猜测的目的。
+ </para>
+ <para>
+  如果需要加密安全随机，则可以将 <classname>Random\Engine\Secure</classname> 引擎用于
+  <classname>Random\Randomizer</classname>。对于简单的用例，<function>random_int</function>
+  和 <function>random_bytes</function> 函数提供了操作系统的 <acronym>CSPRNG</acronym> 支持的方便且安全的 <acronym>API</acronym>。
+ </para>
+</caution>'>
+
 
 
 <!-- Notes -->
 
 <!ENTITY note.bin-safe '<note xmlns="http://docbook.org/ns/docbook"><simpara>此函数可安全用于二进制对象。</simpara></note>'>
-
-
-<!ENTITY note.locale-single-byte '<note xmlns="http://docbook.org/ns/docbook"><simpara>此函数是本地识别的，会根据当前设置的 locale 处理输入，只适用于单字节字符集。
-如果您需要使用多字节字符（大多数非西欧语言），请参考
-<link linkend="book.mbstring">multibyte</link> 或 <link linkend="book.intl">intl</link> 扩展。</simpara></note>'>
 
 
 <!ENTITY note.clearstatcache '<note xmlns="http://docbook.org/ns/docbook"><simpara>此函数的结果会被缓存。参见
@@ -579,6 +582,8 @@ xmlns="http://docbook.org/ns/docbook"><simpara> 该函数自 PHP 8.1
 <!ENTITY example.outputs.81 '<para xmlns="http://docbook.org/ns/docbook">以上例程在 PHP 8.1 中的输出：</para>'>
 
 <!ENTITY example.outputs.82 '<para xmlns="http://docbook.org/ns/docbook">以上例程在 PHP 8.2 中的输出：</para>'>
+
+<!ENTITY example.outputs.82.similar '<para xmlns="http://docbook.org/ns/docbook">上述示例在 PHP 8.2 中的输出类似于于：</para>'>
 
 <!ENTITY example.outputs.32bit '<para xmlns="http://docbook.org/ns/docbook">以上例程在 32 位机器上的输出:</para>'>
 
@@ -1259,6 +1264,14 @@ will be used as the character encoding for this function by default.</para></not
 
 <!-- memcached notes -->
 
+<!ENTITY memcached.note.delete-time '<note xmlns="http://docbook.org/ns/docbook"><simpara>
+       As of memcached 1.3.0 (released 2009) this feature is no longer
+       supported. Passing a non-zero <parameter>time</parameter> will cause
+       the deletion to fail. <methodname>Memcached::getResultCode</methodname>
+       will return <constant>MEMCACHED_INVALID_ARGUMENTS</constant>.
+      </simpara></note>
+'>
+
 <!ENTITY memcached.parameter.expiration '到期时间，默认为 0。 更多信息请参见<link
 linkend="memcached.expiration" xmlns="http://docbook.org/ns/docbook">到期时间</link>。'>
 
@@ -1271,6 +1284,19 @@ linkend="memcached.expiration" xmlns="http://docbook.org/ns/docbook">到期时�
 <!ENTITY memcached.parameter.value '存储的值。'>
 
 <!ENTITY memcached.result.getresultcode '如需要则使用 <methodname xmlns="http://docbook.org/ns/docbook">Memcached::getResultCode</methodname>。'>
+
+<!ENTITY memcached.result.delete-multi '<para xmlns="http://docbook.org/ns/docbook">
+   Returns an array indexed by <parameter>keys</parameter>. Each element
+   is &true; if the corresponding key was deleted, or one of the
+   <constant>Memcached::RES_*</constant> constants if the corresponding deletion
+   failed.
+   </para>
+  <para xmlns="http://docbook.org/ns/docbook">
+   The <methodname>Memcached::getResultCode</methodname> will return
+   the result code for the last executed delete operation, that is, the delete
+   operation for the last element of <parameter>keys</parameter>.
+  </para>
+'>
 
 <!-- password notes -->
 
@@ -1303,6 +1329,14 @@ linkend="memcached.expiration" xmlns="http://docbook.org/ns/docbook">到期时�
 <!ENTITY pspell.parameter.pspell-dictionary '<para xmlns="http://docbook.org/ns/docbook">An <classname>PSpell\Dictionary</classname> instance.</para>'>
 
 <!ENTITY pspell.parameter.pspell-config '<para xmlns="http://docbook.org/ns/docbook">An <classname>PSpell\Config</classname> instance.</para>'>
+
+<!-- RNP -->
+
+<!ENTITY rnp.parameter.ffi-description 'The FFI object returned by rnp_ffi_create.'>
+
+<!ENTITY rnp.parameter.key-format 'The key format of the data (GPG, KBX, G10).'>
+
+<!ENTITY rnp.parameter.loadsave-flags 'See RNP_LOAD_SAVE_* flags description.'>
 
 <!-- socket entities -->
 
@@ -3688,6 +3722,27 @@ local: {
  </row>
 '>
 
+<!ENTITY strings.changelog.ascii-case-conversion '
+ <row xmlns="http://docbook.org/ns/docbook">
+  <entry>8.2.0</entry>
+  <entry>
+   大小写转换不在依赖于使用 <function>setlocale</function> 设置的区域。只会转换 ASCII 字符。
+  </entry>
+ </row>
+'>
+
+
+<!ENTITY strings.changelog.ascii-case-folding '
+ <row xmlns="http://docbook.org/ns/docbook">
+  <entry>8.2.0</entry>
+  <entry>
+   大小写转换不在依赖于使用 <function>setlocale</function> 设置的区域。只会进行 ASCII
+   大小写转换。非 ASCII 字节值将通过它们的字节值进行比较。
+  </entry>
+ </row>
+'>
+
+
 <!-- filter snippets -->
 <!ENTITY filter.param.filter '
  <varlistentry xmlns="http://docbook.org/ns/docbook">
@@ -3748,13 +3803,7 @@ local: {
    如果没有找到合适的随机性来源，将会抛出 <classname>Random\RandomException</classname>。
   </simpara>
  </listitem>
- <listitem xmlns="http://docbook.org/ns/docbook">
-  <simpara>
-    如果指定的参数无效，将会抛出 <classname>TypeError</classname>。
-  </simpara>
- </listitem>
 '>
-
 
 <!ENTITY csprng.function.backport '
  <note xmlns="http://docbook.org/ns/docbook">
