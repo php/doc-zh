@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 3a0c7df3b6875a78c3f10c072d4239ecc63dd29d Maintainer: daijie Status: ready -->
-<refentry xmlns="http://docbook.org/ns/docbook" xml:id="function.strip-tags">
+<!-- EN-Revision: 8cdc6621f9826d04abc3e50438c010804d7e8683 Maintainer: daijie Status: ready -->
+<refentry xml:id="function.strip-tags" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>strip_tags</refname>
   <refpurpose>从字符串中去除 HTML 和 PHP 标记</refpurpose>
@@ -11,11 +11,11 @@
   &reftitle.description;
   <methodsynopsis>
    <type>string</type><methodname>strip_tags</methodname>
-   <methodparam><type>string</type><parameter>str</parameter></methodparam>
-   <methodparam choice="opt"><type>string</type><parameter>allowable_tags</parameter></methodparam>
+   <methodparam><type>string</type><parameter>string</parameter></methodparam>
+   <methodparam choice="opt"><type class="union"><type>array</type><type>string</type><type>null</type></type><parameter>allowed_tags</parameter><initializer>&null;</initializer></methodparam>
   </methodsynopsis>
   <para>
-   该函数尝试返回给定的字符串 <parameter>str</parameter> 去除空字符、HTML 和 PHP 标记后的结果。它使用与函数 <function>fgetss</function> 一样的机制去除标记。
+   该函数尝试返回给定的字符串 <parameter>string</parameter> 去除空字符、HTML 和 PHP 标记后的结果。它使用与函数 <function>fgetss</function> 一样的机制去除标记。
   </para>
  </refsect1>
 
@@ -24,7 +24,7 @@
   <para>
    <variablelist>
     <varlistentry>
-     <term><parameter>str</parameter></term>
+     <term><parameter>string</parameter></term>
      <listitem>
       <para>
        输入字符串。
@@ -32,23 +32,21 @@
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>allowable_tags</parameter></term>
+     <term><parameter>allowed_tags</parameter></term>
      <listitem>
       <para>
-       使用可选的第二个参数指定不被去除的字符列表。
+       使用可选的第二个参数指定不被去除的字符列表。要么是 &string;，要么自
+       PHP 7.4.0 起是 &array;。有关此格式的格式，请参考以下示例：
       </para>
       <note>
        <para>
-        HTML 注释和 PHP 标签也会被去除。这里是硬编码处理的，所以无法通过 <parameter>allowable_tags</parameter> 参数进行改变。
+        HTML 注释和 PHP 标签也会被去除。这里是硬编码处理的，所以无法通过 <parameter>allowed_tags</parameter> 参数进行改变。
        </para>
       </note>
       <note>
        <para>
-        In PHP 5.3.4 and later, self-closing
-        XHTML tags are ignored and only non-self-closing tags should be used in
-        <parameter>allowable_tags</parameter>. For example,
-        to allow both <literal>&lt;br&gt;</literal> and
-        <literal>&lt;br/&gt;</literal>, you should use:
+        将会忽略自闭合 XHTML 标签，<parameter>allowed_tags</parameter> 仅可用于非自闭合标签。例如，要同时允许
+        <literal>&lt;br&gt;</literal> 和 <literal>&lt;br/&gt;</literal>，应该使用：
        </para>
        <informalexample>
         <programlisting role="php">
@@ -85,18 +83,16 @@ strip_tags($input, '<br>');
       </row>
      </thead>
      <tbody>
+     <row>
+      <entry>8.0.0</entry>
+      <entry>
+       <parameter>allowed_tags</parameter> 允许为 null。
+      </entry>
+     </row>
       <row>
-       <entry>5.3.4</entry>
+       <entry>7.4.0</entry>
        <entry>
-        <function>strip_tags</function> ignores self-closing XHTML
-        tags in
-        <parameter>allowable_tags</parameter>.
-       </entry>
-      </row>
-      <row>
-       <entry>5.0.0</entry>
-       <entry>
-        <function>strip_tags</function> 变为二进制安全的。
+        <parameter>allowed_tags</parameter> 现在可以接受 &array;。
        </entry>
       </row>
      </tbody>
@@ -119,6 +115,9 @@ echo "\n";
 
 // 允许 <p> 和 <a>
 echo strip_tags($text, '<p><a>');
+
+// 自 PHP 7.4.0 起，上面的行可以写成：
+// echo strip_tags($text, ['p', 'a']);
 ?>
 ]]>
     </programlisting>
@@ -137,18 +136,26 @@ Test paragraph. Other text
   &reftitle.notes;
   <warning>
    <para>
+    This function should not be used to try to prevent XSS attacks.
+    Use more appropriate functions like <function>htmlspecialchars</function>
+    or other means depending on the context of the output.
+    此函数不能用于尝试阻拦 XSS 攻击。根据输出的上下文选择更合适的函数（像 <function>htmlspecialchars</function>）或者其它方式。
+   </para>
+  </warning>  
+  <warning>
+   <para>
     由于 <function>strip_tags</function> 无法实际验证 HTML，不完整或者破损标签将导致更多的数据被删除。
    </para>
   </warning>
   <warning>
    <para>
-    该函数不会修改 <parameter>allowable_tags</parameter> 参数中指定的允许标记的任何属性，包括 <literal>style</literal> 和 <literal>onmouseover</literal> 属性，用户可能会在提交的内容中恶意滥用这些属性，从而展示给其他用户。
+    该函数不会修改 <parameter>allowed_tags</parameter> 参数中指定的允许标记的任何属性，包括 <literal>style</literal> 和 <literal>onmouseover</literal> 属性，用户可能会在提交的内容中恶意滥用这些属性，从而展示给其他用户。
    </para>
   </warning>
   <note>
    <para>
     输入 HTML 标签名字如果大于 1023 字节(bytes)将会被认为是无效的，无论
-    <parameter>allowable_tags</parameter> 参数是怎样的。
+    <parameter>allowed_tags</parameter> 参数是怎样的。
    </para>
   </note>
  </refsect1>
@@ -163,7 +170,6 @@ Test paragraph. Other text
  </refsect1>
 
 </refentry>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
