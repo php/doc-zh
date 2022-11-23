@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 53bdffa6b9f8ce5ffdaf476c9d450f7cd0d1afa2 Maintainer: daijie Status: ready -->
-<refentry xmlns="http://docbook.org/ns/docbook" xml:id="function.substr-compare">
+<!-- EN-Revision: a3573c18b89fd32aca1c3924d3fd9568900b4a33 Maintainer: daijie Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
+<refentry xml:id="function.substr-compare" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>substr_compare</refname>
   <refpurpose>二进制安全比较字符串（从偏移位置比较指定长度）</refpurpose>
@@ -11,17 +12,17 @@
   &reftitle.description;
   <methodsynopsis>
    <type>int</type><methodname>substr_compare</methodname>
-   <methodparam><type>string</type><parameter>main_str</parameter></methodparam>
-   <methodparam><type>string</type><parameter>str</parameter></methodparam>
+   <methodparam><type>string</type><parameter>haystack</parameter></methodparam>
+   <methodparam><type>string</type><parameter>needle</parameter></methodparam>
    <methodparam><type>int</type><parameter>offset</parameter></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter>length</parameter></methodparam>
-   <methodparam choice="opt"><type>bool</type><parameter>case_insensitivity</parameter><initializer>&false;</initializer></methodparam>
+   <methodparam choice="opt"><type class="union"><type>int</type><type>null</type></type><parameter>length</parameter><initializer>&null;</initializer></methodparam>
+   <methodparam choice="opt"><type>bool</type><parameter>case_insensitive</parameter><initializer>&false;</initializer></methodparam>
   </methodsynopsis>
   <para>
    <function>substr_compare</function> 从偏移位置
    <parameter>offset</parameter> 开始比较
-   <parameter>main_str</parameter> 与
-   <parameter>str</parameter>，比较长度为
+   <parameter>haystack</parameter> 与
+   <parameter>needle</parameter>，比较长度为
    <parameter>length</parameter> 个字符。
   </para>
  </refsect1>
@@ -31,7 +32,7 @@
   <para>
    <variablelist>
     <varlistentry>
-     <term><parameter>main_str</parameter></term>
+     <term><parameter>haystack</parameter></term>
      <listitem>
       <para>
        待比较的第一个字符串。
@@ -39,7 +40,7 @@
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>str</parameter></term>
+     <term><parameter>needle</parameter></term>
      <listitem>
       <para>
        待比较的第二个字符串。
@@ -58,17 +59,17 @@
      <term><parameter>length</parameter></term>
      <listitem>
       <para>
-       比较的长度。默认值为 <parameter>str</parameter> 的长度与
-       <parameter>main_str</parameter> 的长度减去位置偏移量
+       比较的长度。默认值为 <parameter>needle</parameter> 的长度与
+       <parameter>haystack</parameter> 的长度减去位置偏移量
        <parameter>offset</parameter> 后二者中的较大者。
       </para>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>case_insensitivity</parameter></term>
+     <term><parameter>case_insensitive</parameter></term>
      <listitem>
       <para>
-       如果 <parameter>case_insensitivity</parameter> 为 &true;，比较将不区分大小写。
+       如果 <parameter>case_insensitive</parameter> 为 &true;，比较将不区分大小写。
       </para>
      </listitem>
     </varlistentry>
@@ -79,14 +80,14 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   如果 <parameter>main_str</parameter> 从偏移位置
+   如果 <parameter>haystack</parameter> 从偏移位置
    <parameter>offset</parameter> 起的子字符串小于
-   <parameter>str</parameter>，则返回小于 0 的数；如果大于
-   <parameter>str</parameter>，则返回大于 0 的数；如果二者相等，则返回 0。如果
-   <parameter>offset</parameter> 大于等于
-   <parameter>main_str</parameter> 的长度或
-   <parameter>length</parameter> 被设置为小于 1 的值（ PHP 5.5.11 之前的版本），<function>substr_compare</function>
-   将打印出一条警告信息并且返回 &false;。
+   <parameter>needle</parameter>，则返回 <literal>-1</literal>；如果大于
+   <parameter>needle</parameter>，则返回 <literal>1</literal>；如果二者相等，则返回 <literal>0</literal>。如果
+   <parameter>offset</parameter> 等于（在 PHP 7.2.18, 7.3.5 之前）或大于
+   <parameter>haystack</parameter> 的长度，或设置
+   <parameter>length</parameter> 小于或等于 0，<function>substr_compare</function>
+   将打印出警告信息并且返回 &false;。
   </para>
  </refsect1>
 
@@ -102,10 +103,17 @@
       </row>
      </thead>
      <tbody>
+      &standard.changelog.binary-safe-string-comparison;
+      <row>
+       <entry>8.0.0</entry>
+       <entry>
+        <parameter>length</parameter> 现在允许为 null。
+       </entry>
+      </row>
       <row>
        <entry>7.2.18, 7.3.5</entry>
        <entry>
-        <parameter>offset</parameter> 现在可能等于 <parameter>main_str</parameter>。
+        <parameter>offset</parameter> 现在可能等于 <parameter>haystack</parameter>。
        </entry>
       </row>
      </tbody>
@@ -146,7 +154,6 @@ echo substr_compare("abcde", "abc", 5, 1); // warning
  </refsect1>
  
 </refentry>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
