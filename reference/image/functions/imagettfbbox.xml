@@ -1,109 +1,197 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
+<!-- EN-Revision: 593ea510e853ff034e03f78a4be0daa41661c9d4 Maintainer: dallas Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="function.imagettfbbox" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>imagettfbbox</refname>
-  <refpurpose>取得使用 TrueType 字体的文本的范围</refpurpose>
+  <refpurpose>取得使用 TrueType 字体的文本的边界框</refpurpose>
  </refnamediv>
- <refsect1>
-  <title>说明</title>
+ <refsect1 role="description">
+  &reftitle.description;
   <methodsynopsis>
-   <type>array</type><methodname>imagettfbbox</methodname>
+   <type class="union"><type>array</type><type>false</type></type><methodname>imagettfbbox</methodname>
    <methodparam><type>float</type><parameter>size</parameter></methodparam>
    <methodparam><type>float</type><parameter>angle</parameter></methodparam>
-   <methodparam><type>string</type><parameter>fontfile</parameter></methodparam>
-   <methodparam><type>string</type><parameter>text</parameter></methodparam>
+   <methodparam><type>string</type><parameter>font_filename</parameter></methodparam>
+   <methodparam><type>string</type><parameter>string</parameter></methodparam>
+   <methodparam choice="opt"><type>array</type><parameter>options</parameter><initializer>[]</initializer></methodparam>
   </methodsynopsis>
   <para>
-   本函数计算并返回一个包围着 TrueType 文本范围的虚拟方框的像素大小。
+   本函数计算并返回 TrueType 文本的边界框的像素大小。
+  </para>
+  <note>
+   <para>
+    在 PHP 8.0.0 之前，<function>imageftbbox</function> 是 <function>imagettfbbox</function> 的扩展变体，额外支持
+    <parameter>extrainfo</parameter>。自 PHP 8.0.0 起，<function>imagettfbbox</function> 是 <function>imageftbbox</function> 的别名。
+   </para>
+  </note>
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
    <variablelist>
     <varlistentry>
-     <term>
-      <parameter>size</parameter>
-     </term>
+     <term><parameter>size</parameter></term>
      <listitem>
-      <simpara>像素单位的字体大小。</simpara>
+      <para>&gd.font.size;</para>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term>
-      <parameter>angle</parameter>
-     </term>
+     <term><parameter>angle</parameter></term>
      <listitem>
-      <simpara><parameter>text</parameter> 将被度量的角度大小。</simpara>
+      <para>
+       测量字符串的角度（以度为单位）。
+      </para>
      </listitem>
     </varlistentry>
+    &gd.ttf.fontfile;
     <varlistentry>
-     <term>
-      <parameter>fontfile</parameter>
-     </term>
+     <term><parameter>string</parameter></term>
      <listitem>
-      <simpara>
-       TrueType 字体文件的文件名（可以是 URL）。根据 PHP
-       所使用的 GD 库版本，可能尝试搜索那些不是以 '/'
-       开头的文件名并加上 '.ttf' 的后缀并搜索库定义的字体路径。
-      </simpara>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
-     <term>
-      <parameter>text</parameter>
-     </term>
-     <listitem>
-      <simpara>要度量的字符串。</simpara>
+      <para>
+       要测量的字符串。
+      </para>
      </listitem>
     </varlistentry>
    </variablelist>
-   <function>imagettfbbox</function> 返回一个含有 8
-   个单元的数组表示了文本外框的四个角：
+  </para>
+ </refsect1>
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   <function>imagettfbbox</function> 成功时返回包含 8 个元素的数组，代表构成文本边界框的四个点。失败时返回 &false;。
    <informaltable>
     <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>键</entry>
+       <entry>内容</entry>
+      </row>
+     </thead>
      <tbody>
       <row>
        <entry>0</entry>
-       <entry>左下角 X 位置</entry>
+       <entry>左下角,X 位置</entry>
       </row>
       <row>
        <entry>1</entry>
-       <entry>左下角 Y 位置</entry>
+       <entry>左下角，Y 位置</entry>
       </row>
       <row>
        <entry>2</entry>
-       <entry>右下角 X 位置</entry>
+       <entry>右下角，X 位置</entry>
       </row>
       <row>
        <entry>3</entry>
-       <entry>右下角 Y 位置</entry>
+       <entry>右下角，Y 位置</entry>
       </row>
       <row>
        <entry>4</entry>
-       <entry>右上角 X 位置</entry>
+       <entry>右上角，X 位置</entry>
       </row>
       <row>
        <entry>5</entry>
-       <entry>右上角 Y 位置</entry>
+       <entry>右上角，Y 位置</entry>
       </row>
       <row>
        <entry>6</entry>
-       <entry>左上角 X 位置</entry>
+       <entry>左上角，X 位置</entry>
       </row>
       <row>
        <entry>7</entry>
-       <entry>左上角 Y 位置</entry>
+       <entry>左上角，Y 位置</entry>
       </row>
      </tbody>
     </tgroup>
    </informaltable>
-   这些点是相对于<emphasis>文本</emphasis>的而和角度无关，因此“左上角”指的是以水平方向看文字时其左上角。
   </para>
   <para>
-   本函数同时需要 GD 库和 FreeType 库。
+   这些点相对于  <emphasis>text</emphasis>，与 <parameter>angle</parameter> 无关，因此“左上角”意味着可以在左上角看到横排文本。
   </para>
+ </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <informaltable>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>&Version;</entry>
+      <entry>&Description;</entry>
+     </row>
+    </thead>
+    <tbody>
+     <row>
+      <entry>8.0.0</entry>
+      <entry>
+       新增 <parameter>options</parameter>。
+      </entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </informaltable>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
   <para>
-   参见 <function>imagettftext</function>。
+   <example>
+    <title><function>imagettfbbox</function> 示例</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+// 创建 300x150 图像
+$im = imagecreatetruecolor(300, 150);
+$black = imagecolorallocate($im, 0, 0, 0);
+$white = imagecolorallocate($im, 255, 255, 255);
+
+// 设置白色背景色
+imagefilledrectangle($im, 0, 0, 299, 299, $white);
+
+// 字体文件的路径
+$font = './arial.ttf';
+
+// 首先为第一个文本创建边界框
+$bbox = imagettfbbox(10, 45, $font, 'Powered by PHP ' . phpversion());
+
+// 这是 X 坐标和 Y 坐标
+$x = $bbox[0] + (imagesx($im) / 2) - ($bbox[4] / 2) - 25;
+$y = $bbox[1] + (imagesy($im) / 2) - ($bbox[5] / 2) - 5;
+
+// 写入
+imagettftext($im, 10, 45, $x, $y, $black, $font, 'Powered by PHP ' . phpversion());
+
+// 为第二个文本创建边界框
+$bbox = imagettfbbox(10, 45, $font, 'and Zend Engine ' . zend_version());
+
+// 设置坐标，使其位于第一个字的旁边
+$x = $bbox[0] + (imagesx($im) / 2) - ($bbox[4] / 2) + 10;
+$y = $bbox[1] + (imagesy($im) / 2) - ($bbox[5] / 2) - 5;
+
+// 写入
+imagettftext($im, 10, 45, $x, $y, $black, $font, 'and Zend Engine ' . zend_version());
+
+// 输出到浏览器
+header('Content-Type: image/png');
+
+imagepng($im);
+imagedestroy($im);
+?>
+]]>
+    </programlisting>
+   </example>
   </para>
+ </refsect1>
+ <refsect1 role="notes">
+  &reftitle.notes;
+  &note.freetype;
+ </refsect1>
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <simplelist>
+   <member><function>imagettftext</function></member>
+   <member><function>imageftbbox</function></member>
+  </simplelist>
  </refsect1>
 </refentry>
 
