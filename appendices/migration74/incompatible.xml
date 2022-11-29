@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- $Revision: 348018 $ -->
-<!-- $Author: hytest $ -->
-<!-- EN-Revision: e61d2217d58d7135abd368baa1089e58c626fbcc Maintainer: Avenger Status: partial -->
+<!-- $Revision$ -->
+<!-- EN-Revision: 68dfe9740823ed1d229e5e79b7018fe71237c665 Maintainer: Avenger Status: partial -->
+<!-- CREDITS: mowangjuanzi -->
 <sect1 xml:id="migration74.incompatible" xmlns:xlink="http://www.w3.org/1999/xlink">
  <title>不向后兼容的变更</title>
 
@@ -82,7 +82,7 @@
    <itemizedlist>
     <listitem>
      <simpara>
-      <constant>PASSWORD_DEFAULT</constant> 之前是 int 1; 现在是 &null;
+      <constant>PASSWORD_DEFAULT</constant> 之前是 int 1; 现在是“2y”（在 PHP 7.4.0、7.4.1、7.4.2 中是 &null;）
      </simpara>
     </listitem>
     <listitem>
@@ -135,15 +135,11 @@
 
  </sect2>
 
- 
-
-
  <sect2 xml:id="migration74.incompatible.bcmath">
-  <title>BCMath Arbitrary Precision Mathematics</title>
+  <title>BCMath 任意精度数学</title>
 
   <para>
-   BCMath functions will now warn if a non well-formed number is passed, such
-   as <literal>"32foo"</literal>. The argument will be interpreted as zero, as before.
+   如果传递了例如 <literal>"32foo"</literal> 这种格式不正确的数字，BCMath 函数现在将发出警告。和以前一样，参数将解释为 0。
   </para>
  </sect2>
 
@@ -151,22 +147,19 @@
   <title>CURL</title>
 
   <para>
-   Attempting to serialize a <classname>CURLFile</classname> class will now
-   generate an exception. Previously the exception was only thrown on unserialization.
+   现在尝试序列化 <classname>CURLFile</classname> 类将会生成异常。之前仅会在反序列化时引发。
   </para>
   <para>
-   Using <constant>CURLPIPE_HTTP1</constant> is deprecated, and is no longer
-   supported as of cURL 7.62.0.
+   弃用 <constant>CURLPIPE_HTTP1</constant>，并在 cURL 7.62.0 起不再支持。
   </para>
   <para>
-   The <literal>$version</literal> parameter of <function>curl_version</function>
-   is deprecated. If any value not equal to the default <constant>CURLVERSION_NOW</constant>
-   is passed, a warning is raised and the parameter is ignored.
+   弃用 <function>curl_version</function> 的 <literal>$version</literal> 参数。如果传递了任何不等于默认
+   <constant>CURLVERSION_NOW</constant> 的值，则会引发警告并忽略参数。
   </para>
  </sect2>
 
  <sect2 xml:id="migration74.incompatible.datetime">
-  <title>Date and Time</title>
+  <title>日期和时间</title>
 
   <para>
    Calling <function>var_dump</function> or similar on a
@@ -174,10 +167,9 @@
    instance will no longer leave behind accessible properties on the object.
   </para>
   <para>
-   Comparison of <classname>DateInterval</classname> objects
-   (using <literal>==</literal>, <literal>&lt;</literal>, and so on) will now generate
-   a warning and always return &false;. Previously all <classname>DateInterval</classname>
-   objects were considered equal, unless they had properties.
+   <classname>DateInterval</classname> 对象的比较（使用
+   <literal>==</literal>、<literal>&lt;</literal> 等）现在将生成警告并始终返回
+   &false;。之前所有的 <classname>DateInterval</classname> 对象都认为相等，除非它们有属性。
   </para>
  </sect2>
 
@@ -241,28 +233,30 @@
  </sect2>
 
  <sect2 xml:id="migration74.incompatible.reflection">
-  <title>Reflection</title>
+  <title>反射</title>
 
   <para>
-   Reflection objects will now generate an exception if an attempt is made
-   to serialize them. Serialization for reflection objects was never
-   supported and resulted in corrupted reflection objects. It has been
-   explicitly prohibited now.
+   现在如果尝试对 Reflection 对象序列化将会生成异常。从未支持反射对象序列化并会引起反射对象错误。现在已明确禁止。
+  </para>
+
+  <para>
+   <classname>ReflectionClassConstant</classname>、<classname>ReflectionMethod</classname> 和
+   <classname>ReflectionProperty</classname> 类常量的值发生了变化。
   </para>
  </sect2>
 
  <sect2 xml:id="migration74.incompatible.spl">
-  <title>Standard PHP Library (SPL)</title>
+  <title>PHP 标准库（SPL）</title>
 
   <para>
-   Calling <function>get_object_vars</function> on an <classname>ArrayObject</classname>
-   instance will now always return the properties of the <classname>ArrayObject</classname>
-   itself (or a subclass). Previously it returned the values of the wrapped
+   现在对 <classname>ArrayObject</classname> 实例调用 <function>get_object_vars</function>
+   将始终返回 <classname>ArrayObject</classname> 本身（或子类）的属性。
+   Previously it returned the values of the wrapped
    array/object unless the <constant>ArrayObject::STD_PROP_LIST</constant>
    flag was specified.
   </para>
   <para>
-   Other affected operations are:
+   其它受到影响的操作有：
   </para>
   <itemizedlist>
    <listitem>
@@ -272,13 +266,13 @@
    </listitem>
    <listitem>
     <simpara>
-     <function>reset</function>, <function>current</function>, etc.
-     Use <interfacename>Iterator</interfacename> methods instead.
+     <function>reset</function>、<function>current</function> 等等。
+     改用 <interfacename>Iterator</interfacename> 方法。
     </simpara>
    </listitem>
    <listitem>
     <simpara>
-     Potentially others working on object properties as a list.
+     可能将对象属性作为列表处理的其它情况。比如 <function>array_walk</function>。
     </simpara>
    </listitem>
   </itemizedlist>

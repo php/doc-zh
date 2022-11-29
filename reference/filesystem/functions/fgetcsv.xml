@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 38fb898f9a9623e4c134394da2082d784df2c253 Maintainer: HonestQiao Status: ready -->
-<!-- Reviewed: no Maintainer: HonestQiao -->
+<!-- EN-Revision: 34e2e3541c52edc9f60a1ad9735b1f769254eb1e Maintainer: HonestQiao Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="function.fgetcsv" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>fgetcsv</refname>
@@ -10,18 +10,24 @@
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <type>array</type><methodname>fgetcsv</methodname>
-   <methodparam><type>resource</type><parameter>handle</parameter></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter>length</parameter><initializer>0</initializer></methodparam>
-   <methodparam choice="opt"><type>string</type><parameter>delimiter</parameter><initializer>','</initializer></methodparam>
-   <methodparam choice="opt"><type>string</type><parameter>enclosure</parameter><initializer>'"'</initializer></methodparam>
-   <methodparam choice="opt"><type>string</type><parameter>escape</parameter><initializer>'\\'</initializer></methodparam>
+   <type class="union"><type>array</type><type>false</type></type><methodname>fgetcsv</methodname>
+   <methodparam><type>resource</type><parameter>stream</parameter></methodparam>
+   <methodparam choice="opt"><type class="union"><type>int</type><type>null</type></type><parameter>length</parameter><initializer>&null;</initializer></methodparam>
+   <methodparam choice="opt"><type>string</type><parameter>separator</parameter><initializer>","</initializer></methodparam>
+   <methodparam choice="opt"><type>string</type><parameter>enclosure</parameter><initializer>"\""</initializer></methodparam>
+   <methodparam choice="opt"><type>string</type><parameter>escape</parameter><initializer>"\\"</initializer></methodparam>
   </methodsynopsis>
   <para>
    和 <function>fgets</function> 类似，只除了
    <function>fgetcsv</function> 解析读入的行并找出 <acronym>CSV</acronym>
    格式的字段然后返回一个包含这些字段的数组。
   </para>
+  <note>
+   <para>
+    使用此函数需要考虑区域设置。例如，如果 <literal>LC_CTYPE</literal> 是
+    <literal>en_US.UTF-8</literal>，通过该函数可能会导致对文件中的单字节编码读取错误。
+   </para>
+  </note>
  </refsect1>
 
  <refsect1 role="parameters">
@@ -29,7 +35,7 @@
   <para>
    <variablelist>
     <varlistentry>
-     <term><parameter>handle</parameter></term>
+     <term><parameter>stream</parameter></term>
      <listitem>
       <para>
        一个由 <function>fopen</function>、<function>popen</function> 或
@@ -41,17 +47,19 @@
      <term><parameter>length</parameter></term>
      <listitem>
       <para>
-       必须大于 CVS 文件内最长的一行。在 PHP 5
-       中该参数是可选的。如果忽略（在 PHP 5.0.4 以后的版本中设为
-       0）该参数的话，那么长度就没有限制，不过可能会影响执行效率。
+       必须大于在 CVS 文件（允许尾随行尾字符）中找到的最长行（以字符为单位）。否则，该行将拆分为
+       <parameter>length</parameter> 字符的块，除非拆分发生在环绕字符内。
+      </para>
+      <para>
+       忽略此参数（或者设为 0 或者在 PHP 8.0.0 及以后的版本中设为 &null;）行的最大长度将不受限制，速度稍慢。
       </para>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>delimiter</parameter></term>
+     <term><parameter>separator</parameter></term>
      <listitem>
       <para>
-       设置字段分界符（只允许一个字符）。
+       可选的 <parameter>separator</parameter> 参数，设置字段分隔符（仅一个单字节字符）。
       </para>
      </listitem>
     </varlistentry>
@@ -59,7 +67,7 @@
      <term><parameter>enclosure</parameter></term>
      <listitem>
       <para>
-       设置字段环绕符（只允许一个字符）。
+       可选的 <parameter>enclosure</parameter> 参数，设置字段环绕符（仅一个单字节字符）。
       </para>
      </listitem>
     </varlistentry>
@@ -67,8 +75,21 @@
      <term><parameter>escape</parameter></term>
      <listitem>
       <para>
-       设置转义字符（只允许一个字符），默认是一个反斜杠。
+       可选的 <parameter>escape</parameter>
+       参数，设置转义字符（最多一个单字节字符）。空字符串（<literal>""</literal>）禁用所有的转义机制。
       </para>
+      <note>
+       <simpara>
+        Usually an <parameter>enclosure</parameter> character is escaped inside
+        a field by doubling it; however, the <parameter>escape</parameter>
+        character can be used as an alternative. So for the default parameter
+        values <literal>""</literal> and <literal>\"</literal> have the same
+        meaning. Other than allowing to escape the
+        <parameter>enclosure</parameter> character the
+        <parameter>escape</parameter> character has no special meaning; it isn't
+        even meant to escape itself.
+       </simpara>
+      </note>
      </listitem>
     </varlistentry>
    </variablelist>
@@ -78,7 +99,7 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   返回包含读取字段的索引数组。
+   成功时返回包含读取字段的索引数组，&return.falseforfailure;。
   </para>
   <note>
    <para>    
@@ -86,10 +107,6 @@
    </para>
   </note>
   &note.line-endings;
-  <para>
-   如果提供了无效的文件指针，<function>fgetcsv</function> 会返回 &null;。
-   其他错误，包括碰到文件结束时返回 &false;，。
-  </para>
  </refsect1>
 
  <refsect1 role="changelog">
@@ -105,21 +122,15 @@
      </thead>
      <tbody>
       <row>
-       <entry>5.3.0</entry>
+       <entry>8.0.0</entry>
        <entry>
-        增加了 <parameter>escape</parameter> 参数。
+        现在 <parameter>length</parameter> 允许为 null.
        </entry>
       </row>
       <row>
-       <entry>4.3.5</entry>
+       <entry>7.4.0</entry>
        <entry>
-        现在起 <function>fgetcsv</function> 的操作是二进制安全的。
-       </entry>
-      </row>
-      <row>
-       <entry>4.3.0</entry>
-       <entry>
-        增加了 <parameter>enclosure</parameter> 参数。
+        <parameter>escape</parameter> 参数也接受空字符串来禁用所有的转义机制。
        </entry>
       </row>
      </tbody>
@@ -155,16 +166,6 @@ if (($handle = fopen("test.csv", "r")) !== FALSE) {
   </para>
  </refsect1>
 
- <refsect1 role="notes">
-  &reftitle.notes;
-  <note>
-   <para>
-    该函数对区域设置是敏感的。比如说 <varname>LANG</varname> 设为
-    <literal>en_US.UTF-8</literal> 的话，单字节编码的文件就会出现读取错误。
-   </para>
-  </note>
- </refsect1>
-
  <refsect1 role="seealso">
   &reftitle.seealso;
   <para>
@@ -178,7 +179,6 @@ if (($handle = fopen("test.csv", "r")) !== FALSE) {
   </para>
  </refsect1>
 </refentry>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml

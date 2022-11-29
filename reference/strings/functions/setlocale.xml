@@ -1,30 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 8b5940cadeb4f1c8492f4a7f70743a2be807cf39 Maintainer: WeijianZhang Status: ready -->
-<!-- Reviewed: no -->
-
+<!-- EN-Revision: 54ff7bf8e0f8fa90988cccf6b583517366605f6d Maintainer: WeijianZhang Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://docbook.org/ns/docbook" xml:id="function.setlocale">
  <refnamediv>
   <refname>setlocale</refname>
-  <refpurpose>设置地区信息</refpurpose>
+  <refpurpose>设置区域信息</refpurpose>
  </refnamediv>
  
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <type>string</type><methodname>setlocale</methodname>
+   <type class="union"><type>string</type><type>false</type></type><methodname>setlocale</methodname>
    <methodparam><type>int</type><parameter>category</parameter></methodparam>
-   <methodparam><type>string</type><parameter>locale</parameter></methodparam>
-   <methodparam choice="opt"><type>string</type><parameter>...</parameter></methodparam>
+   <methodparam><type>string</type><parameter>locales</parameter></methodparam>
+   <methodparam rep="repeat"><type>string</type><parameter>rest</parameter></methodparam>
   </methodsynopsis>
+  <simpara>替代签名（不支持命名参数）：</simpara>
   <methodsynopsis>
-   <type>string</type><methodname>setlocale</methodname>
+   <type class="union"><type>string</type><type>false</type></type><methodname>setlocale</methodname>
    <methodparam><type>int</type><parameter>category</parameter></methodparam>
-   <methodparam><type>array</type><parameter>locale</parameter></methodparam>
+   <methodparam><type>array</type><parameter>locale_array</parameter></methodparam>
   </methodsynopsis>
   <para>
-   设置地区信息。
+   设置区域信息。
   </para>
+  <warning>
+   <para>
+    区域信息是按进程维护的，而不是线程。如果在多线程服务器 API 上运行 PHP，区域设置可能在脚本运行时突然变化，尽管脚本本身并没有调用
+    <function>setlocale</function>。这是因为其它脚本在同一时刻的同一进程的不同线程中运行，使用 <function>setlocale</function>
+    改变了进程级别的区域。在 Windows 上，自 PHP 7.0.5 起，每个线程都维护自己的区域信息。
+   </para>
+  </warning>
  </refsect1>
 
  <refsect1 role="parameters">
@@ -51,7 +58,7 @@
         <listitem>
          <simpara>
           <constant>LC_CTYPE</constant> 字符串的分类与转换, 参见例子
-          <function>strtoupper</function>
+          <function>ctype_alpha</function>
          </simpara>
         </listitem>
         <listitem>
@@ -61,8 +68,8 @@
         </listitem>
         <listitem>
          <simpara>
-          <constant>LC_NUMERIC</constant> 对于小数点的分隔 (另请参见
-          <function>localeconv</function>)
+          <constant>LC_NUMERIC</constant> 对于小数点的分隔（另请参见
+          <function>localeconv</function>）
          </simpara>
         </listitem>
         <listitem>
@@ -73,7 +80,7 @@
         </listitem>
         <listitem>
          <simpara>
-          <constant>LC_MESSAGES</constant> 系统响应 (如果PHP使用<literal>libintl</literal>编译)
+          <constant>LC_MESSAGES</constant> 系统响应（如果 PHP 使用 <literal>libintl</literal> 编译）
          </simpara>
         </listitem>
        </itemizedlist>
@@ -81,39 +88,41 @@
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>locale</parameter></term>
+     <term><parameter>locales</parameter></term>
      <listitem>
       <para>
-       If <parameter>locale</parameter> is &null; or the empty string
-       <literal>""</literal>, the locale names will be set from the
-       values of environment variables with the same names as the above
-       categories, or from "LANG".
+       如果 <parameter>locales</parameter> 是空字符串
+       <literal>""</literal>，则区域名将从跟上述类别同名的环境变量的值或“LANG”中设置。
       </para>
       <para>
-       If <parameter>locale</parameter> is <literal>"0"</literal>,
-       the locale setting is not affected, only the current setting is returned.
+       如果 <parameter>locales</parameter> 是 <literal>"0"</literal>，则区域设置不受影响，仅返回当前设置。
       </para>
       <para>
-       If <parameter>locale</parameter> is an array or followed by additional
-       parameters then each array element or parameter is tried to be set as
-       new locale until success. This is useful if a locale is known under
-       different names on different systems or for providing a fallback
-       for a possibly not available locale.
+       如果 <parameter>locales</parameter>
+       后跟附加参数，则每个参数都会尝试设置为新的区域，直至成功。对于以下情况非常有用：不同的系统已知的区域名称不同；为可能无效的区域提供后备。
       </para>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>...</parameter></term>
+     <term><parameter>rest</parameter></term>
      <listitem>
       <para>
-       (可使用字符串或数组参数进行尝试直到设置成功。)
+       可选的字符串参数，尝试作为区域设置，直至成功。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>locale_array</parameter></term>
+     <listitem>
+      <para>
+       尝试将数组中的每个元素设置为新的区域，直至成功。对于以下情况非常有用：不同的系统已知的区域名称不同；为可能无效的区域提供后备。
       </para>
      </listitem>
     </varlistentry>
    </variablelist>
    <note>
     <para>
-     在Windows中，setlocale(LC_ALL, '')要从系统中的区域/语言设置(通过控制面板访问) 。
+     在 Windows 中，setlocale(LC_ALL, '') 从系统中的区域/语言设置（通过控制面板访问）中设置区域设置信息。
     </para>
    </note>
   </para>
@@ -122,66 +131,35 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   Returns the new current locale, or &false; if the locale functionality is
-   not implemented on your platform, the specified locale does not exist or
-   the category name is invalid.
+   返回新的当前区域，如果区域功能没有在当前平台实现、指定区域不存在或类别名无效时返回 &false;。
   </para>
   <para>
-   An invalid category name also causes a warning message. Category/locale
-   names can be found in <link xlink:href="&url.rfc;1766">RFC 1766</link>
-   and <link xlink:href="&url.iso-639;">ISO 639</link>.
-   Different systems have different naming schemes for locales.
+   无效的类别名也会导致警告消息。类别/区域名可以在 <link xlink:href="&url.rfc;1766">RFC 1766</link>
+   和 <link xlink:href="&url.iso-639;">ISO 639</link> 中找到。不同的系统有不同的区域命名方案。
   </para>
   <note>
    <para>
-    The return value of <function>setlocale</function> depends
-    on the system that PHP is running.  It returns exactly
-    what the system <literal>setlocale</literal> function returns.
+    <function>setlocale</function> 的返回值依赖运行 PHP 的系统。它准确返回系统
+    <literal>setlocale</literal> 函数返回的内容。
    </para>
   </note>
- </refsect1>
-
- <refsect1 role="changelog">
-  &reftitle.changelog;
-  <para>
-   <informaltable>
-    <tgroup cols="2">
-     <thead>
-      <row>
-       <entry>&Version;</entry>
-       <entry>&Description;</entry>
-      </row>
-     </thead>
-     <tbody>
-      <row>
-       <entry>5.3.0</entry>
-       <entry>
-        This function now throws an <constant>E_DEPRECATED</constant> notice if a string is passed 
-        to the <parameter>category</parameter> parameter instead of one of the 
-        <literal>LC_*</literal> constants.
-       </entry>
-      </row>
-     </tbody>
-    </tgroup>
-   </informaltable>
-  </para>
  </refsect1>
 
  <refsect1 role="examples">
   &reftitle.examples;
   <para>
    <example>
-    <title><function>setlocale</function> Examples</title>
+    <title><function>setlocale</function> 示例</title>
     <programlisting role="php">
 <![CDATA[
 <?php
-/* Set locale to Dutch */
+/* 设置区域为荷兰 */
 setlocale(LC_ALL, 'nl_NL');
 
-/* Output: vrijdag 22 december 1978 */
+/* 输出：vrijdag 22 december 1978 */
 echo strftime("%A %e %B %Y", mktime(0, 0, 0, 12, 22, 1978));
 
-/* try different possible locale names for german as of PHP 4.3.0 */
+/* 尝试为德语设置不同的可能区域 */
 $loc_de = setlocale(LC_ALL, 'de_DE@euro', 'de_DE', 'de', 'ge');
 echo "Preferred locale for german on this system is '$loc_de'";
 ?>
@@ -191,17 +169,17 @@ echo "Preferred locale for german on this system is '$loc_de'";
   </para>
   <para>
    <example>
-    <title><function>setlocale</function> Examples for Windows</title>
+    <title>Windows 的 <function>setlocale</function> 示例</title>
     <programlisting role="php">
 <![CDATA[
 <?php
-/* Set locale to Dutch */
+/* 设置区域为荷兰 */
 setlocale(LC_ALL, 'nld_nld');
 
-/* Output: vrijdag 22 december 1978 */
+/* 输出：vrijdag 22 december 1978 */
 echo strftime("%A %d %B %Y", mktime(0, 0, 0, 12, 22, 1978));
 
-/* try different possible locale names for german as of PHP 4.3.0 */
+/* 尝试为德语设置不同的可能区域 */
 $loc_de = setlocale(LC_ALL, 'de_DE@euro', 'de_DE', 'deu_deu');
 echo "Preferred locale for german on this system is '$loc_de'";
 ?>
@@ -213,32 +191,18 @@ echo "Preferred locale for german on this system is '$loc_de'";
 
  <refsect1 role="notes">
   &reftitle.notes;
-  <warning>
-   <para>
-    The locale information is maintained per process, not per thread. If you
-    are running PHP on a multithreaded server API like IIS or Apache on
-    Windows, you may experience sudden changes in locale settings while a
-    script is running, though the script itself never called 
-    <function>setlocale</function>. This happens due to other scripts
-    running in different threads of the same process at the same time,
-    changing the process-wide locale using <function>setlocale</function>.
-   </para>
-  </warning>
   <tip>
    <para>
-    Windows users will find useful information about
-    <parameter>locale</parameter> strings at Microsoft's
-    <acronym>MSDN</acronym> website. Supported language strings can be found
-    in the
-    <link xlink:href="&url.setlocale.lang.win32;">language strings documentation</link>
-    and supported country/region strings in the
-    <link xlink:href="&url.setlocale.country.win32;">country/region strings documentation</link>.
+    Windows 用户可以在 Microsoft 的 <acronym>MSDN</acronym> 网站上找到有关
+    <parameter>locales</parameter> 字符串的有用信息。支持的语言字符串可在<link
+    xlink:href="&url.setlocale.lang.win32;">语言字符串文档</link>中找到，支持的国家/区域字符串可在<link
+    xlink:href="&url.setlocale.country.win32;">国家/区域文档</link>中找到。
+
    </para>
   </tip>
  </refsect1>
 
 </refentry>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml

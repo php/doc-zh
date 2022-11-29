@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 6b345e4d7fc2b147f8418307d1db78e108aae018 Maintainer: HonestQiao Status: ready -->
-<!-- Reviewed: no Maintainer: HonestQiao -->
+<!-- EN-Revision: 871a231f4a1caa5fb258ae53b1bb7d1fb2a0f949 Maintainer: HonestQiao Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="function.fileperms" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>fileperms</refname>
-  <refpurpose>取得文件的权限</refpurpose>
+  <refpurpose>获取文件权限</refpurpose>
  </refnamediv>
  
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <type>int</type><methodname>fileperms</methodname>
+   <type class="union"><type>int</type><type>false</type></type><methodname>fileperms</methodname>
    <methodparam><type>string</type><parameter>filename</parameter></methodparam>
   </methodsynopsis>
   <para>
-   取得文件的权限。
+   获取指定文件权限。
   </para>
  </refsect1>
 
@@ -38,24 +38,25 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   以数字模式返回文件的访问权限。
-   Returns the file's permissions as a numeric mode. 
-   
-   Lower bits of this mode
-   are the same as the permissions expected by <function>chmod</function>,
-   however on most platforms the return value will also include information on
-   the type of file given as <parameter>filename</parameter>. The examples
-   below demonstrate how to test the return value for specific permissions and
-   file types on POSIX systems, including Linux and Mac OS X.
+   以数字模式返回文件权限。此模式的低位与 <function>chmod</function>
+   期望权限相同，然而在大多数平台上，返回值还将会包含指定 <parameter>filename</parameter>
+   的文件类型信息。下面的示例示范了如何在 POSIX 系统上测试特定权限和文件类型的返回值。
   </para>
   <para>
-   For local files, the specific return value is that of the
-   <literal>st_mode</literal> member of the structure returned by the C
-   library's <function>stat</function> function. Exactly which bits are set
+   对于本地文件，特定的返回值是通过 C 库的 <function>stat</function> 函数返回结构中的
+   <literal>st_mode</literal> 成员的值。Exactly which bits are set
    can vary from platform to platform, and looking up your specific platform's
    documentation is recommended if parsing the non-permission bits of the
    return value is required.
   </para>
+  <para>
+   失败时返回 &false;。
+  </para>
+ </refsect1>
+
+ <refsect1 role="errors">
+  &reftitle.errors;
+  &fs.emits.warning.on.failure;
  </refsect1>
 
  <refsect1 role="examples">
@@ -86,47 +87,47 @@ echo substr(sprintf('%o', fileperms('/etc/passwd')), -4);
 <?php
 $perms = fileperms('/etc/passwd');
 
-if (($perms & 0xC000) == 0xC000) {
-    // Socket
-    $info = 's';
-} elseif (($perms & 0xA000) == 0xA000) {
-    // Symbolic Link
-    $info = 'l';
-} elseif (($perms & 0x8000) == 0x8000) {
-    // Regular
-    $info = '-';
-} elseif (($perms & 0x6000) == 0x6000) {
-    // Block special
-    $info = 'b';
-} elseif (($perms & 0x4000) == 0x4000) {
-    // Directory
-    $info = 'd';
-} elseif (($perms & 0x2000) == 0x2000) {
-    // Character special
-    $info = 'c';
-} elseif (($perms & 0x1000) == 0x1000) {
-    // FIFO pipe
-    $info = 'p';
-} else {
-    // Unknown
-    $info = 'u';
+switch ($perms & 0xF000) {
+    case 0xC000: // 套接字
+        $info = 's';
+        break;
+    case 0xA000: // 符号链接
+        $info = 'l';
+        break;
+    case 0x8000: // regular
+        $info = 'r';
+        break;
+    case 0x6000: // 块设备
+        $info = 'b';
+        break;
+    case 0x4000: // 目录
+        $info = 'd';
+        break;
+    case 0x2000: // 字符设备
+        $info = 'c';
+        break;
+    case 0x1000: // FIFO 管道
+        $info = 'p';
+        break;
+    default: // 位置
+        $info = 'u';
 }
 
-// Owner
+// 所有者
 $info .= (($perms & 0x0100) ? 'r' : '-');
 $info .= (($perms & 0x0080) ? 'w' : '-');
 $info .= (($perms & 0x0040) ?
             (($perms & 0x0800) ? 's' : 'x' ) :
             (($perms & 0x0800) ? 'S' : '-'));
 
-// Group
+// 组
 $info .= (($perms & 0x0020) ? 'r' : '-');
 $info .= (($perms & 0x0010) ? 'w' : '-');
 $info .= (($perms & 0x0008) ?
             (($perms & 0x0400) ? 's' : 'x' ) :
             (($perms & 0x0400) ? 'S' : '-'));
 
-// World
+// 其它
 $info .= (($perms & 0x0004) ? 'r' : '-');
 $info .= (($perms & 0x0002) ? 'w' : '-');
 $info .= (($perms & 0x0001) ?
@@ -147,11 +148,6 @@ echo $info;
   </para>
  </refsect1>
 
- <refsect1 role="errors">
-  &reftitle.errors;
-  &fs.emits.warning.on.failure;
- </refsect1>
-
  <refsect1 role="notes">
   &reftitle.notes;
   &note.clearstatcache;
@@ -169,7 +165,6 @@ echo $info;
   </para>
  </refsect1>
 </refentry>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml

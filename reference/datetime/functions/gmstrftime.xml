@@ -1,45 +1,122 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
+<!-- EN-Revision: 5c951013ca04161992efed8b86fb40f55669958e Maintainer: mowangjuanzi Status: ready -->
 <refentry xml:id="function.gmstrftime" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>gmstrftime</refname>
-  <refpurpose>
-   根据区域设置格式化 GMT/UTC 时间／日期
-  </refpurpose>
+  <refpurpose>根据区域设置格式化 GMT/UTC 时间/日期</refpurpose>
  </refnamediv>
- <refsect1>
-  <title>说明</title>
+
+ <refsynopsisdiv>
+  &warn.deprecated.function-8-1-0.alternatives;
+  <simplelist role="alternatives">
+   <member><function>gmdate</function></member>
+   <member><methodname>IntlDateFormatter::format</methodname></member>
+  </simplelist>
+ </refsynopsisdiv>
+
+ <refsect1 role="description">
+  &reftitle.description;
   <methodsynopsis>
-   <type>string</type><methodname>gmstrftime</methodname>
+   <type class="union"><type>string</type><type>false</type></type><methodname>gmstrftime</methodname>
    <methodparam><type>string</type><parameter>format</parameter></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter>timestamp</parameter></methodparam>
+   <methodparam choice="opt"><type class="union"><type>int</type><type>null</type></type><parameter>timestamp</parameter><initializer>&null;</initializer></methodparam>
   </methodsynopsis>
   <para>
-   和 <function>strftime</function>
-   的行为相同，只除了返回时间是格林威治标准时（GMT）。例如，当在东部标准时（EST，GMT
-   -500）运行时，下面第一行显示“Dec 31 1998 20:00:00”，而第二行显示“Jan 01 1999
+   行为和 <function>strftime</function> 相同，只是返回的时间是格林威治标准时（GMT）。例如，在东部标准时（EST，GMT
+   -0500）运行时，下面第一行显示“Dec 31 1998 20:00:00”，而第二行显示“Jan 01 1999
    01:00:00”。
+  </para>
+  <warning>
+   <para>
+    此函数依赖于操作系统区域设置信息，这些信息可能彼此不一致，或者根本不能用。而是使用
+    <methodname>IntlDateFormatter::format</methodname> 方法。
+   </para>
+  </warning>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>format</parameter></term>
+     <listitem>
+      <para>
+       See description in <function>strftime</function>.
+      </para>
+     </listitem>
+    </varlistentry>
+    &date.timestamp.description;
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   Returns a string formatted according to the given format string
+   using the given <parameter>timestamp</parameter> or the current
+   local time if no timestamp is given.  Month and weekday names and
+   other language dependent strings respect the current locale set
+   with <function>setlocale</function>.
+   On failure, &false; is returned.
+  </para>
+ </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <para>
+   <informaltable>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>&Version;</entry>
+       <entry>&Description;</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>8.0.0</entry>
+       <entry>
+        现在 <parameter>timestamp</parameter> 允许为 null。
+       </entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </informaltable>
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
    <example>
     <title><function>gmstrftime</function> 例子</title>
     <programlisting role="php">
 <![CDATA[
 <?php
 setlocale(LC_TIME, 'en_US');
-echo strftime("%b %d %Y %H:%M:%S", mktime (20,0,0,12,31,98))."\n";
-echo gmstrftime("%b %d %Y %H:%M:%S", mktime (20,0,0,12,31,98))."\n";
+echo strftime("%b %d %Y %H:%M:%S", mktime(20, 0, 0, 12, 31, 98)) . "\n";
+echo gmstrftime("%b %d %Y %H:%M:%S", mktime(20, 0, 0, 12, 31, 98)) . "\n";
 ?>
 ]]>
     </programlisting>
    </example>
   </para>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
   <para>
-   参见 <function>strftime</function>。
+   <simplelist>
+    <member><methodname>IntlDateFormatter::format</methodname></member>
+    <member><methodname>DateTimeInterface::format</methodname></member>
+    <member><function>strftime</function></member>
+   </simplelist>
   </para>
  </refsect1>
 </refentry>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml

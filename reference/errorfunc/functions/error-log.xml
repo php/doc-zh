@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: a2db0ec37511850cc529be2b141bf194ad878ee2 Maintainer: daijie Status: ready -->
-<!-- Reviewed: no -->
-
+<!-- EN-Revision: 769812c12f00c1978bf7dd711dca38dbf05462da Maintainer: daijie Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="function.error-log" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>error_log</refname>
@@ -15,8 +14,8 @@
    <type>bool</type><methodname>error_log</methodname>
    <methodparam><type>string</type><parameter>message</parameter></methodparam>
    <methodparam choice="opt"><type>int</type><parameter>message_type</parameter><initializer>0</initializer></methodparam>
-   <methodparam choice="opt"><type>string</type><parameter>destination</parameter></methodparam>
-   <methodparam choice="opt"><type>string</type><parameter>extra_headers</parameter></methodparam>
+   <methodparam choice="opt"><type class="union"><type>string</type><type>null</type></type><parameter>destination</parameter><initializer>&null;</initializer></methodparam>
+   <methodparam choice="opt"><type class="union"><type>string</type><type>null</type></type><parameter>additional_headers</parameter><initializer>&null;</initializer></methodparam>
   </methodsynopsis>
   <para>
    把错误信息发送到 web 服务器的错误日志，或者到一个文件里。
@@ -60,7 +59,7 @@
            <entry>
             <parameter>message</parameter> 发送到参数 <parameter>destination</parameter> 
             设置的邮件地址。
-            第四个参数 <parameter>extra_headers</parameter> 只有在这个类型里才会被用到。
+            第四个参数 <parameter>additional_headers</parameter> 只有在这个类型里才会被用到。
            </entry>
           </row>
           <row>
@@ -98,7 +97,7 @@
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>extra_headers</parameter></term>
+     <term><parameter>additional_headers</parameter></term>
      <listitem>
       <para>
        额外的头。当 <parameter>message_type</parameter>
@@ -114,24 +113,32 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   &return.success;
+   &return.success;如果 <parameter>message_type</parameter> 是 0，此函数始终返回
+   &true;，无论是否可以记录错误。
   </para>
  </refsect1>
 
- <refsect1 role="notes">
-  &reftitle.notes;
-  <warning>
-   <simpara>
-    <function>error_log</function> 并非二进制安全的。null 字符可能截断 <parameter>message</parameter>。
-   </simpara>
-  </warning>
-  <tip>
-   <simpara>
-    <parameter>message</parameter> 不能包含 null 字符。
-    注意，<parameter>message</parameter> 可能会发送到文件、邮件、syslog 等。
-    所以在调用 <function>error_log</function> 前需要使用适合的转换/转义函数： <function>base64_encode</function>、 <function>rawurlencode</function> 或 <function>addslashes</function>。
-   </simpara>
-  </tip>
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <informaltable>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>&Version;</entry>
+      <entry>&Description;</entry>
+     </row>
+    </thead>
+    <tbody>
+     <row>
+      <entry>8.0.0</entry>
+      <entry>
+       现在 <parameter>destination</parameter> 和
+       <parameter>additional_headers</parameter> 允许为 null。
+      </entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </informaltable>
  </refsect1>
  
  <refsect1 role="examples">
@@ -162,32 +169,23 @@ error_log("You messed up!", 3, "/var/tmp/my-errors.log");
   </para>
  </refsect1>
  
- <refsect1 role="changelog">
-  &reftitle.changelog;
-  <para>
-   <informaltable>
-    <tgroup cols="2">
-     <thead>
-      <row>
-       <entry>&Version;</entry>
-       <entry>&Description;</entry>
-      </row>
-     </thead>
-     <tbody>
-     <row>
-       <entry>5.2.7</entry>
-       <entry>
-        可能的值：4添加到了 <parameter>message_type</parameter>。
-       </entry>
-      </row>
-     </tbody>
-    </tgroup>
-   </informaltable>
-  </para>
+ <refsect1 role="notes">
+  &reftitle.notes;
+  <warning>
+   <simpara>
+    <function>error_log</function> 并非二进制安全的。null 字符可能截断 <parameter>message</parameter>。
+   </simpara>
+  </warning>
+  <tip>
+   <simpara>
+    <parameter>message</parameter> 不能包含 null 字符。注意，<parameter>message</parameter>
+    可能会发送到文件、邮件、syslog 等。所以在调用 <function>error_log</function>
+    前需要使用适合的转换/转义函数：<function>base64_encode</function>、<function>rawurlencode</function> 或 <function>addslashes</function>。
+   </simpara>
+  </tip>
  </refsect1>
 
 </refentry>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml

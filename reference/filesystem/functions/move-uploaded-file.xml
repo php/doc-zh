@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 343d5f4dd6f6a85ef06bd82cca1574512e04c1bd Maintainer: HonestQiao Status: ready -->
-<!-- Reviewed: no Maintainer: HonestQiao -->
+<!-- EN-Revision: 0c9c2dd669fe9395eaa73d487fbd160f9057429a Maintainer: HonestQiao Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="function.move-uploaded-file" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>move_uploaded_file</refname>
@@ -11,14 +11,14 @@
   &reftitle.description;
   <methodsynopsis>
    <type>bool</type><methodname>move_uploaded_file</methodname>
-   <methodparam><type>string</type><parameter>filename</parameter></methodparam>
-   <methodparam><type>string</type><parameter>destination</parameter></methodparam>
+   <methodparam><type>string</type><parameter>from</parameter></methodparam>
+   <methodparam><type>string</type><parameter>to</parameter></methodparam>
   </methodsynopsis>
   <para>
-   本函数检查并确保由 <parameter>filename</parameter>
+   本函数检查并确保由 <parameter>from</parameter>
    指定的文件是合法的上传文件（即通过 PHP 的 HTTP POST
    上传机制所上传的）。如果文件合法，则将其移动为由
-   <parameter>destination</parameter> 指定的文件。
+   <parameter>to</parameter> 指定的文件。
   </para>
   <para>
    这种检查显得格外重要，如果上传的文件有可能会造成对用户或本系统的其他用户显示其内容的话。
@@ -30,7 +30,7 @@
   <para>
    <variablelist>
     <varlistentry>
-     <term><parameter>filename</parameter></term>
+     <term><parameter>from</parameter></term>
      <listitem>
       <para>
        上传的文件的文件名。
@@ -38,7 +38,7 @@
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>destination</parameter></term>
+     <term><parameter>to</parameter></term>
      <listitem>
       <para>
        移动文件到这个位置。
@@ -55,12 +55,12 @@
    成功时返回 &true;。
   </para>
   <para>
-   如果 <parameter>filename</parameter>
+   如果 <parameter>from</parameter>
    不是合法的上传文件，不会出现任何操作，<function>move_uploaded_file</function>
    将返回 &false;。
   </para>
   <para>
-   如果 <parameter>filename</parameter>
+   如果 <parameter>from</parameter>
    是合法的上传文件，但出于某些原因无法移动，不会出现任何操作，<function>move_uploaded_file</function>
    将返回 &false;。此外还会发出一条警告。
   </para>
@@ -78,7 +78,9 @@ $uploads_dir = '/uploads';
 foreach ($_FILES["pictures"]["error"] as $key => $error) {
     if ($error == UPLOAD_ERR_OK) {
         $tmp_name = $_FILES["pictures"]["tmp_name"][$key];
-        $name = $_FILES["pictures"]["name"][$key];
+        // basename() 可以防止遍历攻击文件系统；
+        // 进一步验证/清理文件名可能是合适的
+        $name = basename($_FILES["pictures"]["name"][$key]);
         move_uploaded_file($tmp_name, "$uploads_dir/$name");
     }
 }
@@ -95,8 +97,8 @@ foreach ($_FILES["pictures"]["error"] as $key => $error) {
    <para>
     <function>move_uploaded_file</function> 对
     <link linkend="ini.open-basedir">open_basedir</link> 是敏感的。不过，限制只针对
-    <parameter>destination</parameter> 路径，因为允许移动上传的文件名
-    <parameter>filename</parameter>
+    <parameter>to</parameter> 路径，因为允许移动上传的文件名
+    <parameter>from</parameter>
     可能会与这些限制产生冲突。<function>move_uploaded_file</function>
     仅作用于通过 PHP 上传的文件以确保这个操作的安全性。
    </para>
@@ -120,7 +122,6 @@ foreach ($_FILES["pictures"]["error"] as $key => $error) {
   </para>
  </refsect1>
 </refentry>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml

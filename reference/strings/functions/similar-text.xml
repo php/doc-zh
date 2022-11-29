@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 2b0ee0e1f86417fc5cfb6c97d54e99450e666593 Maintainer: daijie Status: ready -->
-<refentry xmlns="http://docbook.org/ns/docbook" xml:id="function.similar-text">
+<!-- EN-Revision: e095023e408c8cb6378ae16bb6870343a3946919 Maintainer: daijie Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
+<refentry xml:id="function.similar-text" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>similar_text</refname>
   <refpurpose>计算两个字符串的相似度</refpurpose>
@@ -11,9 +12,9 @@
   &reftitle.description;
   <methodsynopsis>
    <type>int</type><methodname>similar_text</methodname>
-   <methodparam><type>string</type><parameter>first</parameter></methodparam>
-   <methodparam><type>string</type><parameter>second</parameter></methodparam>
-   <methodparam choice="opt"><type>float</type><parameter role="reference">percent</parameter></methodparam>
+   <methodparam><type>string</type><parameter>string1</parameter></methodparam>
+   <methodparam><type>string</type><parameter>string2</parameter></methodparam>
+   <methodparam choice="opt"><type>float</type><parameter role="reference">percent</parameter><initializer>&null;</initializer></methodparam>
   </methodsynopsis>
   <para>
    两个字符串的相似程度计算依据 &book.programming.classics;  的描述进行。注意该实现没有使用 Oliver 虚拟码中的堆栈，但是却进行了递归调用，这个做法可能会导致整个过程变慢或变快。也请注意，该算法的复杂度是 O(N**3)，N 是最长字符串的长度。
@@ -25,7 +26,7 @@
   <para>
    <variablelist>
     <varlistentry>
-     <term><parameter>first</parameter></term>
+     <term><parameter>string1</parameter></term>
      <listitem>
       <para>
        第一个字符串。
@@ -33,18 +34,25 @@
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>second</parameter></term>
+     <term><parameter>string2</parameter></term>
      <listitem>
       <para>
        第二个字符串。
       </para>
+      <note>
+       <para>
+        交换 <parameter>string1</parameter> 和 <parameter>string2</parameter>
+        可能会产生不同的结果；请看下面的示例。
+       </para>
+      </note> 
      </listitem>
     </varlistentry>
     <varlistentry>
      <term><parameter>percent</parameter></term>
      <listitem>
       <para>
-       通过引用方式传递第三个参数，<function>similar_text</function> 将计算相似程度百分数。
+       第三个参数通过引用传递，<function>similar_text</function> 将以百分比计算相似度，通过将
+       <function>similar_text</function> 的结果除以指定字符串长度的平均值然后乘以 <literal>100</literal>。
       </para>
      </listitem>
     </varlistentry>
@@ -55,8 +63,40 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   返回在两个字符串中匹配字符的数目。
+   返回在两个字符串中匹配字符的数量。
   </para>
+  <para>
+   The number of matching characters is calculated by finding the longest first
+   common substring, and then doing this for the prefixes and the suffixes,
+   recursively. The lengths of all found common substrings are added.
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <example xml:id="similar_text.example.swapping">
+   <title><function>similar_text</function> 交换参数示例</title>
+   <para>
+    此示例展示了交换 <parameter>string1</parameter> 和 <parameter>string2</parameter>
+    可能会产生不同的结果。
+   </para>
+   <programlisting role="php">
+<![CDATA[
+<?php
+$sim = similar_text('bafoobar', 'barfoo', $perc);
+echo "similarity: $sim ($perc %)\n";
+$sim = similar_text('barfoo', 'bafoobar', $perc);
+echo "similarity: $sim ($perc %)\n";
+]]>
+   </programlisting>
+   &example.outputs.similar;
+   <screen>
+<![CDATA[
+similarity: 5 (71.428571428571 %)
+similarity: 3 (42.857142857143 %)
+]]>
+   </screen>
+  </example>
  </refsect1>
 
  <refsect1 role="seealso">
@@ -70,7 +110,6 @@
  </refsect1>
 
 </refentry>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml

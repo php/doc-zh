@@ -1,18 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: c1ba09cf2b4ede782e9fa6702fb5e9c593356995 Maintainer: HonestQiao Status: ready -->
-<!-- Reviewed: no Maintainer: HonestQiao -->
+<!-- EN-Revision: a123b24db5b3e42841179fea13cd508418fc45c7 Maintainer: HonestQiao Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="function.get-headers" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>get_headers</refname>
-  <refpurpose>取得服务器响应一个 HTTP 请求所发送的所有标头</refpurpose>
+  <refpurpose>取得服务器响应 HTTP 请求所发送的所有标头</refpurpose>
  </refnamediv>
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <type>array</type><methodname>get_headers</methodname>
+   <type class="union"><type>array</type><type>false</type></type><methodname>get_headers</methodname>
    <methodparam><type>string</type><parameter>url</parameter></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter>format</parameter><initializer>0</initializer></methodparam>
+   <methodparam choice="opt"><type>bool</type><parameter>associative</parameter><initializer>&false;</initializer></methodparam>
+   <methodparam choice="opt"><type class="union"><type>resource</type><type>null</type></type><parameter>context</parameter><initializer>&null;</initializer></methodparam>
   </methodsynopsis>
   <para>
    <function>get_headers</function> 返回一个数组，包含有服务器响应一个
@@ -33,11 +34,20 @@
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>format</parameter></term>
+     <term><parameter>associative</parameter></term>
      <listitem>
       <para>
-        如果将可选的 <parameter>format</parameter> 参数设为 1，则
-   <function>get_headers</function> 会解析相应的信息并设定数组的键名。
+        如果将可选的 <parameter>associative</parameter> 参数设为 true，则
+        <function>get_headers</function> 会解析相应的信息并设定数组的键名。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>context</parameter></term>
+     <listitem>
+      <para>
+       使用 <function>stream_context_create</function> 创建的有效上下文资源，&null;
+       使用默认上下文。
       </para>
      </listitem>
     </varlistentry>
@@ -66,10 +76,15 @@
      </thead>
      <tbody>
       <row>
-       <entry>5.1.3</entry>
+       <entry>8.0.0</entry>
        <entry>
-        自 PHP 5.1.3 起本函数使用默认的流上下文，其可以用 <function>stream_context_get_default</function>
-    函数设定和修改。
+        <parameter>associative</parameter> 从 <type>int</type> 更改为 <type>bool</type>。
+       </entry>
+      </row>
+      <row>
+       <entry>7.1.0</entry>
+       <entry>
+        新增 <parameter>context</parameter> 参数。
        </entry>
       </row>
      </tbody>
@@ -90,7 +105,7 @@ $url = 'http://www.example.com';
 
 print_r(get_headers($url));
 
-print_r(get_headers($url, 1));
+print_r(get_headers($url, true));
 ?>
 ]]>
     </programlisting>
@@ -126,7 +141,7 @@ Array
     </screen>
    </example>
    <example>
-    <title><function>get_headers</function> using HEAD example</title>
+    <title><function>get_headers</function> 使用 HEAD 示例</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -155,8 +170,8 @@ $headers = get_headers('http://example.com');
    </simplelist>
   </para>
  </refsect1>
-</refentry>
 
+</refentry>
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml

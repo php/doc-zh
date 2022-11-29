@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 1adf24615e8be8049f68db37513e37dc631d49d1 Maintainer: yuanyuqiang Status: ready -->
-<!-- CREDITS: Luffy -->
-
+<!-- EN-Revision: 91e303f2d27cbca485137230fa7d2e50e75f19a6 Maintainer: yuanyuqiang Status: ready -->
+<!-- CREDITS: Luffy, mowangjuanzi -->
 <refentry xml:id="function.hash-hmac-file" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>hash_hmac_file</refname>
-  <refpurpose>使用 HMAC 方法和给定文件的内容生成带密钥的哈希值</refpurpose>
+  <refpurpose>使用 HMAC 方法和给定文件的内容生成带密钥的散列值</refpurpose>
  </refnamediv>
  <refsect1 role="description">
   &reftitle.description;
@@ -27,7 +26,7 @@
      <term><parameter>algo</parameter></term>
      <listitem>
       <para>
-       要使用的哈希算法名称，例如："md5"，"sha256"，"haval160,4" 等。
+       要使用的散列算法名称，例如："md5"，"sha256"，"haval160,4" 等。
        如何获取受支持的算法清单，请参见 <function>hash_hmac_algos</function> 函数。
       </para>
      </listitem>
@@ -36,7 +35,7 @@
      <term><parameter>filename</parameter></term>
      <listitem>
       <para>
-       要进行哈希运算的文件路径，支持 fopen 封装器。
+       要进行散列运算的文件路径，支持 fopen 封装器。
       </para>
      </listitem>
     </varlistentry>
@@ -64,9 +63,17 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   如果 <parameter>binary</parameter> 设置为 &true;， 则返回原始二进制数据表示的信息摘要，
-   否则返回 16 进制小写字符串格式表示的信息摘要。
-   如果 <parameter>algo</parameter> 参数指定的不是受支持的算法，或者无法读取 <parameter>filename</parameter> 给定的文件，则返回 &false;。
+   如果 <parameter>binary</parameter> 设置为 &true;， 则返回原始二进制数据表示的信息摘要，否则返回
+   16 进制小写字符串格式表示的信息摘要。如果无法读取文件 
+   <parameter>filename</parameter>，则返回 &false;。
+  </para>
+ </refsect1>
+
+ <refsect1 role="errors">
+  &reftitle.errors;
+  <para>
+   如果 <parameter>algo</parameter> 未知或非加密散列函数，则抛出
+   <classname>ValueError</classname> 异常。
   </para>
  </refsect1>
 
@@ -83,8 +90,15 @@
      </thead>
      <tbody>
       <row>
+       <entry>8.0.0</entry>
+       <entry>
+        如果 <parameter>algo</parameter> 未知或非加密散列函数，现在抛出
+        <classname>ValueError</classname> 异常，之前返回 &false;。
+       </entry>
+      </row>
+      <row>
        <entry>7.2.0</entry>
-       <entry>不再支持非加密的哈希函数（adler32，crc32，crc32b，fnv132，fnv1a32，fnv164，fnv1a64，joaat）。</entry>
+       <entry>禁用非加密散列函数（adler32、crc32、crc32b、fnv132、fnv1a32、fnv164、fnv1a64、joaat）。</entry>
       </row>
      </tbody>
     </tgroup>
@@ -100,7 +114,7 @@
     <programlisting role="php">
 <![CDATA[
 <?php
-/* 创建一个要计算哈希值的文件 */
+/* 创建一个要计算散列值的文件 */
 file_put_contents('example.txt', 'The quick brown fox jumped over the lazy dog.');
 
 echo hash_hmac_file('md5', 'example.txt', 'secret');

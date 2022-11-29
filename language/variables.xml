@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 165718f97f983da66504dbe547900b7e5d54fdb5 Maintainer: HonestQiao Status: ready -->
-<!-- CREDITS: dallas, Gregory, verdana -->
+<!-- EN-Revision: 19e8122137a1d42ed60f17fe2c0c2b69b0b2d16b Maintainer: HonestQiao Status: ready -->
+<!-- CREDITS: dallas, Gregory, verdana, mowangjuanzi -->
  <chapter xml:id="language.variables" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
   <title>变量</title>
 
@@ -112,26 +112,26 @@ $bar = &test();    // 非法
 // 未设置和未引用（不使用上下文）的变量；输出 NULL
 var_dump($unset_var);
 
-// Boolean usage; outputs 'false' (See ternary operators for more on this syntax)
+// Boolean 用法；输出 'false' (See ternary operators for more on this syntax)
 echo($unset_bool ? "true\n" : "false\n");
 
-// String usage; outputs 'string(3) "abc"'
+// String 用法；输出 'string(3) "abc"'
 $unset_str .= 'abc';
 var_dump($unset_str);
 
-// Integer usage; outputs 'int(25)'
+// Integer 用法；输出 'int(25)'
 $unset_int += 25; // 0 + 25 => 25
 var_dump($unset_int);
 
-// Float/double usage; outputs 'float(1.25)'
+// Float 用法；输出 'float(1.25)'
 $unset_float += 1.25;
 var_dump($unset_float);
 
-// Array usage; outputs array(1) {  [3]=>  string(3) "def" }
+// Array 用法；输出 array(1) {  [3]=>  string(3) "def" }
 $unset_arr[3] = "def"; // array() + array(3 => "def") => array(3 => "def")
 var_dump($unset_arr);
 
-// Object usage; creates new stdClass object (see http://www.php.net/manual/en/reserved.classes.php)
+// Object 用法：创建新 stdClass 对象 (see http://www.php.net/manual/en/reserved.classes.php)
 // Outputs: object(stdClass)#1 (1) {  ["foo"]=>  string(3) "bar" }
 $unset_obj->foo = 'bar';
 var_dump($unset_obj);
@@ -411,9 +411,9 @@ function test()
 <![CDATA[
 <?php
 function foo(){
-    static $int = 0;          // correct
-    static $int = 1+2;        // correct 
-    static $int = sqrt(121);  // wrong  (as it is a function)
+    static $int = 0;          // 正确
+    static $int = 1+2;        // 正确
+    static $int = sqrt(121);  // 错误（因为它是函数）
 
     $int++;
     echo $int;
@@ -424,10 +424,39 @@ function foo(){
       </example>
     </para>
      
+   <para>
+    从 PHP 8.1.0
+    开始，当继承（不是覆盖）使用有静态变量的方法时，继承的方法将会跟父级方法共享静态变量。这意味着方法中的静态变量现在跟静态属性有相同的行为。
+   </para>
+
+   <example>
+    <title>在继承方法中使用静态变量</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+class Foo {
+    public static function counter() {
+        static $counter = 0;
+        $counter++;
+        return $counter;
+    }
+}
+class Bar extends Foo {}
+var_dump(Foo::counter()); // int(1)
+var_dump(Foo::counter()); // int(2)
+var_dump(Bar::counter()); // int(3)，PHP 8.1.0 之前 int(1)
+var_dump(Bar::counter()); // int(4)，PHP 8.1.0 之前 int(2)
+?>
+]]>
+    </programlisting>
+   </example>
+
+   <note>
     <para>
-     静态声明是在编译时解析的。
+     静态声明在编译时解析。
     </para>
-   </sect2>
+   </note>
+  </sect2>
 
    <sect2 xml:id="language.variables.scope.references">
     <title>全局和静态变量的引用</title>

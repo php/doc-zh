@@ -1,19 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
+<!-- EN-Revision: 52dc204a77076e1404257cf39f179882b90b5780 Maintainer: mowangjuanzi Status: ready -->
 <refentry xml:id="function.curl-multi-close" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>curl_multi_close</refname>
-  <refpurpose>关闭一组cURL句柄</refpurpose>
+  <refpurpose>关闭一组 cURL 句柄</refpurpose>
  </refnamediv>
  
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
    <type>void</type><methodname>curl_multi_close</methodname>
-   <methodparam><type>resource</type><parameter>mh</parameter></methodparam>
+   <methodparam><type>CurlMultiHandle</type><parameter>multi_handle</parameter></methodparam>
   </methodsynopsis>
+  &note.resource-migration-8.0-dead-function;
   <para>
-   关闭一组cURL句柄。
+   关闭一组 cURL 句柄。
   </para>
  </refsect1>
 
@@ -33,43 +35,64 @@
   </para>
  </refsect1>
 
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <informaltable>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>&Version;</entry>
+      <entry>&Description;</entry>
+     </row>
+    </thead>
+    <tbody>
+     &curl.changelog.multi-handle-param;
+    </tbody>
+   </tgroup>
+  </informaltable>
+ </refsect1>
+
  <refsect1 role="examples">
   &reftitle.examples;
   <para>
    <example>
-    <title><function>curl_multi_close</function> example</title>
+    <title><function>curl_multi_close</function> 示例</title>
     <para>
-     这个范例将会创建2个cURL句柄，把它们加到批处理句柄，然后并行地运行它们。
+     此示例将创建两个 cURL 句柄，并把它们加到多句柄中，然后对其异步处理。
     </para>
     <programlisting role="php">
 <![CDATA[
 <?php
-// 创建一对cURL资源
+// 创建一对 cURL 资源
 $ch1 = curl_init();
 $ch2 = curl_init();
 
-// 设置URL和相应的选项
+// 设置 URL 和其它相应的选项
 curl_setopt($ch1, CURLOPT_URL, "http://www.example.com/");
 curl_setopt($ch1, CURLOPT_HEADER, 0);
 curl_setopt($ch2, CURLOPT_URL, "http://www.php.net/");
 curl_setopt($ch2, CURLOPT_HEADER, 0);
 
-// 创建批处理cURL句柄
+// 创建 cURL 多句柄
 $mh = curl_multi_init();
 
-// 增加2个句柄
+// 新增两个句柄
 curl_multi_add_handle($mh,$ch1);
 curl_multi_add_handle($mh,$ch2);
 
-$running=null;
-// 执行批处理句柄
+// 执行多句柄
 do {
-    curl_multi_exec($mh,$running);
-} while ($running > 0);
+    $status = curl_multi_exec($mh, $active);
+    if ($active) {
+        curl_multi_select($mh);
+    }
+} while ($active && $status == CURLM_OK);
 
 // 关闭全部句柄
 curl_multi_remove_handle($mh, $ch1);
+curl_close($ch1);
 curl_multi_remove_handle($mh, $ch2);
+curl_close($ch2);
 curl_multi_close($mh);
 
 ?>
@@ -90,7 +113,6 @@ curl_multi_close($mh);
  </refsect1>
 
 </refentry>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml

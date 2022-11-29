@@ -1,199 +1,282 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author: eniac2008 -->
-<!-- EN-Revision: c4de1a06045b84afa79ac0b6503fa4f60400359c Maintainer: Avenger Status: ready -->
-<!-- CREDITS: Geogory, dallas, Altair -->
+<!-- EN-Revision: f32703dce3d941dd6add101551a6c9f126d8eaa0 Maintainer: Avenger Status: ready -->
+<!-- CREDITS: Geogory, dallas, Altair, mowangjuanzi -->
 <sect1 xml:id="language.types.type-juggling">
- <title>类型转换的判别</title>
+ <title>类型转换</title>
 
  <simpara>
-  PHP 在变量定义中不需要（或不支持）明确的类型定义；变量类型是根据使用该变量的上下文所决定的。也就是说，如果把一个 <type>string</type> 值赋给变量
-<varname>$var</varname>，<varname>$var</varname>
-  就成了一个 <type>string</type>。如果又把一个<type>int</type> 赋给
-  <varname>$var</varname>，那它就成了一个<type>int</type>。
+  PHP 在变量声明时不需要定义类型。在这种情况下，变量的类型由存储的值决定。也就是说，如果
+  <type>string</type> 赋值给 <varname>$var</varname>，然后 <varname>$var</varname>
+  的类型就是 <type>string</type>。之后将 <type>int</type> 值赋值给 
+  <varname>$var</varname>，它将是 <type>int</type> 类型。
  </simpara>
 
  <para>
-  PHP 的自动类型转换的一个例子是乘法运算符“*”。如果任何一个操作数是<type>float</type>，
-  则所有的操作数都被当成<type>float</type>，结果也是<type>float</type>。
-  否则操作数会被解释为<type>int</type>，结果也是<type>int</type>。
-  注意这并<emphasis>没有</emphasis>改变这些操作数本身的类型；
-  改变的仅是这些操作数如何被求值以及表达式本身的类型。
- </para>
-
- <informalexample>
-  <programlisting role="php">
-<![CDATA[
-<?php
-$foo = "1";  // $foo 是字符串 (ASCII 49)
-$foo *= 2;   // $foo 现在是一个整数 (2)
-$foo = $foo * 1.3;  // $foo 现在是一个浮点数 (2.6)
-$foo = 5 * "10 Little Piggies"; // $foo 是整数 (50)
-$foo = 5 * "10 Small Pigs";     // $foo 是整数 (50)
-?>
-]]>
-<!-- bad example, no real operator (must be used with variable, modifies it too)
-$foo++;      // $foo is the string "2" (ASCII 50)
-
-TODO: explain ++/- - behaviour with strings
-
-examples:
-
-++'001' = '002'
-++'abc' = 'abd'
-++'xyz' = 'xza'
-++'9.9' = '9.0'
-++'-3'  = '-4'
-- -'9'   = 8 (integer!)
-- -'5.5' = '5.5'
-- -'-9'  = -10 (integer)
-- -'09'  = 8 (integer)
-- -'abc' = 'abc'
-
--->
-  </programlisting>
- </informalexample>
-
- <simpara>
-  如果上面两个例子看上去古怪的话，参见如何将
-  <link linkend="language.types.numeric-strings">数字字符串</link>转换为数值。
- </simpara>
-
- <simpara>
-  如果要强制将一个变量当作某种类型来求值，参见<link
-  linkend="language.types.typecasting">类型强制转换</link>一节。如果要改变一个变量的类型，参见 <function>settype</function>。
- </simpara>
-
- <para>
-  如果想要测试本节中任何例子的话，可以用 <function>var_dump</function> 函数。
+  PHP 可能会尝试在某些上下文中自动将值转换为另一种类型。不同的上下文有：
+  <itemizedlist>
+   <listitem>
+    <simpara>Numeric</simpara>
+   </listitem>
+   <listitem>
+    <simpara>String</simpara>
+   </listitem>
+   <listitem>
+    <simpara>Logical</simpara>
+   </listitem>
+   <listitem>
+    <simpara>Integral and string</simpara>
+   </listitem>
+   <listitem>
+    <simpara>Comparative</simpara>
+   </listitem>
+   <listitem>
+    <simpara>Function</simpara>
+   </listitem>
+  </itemizedlist>
  </para>
 
  <note>
-  <para>
-   自动转换为 <type>数组</type> 的行为目前没有定义。
-  </para>
-
-  <para>
-   此外，由于 PHP 支持使用和数组下标同样的语法访问字符串下标，以下例子在所有 PHP 版本中都有效：
-  </para>
-
-  <informalexample>
-   <programlisting role="php">
-<![CDATA[
-<?php
-$a    = 'car'; // $a 是 string
-$a[0] = 'b';   // $a 仍然是 string
-echo $a;       // bar
-?>
-]]>
-   </programlisting>
-  </informalexample>
-
-  <para>
-   请参阅<link linkend="language.types.string.substr">存取和修改字符串中的字符</link>一节以获取更多信息。
-  </para>
+  <simpara>
+   当值需要解释为不同类型时，值本身<emphasis>不</emphasis>会改变类型。
+  </simpara>
  </note>
 
- <sect2 xml:id="language.types.typecasting">
-  <title>类型强制转换</title>
+ <simpara>
+  强制将变量当做某种变量来求值，参见<link linkend="language.types.typecasting">类型转换</link>一节。要更改变量的类型，请参阅
+  <function>settype</function> 函数。
+ </simpara>
+
+ <sect2>
+  <title>Numeric contexts</title>
+
+  <simpara>
+   This is the context when using an
+   <link linkend="language.operators.arithmetic">arithmetical operator</link>.
+  </simpara>
+
+  <simpara>
+   在这种情况下，如果任一运算对象是 <type>float</type>（或者不能解释为 <type>int</type>），则两个运算对象都将解释为
+   <type>float</type>，结果也将是 <type>float</type>。否则，运算对象将解释为 <type>int</type>，结果也将是
+   <type>int</type>。自 PHP 8.0.0 起，如果无法解释其中一个运算对象，则会抛出 <classname>TypeError</classname>。
+  </simpara>
+ </sect2>
+
+ <sect2>
+  <title>String contexts</title>
+
+  <simpara>
+   This is the context when using <function>echo</function>,
+   <function>print</function>,
+   <link linkend="language.types.string.parsing">string interpolation</link>,
+   or the string
+   <link linkend="language.operators.string">concatenation operator</link>.
+  </simpara>
+
+  <simpara>
+   这种情况下，值将会解释为 <type>string</type>。
+  </simpara>
+ </sect2>
+
+ <sect2>
+  <title>Logical contexts</title>
+
+  <simpara>
+   This is the context when using conditional statements, the
+   <link linkend="language.operators.comparison.ternary">ternary operator</link>,
+   or a <link linkend="language.operators.logical">logical operator</link>.
+  </simpara>
+
+  <simpara>
+   在这种情况下，值将会解释为 <type>bool</type>。
+  </simpara>
+ </sect2>
+
+ <sect2>
+  <title>Integral and string contexts</title>
+
+  <simpara>
+   This is the context when using a
+   <link linkend="language.operators.bitwise">bitwise operators</link>.
+  </simpara>
+
+  <simpara>
+   在这种情况下，如果所有的运算对象都是 <type>string</type>，则结果也将是
+   <type>string</type>。否则运算对象将解释为 <type>int</type>，结果也将是
+   <type>int</type>。如果其中一个运算对象无法解释，则会抛出 <classname>TypeError</classname>。
+  </simpara>
+ </sect2>
+
+ <sect2>
+  <title>Comparative contexts</title>
+
+  <simpara>
+   This is the context when using a
+   <link linkend="language.operators.comparison">comparison operator</link>.
+  </simpara>
+
+  <simpara>
+   在此上下文中发生的类型转换在比较多种类型<link
+   linkend="language.operators.comparison.types">表</link>中进行了说明。
+  </simpara>
+ </sect2>
+
+ <sect2>
+  <title>Function contexts</title>
+
+  <simpara>
+   This is the context when a value is passed to a typed parameter, property,
+   or returned from a function which declares a return type.
+  </simpara>
 
   <para>
-   PHP 中的类型强制转换和 C 中的非常像：在要转换的变量之前加上用括号括起来的目标类型。
+   在此上下文中，当激活（默认）强制类型模式时，只有标量值可以转为另外一个标量值。对于简单类型声明，行为如下所示：
+   <itemizedlist>
+    <listitem>
+     <simpara>
+      声明 <type>bool</type> 类型：值将解释为 <type>bool</type>。
+     </simpara>
+    </listitem>
+    <listitem>
+     <simpara>
+      声明 <type>int</type> 类型：如果明确定义转换，则值将解释为 <type>int</type>。例如，字符串是<link
+      linkend="language.types.numeric-strings">数字</link>。
+     </simpara>
+    </listitem>
+    <listitem>
+     <simpara>
+      声明 <type>float</type> 类型：如果明确定义转换，则值将解释为 <type>float</type>。例如，字符串是<link
+      linkend="language.types.numeric-strings">数字</link>。
+     </simpara>
+    </listitem>
+    <listitem>
+     <simpara>
+      声明 <type>string</type> 类型：值将解释为 <type>string</type>。
+     </simpara>
+    </listitem>
+   </itemizedlist>
+
+   如果类型声明是联合，查看有关<link
+   linkend="language.types.declarations.union.coercive">强制类型与联合类型</link> 的章节。
   </para>
+
+  <warning>
+   <simpara>
+    自 PHP 8.1.0 起弃用<link linkend="functions.internal">内部函数</link>自动将
+    &null; 转换为标量类型的行为。
+   </simpara>
+  </warning>
+ </sect2>
+
+ <sect2 xml:id="language.types.typecasting">
+  <title>类型转换</title>
+
+  <simpara>
+   类型转换通过在值前面的括号中写入类型来将值转换指定的类型。
+  </simpara>
 
   <informalexample>
    <programlisting role="php">
 <![CDATA[
 <?php
-$foo = 10;   // $foo is an integer
-$bar = (boolean) $foo;   // $bar is a boolean
+$foo = 10;   // $foo 是 int
+$bar = (bool) $foo;   // $bar 是 bool
 ?>
 ]]>
    </programlisting>
   </informalexample>
 
-  <para>
-   允许的强制转换有：
-  </para>
+  <simpara>
+   允许的转换是：
+  </simpara>
 
-  <itemizedlist>
-   <listitem>
-    <simpara>(int), (integer) - 转换为整形 <type>int</type></simpara>
-   </listitem>
-   <listitem>
-    <simpara>(bool), (boolean) - 转换为布尔类型 <type>bool</type></simpara>
-   </listitem>
-   <listitem>
-    <simpara>(float), (double), (real) - 转换为浮点型 <type>float</type></simpara>
-   </listitem>
-   <listitem>
-    <simpara>(string) - 转换为字符串 <type>string</type></simpara>
-   </listitem>
-   <listitem>
-    <simpara>(array) - 转换为数组 <type>array</type></simpara>
-   </listitem>
-   <listitem>
-    <simpara>(object) - 转换为对象 <type>object</type></simpara>
-   </listitem>
-   <listitem>
-    <simpara>(unset) - 转换为 <type>NULL</type></simpara>
-   </listitem>
-  </itemizedlist>
+  <simplelist>
+   <member><literal>(int)</literal> ——转换为 <type>int</type></member>
+   <member><literal>(bool)</literal> ——转换为 <type>bool</type></member>
+   <member><literal>(float)</literal> ——转换为 <type>float</type></member>
+   <member><literal>(string)</literal> ——转换为 <type>string</type></member>
+   <member><literal>(array)</literal> ——转换为 <type>array</type></member>
+   <member><literal>(object)</literal> ——转换为 <type>object</type></member>
+   <member><literal>(unset)</literal> ——转换为 <type>NULL</type></member>
+  </simplelist>
 
-  <para>
-   向前兼容 (binary) 转换和 b 前缀转换。注意 (binary)
-   转换和 (string)
-   基本相同，但是不应该依赖它。
-  </para>
+  <note>
+   <para>
+    <literal>(integer)</literal> 是 <literal>(int)</literal> 转换的别名。<literal>(boolean)</literal>
+    是 <literal>(bool)</literal> 转换的别名。<literal>(binary)</literal> 是 <literal>(string)</literal>
+    转换的别名。<literal>(double)</literal> 和 <literal>(real)</literal> 是 <literal>(float)</literal>
+    转换的别名。这些转换不使用标准的类型名称，不推荐使用。
+   </para>
+  </note>
 
-  <para>
-   (unset) 转换在 PHP 7.2.0 中已被废弃。请注意 (unset)
-   转换等于将值赋予 <type>NULL</type>。(unset)
-   转换已经在 PHP 8.0.0 中被移除。
-  </para>
+  <warning>
+   <simpara>
+    自 PHP 8.0.0 起弃用 <literal>(real)</literal> 转换别名。
+   </simpara>
+  </warning>
 
-  <para>
-   注意在括号内允许有空格和制表符，所以下面两个例子功能相同：
-  </para>
-   
-  <informalexample>
-   <programlisting role="php">
+  <warning>
+   <simpara>
+    自 PHP 7.2.0 起弃用 <literal>(unset)</literal> 转换。注意
+    <literal>(unset)</literal> 转换等同于将值 <type>NULL</type> 
+    通过赋值或者调用给变量。自 PHP 8.0.0 起移除 <literal>unset</literal> 转换。
+   </simpara>
+  </warning>
+
+  <caution>
+   <simpara>
+    向前兼容 <literal>(binary)</literal> 转换和 <literal>b</literal>
+    前缀转换。注意 <literal>(binary)</literal> 转换和 <literal>(string)</literal>
+    相同，但是这可能会改变且不应依赖。
+   </simpara>
+  </caution>
+
+  <note>
+   <para>
+    在转换的括号内忽略空格。因此，以下两个转换是等价的：
+    <informalexample>
+     <programlisting role="php">
 <![CDATA[
 <?php
 $foo = (int) $bar;
 $foo = ( int ) $bar;
 ?>
 ]]>
-   </programlisting>
-
-   <para>
-    将字符串文字和变量转换为二进制字符串：
+     </programlisting>
+    </informalexample>
    </para>
+  </note>
+
+  <informalexample>
+   <simpara>
+    将文字 <type>string</type> 和变量转换为二进制 <type>string</type>：
+   </simpara>
 
    <programlisting role="php">
 <![CDATA[
 <?php
-$binary = (binary)$string;
+$binary = (binary) $string;
 $binary = b"binary string";
 ?>
 ]]>
    </programlisting>
   </informalexample>
 
+  <!-- TODO Remove or move into string context section? -->
   <note>
-   <para>
-    可以将变量放置在双引号中的方式来代替将变量转换成字符串：
-   </para>
+   <simpara>
+    除了将变量转换为 <type>string</type> 之外，还可以将变量放在双引号内。
+   </simpara>
 
    <informalexample>
     <programlisting role="php">
 <![CDATA[
 <?php
-$foo = 10;            // $foo 是一个整数
-$str = "$foo";        // $str 是一个字符串
-$fst = (string) $foo; // $fst 也是一个字符串
+$foo = 10;            // $foo 是 int
+$str = "$foo";        // $str 是 string
+$fst = (string) $foo; // $fst 也是 string
 
-// 输出 "they are the same"
+// 打印出 "they are the same"
 if ($fst === $str) {
     echo "they are the same";
 }
@@ -204,60 +287,47 @@ if ($fst === $str) {
   </note>
    
   <para>
-   有时在类型之间强制转换时确切地会发生什么可能不是很明显。更多信息见如下小节：
+   有时在类型之间转换时确切地会发生什么可能不是很明显。更多信息见如下不分：
+   <simplelist>
+    <member><link linkend="language.types.boolean.casting">转换为 bool</link></member>
+    <member><link linkend="language.types.integer.casting">转换为 int</link></member>
+    <member><link linkend="language.types.float.casting">转换为 float</link></member>
+    <member><link linkend="language.types.string.casting">转换为 string</link></member>
+    <member><link linkend="language.types.array.casting">转换为 array</link></member>
+    <member><link linkend="language.types.object.casting">转换为 object</link></member>
+    <member><link linkend="language.types.resource.casting">转换为 resource</link></member>
+    <member><link linkend="language.types.null.casting">转换为 NULL</link></member>
+    <member><link linkend="types.comparisons">类型比较表</link></member>
+   </simplelist>
   </para>
-  
-  <itemizedlist>
-   <listitem>
-    <simpara>
-     <link linkend="language.types.boolean.casting">转换为布尔型</link>
-    </simpara>
-   </listitem>
-   <listitem>
-    <simpara>
-     <link linkend="language.types.integer.casting">转换为整型</link>
-    </simpara>
-   </listitem>
-   <listitem>
-    <simpara>
-     <link linkend="language.types.float.casting">转换为浮点型</link>
-    </simpara>
-   </listitem>
-   <listitem>
-    <simpara>
-     <link linkend="language.types.string.casting">转换为字符串</link>
-    </simpara>
-   </listitem>
-   <listitem>
-    <simpara>
-     <link linkend="language.types.array.casting">转换为数组</link>
-    </simpara>
-   </listitem>
-   <listitem>
-    <simpara>
-     <link linkend="language.types.object.casting">转换为对象</link>
-    </simpara>
-   </listitem>
-   <listitem>
-    <simpara>
-     <link linkend="language.types.resource.casting">转换为资源</link>
-    </simpara>
-   </listitem>
-   <listitem>
-    <simpara>
-     <link linkend="language.types.null.casting">转换为 NULL</link>
-    </simpara>
-   </listitem>
-   <listitem>
-    <simpara>
-     <link linkend="types.comparisons">类型比较表</link>
-    </simpara>
-   </listitem>
-  </itemizedlist>
-
  </sect2>
+
+ <simplesect>
+  <note>
+   <simpara>
+    因为 PHP 的 <type>string</type> 支持使用与 <type>array</type>
+    索引相同的语法，通过偏移量进行索引，所以以下示例适用于所有 PHP 版本：
+   </simpara>
+
+   <informalexample>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$a    = 'car'; // $a 是 string
+$a[0] = 'b';   // $a 依然是 string
+echo $a;       // bar
+?>
+]]>
+    </programlisting>
+   </informalexample>
+
+   <simpara>
+    请查看章节标题为<link linkend="language.types.string.substr">存取和修改字符串中的字符</link>获取更多信息。
+   </simpara>
+  </note>
+ </simplesect>
+
 </sect1>
- 
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
