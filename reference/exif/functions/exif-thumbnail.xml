@@ -1,34 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: 96c9d88bad9a7d7d44bfb7f26c226df7ee9ddf26 Maintainer: dallas Status: ready -->
+<!-- EN-Revision: cbac1ecf71d754707d69bdc344c4031c157eaa54 Maintainer: dallas Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
  <refentry xml:id="function.exif-thumbnail" xmlns="http://docbook.org/ns/docbook">
   <refnamediv>
    <refname>exif_thumbnail</refname>
-   <refpurpose>取得嵌入在 TIFF 或 JPEG 图像中的缩略图</refpurpose>
+   <refpurpose>检索图像的嵌入式缩略图</refpurpose>
   </refnamediv>
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <type>string</type><methodname>exif_thumbnail</methodname>
-   <methodparam><type>string</type><parameter>filename</parameter></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter role="reference">width</parameter></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter role="reference">height</parameter></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter role="reference">imagetype</parameter></methodparam>
+   <type class="union"><type>string</type><type>false</type></type><methodname>exif_thumbnail</methodname>
+   <methodparam><type class="union"><type>resource</type><type>string</type></type><parameter>file</parameter></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter role="reference">width</parameter><initializer>&null;</initializer></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter role="reference">height</parameter><initializer>&null;</initializer></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter role="reference">image_type</parameter><initializer>&null;</initializer></methodparam>
   </methodsynopsis>
    <para>
-    <function>exif_thumbnail</function> 读取 <acronym>TIFF</acronym> 或 <acronym>JPEG</acronym>
-    图像中的嵌入缩略图。如果图像不包含缩略图则返回 &false;。
+    <function>exif_thumbnail</function> 读取图像的嵌入式缩略图。
 </para>
   <para>
-   If you want to deliver thumbnails through this function, you should send
-   the mimetype information using the <function>header</function> function.
+   如果想通过该函数发送缩略图，应该使用 <function>header</function> 函数发送 mimetype 信息。
    </para>
   <para>
-   It is possible that <function>exif_thumbnail</function> cannot create an 
-   image but can determine its size. In this case, the return value is 
-   &false; but <parameter>width</parameter> and <parameter>height</parameter> 
-   are set.
+   <function>exif_thumbnail</function> 不能创建图像但能确定它的尺寸。在这种情况下，返回值是
+   &false;，但会设置 <parameter>width</parameter> 和 <parameter>height</parameter>。
   </para>
  </refsect1>
  <refsect1 role="parameters">
@@ -36,11 +32,10 @@
   <para>
    <variablelist>
     <varlistentry>
-     <term><parameter>filename</parameter></term>
+     <term><parameter>file</parameter></term>
      <listitem>
       <para>
-       The name of the image file being read.  This image contains an
-       embedded thumbnail.
+       图像文件的路径。可以是文件路径也可以是流 <type>resource</type>。
       </para>
      </listitem>
     </varlistentry>
@@ -48,7 +43,7 @@
      <term><parameter>width</parameter></term>
      <listitem>
       <para>
-       The return width of the returned thumbnail.
+       返回缩略图的宽度。
       </para>
      </listitem>
     </varlistentry>
@@ -56,16 +51,15 @@
      <term><parameter>height</parameter></term>
      <listitem>
       <para>
-       The returned height of the returned thumbnail.
+       返回缩略图的高度。
       </para>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>imagetype</parameter></term>
+     <term><parameter>image_type</parameter></term>
      <listitem>
       <para>
-       The returned image type of the returned thumbnail.  This is either
-       <acronym>TIFF</acronym> or <acronym>JPEG</acronym>.
+       返回缩略图的图像类型。不是 <acronym>TIFF</acronym> 就是 <acronym>JPEG</acronym>。
       </para>
      </listitem>
     </varlistentry>
@@ -75,8 +69,7 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   Returns the embedded thumbnail, or &false; if the image contains no 
-   thumbnail.
+   返回嵌入式缩略图，如果图像不包含缩略图则返回 &false;。
   </para>
  </refsect1>
  <refsect1 role="changelog">
@@ -92,17 +85,9 @@
      </thead>
      <tbody>
       <row>
-       <entry>4.3.0</entry>
+       <entry>7.2.0</entry>
        <entry>
-        The optional parameters <parameter>width</parameter>, 
-        <parameter>height</parameter>, and <parameter>imagetype</parameter> 
-        all became available.
-       </entry>
-      </row>
-      <row>
-       <entry>4.3.0</entry>
-       <entry>
-        May return thumbnails in the <acronym>TIFF</acronym> format.
+        <parameter>file</parameter> 参数现在支持本地文件和流资源。
        </entry>
       </row>
      </tbody>
@@ -110,32 +95,39 @@
    </informaltable>
   </para>
  </refsect1>
+
  <refsect1 role="examples">
   &reftitle.examples;
   <para>
     <example>
-     <title><function>exif_thumbnail</function> 例子</title>
+     <title><function>exif_thumbnail</function> 示例</title>
      <programlisting role="php">
 <![CDATA[
 <?php
-if (array_key_exists('file',$_REQUEST)) {
-    $image = exif_thumbnail($_REQUEST['file'], $width, $height, $type);
-} else {
-    $image = false;
-}
+$image = exif_thumbnail('/path/to/image.jpg', $width, $height, $type);
+
 if ($image!==false) {
-    header("Content-type: ".image_type_to_mime_type($type));
+    header('Content-type: ' .image_type_to_mime_type($type));
     echo $image;
     exit;
 } else {
-    // no thumbnail available, handle the error here
-    echo "No thumbnail available";
+    // 没有可用的缩略图，这里处理错误
+    echo 'No thumbnail available';
 }
 ?>
 ]]>
      </programlisting>
     </example>
    </para>
+ </refsect1>
+
+ <refsect1 role="notes">
+  &reftitle.notes;
+  <note>
+   <para>
+    如果传递流到此函数的 <parameter>file</parameter>，然后流必须是可寻找的。请注意，此函数返回后，文件指针位置不会改变。
+   </para>
+  </note>
  </refsect1>
  <refsect1 role="seealso">
   &reftitle.seealso;
@@ -147,7 +139,6 @@ if ($image!==false) {
   </para>
  </refsect1>
 </refentry>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml

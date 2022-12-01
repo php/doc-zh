@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: 8860f92aeea865e9ee663333fd7b47e7f27b058d Maintainer: nio Status: ready -->
+<!-- EN-Revision: e095023e408c8cb6378ae16bb6870343a3946919 Maintainer: nio Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="function.crc32" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>crc32</refname>
@@ -12,47 +12,37 @@
   &reftitle.description;
   <methodsynopsis>
    <type>int</type><methodname>crc32</methodname>
-   <methodparam><type>string</type><parameter>str</parameter></methodparam>
+   <methodparam><type>string</type><parameter>string</parameter></methodparam>
   </methodsynopsis>
   <para>
-   生成 <parameter>str</parameter>
-   的 32 位循环冗余校验码多项式。这通常用于检查传输的数据是否完整。
+   生成 <parameter>string</parameter> 的 32 位循环冗余校验和多项式。这通常用于检查正在传输的数据是否完整。
   </para>
   <warning>
    <simpara>
-    由于 PHP 的整数是带符号的，所以在 32 位系统上许多 crc32 校验码将返回负整数。
-    尽管在 64 位上所有 <function>crc32</function> 的结果将都是正整数。
+    由于 PHP 的整数类型是有符号的，所以在 32 位系统上许多 crc32 校验和将产生负整数。不过在
+    64 位上所有 <function>crc32</function> 的结果将都是正整数。
    </simpara>
    <simpara>
-    因此你需要使用
-    <function>sprintf</function> 或 <function>printf</function>
-    的“%u”格式符来获取表示无符号 crc32 校验码的字符串。
+    因此需要使用 <function>sprintf</function> 或 <function>printf</function>
+    的“%u”格式标志符获取十进制格式的无符号 crc32 校验和的字符串表示形式。
    </simpara>
    <simpara>
-    For a hexadecimal representation of the checksum you can either use the 
-    "%x" formatter of <function>sprintf</function> or <function>printf</function> 
-    or the <function>dechex</function> conversion functions, both of these
-    also take care of converting the <function>crc32</function> result to
-    an unsigned integer.
+    对于十六进制的校验和可以使用 <function>sprintf</function> 或 <function>printf</function>
+    的“%x”格式标志符或 <function>dechex</function> 转换程序，这两个函数负责将
+    <function>crc32</function> 结果转为无符号整数。
    </simpara>
    <simpara>
-    Having 64bit installations also return negative integers for higher
-    result values was considered but would break the hexadecimal conversion
-    as negatives would get an extra 0xFFFFFFFF######## offset then. As 
-    hexadecimal representation seems to be the most common use case we
-    decided to not break this even if it breaks direct decimal comparisons
-    in about 50% of the cases when moving from 32 to 64bits.
+    64 位的设备也会返回负数，更高的结果值会破坏十六进制转换，因为负数会得到额外的
+    0xFFFFFFFF######## 偏移量。由于十六进制似乎是最常见的用例，所以决定不破坏该原则，即使从 32
+    位移动到 64 位时破坏了大约 50% 的十进制直接比较。
    </simpara>
    <simpara>
-    In retrospect having the function return an integer maybe wasn't the 
-    best idea and returning a hex string representation right away (as 
-    e.g. <function>md5</function> does) might have been a better plan to
-    begin with.
+    回想一下，让函数返回整数可能不是最好的主意，而立即返回十六进制的字符串（例如
+    <function>md5</function>）可能是更好的开始。
    </simpara>
    <simpara>
-    For a more portable solution you may also consider the generic 
-    <function>hash</function>. <code>hash("crc32b", $str)</code> will 
-    return the same string as <code>dechex(crc32($str))</code>.
+    可移植方案可以考虑通用的 <function>hash</function>。<code>hash("crc32b", $str)</code>
+    返回跟 <code>str_pad(dechex(crc32($str)), 8, '0', STR_PAD_LEFT)</code> 相同的字符串。
    </simpara>
   </warning>
  </refsect1>
@@ -62,7 +52,7 @@
    <para>
     <variablelist>
      <varlistentry>
-      <term><parameter>str</parameter></term>
+      <term><parameter>string</parameter></term>
       <listitem>
        <para>
         要校验的数据。
@@ -76,7 +66,7 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
    <para>
-    返回 <parameter>str</parameter> crc32 校验的整数。
+    以整数形式返回 <parameter>string</parameter> 的 crc32 校验和。
    </para>
  </refsect1>
  
@@ -84,10 +74,10 @@
   &reftitle.examples;
   <para>
    <example>
-    <title>显示一个 crc32 校验码</title>
+    <title>显示 crc32 校验和</title>
     <para>
-     示例中的第二行演示了如何使用 <function>printf</function>
-     函数转换校验码：
+     示例中演示了如何使用 <function>printf</function>
+     函数打印转换后的校验和：
     </para>
     <programlisting role="php">
 <![CDATA[
@@ -111,10 +101,8 @@ printf("%u\n", $checksum);
     </simplelist>
    </para>
  </refsect1>
- 
- 
-</refentry>
 
+</refentry>
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml

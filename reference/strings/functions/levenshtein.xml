@@ -1,38 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: af4410a7e15898c3dbe83d6ea38246745ed9c6fb Maintainer: daijie Status: ready -->
-<!-- Reviewed: no -->
-
-<refentry xmlns="http://docbook.org/ns/docbook" xml:id="function.levenshtein" xmlns:xlink="http://www.w3.org/1999/xlink">
+<!-- EN-Revision: a484d5d2bbad7e385a8864370b5280c4e05add8c Maintainer: daijie Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
+<refentry xml:id="function.levenshtein" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
   <refname>levenshtein</refname>
-  <refpurpose>计算两个字符串之间的编辑距离</refpurpose>
+  <refpurpose>计算两个字符串之间的 Levenshtein 距离</refpurpose>
  </refnamediv>
  
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
    <type>int</type><methodname>levenshtein</methodname>
-   <methodparam><type>string</type><parameter>str1</parameter></methodparam>
-   <methodparam><type>string</type><parameter>str2</parameter></methodparam>
-  </methodsynopsis>
-  <methodsynopsis>
-   <type>int</type><methodname>levenshtein</methodname>
-   <methodparam><type>string</type><parameter>str1</parameter></methodparam>
-   <methodparam><type>string</type><parameter>str2</parameter></methodparam>
-   <methodparam><type>int</type><parameter>cost_ins</parameter></methodparam>
-   <methodparam><type>int</type><parameter>cost_rep</parameter></methodparam>
-   <methodparam><type>int</type><parameter>cost_del</parameter></methodparam>
+   <methodparam><type>string</type><parameter>string1</parameter></methodparam>
+   <methodparam><type>string</type><parameter>string2</parameter></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>insertion_cost</parameter><initializer>1</initializer></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>replacement_cost</parameter><initializer>1</initializer></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>deletion_cost</parameter><initializer>1</initializer></methodparam>
   </methodsynopsis>
   <para>
-   编辑距离，是指两个字串之间，通过替换、插入、删除等操作将字符串<parameter>str1</parameter>转换成<parameter>str2</parameter>所需要操作的最少字符数量。
-   该算法的复杂度是 <literal>O(m*n)</literal>，其中 <literal>n</literal> 和 <literal>m</literal> 分别是<parameter>str1</parameter> 和<parameter>str2</parameter>的长度 （当和算法复杂度为O(max(n,m)**3)的<function>similar_text</function>相比时，此函数还是相当不错的，尽管仍然很耗时。）。
+   Levenshtein 距离，是指两个字串之间，通过替换、插入、删除等操作将字符串 <parameter>string1</parameter> 转换成 <parameter>string2</parameter>
+   所需要操作的最少字符数量。该算法的复杂度是 <literal>O(m*n)</literal>，其中 <literal>n</literal> 和 <literal>m</literal> 分别是
+   <parameter>string1</parameter> 和 <parameter>string2</parameter> 的长度 （当和算法复杂度为 <literal>O(max(n,m)**3)</literal>
+   的 <function>similar_text</function> 相比时，此函数还是相当不错的，尽管仍然很耗时）。
   </para>
   <para>
-   在最简单的形式中，该函数只以两个字符串作为参数，并计算通过插入、替换和删除等操作将<parameter>str1</parameter>转换成<parameter>str2</parameter>所需要的操作次数。
-  </para>
-  <para>
-   第二种变体将采用三个额外的参数来定义插入、替换和删除操作的次数。此变体比第一种更加通用和适应，但效率不高。
+   如果 <parameter>insertion_cost</parameter>、<parameter>replacement_cost</parameter> 和/或
+   <parameter>deletion_cost</parameter> 不等于 <literal>1</literal>，则算法选择应用于最简便的算法。如果
+   <code>$insertion_cost + $deletion_cost &lt; $replacement_cost</code>，则不会替换，而是插入和删除。
   </para>
  </refsect1>
 
@@ -41,42 +36,42 @@
   <para>
    <variablelist>
     <varlistentry>
-     <term><parameter>str1</parameter></term>
+     <term><parameter>string1</parameter></term>
      <listitem>
       <para>
-       求编辑距离中的其中一个字符串
+       求编辑距离中的其中一个字符串。
       </para>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>str2</parameter></term>
+     <term><parameter>string2</parameter></term>
      <listitem>
       <para>
-       求编辑距离中的另一个字符串
+       求编辑距离中的另一个字符串。
       </para>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>cost_ins</parameter></term>
+     <term><parameter>insertion_cost</parameter></term>
      <listitem>
       <para>
-       定义插入次数
+       定义插入次数。
       </para>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>cost_rep</parameter></term>
+     <term><parameter>replacement_cost</parameter></term>
      <listitem>
       <para>
-       定义替换次数
+       定义替换次数。
       </para>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>cost_del</parameter></term>
+     <term><parameter>deletion_cost</parameter></term>
      <listitem>
       <para>
-       定义删除次数
+       定义删除次数。
       </para>
      </listitem>
     </varlistentry>
@@ -87,10 +82,38 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   此函数返回两个字符串参数之间的编辑距离，如果其中一个字符串参数长度大于限制的255个字符时，返回-1。
+   此函数返回两个字符串参数之间的 Levenshtein 距离。
   </para>
  </refsect1>
- 
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <informaltable>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>&Version;</entry>
+      <entry>&Description;</entry>
+     </row>
+    </thead>
+    <tbody>
+     <row>
+      <entry>8.0.0</entry>
+      <entry>
+       在此版本之前，必须使用两个或者五个参数调用 <function>levenshtein</function>。
+      </entry>
+     </row>
+     <row>
+      <entry>8.0.0</entry>
+      <entry>
+       在此版本之前，如果某个参数字符串的长度超过 255 个字符，则 <function>levenshtein</function> 将会返回 <literal>-1</literal>。
+      </entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </informaltable>
+ </refsect1>
+
  <refsect1 role="examples">
   &reftitle.examples;
   <para>
@@ -168,7 +191,6 @@ Did you mean: carrot?
  </refsect1>
 
 </refentry>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
