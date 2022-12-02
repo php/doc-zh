@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 5d1673b7a0e1a941111595d25cda663d8667a015 Maintainer: jhdxr Status: ready -->
-<!-- $Author$ -->
+<!-- EN-Revision: e5bdb2471a1bb203b5b80a5e2797a9147ea31a07 Maintainer: jhdxr Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <sect1 xml:id="language.oop5.interfaces" xmlns="http://docbook.org/ns/docbook"
 xmlns:xlink="http://www.w3.org/1999/xlink">
  <title>对象接口</title>
@@ -52,11 +52,6 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
   </para>
   <warning>
    <para>
-    类实现（implement）两个接口时，如果它们定义了相同名称的方法，只有签名相同的时候才是允许的。
-   </para>
-  </warning>
-  <warning>
-   <para>
     实现接口的时候，class 中的参数名称不必和接口完全一致。
     然而， PHP 8.0 起语法开始支持<link linkend="functions.named-arguments">命名参数</link>，
     也就是说调用方会依赖接口中参数的名称。
@@ -66,15 +61,16 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
   <note>
    <para>
     接口也可以通过 <link linkend="language.oop5.inheritance">extends</link> 操作符扩展。
-   </para>
-  </note>
-  <note>
-   <para>
-    类实现接口时，必须以<link linkend="language.oop.lsp">兼容的签名</link>定义接口中所有方法。
-   </para>
-  </note>
- </sect2>
-
+    </para>
+   </note>
+   <note>
+    <para>
+     类实现接口时，必须以<link linkend="language.oop.lsp">兼容的签名</link>定义接口中所有方法。类可以实现多个声明了相同方法名称的多个接口。在这种情况下，实现必须遵循所有接口的<link
+     linkend="language.oop.lsp">签名兼容性规则</link>。因此可以应用<link linkend="language.oop5.variance">协变和逆变</link>。
+    </para>
+   </note>
+  </sect2>
+ <!-- Move this to OOP constants page? -->
  <sect2 xml:id="language.oop5.interfaces.constants">
   <title><literal>常量</literal></title>
   <para> 
@@ -177,7 +173,34 @@ class D implements B
 }
 ?>
 ]]>
-    </programlisting>
+     </programlisting>
+   </example>
+   <example xml:id="language.oop5.interfaces.examples.variance.multiple.interfaces">
+    <title>多接口的差异兼容性</title>
+     <programlisting role="php">
+<![CDATA[
+<?php
+class Foo {}
+class Bar extends Foo {}
+
+interface A {
+    public function myfunc(Foo $arg): Foo;
+}
+
+interface B {
+    public function myfunc(Bar $arg): Bar;
+}
+
+class MyClass implements A, B
+{
+    public function myfunc(Foo $arg): Bar
+    {
+        return new Bar();
+    }
+}
+?>
+]]>
+     </programlisting>
   </example>
   <example xml:id="language.oop5.interfaces.examples.ex3">
    <title>扩展多个接口</title>
