@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 8a058e9acded067eaa1bd445ed6943158e7311df Maintainer: daijie Status: ready -->
+<!-- EN-Revision: 661e6858acade9f5a08fc8f9c07b605f42f4a700 Maintainer: daijie Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="pdo.prepare" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>PDO::prepare</refname>
@@ -10,21 +11,21 @@
  </refnamediv>
  <refsect1 role="description">
   &reftitle.description;
-  <methodsynopsis>
-   <modifier>public</modifier> <type>PDOStatement</type><methodname>PDO::prepare</methodname>
-   <methodparam><type>string</type><parameter>statement</parameter></methodparam>
-   <methodparam choice="opt"><type>array</type><parameter>driver_options</parameter><initializer>array()</initializer></methodparam>
+  <methodsynopsis role="PDO">
+   <modifier>public</modifier> <type class="union"><type>PDOStatement</type><type>false</type></type><methodname>PDO::prepare</methodname>
+   <methodparam><type>string</type><parameter>query</parameter></methodparam>
+   <methodparam choice="opt"><type>array</type><parameter>options</parameter><initializer>[]</initializer></methodparam>
   </methodsynopsis>
 
   <para>
-   为 <function>PDOStatement::execute</function> 方法准备待执行的 SQL 语句。
+   为 <methodname>PDOStatement::execute</methodname> 方法准备待执行的 SQL 语句。
    语句模板可以包含零个或多个参数占位标记，格式是命名（:name）或问号（?）的形式，当它执行时将用真实数据取代。
    
    在同一个语句模板里，命名形式和问号形式不能同时使用；只能选择其中一种参数形式。
    请用参数形式绑定用户输入的数据，不要直接字符串拼接到查询里。
   </para>
   <para>
-   调用 <function>PDOStatement::execute</function> 时，每一个值的参数占位标记，名称必须唯一。
+   调用 <methodname>PDOStatement::execute</methodname> 时，每一个值的参数占位标记，名称必须唯一。
    除非启用模拟（emulation）模式，同一个语句里无法使用重名的参数。
   </para>
   <note>
@@ -34,10 +35,10 @@
    </para>
   </note>
   <para>
-    如果用不同参数，通过 <function>PDO::prepare</function> 和 <function>PDOStatement::execute</function>
+    如果用不同参数，通过 <methodname>PDO::prepare</methodname> 和 <methodname>PDOStatement::execute</methodname>
    多次调用同一个 SQL 语句，将提升应用的性能 —— 驱动可以让客户端/服务器缓存查询和元信息。
-   同时，调用 <function>PDO::prepare</function> 和
-   <function>PDOStatement::execute</function> 还能阻止 SQL 注入攻击，不需要给参数手动加引号与转义。
+   同时，调用 <methodname>PDO::prepare</methodname> 和
+   <methodname>PDOStatement::execute</methodname> 还能阻止 SQL 注入攻击，不需要给参数手动加引号与转义。
   </para>
   <para>
     如果内置驱动不支持参数，PDO 将模拟出参数的功能；如果驱动仅仅支持其中一种风格（命名参数和问号参数两种），也会自动重写到另外一种风格。
@@ -54,13 +55,16 @@
     which is natively supported by the driver.
    </simpara>
   </note>
+  <para>
+    自 PHP 7.4.0 起，可以通过两个问号来转义。这意味着 <literal>??</literal> 在发送查询到数据库时会转换成 <literal>?</literal>。
+  </para>
  </refsect1>
  <refsect1 role="parameters">
   &reftitle.parameters;
   <para>
    <variablelist>
     <varlistentry>
-     <term><parameter>statement</parameter></term>
+     <term><parameter>query</parameter></term>
      <listitem>
       <para>
         必须是对目标数据库服务器有效的 SQL 语句模板。
@@ -68,7 +72,7 @@
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>driver_options</parameter></term>
+     <term><parameter>options</parameter></term>
      <listitem>
       <para>
         数组包含一个或多个 key=&gt;value 键值对，为返回的 PDOStatement 对象设置属性。
@@ -84,18 +88,13 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-    如果数据库服务器完成准备了语句，
-   <function>PDO::prepare</function> 返回
-   <classname>PDOStatement</classname> 对象。
-   
-   如果数据库服务器无法准备语句，
-   <function>PDO::prepare</function> 返回 &false; 或抛出
-   <classname>PDOException</classname> (取决于 <link
-   linkend="pdo.error-handling">错误处理器</link>)。
+   如果数据库服务器完成准备了语句，<methodname>PDO::prepare</methodname> 返回 <classname>PDOStatement</classname> 对象。
+   如果数据库服务器无法准备语句，<methodname>PDO::prepare</methodname> 返回 &false; 或抛出
+   <classname>PDOException</classname> (取决于 <link linkend="pdo.error-handling">错误处理器</link>)。
   </para>
   <note>
    <para>
-     模拟模式下的 prepare 语句不会和数据库服务器交互，所以 <function>PDO::prepare</function> 不会检查语句。
+    模拟模式下的 prepare 语句不会和数据库服务器交互，所以 <methodname>PDO::prepare</methodname> 不会检查语句。
    </para>
   </note>
  </refsect1>
@@ -111,10 +110,11 @@
 $sql = 'SELECT name, colour, calories
     FROM fruit
     WHERE calories < :calories AND colour = :colour';
-$sth = $dbh->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_FWDONLY));
-$sth->execute(array(':calories' => 150, ':colour' => 'red'));
+$sth = $dbh->prepare($sql, [PDO::ATTR_CURSOR => PDO::CURSOR_FWDONLY]);
+$sth->execute(['calories' => 150, 'colour' => 'red']);
 $red = $sth->fetchAll();
-$sth->execute(array(':calories' => 175, ':colour' => 'yellow'));
+/* Array keys can be prefixed with colons ":" too (optional) */
+$sth->execute([':calories' => 175, ':colour' => 'yellow']);
 $yellow = $sth->fetchAll();
 ?>
 ]]>
@@ -129,10 +129,25 @@ $yellow = $sth->fetchAll();
 $sth = $dbh->prepare('SELECT name, colour, calories
     FROM fruit
     WHERE calories < ? AND colour = ?');
-$sth->execute(array(150, 'red'));
+$sth->execute([150, 'red']);
 $red = $sth->fetchAll();
-$sth->execute(array(175, 'yellow'));
+$sth->execute([175, 'yellow']);
 $yellow = $sth->fetchAll();
+?>
+]]>
+    </programlisting>
+   </example>
+   <example>
+    <title>问号转义的SQL 语句模板</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+/* note: this is only valid on PostgreSQL databases */
+$sth = $dbh->prepare('SELECT * FROM issues WHERE tag::jsonb ?? ?');
+$sth->execute(['feature']);
+$featureIssues = $sth->fetchAll();
+$sth->execute(['performance']);
+$performanceIssues = $sth->fetchAll();
 ?>
 ]]>
     </programlisting>
@@ -144,14 +159,13 @@ $yellow = $sth->fetchAll();
   &reftitle.seealso;
   <para>
    <simplelist>
-    <member><function>PDO::exec</function></member>
-    <member><function>PDO::query</function></member>
-    <member><function>PDOStatement::execute</function></member>
+    <member><methodname>PDO::exec</methodname></member>
+    <member><methodname>PDO::query</methodname></member>
+    <member><methodname>PDOStatement::execute</methodname></member>
    </simplelist>
   </para>
  </refsect1>
 </refentry>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
