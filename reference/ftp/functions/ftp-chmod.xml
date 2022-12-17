@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 96c9d88bad9a7d7d44bfb7f26c226df7ee9ddf26 Maintainer: yuanyuqiang Status: ready -->
-<!-- Reviewed: no -->
-
+<!-- EN-Revision: 4d1c34c9b7a30cfc3a59641122c707a2812cfed7 Maintainer: yuanyuqiang Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="function.ftp-chmod" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>ftp_chmod</refname>
@@ -11,14 +10,14 @@
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <type>int</type><methodname>ftp_chmod</methodname>
-   <methodparam><type>resource</type><parameter>ftp_stream</parameter></methodparam>
-   <methodparam><type>int</type><parameter>mode</parameter></methodparam>
+   <type class="union"><type>int</type><type>false</type></type><methodname>ftp_chmod</methodname>
+   <methodparam><type>FTP\Connection</type><parameter>ftp</parameter></methodparam>
+   <methodparam><type>int</type><parameter>permissions</parameter></methodparam>
    <methodparam><type>string</type><parameter>filename</parameter></methodparam>
   </methodsynopsis>
   <para> 
    将服务器上的文件权限设置为
-   <parameter>mode</parameter> 指定的值。
+   <parameter>permissions</parameter> 指定的值。
   </para>
  </refsect1>
  <refsect1 role="parameters">
@@ -26,15 +25,13 @@
   <para>
    <variablelist>
     <varlistentry>
-     <term><parameter>ftp_stream</parameter></term>
+     <term><parameter>ftp</parameter></term>
      <listitem>
-      <para>
-       FTP 连接标示符。
-      </para>
+       &ftp.parameter.ftp;
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>mode</parameter></term>
+     <term><parameter>permissions</parameter></term>
      <listitem>
       <para>
        要设置的权限值， <emphasis>八进制</emphasis> 值。
@@ -58,31 +55,49 @@
    操作成功返回文件新的权限，操作失败返回 &false; 。
   </para>
  </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <informaltable>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>&Version;</entry>
+      <entry>&Description;</entry>
+     </row>
+    </thead>
+    <tbody>
+     &ftp.changelog.ftp-param;
+    </tbody>
+   </tgroup>
+  </informaltable>
+ </refsect1>
+ 
  <refsect1 role="examples">
   &reftitle.examples;
   <para>
    <example>
-    <title><function>ftp_chmod</function> 函数例程</title>
+    <title><function>ftp_chmod</function> 示例</title>
     <programlisting role="php">
 <![CDATA[
 <?php
 $file = 'public_html/index.php';
 
 // 建立基础连接
-$conn_id = ftp_connect($ftp_server);
+$ftp = ftp_connect($ftp_server);
 
 // 使用用户名和密码登录
-$login_result = ftp_login($conn_id, $ftp_user_name, $ftp_user_pass);
+$login_result = ftp_login($ftp, $ftp_user_name, $ftp_user_pass);
 
 // 尝试设置 $file 的权限为 644
-if (ftp_chmod($conn_id, 0644, $file) !== false) {
+if (ftp_chmod($ftp, 0644, $file) !== false) {
  echo "$file chmoded successfully to 644\n";
 } else {
  echo "could not chmod $file\n";
 }
 
 // 关闭连接
-ftp_close($conn_id);
+ftp_close($ftp);
 ?>
 ]]>
     </programlisting>
@@ -98,7 +113,6 @@ ftp_close($conn_id);
   </para>
  </refsect1>
 </refentry>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
