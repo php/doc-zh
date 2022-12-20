@@ -1,35 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-
+<!-- EN-Revision: c9389e4a0e96801fd14d91336ff3f12e45929a73 Maintainer: mowangjuanzi Status: ready -->
 <refentry xml:id="yaf-controller-abstract.forward" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
   <refname>Yaf_Controller_Abstract::forward</refname>
-  <refpurpose>The forward purpose</refpurpose>
+  <refpurpose>转发到另一个动作</refpurpose>
  </refnamediv>
 
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <modifier>public</modifier> <type>void</type><methodname>Yaf_Controller_Abstract::forward</methodname>
+   <modifier>public</modifier> <type>bool</type><methodname>Yaf_Controller_Abstract::forward</methodname>
+   <methodparam><type>string</type><parameter>action</parameter></methodparam>
+   <methodparam choice="opt"><type>array</type><parameter>paramters</parameter></methodparam>
+  </methodsynopsis>
+  <methodsynopsis>
+   <modifier>public</modifier> <type>bool</type><methodname>Yaf_Controller_Abstract::forward</methodname>
+   <methodparam><type>string</type><parameter>controller</parameter></methodparam>
+   <methodparam><type>string</type><parameter>action</parameter></methodparam>
+   <methodparam choice="opt"><type>array</type><parameter>paramters</parameter></methodparam>
+  </methodsynopsis>
+  <methodsynopsis>
+   <modifier>public</modifier> <type>bool</type><methodname>Yaf_Controller_Abstract::forward</methodname>
    <methodparam><type>string</type><parameter>module</parameter></methodparam>
-   <methodparam choice="opt"><type>string</type><parameter>controller</parameter></methodparam>
-   <methodparam choice="opt"><type>string</type><parameter>action</parameter></methodparam>
+   <methodparam><type>string</type><parameter>controller</parameter></methodparam>
+   <methodparam><type>string</type><parameter>action</parameter></methodparam>
    <methodparam choice="opt"><type>array</type><parameter>paramters</parameter></methodparam>
   </methodsynopsis>
   <para>
-    将当前的请求转交给另外的Action.
-   </para>
+   转发当前处理过程到其他动作。
    <note>
     <para>
-     调用<methodname>Yaf_Controller_Abstract::forward</methodname>以后,
-     不会直接立即跳转到目的Action执行, 而是会在当前的Action执行完成后,
-     下一轮的DispatchLoop中, 交给目的Action.
-    </para>
-    <para>
-      所以, 如果你希望立即跳转到目的Action,
-      那么请使用return结束当前的执行流程.
+      此方法不会立即切换到目标操作，而是会在当前流程结束后发生。
     </para>
    </note>
+  </para>
  </refsect1>
 
  <refsect1 role="parameters">
@@ -39,7 +44,7 @@
     <term><parameter>module</parameter></term>
     <listitem>
      <para>
-       要跳转的目的Action的Module, 如果是NULL, 则默认Module会被采用.
+      目标模块名称，如果是 NULL，则采用默认模块名
      </para>
     </listitem>
    </varlistentry>
@@ -47,7 +52,7 @@
     <term><parameter>controller</parameter></term>
     <listitem>
      <para>
-       要跳转的目的Action的Controller, 如果是NULL, 则默认Controller会被采用.
+      目标控制器名称
      </para>
     </listitem>
    </varlistentry>
@@ -55,7 +60,7 @@
     <term><parameter>action</parameter></term>
     <listitem>
      <para>
-      要跳转的目的Action.
+      目标动作名称
      </para>
     </listitem>
    </varlistentry>
@@ -63,18 +68,24 @@
     <term><parameter>paramters</parameter></term>
     <listitem>
      <para>
-      跳转参数,
-      可以在目的Action中通过<methodname>Yaf_Request_Abstrace::getParam</methodname>来获取.
+      调用参数
      </para>
     </listitem>
    </varlistentry>
   </variablelist>
  </refsect1>
 
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   &return.success;
+  </para>
+ </refsect1>
+
  <refsect1 role="examples">
   &reftitle.examples;
   <example>
-   <title><function>Yaf_Controller_Abstract::forward</function>例子</title>
+   <title><function>Yaf_Controller_Abstract::forward</function> 示例</title>
    <programlisting role="php">
 <![CDATA[
 <?php
@@ -83,9 +94,9 @@ class IndexController extends Yaf_Controller_Abstract
     public function indexAction(){   
          $logined = $_SESSION["login"];
          if (!$logined) {
-             $this->forward("login", array("from" => "Index")); // 跳转到login Action
-             return FALSE;  // return立即结束当前的执行流程, 跳转到目的Action
-                            // 而这里的FALSE是告诉Yaf不要自动渲染这个Action的视图
+             $this->forward("login", array("from" => "Index")); // 转发到 login 动作
+             return FALSE;  // 这非常重要，这会结束当前工作流
+                            // 然后告诉 Yaf 不要自动渲染
          }
 
          // other processes
@@ -105,14 +116,6 @@ class IndexController extends Yaf_Controller_Abstract
 ]]>
    </screen>
   </example>
- </refsect1>
-
-
- <refsect1 role="returnvalues">
-  &reftitle.returnvalues;
-  <para>
-    return FALSE on failure
-  </para>
  </refsect1>
 
  <refsect1 role="seealso">
