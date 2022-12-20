@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 1a9ee818e554e116b4721d432c6d671e14281ea0 Maintainer: mowangjuanzi Status: ready -->
+<!-- EN-Revision: 0466dd93f73635c728c6c4707aaf5876692f1ef3 Maintainer: mowangjuanzi Status: ready -->
 <refentry xml:id="datetime.format" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
   <refname>DateTimeInterface::format</refname>
@@ -45,7 +45,7 @@
     <listitem>
      <para>
       输出的日期 <type>string</type>
-      的格式。参见下面的格式化选项。也有几个<link linkend="datetime.constants.types">预定义日期常量</link>可以代替。例如
+      的格式。参见下面的格式化选项。也有几个<link linkend="datetimeinterface.constants.types">预定义日期常量</link>可以代替。例如
       <constant>DATE_RSS</constant> 包含格式化字符串 <literal>'D, d M Y H:i:s'</literal>。
      </para>
      <para>
@@ -288,7 +288,7 @@
            跟 <literal>P</literal> 相同，区别是使用 <literal>Z</literal>
            替换 <literal>+00:00</literal> 返回（PHP 8.0.0 起可用）
           </entry>
-          <entry>示例：<literal>+02:00</literal></entry>
+          <entry>示例：<literal>Z</literal> 或 <literal>+02:00</literal></entry>
          </row>
          <row>
           <entry><literal>T</literal></entry>
@@ -383,33 +383,82 @@
 
  <refsect1 role="examples">
   &reftitle.examples;
-  <example>
-   <title><function>DateTime::format</function> 示例</title>
-   <para>&style.oop;</para>
-   <programlisting role="php">
+  <para>
+   <example>
+    <title><function>DateTimeInterface::format</function> 示例</title>
+    <para>&style.oop;</para>
+    <programlisting role="php">
 <![CDATA[
 <?php
-$date = new DateTime('2000-01-01');
+$date = new DateTimeImmutable('2000-01-01');
 echo $date->format('Y-m-d H:i:s');
 ?>
 ]]>
-   </programlisting>
-   <para>&style.procedural;</para>
-   <programlisting role="php">
+    </programlisting>
+    <para>&style.procedural;</para>
+    <programlisting role="php">
 <![CDATA[
 <?php
 $date = date_create('2000-01-01');
 echo date_format($date, 'Y-m-d H:i:s');
 ?>
 ]]>
-   </programlisting>
-   &example.outputs;
-   <screen>
+    </programlisting>
+    &example.outputs;
+    <screen>
 <![CDATA[
 2000-01-01 00:00:00
 ]]>
-   </screen>
-  </example>
+    </screen>
+   </example>
+  </para>
+
+  <para>
+   <example>
+    <title>更多示例</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+// 设置使用的默认时区。
+date_default_timezone_set('UTC');
+
+// 现在
+$date = new DateTimeImmutable();
+
+// 打印类似：Wednesday
+echo $date->format('l'), "\n";
+ 
+// 打印类似：Wednesday 19th of October 2022 08:40:48 AM
+echo $date->format('l jS \o\f F Y h:i:s A'), "\n";
+
+/* 在 format 参数中使用常量 */
+// 打印类似：Wed, 19 Oct 2022 08:40:48 +0000
+echo $date->format(DateTimeInterface::RFC2822), "\n";
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   通过对格式化字符串中的识别字符添加反斜线，对其转义来防止被解析。如果带有反斜线的字符已经是特殊序列，那么还要对反斜线进行转义。
+   <example>
+    <title>格式化时转义字符</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$date = new DateTimeImmutable();
+
+// 打印类似：Wednesday the 19th
+echo $date->format('l \t\h\e jS');
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   要格式化其它语言的日期，可以使用 <methodname>IntlDateFormatter::format</methodname>
+   代替 <methodname>DateTimeInterface::format</methodname>。
+  </para>
  </refsect1>
 
  <refsect1 role="notes">
@@ -422,7 +471,7 @@ echo date_format($date, 'Y-m-d H:i:s');
  <refsect1 role="seealso">
   &reftitle.seealso;
   <simplelist>
-   <member><function>date</function></member>
+   <member><methodname>IntlDateFormatter::format</methodname></member>
   </simplelist>
  </refsect1>
 

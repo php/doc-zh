@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: f32703dce3d941dd6add101551a6c9f126d8eaa0 Maintainer: Avenger Status: ready -->
+<!-- EN-Revision: 445502deadd968bfb0207f96237b8fb6f968b100 Maintainer: Avenger Status: ready -->
 <!-- CREDITS: Geogory, dallas, Altair, mowangjuanzi -->
 <sect1 xml:id="language.types.type-juggling">
  <title>类型转换</title>
@@ -74,7 +74,8 @@
   </simpara>
 
   <simpara>
-   这种情况下，值将会解释为 <type>string</type>。
+   这种情况下，值将会解释为 <type>string</type>。如果值无法解释，那么会抛出
+   <classname>TypeError</classname>。在 PHP 7.4.0 之前，会引发 <constant>E_RECOVERABLE_ERROR</constant>。
   </simpara>
  </sect2>
 
@@ -121,7 +122,7 @@
   </simpara>
  </sect2>
 
- <sect2>
+ <sect2 xml:id="language.types.type-juggling.function">
   <title>Function contexts</title>
 
   <simpara>
@@ -130,42 +131,127 @@
   </simpara>
 
   <para>
-   在此上下文中，当激活（默认）强制类型模式时，只有标量值可以转为另外一个标量值。对于简单类型声明，行为如下所示：
-   <itemizedlist>
-    <listitem>
-     <simpara>
-      声明 <type>bool</type> 类型：值将解释为 <type>bool</type>。
-     </simpara>
-    </listitem>
-    <listitem>
-     <simpara>
-      声明 <type>int</type> 类型：如果明确定义转换，则值将解释为 <type>int</type>。例如，字符串是<link
-      linkend="language.types.numeric-strings">数字</link>。
-     </simpara>
-    </listitem>
-    <listitem>
-     <simpara>
-      声明 <type>float</type> 类型：如果明确定义转换，则值将解释为 <type>float</type>。例如，字符串是<link
-      linkend="language.types.numeric-strings">数字</link>。
-     </simpara>
-    </listitem>
-    <listitem>
-     <simpara>
-      声明 <type>string</type> 类型：值将解释为 <type>string</type>。
-     </simpara>
-    </listitem>
-   </itemizedlist>
-
-   如果类型声明是联合，查看有关<link
-   linkend="language.types.declarations.union.coercive">强制类型与联合类型</link> 的章节。
+   在此上下文中，值必须是类型值。但存在两个例外，第一个是如果值为 <type>int</type>，但声明的类型是
+   <type>float</type>，然后整数会转换为浮点数。第二个是如果值和声明的类型都是 <emphasis>scalar</emphasis>
+   值，并且强制类型模式处于活动状态（默认），值会转换为可接受的标量值。参见下文查看有关此行为的描述。
   </para>
 
   <warning>
    <simpara>
-    自 PHP 8.1.0 起弃用<link linkend="functions.internal">内部函数</link>自动将
-    &null; 转换为标量类型的行为。
+    <link linkend="functions.internal">内部函数</link>自动将 &null;
+    转换为标量类型，此行为自 PHP 8.1.0 起<emphasis>弃用</emphasis>。
    </simpara>
   </warning>
+
+  <sect3 xml:id="language.types.type-juggling.function.simple">
+   <title>使用简单类型声明的强制类型</title>
+   <itemizedlist>
+    <listitem>
+     <simpara>
+      <type>bool</type> 类型声明：值将解释为 <type>bool</type>。
+     </simpara>
+    </listitem>
+    <listitem>
+     <simpara>
+      <type>int</type> 类型声明：如果明确定义转换，则值将解释为 <type>int</type>。例如，字符串是<link
+      linkend="language.types.numeric-strings">数字</link>。
+     </simpara>
+    </listitem>
+    <listitem>
+     <simpara>
+      <type>float</type> 类型声明：如果明确定义转换，则值将解释为 <type>float</type>。例如，字符串是<link
+      linkend="language.types.numeric-strings">数字</link>。
+     </simpara>
+    </listitem>
+    <listitem>
+     <simpara>
+      <type>string</type> 类型声明：值将解释为 <type>string</type>。
+     </simpara>
+    </listitem>
+   </itemizedlist>
+  </sect3>
+
+  <sect3 xml:id="language.types.type-juggling.function.union">
+   <title>使用联合类型的强制类型</title>
+   <para>
+    When <literal>strict_types</literal> is not enabled, scalar type declarations
+    are subject to limited implicit type coercions.
+    如果值的精确类型不是联合的一部分，然后会按照以下优先顺序选择目标类型：
+
+    <orderedlist>
+     <listitem>
+      <simpara>
+       <type>int</type>
+      </simpara>
+     </listitem>
+     <listitem>
+      <simpara>
+       <type>float</type>
+      </simpara>
+     </listitem>
+     <listitem>
+      <simpara>
+       <type>string</type>
+      </simpara>
+     </listitem>
+     <listitem>
+      <simpara>
+       <type>bool</type>
+      </simpara>
+     </listitem>
+    </orderedlist>
+
+    If the type both exists in the union, and the value can be coerced to the
+    type under PHPs existing type checking semantics, then the type is chosen.
+    Otherwise, the next type is tried.
+   </para>
+
+   <caution>
+    <para>
+     一个例外，如果值是字符串，并且 int 和 float 都是联合类型的一部分，首选类型则通过现有的“数字字符串”语义决定。例如
+     <literal>"42"</literal> 选择 <type>int</type>，<literal>"42.0"</literal> 选择 <type>float</type>。
+    </para>
+   </caution>
+
+   <note>
+    <para>
+     Types that are not part of the above preference list are not eligible
+     targets for implicit coercion. In particular no implicit coercions to
+     the <literal>null</literal> and <literal>false</literal> types occur.
+    </para>
+   </note>
+
+   <example>
+    <title>Example of types being coerced into a type part of the union</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+// int|string
+42    --> 42          // exact type
+"42"  --> "42"        // exact type
+new ObjectWithToString --> "Result of __toString()"
+                      // object never compatible with int, fall back to string
+42.0  --> 42          // float compatible with int
+42.1  --> 42          // float compatible with int
+1e100 --> "1.0E+100"  // float too large for int type, fall back to string
+INF   --> "INF"       // float too large for int type, fall back to string
+true  --> 1           // bool compatible with int
+[]    --> TypeError   // array not compatible with int or string
+
+// int|float|bool
+"45"    --> 45        // int numeric string
+"45.0"  --> 45.0      // float numeric string
+
+"45X"   --> true      // not numeric string, fall back to bool
+""      --> false     // not numeric string, fall back to bool
+"X"     --> true      // not numeric string, fall back to bool
+[]      --> TypeError // array not compatible with int, float or bool
+?>
+]]>
+    </programlisting>
+   </example>
+  </sect3>
+
  </sect2>
 
  <sect2 xml:id="language.types.typecasting">
