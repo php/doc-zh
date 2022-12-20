@@ -1,8 +1,7 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: fc9e379fd822e0731859b056db368fa59f7f14b9 Maintainer: anonymous #27375 Status: ready -->
-<!-- Reviewed: no -->
-
+<!-- EN-Revision: 7018fc43215d402adcddfe657cbd0a47f68cb5d7 Maintainer: anonymous #27375 Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="pdo.construct" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>PDO::__construct</refname>
@@ -12,12 +11,12 @@
  </refnamediv>
  <refsect1 role="description">
   &reftitle.description;
-  <constructorsynopsis>
-   <methodname>PDO::__construct</methodname>
+  <constructorsynopsis role="PDO">
+   <modifier>public</modifier> <methodname>PDO::__construct</methodname>
    <methodparam><type>string</type><parameter>dsn</parameter></methodparam>
-   <methodparam choice="opt"><type>string</type><parameter>username</parameter></methodparam>
-   <methodparam choice="opt"><type>string</type><parameter>password</parameter></methodparam>
-   <methodparam choice="opt"><type>array</type><parameter>driver_options</parameter></methodparam>
+   <methodparam choice="opt"><type class="union"><type>string</type><type>null</type></type><parameter>username</parameter><initializer>&null;</initializer></methodparam>
+   <methodparam choice="opt"><type class="union"><type>string</type><type>null</type></type><parameter>password</parameter><initializer>&null;</initializer></methodparam>
+   <methodparam choice="opt"><type class="union"><type>array</type><type>null</type></type><parameter>options</parameter><initializer>&null;</initializer></methodparam>
   </constructorsynopsis>
   <para>
     创建一个表示连接到请求数据库的数据库连接 PDO 实例。
@@ -27,7 +26,8 @@
   &reftitle.parameters;
   <para>
    <variablelist>
-    <varlistentry><term>dsn</term>
+    <varlistentry>
+     <term><parameter>dsn</parameter></term>
      <listitem>
       <para>
        数据源名称或叫做 DSN，包含了请求连接到数据库的信息。
@@ -36,11 +36,11 @@
        通常，一个 DSN 由 PDO 驱动名、紧随其后的冒号、以及具体 PDO 驱动的连接语法组成。更深入的信息能从 <link linkend="pdo.drivers">PDO 具体驱动文档</link>找到。
       </para>
       <para>
-       The <parameter>dsn</parameter> 参数支持三种不同的方式 创建一个数据库连接：
+       <parameter>dsn</parameter> 参数支持三种不同的方式 创建一个数据库连接：
       </para>
       <para>
        <variablelist>
-        <varlistentry><term>Driver invocation</term>
+        <varlistentry><term>驱动程序调用</term>
          <listitem>
           <para>
            <parameter>dsn</parameter> 包含完整的DSN。
@@ -50,9 +50,8 @@
         <varlistentry><term>URI invocation</term>
          <listitem>
           <para>
-           <parameter>dsn</parameter> consists of <userinput>uri:</userinput>
-           followed by a URI that defines the location of a file containing
-           the DSN string. The URI can specify a local file or a remote URL.
+           <parameter>dsn</parameter> 由 <userinput>uri:</userinput> 后跟 URI 组成，该 URI 包含定义 DSN
+           字符串的文件位置。URI 可以指定本地文件或远程 URL。
           </para>
           <para><userinput>uri:file:///path/to/dsnfile</userinput></para>
          </listitem>
@@ -60,10 +59,8 @@
         <varlistentry><term>Aliasing</term>
          <listitem>
           <para>
-           <parameter>dsn</parameter> consists of a name 
-           <parameter>name</parameter> that maps to 
-           <code>pdo.dsn.<parameter>name</parameter></code> in &php.ini;
-           defining the DSN string.
+           <parameter>dsn</parameter> 由映射到 &php.ini; 中定义 DSN 字符串的 <code>pdo.dsn.<parameter>name</parameter></code>
+           的 <parameter>name</parameter> 名组成。
           </para>
           <note>
            <para>
@@ -76,21 +73,24 @@
       </para>
      </listitem>
     </varlistentry>
-    <varlistentry><term>username</term>
+    <varlistentry>
+     <term><parameter>username</parameter></term>
      <listitem>
       <para>
        DSN字符串中的用户名。对于某些PDO驱动，此参数为可选项。
       </para>
      </listitem>
     </varlistentry>
-    <varlistentry><term>password</term>
+    <varlistentry>
+     <term><parameter>password</parameter></term>
      <listitem>
       <para>
        DSN字符串中的密码。对于某些PDO驱动，此参数为可选项。
       </para>
      </listitem>
     </varlistentry>
-    <varlistentry><term>driver_options</term>
+    <varlistentry>
+     <term><parameter>options</parameter></term>
      <listitem>
       <para>
        一个具体驱动的连接选项的键=&gt;值数组。
@@ -101,43 +101,33 @@
   </para>
  </refsect1>
 
- <refsect1 role="returnvalues">
-  &reftitle.returnvalues;
-  <para>
-   成功则返回一个PDO对象。
-  </para>
- </refsect1>
-
  <refsect1 role="errors">
   &reftitle.errors;
   <para>
-   如果试图连接到请求的数据库失败，则<function>PDO::__construct</function> 抛出一个 PDO异常（<classname>PDOException</classname>）  。
+   如果试图连接到请求的数据库失败，无论当前设置了哪个 <constant>PDO::ATTR_ERRMODE</constant>，<methodname>PDO::__construct</methodname>
+   抛出 <classname>PDOException</classname>。
   </para>
  </refsect1>
 
  <refsect1 role="examples">
   &reftitle.examples;
   <para>
-   <example><title>Create a PDO instance via driver invocation</title>
+   <example><title>通过驱动程序调用创建 PDO 实例</title>
     <programlisting role="php">
 <![CDATA[
 <?php
-/* Connect to an ODBC database using driver invocation */
+/* Connect to a MySQL database using driver invocation */
 $dsn = 'mysql:dbname=testdb;host=127.0.0.1';
 $user = 'dbuser';
 $password = 'dbpass';
 
-try {
-    $dbh = new PDO($dsn, $user, $password);
-} catch (PDOException $e) {
-    echo 'Connection failed: ' . $e->getMessage();
-}
+$dbh = new PDO($dsn, $user, $password);
 
 ?>
 ]]>
     </programlisting>
    </example>
-   <example><title>Create a PDO instance via URI invocation</title>
+   <example><title>通过 URI 调用创建 PDO 实例</title>
     <para>
      The following example assumes that the file
      <filename>/usr/local/dbconnect</filename> exists with file permissions
@@ -150,9 +140,7 @@ odbc:DSN=SAMPLE;UID=john;PWD=mypass
 ]]>
     </screen>
     <para>
-     The PHP script can then create a database connection by simply
-     passing the <literal>uri:</literal> parameter and pointing to
-     the file URI:
+     PHP 脚本可以简单的传递指向文件 URI 的 <literal>uri:</literal> 参数来创建数据库连接：
     </para>
     <programlisting role="php">
 <![CDATA[
@@ -162,11 +150,7 @@ $dsn = 'uri:file:///usr/local/dbconnect';
 $user = '';
 $password = '';
 
-try {
-    $dbh = new PDO($dsn, $user, $password);
-} catch (PDOException $e) {
-    echo 'Connection failed: ' . $e->getMessage();
-}
+$dbh = new PDO($dsn, $user, $password);
 
 ?>
 ]]>
@@ -185,16 +169,12 @@ pdo.dsn.mydb="mysql:dbname=testdb;host=localhost"
     <programlisting role="php">
 <![CDATA[
 <?php
-/*  使用别名连接到一个ODBC数据库  */
+/* 使用别名连接到 ODBC 数据库 */
 $dsn = 'mydb';
 $user = '';
 $password = '';
 
-try {
-    $dbh = new PDO($dsn, $user, $password);
-} catch (PDOException $e) {
-    echo 'Connection failed: ' . $e->getMessage();
-}
+$dbh = new PDO($dsn, $user, $password);
 
 ?>
 ]]>
@@ -203,7 +183,6 @@ try {
   </para>
  </refsect1>
 </refentry>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
