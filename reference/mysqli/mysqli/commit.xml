@@ -1,26 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
+<!-- EN-Revision: 035c126c0393fe154bac46e2c3c489ebadce48a5 Maintainer: mowangjuanzi Status: ready -->
 <refentry xml:id="mysqli.commit" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>mysqli::commit</refname>
   <refname>mysqli_commit</refname>
-  <refpurpose>提交一个事务</refpurpose>
+  <refpurpose>提交当前事务</refpurpose>
  </refnamediv>
 
  <refsect1 role="description">
   &reftitle.description;
   <para>&style.oop;</para>
-  <methodsynopsis>
-   <type>bool</type><methodname>mysqli::commit</methodname>
-   <void />
+  <methodsynopsis role="mysqli">
+   <modifier>public</modifier> <type>bool</type><methodname>mysqli::commit</methodname>
+   <methodparam choice="opt"><type>int</type><parameter>flags</parameter><initializer>0</initializer></methodparam>
+   <methodparam choice="opt"><type class="union"><type>string</type><type>null</type></type><parameter>name</parameter><initializer>&null;</initializer></methodparam>
   </methodsynopsis>
   <para>&style.procedural;</para>
   <methodsynopsis>
    <type>bool</type><methodname>mysqli_commit</methodname>
-   <methodparam><type>mysqli</type><parameter>link</parameter></methodparam>
+   <methodparam><type>mysqli</type><parameter>mysql</parameter></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>flags</parameter><initializer>0</initializer></methodparam>
+   <methodparam choice="opt"><type class="union"><type>string</type><type>null</type></type><parameter>name</parameter><initializer>&null;</initializer></methodparam>
   </methodsynopsis>
   <para>
-  提交数据库连接的当前事务
+   提交数据库连接的当前事务。
   </para>
  </refsect1>
 
@@ -29,6 +33,22 @@
   <para>
    <variablelist>
     &mysqli.link.description;
+    <varlistentry>
+     <term><parameter>flags</parameter></term>
+     <listitem>
+      <para>
+       <constant>MYSQLI_TRANS_COR_*</constant> 常量的位掩码。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>name</parameter></term>
+     <listitem>
+      <para>
+       如果提供，则执行 <literal>COMMIT/*name*/</literal>。
+      </para>
+     </listitem>
+    </varlistentry>
    </variablelist>
   </para>
  </refsect1>
@@ -40,72 +60,44 @@
   </para>
  </refsect1>
 
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <para>
+   <informaltable>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>&Version;</entry>
+       <entry>&Description;</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>8.0.0</entry>
+       <entry>
+        <parameter>name</parameter> 现在允许为 null。
+       </entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </informaltable>
+  </para>
+ </refsect1>
+
  <refsect1 role="examples">
   &reftitle.examples;
-  <example>
-   <title><methodname>mysqli::commit</methodname> example</title>
-   <para>&style.oop;</para>
-   <programlisting role="php">
-<![CDATA[
-<?php
-$mysqli = new mysqli("localhost", "my_user", "my_password", "world");
+  <para>
+   参阅 <link linkend="mysqli.begin-transaction.example.basic"><methodname>mysqli::begin_transaction</methodname> 示例</link>。
+  </para>
+ </refsect1>
 
-/* check connection */
-if (mysqli_connect_errno()) {
-    printf("Connect failed: %s\n", mysqli_connect_error());
-    exit();
-}
-
-$mysqli->query("CREATE TABLE Language LIKE CountryLanguage");
-
-/* set autocommit to off */
-$mysqli->autocommit(FALSE);
-
-/* Insert some values */
-$mysqli->query("INSERT INTO Language VALUES ('DEU', 'Bavarian', 'F', 11.2)");
-$mysqli->query("INSERT INTO Language VALUES ('DEU', 'Swabian', 'F', 9.4)");
-
-/* commit transaction */
-$mysqli->commit();
-
-/* drop table */
-$mysqli->query("DROP TABLE Language");
-
-/* close connection */
-$mysqli->close();
-?>
-]]>
-   </programlisting>
-   <para>&style.procedural;</para>
-   <programlisting role="php">
-<![CDATA[
-<?php
-$link = mysqli_connect("localhost", "my_user", "my_password", "test");
-
-/* check connection */
-if (!$link) {
-    printf("Connect failed: %s\n", mysqli_connect_error());
-    exit();
-}
-
-/* set autocommit to off */
-mysqli_autocommit($link, FALSE);
-
-mysqli_query($link, "CREATE TABLE Language LIKE CountryLanguage");
-
-/* Insert some values */
-mysqli_query($link, "INSERT INTO Language VALUES ('DEU', 'Bavarian', 'F', 11.2)");
-mysqli_query($link, "INSERT INTO Language VALUES ('DEU', 'Swabian', 'F', 9.4)");
-
-/* commit transaction */
-mysqli_commit($link);
-
-/* close connection */
-mysqli_close($link);
-?>
-]]>
-   </programlisting>
-  </example>
+ <refsect1 role="notes">
+  &reftitle.notes;
+  <note>
+   <para>
+    此方法在不支持事务的表类型中不生效，如 MyISAM 或 ISAM。
+   </para>
+  </note>
  </refsect1>
 
  <refsect1 role="seealso">
@@ -113,13 +105,14 @@ mysqli_close($link);
   <para>
    <simplelist>
     <member><function>mysqli_autocommit</function></member>
+    <member><function>mysqli_begin_transaction</function></member>
     <member><function>mysqli_rollback</function></member>
+    <member><function>mysqli_savepoint</function></member>
    </simplelist>
   </para>
  </refsect1>
 
 </refentry>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
