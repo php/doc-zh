@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: e25450d9dc5f49da38026350643730de2017ac67 Maintainer: Yf D Status: ready -->
-<!-- Reviewed: no -->
-
+<!-- EN-Revision: 035c126c0393fe154bac46e2c3c489ebadce48a5 Maintainer: Yf D Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="mysqli.close" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>mysqli::close</refname>
@@ -13,17 +12,21 @@
  <refsect1 role="description">
   &reftitle.description;
   <para>&style.oop;</para>
-  <methodsynopsis role="oop">
-   <type>bool</type><methodname>mysqli::close</methodname>
-   <void />
+  <methodsynopsis role="mysqli">
+   <modifier>public</modifier> <type>bool</type><methodname>mysqli::close</methodname>
+   <void/>
   </methodsynopsis>
   <para>&style.procedural;</para>
   <methodsynopsis>
    <type>bool</type><methodname>mysqli_close</methodname>
-   <methodparam><type>mysqli</type><parameter>link</parameter></methodparam>
+   <methodparam><type>mysqli</type><parameter>mysql</parameter></methodparam>
   </methodsynopsis>
   <para>
    关闭先前打开的数据库连接
+  </para>
+  <para>
+   当打开的非持久 MySQL
+   连接和结果集的对象销毁时自动关闭。显式关闭打开的连接和释放结果集可选。但是，如果脚本在获得结果后仍有大量工作要做，那么最好在脚本执行完所有数据库操作后立即关闭连接。
   </para>
  </refsect1>
 
@@ -45,9 +48,55 @@
 
  <refsect1 role="examples">
   &reftitle.examples;
-  <para>
-   See <function>mysqli_connect</function>.
-  </para>
+  <example>
+   <title><methodname>mysqli::close</methodname> 示例</title>
+   <para>&style.oop;</para>
+   <programlisting role="php">
+<![CDATA[
+<?php
+
+mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+$mysqli = new mysqli("localhost", "my_user", "my_password", "world");
+
+$result = $mysqli->query("SELECT Name, CountryCode FROM City ORDER BY ID LIMIT 3");
+
+/* Close the connection as soon as it's no longer needed */
+$mysqli->close();
+
+foreach ($result as $row) {
+    /* Processing of the data retrieved from the database */
+}
+]]>
+   </programlisting>
+   <para>&style.procedural;</para>
+   <programlisting role="php">
+<![CDATA[
+<?php
+
+mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+$mysqli = mysqli_connect("localhost", "my_user", "my_password", "world");
+
+$result = mysqli_query($mysqli, "SELECT Name, CountryCode FROM City ORDER BY ID LIMIT 3");
+
+/* Close the connection as soon as it's no longer needed */
+mysqli_close($mysqli);
+
+foreach ($result as $row) {
+    /* Processing of the data retrieved from the database */
+}
+]]>
+   </programlisting>
+  </example>
+ </refsect1>
+
+ <refsect1 role="notes">
+  &reftitle.notes;
+  <note>
+   <para>
+    <function>mysqli_close</function> 不会关闭持久连接。更多详情，查看<link
+    linkend="features.persistent-connections">持久连接</link>的相关手册页。
+   </para>
+  </note>
  </refsect1>
 
  <refsect1 role="seealso">
@@ -57,12 +106,12 @@
     <member><methodname>mysqli::__construct</methodname></member>
     <member><function>mysqli_init</function></member>
     <member><function>mysqli_real_connect</function></member>
+    <member><function>mysqli_free_result</function></member>
    </simplelist>
   </para>
  </refsect1>
 
 </refentry>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
