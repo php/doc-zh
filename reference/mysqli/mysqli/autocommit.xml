@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 9edc7d4114acdf02c57e4269ebd72e01c072e865 Maintainer: Yf D Status: ready -->
-<!-- Reviewed: no -->
-
+<!-- EN-Revision: 035c126c0393fe154bac46e2c3c489ebadce48a5 Maintainer: Yf D Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="mysqli.autocommit" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>mysqli::autocommit</refname>
@@ -13,21 +12,21 @@
  <refsect1 role="description">
   &reftitle.description;
   <para>&style.oop;</para>
-  <methodsynopsis role="oop">
-   <type>bool</type><methodname>mysqli::autocommit</methodname>
-   <methodparam><type>bool</type><parameter>mode</parameter></methodparam>
+  <methodsynopsis role="mysqli">
+   <modifier>public</modifier> <type>bool</type><methodname>mysqli::autocommit</methodname>
+   <methodparam><type>bool</type><parameter>enable</parameter></methodparam>
   </methodsynopsis>
   <para>&style.procedural;</para>
   <methodsynopsis>
    <type>bool</type><methodname>mysqli_autocommit</methodname>
-   <methodparam><type>mysqli</type><parameter>link</parameter></methodparam>
-   <methodparam><type>bool</type><parameter>mode</parameter></methodparam>
+   <methodparam><type>mysqli</type><parameter>mysql</parameter></methodparam>
+   <methodparam><type>bool</type><parameter>enable</parameter></methodparam>
   </methodsynopsis>
   <para>
-  打开或关闭本次数据库连接的自动命令提交事务模式。
+   打开或关闭本次数据库连接的自动命令提交事务模式。
   </para>
   <para>
-   如需要确认当前连接的自动事务提交状态，可执行这个SQL请求<literal>SELECT @@autocommit</literal>.
+   如需要确认当前连接的自动事务提交状态，可执行这个 SQL 请求 <literal>SELECT @@autocommit</literal>。
   </para>
  </refsect1>
 
@@ -37,10 +36,10 @@
    <variablelist>
     &mysqli.link.description;
     <varlistentry>
-     <term><parameter>mode</parameter></term>
+     <term><parameter>enable</parameter></term>
      <listitem>
       <para>
-       Whether to turn on auto-commit or not.
+       是否开启自动提交。
       </para>
      </listitem>
     </varlistentry>
@@ -55,82 +54,166 @@
   </para>
  </refsect1>
 
- <refsect1 role="notes">
-  &reftitle.notes;
-  <note>
-   <para>
-    这个方法不会在不支持事务处理的表单查询中生效，如MyISAM或 ISAM。
-   </para>
-  </note>
- </refsect1>
-
  <refsect1 role="examples">
   &reftitle.examples;
   <example>
-   <title><methodname>mysqli::autocommit</methodname> example</title>
+   <title><methodname>mysqli::autocommit</methodname> 示例</title>
    <para>&style.oop;</para>
    <programlisting role="php">
 <![CDATA[
 <?php
+
+/* Tell mysqli to throw an exception if an error occurs */
+mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+
 $mysqli = new mysqli("localhost", "my_user", "my_password", "world");
 
-if (mysqli_connect_errno()) {
-    printf("Connect failed: %s\n", mysqli_connect_error());
-    exit();
-}
+/* The table engine has to support transactions */
+$mysqli->query("CREATE TABLE IF NOT EXISTS language (
+    Code text NOT NULL,
+    Speakers int(11) NOT NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
 
-/* turn autocommit on */
-$mysqli->autocommit(TRUE);
+/* Turn autocommit off */
+$mysqli->autocommit(false);
 
-if ($result = $mysqli->query("SELECT @@autocommit")) {
+$result = $mysqli->query("SELECT @@autocommit");
+$row = $result->fetch_row();
+printf("Autocommit is %s\n", $row[0]);
+
+try {
+    /* Prepare insert statement */
+    $stmt = $mysqli->prepare('INSERT INTO language(Code, Speakers) VALUES (?,?)');
+    $stmt->bind_param('ss', $language_code, $native_speakers);
+
+    /* Insert some values */
+    $language_code = 'DE';
+    $native_speakers = 50_123_456;
+    $stmt->execute();
+    $language_code = 'FR';
+    $native_speakers = 40_546_321;
+    $stmt->execute();
+
+    /* Commit the data in the database. This doesn't set autocommit=true */
+    $mysqli->commit();
+    print "Committed 2 rows in the database\n";
+
+    $result = $mysqli->query("SELECT @@autocommit");
     $row = $result->fetch_row();
     printf("Autocommit is %s\n", $row[0]);
-    $result->free();
-}
 
-/* close connection */
-$mysqli->close();
-?>
+    /* Try to insert more values */
+    $language_code = 'PL';
+    $native_speakers = 30_555_444;
+    $stmt->execute();
+    $language_code = 'DK';
+    $native_speakers = 5_222_444;
+    $stmt->execute();
+
+    /* Setting autocommit=true will trigger a commit */
+    $mysqli->autocommit(true);
+
+    print "Committed 2 row in the database\n";
+} catch (mysqli_sql_exception $exception) {
+    $mysqli->rollback();
+
+    throw $exception;
+}
 ]]>
    </programlisting>
    <para>&style.procedural;</para>
    <programlisting role="php">
 <![CDATA[
 <?php
-$link = mysqli_connect("localhost", "my_user", "my_password", "world");
 
-if (!$link) {
-    printf("Can't connect to localhost. Error: %s\n", mysqli_connect_error());
-    exit();
-}
+/* Tell mysqli to throw an exception if an error occurs */
+mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
-/* turn autocommit on */
-mysqli_autocommit($link, TRUE);
+$mysqli = mysqli_connect("localhost", "my_user", "my_password", "world");
 
-if ($result = mysqli_query($link, "SELECT @@autocommit")) {
+/* The table engine has to support transactions */
+mysqli_query($mysqli, "CREATE TABLE IF NOT EXISTS language (
+    Code text NOT NULL,
+    Speakers int(11) NOT NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+
+/* Turn autocommit off */
+mysqli_autocommit($mysqli, false);
+
+$result = mysqli_query($mysqli, "SELECT @@autocommit");
+$row = mysqli_fetch_row($result);
+printf("Autocommit is %s\n", $row[0]);
+
+try {
+    /* Prepare insert statement */
+    $stmt = mysqli_prepare($mysqli, 'INSERT INTO language(Code, Speakers) VALUES (?,?)');
+    mysqli_stmt_bind_param($stmt, 'ss', $language_code, $native_speakers);
+
+    /* Insert some values */
+    $language_code = 'DE';
+    $native_speakers = 50_123_456;
+    mysqli_stmt_execute($stmt);
+    $language_code = 'FR';
+    $native_speakers = 40_546_321;
+    mysqli_stmt_execute($stmt);
+
+    /* Commit the data in the database. This doesn't set autocommit=true */
+    mysqli_commit($mysqli);
+    print "Committed 2 rows in the database\n";
+
+    $result = mysqli_query($mysqli, "SELECT @@autocommit");
     $row = mysqli_fetch_row($result);
     printf("Autocommit is %s\n", $row[0]);
-    mysqli_free_result($result);
-}
 
-/* close connection */
-mysqli_close($link);
-?>
+    /* Try to insert more values */
+    $language_code = 'PL';
+    $native_speakers = 30_555_444;
+    mysqli_stmt_execute($stmt);
+    $language_code = 'DK';
+    $native_speakers = 5_222_444;
+    mysqli_stmt_execute($stmt);
+
+    /* Setting autocommit=true will trigger a commit */
+    mysqli_autocommit($mysqli, true);
+
+    print "Committed 2 row in the database\n";
+} catch (mysqli_sql_exception $exception) {
+    mysqli_rollback($mysqli);
+
+    throw $exception;
+}
 ]]>
    </programlisting>
    &examples.outputs;
    <screen>
 <![CDATA[
-Autocommit is 1
+Autocommit is 0
+Committed 2 rows in the database
+Autocommit is 0
+Committed 2 row in the database
+Autocommit is 0
+Committed 2 rows in the database
+Autocommit is 0
+Committed 2 row in the database
 ]]>
    </screen>
   </example>
+ </refsect1>
+
+ <refsect1 role="notes">
+  &reftitle.notes;
+  <note>
+   <para>
+    这个方法不会在不支持事务处理的表单查询中生效，如 MyISAM 或 ISAM。
+   </para>
+  </note>
  </refsect1>
 
  <refsect1 role="seealso">
   &reftitle.seealso;
   <para>
    <simplelist>
+    <member><function>mysqli_begin_transaction</function></member>
     <member><function>mysqli_commit</function></member>
     <member><function>mysqli_rollback</function></member>
    </simplelist>
