@@ -1,152 +1,110 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 0cce59a58b31aa547d8528100af40688ce98a71e Maintainer: HonestQiao Status: ready -->
-<!-- Reviewed: no Maintainer: HonestQiao -->
+<!-- EN-Revision: 050e16021ff71318012fa16322e98d8603d5ab38 Maintainer: HonestQiao Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <section xml:id="mysqli.installation" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
 
 &reftitle.install;
 
  <para>
- <literal>mysqli</literal>扩展在PHP5.0.0中被引入。Mysql Native驱动在PHP5.3.0版本中被引入。
+  在 PHP 5.0.0 中引入 <literal>mysqli</literal> 扩展。PHP 5.3.0 版本中引入 Mysql Native Driver。
  </para>
 
  <section xml:id="mysqli.installation.linux">
 
-  <title>在linux上安装</title>
+  <title>在 Linux 上安装</title>
 
   <para>
-  通用的Unix分发包中会包含PHP可安装的二进制版本。虽然这些二进制版本通常会被构建为支持启用mysql扩展的，
-  蚕食扩展库自身可能需要依赖其他附加包的安装。因此对包管理的检查会比选择可用的发行版本更重要。
+   常见的 Unix 发行版中包含可以安装的 PHP 的二进制版本。虽然这些二进制版本通常是在支持 MySQL
+   扩展的情况下编译的，但扩展库自身可能需要使用额外的包进行安装。因此需要检查选择的发行版附带包管理的可用性。
   </para>
-
-  <para>
-  除非你的Unix分发包包含的PHP二进制包的<literal>mysqli</literal>扩展可用，否则你就需要
-  从源码构建PHP。如果你希望使用mysql扩展，从PHP源代码构建允许你这样做，并且可以指定每个扩展
-  使用什么客户端库。
-  </para>
-<para>
-    使用Mysql Native Driver 是推荐的选项，会提升性能并且会带来一些Mysql Client Library不允许的访问特性。
-    <link linkend="mysqli.overview.mysqlnd">什么是Mysql自然驱动器？</link>中对Mysql Native Driver
-    的优势做了一个简要概述。
-    </para>
-     <para>
-   <literal>/path/to/mysql_config</literal>代表了要用来编译mysql客户端/连接mysql服务端的<literal>mysql_config</literal>程序位置。
-   </para>
   
-  <table>
-   <title>mysqli 编译时支持表</title>
+  <para>
+   例如，在 Ubuntu 上，<literal>php5-mysql</literal> 包安装了 ext/mysql、ext/mysqli 和 pdo_mysql 三个 PHP
+   扩展。在 CentOS 上，<literal>php-mysql</literal> 包也安装了这三个 PHP 扩展。
+  </para>
+
+  <para>
+   或者，可以编译扩展本身。从源代码编译 PHP 允许指定要使用的 MySQL 扩展，以及为每个扩展选择客户端库。
+  </para>
+
+  <para>
+   Mysql Native Driver 是推荐的客户端库选项，可以提升性能并带来一些 MySQL Client Library
+   不支持访问的特性。参阅<link linkend="mysqli.overview.mysqlnd">什么是 PHP 的 MySQL
+   Native Driver？</link>中对简要概述 Mysql Native Driver 的优势。
+  </para>
+
+  <para>
+   <literal>/path/to/mysql_config</literal> 表示 MySQL Server 自带的 mysql_config 程序的位置。
+  </para>
+
+  <table xml:id="mysqli.installation.time.matrix">
+   <title>mysqli 编译时支持模型</title>
    <tgroup cols="5">
     <thead>
      <row>
       <entry>PHP &Version;</entry>
       <entry>&Default;</entry>
       <entry>&ConfigureOptions;: <link linkend="mysqlnd.overview">mysqlnd</link></entry>
-      <entry>&ConfigureOptions;: <literal>libmysql</literal></entry>
+      <entry>&ConfigureOptions;: <literal>libmysqlclient</literal></entry>
       <entry>&Changelog;</entry>
      </row>
     </thead>
     <tbody>
      <row>
-      <entry>5.0.x, 5.1.x, 5.2.x</entry>
-      <entry>libmysql</entry>
-      <entry>&NotAvailable;</entry>
-      <entry><option role="configure">--with-mysqli=/path/to/mysql_config</option></entry>
-      <entry></entry>
-     </row>
-     <row>
-      <entry>5.3.x</entry>
-      <entry>libmysql</entry>
-      <entry><option role="configure">--with-mysqli=mysqlnd</option></entry>
-      <entry><option role="configure">--with-mysqli=/path/to/mysql_config</option></entry>
-      <entry>mysqlnd is now supported</entry>
-     </row>
-     <row>
-      <entry>5.4.x</entry>
+      <entry>5.4.x 及以上</entry>
       <entry>mysqlnd</entry>
       <entry><option role="configure">--with-mysqli</option></entry>
       <entry><option role="configure">--with-mysqli=/path/to/mysql_config</option></entry>
-      <entry>mysqlnd is now the default</entry>
+      <entry>默认是 mysqlnd</entry>
+     </row>
+     <row>
+      <entry>5.3.x</entry>
+      <entry>libmysqlclient</entry>
+      <entry><option role="configure">--with-mysqli=mysqlnd</option></entry>
+      <entry><option role="configure">--with-mysqli=/path/to/mysql_config</option></entry>
+      <entry>支持 mysqlnd</entry>
+     </row>
+     <row>
+      <entry>5.0.x, 5.1.x, 5.2.x</entry>
+      <entry>libmysqlclient</entry>
+      <entry>&NotAvailable;</entry>
+      <entry><option role="configure">--with-mysqli=/path/to/mysql_config</option></entry>
+      <entry>不支持 mysqlnd</entry>
      </row>
     </tbody>
    </tgroup>
   </table>
 
-    <para>
-    请注意Mysql扩展和客户端库是可以自由混合的。比如，可以使用libmysql这个mysql客户端库来启用Mysql扩展，使用
-    Mysql Native Driver来配置<literal>mysqli</literal>扩展。所有的扩展和客户端库的顺序都是可能的。
-    </para>
+  <para>
+   请注意 MySQL 扩展和客户端库可以自由混合。比如，可以启用 MySQL 扩展使用 MySQL Client
+   Library（libmysqlclient），同时配置 <literal>mysqli</literal> 扩展去使用 Mysql Native
+   Driver。然而，扩展和客户端库的所有顺序都有可能。
+  </para>
 
-    <para>
-    下面的示例使用Mysql Client Library（libmysql）构建了mysql扩展，并且<literal>mysqli</literal>和
-    PDO Mysql扩展使用Mysql Native Dirver（作为客户端库）：
-    </para>
-
-<programlisting role="shell">
-<![CDATA[
-./configure --with-mysql=/usr/bin/mysql_config  \
---with-mysqli=mysqlnd \
---with-pdo-mysql=mysqlnd
-[other options]
-]]>
-</programlisting>
  </section>
 
  <section xml:id="mysqli.installation.windows">
 
-  <title>在windows系统安装</title>
+  <title>在 Windows 系统上安装</title>
 
   <para>
-  在windows上，PHP通常使用二进制安装包进行安装。
+   在 Windows 上，必须在 &php.ini; 中启用 <filename>php_mysqli.dll</filename> DLL。
   </para>
 
-  <section>
+  <para>
+   与启用任一 PHP 扩展（比如 <filename>php_mysqli.dll</filename>）一样，PHP 指令
+   <link linkend="ini.extension-dir">extension_dir</link> 应设置为 PHP 扩展所在目录。查看
+   <link linkend="install.windows.manual">Windows 手动安装说明</link>。<literal>extension_dir</literal>
+   的示例值是 <filename>c:\php\ext</filename>。
+  </para>
 
-   <title>PHP 5.0, 5.1, 5.2</title>
-
+  <note>
    <para>
-   当PHP安装后，如果期望使用则可以通过一些配置来开启<literal>mysqli</literal>并指定客户端库。
+    如果启动 Web 服务器的时候发生了类似下面这样的错误：<literal>"Unable to load dynamic library
+    './php_mysqli.dll'"</literal>，这是因为系统找不到 <filename>php_mysqli.dll</filename>。
    </para>
-
-   <para>
-   <literal>mysqli</literal>扩展默认并不会开启，因此&php.ini;中<filename>php_mysqli.dll</filename>这个DLL
-   必须开启。为此你需要找到&php.ini;文件（通常在<filename>c:\php</filename>），并且你需要确认删除了
-   <literal>[PHP_MYSQLI]</literal>部分中的<literal>extension=php_mysqli.dll</literal>一行行首的注释符号（分号）。
-   </para>
-
-   <para>
-   另外，如果你希望使用Mysql client library（libmysql）作为<literal>mysqli</literal>的驱动器，你需要确保PHP可以访问
-   客户端库的文件。Mysql Client Library作为文件<filename>libmysql.dll</filename>包含在windows的PHP分发包中。
-   这个文件需要在windows系统的<envar>PATH</envar>环境变量中才可以被成功加载。查看FAQ文档
-   <link linkend="faq.installation.addtopath">怎样增加我的PHP目录到Windows的PATH中</link>了解怎样配置环境变量PATH。
-   把<filename>libmysql.dll</filename>拷贝到Windows的系统目录（通常是<filename>c:\Windows\system</filename>）也是适用的，
-   通常系统目录默认就在系统的<envar>PATH</envar>环境变量下。然而，我们强烈反对这种做法。
-   </para>
-
-   <para>
-   就像开启任何PHP扩展（比如<filename>php_mysqli.dll</filename>），PHP指令
-   <link linkend="ini.extension-dir">extension_dir</link>可以被设置为PHP扩展位置的目录路径。
-   查看<link linkend="install.windows.manual">windows安装介绍手册</link>。关于此的一个例子是PHP 5中
-   <literal>extension_dir</literal>指令的值是<filename>c:\php\ext</filename>。
-   </para>
-
-   <note>
-    <para>
-    如果启动web服务器的时候发生了类似下面这样的错误<literal>"Unable to load dynamic library './php_mysqli.dll'"</literal>，
-    这就是因为在系统中无法找到<filename>php_mysqli.dll</filename>或者<filename>libmysql.dll</filename>。
-    </para>
-   </note>
-  </section>
-
-  <section>
-
-    <title>PHP 5.3.0+</title>
-
-   <para>
-   在windows上，对于PHP 5.3或更新版本，<literal>mysqli</literal>扩展默认开启并使用Mysql Native Driver。
-   这就是说你不需要担心关于访问<filename>libmysql.dll</filename>的配置。
-   </para>
-
-  </section>
+  </note>
 
  </section>
 
