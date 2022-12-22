@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: afec339bc5b7918baddd9ba3cd02b90f3b423230 Maintainer: daijie Status: ready -->
-<!-- Reviewed: yes -->
-
+<!-- EN-Revision: b6f7d2d0762b52fe81ab510df30e2901fa2ff8ce Maintainer: daijie Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
  <sect1 xml:id="language.oop5.traits" xmlns="http://docbook.org/ns/docbook">
   <title>Trait</title>
   <para>
@@ -451,7 +450,7 @@ $example->x;
    </example>
    <para>
     Trait 定义了一个属性后，类就不能定义同样名称的属性，否则会产生 fatal error。
-    有种情况例外：属性是兼容的（同样的访问可见度、初始默认值）。
+    有种情况例外：属性是兼容的（同样的访问可见度、类型、readonly 修饰符和初始默认值）。
    </para>
    <example xml:id="language.oop5.traits.properties.conflicts">
     <title>解决冲突</title>
@@ -460,19 +459,72 @@ $example->x;
 <?php
 trait PropertiesTrait {
     public $same = true;
-    public $different = false;
+    public $different1 = false;
+    public bool $different2;
+    readonly public bool $different3;
 }
 
 class PropertiesExample {
     use PropertiesTrait;
     public $same = true;
-    public $different = true; // 致命错误
+    public $different1 = true; // Fatal error
+    public string $different2; // Fatal error
+    readonly public bool $different3; // Fatal error
 }
 ?>
 ]]>
     </programlisting>
    </example>
   </sect2>
+
+ <sect2 xml:id="language.oop5.traits.constants">
+  <title>&Constants;</title>
+  <para>
+   自 PHP 8.2.0 起，trait 也可以定义常量。
+  </para>
+  <example xml:id="language.oop5.traits.constants.example">
+   <title>定义常量</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+trait ConstantsTrait {
+    public const FLAG_MUTABLE = 1;
+    final public const FLAG_IMMUTABLE = 5;
+}
+
+class ConstantsExample {
+    use ConstantTrait;
+}
+
+$example = new ConstantExample;
+$example::FLAG;
+?>
+]]>
+   </programlisting>
+  </example>
+  <para>
+   如果 trait 定义了常量，然后类不能定义相同名称的常量，除非两者兼容（相同的可见性、初始化值和
+   final），否则会发出 fatal error。
+  </para>
+  <example xml:id="language.oop5.traits.constants.conflicts">
+   <title>解决冲突</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+trait ConstantsTrait {
+    public const FLAG_MUTABLE = 1;
+    final public const FLAG_IMMUTABLE = 5;
+}
+
+class ConstantsExample {
+    use ConstantTrait;
+    public const FLAG_IMMUTABLE = 5; // Fatal error
+}
+?>
+]]>
+   </programlisting>
+  </example>
+ </sect2>
 
  </sect1>
  

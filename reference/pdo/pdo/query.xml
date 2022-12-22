@@ -1,59 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 2cbeef3874cacf583fa186daa5b7d0a2d4784ca2 Maintainer: daijie Status: ready -->
-<!-- Reviewed: no -->
-
+<!-- EN-Revision: 0ce949d098c21c0109d289c372cc02d12228dbd3 Maintainer: daijie Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="pdo.query" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>PDO::query</refname>
   <refpurpose>
-    执行 SQL 语句，以 PDOStatement 对象形式返回结果集
+    预处理并执行没有占位符的 SQL 语句
   </refpurpose>
  </refnamediv>
  <refsect1 role="description">
   &reftitle.description;
-  <methodsynopsis>
-   <modifier>public</modifier> <type>PDOStatement</type><methodname>PDO::query</methodname>
-   <methodparam><type>string</type><parameter>statement</parameter></methodparam>
+  <methodsynopsis role="PDO">
+   <modifier>public</modifier> <type class="union"><type>PDOStatement</type><type>false</type></type><methodname>PDO::query</methodname>
+   <methodparam><type>string</type><parameter>query</parameter></methodparam>
+   <methodparam choice="opt"><type class="union"><type>int</type><type>null</type></type><parameter>fetchMode</parameter><initializer>&null;</initializer></methodparam>
   </methodsynopsis>
 
-  <methodsynopsis>
-   <modifier>public</modifier> <type>PDOStatement</type><methodname>PDO::query</methodname>
-   <methodparam><type>string</type><parameter>statement</parameter></methodparam>
-   <methodparam><type>int</type><parameter>PDO::FETCH_COLUMN</parameter></methodparam>
+  <methodsynopsis role="PDO">
+   <modifier>public</modifier> <type class="union"><type>PDOStatement</type><type>false</type></type><methodname>PDO::query</methodname>
+   <methodparam><type>string</type><parameter>query</parameter></methodparam>
+   <methodparam choice="opt"><type class="union"><type>int</type><type>null</type></type><parameter>fetchMode</parameter><initializer>PDO::FETCH_COLUMN</initializer></methodparam>
    <methodparam><type>int</type><parameter>colno</parameter></methodparam>
   </methodsynopsis>
 
-  <methodsynopsis>
-   <modifier>public</modifier> <type>PDOStatement</type><methodname>PDO::query</methodname>
-   <methodparam><type>string</type><parameter>statement</parameter></methodparam>
-   <methodparam><type>int</type><parameter>PDO::FETCH_CLASS</parameter></methodparam>
+  <methodsynopsis role="PDO">
+   <modifier>public</modifier> <type class="union"><type>PDOStatement</type><type>false</type></type><methodname>PDO::query</methodname>
+   <methodparam><type>string</type><parameter>query</parameter></methodparam>
+   <methodparam choice="opt"><type class="union"><type>int</type><type>null</type></type><parameter>fetchMode</parameter><initializer>PDO::FETCH_CLASS</initializer></methodparam>
    <methodparam><type>string</type><parameter>classname</parameter></methodparam>
-   <methodparam><type>array</type><parameter>ctorargs</parameter></methodparam>
+   <methodparam><type>array</type><parameter>constructorArgs</parameter></methodparam>
   </methodsynopsis>
 
-  <methodsynopsis>
-   <modifier>public</modifier> <type>PDOStatement</type><methodname>PDO::query</methodname>
-   <methodparam><type>string</type><parameter>statement</parameter></methodparam>
-   <methodparam><type>int</type><parameter>PDO::FETCH_INTO</parameter></methodparam>
+  <methodsynopsis role="PDO">
+   <modifier>public</modifier> <type class="union"><type>PDOStatement</type><type>false</type></type><methodname>PDO::query</methodname>
+   <methodparam><type>string</type><parameter>query</parameter></methodparam>
+   <methodparam choice="opt"><type class="union"><type>int</type><type>null</type></type><parameter>fetchMode</parameter><initializer>PDO::FETCH_INTO</initializer></methodparam>
    <methodparam><type>object</type><parameter>object</parameter></methodparam>
   </methodsynopsis>
 
   <para>
-   <function>PDO::query</function> 在单次函数调用内执行 SQL 语句，以 PDOStatement 对象形式返回结果集（如果有数据的话）。
+   <methodname>PDO::query</methodname> 在单次函数调用内预处理并执行 SQL 语句，以 <classname>PDOStatement</classname> 对象形式返回结果集（如果有数据的话）。
    
   </para>
   <para>
-   如果反复调用同一个查询，用 <function>PDO::prepare</function> 准备 PDOStatement 对象，并用 <function>PDOStatement::execute</function> 执行语句，将具有更好的性能。
+   如果反复调用同一个查询，用 <methodname>PDO::prepare</methodname> 准备 <classname>PDOStatement</classname> 对象，并用 <methodname>PDOStatement::execute</methodname> 执行语句，将具有更好的性能。
   </para>
   <para>
-    如果没有完整获取结果集内的数据，就调用下一个 <function>PDO::query</function>，将可能调用失败。
-   应当在执行下一个 <function>PDO::query</function> 前，先用 <function>PDOStatement::closeCursor</function> 释放数据库PDOStatement 关联的资源。
+   如果没有完整获取结果集内的数据，就调用下一个 <methodname>PDO::query</methodname>，将可能调用失败。应当在执行下一个 <methodname>PDO::query</methodname>
+   前，先用 <methodname>PDOStatement::closeCursor</methodname> 释放数据库 <classname>PDOStatement</classname> 关联的资源。
   </para>
 
   <note>
    <para>
-     如果传入函数的参数数量超过一个，多余的参数将相当于调用结果对象 <function>PDOStatement::setFetchMode</function> 方法。
+    如果 <parameter>query</parameter> 包含占位符，则必须使用 <methodname>PDO::prepare</methodname> 和 <methodname>PDOStatement::execute</methodname>
+    方法分别预处理和执行语句。
    </para>
   </note>
 
@@ -63,14 +64,30 @@
   <para>
    <variablelist>
     <varlistentry>
-     <term><parameter>statement</parameter></term>
+     <term><parameter>query</parameter></term>
       <listitem>
        <para>
-         需要准备、执行的 SQL 语句。
+         预处理和执行的 SQL 语句。
        </para>
        <para>
-         查询里的数据应该用<link
-        linkend="pdo.quote">恰当的形式转义</link>。
+        如果 SQL 包含占位符，则必须使用 <methodname>PDO::prepare</methodname> 和
+        <methodname>PDOStatement::execute</methodname>。或者在调用 <methodname>PDO::query</methodname>
+        之前手动预处理 SQL，如果驱动程序支持，使用 <methodname>PDO::quote</methodname> 正确格式化数据。
+       </para>
+      </listitem>
+     </varlistentry>
+    <varlistentry>
+     <term><parameter>fetchMode</parameter></term>
+      <listitem>
+       <para>
+        返回 <classname>PDOStatement</classname> 的默认获取模式。必须是
+        <link linkend="pdo.constants"><literal>PDO::FETCH_*</literal></link> 常量之一。
+       </para>
+       <para>
+        If this argument is passed to the function, the remaining arguments
+        will be treated as though <methodname>PDOStatement::setFetchMode</methodname>
+        was called on the resultant statement object.
+        The subsequent arguments vary depending on the selected fetch mode.
        </para>
       </listitem>
      </varlistentry>
@@ -80,7 +97,7 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-    <function>PDO::query</function> 返回 PDOStatement 对象，或在失败时返回 &false;。
+   返回 <classname>PDOStatement</classname> 对象&return.falseforfailure;
   </para>
  </refsect1>
 
@@ -88,20 +105,15 @@
   &reftitle.examples;
   <para>
    <example>
-    <title>展示 PDO::query 的使用</title>
-    <para>
-      <function>PDO::query</function> 一个不错的功能是：执行 SELECT 语句，并能够循环遍历结果集。
-    </para>
+    <title>没有占位符的 SQL 可以使用 <methodname>PDO::query</methodname> 执行</title>
     <programlisting role="php">
 <![CDATA[
 <?php
-function getFruit($conn) {
-    $sql = 'SELECT name, color, calories FROM fruit ORDER BY name';
-    foreach ($conn->query($sql) as $row) {
-        print $row['name'] . "\t";
-        print $row['color'] . "\t";
-        print $row['calories'] . "\n";
-    }
+$sql = 'SELECT name, color, calories FROM fruit ORDER BY name';
+foreach ($conn->query($sql) as $row) {
+    print $row['name'] . "\t";
+    print $row['color'] . "\t";
+    print $row['calories'] . "\n";
 }
 ?>
 ]]>
@@ -127,9 +139,9 @@ watermelon      pink    90
   &reftitle.seealso;
   <para>
    <simplelist>
-    <member><function>PDO::exec</function></member>
-    <member><function>PDO::prepare</function></member>
-    <member><function>PDOStatement::execute</function></member>
+    <member><methodname>PDO::exec</methodname></member>
+    <member><methodname>PDO::prepare</methodname></member>
+    <member><methodname>PDOStatement::execute</methodname></member>
    </simplelist>
   </para>
  </refsect1>
