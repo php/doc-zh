@@ -1,23 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: fc9e379fd822e0731859b056db368fa59f7f14b9 Maintainer: HonestQiao Status: ready -->
-<!-- Reviewed: no Maintainer: HonestQiao -->
+<!-- EN-Revision: 593ea510e853ff034e03f78a4be0daa41661c9d4 Maintainer: HonestQiao Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="function.imagexbm" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>imagexbm</refname>
-  <refpurpose>将 XBM 图像输出到浏览器或文件</refpurpose>
+  <refpurpose>输出 XBM 图像到浏览器或文件</refpurpose>
  </refnamediv>
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
    <type>bool</type><methodname>imagexbm</methodname>
-   <methodparam><type>resource</type><parameter>image</parameter></methodparam>
-   <methodparam><type>string</type><parameter>filename</parameter></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter>foreground</parameter></methodparam>
+   <methodparam><type>GdImage</type><parameter>image</parameter></methodparam>
+   <methodparam><type class="union"><type>string</type><type>null</type></type><parameter>filename</parameter></methodparam>
+   <methodparam choice="opt"><type class="union"><type>int</type><type>null</type></type><parameter>foreground_color</parameter><initializer>&null;</initializer></methodparam>
   </methodsynopsis>
   <para>
-   将 <acronym>XBM</acronym> 图像 <parameter>image</parameter> 输出到浏览器或文件
+   输出或保存 <parameter>image</parameter> 的 <acronym>XBM</acronym> 版本。
   </para>
+  <note>
+   <simpara>
+    <function>imagexbm</function> 不应用任何填充，因此图片宽度必须是
+    8 的倍数。从 PHP 7.0.9 起此限制不再适用。
+   </simpara>
+  </note>
  </refsect1>
  <refsect1 role="parameters">
   &reftitle.parameters;
@@ -27,15 +33,21 @@
     <varlistentry>
      <term><parameter>filename</parameter></term>
      <listitem>
-      <para>&gd.image.path;</para>
+      <para>以 &string; 给出保存到文件的路径。如果为 &null;，将直接输出原始图像流。</para>
+      <para>
+       The <parameter>filename</parameter> (without the .xbm extension) is also
+       used for the C identifiers of the <acronym>XBM</acronym>, whereby non
+       alphanumeric characters of the current locale are substituted by
+       underscores. If <parameter>filename</parameter> is set to &null;,
+       <literal>image</literal> is used to build the C identifiers.
+      </para>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>foreground</parameter></term>
+     <term><parameter>foreground_color</parameter></term>
      <listitem>
       <para>
-       你可以从  <function>imagecolorallocate</function> 分配一个颜色，并设置为该前景色参数。
-       默认颜色是黑色。
+       通过设置从 <function>imagecolorallocate</function> 获得的标识符来使用此参数设置前景色。默认前景色是黑色。所有的其它颜色都视为背景。
       </para>
      </listitem>
     </varlistentry>
@@ -47,12 +59,43 @@
   <para>
    &return.success;
   </para>
+  &gd.return.trueonerror;
  </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <informaltable>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>&Version;</entry>
+      <entry>&Description;</entry>
+     </row>
+    </thead>
+    <tbody>
+     &gd.changelog.image-param;
+     <row>
+      <entry>8.0.0</entry>
+      <entry>
+       <parameter>foreground_color</parameter> 现在允许为 null。
+      </entry>
+     </row>
+     <row>
+      <entry>8.0.0</entry>
+      <entry>
+       第四个参数未使用，已移除。
+      </entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </informaltable>
+ </refsect1>
+
  <refsect1 role="examples">
   &reftitle.examples;
   <para>
    <example>
-    <title>保存一个 XBM 文件</title>
+    <title>保存 XBM 文件</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -98,10 +141,8 @@ imagedestroy($im);
  </refsect1>
  <refsect1 role="notes">
   &reftitle.notes;
-  
  </refsect1>
 </refentry>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
