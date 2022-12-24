@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-
+<!-- EN-Revision: ecaa2146429a7f88de40dfce14718afc896b74c5 Maintainer: mowangjuanzi Status: ready -->
 <refentry xml:id="yaf-route-regex.construct" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
   <refname>Yaf_Route_Regex::__construct</refname>
-  <refpurpose>The __construct purpose</refpurpose>
+  <refpurpose>Yaf_Route_Regex 构造方法</refpurpose>
  </refnamediv>
 
  <refsect1 role="description">
   &reftitle.description;
-  <methodsynopsis>
-   <modifier>public</modifier><methodname>Yaf_Route_Regex::__construct</methodname>
+  <constructorsynopsis>
+   <modifier>public</modifier> <methodname>Yaf_Route_Regex::__construct</methodname>
    <methodparam><type>string</type><parameter>match</parameter></methodparam>
    <methodparam><type>array</type><parameter>route</parameter></methodparam>
    <methodparam choice="opt"><type>array</type><parameter>map</parameter></methodparam>
    <methodparam choice="opt"><type>array</type><parameter>verify</parameter></methodparam>
-  </methodsynopsis>
+   <methodparam choice="opt"><type>string</type><parameter>reverse</parameter></methodparam>
+  </constructorsynopsis>
   <para>
-    
   </para>
 
  </refsect1>
@@ -29,7 +29,7 @@
     <term><parameter>match</parameter></term>
     <listitem>
      <para>
-       一个完整的正则表达式，用来匹配一个请求的uri，如果不能匹配，<classname>Yaf_Route_Regex</classname> 将返回FALSE。
+      完整的正则表达式，用来匹配请求的 uri，如果不能匹配，<classname>Yaf_Route_Regex</classname> 将返回 &false;。
      </para>
     </listitem>
    </varlistentry>
@@ -37,11 +37,10 @@
     <term><parameter>route</parameter></term>
     <listitem>
      <para>
-      当路由正则匹配成功请求uri时，<classname>Yaf_Route_Regex</classname>将会用它来决定哪一个m/c/a被路由。
+      当路由正则匹配成功请求 uri 时，<classname>Yaf_Route_Regex</classname> 将会用它来决定哪一个 m/c/a 被路由。
      </para>
      <para>
-      在这个数组中无论是m/c/a都是最优的，如果你没有提供一个明确的值，它将会以默认方式被路由。
-      另外, 你也可以使用map的结果作为m/c/a的结果. 
+      数组中的 m/c/a 是可选的，如果没有分配特定的值，将路由到默认值。
      </para>
     </listitem>
    </varlistentry>
@@ -49,7 +48,7 @@
     <term><parameter>map</parameter></term>
     <listitem>
      <para>
-      将匹配到的结果捕捉放到一个已经命名好的数组中。
+      数组，用于为匹配结果中捕获的名称分配名称。
      </para>
     </listitem>
    </varlistentry>
@@ -58,6 +57,20 @@
     <listitem>
      <para>
       
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><parameter>reverse</parameter></term>
+    <listitem>
+     <para>
+      字符串，用于组合 url，参阅
+      <methodname>Yaf_Route_Regex::assemble</methodname>。
+      <note>
+       <para>
+        2.3.0 起引入该参数
+       </para>
+      </note>
      </para>
     </listitem>
    </varlistentry>
@@ -74,7 +87,7 @@
  <refsect1 role="examples">
   &reftitle.examples;
   <example>
-   <title><function>Yaf_Route_Regex</function>example</title>
+   <title><function>Yaf_Route_Regex</function> 示例</title>
    <programlisting role="php">
 <![CDATA[
 <?php
@@ -98,18 +111,18 @@
    </programlisting>
   </example>
   <example>
-   <title><function>Yaf_Route_Regex(as of 2.3.0)</function>example</title>
+   <title><function>Yaf_Route_Regex</function>（从 2.3.0 起）示例</title>
    <programlisting role="php">
 <![CDATA[
 <?php
    /**
-    *  使用动态的controller
+    * 使用匹配结果作为 MVC 名称
     */
     Yaf_Dispatcher::getInstance()->getRouter()->addRoute("name",
         new Yaf_Route_Regex(
-           "#^/product/([^/]+)/([^/])+#", //match request uri leading "/product"
+           "#^/product/([^/]+)/([^/])+#i", //match request uri leading "/product"
            array(
-              'controller' => ":name",  //使用上面匹配的:name, 也就是$1作为controller
+              'controller' => ":name", // 路由到 :name，匹配结果中的 $1 作为控制器名称
            ),
            array(
               1 => "name",   // now you can call $request->getParam("name")
@@ -122,7 +135,31 @@
    </programlisting>
   </example>
   <example>
-   <title><function>Yaf_Route_Regex</function>example</title>
+   <title><function>Yaf_Route_Regex</function> 和命名捕获组（从 2.3.0 起）示例</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+   /**
+    * Use match result as MVC name
+    */
+    Yaf_Dispatcher::getInstance()->getRouter()->addRoute("name",
+        new Yaf_Route_Regex(
+           "#^/product/(?<name>[^/]+)/([^/])+#i", //match request uri leading "/product"
+           array(
+           'controller' => ":name", // route to :name,
+                                    // which is named capture group 'name' in the match result as controller name
+           ),
+           array(
+              2 => "id",     // to get the first captrue in the match pattern.
+           )
+        )
+    );
+?>
+]]>
+   </programlisting>
+  </example>
+  <example>
+   <title><function>Yaf_Route_Regex</function> 示例</title>
    <programlisting role="php">
 <![CDATA[
 <?php
