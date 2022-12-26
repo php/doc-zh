@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-
+<!-- EN-Revision: ecaa2146429a7f88de40dfce14718afc896b74c5 Maintainer: mowangjuanzi Status: ready -->
 <phpdoc:classref xml:id="class.yaf-router" xmlns:phpdoc="http://php.net/ns/phpdoc" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude">
 
- <title>The Yaf_Router class</title>
+ <title>Yaf_Router 类</title>
  <titleabbrev>Yaf_Router</titleabbrev>
 
  <partintro>
@@ -12,11 +12,17 @@
   <section xml:id="yaf-router.intro">
    &reftitle.intro;
    <para>
-   <classname>Yaf_Router</classname>是标准的框架路由.路由是一个拿到URI端点（URL中的URI的一部分）然后分解参数得到哪一个module, controller, 和action需要接受请求。module, controller, 和action，还有一些其他的参数是打包在一个<classname>Yaf_Request_Abstract</classname>的对象中，然后通过<classname>Yaf_Dispatcher</classname>来处理的。路由只发生一次:最初接到请求并且在第一个controller分发之前。
-   <classname>Yaf_Router</classname> 是设计来允许使用纯PHP结构的类似功能模块的跳转。它非常松散的基于Ruby on Rails的路由，并且不需要你提前就知道webserver URL跳转的相关知识。它是设计来处理一个Apache 跳转模块的规则（一个）
-   <classname>Yaf_Router</classname>是设计来允许mod_rewrite
+    <classname>Yaf_Router</classname> 是标准的框架路由。路由是获取 URI 端点（位于基本 URI 之后的 URI 部分：参考
+    <methodname>Yaf_Request_Abstract::setBaseUri</methodname>）并将其分解为参数得到哪个 module、controller 和
+    action 需要接收请求。module、controller、action 和其它参数打包到 <classname>Yaf_Request_Abstract</classname>
+    对象中，然后由 <classname>Yaf_Dispatcher</classname> 处理。路由只发生一次：最初接到请求和在第一个 controller
+    分发之前。
+
+    <classname>Yaf_Router</classname> 是设计来允许使用纯 PHP 结构的类似 mod_rewrite 的功能。它非常松散的基于 Ruby on
+    Rails 的路由，并且不需要提前知悉 webserver URL 重写的相关知识。它设计为跟单个 Apache mod_rewrite（或其中之一个）
+    规则一起使用：
    <example>
-    <title>Apache的跳转规则</title>
+    <title>Apache 重写规则</title>
    <programlisting role="conf">
 <![CDATA[
 RewriteEngine on
@@ -24,9 +30,9 @@ RewriteRule !\.(js|ico|gif|jpg|png|css|html)$ index.php
 ]]>
    </programlisting>
    </example>
-   or (preferred):
+   或者（首选）：
    <example>
-   <title>Apache的跳转规则</title>
+   <title>Apache 重写规则</title>
    <programlisting role="conf">
 <![CDATA[
 RewriteEngine On
@@ -38,9 +44,9 @@ RewriteRule ^.*$ index.php [NC,L]
 ]]>
    </programlisting>
   </example>
-   如果使用Lighttpd，下面的跳转规则是有效的：
+   如果使用 Lighttpd，以下重写规则有效：
    <example>
-    <title>Lighttpd的跳转规则</title>
+    <title>Lighttpd 重写规则</title>
    <programlisting role="conf">
 <![CDATA[
 url.rewrite-once = (
@@ -51,9 +57,9 @@ url.rewrite-once = (
 ]]>
    </programlisting>
   </example>
-   如果使用Nginx，下面的跳转规则是有效的：
+   如果使用 Nginx，以下重写规则有效：
    <example>
-    <title>Nginx的跳转规则</title>
+    <title>Nginx 重写规则</title>
    <programlisting role="conf">
 <![CDATA[
 server {
@@ -76,19 +82,21 @@ server {
   <section xml:id="yaf-router.default">
    <title>默认路由</title>
    <para>
-   Yaf_Router预设了一个默认路由，它将以controller/action的形式匹配URIs。此外，一个module的名字可以被指定为第一路径元素，允许URIs设置为module/controller/action的形式。最后，它也会匹配一些URI中额外附加的参数，默认形式是controller/action/var1/value1/var2/value2。
+    <classname>Yaf_Router</classname> 预设了默认路由 <classname>Yaf_Route_Static</classname>，将以 controller/action
+    的形式匹配 URI。此外，module 名可以被指定为第一个路径元素，允许 URI 设置为 module/controller/action 形式的
+    URI。最后，它也会匹配默认追加到 URI 中所有附加参数——controller/action/var1/value1/var2/value2。
     <note>
      <para>
-      Module的名字必须要定义在配置中，就application.module="Index,Foo,Bar"而言，在这种情况下，仅仅index, foo 和 bar能被考虑作为为一个module的名称。如果没有在配置文件中定义，那么Yaf使用默认的module名字“Index”。
+      Module 名必须在配置中定义，就 application.module="Index,Foo,Bar" 而言，在这种情况下，仅 index、foo 和 bar 可以认做
+      module 名。如果没有配置，那么 Yaf 使用默认 module 名“Index”。
      </para>
     </note>
    </para>
 
    <para>
-   如何匹配这些路由的一些例子：
+    如何匹配这些路由的一些例子：
    <example>
-    <title><classname>Yaf_Route_Static</classname>(default
-     route)example</title>
+    <title><classname>Yaf_Route_Static</classname>（默认路由）示例</title>
    <programlisting role="conf">
 <![CDATA[
 // Assuming the following configure:
@@ -159,6 +167,7 @@ http://example/blog/archive/list/sort/alpha/date/desc
 
     
     <classsynopsisinfo role="comment">&Methods;</classsynopsisinfo>
+    <xi:include xpointer="xmlns(db=http://docbook.org/ns/docbook) xpointer(id('class.yaf-router')/db:refentry/db:refsect1[@role='description']/descendant::db:constructorsynopsis[not(@role='procedural')])" />
     <xi:include xpointer="xmlns(db=http://docbook.org/ns/docbook) xpointer(id('class.yaf-router')/db:refentry/db:refsect1[@role='description']/descendant::db:methodsynopsis[1])" />
    </classsynopsis>
 <!-- }}} -->
@@ -173,13 +182,19 @@ http://example/blog/archive/list/sort/alpha/date/desc
     <varlistentry xml:id="yaf-router.props.routes">
      <term><varname>_routes</varname></term>
      <listitem>
-      <para></para>
+      <para>
+       已注册路由栈
+      </para>
      </listitem>
     </varlistentry>
     <varlistentry xml:id="yaf-router.props.current">
      <term><varname>_current</varname></term>
      <listitem>
-      <para></para>
+      <para>
+       在路由阶段后，这用于指示当前请求的路由名称。
+
+       可以通过 <methodname>Yaf_Router::getCurrentRoute</methodname> 获取此名称。
+      </para>
      </listitem>
     </varlistentry>
    </variablelist>
