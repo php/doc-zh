@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-
+<!-- EN-Revision: 73fae4ee51b644b72028e610abefefced57c18ad Maintainer: mowangjuanzi Status: ready -->
 <phpdoc:classref xml:id="class.yaf-controller-abstract" xmlns:phpdoc="http://php.net/ns/phpdoc" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude">
 
- <title>The Yaf_Controller_Abstract class</title>
+ <title>Yaf_Controller_Abstract 类</title>
  <titleabbrev>Yaf_Controller_Abstract</titleabbrev>
 
  <partintro>
@@ -12,22 +12,27 @@
   <section xml:id="yaf-controller-abstract.intro">
    &reftitle.intro;
    <para>
-    <classname>Yaf_Controller_Abstract</classname> 是Yaf的MVC体系的核心部分。
-    MVC是指Model-View-Controller, 是一个用于分离应用逻辑和表现逻辑的设计模式。
+    <classname>Yaf_Controller_Abstract</classname> 是 Yaf 系统的 MVC 体系的核心部分。MVC
+    是指 Model-View-Controller，是一个用于分离应用逻辑和表现逻辑的设计模式。
    </para>
    <para>
-    每个用户自定义controller都应当继承<classname>Yaf_Controller_Abstract</classname>。
+    每个自定义 controller 都应当继承 <classname>Yaf_Controller_Abstract</classname>。
    </para>
    <para>
-    你会发现在你自己的controller中无法定义__construct方法。因此，<classname>Yaf_Controller_Abstract</classname>
-    提供了一个魔术方法Yaf_Controller_Abstract::init()。
+    自定义 controller 中无法定义 __construct 方法。因此，<classname>Yaf_Controller_Abstract</classname>
+    提供了一个魔术方法 <methodname>Yaf_Controller_Abstract::init</methodname>。
    </para>
    <para>
-    如果在你自己的controller里面已经定义了一个init()方法，当你的controller被实例化的时候，它将被调用。
+    如果自定义 controller 里已经定义了 init() 方法，当实例化 controller 的时候，它将被调用。
    </para>
    <para>
-    Action可能需要参数，当一个请求来到的时候，在路由中如果请求的参数有相同名称的变量（例如：<methodname>Yaf_Request_Abstract::getParam</methodname>），
-    Yaf将把他们传递给action方法（see <methodname>Yaf_Action_Abstract::execute</methodname>）。
+    Action 可能需要参数，当请求来到的时候，在路由中如果请求的参数有相同名称的变量（例如：<methodname>Yaf_Request_Abstract::getParam</methodname>），Yaf
+    将把他们传递给 action 方法（参阅 <methodname>Yaf_Action_Abstract::execute</methodname>）。
+    <note>
+     <para>
+      这些参数是直接获取的，没有过滤，使用他们之前应该仔细处理。
+     </para>
+    </note>
    </para>
   </section>
 <!-- }}} -->
@@ -79,6 +84,7 @@
 
     
     <classsynopsisinfo role="comment">&Methods;</classsynopsisinfo>
+    <xi:include xpointer="xmlns(db=http://docbook.org/ns/docbook) xpointer(id('class.yaf-controller-abstract')/db:refentry/db:refsect1[@role='description']/descendant::db:constructorsynopsis[not(@role='procedural')])" />
     <xi:include xpointer="xmlns(db=http://docbook.org/ns/docbook) xpointer(id('class.yaf-controller-abstract')/db:refentry/db:refsect1[@role='description']/descendant::db:methodsynopsis[1])" />
    </classsynopsis>
 <!-- }}} -->
@@ -94,9 +100,9 @@
      <term><varname>actions</varname></term>
      <listitem>
       <para>
-      你也可以通过使用这个值和 <classname>Yaf_Action_Abstract</classname> 在一个单独的PHP脚本中定义action函数。
+       也可以通过使用此属性和 <classname>Yaf_Action_Abstract</classname> 在一个单独的 PHP 脚本中定义 action 方法。
       <example>
-       <title>在一个独立的文件中定义action</title>
+       <title>在单独的文件中定义 action</title>
         <programlisting role="php">
 <![CDATA[
 <?php
@@ -107,7 +113,8 @@ class IndexController extends Yaf_Controller_Abstract {
     );
 
     /* action method may have arguments */
-    public indexAction($name, $id) {
+    public function indexAction($name, $id) {
+       /* $name and $id are unsafe raw data */
        assert($name == $this->getRequest()->getParam("name"));
        assert($id   == $this->_request->getParam("id"));
     }
@@ -122,8 +129,8 @@ class IndexController extends Yaf_Controller_Abstract {
 <![CDATA[
 <?php
 class DummyAction extends Yaf_Action_Abstract {
-    /* a action class shall define this method  as the entry point */
-    public execute() {
+    /* an action class shall define this method as the entry point */
+    public function execute() {
     }
 }
 ?>
@@ -144,21 +151,25 @@ class DummyAction extends Yaf_Action_Abstract {
     <varlistentry xml:id="yaf-controller-abstract.props.name">
      <term><varname>_name</varname></term>
      <listitem>
-      <para></para>
+      <para>
+        控制器名
+      </para>
      </listitem>
     </varlistentry>
     <varlistentry xml:id="yaf-controller-abstract.props.request">
      <term><varname>_request</varname></term>
      <listitem>
       <para>
-      当前的请求实例
+       当前请求实例
       </para>
      </listitem>
     </varlistentry>
     <varlistentry xml:id="yaf-controller-abstract.props.response">
      <term><varname>_response</varname></term>
      <listitem>
-      <para></para>
+      <para>
+       当前响应对象
+      </para>
      </listitem>
     </varlistentry>
     <varlistentry xml:id="yaf-controller-abstract.props.invoke-args">

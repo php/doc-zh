@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-
+<!-- EN-Revision: 7418592d82d6cde8d052effd3607e5761d6c4e67 Maintainer: mowangjuanzi Status: ready -->
 <refentry xml:id="yaf-loader.registerlocalnamespace" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
   <refname>Yaf_Loader::registerLocalNamespace</refname>
@@ -11,10 +11,26 @@
   &reftitle.description;
   <methodsynopsis>
    <modifier>public</modifier> <type>void</type><methodname>Yaf_Loader::registerLocalNamespace</methodname>
-   <methodparam choice="opt"><type>mixed</type><parameter>prefix</parameter></methodparam>
+   <methodparam><type>mixed</type><parameter>prefix</parameter></methodparam>
   </methodsynopsis>
   <para>
-   register local class prefix
+   注册本地类前缀，<classname>Yaf_Loader</classname> 在两个库目录下搜索类，一个是通过 <link
+   linkend="configuration.yaf.library">application.library.directory</link>（在
+   application.ini 中）配置，称为本地库目录；另一个是通过 <link
+   linkend="ini.yaf.library">yaf.library</link>（在 php.ini
+   中），成为全局库目录，因为它可以在同一个服务器中的许多应用程序共享。
+  </para>
+  <para>
+   当触发自动加载时，<classname>Yaf_Loader</classname> 将通过检查丢失类名的前缀来确定应该在哪个库目录中去搜索。
+
+   如果前缀名注册为 localnamespack，则在本地库目录中查找，否则在全局库目录中查找。
+   <note>
+    <para>
+     如果未配置 yaf.library，则假定全局库目录为本地库目录。在这种情况下，所有自动加载都将查找本地库目录。
+
+     但如果希望 Yaf 应用程序更加健壮，那么请始终将类注册为本地类。
+    </para>
+   </note>
   </para>
  </refsect1>
 
@@ -25,7 +41,7 @@
     <term><parameter>prefix</parameter></term>
     <listitem>
      <para>
-      字符串或者是数组格式的类名前缀，所有拥有和这些前缀相同前缀的类将被加载到本地library路径。
+      字符串或者是数组格式的类名前缀，所有拥有和这些前缀相同前缀的类将被加载到本地 library 路径。
      </para>
     </listitem>
    </varlistentry>
@@ -42,13 +58,13 @@
  <refsect1 role="examples">
   &reftitle.examples;
   <example>
-   <title><function>Yaf_Loader::registerLocalNamespace</function>example</title>
+   <title><function>Yaf_Loader::registerLocalNamespace</function> 示例</title>
    <programlisting role="php">
 <![CDATA[
 <?php
 $loader = Yaf_Loader::getInstance('/local/library/', '/global/library');
 $loader->registerLocalNamespace("Baidu");
-$loader->registerLocalNamespace(array("Sina", "Weibo");
+$loader->registerLocalNamespace(array("Sina", "Weibo"));
 
 $loader->autoload("Baidu_Name"); // search in '/local/library/'
 $loader->autoload("Sina");       // search '/local/library/'
