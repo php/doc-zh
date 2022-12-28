@@ -1,43 +1,124 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
-  <refentry xml:id="function.imagesetbrush" xmlns="http://docbook.org/ns/docbook">
-   <refnamediv>
-    <refname>imagesetbrush</refname>
-    <refpurpose>设定画线用的画笔图像</refpurpose>
-   </refnamediv>
-   <refsect1>
-    <title>说明</title>
-    <methodsynopsis>
-     <type>bool</type><methodname>imagesetbrush</methodname>
-     <methodparam><type>resource</type><parameter>image</parameter></methodparam>
-     <methodparam><type>resource</type><parameter>brush</parameter></methodparam>
-    </methodsynopsis>
-    <para>
-     当用特殊的颜色 <literal>IMG_COLOR_BRUSHED</literal> 或
-     <literal>IMG_COLOR_STYLEDBRUSHED</literal>
-     绘画时，<function>imagesetbrush</function>
-     设定了所有画线的函数（例如 <function>imageline</function>
-     和 <function>imagepolygon</function>）所使用的画笔图像。【注：使用画笔图像，所画的线是由
-     <parameter>brush</parameter> 所代表的图像构成的。请参考并尝试运行
-     <function>imagesetstyle</function> 中的例子以帮助理解。】
-    </para>
-    <note>
-     <para>
-      使用完画笔图像后不需要采取什么特殊动作。但如果销毁了画笔图像，在设定一个新的画笔图像之前不能使用
-      <literal>IMG_COLOR_BRUSHED</literal> 或
-      <literal>IMG_COLOR_STYLEDBRUSHED</literal>！
-     </para>
-    </note>
-    <note>
-     <para>
-      本函数是 PHP 4.0.6 添加的。
-     </para>
-    </note>
-   </refsect1>
-  </refentry>
+<!-- EN-Revision: 593ea510e853ff034e03f78a4be0daa41661c9d4 Maintainer: dallas Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
+<refentry xml:id="function.imagesetbrush" xmlns="http://docbook.org/ns/docbook">
+ <refnamediv>
+  <refname>imagesetbrush</refname>
+  <refpurpose>设定画线用的画笔图像</refpurpose>
+ </refnamediv>
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <type>bool</type><methodname>imagesetbrush</methodname>
+   <methodparam><type>GdImage</type><parameter>image</parameter></methodparam>
+   <methodparam><type>GdImage</type><parameter>brush</parameter></methodparam>
+  </methodsynopsis>
+  <para>
+   当用特殊的颜色 <literal>IMG_COLOR_BRUSHED</literal> 或 <literal>IMG_COLOR_STYLEDBRUSHED</literal>
+   绘制时，<function>imagesetbrush</function> 设定了所有画线的函数（例如 <function>imageline</function>
+   和 <function>imagepolygon</function>）所使用的画笔图像。【注：使用画笔图像，所画的线是由
+   <parameter>brush</parameter> 所代表的图像构成的。请参考并尝试运行
+   <function>imagesetstyle</function> 中的例子以帮助理解。】
+  </para>
+  <caution>
+   <para>
+    平铺完成后不需要采取什么特殊动作，但如果要销毁画笔图像（或让 PHP 销毁），不能使用 <constant>IMG_COLOR_BRUSHED</constant>
+    或 <constant>IMG_COLOR_TILED</constant> 颜色，除非设置了新的画笔图像。
+   </para>
+  </caution>
+ </refsect1>
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    &gd.image.description;
+    <varlistentry>
+     <term><parameter>brush</parameter></term>
+     <listitem>
+      <para>
+       图像对象。
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   &return.success;
+  </para>
+ </refsect1>
 
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <informaltable>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>&Version;</entry>
+      <entry>&Description;</entry>
+     </row>
+    </thead>
+    <tbody>
+     <row>
+      <entry>8.0.0</entry>
+      <entry>
+       <parameter>image</parameter> 和 <parameter>brush</parameter> 现在需要
+       <classname>GdImage</classname> 实例，之前需要 <type>resource</type>。
+      </entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </informaltable>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title><function>imagesetbrush</function> 示例</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+// Load a mini php logo
+$php = imagecreatefrompng('./php.png');
+
+// Create the main image, 100x100
+$im = imagecreatetruecolor(100, 100);
+
+// Fill the background with white
+$white = imagecolorallocate($im, 255, 255, 255);
+imagefilledrectangle($im, 0, 0, 299, 99, $white);
+
+// Set the brush
+imagesetbrush($im, $php);
+
+// Draw a couple of brushes, each overlaying each
+imageline($im, 50, 50, 50, 60, IMG_COLOR_BRUSHED);
+
+// Output image to the browser
+header('Content-type: image/png');
+
+imagepng($im);
+imagedestroy($im);
+imagedestroy($php);
+?>
+]]>
+    </programlisting>
+    &example.outputs.similar;
+    <mediaobject>
+     <alt>Output of example : imagesetbrush()</alt>
+     <imageobject>
+      <imagedata fileref="en/reference/image/figures/imagesetbrush.png"/>
+     </imageobject>
+    </mediaobject>
+   </example>
+  </para>
+ </refsect1>
+
+</refentry>
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
