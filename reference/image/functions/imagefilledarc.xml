@@ -1,35 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: c621e33dd31b5a1914c176b681550cb45335496d Maintainer: HonestQiao Status: ready -->
-<!-- Reviewed: no Maintainer: HonestQiao -->
+<!-- EN-Revision: 593ea510e853ff034e03f78a4be0daa41661c9d4 Maintainer: HonestQiao Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="function.imagefilledarc" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>imagefilledarc</refname>
-  <refpurpose>画一椭圆弧且填充</refpurpose>
+  <refpurpose>绘制部分圆弧并填充</refpurpose>
  </refnamediv>
  <refsect1 role="description">
   &reftitle.description;
-   <methodsynopsis>
+  <methodsynopsis>
    <type>bool</type><methodname>imagefilledarc</methodname>
-   <methodparam><type>resource</type><parameter>image</parameter></methodparam>
-   <methodparam><type>int</type><parameter>cx</parameter></methodparam>
-   <methodparam><type>int</type><parameter>cy</parameter></methodparam>
+   <methodparam><type>GdImage</type><parameter>image</parameter></methodparam>
+   <methodparam><type>int</type><parameter>center_x</parameter></methodparam>
+   <methodparam><type>int</type><parameter>center_y</parameter></methodparam>
    <methodparam><type>int</type><parameter>width</parameter></methodparam>
    <methodparam><type>int</type><parameter>height</parameter></methodparam>
-   <methodparam><type>int</type><parameter>start</parameter></methodparam>
-   <methodparam><type>int</type><parameter>end</parameter></methodparam>
+   <methodparam><type>int</type><parameter>start_angle</parameter></methodparam>
+   <methodparam><type>int</type><parameter>end_angle</parameter></methodparam>
    <methodparam><type>int</type><parameter>color</parameter></methodparam>
    <methodparam><type>int</type><parameter>style</parameter></methodparam>
   </methodsynopsis>
-  <para>在指定的 <parameter>image</parameter> 上画一椭圆弧且填充。</para>
-  </refsect1>
+  <para>
+   在给定 <parameter>image</parameter> 中以指定坐标为中心绘制部分圆弧。
+  </para>
+ </refsect1>
  <refsect1 role="parameters">
   &reftitle.parameters;
   <para>
    <variablelist>
     &gd.image.description;
     <varlistentry>
-     <term><parameter>cx</parameter></term>
+     <term><parameter>center_x</parameter></term>
      <listitem>
       <para>
        中间的 x 坐标。
@@ -37,7 +39,7 @@
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>cy</parameter></term>
+     <term><parameter>center_y</parameter></term>
      <listitem>
       <para>
        中间的 y 坐标。
@@ -48,7 +50,7 @@
      <term><parameter>width</parameter></term>
      <listitem>
       <para>
-       椭圆弧的宽度。
+       圆弧宽度。
       </para>
      </listitem>
     </varlistentry>
@@ -56,25 +58,24 @@
      <term><parameter>height</parameter></term>
      <listitem>
       <para>
-       椭圆弧的高度。
+       圆弧高度。
       </para>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>start</parameter></term>
+     <term><parameter>start_angle</parameter></term>
      <listitem>
       <para>
-       起点角度。
+       圆弧起始角，以度为单位。
       </para>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>end</parameter></term>
+     <term><parameter>end_angle</parameter></term>
      <listitem>
       <para>
-       终点角度。
-       0° is located at the three-o'clock position, and the arc is drawn
-       clockwise.
+       圆弧结束角度，以度为单位。
+       0°位于三点钟位置，顺时针绘制圆弧。
       </para>
      </listitem>
     </varlistentry>
@@ -82,7 +83,7 @@
      <term><parameter>color</parameter></term>
      <listitem>
       <para>
-              <function>imagecolorallocate</function> 创建的颜色标识符。
+       &gd.identifier.color;
       </para>
      </listitem>
     </varlistentry>
@@ -97,13 +98,13 @@
         <listitem><simpara><constant>IMG_ARC_NOFILL</constant></simpara></listitem>
         <listitem><simpara><constant>IMG_ARC_EDGED</constant></simpara></listitem>
        </orderedlist>
-  <constant>IMG_ARC_PIE</constant> 和 <constant>IMG_ARC_CHORD</constant>
-   是互斥的；<constant>IMG_ARC_CHORD</constant>
-   只是用直线连接了起始和结束点，<constant>IMG_ARC_PIE</constant>
-   则产生圆形边界。<constant>IMG_ARC_NOFILL</constant>
-   指明弧或弦只有轮廓，不填充。<constant>IMG_ARC_EDGED</constant>
-   指明用直线将起始和结束点与中心点相连，和 <constant>IMG_ARC_NOFILL</constant>
-   一起使用是画饼状图轮廓的好方法（而不用填充）。
+       <constant>IMG_ARC_PIE</constant> 和 <constant>IMG_ARC_CHORD</constant>
+       是互斥的；<constant>IMG_ARC_CHORD</constant>
+       只是用直线连接了起始和结束点，<constant>IMG_ARC_PIE</constant>
+       则产生圆形边界。<constant>IMG_ARC_NOFILL</constant>
+       指明弧或弦只有轮廓，不填充。<constant>IMG_ARC_EDGED</constant>
+       指明用直线将起始和结束点与中心点相连，和 <constant>IMG_ARC_NOFILL</constant>
+       一起使用是画饼状图轮廓的好方法（而不用填充）。
       </para>
      </listitem>
     </varlistentry>
@@ -116,11 +117,29 @@
    &return.success;
   </para>
  </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <informaltable>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>&Version;</entry>
+      <entry>&Description;</entry>
+     </row>
+    </thead>
+    <tbody>
+     &gd.changelog.image-param;
+    </tbody>
+   </tgroup>
+  </informaltable>
+ </refsect1>
+
  <refsect1 role="examples">
   &reftitle.examples;
   <para>
    <example>
-    <title>创建一 3D 效果的饼状图</title>
+    <title>创建 3D 外观的饼图</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -158,7 +177,7 @@ imagedestroy($image);
     </programlisting>
     &example.outputs.similar;
     <mediaobject>
-     <alt>例子输出：创建一 3D 效果的饼状图</alt>
+     <alt>示例输出：创建 3D 外观的饼图</alt>
      <imageobject>
       <imagedata fileref="en/reference/image/figures/imagefilledarc.png"/>
      </imageobject>
@@ -166,11 +185,8 @@ imagedestroy($image);
    </example>
   </para>
  </refsect1>
- <refsect1 role="notes">
-  &reftitle.notes;
- </refsect1>
- </refentry>
 
+</refentry>
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
