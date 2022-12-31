@@ -6,7 +6,7 @@
  <refnamediv>
   <refname>mysqli::store_result</refname>
   <refname>mysqli_store_result</refname>
-  <refpurpose>转移上一次查询返回的结果集</refpurpose>
+  <refpurpose>传输上次查询的结果集</refpurpose>
  </refnamediv>
 
  <refsect1 role="description">
@@ -23,9 +23,8 @@
    <methodparam choice="opt"><type>int</type><parameter>mode</parameter><initializer>0</initializer></methodparam>
   </methodsynopsis>
   <para>
-   迁移 <parameter>mysql</parameter> 参数所指定的连接上的上一次查询返回的结果集，
-   迁移之后的结果集可以
-   在 <function>mysqli_data_seek</function> 函数中使用。
+   传输由 <parameter>mysql</parameter> 参数表示的连接上的上一次查询的结果集，可在
+   <function>mysqli_data_seek</function> 函数中使用。
   </para>
  </refsect1>
 
@@ -40,22 +39,20 @@
       <para>
        指定的选项，可以是下列中的某一值：
        <table xml:id="mysqli.store-result.parameters">
-        <title>Valid options</title>
+        <title>有效选项</title>
         <tgroup cols="2">
          <thead>
           <row>
-           <entry>Name</entry>
-           <entry>Description</entry>
+           <entry>名称</entry>
+           <entry>说明</entry>
           </row>
          </thead>
          <tbody>
           <row>
            <entry><constant>MYSQLI_STORE_RESULT_COPY_DATA</constant></entry>
-           <entry>将结果集从 mysqlnd 的内部缓冲区复制到 PHP 变量中。
-            默认情况下，mysqlnd 采取一种引用策略尽量避免在内容中复制多份同样的结果集。
-            例如，对于一个包含了很多行的结果集，每个行中的内容又不是很大，那么复制结果集的过程会导致内存使用率下降，
-            因为用来保存结果集数据的 PHP 变量可能提前被释放掉。
-            （此选项仅在使用 mysqlnd 驱动）。</entry>
+           <entry>将结果从内部 mysqlnd 缓冲区复制到 PHP 变量中。默认 mysqlnd
+           采取引用策略来避免在内容中复制多份同样的结果集。例如，对于包含了很多小行的结果集，复制方法可以减少整体内存使用，因为保存结果的
+           PHP 变量可能会更早释放。（此选项适用于 mysqlnd 驱动）。</entry>
           </row>
          </tbody>
         </tgroup>
@@ -70,22 +67,16 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   成功则返回一个缓冲的结果集对象，失败则返回 &false;。
+   返回缓冲的结果对象，如果发生错误则返回 &false;。
   </para>
   <note>
    <para>
-    如果上一查询并不产生结果集（例如，执行了一个 INSERT 语句），
-    那么 <function>mysqli_store_result</function> 会返回 &false;。
-    如果读取结果集失败了，也会返回 &false;。
-    如何区分是上面哪种情况导致此函数的调用返回了 &false;？
-    你可以通过下面的方法来检测：
-    <function>mysqli_error</function> 返回了非空的字符串，
-    <function>mysqli_errno</function> 返回了非零值，
-    或者 <function>mysqli_field_count</function> 返回了非零值，
-    都表示发生错误了。
-    还有一种可能的情况会导致此函数的调用返回 &false;：上一次查询 <function>mysqli_query</function> 本身是成功的，
-    但是由于返回的结果集太大，无法为其分配足够的内存来进行结果集转移。
-    如果 <function>mysqli_field_count</function> 函数返回了一个非零值，那么表示 SQL 语句产生了一个非空的结果集。
+    如果查询没有返回结果集（例如，执行 INSERT 语句查询），<function>mysqli_store_result</function>
+    会返回 &false;。如果读取结果集失败，也会返回 &false;。如果通过检查 <function>mysqli_error</function>
+    是否返回非空字符串、<function>mysqli_error</function> 或 <function>mysqli_field_count</function>
+    是否返回了非零值来检查是否有错误。此函数在成功调用 <function>mysqli_query</function> 后返回 &false;
+    的一个可能原因是结果集太大（无法分配内存）。如果 <function>mysqli_field_count</function>
+    返回非零值，语句应该产生非空结果集。
    </para>
   </note>
  </refsect1>
@@ -101,11 +92,10 @@
   &reftitle.notes;
   <note>
    <para>
-    执行查询之后，
-    使用 <function>mysqli_free_result</function> 函数来释放结果集所占用的内存，
-    是一个很有用的实战经验。
-    尤其是当使用 <function>mysqli_store_result</function> 函数来转移数量较大的结果集的时候，
-    释放结果集内存的操作尤为重要。
+    执行查询之后，使用 <function>mysqli_free_result</function>
+    函数来释放结果集所占用的内存，是一个很有用的实战经验。尤其是当使用
+    <function>mysqli_store_result</function>
+    函数来转移数量较大的结果集的时候，释放结果集内存的操作尤为重要。
    </para>
   </note>
  </refsect1>
