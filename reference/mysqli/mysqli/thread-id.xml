@@ -19,21 +19,15 @@
    <methodparam><type>mysqli</type><parameter>mysql</parameter></methodparam>
   </methodsynopsis>
   <para>
-   <function>mysqli_thread_id</function> 函数返回当前连接的线程 ID，
-   这个线程 ID 可以在 <function>mysqli_kill</function> 函数中使用。
-   如果 PHP 到数据库的连接中断了，
-   然后使用 <function>mysqli_ping</function> 函数重新建立连接的话，
-   新的连接的线程 ID 会发生改变。所以，仅在需要的时候，调用本函数获取连接的线程 ID。
+   <function>mysqli_thread_id</function> 函数返回当前连接的线程 ID，然后可以使用 <function>mysqli_kill</function>
+   函数将其终止。如果连接中断且使用 <function>mysqli_ping</function> 重新连接，线程 ID 会发生改变。所以，仅在需要时获取线程 ID。
   </para>
   <note>
    <para>
-    线程 ID 是每次连接都重新分配的，也就是说它和连接是紧密相关的，
-    如果某个连接异常断开了，然后重新建立了到数据库的连接，
-    这个线程 ID 就不再是原来的那个了，它会发生变化。
+    线程 ID 是连接的基础上分配的。因此，如果连接断开然后重新建立，将分配新的线程 ID。
    </para>
    <para>
-    可以通过执行 SQL 语句：<literal>KILL QUERY processid</literal>
-    来杀掉对应连接上正在执行的 SQL 语句。
+    要终止正在查询的命令，可以使用 SQL 命令 <literal>KILL QUERY processid</literal>。
    </para>
   </note>
  </refsect1>
@@ -50,7 +44,7 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   返回当前连接的线程 ID
+   返回当前连接的线程 ID。
   </para>
  </refsect1>
 
@@ -64,16 +58,16 @@
 <?php
 $mysqli = new mysqli("localhost", "my_user", "my_password", "world");
 
-/* 检查连接是否成功 */
+/* 检查连接 */
 if (mysqli_connect_errno()) {
     printf("Connect failed: %s\n", mysqli_connect_error());
     exit();
 }
 
-/* 获取连接的线程 ID */
+/* 确定线程 ID */
 $thread_id = $mysqli->thread_id;
 
-/* 杀掉这个连接 */
+/* 杀掉连接 */
 $mysqli->kill($thread_id);
 
 /* 这句代码应该会报错 */
@@ -93,16 +87,16 @@ $mysqli->close();
 <?php
 $link = mysqli_connect("localhost", "my_user", "my_password", "world");
 
-/* 检查连接是否成功 */
+/* 检查连接 */
 if (mysqli_connect_errno()) {
     printf("Connect failed: %s\n", mysqli_connect_error());
     exit();
 }
 
-/* 获取连接的线程 ID */
+/* 确定线程 ID */
 $thread_id = mysqli_thread_id($link);
 
-/* 杀掉这个连接 */
+/* 杀掉连接 */
 mysqli_kill($link, $thread_id);
 
 /* 这句代码应该会报错 */
