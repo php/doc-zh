@@ -1,63 +1,148 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
-  <refentry xml:id="function.pg-connect" xmlns="http://docbook.org/ns/docbook">
-   <refnamediv>
-    <refname>pg_connect</refname>
-    <refpurpose>打开一个 PostgreSQL 连接</refpurpose>
-   </refnamediv>
-   <refsect1>
-    <title>说明</title>
-    <methodsynopsis>
-     <type>resource</type><methodname>pg_connect</methodname>
-     <methodparam><type>string</type><parameter>connection_string</parameter></methodparam>
-    </methodsynopsis>
-    <para>
-     <function>pg_connect</function> 返回其它 PostgreSQL 函数所需要的资源。
-    </para>
-    <para>
-     <function>pg_connect</function> 打开一个由
-     <parameter>connection_string</parameter> 所指定的
-     PostgreSQL 数据库的连接。如果成功则返回连接资源，如果不能连接则返回
-     &false;。<parameter>connection_string</parameter> 应该是用引号引起来的字符串。
-     <example>
-      <title>使用 <function>pg_connect</function></title>
-      <programlisting role="php">
+<!-- EN-Revision: c2eca73ef79ebe78cebb34053e41b565af504c4f Maintainer: dallas Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
+<refentry xml:id="function.pg-connect" xmlns="http://docbook.org/ns/docbook">
+ <refnamediv>
+  <refname>pg_connect</refname>
+  <refpurpose>打开 PostgreSQL 连接</refpurpose>
+ </refnamediv>
+
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <type class="union"><type>PgSql\Connection</type><type>false</type></type><methodname>pg_connect</methodname>
+   <methodparam><type>string</type><parameter>connection_string</parameter></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>flags</parameter><initializer>0</initializer></methodparam>
+  </methodsynopsis>
+  <para>
+   <function>pg_connect</function> 打开到 <parameter>connection_string</parameter> 指定的 PostgreSQL 数据库的连接。
+  </para>
+  <para>
+   如果使用与现有连接相同的 <parameter>connection_string</parameter> 对 <function>pg_connect</function>
+   进行第二次调用，将返回现有连接，除非将 <constant>PGSQL_CONNECT_FORCE_NEW</constant> 作为
+   <parameter>flags</parameter> 传递。
+  </para>
+  <para>
+   弃用具有多个参数的旧语法 <command>$conn = pg_connect("host", "port", "options", "tty", "dbname")</command>。
+  </para>
+ </refsect1>
+
+<refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>connection_string</parameter></term>
+     <listitem>
+      <para>
+       <parameter>connection_string</parameter> 可以为空以使用所有默认参数，或者可以包含一个或多个由空格分隔的参数设置。
+       每个参数设置的形式为 <literal>keyword = value</literal>。等号两旁的空格是可选的。写入空值或包含空格的值，请用单引号将其括起来，例如
+       <literal>keyword = 'a value'</literal>。值中的单引号和反斜线必须使用反斜线转义，即 \' 和 \\。
+      </para>
+      <para>
+       当前可识别的参数关键字有
+       <parameter>host</parameter>、<parameter>hostaddr</parameter>、<parameter>port</parameter>、<parameter>dbname</parameter>（默认为
+       <parameter>user</parameter> 的值）、<parameter>user</parameter>、<parameter>password</parameter>、<parameter>connect_timeout</parameter>、<parameter>options</parameter>、<parameter>tty</parameter>（忽略）、<parameter>sslmode</parameter>、<parameter>requiressl</parameter>（弃用
+       <parameter>sslmode</parameter>）和 <parameter>service</parameter>。存在哪些参数取决于 PostgreSQL 版本。
+      </para>
+      <para>
+       The <parameter>options</parameter> parameter can be used to set command line parameters 
+       to be invoked by the server.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>flags</parameter></term>
+     <listitem>
+      <para>
+       如果传递 <constant>PGSQL_CONNECT_FORCE_NEW</constant>，将会创建新连接，即使 <parameter>connection_string</parameter>
+       与现有连接相同。
+      </para>
+      <para>
+       如果指定 <constant>PGSQL_CONNECT_ASYNC</constant>，然后连接是异步创建。连接状态可以通过
+       <function>pg_connect_poll</function> 或 <function>pg_connection_status</function> 检测。
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   成功时返回 <classname>PgSql\Connection</classname> 实例，&return.falseforfailure;。
+  </para>
+ </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <informaltable>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>&Version;</entry>
+      <entry>&Description;</entry>
+     </row>
+    </thead>
+    <tbody>
+     <row>
+      <entry>8.1.0</entry>
+      <entry>
+       现在返回 <classname>PgSql\Connection</classname> 实例；之前返回 &resource;。
+      </entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </informaltable>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title>使用 <function>pg_connect</function></title>
+    <programlisting role="php">
 <![CDATA[
 <?php
 $dbconn = pg_connect("dbname=mary");
 //connect to a database named "mary"
+
 $dbconn2 = pg_connect("host=localhost port=5432 dbname=mary");
 // connect to a database named "mary" on "localhost" at port "5432"
+
 $dbconn3 = pg_connect("host=sheep port=5432 dbname=mary user=lamb password=foo");
 //connect to a database named "mary" on the host "sheep" with a username and password
 
 $conn_string = "host=sheep port=5432 dbname=test user=lamb password=bar";
 $dbconn4 = pg_connect($conn_string);
 //connect to a database named "test" on the host "sheep" with a username and password
+
+$dbconn5 = pg_connect("host=localhost options='--client_encoding=UTF8'");
+//connect to a database on "localhost" and set the command line parameter which tells the encoding is in UTF-8
 ?>
 ]]>
-      </programlisting>
-     </example>
-     <parameter>connection_string</parameter> 所包括的参数有
-     <parameter>host</parameter>，<parameter>port</parameter>，<parameter>tty</parameter>, <parameter>options</parameter>，<parameter>dbname</parameter>, <parameter>user</parameter>
-     和 <parameter>password</parameter>。
-    </para>
-    <para>
-     如果用同样的 <parameter>connection_string</parameter> 再次调用
-     <function>pg_connect</function>，不会建立新连接，而是返回前面已经打开的连接资源。如果使用不同的连接字符串，则可以和同一个数据库建立多个连接。
-    </para>
-    <para>
-     旧的多参数语法 <command>$conn = pg_connect("host", "port", "options", "tty", "dbname")</command> 已经不提倡使用。
-    </para>
-    <para>
-     参见 <function>pg_pconnect</function>，<function>pg_close</function>，<function>pg_host</function>，<function>pg_port</function>, <function>pg_tty</function>，<function>pg_options</function>
-     和 <function>pg_dbname</function>。
-    </para>
-   </refsect1>
-  </refentry>
+    </programlisting>
+   </example>
+  </para>
+ </refsect1>
 
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>pg_pconnect</function></member>
+    <member><function>pg_close</function></member>
+    <member><function>pg_host</function></member>
+    <member><function>pg_port</function></member>
+    <member><function>pg_tty</function></member>
+    <member><function>pg_options</function></member>
+    <member><function>pg_dbname</function></member>
+   </simplelist>
+  </para>
+ </refsect1>
+</refentry>
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
