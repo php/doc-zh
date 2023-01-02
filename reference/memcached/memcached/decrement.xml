@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-
+<!-- EN-Revision: b95d28e6ec86e4a71e012737d36ebdc1cf009180 Maintainer: mowangjuanzi Status: ready -->
 <refentry xml:id="memcached.decrement" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
   <refname>Memcached::decrement</refname>
@@ -10,14 +10,16 @@
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <modifier>public</modifier> <type>int</type><methodname>Memcached::decrement</methodname>
+   <modifier>public</modifier> <type class="union"><type>int</type><type>false</type></type><methodname>Memcached::decrement</methodname>
    <methodparam><type>string</type><parameter>key</parameter></methodparam>
    <methodparam choice="opt"><type>int</type><parameter>offset</parameter><initializer>1</initializer></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>initial_value</parameter><initializer>0</initializer></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>expiry</parameter><initializer>0</initializer></methodparam>
   </methodsynopsis>
   <para>
-   <function>Memcached::decrement</function>减小一个数值元素的值，减小多少由参数<parameter>offset</parameter>决定。
-   如果元素的值不是数值，以0值对待。如果减小后的值小于0,则新的值被设置为0.如果元素不存在，<function>Memcached::decrement</function>
-   失败。
+   <function>Memcached::decrement</function> 减小数值元素的值，减小多少由参数 <parameter>offset</parameter>
+   决定。如果元素的值不是数值，则会导致错误。如果减小后的值小于 0,则新的值被设置为 0。如果键不存在，<function>Memcached::decrement</function>
+   会将元素设置为 <parameter>initial_value</parameter> 参数。
   </para>
  </refsect1>
 
@@ -29,7 +31,7 @@
      <term><parameter>key</parameter></term>
      <listitem>
       <para>
-       将要减小值的元素的key。
+       将要减小值的元素的 key。
       </para>
      </listitem>
     </varlistentry>
@@ -37,7 +39,23 @@
      <term><parameter>offset</parameter></term>
      <listitem>
       <para>
-      要将减小指定元素的值减小多少。
+      要将减小指定元素的值减小多少.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>initial_value</parameter></term>
+     <listitem>
+      <para>
+       如果 key 不存在的时候设置到元素的值。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>expiry</parameter></term>
+     <listitem>
+      <para>
+       设置的元素过期时间。
       </para>
      </listitem>
     </varlistentry>
@@ -48,8 +66,7 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   成功时返回元素新的值，&return.falseforfailure;。
-   如果key不存在，<methodname>Memcached::getResultCode</methodname>返回<constant>Memcached::RES_NOTFOUND</constant>。
+   成功时返回元素的新值，&return.falseforfailure;。
   </para>
  </refsect1>
 
@@ -65,11 +82,18 @@ $m = new Memcached();
 $m->addServer('localhost', 11211);
 
 $m->set('counter', 5);
-$m->decrement('counter');
+$n = $m->decrement('counter');
+var_dump($n);
+
+$n = $m->decrement('counter', 10);
+var_dump($n);
+
 var_dump($m->get('counter'));
 
-$m->decrement('counter', 10);
-var_dump($m->get('counter'));
+$m->set('counter', 'abc');
+$n = $m->increment('counter');
+// ^ will fail due to item value not being numeric
+var_dump($n);
 ?>
 ]]>
     </programlisting>
@@ -78,6 +102,8 @@ var_dump($m->get('counter'));
 <![CDATA[
 int(4)
 int(0)
+int(0)
+bool(false)
 ]]>
     </screen>
    </example>
@@ -89,6 +115,8 @@ int(0)
   <para>
    <simplelist>
     <member><methodname>Memcached::increment</methodname></member>
+    <member><methodname>Memcached::incrementByKey</methodname></member>
+    <member><methodname>Memcached::decrementByKey</methodname></member>
    </simplelist>
   </para>
  </refsect1>
