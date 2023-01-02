@@ -1,32 +1,122 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
-  <refentry xml:id='function.pg-copy-to' xmlns="http://docbook.org/ns/docbook">
-   <refnamediv>
-    <refname>pg_copy_to</refname>
-    <refpurpose>
-     将一个表拷贝到数组中
-    </refpurpose>
-   </refnamediv>
-   <refsect1>
-    <title>说明</title>
-     <methodsynopsis>
-      <type>array</type><methodname>pg_copy_to</methodname>  
-      <methodparam><type>resource</type><parameter>connection</parameter></methodparam>  
-      <methodparam><type>string</type><parameter>table_name</parameter></methodparam>
-      <methodparam choice="opt"><type>string</type><parameter>delimiter</parameter></methodparam>
-      <methodparam choice="opt"><type>string</type><parameter>null_as</parameter></methodparam>
-     </methodsynopsis>
-    <para>
-     <function>pg_copy_to</function> 将一个表拷贝到数组中，该数组作为结果返回。它在内部使用了 <literal>COPY FROM</literal> SQL 命令来插入记录，并返回结果数组。如果失败则返回 &false;。
-    </para>
-    <para>
-     参见 <function>pg_copy_from</function>。
-    </para>
-   </refsect1>
-  </refentry>
+<!-- EN-Revision: c2eca73ef79ebe78cebb34053e41b565af504c4f Maintainer: dallas Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
+<refentry xml:id="function.pg-copy-to" xmlns="http://docbook.org/ns/docbook">
+ <refnamediv>
+  <refname>pg_copy_to</refname>
+  <refpurpose>
+   将表复制到数组
+  </refpurpose>
+ </refnamediv>
 
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <type class="union"><type>array</type><type>false</type></type><methodname>pg_copy_to</methodname>
+   <methodparam><type>PgSql\Connection</type><parameter>connection</parameter></methodparam>
+   <methodparam><type>string</type><parameter>table_name</parameter></methodparam>
+   <methodparam choice="opt"><type>string</type><parameter>separator</parameter><initializer>"\t"</initializer></methodparam>
+   <methodparam choice="opt"><type>string</type><parameter>null_as</parameter><initializer>"\\\\N"</initializer></methodparam>
+  </methodsynopsis>
+  <para>
+   <function>pg_copy_to</function> 将表复制到数组。在内部发出 <literal>COPY TO</literal> 命令来检索记录。
+  </para>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>connection</parameter></term>
+     <listitem>
+      &pgsql.parameter.connection;
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>table_name</parameter></term>
+     <listitem>
+      <para>
+       从表中将数据复制到 <parameter>rows</parameter> 中的表名。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>separator</parameter></term>
+     <listitem>
+      <para>
+       分隔 <parameter>rows</parameter> 的每个元素中每个字段的值的标记。默认为 <literal>\t</literal>。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>null_as</parameter></term>
+     <listitem>
+      <para>
+       SQL <literal>NULL</literal> 值在 <parameter>rows</parameter> 中的表示方式。默认为 <literal>\\N</literal>（<literal>"\\\\N"</literal>）。
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+   <para>
+    每行 <literal>COPY</literal> 数据有一个元素的 <type>array</type>，&return.falseforfailure;。
+   </para>
+ </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <informaltable>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>&Version;</entry>
+      <entry>&Description;</entry>
+     </row>
+    </thead>
+    <tbody>
+     &pgsql.changelog.connection-object;
+    </tbody>
+   </tgroup>
+  </informaltable>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title><function>pg_copy_to</function> 示例</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+   $db = pg_connect("dbname=publisher") or die("Could not connect");
+   
+   $rows = pg_copy_to($db, $table_name);
+   
+   pg_query($db, "DELETE FROM $table_name");
+   
+   pg_copy_from($db, $table_name, $rows);
+?>
+]]>
+    </programlisting>
+   </example> 
+  </para>
+ </refsect1>
+ 
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>pg_copy_from</function></member>
+   </simplelist>
+  </para>
+ </refsect1>
+</refentry>
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
