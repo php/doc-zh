@@ -1,32 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 96c9d88bad9a7d7d44bfb7f26c226df7ee9ddf26 Maintainer: HonestQiao Status: ready -->
-<!-- Reviewed: no Maintainer: HonestQiao -->
+<!-- EN-Revision: c2eca73ef79ebe78cebb34053e41b565af504c4f Maintainer: HonestQiao Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="function.pg-close" xmlns="http://docbook.org/ns/docbook">
-   <refnamediv>
-    <refname>pg_close</refname>
-    <refpurpose>关闭一个 PostgreSQL 连接</refpurpose>
-   </refnamediv>
- 
+ <refnamediv>
+  <refname>pg_close</refname>
+  <refpurpose>关闭 PostgreSQL 连接</refpurpose>
+ </refnamediv>
+
  <refsect1 role="description">
   &reftitle.description;
-    <methodsynopsis>
-     <type>bool</type><methodname>pg_close</methodname>
-   <methodparam choice="opt"><type>resource</type><parameter>connection</parameter></methodparam>
-    </methodsynopsis>
-    <para>
-     <function>pg_close</function> 关闭由所给资源 <parameter>connection</parameter>
-     指定的到 PostgreSQL 数据库的非持久连接。
-    </para>
-    <note>
-     <para>
-      使用 <function>pg_close</function> 并不很必要，因为非持久连接在本脚本执行结束后会自动关闭。
-     </para>
-    </note>
-    <para>
-     如果在此连接中打开了 large object 资源，则在关闭所有 large object 资源之前不要关闭连接。
-    </para>
-   </refsect1>
+  <methodsynopsis>
+   <type>bool</type><methodname>pg_close</methodname>
+   <methodparam choice="opt"><type class="union"><type>PgSql\Connection</type><type>null</type></type><parameter>connection</parameter><initializer>&null;</initializer></methodparam>
+  </methodsynopsis>
+  <para>
+   <function>pg_close</function> 关闭与指定 <parameter>connection</parameter>
+   实例关联的 PostgreSQL 数据库的非持久连接。
+  </para>
+  <note>
+   <para>
+    通常不需要使用 <function>pg_close</function>，因为打开的非持久连接会在脚本结束时自动关闭。
+   </para>
+  </note>
+  <para>
+   如果连接上有打开的 <classname>PgSql\Lob</classname> 实例，请不要在关闭所有 <classname>PgSql\Lob</classname> 实例之前关闭连接。
+  </para>
+ </refsect1>
 
  <refsect1 role="parameters">
   &reftitle.parameters;
@@ -35,12 +35,7 @@
     <varlistentry>
      <term><parameter>connection</parameter></term>
      <listitem>
-      <para>
-       PostgreSQL database connection resource.  When 
-       <parameter>connection</parameter> is not present, the default connection 
-       is used. The default connection is the last connection made by 
-       <function>pg_connect</function> or <function>pg_pconnect</function>.
-      </para>
+      &pgsql.parameter.connection-with-nullable-default;
      </listitem>
     </varlistentry>
    </variablelist>
@@ -50,15 +45,38 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   &return.success;
+   &return.true.always;
   </para>
+ </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <informaltable>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>&Version;</entry>
+      <entry>&Description;</entry>
+     </row>
+    </thead>
+    <tbody>
+     &pgsql.changelog.connection-object;
+     <row>
+      <entry>8.0.0</entry>
+      <entry>
+       <parameter>connection</parameter> 现在可以为 null。
+      </entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </informaltable>
  </refsect1>
  
  <refsect1 role="examples">
   &reftitle.examples;
   <para>
    <example>
-    <title><function>pg_close</function> 例子</title>
+    <title><function>pg_close</function> 示例</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -87,8 +105,7 @@ Connected successfully
    </simplelist>
   </para>
  </refsect1>
-  </refentry>
-
+</refentry>
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml

@@ -1,37 +1,114 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
-  <refentry xml:id="function.pg-client-encoding" xmlns="http://docbook.org/ns/docbook">
-   <refnamediv>
-    <refname>pg_client_encoding</refname>
-    <refpurpose>
-     取得客户端编码方式
-    </refpurpose>
-   </refnamediv>
-   <refsect1>
-    <title>说明</title>      
-     <methodsynopsis>
-      <type>string</type><methodname>pg_client_encoding</methodname>
-      <methodparam choice="opt"><type>resource</type><parameter>connection</parameter></methodparam>
-     </methodsynopsis>
-    <para>
-     <function>pg_client_encoding</function> 以字符串形式返回客户端编码。所返回的字符串为以下之一：SQL_ASCII，EUC_JP，EUC_CN，EUC_KR，EUC_TW，UNICODE，MULE_INTERNAL，LATINX (X=1...9)，KOI8，WIN，ALT，SJIS，BIG5，WIN1250。
-    </para>
-    <note>
-     <para>
-      本函数需要 PHP-4.0.3 或以上版本以及 PostgreSQL-7.0 或以上版本。如果在编译 libpq 时没有加入多字节编码支持，则 <function>pg_set_client_encoding</function> 总是返回 &quot;SQL_ASCII&quot;。所支持的编码方式取决于 PostgreSQL 的版本。详情参见 PostgreSQL 手册如何加入多字节支持以及所支持的编码方式。
-     </para>
-     <para>
-      本函数以前被称为 <function>pg_clientencoding</function>。
-     </para>
-    </note>
-    <para>
-     参见 <function>pg_set_client_encoding</function>。
-    </para>
-   </refsect1>
-  </refentry>
+<!-- EN-Revision: ad618eea48c773ff8768d9d27ea986f81a2a2400 Maintainer: dallas Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
+<refentry xml:id="function.pg-client-encoding" xmlns="http://docbook.org/ns/docbook">
+ <refnamediv>
+  <refname>pg_client_encoding</refname>
+  <refpurpose>
+   获取客户端编码
+  </refpurpose>
+ </refnamediv>
 
+ <refsect1 role="description">
+  &reftitle.description;     
+  <methodsynopsis>
+   <type>string</type><methodname>pg_client_encoding</methodname>
+   <methodparam choice="opt"><type class="union"><type>PgSql\Connection</type><type>null</type></type><parameter>connection</parameter><initializer>&null;</initializer></methodparam>
+  </methodsynopsis>
+  <para>
+   PostgreSQL 支持某些字符集在服务器和客户端之间自动进行字符集转换。<function>pg_client_encoding</function>
+   以字符串形式返回客户端编码。返回的字符串将是标准的 PostgreSQL 编码标识符之一。
+  </para>
+  <note>
+   <para>
+    此函数需要 PostgreSQL 7.0 或更高版本。如果 libpq 在没有多字节编码支持的情况下编译，<function>pg_client_encoding</function>
+    总是返回 <literal>SQL_ASCII</literal>。支持的编码取决于 PostgreSQL 版本。请参阅 PostgreSQL 文档支持的编码。
+   </para>
+   <para>
+    此函数过去称为 <function>pg_clientencoding</function>。
+   </para>
+  </note>
+ </refsect1>
+
+<refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>connection</parameter></term>
+     <listitem>
+      &pgsql.parameter.connection-with-nullable-default;
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   客户端编码。
+  </para>
+ </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <informaltable>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>&Version;</entry>
+      <entry>&Description;</entry>
+     </row>
+    </thead>
+    <tbody>
+     &pgsql.changelog.connection-object;
+     <row>
+      <entry>8.0.0</entry>
+      <entry>
+       <parameter>connection</parameter> 现在可以为 null。
+      </entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </informaltable>
+ </refsect1>
+ 
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title><function>pg_client_encoding</function> 示例</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+// Assume $conn is a connection to a ISO-8859-1 database
+$encoding = pg_client_encoding($conn);
+
+echo "Client encoding is: ", $encoding, "\n";
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+Client encoding is: ISO-8859-1
+]]>
+    </screen>
+   </example>
+  </para>
+ </refsect1>
+ 
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>pg_set_client_encoding</function></member>
+   </simplelist>
+  </para>
+ </refsect1>
+</refentry>
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
