@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 96c9d88bad9a7d7d44bfb7f26c226df7ee9ddf26 Maintainer: HonestQiao Status: ready -->
-<!-- Reviewed: no Maintainer: HonestQiao -->
-<refentry xml:id='function.imagefttext' xmlns="http://docbook.org/ns/docbook">
+<!-- EN-Revision: 213fbd9440a224f9c1da4942c85124ce0c120c52 Maintainer: HonestQiao Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
+<refentry xml:id="function.imagefttext" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>imagefttext</refname>
   <refpurpose>使用 FreeType 2 字体将文本写入图像</refpurpose>
@@ -10,17 +10,23 @@
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <type>array</type><methodname>imagefttext</methodname>
-   <methodparam><type>resource</type><parameter>image</parameter></methodparam>
+   <type class="union"><type>array</type><type>false</type></type><methodname>imagefttext</methodname>
+   <methodparam><type>GdImage</type><parameter>image</parameter></methodparam>
    <methodparam><type>float</type><parameter>size</parameter></methodparam>
    <methodparam><type>float</type><parameter>angle</parameter></methodparam>
    <methodparam><type>int</type><parameter>x</parameter></methodparam>
    <methodparam><type>int</type><parameter>y</parameter></methodparam>
    <methodparam><type>int</type><parameter>color</parameter></methodparam>
-   <methodparam><type>string</type><parameter>fontfile</parameter></methodparam>
+   <methodparam><type>string</type><parameter>font_filename</parameter></methodparam>
    <methodparam><type>string</type><parameter>text</parameter></methodparam>
-   <methodparam choice="opt"><type>array</type><parameter>extrainfo</parameter></methodparam>
+   <methodparam choice="opt"><type>array</type><parameter>options</parameter><initializer>[]</initializer></methodparam>
   </methodsynopsis>
+  <note>
+   <para>
+    在 PHP 8.0.0 之前，<function>imagefttext</function> 是 <function>imagettftext</function> 的扩展变体，它还支持 <parameter>options</parameter>。
+    自 PHP 8.0.0 起，<function>imagettftext</function> 是 <function>imagefttext</function> 的别名。
+   </para>
+  </note>
  </refsect1>
  <refsect1 role="parameters">
   &reftitle.parameters;
@@ -31,7 +37,7 @@
      <term><parameter>size</parameter></term>
      <listitem>
       <para>
-       The font size to use in points.
+       字体的尺寸，单位：点（磅）。
       </para>
      </listitem>
     </varlistentry>
@@ -39,9 +45,8 @@
      <term><parameter>angle</parameter></term>
      <listitem>
       <para> 
-       The angle in degrees, with 0 degrees being left-to-right reading text.
-       Higher values represent a counter-clockwise rotation. For example, a 
-       value of 90 would result in bottom-to-top reading text.
+       以度为单位的角度，0 度表示从左到右阅读文本。较高的值表示逆时针旋转。例如，值为
+       90 将导致从下到上阅读文本。
       </para>
      </listitem>
     </varlistentry>
@@ -49,13 +54,9 @@
      <term><parameter>x</parameter></term>
      <listitem>
       <para>
-       The coordinates given by <parameter>x</parameter> and
-       <parameter>y</parameter> will define the basepoint of the first
-       character (roughly the lower-left corner of the character). This
-       is different from the <function>imagestring</function>, where
-       <parameter>x</parameter> and <parameter>y</parameter> define the
-       upper-left corner of the first character. For example, "top left"
-       is 0, 0.
+       <parameter>x</parameter> 和 <parameter>y</parameter> 给出的坐标将定义第一个字符的基点（大致是字符的左下角）。 这与
+       <function>imagestring</function> 不同，其中 <parameter>x</parameter> 和 <parameter>y</parameter>
+       定义第一个字符的左上角。例如，“左上角”是 0, 0。
       </para>
      </listitem>
     </varlistentry>
@@ -63,8 +64,7 @@
      <term><parameter>y</parameter></term>
      <listitem>
       <para>
-       The y-ordinate. This sets the position of the fonts baseline, not the
-       very bottom of the character.
+       y 坐标。设置字体基线的位置，而不是字符的最底部。
       </para>
      </listitem>
     </varlistentry>
@@ -72,38 +72,26 @@
      <term><parameter>color</parameter></term>
      <listitem>
       <para>
-       The index of the desired color for the text, see 
-       <function>imagecolorexact</function>.
+       文本所需颜色的索引，请参阅 <function>imagecolorexact</function>。
       </para>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>fontfile</parameter></term>
+     <term><parameter>font_filename</parameter></term>
      <listitem>
       <para>
-       The path to the TrueType font you wish to use.
+       希望使用的 TrueType 字体的路径。
       </para>
       <para>
-       Depending on which version of the GD library PHP is using, <emphasis>when
-       <parameter>fontfile</parameter> does not begin with a leading
-       <literal>/</literal> then <literal>.ttf</literal> will be appended</emphasis>
-       to the filename and the library will attempt to search for that
-       filename along a library-defined font path.
+       根据 PHP 使用的 GD 库版本，<emphasis>当 <parameter>font_filename</parameter> 不以 <literal>/</literal>
+       开头时，将追加 <literal>.ttf</literal></emphasis> 到文件名末尾，库将尝试沿着库定义的字体路径搜索该文件名。
       </para>
       <para>
-       When using versions of the GD library lower than 2.0.18, a <literal>space</literal> character,
-       rather than a semicolon, was used as the 'path separator' for different font files.
-       Unintentional use of this feature will result in the warning message:
-       <literal>Warning: Could not find/open font</literal>. For these affected versions, the
-       only solution is moving the font to a path which does not contain spaces.
-      </para>
-      <para>
-       In many cases where a font resides in the same directory as the script using it
-       the following trick will alleviate any include problems.
+       在许多情况下，字体与使用的脚本位于同一目录中，以下技巧将缓解任何包含问题。
        <programlisting role="php">
 <![CDATA[
 <?php
-// Set the enviroment variable for GD
+// 设置 GD 的环境变量
 putenv('GDFONTPATH=' . realpath('.'));
 
 // Name the font to be used (note the lack of the .ttf extension)
@@ -118,29 +106,29 @@ $font = 'SomeFont';
      <term><parameter>text</parameter></term>
      <listitem>
       <para>
-       Text to be inserted into image. 
+       要插入到图像中的文本。
       </para>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>extrainfo</parameter></term>
+     <term><parameter>options</parameter></term>
      <listitem>
       <para>
        <table>
-       <title>Possible array indexes for <parameter>extrainfo</parameter></title>
+       <title><parameter>options</parameter> 可能的数组索引</title>
         <tgroup cols="2">
          <thead>
           <row>
-           <entry>Key</entry>
-           <entry>Type</entry>
-           <entry>Meaning</entry>
+           <entry>键</entry>
+           <entry>类型</entry>
+           <entry>含义</entry>
           </row>
          </thead>
          <tbody>
           <row>
            <entry><literal>linespacing</literal></entry>
            <entry><type>float</type></entry>
-           <entry>Defines drawing linespacing</entry>
+           <entry>定义绘制行距</entry>
           </row>
          </tbody>
         </tgroup>
@@ -154,52 +142,73 @@ $font = 'SomeFont';
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   This function returns an array defining the four points of the box, starting in the lower left and moving counter-clockwise:
+   这个函数返回数组，定义了盒子的四个点，从左下角开始逆时针移动：
    <informaltable>
     <tgroup cols="2">
      <tbody>
       <row>
        <entry>0</entry>
-       <entry>lower left x-coordinate</entry>
+       <entry>左下 x 坐标</entry>
       </row>
       <row>
        <entry>1</entry>
-       <entry>lower left y-coordinate</entry>
+       <entry>左下 y 坐标</entry>
       </row>
       <row>
        <entry>2</entry>
-       <entry>lower right x-coordinate</entry>
+       <entry>右下 x 坐标</entry>
       </row>
       <row>
        <entry>3</entry>
-       <entry>lower right y-coordinate</entry>
+       <entry>右下 x 坐标</entry>
       </row>
       <row>
        <entry>4</entry>
-       <entry>upper right x-coordinate</entry>
+       <entry>右上 x 坐标</entry>
       </row>
       <row>
        <entry>5</entry>
-       <entry>upper right y-coordinate</entry>
+       <entry>右上 x 坐标</entry>
       </row>
       <row>
        <entry>6</entry>
-       <entry>upper left x-coordinate</entry>
+       <entry>左上 x 坐标</entry>
       </row>
       <row>
        <entry>7</entry>
-       <entry>upper left y-coordinate</entry>
+       <entry>左上 y 坐标</entry>
       </row>
      </tbody>
     </tgroup>
    </informaltable>
   </para>
+  <para>
+   失败时返回 &false;。
+  </para>
  </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <informaltable>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>&Version;</entry>
+      <entry>&Description;</entry>
+     </row>
+    </thead>
+    <tbody>
+     &gd.changelog.image-param;
+    </tbody>
+   </tgroup>
+  </informaltable>
+ </refsect1>
+
  <refsect1 role="examples">
   &reftitle.examples;
   <para>
    <example>
-    <title><function>imagefttext</function> example</title>
+    <title><function>imagefttext</function> 示例</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -232,31 +241,15 @@ imagedestroy($im);
   &reftitle.notes;
   &note.freetype;
  </refsect1>
- <refsect1 role="changelog">
-  &reftitle.changelog;
-  <para>
-   <informaltable>
-    <tgroup cols="2">
-     <thead>
-      <row>
-       <entry>&Version;</entry>
-       <entry>&Description;</entry>
-      </row>
-     </thead>
-     <tbody>
-      <row>
-       <entry>4.3.5</entry>
-       <entry>
-        <parameter>extrainfo</parameter> was made optional.
-       </entry>
-      </row>
-     </tbody>
-    </tgroup>
-   </informaltable>
-  </para>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <simplelist>
+   <member><function>imageftbbox</function></member>
+   <member><function>imagettftext</function></member>
+  </simplelist>
  </refsect1>
 </refentry>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml

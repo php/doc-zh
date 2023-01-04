@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-
+<!-- EN-Revision: 2523222ce06c576beeed1f2e486dd282a6204278 Maintainer: mowangjuanzi Status: ready -->
 <refentry xml:id="memcached.addserver" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
   <refname>Memcached::addServer</refname>
-  <refpurpose>向服务器池中增加一个服务器</refpurpose>
+  <refpurpose>向服务器池增加服务器</refpurpose>
  </refnamediv>
 
  <refsect1 role="description">
@@ -16,15 +16,14 @@
    <methodparam choice="opt"><type>int</type><parameter>weight</parameter><initializer>0</initializer></methodparam>
   </methodsynopsis>
   <para>
-   <function>Memcached::addServer</function>增加指定服务器到服务器池中。此时不会建立与服务端的连接，
-   但是，如果你使用一致性key分布选项（<constant>Memcached::DISTRIBUTION_CONSISTENT</constant>或
-   <constant>Memcached::OPT_LIBKETAMA_COMPATIBLE</constant>），一些内部的数据结构将会被更新。 
-   因此，如果你需要增加多台服务器，更好的方式是使用<methodname>Memcached::addServers</methodname>
-   以确保这种更新只发生一次。
+   <function>Memcached::addServer</function> 增加指定服务器到服务器池。此时不会与服务端建立连接，但如果使用一致性
+   key 分发选项（<constant>Memcached::DISTRIBUTION_CONSISTENT</constant> 或
+   <constant>Memcached::OPT_LIBKETAMA_COMPATIBLE</constant>），则必须更新一些内部的数据结构。 因此，如果需要增加多台服务器，最好使用
+   <methodname>Memcached::addServers</methodname> 以确保这种更新只发生一次。
   </para>
   <para>
-  同一台服务器可以在服务器池中多次出现，因为这里没有做重复检测。但这是不推荐的做法，对于期望提高某台服务器
-  权重的需求，请使用<parameter>weight</parameter>参数。
+   同一台服务器可以在服务器池中多次出现，因为没有做重复检测。但并不推荐这样做，对于期望提高某台服务器的权重，请使用
+   <parameter>weight</parameter> 参数。
   </para>
  </refsect1>
 
@@ -36,7 +35,10 @@
      <term><parameter>host</parameter></term>
      <listitem>
       <para>
-      memcached服务端主机名。如果主机名无效，相关的数据操作的返回代码将被设置为<constant>Memcached::RES_HOST_LOOKUP_FAILURE</constant>。
+       memcached 服务端主机名。如果主机名无效，相关的数据操作的结果代码将被设置为
+       <constant>Memcached::RES_HOST_LOOKUP_FAILURE</constant>。从 2.0.0b1 版本开始，这个参数还可以指定 unix
+       套接字文件的路径。例如：<literal>/path/to/memcached.sock</literal> 使用 UNIX 域套接字，在这种情况下
+       <parameter>port</parameter> 也必须设置为 <literal>0</literal>。
       </para>
      </listitem>
     </varlistentry>
@@ -44,7 +46,8 @@
      <term><parameter>port</parameter></term>
      <listitem>
       <para>
-      memcached服务端端口号，通常是<literal>11211</literal>。
+       运行 memcached 的端口号，通常是 <literal>11211</literal>。从版本 2.0.0b1
+       开始，在使用 UNIX 域套接字时将此参数设置为 <literal>0</literal>。
       </para>
      </listitem>
     </varlistentry>
@@ -52,8 +55,7 @@
      <term><parameter>weight</parameter></term>
      <listitem>
       <para>
-      此服务器相对于服务器池中所有服务器的权重。此参数用来控制服务器在操作时被选种的概率。这个仅用于一致性
-      分布选项，并且这个值通常是由服务端分配的内存来设置的。
+       此服务器相对于服务器池中所有服务器的权重。此参数用来控制服务器在操作时被选中的概率。这个仅用于一致性分布选项，并且这个值通常是由服务端分配的内存来设置的。
       </para>
      </listitem>
     </varlistentry>
@@ -72,7 +74,7 @@
   &reftitle.examples;
   <para>
    <example>
-    <title><function>Memcached::addServer</function> example</title>
+    <title><function>Memcached::addServer</function> 示例</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -94,6 +96,7 @@ $m->addServer('mem2.domain.com', 11211, 67);
   <para>
    <simplelist>
     <member><methodname>Memcached::addServers</methodname></member>
+    <member><methodname>Memcached::resetServerList</methodname></member>
    </simplelist>
   </para>
  </refsect1>
