@@ -1,45 +1,58 @@
-name: Build
+name: "Build"
 
 on:
-  push:
-    branches:
-      - master
   pull_request:
     branches:
       - master
-  schedule:
-    - cron: '0 0 * * *'
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: read
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    name: "Build"
+
+    runs-on: "ubuntu-20.04"
+
+    strategy:
+      matrix:
+        language:
+          - "zh"
+
     steps:
 
-    - name: Check env
-      run: |
-        php -v
-        pear version
-        php -m
+      - name: Check env
+        run: |
+          php -v
+          pear version
+          php -m
 
-    # https://github.com/actions/checkout
-    - name: Checkout doc-zh
-      uses: actions/checkout@v3
-      with:
-        path: 'zh'
-        
-    - name: Checkout doc-base
-      uses: actions/checkout@v3
-      with:
-        repository: php/doc-base
-        path: 'doc-base'
-        
-    - name: Checkout doc-en
-      uses: actions/checkout@v3
-      with:
-        repository: php/doc-en
-        path: 'en' 
-        
-    - name: Build 
-      run: php doc-base/configure.php --enable-xml-details --disable-libxml-check --redirect-stderr-to-stdout --with-lang=zh
+      - name: "Checkout php/doc-${{ matrix.language }}"
+        uses: "actions/checkout@v3"
+        with:
+          path: "${{ matrix.language }}"
+          repository: "php/doc-${{ matrix.language }}"
 
-
+      - name: "Checkout php/doc-en as fallback"
+        if: "matrix.language != 'en'"
+        uses: "actions/checkout@v3"
+        with:
+          path: "en"
+          repository: "php/doc-en"
+          
+      - name: "Checkout php/doc-base"
+        uses: "actions/checkout@v3"
+        with:
+          path: "doc-base"
+          repository: "php/doc-base"
+          
+      - name: "Quality Assurance scripts"
+        run: |
+          php8.0 doc-base/scripts/qa/extensions.xml.php --check
+          php8.0 doc-base/scripts/qa/section-order.php
+          
+      - name: "Build documentation for ${{ matrix.language }}"
+        run: "php8.0 doc-base/configure.php --disable-libxml-check --enable-xml-details --redirect-stderr-to-stdout --with-lang=${{ matrix.language }}"
