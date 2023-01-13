@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 6dfe0767250cdbdf509223f6bc266557b0a3fec9 Maintainer: HonestQiao Status: ready -->
-<!-- Reviewed: no Maintainer: HonestQiao -->
+<!-- EN-Revision: 9bfa379b20d63ad52b133be32533aca3e04ed10f Maintainer: HonestQiao Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <section xml:id="memcache.ini" xmlns="http://docbook.org/ns/docbook">
  &reftitle.runtime;
  &extension.runtime;
  <para>
   <table>
-   <title>Memcache配置选项</title>
+   <title>Memcache 配置选项</title>
    <tgroup cols="4">
     <thead>
      <row>
@@ -55,18 +55,6 @@
       <entry>Available since memcache 2.2.0.</entry>
      </row>
      <row>
-      <entry><link linkend="ini.session.save-handler">session.save_handler</link></entry>
-      <entry>"files"</entry>
-      <entry>PHP_INI_ALL</entry>
-      <entry>Supported since memcache 2.1.2</entry>
-     </row>
-     <row>
-      <entry><link linkend="ini.session.save-path">session.save_path</link></entry>
-      <entry>""</entry>
-      <entry>PHP_INI_ALL</entry>
-      <entry>Supported since memcache 2.1.2</entry>
-     </row>
-      <row>
       <entry><link linkend="ini.memcache.protocol">memcache.protocol</link></entry>
       <entry>ascii</entry>
       <entry>>PHP_INI_ALL</entry>
@@ -99,6 +87,33 @@
     </tbody>
    </tgroup>
   </table>
+  <table>
+   <title>影响 Memcache 行为的 Session 配置选项</title>
+   <tgroup cols="4">
+    <thead>
+     <row>
+      <entry>&Name;</entry>
+      <entry>&Default;</entry>
+      <entry>&Changeable;</entry>
+      <entry>&Changelog;</entry>
+     </row>
+    </thead>
+    <tbody xml:id="memcache.ini.list.extra">
+     <row>
+      <entry><link linkend="ini.memcache.save-handler">session.save_handler</link></entry>
+      <entry>"files"</entry>
+      <entry>PHP_INI_ALL</entry>
+      <entry>Supported since memcache 2.1.2</entry>
+     </row>
+     <row>
+      <entry><link linkend="ini.memcache.save-path">session.save_path</link></entry>
+      <entry>""</entry>
+      <entry>PHP_INI_ALL</entry>
+      <entry>Supported since memcache 2.1.2</entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </table>
   &ini.php.constants;
  </para>
 
@@ -127,7 +142,7 @@
    <listitem>
     <para>
     定义在写入和获取数据时最多尝试的服务器次数（即：故障转移最大尝试数），仅和
-    memcache.allow_failover结合使用。
+    memcache.allow_failover 结合使用。
     </para>
    </listitem>
   </varlistentry>
@@ -139,7 +154,7 @@
    </term>
    <listitem>
     <para>
-    数据传输块大小，这个值越小网络I/O次数越多，如果发现莫名的速度降低， 可以尝试将此值调至32768。
+    数据传输块大小，这个值越小网络I/O次数越多，如果发现莫名的速度降低， 可以尝试将此值调至 32768。
     </para>
    </listitem>
   </varlistentry>
@@ -151,7 +166,7 @@
    </term>
    <listitem>
     <para>
-    在尝试连接memcache的时候如果没有单独指定端口默认使用的TCP端口号。
+    在连接 memcached 服务器时如果没有指定其它端口则使用默认 TCP 端口号。
     </para>
    </listitem>
   </varlistentry>
@@ -163,10 +178,8 @@
    </term>
    <listitem>
     <para>
-    控制key到服务器的映射（分布式）策略。值 
-     <literal>consistent</literal>允许服务器增减而不会（大量）导致健的重新映射
-     （译注：参见http://tech.idv2.com/2008/07/24/memcached-004/），设置为
-     <literal>standard</literal>则使用余数方式进行key的映射。
+     控制将 key 映射到服务器时使用的（分布式）策略。设置此值为 <literal>consistent</literal> 以启用一致散列，允许服务器增减而不会导致重新映射
+     key。（译注：参见 http://tech.idv2.com/2008/07/24/memcached-004/）将此值设置为 <literal>standard</literal> 会导致使用旧策略。
     </para>
    </listitem>
   </varlistentry>
@@ -178,37 +191,7 @@
    </term>
    <listitem>
     <para>
-    控制在key-server映射时使用哪个hash函数<literal>crc32</literal> 
-    标明使用标准CRC32进行hash，<literal>fnv</literal>则说明使用FNV-1a。
-    </para>
-   </listitem>
-  </varlistentry>
-
-  <varlistentry xml:id="ini.memcache.session-handler">
-   <term>
-    <parameter>session.save_handler</parameter>
-    <type>string</type>
-   </term>
-   <listitem>
-    <para>
-    当值为<literal>memcache</literal>时标记使用memcache作为session处理器。
-    </para>
-   </listitem>
-  </varlistentry>
-
-  <varlistentry xml:id="ini.memcache.save-path">
-   <term>
-    <parameter>session.save_path</parameter>
-    <type>string</type>
-   </term>
-   <listitem>
-    <para>
-    定义一个逗号分割的用于session存储的服务器url列表，例如：
-     <literal>"tcp://host1:11211, tcp://host2:11211"</literal>.
-    </para>
-    <para>
-    每个url可以包含参数，这些参数于方法<function>Memcache::addServer</function>的参数相同。比如： 
-     <literal>"tcp://host1:11211?persistent=1&amp;weight=1&amp;timeout=1&amp;retry_interval=15"</literal>
+     控制将 key 映射到服务器时应用哪个 hash 函数，<literal>crc32</literal> 使用标准 CRC32 散列，<literal>fnv</literal> 使用 FNV-1a。
     </para>
    </listitem>
   </varlistentry>
@@ -272,6 +255,35 @@
     </para>
    </listitem>
   </varlistentry>
+
+  <varlistentry xml:id="ini.memcache.save-handler">
+   <term>
+    <parameter>session.save_handler</parameter>
+    <type>string</type>
+   </term>
+   <listitem>
+    <para>
+     通过设置此值为 <literal>memcache</literal>，将 memcache 用作 session 处理程序。
+    </para>
+   </listitem>
+  </varlistentry>
+
+  <varlistentry xml:id="ini.memcache.save-path">
+   <term>
+    <parameter>session.save_path</parameter>
+    <type>string</type>
+   </term>
+   <listitem>
+    <para>
+     定义服务器 URL，以逗号分隔，以用于 session 存储，例如<literal>"tcp://host1:11211, tcp://host2:11211"</literal>。
+    </para>
+    <para>
+     每个 url 可能包含应用于该服务器的参数，它们与 <function>Memcache::addServer</function> 方法相同。 例如
+     <literal>"tcp://host1:11211?persistent=1&amp;weight=1&amp;timeout=1&amp;retry_interval=15"</literal>
+    </para>
+   </listitem>
+  </varlistentry>
+
  </variablelist>
 </para>
 </section>
