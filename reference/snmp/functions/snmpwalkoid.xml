@@ -1,72 +1,123 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: nio Status: ready -->
-<!-- splitted from ./en/functions/snmp.xml, last change in rev 1.2 -->
+<!-- EN-Revision: b0b19b66183b28cebc1ffbcf1e2b8763f9d9c7b3 Maintainer: nio Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="function.snmpwalkoid" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>snmpwalkoid</refname>
-  <refpurpose>查询关于网络实体的信息树</refpurpose>
+  <refpurpose>查询有关网络实体的信息树
+  </refpurpose>
  </refnamediv>
- <refsect1>
-  <title>说明</title>
+ <refsect1 role="description">
+  &reftitle.description;
   <methodsynopsis>
-   <type>array</type><methodname>snmpwalkoid</methodname>
+   <type class="union"><type>array</type><type>false</type></type><methodname>snmpwalkoid</methodname>
    <methodparam><type>string</type><parameter>hostname</parameter></methodparam>
    <methodparam><type>string</type><parameter>community</parameter></methodparam>
-   <methodparam><type>string</type><parameter>object_id</parameter></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter>timeout</parameter></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter>retries</parameter></methodparam>
+   <methodparam><type class="union"><type>array</type><type>string</type></type><parameter>object_id</parameter></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>timeout</parameter><initializer>-1</initializer></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>retries</parameter><initializer>-1</initializer></methodparam>
   </methodsynopsis>
 
   <para>
-   返回一个包含对象 id 及它们各自对象值的关联数组，这些对象以 
-   <parameter>object_id</parameter> 作为根，错误则返回 &false;。
+   <function>snmpwalkoid</function> 函数用于从 <parameter>hostname</parameter> 指定的 SNMP 代理读取所有对象 ID 及其各自的值。
   </para>
 
   <para>
-   <function>snmpwalkoid</function> 用于从
-   <parameter>hostname</parameter> 所指定的 SNMP 
-   代理那里读取所有对象 id 及它们各自的值。<parameter>community</parameter>
-   指定对于该代理有读权限的域。一个为 &null;
-   的 <parameter>object_id</parameter> 将被看作 
-   SNMP 对象树的根，而在此树下的所有对象将作为一个数组被返回。如果指定了
-   <parameter>object_id</parameter>，则返回所有在
-   <parameter>object_id</parameter> 下的 SNMP 对象。
-  </para>
+   <function>snmpwalkoid</function> 和 <function>snmpwalk</function> 的存在是有历史原因的。提供这两个函数是为了向后兼容。请改用 <function>snmprealwalk</function>。
+  </para> 
+ </refsect1>
 
+ <refsect1 role="parameters">
+  &reftitle.parameters;
   <para>
-   <function>snmpwalkoid</function> 和
-   <function>snmpwalk</function> 的同时存在出于历史原因。提供两个函数是为了向后兼容。
-   <informalexample>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>hostname</parameter></term>
+     <listitem>
+      <para>
+       SNMP 代理。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>community</parameter></term>
+     <listitem>
+      <para>
+       The read community.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>object_id</parameter></term>
+     <listitem>
+      <para>
+       如果为 &null;，则将 <parameter>object_id</parameter> 作为 <acronym>SNMP</acronym> 对象树的根，并且该树下的所有对象都作为数组返回。
+      </para>
+      <para>
+       如果指定了 <parameter>object_id</parameter>，则返回该 <parameter>object_id</parameter> 下面的所有 <acronym>SNMP</acronym> 对象。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>timeout</parameter></term>
+     <listitem>
+      <para>
+       第一次超时前的微秒数。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>retries</parameter></term>
+     <listitem>
+      <para>
+       发生超时时重试的次数。
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   返回关联数组，其中包含对象 ID 及其各自的对象值，从 <parameter>object_id</parameter> 开始为 root 或错误时为 &false;。
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para> 
+   <example>
+    <title><function>snmpwalkoid</function> 示例</title>
     <programlisting role="php"> 
 <![CDATA[
 <?php
 $a = snmpwalkoid("127.0.0.1", "public", ""); 
-?>
-]]>
-    </programlisting>
-   </informalexample>
-  </para> 
-
-  <para>
-   上边的函数调用将从运行于本机的 SNMP 
-   代理那里返回所有的 SNMP 对象。可使用循环遍历这些值。
-   <informalexample>
-    <programlisting role="php">
-<![CDATA[
-<?php
 for (reset($a); $i = key($a); next($a)) {
     echo "$i: $a[$i]<br />\n";
 }
 ?>
 ]]>
     </programlisting>
-   </informalexample>
+   </example>
+  </para> 
+  <para>
+   上面的函数调用将从本地主机上运行的 SNMP 代理返回所有 SNMP 对象。可以通过循环遍历这些值
   </para>
  </refsect1>
-</refentry>
 
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>snmpwalk</function></member>
+   </simplelist>
+  </para>
+ </refsect1>
+
+</refentry>
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
