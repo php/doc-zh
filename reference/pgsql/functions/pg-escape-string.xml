@@ -1,33 +1,114 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
-  <refentry xml:id='function.pg-escape-string' xmlns="http://docbook.org/ns/docbook">
-   <refnamediv>
-    <refname>pg_escape_string</refname>
-    <refpurpose>
-     转义 text/char 类型的字符串
-    </refpurpose>
-   </refnamediv>
-   <refsect1>
-    <title>说明</title>
-     <methodsynopsis>
-      <type>string</type><methodname>pg_escape_string</methodname>
-      <methodparam><type>string</type><parameter>data</parameter></methodparam>
-     </methodsynopsis>
-    <para>
-     <function>pg_escape_string</function> 转义 text/char 数据类型的字符串，返回转义后的字符串。建议用此函数替代 <function>addslashes</function>。
+<!-- EN-Revision: c2eca73ef79ebe78cebb34053e41b565af504c4f Maintainer: dallas Status: ready -->
+<refentry xml:id='function.pg-escape-string' xmlns="http://docbook.org/ns/docbook">
+ <refnamediv>
+  <refname>pg_escape_string</refname>
+  <refpurpose>
+   转义字符串以供查询
+  </refpurpose>
+ </refnamediv>
+
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <type>string</type><methodname>pg_escape_string</methodname>
+   <methodparam choice="opt"><type>PgSql\Connection</type><parameter>connection</parameter></methodparam>
+   <methodparam><type>string</type><parameter>data</parameter></methodparam>
+  </methodsynopsis>
+  <para>
+   <function>pg_escape_string</function> 转义用于查询数据库的字符串。它返回一个不带引号的 PostgreSQL 格式的转义字符串。<function>pg_escape_literal</function>
+   是为 PostgreSQL 转义 SQL 参数的首选方法。<function>addslashes</function> 不得与 PostgreSQL 一起使用。如果列的类型是 bytea，则必须改用
+   <function>pg_escape_bytea</function>。<function>pg_escape_identifier</function> 必须用于转义标识符（例如表名、字段名）
+  </para>
+  <note>
+   <para>
+    本函数需要 PostgreSQL 7.2 及其更高版本。
     </para>
-    <note>
-     <para>
-      本函数需要 PostgreSQL 7.2 或以上版本。
+  </note>
+ </refsect1>
+
+<refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>connection</parameter></term>
+     <listitem>
+      &pgsql.parameter.connection-with-unspecified-default;
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>data</parameter></term>
+     <listitem>
+      <para>
+       包含要转义的 <type>string</type>。
       </para>
-    </note>
-    <para>
-     参见 <function>pg_escape_bytea</function>。
-    </para>
-   </refsect1>
-  </refentry>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   包含转义数据的 <type>string</type>。
+  </para>
+ </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <informaltable>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>&Version;</entry>
+      <entry>&Description;</entry>
+     </row>
+    </thead>
+    <tbody>
+     &pgsql.changelog.connection-object;
+    </tbody>
+   </tgroup>
+  </informaltable>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title><function>pg_escape_string</function> 示例</title>
+    <programlisting role="php">
+<![CDATA[
+<?php 
+  // 连接到数据库
+  $dbconn = pg_connect('dbname=foo');
+  
+  // 读入文本文件（包含撇号和反斜线）
+  $data = file_get_contents('letter.txt');
+  
+  // 转义文本数据
+  $escaped = pg_escape_string($data);
+  
+  // 将其插入数据库
+  pg_query("INSERT INTO correspondence (name, data) VALUES ('My letter', '{$escaped}')");
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+ </refsect1>
+ 
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>pg_escape_bytea</function></member>
+   </simplelist>
+  </para>
+ </refsect1>
+</refentry>
 
 <!-- Keep this comment at the end of the file
 Local variables:
