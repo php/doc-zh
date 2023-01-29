@@ -1,52 +1,147 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
-  <refentry xml:id="function.pg-fetch-all" xmlns="http://docbook.org/ns/docbook">
-   <refnamediv>
-    <refname>pg_fetch_all</refname>
-    <refpurpose>从结果中提取所有行作为一个数组</refpurpose>
-   </refnamediv>
-   <refsect1>
-    <title>说明</title>
-    <methodsynopsis>
-     <type>array</type><methodname>pg_fetch_all</methodname>
-     <methodparam><type>resource</type><parameter>result</parameter></methodparam>
-    </methodsynopsis>
-    <para>
-     <function>pg_fetch_all</function>
-     从结果资源中返回一个包含有所有的行（元组/记录）的数组。如果没有更多行可供提取，则返回 &false;。
-    </para>
-    <para>
-     <example>
-      <title><function>pg_fetch_all</function> 例子</title>
-      <programlisting role="php">
-<![CDATA[
-<?php
+<!-- EN-Revision: cfeb14a38b666f6a3fc73da70f4a90fbe115e53f Maintainer: dallas Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
+<refentry xml:id="function.pg-fetch-all" xmlns="http://docbook.org/ns/docbook">
+ <refnamediv>
+  <refname>pg_fetch_all</refname>
+  <refpurpose>从结果中获取所有行作为数组</refpurpose>
+ </refnamediv>
+
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <type>array</type><methodname>pg_fetch_all</methodname>
+   <methodparam><type>PgSql\Result</type><parameter>result</parameter></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>mode</parameter><initializer><constant>PGSQL_ASSOC</constant></initializer></methodparam>
+  </methodsynopsis>
+  <para>
+   <function>pg_fetch_all</function> 返回包含 <classname>PgSql\Result</classname> 实例中所有行（记录）的数组。
+  </para>
+  &database.fetch-null;
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>result</parameter></term>
+     <listitem>
+      &pgsql.parameter.result;
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>mode</parameter></term>
+     <listitem>
+      &pgsql.parameter.mode;
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   结果中包含所有行的 <type>array</type>。每行都是一个由字段名作为索引的字段值数组。
+  </para>
+ </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <para>
+   <informaltable>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>&Version;</entry>
+       <entry>&Description;</entry>
+      </row>
+     </thead>
+     <tbody>
+      &pgsql.changelog.result-object;
+      <row>
+       <entry>8.0.0</entry>
+       <entry>
+        对于零行的结果集，<function>pg_fetch_all</function> 现在将返回一个空数组而不是 &array;。
+       </entry>
+      </row>
+      <row>
+       <entry>7.1.0</entry>
+       <entry>
+        新增 <parameter>mode</parameter> 参数。
+       </entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </informaltable>
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title>PostgreSQL 获取全部</title>
+    <programlisting role="php">
+     <![CDATA[
+<?php 
 $conn = pg_pconnect("dbname=publisher");
 if (!$conn) {
-    echo "An error occured.\n";
+    echo "An error occurred.\n";
     exit;
 }
+
 $result = pg_query($conn, "SELECT * FROM authors");
 if (!$result) {
-    echo "An error occured.\n";
+    echo "An error occurred.\n";
     exit;
 }
+
 $arr = pg_fetch_all($result);
-var_dump($arr);
+
+print_r($arr);
+
 ?>
 ]]>
-      </programlisting>
-     </example>
-    </para>
-    <para>
-     参见 <function>pg_fetch_row</function>，<function>pg_fetch_array</function>，<function>pg_fetch_object</function>
-     和 <function>pg_fetch_result</function>。
-    </para>
-   </refsect1>
-  </refentry>
+    </programlisting>
+    &example.outputs.similar;
+    <screen>
+     <![CDATA[
+Array
+(
+    [0] => Array
+        (
+            [id] => 1
+            [name] => Fred
+        )
 
+    [1] => Array
+        (
+            [id] => 2
+            [name] => Bob
+        )
+
+)
+]]>
+    </screen>
+   </example>
+  </para>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>pg_fetch_row</function></member>
+    <member><function>pg_fetch_array</function></member>
+    <member><function>pg_fetch_object</function></member>
+    <member><function>pg_fetch_result</function></member>
+   </simplelist>
+  </para>
+ </refsect1>
+</refentry>
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
