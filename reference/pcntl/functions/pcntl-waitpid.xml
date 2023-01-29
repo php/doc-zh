@@ -1,26 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
+<!-- EN-Revision: b890f28c0c6d2856eadcdc34b3faf83a846b3d79 Maintainer: mowangjuanzi Status: ready -->
 <refentry xml:id="function.pcntl-waitpid" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>pcntl_waitpid</refname>
-  <refpurpose>等待或返回fork的子进程状态</refpurpose>
+  <refpurpose>等待或返回 fork 的子进程状态</refpurpose>
  </refnamediv>
  
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
    <type>int</type><methodname>pcntl_waitpid</methodname>
-   <methodparam><type>int</type><parameter>pid</parameter></methodparam>
+   <methodparam><type>int</type><parameter>process_id</parameter></methodparam>
    <methodparam><type>int</type><parameter role="reference">status</parameter></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter>options</parameter><initializer>0</initializer></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>flags</parameter><initializer>0</initializer></methodparam>
+   <methodparam choice="opt"><type>array</type><parameter role="reference">resource_usage</parameter><initializer>[]</initializer></methodparam>
   </methodsynopsis>
   <para>
-  挂起当前进程的执行直到参数<parameter>pid</parameter>指定的进程号的进程退出，
+  挂起当前进程的执行直到参数 <parameter>process_id</parameter> 指定的进程号的进程退出，
   或接收到一个信号要求中断当前进程或调用一个信号处理函数。
   </para>
   <para>
-  如果<parameter>pid</parameter>指定的子进程在此函数调用时已经退出（俗称僵尸进程），此函数
-  将立刻返回。关于waitpid更详细的规范请参见您系统的waitpid（2）手册。
+  如果 <parameter>process_id</parameter> 指定的子进程在此函数调用时已经退出（俗称僵尸进程），此函数
+  将立刻返回。关于 waitpid 更详细的规范请参见系统的 waitpid（2）手册。
   </para>
  </refsect1>
 
@@ -29,36 +31,36 @@
   <para>
    <variablelist>
     <varlistentry>
-     <term><parameter>pid</parameter></term>
+     <term><parameter>process_id</parameter></term>
      <listitem>
       <para>
-       参数<parameter>pid</parameter>的值可以是以下之一：
+       参数 <parameter>process_id</parameter> 的值可以是以下之一：
        <table>
-        <title><parameter>pid</parameter>可选值</title>
+        <title><parameter>process_id</parameter> 可选值</title>
         <tgroup cols="2">
          <tbody>
           <row>
            <entry><literal>&lt; -1</literal></entry>
            <entry>
-           等待任意进程组ID等于参数<parameter>pid</parameter>给定值的绝对值的进程。
+           等待任意进程组 ID 等于参数 <parameter>process_id</parameter> 给定值的绝对值的进程。
            </entry>
           </row>
           <row>
            <entry><literal>-1</literal></entry>
            <entry>
-           等待任意子进程;与pcntl_wait函数行为一致。
+           等待任意子进程；与 wait 函数行为一致。
            </entry>
           </row>
           <row>
            <entry><literal>0</literal></entry>
            <entry>
-           等待任意与调用进程组ID相同的子进程。
+           等待任意与调用进程组 ID 相同的子进程。
            </entry>
           </row>
           <row>
            <entry><literal>&gt; 0</literal></entry>
            <entry>
-            等待进程号等于参数<parameter>pid</parameter>值的子进程。
+            等待进程号等于参数 <parameter>process_id</parameter> 值的子进程。
            </entry>
           </row>
          </tbody>
@@ -67,8 +69,8 @@
       </para>
       <note>
        <para>
-       指定<literal>-1</literal>作为<parameter>pid</parameter>的值等同于<function>pcntl_wait</function>
-       提供(负的<parameter>options</parameter>)。
+       指定 <literal>-1</literal> 作为 <parameter>process_id</parameter> 的值等同于 <function>pcntl_wait</function>
+       提供（负的 <parameter>flags</parameter>）。
        </para>
       </note>
      </listitem>
@@ -77,27 +79,24 @@
      <term><parameter>status</parameter></term>
      <listitem>
       <para>
-       <function>pcntl_waitpid</function>将会存储状态信息到<parameter>status</parameter>
-       参数上，这个通过<parameter>status</parameter>参数返回的状态信息可以用以下函数
-       <function>pcntl_wifexited</function>,
-       <function>pcntl_wifstopped</function>,
-       <function>pcntl_wifsignaled</function>,
-       <function>pcntl_wexitstatus</function>,
-       <function>pcntl_wtermsig</function>以及
-       <function>pcntl_wstopsig</function>获取其具体的值。
+       <function>pcntl_waitpid</function> 将会存储状态信息到 <parameter>status</parameter>
+       参数上，这个通过 <parameter>status</parameter> 参数返回的状态信息可以用以下函数
+       <function>pcntl_wifexited</function>、
+       <function>pcntl_wifstopped</function>、
+       <function>pcntl_wifsignaled</function>、
+       <function>pcntl_wexitstatus</function>、
+       <function>pcntl_wtermsig</function> 以及
+       <function>pcntl_wstopsig</function> 获取其具体的值。
       </para>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>options</parameter></term>
+     <term><parameter>flags</parameter></term>
      <listitem>
       <para>
-       如果您的操作系统（多数BSD类系统）允许使用wait3，您可以提供可选的<parameter>options</parameter>
-      参数。如果这个参数没有提供，wait将会被用作系统调用。如果wait3不可用，提供参数
-      <parameter>options</parameter>不会有任何效果。<parameter>options</parameter>的值可以是0
-      或者以下两个常量或两个常量“或运算”结果（即两个常量代表意义都有效）。
+       <parameter>flags</parameter> 的值可以是以下两个常量中 0 个或多个 <literal>OR</literal> 运算的结果：
        <table>
-        <title><parameter>options</parameter>可用的值</title>
+        <title><parameter>flags</parameter> 可用的值</title>
         <tgroup cols="2">
          <tbody>
           <row>
@@ -125,8 +124,8 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   <function>pcntl_waitpid</function>返回退出的子进程进程号，发生错误时返回-1,如果提供了
-   <constant>WNOHANG</constant>作为option（wait3可用的系统）并且没有可用子进程时返回0。
+   <function>pcntl_waitpid</function> 返回退出的子进程进程号，发生错误时返回 -1，如果使用
+   <constant>WNOHANG</constant> 并且没有可用子进程时返回 0。
   </para>
  </refsect1>
 
@@ -147,7 +146,6 @@
  </refsect1>
 
 </refentry>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
