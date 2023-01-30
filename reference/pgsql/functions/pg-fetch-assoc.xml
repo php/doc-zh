@@ -1,72 +1,127 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
-  <refentry xml:id="function.pg-fetch-assoc" xmlns="http://docbook.org/ns/docbook">
-   <refnamediv>
-    <refname>pg_fetch_assoc</refname>
-    <refpurpose>提取一行作为关联数组</refpurpose>
-   </refnamediv>
-   <refsect1>
-    <title>说明</title>
-     <methodsynopsis>
-      <type>array</type><methodname>pg_fetch_assoc</methodname>
-      <methodparam><type>resource</type><parameter>result</parameter></methodparam>
-      <methodparam choice="opt"><type>int</type><parameter>row</parameter></methodparam>
-     </methodsynopsis>
-    <para>
-     <function>pg_fetch_assoc</function> 和调用 <function>pg_fetch_array</function>
-     加上第三个可选参数 PGSQL_ASSOC 是等价的。它只返回一个关联数组。如果需要数字索引，用
-     <function>pg_fetch_row</function>。
-    </para>
-    <para>
-     <function>pg_fetch_assoc</function> 是
-     <function>pg_fetch_row</function>
-     的扩展版本。除了将数据存储在数字索引（字段编号）之外，默认还将数组存储在关联索引（字段名）中。
-    </para>
-    <para>
-     <parameter>row</parameter> 是要被提取的行（记录）编号。第一行为 0。
-    </para>
-    <para>
-     <function>pg_fetch_assoc</function> 并不明显比
-     <function>pg_fetch_row</function>
-     慢，而且还显著更便于使用。
-    </para>
-    <para>
-     <example>
-      <title><function>pg_fetch_assoc</function> 例子</title>
-      <programlisting role="php">
+<!-- EN-Revision: c2eca73ef79ebe78cebb34053e41b565af504c4f Maintainer: dallas Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
+<refentry xml:id="function.pg-fetch-assoc" xmlns="http://docbook.org/ns/docbook">
+ <refnamediv>
+  <refname>pg_fetch_assoc</refname>
+  <refpurpose>获取一行作为关联数组</refpurpose>
+ </refnamediv>
+
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <type class="union"><type>array</type><type>false</type></type><methodname>pg_fetch_assoc</methodname>
+   <methodparam><type>PgSql\Result</type><parameter>result</parameter></methodparam>
+   <methodparam choice="opt"><type class="union"><type>int</type><type>null</type></type><parameter>row</parameter><initializer>&null;</initializer></methodparam>
+  </methodsynopsis>
+  <para>
+   <function>pg_fetch_assoc</function> 返回与所提取的行（元组/记录）相一致的关联数组。
+  </para>
+  <para>
+   <function>pg_fetch_assoc</function> 等同于调用 <constant>PGSQL_ASSOC</constant> 作为第三个参数的
+   <function>pg_fetch_array</function>。其仅返回关联数组。如果需要数字索引，使用 <function>pg_fetch_row</function>。  
+  </para>
+  &database.fetch-null;
+  <para>
+   <function>pg_fetch_assoc</function> 并不明显比使用 <function>pg_fetch_row</function> 慢，而且在使用中提供了更大的方便。
+  </para>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>result</parameter></term>
+     <listitem>
+      &pgsql.parameter.result;
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>row</parameter></term>
+     <listitem>
+      <para>
+       要获取的结果中的行号。行从 0 向上编号。如果省略或为 &null;，则获取下一行。
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   以关联方式（按字段名）的 <type>array</type>。<type>array</type>
+   中的每个值都表示为 <type>string</type>。数据库 <literal>NULL</literal> 值作为 &null; 返回。
+  </para>
+  <para>
+   如果 <parameter>row</parameter> 超过集合中的行数、没有更多行或任何其他错误，则返回 &false;。从 SELECT 以外的查询结果中获取也将返回 &false;。
+  </para>
+ </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <informaltable>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>&Version;</entry>
+      <entry>&Description;</entry>
+     </row>
+    </thead>
+    <tbody>
+     &pgsql.changelog.result-object;
+    </tbody>
+   </tgroup>
+  </informaltable>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title><function>pg_fetch_assoc</function> 示例</title>
+    <programlisting role="php">
 <![CDATA[
-<?php
-$conn = pg_pconnect("dbname=publisher");
+<?php 
+$conn = pg_connect("dbname=publisher");
 if (!$conn) {
-    echo "An error occured.\n";
-    exit;
+  echo "An error occurred.\n";
+  exit;
 }
 
 $result = pg_query($conn, "SELECT id, author, email FROM authors");
 if (!$result) {
-    echo "An error occured.\n";
-    exit;
+  echo "An error occurred.\n";
+  exit;
 }
+
 while ($row = pg_fetch_assoc($result)) {
-    echo $row['id'];
-    echo $row['author'];
-    echo $row['email'];
+  echo $row['id'];
+  echo $row['author'];
+  echo $row['email'];
 }
 ?>
 ]]>
-      </programlisting>
-     </example>
-    </para>
-    <para>
-     参见
-     <function>pg_fetch_row</function>，<function>pg_fetch_array</function>，<function>pg_fetch_object</function> 和
-    <function>pg_fetch_result</function>。
-    </para>
-   </refsect1>
-  </refentry>
+    </programlisting>
+   </example>
+  </para>
+ </refsect1>
 
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>pg_fetch_row</function></member>
+    <member><function>pg_fetch_array</function></member>
+    <member><function>pg_fetch_object</function></member>
+    <member><function>pg_fetch_result</function></member>
+   </simplelist>
+  </para>
+ </refsect1>
+</refentry>
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
