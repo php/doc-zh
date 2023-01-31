@@ -1,47 +1,102 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
-  <refentry xml:id="function.pg-fetch-object" xmlns="http://docbook.org/ns/docbook">
-   <refnamediv>
-    <refname>pg_fetch_object</refname>
-    <refpurpose>提取一行作为对象</refpurpose>
-   </refnamediv>
-   <refsect1>
-    <title>说明</title>
-     <methodsynopsis>
-      <type>object</type><methodname>pg_fetch_object</methodname>
-      <methodparam><type>resource</type><parameter>result</parameter></methodparam>
-      <methodparam choice="opt"><type>int</type><parameter>row</parameter></methodparam> 
-      <methodparam choice="opt"><type>int</type><parameter>result_type</parameter></methodparam>
-     </methodsynopsis>
-    <para>
-     <function>pg_fetch_object</function> 返回与所提取行的属性相一致的一个对象。如果出错或者没有更多行可供提取时则返回 &false;。
-    </para>
-    <para> 
-     <function>pg_fetch_object</function> 和 <function>pg_fetch_array</function> 相似，只有一点区别 － 返回一个对象而不是数组。间接的，这意味着只能通过字段名来访问数据而不能通过偏移量来访问（数字是非法的属性名）。
-    </para>
-    <para>
-     <parameter>row</parameter> 是想要取得的行（记录）的编号。第一行为 0。
-    </para>
-    <para>
-     除了速度之外，本函数和 <function>pg_fetch_array</function> 完全一样，而且几乎和 <function>pg_fetch_row</function> 一样快（速度上的差别很小）。
-    </para>
-    <note>
-     <para> 
-      从 4.1.0 版本开始，参数 <parameter>row</parameter> 变为可选参数。 
-     </para> 
-     <para>
-      从 4.3.0 开始，<parameter>result_type</parameter> 默认值为 PGSQL_ASSOC，而旧版本的默认值是 PGSQL_BOTH。数字属性在这里没有用处，因为在 PHP 中对象的属性不能是数字。
-     </para>
-     <para>
-      <parameter>result_type</parameter> 参数在以后的版本中可能会删除。
-     </para>
-    </note>
-    <para>
-     <example>
-      <title><function>pg_fetch_object</function></title>
-      <programlisting role="php">
+<!-- EN-Revision: c2eca73ef79ebe78cebb34053e41b565af504c4f Maintainer: dallas Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
+<refentry xml:id="function.pg-fetch-object" xmlns="http://docbook.org/ns/docbook">
+ <refnamediv>
+  <refname>pg_fetch_object</refname>
+  <refpurpose>获取一行作为对象</refpurpose>
+ </refnamediv>
+
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <type class="union"><type>object</type><type>false</type></type><methodname>pg_fetch_object</methodname>
+   <methodparam><type>PgSql\Result</type><parameter>result</parameter></methodparam>
+   <methodparam choice="opt"><type class="union"><type>int</type><type>null</type></type><parameter>row</parameter><initializer>&null;</initializer></methodparam>
+   <methodparam choice="opt"><type>string</type><parameter>class</parameter><initializer>"stdClass"</initializer></methodparam>
+   <methodparam choice="opt"><type>array</type><parameter>constructor_args</parameter><initializer>[]</initializer></methodparam>
+  </methodsynopsis>
+  <para>
+   <function>pg_fetch_object</function> 返回对象，该对象的属性对应于获取的行的字段名称。它可以选择实例化特定类的对象，并将参数传递给该类的构造方法。
+  </para>
+  &database.fetch-null;
+  <para>
+   在速度方面，该函数与 <function>pg_fetch_array</function> 相同，并且几乎与 <function>pg_fetch_row</function> 一样快（差别不大）。
+  </para>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>result</parameter></term>
+     <listitem>
+      &pgsql.parameter.result;
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>row</parameter></term>
+     <listitem>
+      <para>
+       要获取的结果中的行号。行从 0 向上编号。如果省略或为 &null;，则获取下一行。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>class</parameter></term>
+      <listitem>
+       <para>
+        要实例化、设置属性并返回的类的名称。如果未指定，则返回 <classname>stdClass</classname> 对象。
+       </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>constructor_args</parameter></term>
+      <listitem>
+       <para>
+        要传递给 <parameter>class</parameter> 对象的构造方法的可选参数 <type>array</type>。
+       </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   结果中的每个字段名称都有在 <type>object</type> 中对应的属性。数据库 <literal>NULL</literal> 值作为 &null; 返回。
+  </para>
+  <para>
+   如果 <parameter>row</parameter> 超过集合中的行数、没有更多行或任何其他错误，则返回 &false;。
+  </para>
+ </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <informaltable>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>&Version;</entry>
+      <entry>&Description;</entry>
+     </row>
+    </thead>
+    <tbody>
+     &pgsql.changelog.result-object;
+    </tbody>
+   </tgroup>
+  </informaltable>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title><function>pg_fetch_object</function> 示例</title>
+    <programlisting role="php">
 <![CDATA[
 <?php 
 
@@ -49,40 +104,42 @@ $database = "store";
 
 $db_conn = pg_connect("host=localhost port=5432 dbname=$database");
 if (!$db_conn) {
-    echo "Failed connecting to postgres database $database\n";
-    exit;
+  echo "Failed connecting to postgres database $database\n";
+  exit;
 }
 
 $qu = pg_query($db_conn, "SELECT * FROM books ORDER BY author");
 
-$row = 0; // postgres needs a row counter 
 
-while ($data = pg_fetch_object($qu, $row)) {
-    echo $data->author . " (";
-    echo $data->year . "): ";
-    echo $data->title . "<br />";
-    $row++;
+while ($data = pg_fetch_object($qu)) {
+  echo $data->author . " (";
+  echo $data->year . "): ";
+  echo $data->title . "<br />";
 }
 
-pg_free_result ($qu);
-pg_close ($db_conn);
+pg_free_result($qu);
+pg_close($db_conn);
 
 ?>
 ]]>
-      </programlisting>
-     </example>
-    </para>
-    <note>
-     <para>
-      从 4.1.0 开始，<parameter>row</parameter> 成为可选参数。每次调用 <function>pg_fetch_object</function>，内部的行计数器都会加一。
-     </para>
-    </note>
-    <para> 
-     参见 <function>pg_query</function>，<function>pg_fetch_array</function>，<function>pg_fetch_row</function> 和 <function>pg_fetch_result</function>。
-    </para>
-   </refsect1>
-  </refentry>
+    </programlisting>
+   </example>
+  </para>
+ </refsect1>
 
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>pg_query</function></member>
+    <member><function>pg_fetch_array</function></member>
+    <member><function>pg_fetch_assoc</function></member>
+    <member><function>pg_fetch_row</function></member>
+    <member><function>pg_fetch_result</function></member>
+   </simplelist>
+  </para>
+ </refsect1>
+</refentry>
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
