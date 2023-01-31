@@ -1,37 +1,131 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
-  <refentry xml:id="function.pg-fetch-result" xmlns="http://docbook.org/ns/docbook">
-   <refnamediv>
-    <refname>pg_fetch_result</refname>
-    <refpurpose>从结果资源中返回值</refpurpose>
-   </refnamediv>
-   <refsect1>
-    <title>说明</title>
-     <methodsynopsis>
-      <type>mixed</type><methodname>pg_fetch_result</methodname>
-      <methodparam><type>resource</type><parameter>result</parameter></methodparam>
-      <methodparam><type>int</type><parameter>row</parameter></methodparam>
-      <methodparam><type>mixed</type><parameter>field</parameter></methodparam>
-     </methodsynopsis>
-    <para>
-     <function>pg_fetch_result</function> 根据由 <function>pg_query</function> 返回的 <parameter>result</parameter> 资源返回相应的值。<parameter>row</parameter> 为整型数。<parameter>field</parameter> 为字段名（字符串）或字段索引（整数）。<parameter>row</parameter> 和 <parameter>field</parameter> 指明了查询结果中的哪个单元被返回。行编号从 0 开始。除了用字段名之外，还可以用不带引号的数字作为字段索引。字段索引从 0 开始。
-    </para>
-    <para>
-     PostgreSQL 有很多内置的类型，这里只直接支持基本类型。所有形式的
-     <type>integer</type>，<type>boolean</type> 和 void 类型都被返回为
-     <type>integer</type> 值。所有形式的 float 和 real 类型都被返回为
-     <type>float</type> 值。Boolean 类型被返回为 &quot;t&quot; 或者
-     &quot;f&quot;。所有其它类型包括数组都被返回为字符串，该字符串的格式和默认的
-     PostgreSQL 风格一样，可以在 <command>psql</command> 程序中看到。
-     <!-- FIXME: is that still true? PHP supports boolean&null now... --> 
-     <!-- Yes, supporting boolean&null breaks scripts. pg_fetch_array() 
-          can be used instead. I might take of this issue with additional 
-          ini directive. yohgaki@php.net --> 
-    </para>
-   </refsect1>
-  </refentry>
+<!-- EN-Revision: c2eca73ef79ebe78cebb34053e41b565af504c4f Maintainer: dallas Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
+<refentry xml:id="function.pg-fetch-result" xmlns="http://docbook.org/ns/docbook">
+ <refnamediv>
+  <refname>pg_fetch_result</refname>
+  <refpurpose>从结果实例返回值</refpurpose>
+ </refnamediv>
+
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <type class="union"><type>string</type><type>false</type><type>null</type></type><methodname>pg_fetch_result</methodname>
+   <methodparam><type>PgSql\Result</type><parameter>result</parameter></methodparam>
+   <methodparam><type>int</type><parameter>row</parameter></methodparam>
+   <methodparam><type>mixed</type><parameter>field</parameter></methodparam>
+  </methodsynopsis>
+  <methodsynopsis>
+   <type class="union"><type>string</type><type>false</type><type>null</type></type><methodname>pg_fetch_result</methodname>
+   <methodparam><type>PgSql\Result</type><parameter>result</parameter></methodparam>
+   <methodparam><type>mixed</type><parameter>field</parameter></methodparam>
+  </methodsynopsis>
+  <para>
+   <function>pg_fetch_result</function> 返回 <classname>PgSql\Result</classname> 实例中特定行和字段（列）的值。
+  </para>
+  <note>
+   <para>
+    此函数过去称为 <function>pg_result</function>。
+   </para>
+  </note>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>result</parameter></term>
+     <listitem>
+      &pgsql.parameter.result;
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>row</parameter></term>
+     <listitem>
+      <para>
+       要获取的结果中的行号。行从 0 向上编号。如果省略，则获取下一行。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>field</parameter></term>
+     <listitem>
+      <para>       
+       表示要获取的字段（列）名的 <type>string</type>，否则为表示要获取的字段编号的 <type>int</type>。字段从 0 向上编号。
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   布尔值返回为 &quot;t&quot; 或 &quot;f&quot;。所有其它类型，包括数组，都以字符串形式返回，其格式与 <command>psql</command> 程序中的相同默认 PostgreSQL 方式。数据库 <literal>NULL</literal> 值作为 &null; 返回。
+  </para>
+  <para>
+   如果 <parameter>row</parameter> 超过集合中的行数或任何其他错误，则返回 &false;。
+  </para>
+ </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <informaltable>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>&Version;</entry>
+      <entry>&Description;</entry>
+     </row>
+    </thead>
+    <tbody>
+     &pgsql.changelog.result-object;
+    </tbody>
+   </tgroup>
+  </informaltable>
+ </refsect1>
+ 
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title><function>pg_fetch_result</function> 示例</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$db = pg_connect("dbname=users user=me") || die();
+
+$res = pg_query($db, "SELECT 1 UNION ALL SELECT 2");
+
+$val = pg_fetch_result($res, 1, 0);
+
+echo "First field in the second row is: ", $val, "\n";
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+First field in the second row is: 2
+]]>
+    </screen>
+   </example>
+  </para>
+ </refsect1>
+ 
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>pg_query</function></member>
+    <member><function>pg_fetch_array</function></member>
+   </simplelist>
+  </para>
+ </refsect1>
+</refentry>
 
 <!-- Keep this comment at the end of the file
 Local variables:
