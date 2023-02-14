@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 4a7ddddc27271967b616ad3400cfbe2a9b48212b Maintainer: yuanyuqiang Status: ready -->
-<!-- Reviewed: no -->
-
+<!-- EN-Revision: 184f3f7bd45643cb80f828d0bb001991ec3a5fad Maintainer: yuanyuqiang Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <appendix xml:id="session.examples" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  &reftitle.examples;
  <section xml:id="session.examples.basic">
@@ -18,12 +17,12 @@
     如果请求中不包含会话 ID 信息，PHP 就会创建一个新的会话。
     会话开始之后，PHP 就会将会话中的数据设置到 <varname>$_SESSION</varname> 变量中。
     当 PHP 停止的时候，它会自动读取 <varname>$_SESSION</varname> 中的内容，并将其进行序列化，
-    然后发送给会话保存管理器来进行保存。
+    然后发送给会话保存处理程序来进行保存。
    </para>
    <para>
-    默认情况下，PHP 使用内置的文件会话保存管理器（<parameter>files</parameter>）来完成会话的保存。
-    也可以通过配置项 <link linkend="ini.session.save-handler">session.save_handler</link> 来修改所要采用的会话保存管理器。
-    对于文件会话保存管理器，会将会话数据保存到配置项
+    默认情况下，PHP 使用内置的文件会话保存处理程序（<parameter>files</parameter>）来完成会话的保存。
+    也可以通过配置项 <link linkend="ini.session.save-handler">session.save_handler</link> 来修改所要采用的会话保存处理程序。
+    对于文件会话保存处理程序，会将会话数据保存到配置项
     <link linkend="ini.session.save-path">session.save_path</link> 所指定的位置。
    </para>
    <para>
@@ -95,7 +94,7 @@ unset($_SESSION['count']);
     对于大量使用 Ajax 或者并发请求的网站而言，这可能是一个严重的问题。
     解决这个问题最简单的做法是如果修改了会话中的变量，
     那么应该尽快调用 <function>session_write_close</function> 来保存会话数据并释放文件锁。
-    还有一种选择就是使用支持并发操作的会话保存管理器来替代文件会话保存管理器。
+    还有一种选择就是使用支持并发操作的会话保存处理程序来替代文件会话保存处理程序。
    </para>
   </note>
  </section>
@@ -188,12 +187,12 @@ here</a>.
  </section>
 
  <section xml:id="session.customhandler">
-  <title>自定义会话管理器</title>
+  <title>自定义会话处理程序</title>
   <para>
    如果需要在数据库中或者以其他方式存储会话数据，
    需要使用 <function>session_set_save_handler</function> 函数来创建一系列用户级存储函数。
-   PHP 5.4.0 之后，你可以使用 <classname>SessionHandlerInterface</classname> 类
-   或者通过继承 <classname>SessionHandler</classname> 类来扩展内置的管理器，
+   可以使用 <classname>SessionHandlerInterface</classname> 类
+   或者通过继承 <classname>SessionHandler</classname> 类扩展 PHP 的内置处理程序，
    从而达到自定义会话保存机制的目的。
   </para>
   <para>
@@ -204,15 +203,15 @@ here</a>.
    <parameter>gc</parameter> 用来进行周期性的垃圾收集。
   </para>
   <para>
-   因此，会话保存管理器对于 PHP 而言是必需的。
-   默认情况下会使用内置的文件会话保存管理器。
-   可以通过 <function>session_set_save_handler</function> 函数来设置自定义会话保存管理器。
-   一些 PHP 扩展也提供了内置的会话管理器，例如：<parameter>sqlite</parameter>，
+   因此，会话保存处理程序对于 PHP 而言是必需的。
+   默认情况下会使用内置的文件会话保存处理程序。
+   可以通过 <function>session_set_save_handler</function> 函数来设置自定义会话保存处理程序。
+   一些 PHP 扩展也提供了内置的会话处理程序，例如：<parameter>sqlite</parameter>，
    <parameter>memcache</parameter> 以及 <parameter>memcached</parameter>，
    可以通过配置项 <link linkend="ini.session.save-handler">session.save_handler</link> 来使用它们。
   </para>
   <para>
-   会话开始的时候，PHP 会调用 <parameter>open</parameter> 管理器，然后再调用
+   会话开始的时候，PHP 会调用 <parameter>open</parameter> 处理程序，然后再调用
    <parameter>read</parameter> 回调函数来读取内容，该回调函数返回已经经过编码的字符串。
    然后 PHP 会将这个字符串解码，并且产生一个数组对象，然后保存至 <varname>$_SESSION</varname> 
    超级全局变量。
