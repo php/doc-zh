@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 60809ebcf7d0c261b2f00e093e4fab70326ffc7b Maintainer: daijie Status: ready -->
+<!-- EN-Revision: a7f7a21fb973015c98ab3e9b9bb2d2d118f73291 Maintainer: daijie Status: ready -->
 <!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="function.spl-autoload-register" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
@@ -42,8 +42,11 @@
       </para>
       <methodsynopsis>
        <type>void</type><methodname><replaceable>callback</replaceable></methodname>
-       <methodparam><type>string</type><parameter>class_name</parameter></methodparam>
+       <methodparam><type>string</type><parameter>class</parameter></methodparam>
       </methodsynopsis>
+      <para>
+       <parameter>class</parameter> 将是不包含开头反斜线的完整标识符。
+      </para>
      </listitem>
     </varlistentry>
     <varlistentry>
@@ -136,8 +139,8 @@ spl_autoload_register(function ($class) {
 namespace Foobar;
 
 class Foo {
-    static public function test($name) {
-        print '[['. $name .']]';
+    static public function test($class) {
+        print '[['. $class .']]';
     }
 }
 
@@ -153,6 +156,34 @@ new InexistentClass;
 <![CDATA[
 [[Foobar\InexistentClass]]
 Fatal error: Class 'Foobar\InexistentClass' not found in ...
+]]>
+    </screen>
+   </example>
+   <example>
+    <title>提供的标识符将不包含开头的反斜线</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+
+spl_autoload_register(static function ($class) {
+    var_dump($class);
+});
+
+class_exists('RelativeName');
+class_exists('RelativeName\\WithNamespace');
+class_exists('\\AbsoluteName');
+class_exists('\\AbsoluteName\\WithNamespace');
+
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+string(12) "RelativeName"
+string(26) "RelativeName\WithNamespace"
+string(12) "AbsoluteName"
+string(26) "AbsoluteName\WithNamespace"
 ]]>
     </screen>
    </example>
