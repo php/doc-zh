@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision$ -->
+<!-- EN-Revision: 562a216c8108885a492cbfb66e2d5734847fa19d Maintainer: mowangjuanzi Status: partial -->
+<book xml:id="book.phar" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <?phpdoc extension-membership="bundled" ?>
+ <title>Phar</title>
+ 
+ <!-- {{{ preface -->
+ <preface xml:id="intro.phar">
+  &reftitle.intro;
+  <para>
+   phar 扩展提供了一种将整个 PHP 应用程序放入单个叫做“phar”（PHP 归档）文件的方法，以便于分发和安装。 
+   除了提供此服务外，phar 扩展还提供了一种文件格式抽象方法，用于通过 <classname>PharData</classname> 类创建和操作
+   tar 和 zip 文件，就像 PDO 提供访问不同数据库的统一接口一样。与不能在不同数据库之间转换的 PDO 不同，Phar
+   还可以使用一行代码在 tar、zip 和 phar 文件格式之间进行转换。参见 <function>Phar::convertToExecutable</function> 中的示例。
+  </para>
+  <para>
+   什么是 phar？Phar 归档的最佳特征是可以将多个文件组合成一个文件。 因此，phar 存档提供了在单个文件中分发完整的 PHP
+   应用程序并无需将其解压缩到磁盘而直接运行文件的方法。此外，phar 存档可以像任何其他文件一样由 PHP 在命令行和 Web
+   服务器上执行。Phar is kind of like a thumb drive for PHP applications.
+  </para>
+  <para>
+   Phar 通过 <link linkend="book.stream">stream 封装协议</link>实现这个功能。通常，要在 PHP 脚本中使用外部文件，将使用 <function>include</function>：
+  </para>
+  <para>
+   <example>
+    <title>使用外部文件</title>
+    <programlisting role="php">
+     <![CDATA[
+ <?php
+ include '/path/to/external/file.php';
+ ?>
+     ]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   PHP can be thought of as actually translating
+   <literal>/path/to/external/file.php</literal> into a
+   stream wrapper as <literal>file:///path/to/external/file.php</literal>, and under
+   the hood it does in fact use the plain file stream wrapper stream functions to
+   access all local files.
+  </para>
+  <para>
+   To use a file named <literal>file.php</literal> contained with a phar archive
+   <literal>/path/to/myphar.phar</literal>,
+   the syntax is very similar to the <literal>file://</literal> syntax above.
+  </para>
+  <para>
+   <example>
+    <title>Using a file within a phar archive</title>
+    <programlisting role="php">
+     <![CDATA[
+ <?php
+ include 'phar:///path/to/myphar.phar/file.php';
+ ?>
+     ]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   In fact, one can treat a phar archive exactly as if it were an external disk, using
+   any of <function>fopen</function>-related functions, <function>opendir</function> and
+   <function>mkdir</function>-related functions to read, change, or create new files
+   and directories within the phar archive.  This allows complete PHP applications
+   to be distributed in a single file and run directly from that file.
+  </para>
+  <para>
+   The most common usage for a phar archive is to distribute a complete application
+   in a single file.  For instance, the PEAR Installer that is bundled with PHP
+   versions is distributed as a phar archive.  To use a phar archive distributed
+   in this way, the archive can be executed on the command-line or via a web server.
+  </para>
+  <para>
+   Phar archives can be distributed as <literal>tar</literal> archives,
+   <literal>zip</literal> archives, or as the custom <literal>phar</literal> file format
+   designed specifically for the phar extension.  Each file format has advantages
+   and disadvantages.  The tar and zip file formats can be read or extracted by any
+   third-party tool that can read the format, but require the phar extension in order to
+   run with PHP.  The phar file format is customized and unique to the phar extension,
+   and can only be created by the phar extension or the PEAR package
+   <link xlink:href="&url.pear.package;PHP_Archive">PHP_Archive</link>, but has the
+   advantage that applications created in this format will run even if the phar
+   extension is not enabled.
+  </para>
+  <para>
+   In other words, even with the phar extension disabled, one can execute or include
+   a phar-based archive.  Accessing individual files within a phar archive is only
+   possible with the phar extension unless the phar archive was created by PHP_Archive.
+  </para>
+  <para>
+   The phar extension is also capable of converting a phar archive from tar to zip or
+   to phar file format in a single command:
+  </para>
+  <para>
+   <example>
+    <title>Converting a phar archive from phar to tar file format</title>
+    <programlisting role="php">
+     <![CDATA[
+ <?php
+ $phar = new Phar('myphar.phar');
+ $pgz = $phar->convertToExecutable(Phar::TAR, Phar::GZ); // makes myphar.phar.tar.gz
+ ?>
+     ]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   Phar can compress individual files or an entire archive
+   using <link linkend="book.zlib">gzip</link> compression or
+   <link linkend="book.bzip2">bzip2</link> compression, and can verify archive
+   integrity automatically through the use of MD5, SHA-1, SHA-256 or SHA-512
+   signatures.
+  </para>
+  <para>
+   Lastly, the Phar extension is security-conscious, and disables write access
+   to executable phar archives by default, and requires system-level disabling of the
+   <literal>phar.readonly</literal> php.ini setting in order to create or
+   modify phar archives.  Normal tar and zip archives without an executable stub
+   can always be created or modified using the <classname>PharData</classname> class.
+  </para>
+  <para>
+   If you are creating applications for distribution, you will want to read
+   <link linkend="phar.creating">How to create Phar Archives</link>.  If you want
+   more information on the differences between the three file formats that phar supports,
+   you should read <link linkend="phar.fileformat">Phar, Tar and Zip</link>.
+  </para>
+  <para>
+   If you are using phar applications, there are helpful tips in
+   <link linkend="phar.using">How to use Phar Archives</link>.
+  </para>
+  <para>
+   The word <literal>phar</literal> is a portmanteau of <literal>PHP</literal> and
+   <literal>Archive</literal> and is based loosely
+   on the <literal>jar</literal> (Java Archive) familiar to Java developers.
+  </para>
+  <para>
+   The implementation for Phar archives is based on the PEAR package
+   <link xlink:href="&url.pear.package;PHP_Archive">PHP_Archive</link>, and
+   the implementation details are similar, although the Phar extension
+   is much more powerful.  In addition, the Phar extension allows most PHP
+   applications to be run unmodified while PHP_Archive-based phar archives
+   often require extensive modification in order to work.
+  </para>
+ </preface>
+ <!-- }}} -->
+ 
+ &reference.phar.setup;
+ &reference.phar.constants;
+ &reference.phar.using;
+ &reference.phar.creating;
+ &reference.phar.fileformat;
+ &reference.phar.Phar;
+ &reference.phar.PharData;
+ &reference.phar.PharFileInfo;
+ &reference.phar.PharException;
+
+</book>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
+
