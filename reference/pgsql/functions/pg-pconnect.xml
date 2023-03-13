@@ -1,41 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: e41806c30bf6975e452c0d4ce35ab0984c2fa68c Maintainer: HonestQiao Status: ready -->
-<!-- Reviewed: no Maintainer: HonestQiao -->
+<!-- EN-Revision: c2eca73ef79ebe78cebb34053e41b565af504c4f Maintainer: HonestQiao Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="function.pg-pconnect" xmlns="http://docbook.org/ns/docbook">
-   <refnamediv>
-    <refname>pg_pconnect</refname>
-    <refpurpose>打开一个持久的 PostgreSQL 连接</refpurpose>
-   </refnamediv>
- 
+ <refnamediv>
+  <refname>pg_pconnect</refname>
+  <refpurpose>打开一个持久的 PostgreSQL 连接</refpurpose>
+ </refnamediv>
+
  <refsect1 role="description">
   &reftitle.description;
-    <methodsynopsis>
-     <type>resource</type><methodname>pg_pconnect</methodname> 
-     <methodparam><type>string</type><parameter>connection_string</parameter></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter>connect_type</parameter></methodparam>
-    </methodsynopsis>
-    <para>
-     <function>pg_pconnect</function> 打开一个到 PostgreSQL 数据库的持久连接。返回其它 PostgreSQL 函数所需要的连接资源号。
-    </para>
-    <para>
-   If a second call is made to <function>pg_pconnect</function> with
-   the same <parameter>connection_string</parameter> as an existing connection, the
-   existing connection will be returned unless you pass
-   <constant>PGSQL_CONNECT_FORCE_NEW</constant> as
-   <parameter>connect_type</parameter>.
+  <methodsynopsis>
+   <type class="union"><type>PgSql\Connection</type><type>false</type></type><methodname>pg_pconnect</methodname>
+   <methodparam><type>string</type><parameter>connection_string</parameter></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>flags</parameter><initializer>0</initializer></methodparam>
+  </methodsynopsis>
+  <para>
+   <function>pg_pconnect</function> 打开一个到 PostgreSQL 数据库的持久连接。返回其它 PostgreSQL 函数所需要的 <classname>PgSql\Connection</classname> 实例。
   </para>
-    <para>
-     要打开持久连接功能，&php.ini; 中的 <link 
-     linkend="ini.pgsql.allow-persistent">pgsql.allow_persistent</link> 参数必须为 &quot;On&quot;（也是默认值）。
-最大持久连接数目由 &php.ini; 中的 <link linkend="ini.pgsql.max-persistent">pgsql.max_persistent</link>
-参数定义（默认为 -1 表示没有限制）。所有连接的数目可由 &php.ini; 中的 <link
-      linkend="ini.pgsql.max-links">pgsql.max_links</link> 参数设置。
-    </para>
-    <para>
-     <function>pg_close</function> 不能关闭由 <function>pg_pconnect</function> 打开的持久连接。
-    </para>
-   </refsect1>
+  <para>
+   如果使用与已有连接相同的 <parameter>connection_string</parameter> 对 <function>pg_pconnect</function>
+   进行第二次调用，则将返回已有连接，除非将 <constant>PGSQL_CONNECT_FORCE_NEW</constant> 传递给 <parameter>flags</parameter>。
+  </para>
+  <para>
+   要打开持久连接功能，&php.ini; 中的 <link linkend="ini.pgsql.allow-persistent">pgsql.allow_persistent</link> 参数必须为
+   &quot;On&quot;（也是默认值）。最大持久连接数目由 &php.ini; 中的 <link linkend="ini.pgsql.max-persistent">pgsql.max_persistent</link>
+   参数定义（默认为 -1 表示没有限制）。所有连接的数目可由 &php.ini; 中的 <link linkend="ini.pgsql.max-links">pgsql.max_links</link> 参数设置。
+  </para>
+  <para>
+   <function>pg_close</function> 不能关闭由 <function>pg_pconnect</function> 打开的持久连接。
+  </para>
+ </refsect1>
 
  <refsect1 role="parameters">
   &reftitle.parameters;
@@ -45,33 +40,21 @@
      <term><parameter>connection_string</parameter></term>
      <listitem>
       <para>
-       The <parameter>connection_string</parameter> can be empty to use all default parameters, or it 
-       can contain one or more parameter settings separated by whitespace. 
-       Each parameter setting is in the form <literal>keyword = value</literal>. Spaces around 
-       the equal sign are optional. To write an empty value or a value 
-       containing spaces, surround it with single quotes, e.g., <literal>keyword = 
-       'a value'</literal>. Single quotes and backslashes within the value must be 
-       escaped with a backslash, i.e., \' and \.  
+       <parameter>connection_string</parameter> 可以为空以使用所有默认参数，也可以包含一个或多个由空格分隔的参数设置。每个参数设置的形式为
+       <literal>keyword = value</literal>。等号旁边的空格是可选的。要写入空值或包含空格的值，请用单引号将其括起来，例如，<literal>keyword = 
+       'a value'</literal>。值中的单引号和反斜线必须用反斜线转义，即 \' 和 \\。
       </para>
       <para>
-       The currently recognized parameter keywords are:
-       <parameter>host</parameter>, <parameter>hostaddr</parameter>, <parameter>port</parameter>,
-       <parameter>dbname</parameter>, <parameter>user</parameter>,
-       <parameter>password</parameter>, <parameter>connect_timeout</parameter>,
-       <parameter>options</parameter>, <parameter>tty</parameter> (ignored), <parameter>sslmode</parameter>,
-       <parameter>requiressl</parameter> (deprecated in favor of <parameter>sslmode</parameter>), and
-       <parameter>service</parameter>.  Which of these arguments exist depends
-       on your PostgreSQL version.
+       当前可识别的参数关键字是：<parameter>host</parameter>、<parameter>hostaddr</parameter>、<parameter>port</parameter>、<parameter>dbname</parameter>、<parameter>user</parameter>、<parameter>password</parameter>、<parameter>connect_timeout</parameter>、<parameter>options</parameter>、<parameter>tty</parameter>（已忽略）、<parameter>sslmode</parameter>、<parameter>requiressl</parameter>（已弃用以支持
+       <parameter>sslmode</parameter>）和 <parameter>service</parameter>。存在哪些参数取决于 PostgreSQL 版本。
       </para>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>connect_type</parameter></term>
+     <term><parameter>flags</parameter></term>
      <listitem>
       <para>
-       If <constant>PGSQL_CONNECT_FORCE_NEW</constant> is passed, then a new connection
-       is created, even if the <parameter>connection_string</parameter> is identical to
-       an existing connection.
+       如果传递了 <constant>PGSQL_CONNECT_FORCE_NEW</constant>，则会创建新连接，即使 <parameter>connection_string</parameter> 与现有连接相同。
       </para>
      </listitem>
     </varlistentry>
@@ -82,15 +65,37 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   PostgreSQL connection resource on success, &false; on failure.
+   成功时返回 <classname>PgSql\Connection</classname> 实例，&return.falseforfailure;。
   </para>
+ </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <informaltable>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>&Version;</entry>
+      <entry>&Description;</entry>
+     </row>
+    </thead>
+    <tbody>
+     <row>
+      <entry>8.1.0</entry>
+      <entry>
+       现在返回 <classname>PgSql\Connection</classname> 实例；之前返回 &resource;。
+      </entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </informaltable>
  </refsect1>
  
  <refsect1 role="examples">
   &reftitle.examples;
   <para>
    <example>
-    <title>Using <function>pg_pconnect</function></title>
+    <title>使用 <function>pg_pconnect</function></title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -124,8 +129,7 @@ $dbconn4 = pg_pconnect($conn_string);
    </simplelist>
   </para>
  </refsect1>
-  </refentry>
-
+</refentry>
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
