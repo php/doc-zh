@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 59a1bbcb6f7a1e74a640d7ec2890cc6a12f19b52 Maintainer:duanxiaoqiang Status: ready -->
-<!-- Reviewed: no -->
-
+<!-- EN-Revision: 73fae4ee51b644b72028e610abefefced57c18ad Maintainer:duanxiaoqiang Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="function.curl-multi-strerror" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
   <refname>curl_multi_strerror</refname>
@@ -12,8 +11,8 @@
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <type>string</type><methodname>curl_multi_strerror</methodname>
-   <methodparam><type>int</type><parameter>errornum</parameter></methodparam>
+   <type class="union"><type>string</type><type>null</type></type><methodname>curl_multi_strerror</methodname>
+   <methodparam><type>int</type><parameter>error_code</parameter></methodparam>
   </methodsynopsis>
   <para>
    返回一个用以描述所给 CURLM 错误代码所对应的错误信息。
@@ -25,7 +24,7 @@
   &reftitle.parameters;
   <variablelist>
    <varlistentry>
-    <term><parameter>errornum</parameter></term>
+    <term><parameter>error_code</parameter></term>
     <listitem>
      <para>
       <link xlink:href="&url.curl.error;">CURLM 错误代码</link>中的常量之一。
@@ -50,26 +49,31 @@
     <programlisting role="php">
 <![CDATA[
 <?php
-// Create cURL handles
-$ch1 = curl_init("http://example.com"/);
+// 创建 cURL 句柄
+$ch1 = curl_init("http://example.com/");
 $ch2 = curl_init("http://php.net/");
 
-// Create a cURL multi handle
+// 创建 cURL 多句柄
 $mh = curl_multi_init();
 
-// Add the handles to the multi handle
+// 添加句柄到多句柄
 curl_multi_add_handle($mh, $ch1);
 curl_multi_add_handle($mh, $ch2);
 
-// Execute the multi handle
+// 执行多句柄
 do {
     $status = curl_multi_exec($mh, $active);
-    // Check for errors
-    if($status > 0) {
-        // Display error message
-        echo "ERROR!\n " . curl_multi_strerror($status);
+    if ($active) {
+        curl_multi_select($mh);
     }
-} while ($status === CURLM_CALL_MULTI_PERFORM || $active);
+} while ($active && $status === CURLM_OK);
+
+// 检测错误
+if ($status != CURLM_OK) {
+    // Display error message
+    echo "ERROR!\n " . curl_multi_strerror($status);
+}
+
 ?>
 ]]>
     </programlisting>
@@ -88,7 +92,6 @@ do {
  </refsect1>
 
 </refentry>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
