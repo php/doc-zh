@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: 53bdffa6b9f8ce5ffdaf476c9d450f7cd0d1afa2 Maintainer: daijie Status: ready -->
+<!-- EN-Revision: 52dbbb3856a16174bfd0a96e6df8c52f236397eb Maintainer: daijie Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="function.curl-setopt" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>curl_setopt</refname>
@@ -12,7 +12,7 @@
   &reftitle.description;
   <methodsynopsis>
    <type>bool</type><methodname>curl_setopt</methodname>
-   <methodparam><type>resource</type><parameter>ch</parameter></methodparam>
+   <methodparam><type>CurlHandle</type><parameter>handle</parameter></methodparam>
    <methodparam><type>int</type><parameter>option</parameter></methodparam>
    <methodparam><type>mixed</type><parameter>value</parameter></methodparam>
   </methodsynopsis>
@@ -61,16 +61,6 @@
            </entry>
           </row>
           <row>
-           <entry valign="top"><constant>CURLOPT_BINARYTRANSFER</constant></entry>
-           <entry valign="top">
-            设为 &true; ，将在启用 <constant>CURLOPT_RETURNTRANSFER</constant> 时，返回原生的（Raw）输出。
-           </entry>
-           <entry valign="top">
-            从 PHP 5.1.3 开始，此选项不再有效果：使用
-           <constant>CURLOPT_RETURNTRANSFER</constant> 后总是会返回原生的（Raw）内容。
-           </entry>
-          </row>
-          <row>
            <entry valign="top"><constant>CURLOPT_COOKIESESSION</constant></entry>
            <entry valign="top">
             设为 &true;  时将开启新的一次 cookie 会话。它将强制 libcurl 忽略之前会话时存的其他 cookie。
@@ -86,7 +76,6 @@
            </entry>
            <entry valign="top">
             在 cURL 7.19.1 中添加。
-            PHP 5.3.2 后有效。
             需要开启 <constant>CURLOPT_VERBOSE</constant> 才有效。
            </entry>
           </row>
@@ -98,7 +87,6 @@
            </entry>
            <entry valign="top">
             在 7.15.2 中添加。
-            PHP 5.5.0 起有效。
            </entry>
           </row>
           <row>
@@ -146,7 +134,7 @@
           <row>
            <entry valign="top"><constant>CURLOPT_FOLLOWLOCATION</constant></entry>
            <entry valign="top">
-            &true;  时将会根据服务器返回 HTTP 头中的 <literal>"Location: "</literal> 重定向。（注意：这是递归的，<literal>"Location: "</literal> 发送几次就重定向几次，除非设置了 <constant>CURLOPT_MAXREDIRS</constant>，限制最大重定向次数。）。
+            &true; 时将会根据服务器返回 HTTP 头中的 <literal>"Location: "</literal> 重定向。参阅 <constant>CURLOPT_MAXREDIRS</constant>。
            </entry>
            <entry valign="top">
            </entry>
@@ -202,10 +190,10 @@
           <row>
            <entry valign="top"><constant>CURLOPT_TCP_NODELAY</constant></entry>
            <entry valign="top">
-            &true; 时禁用 TCP 的 Nagle 算法，就是减少网络上的小包数量。
+            &true; 时禁用 TCP 的 Nagle 算法，就是减少网络上的小数据包数量。
            </entry>
            <entry valign="top">
-             PHP 5.2.1 有效，编译时需要 libcurl 7.11.2 及以上。
+            编译的版本在 libcurl 7.11.2 及以上时有效。
            </entry>
           </row>
           <row>
@@ -238,7 +226,16 @@
             &true; 时追踪句柄的请求字符串。
            </entry>
            <entry valign="top">
-            从 PHP 5.1.3 开始可用。<constant>CURLINFO_</constant> 的前缀是有意的(intentional)。
+            <constant>CURLINFO_</constant> 的前缀是指向的（intentional）。
+           </entry>
+          </row>
+          <row>
+           <entry valign="top"><constant>CURLOPT_HTTP09_ALLOWED</constant></entry>
+           <entry valign="top">
+            是否允许 HTTP/0.9 响应。从 libcurl 7.66.0 开始默认为 &false;； 以前它默认为 &true;。
+           </entry>
+           <entry valign="top">
+            如果编译 libcurl 版本 &gt;= 7.64.0，则分别从 PHP 7.3.15 和 7.4.3 开始可用
            </entry>
           </row>
           <row>
@@ -255,6 +252,24 @@
             &true;  会通过指定的 HTTP 代理来传输。
            </entry>
            <entry valign="top">
+           </entry>
+          </row>
+          <row>
+           <entry valign="top"><constant>CURLOPT_HTTP_CONTENT_DECODING</constant></entry>
+           <entry valign="top">
+            &false; 时获取原始 HTTP 响应正文。
+           </entry>
+           <entry valign="top">
+            如果编译的 libcurl &gt;= 7.16.2 时可用。
+           </entry>
+          </row>
+          <row>
+           <entry valign="top"><constant>CURLOPT_KEEP_SENDING_ON_ERROR</constant></entry>
+           <entry valign="top">
+            &true; 时，如果返回的 HTTP 代码等于或大于 300，则继续发送请求主体。默认操作是停止发送并关闭流或连接。适用于手动 NTLM 身份验证。大多数应用程序不需要此选项。
+           </entry>
+           <entry valign="top">
+            如果编译的 libcurl &gt;= 7.51.0，则从 PHP 7.3.0 开始可用。
            </entry>
           </row>
           <row>
@@ -347,24 +362,6 @@
            </entry>
           </row>
           <row>
-           <entry valign="top"><constant>CURLOPT_SAFE_UPLOAD</constant></entry>
-           <entry valign="top">
-            &true; 禁用 <literal>@</literal> 前缀在 <constant>CURLOPT_POSTFIELDS</constant> 中发送文件。
-            
-            意味着 <literal>@</literal> 可以在字段中安全得使用了。 
-            可使用 <classname>CURLFile</classname> 作为上传的代替。
-           </entry>
-           
-           
-           
-           
-           <entry valign="top">
-            PHP 5.5.0 中添加，默认值 &false;。
-            PHP 5.6.0 改默认值为 &true;。.
-            PHP 7 删除了此选项， 必须使用 CURLFile interface 来上传文件。
-           </entry>
-          </row>
-          <row>
            <entry valign="top"><constant>CURLOPT_SASL_IR</constant></entry>
            <entry valign="top">
             &true; 开启，收到首包(first packet)后发送初始的响应(initial response)。
@@ -428,6 +425,26 @@
            </entry>
           </row>
           <row>
+           <entry valign="top"><constant>CURLOPT_PROXY_SSL_VERIFYPEER</constant></entry>
+           <entry valign="top">
+            &false; 会阻止 CURL 验证对等证书（peer's certificate）。可以使用 <constant>CURLOPT_CAINFO</constant>
+            选项指定要验证的备用证书，或者可以使用 <constant>CURLOPT_CAPATH</constant> 选项指定证书目录。设置为
+            &false; 时，无论如何验证对等证书都会成功。
+           </entry>
+           <entry valign="top">
+            默认为 &true;。自 PHP 7.3.0 和 libcurl &gt;= cURL 7.52.0 起可用。
+           </entry>
+          </row>
+          <row>
+           <entry valign="top"><constant>CURLOPT_SAFE_UPLOAD</constant></entry>
+           <entry valign="top">
+            始终为 &true;，在 <constant>CURLOPT_POSTFIELDS</constant> 中禁用了对上传文件的 <literal>@</literal>
+            前缀的支持，这意味着以 <literal>@</literal> 开头的值可以作为字段安全地传递。<classname>CURLFile</classname> 可用于替代上传。
+           </entry>
+           <entry valign="top">
+           </entry>
+          </row>
+          <row>
            <entry valign="top"><constant>CURLOPT_TCP_FASTOPEN</constant></entry>
            <entry valign="top">
             &true; 开启 TCP Fast Open。
@@ -484,7 +501,7 @@
        </informaltable>
       </para>
       <para>
-       以下 <parameter>option</parameter>的<parameter>value</parameter>应该被设置成 <type>integer</type>：
+       以下 <parameter>option</parameter>的<parameter>value</parameter>应该被设置成 <type>int</type>：
        <informaltable>
         <tgroup cols="3">
          <thead>
@@ -505,20 +522,6 @@
            </entry>
           </row>
           <row>
-           <entry valign="top"><constant>CURLOPT_CLOSEPOLICY</constant></entry>
-           <entry valign="top">
-            <constant>CURLCLOSEPOLICY_*</constant> 中的一个。
-            <note>
-             <para>
-              此选项已被废弃，它不会被实现，永远不会有效果啦。
-             </para>
-            </note>
-           </entry>
-           <entry valign="top">
-            PHP 5.6.0 中移除。
-           </entry>
-          </row>
-          <row>
            <entry><constant>CURLOPT_CONNECTTIMEOUT</constant></entry>
            <entry valign="top">
             在尝试连接时等待的秒数。设置为0，则无限等待。
@@ -534,7 +537,7 @@
             如果 libcurl 编译时使用系统标准的名称解析器（ standard system name resolver），那部分的连接仍旧使用以秒计的超时解决方案，最小超时时间还是一秒钟。
            </entry>
            <entry valign="top">
-            在 cURL 7.16.2 中被加入。从 PHP 5.2.3 开始可用。
+            在 cURL 7.16.2 中被加入。
            </entry>
           </row>
           <row>
@@ -658,7 +661,7 @@
           <row>
            <entry valign="top"><constant>CURLOPT_MAXCONNECTS</constant></entry>
            <entry valign="top">
-            允许的最大连接数量。达到限制时，会通过<constant>CURLOPT_CLOSEPOLICY</constant>决定应该关闭哪些连接。
+            允许的最大持久连接数。当达到限制时，将会关闭缓存中最早的连接，以防止增加打开的连接数。
            </entry>
            <entry valign="top">
            </entry>
@@ -666,7 +669,8 @@
           <row>
            <entry valign="top"><constant>CURLOPT_MAXREDIRS</constant></entry>
            <entry valign="top">
-            指定最多的 HTTP 重定向次数，这个选项是和<constant>CURLOPT_FOLLOWLOCATION</constant>一起使用的。
+            指定最多的 HTTP 重定向次数，这个选项是和 <constant>CURLOPT_FOLLOWLOCATION</constant> 一起使用的。
+            设置默认值 <literal>20</literal> 是为防止无限重定向。设置为 <literal>-1</literal> 允许无限重定向，<literal>0</literal> 拒绝所有重定向。
            </entry>
            <entry valign="top">
            </entry>
@@ -687,7 +691,7 @@
             设置 <constant>CURLOPT_FOLLOWLOCATION</constant> 时，什么情况下需要再次  HTTP POST 到重定向网址。
            </entry>
            <entry valign="top">
-            cURL 7.19.1 中添加，PHP 5.3.2 开始可用。
+            cURL 7.19.1 中添加。
            </entry>
           </row>
           
@@ -773,6 +777,32 @@
            </entry>
           </row>
           <row>
+           <entry valign="top"><constant>CURLOPT_SOCKS5_AUTH</constant></entry>
+           <entry valign="top">
+            <para>
+             用于 SOCKS5 验证方法。选项是：<constant>CURLAUTH_BASIC</constant>、<constant>CURLAUTH_GSSAPI</constant>、<constant>CURLAUTH_NONE</constant>。
+            </para>
+            <para>
+             位操作符 <literal>|</literal>（or）用于组合多个方法。如果这样做，cURL 将轮询服务器以查看它支持哪些方法并选择最佳方法。
+            </para>
+            <para>
+             <constant>CURLAUTH_BASIC</constant> 允许用户名/密码认证。
+            </para>
+            <para>
+             <constant>CURLAUTH_GSSAPI</constant> 允许 GSS-API 身份验证。
+            </para>
+            <para>
+             <constant>CURLAUTH_NONE</constant> 允许不验证。
+            </para>
+            <para>
+             默认为 <literal>CURLAUTH_BASIC|CURLAUTH_GSSAPI</literal>。使用 <constant>CURLOPT_PROXYUSERPWD</constant> 选项设置真实的用户名和密码。
+            </para>
+           </entry>
+           <entry valign="top">
+            从 7.3.0 和 curl &gt;= 7.55.0 开始可用。
+           </entry>
+          </row>
+          <row>
            <entry valign="top"><constant>CURLOPT_SSL_OPTIONS</constant></entry>
            <entry valign="top">
             Set SSL behavior options, which is a bitmask of any of the following constants:
@@ -793,25 +823,23 @@
           <row>
            <entry valign="top"><constant>CURLOPT_SSL_VERIFYHOST</constant></entry>
            <entry valign="top">
-            设置为 <literal>1</literal> 是检查服务器SSL证书中是否存在一个公用名(common name)。译者注：公用名(Common Name)一般来讲就是填写你将要申请SSL证书的域名 (domain)或子域名(sub domain)。
-            设置成 2，会检查公用名是否存在，并且是否与提供的主机名匹配。
-             <literal>0</literal> 为不检查名称。
-            在生产环境中，这个值应该是 <literal>2</literal>（默认值）。
+            2 时验证 SSL 对等证书中的公用名字段或主题备用名称（Subject Alternate Name，简称 SNA）字段是否与提供的主机名匹配。<literal>0</literal>
+            时不检查名称。不应使用 <literal>1</literal>。在生产环境中，此选项的值应保持为 2（默认值）。
            </entry>
            <entry valign="top">
-           值 <literal>1</literal> 的支持在 cURL 7.28.1 中被删除了。
+           在 cURL 7.28.1 中移除了对 <literal>1</literal> 的支持。
            </entry>
           </row>
           <row>
            <entry valign="top"><constant>CURLOPT_SSLVERSION</constant></entry>
            <entry valign="top">
-             <constant>CURL_SSLVERSION_DEFAULT</constant> (0),
-            <constant>CURL_SSLVERSION_TLSv1</constant> (1),
-            <constant>CURL_SSLVERSION_SSLv2</constant> (2),
-            <constant>CURL_SSLVERSION_SSLv3</constant> (3),
-            <constant>CURL_SSLVERSION_TLSv1_0</constant> (4),
+            <constant>CURL_SSLVERSION_DEFAULT</constant> (0)，
+            <constant>CURL_SSLVERSION_TLSv1</constant> (1)，
+            <constant>CURL_SSLVERSION_SSLv2</constant> (2)，
+            <constant>CURL_SSLVERSION_SSLv3</constant> (3)，
+            <constant>CURL_SSLVERSION_TLSv1_0</constant> (4)，
             <constant>CURL_SSLVERSION_TLSv1_1</constant> (5) ，
-            <constant>CURL_SSLVERSION_TLSv1_2</constant> (6)  中的其中一个。
+            <constant>CURL_SSLVERSION_TLSv1_2</constant> (6) 或 <constant>CURL_SSLVERSION_TLSv1_3</constant> (7) 中的其中一个。
             <note>
              <para>
               你最好别设置这个值，让它使用默认值。
