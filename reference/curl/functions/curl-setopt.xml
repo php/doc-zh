@@ -833,21 +833,59 @@
           <row>
            <entry valign="top"><constant>CURLOPT_SSLVERSION</constant></entry>
            <entry valign="top">
-            <constant>CURL_SSLVERSION_DEFAULT</constant> (0)，
-            <constant>CURL_SSLVERSION_TLSv1</constant> (1)，
-            <constant>CURL_SSLVERSION_SSLv2</constant> (2)，
-            <constant>CURL_SSLVERSION_SSLv3</constant> (3)，
-            <constant>CURL_SSLVERSION_TLSv1_0</constant> (4)，
-            <constant>CURL_SSLVERSION_TLSv1_1</constant> (5) ，
-            <constant>CURL_SSLVERSION_TLSv1_2</constant> (6) 或 <constant>CURL_SSLVERSION_TLSv1_3</constant> (7) 中的其中一个。
+            <constant>CURL_SSLVERSION_DEFAULT</constant> (0)、<constant>CURL_SSLVERSION_TLSv1</constant> (1)、<constant>CURL_SSLVERSION_SSLv2</constant> (2)、<constant>CURL_SSLVERSION_SSLv3</constant> (3)、<constant>CURL_SSLVERSION_TLSv1_0</constant> (4)、<constant>CURL_SSLVERSION_TLSv1_1</constant> (5) 、<constant>CURL_SSLVERSION_TLSv1_2</constant> (6) 或
+            <constant>CURL_SSLVERSION_TLSv1_3</constant> (7) 中的其中一个。
             <note>
              <para>
-              你最好别设置这个值，让它使用默认值。
-设置为 2 或 3 比较危险，在 SSLv2 和 SSLv3 中有弱点存在。
+              最好别设置这个值并让它使用默认值。鉴于 SSLv2 和 SSLv3 中的已知漏洞，将其设置为 2 或 3 非常危险。
              </para>
             </note>
            </entry>
            <entry valign="top">
+           </entry>
+          </row>
+          <row>
+           <entry valign="top"><constant>CURLOPT_PROXY_SSL_OPTIONS</constant></entry>
+           <entry valign="top">
+            设置代理 SSL 行为选项，它是以下任何常量的位掩码：
+            <simpara>
+             <constant>CURLSSLOPT_ALLOW_BEAST</constant>：不要尝试对 SSL3 和 TLS1.0 协议中的安全漏洞使用任何替代方法。
+            </simpara>
+            <simpara>
+             <constant>CURLSSLOPT_NO_REVOKE</constant>：对存在此类行为的 SSL 后端禁用证书吊销检查。（curl &gt;= 7.44.0）
+            </simpara>
+            <simpara>
+             <constant>CURLSSLOPT_NO_PARTIALCHAIN</constant>：不接受“部分”（partial）证书链，不然默认接受。（curl &gt;= 7.68.0）
+            </simpara>
+           </entry>
+           <entry valign="top">
+            自 PHP 7.3.0 和 libcurl &gt;= cURL 7.52.0 起可用。
+           </entry>
+          </row>
+          <row>
+           <entry valign="top"><constant>CURLOPT_PROXY_SSL_VERIFYHOST</constant></entry>
+           <entry valign="top">
+            设置为 <literal>2</literal> 以根据代理名称验证 HTTPS 代理的证书名称字段。设置为 <literal>0</literal> 时，无论证书中使用的名称如何，连接都会成功。谨慎使用该能力！
+            在 curl 7.28.0 及更早版本中 <literal>1</literal> 视为调试选项。 从 curl 7.28.1 到 7.65.3 返回 <constant>CURLE_BAD_FUNCTION_ARGUMENT</constant>。
+            从 curl 7.66.0 开始，<literal>1</literal> 和 <literal>2</literal> 被视为相同的值。 在生产环境中，此选项的值应保持为 <literal>2</literal>（默认值）。
+           </entry>
+           <entry valign="top">
+            自 PHP 7.3.0 和 libcurl &gt;= cURL 7.52.0 起可用。
+           </entry>
+          </row>
+          <row>
+           <entry valign="top"><constant>CURLOPT_PROXY_SSLVERSION</constant></entry>
+           <entry valign="top">
+            <constant>CURL_SSLVERSION_DEFAULT</constant>、<constant>CURL_SSLVERSION_TLSv1</constant>、<constant>CURL_SSLVERSION_TLSv1_0</constant>、<constant>CURL_SSLVERSION_TLSv1_1</constant>、<constant>CURL_SSLVERSION_TLSv1_2</constant>、<constant>CURL_SSLVERSION_TLSv1_3</constant>、<constant>CURL_SSLVERSION_MAX_DEFAULT</constant>、<constant>CURL_SSLVERSION_MAX_TLSv1_0</constant>、<constant>CURL_SSLVERSION_MAX_TLSv1_1</constant>、<constant>CURL_SSLVERSION_MAX_TLSv1_2</constant>、<constant>CURL_SSLVERSION_MAX_TLSv1_3</constant>
+            或 <constant>CURL_SSLVERSION_SSLv3</constant> 其中之一。
+            <note>
+             <para>
+              最好的办法是不要设置它，使用默认的 <constant>CURL_SSLVERSION_DEFAULT</constant>，这将尝试找出远程 SSL 协议版本。
+             </para>
+            </note>
+           </entry>
+           <entry valign="top">
+            自 PHP 7.3.0 和 libcurl &gt;= cURL 7.52.0 起可用。
            </entry>
           </row>
           <row>
@@ -860,13 +898,46 @@
            </entry>
           </row>
           <row>
-           <entry valign="top"><constant>CURLOPT_TIMECONDITION</constant></entry>
+           <entry valign="top"><constant>CURLOPT_TCP_KEEPALIVE</constant></entry>
            <entry valign="top">
-           设置如何对待 <constant>CURLOPT_TIMEVALUE</constant>。
-            使用 <parameter>CURL_TIMECOND_IFMODSINCE</parameter>，仅在页面 <constant>CURLOPT_TIMEVALUE</constant> 之后修改，才返回页面。没有修改则返回 <literal>"304 Not Modified"</literal> 头，假设设置了 <constant>CURLOPT_HEADER</constant> 为  &true;。<parameter>CURL_TIMECOND_IFUNMODSINCE</parameter>则起相反的效果。
-            默认为 <parameter>CURL_TIMECOND_IFMODSINCE</parameter>。
+            如果设置为 <literal>1</literal>，将发送 TCP keepalive 探针。这些探针的延迟和频率可以通过 <constant>CURLOPT_TCP_KEEPIDLE</constant> 和 <constant>CURLOPT_TCP_KEEPINTVL</constant>
+            选项来控制，前提是操作系统支持它们。如果设置为 <literal>0</literal>（默认值），将禁用 keepalive 探针。
            </entry>
            <entry valign="top">
+            在 cURL 7.25.0 中添加。
+           </entry>
+          </row>
+          <row>
+           <entry valign="top"><constant>CURLOPT_TCP_KEEPIDLE</constant></entry>
+           <entry valign="top">
+            设置延迟（以秒为单位），如果启用了 <constant>CURLOPT_TCP_KEEPALIVE</constant>，操作系统将在连接空闲时等待，然后再发送
+            keepalive 探针。并非所有操作系统都支持此选项。默认值为 <literal>60</literal>。
+           </entry>
+           <entry valign="top">
+            在 cURL 7.25.0 中添加。
+           </entry>
+          </row>
+          <row>
+           <entry valign="top"><constant>CURLOPT_TCP_KEEPINTVL</constant></entry>
+           <entry valign="top">
+            设置间隔（以秒为单位），如果启用了 <constant>CURLOPT_TCP_KEEPALIVE</constant>，操作系统将在发送
+            keepalive 探针之间等待。并非所有操作系统都支持此选项。默认值为 <literal>60</literal>。
+           </entry>
+           <entry valign="top">
+            在 cURL 7.25.0 中添加。
+           </entry>
+          </row>
+          <row>
+           <entry valign="top"><constant>CURLOPT_TIMECONDITION</constant></entry>
+           <entry valign="top">
+            设置如何对待 <constant>CURLOPT_TIMEVALUE</constant>。
+            使用 <parameter>CURL_TIMECOND_IFMODSINCE</parameter>，仅在页面 <constant>CURLOPT_TIMEVALUE</constant> 之后修改，才返回页面。没有修改则返回
+            <literal>"304 Not Modified"</literal> 头，假设设置了 <constant>CURLOPT_HEADER</constant> 为 &true;。<parameter>CURL_TIMECOND_IFUNMODSINCE</parameter>
+            则起相反的效果。使用 <constant>CURL_TIMECOND_NONE</constant> 忽略 <constant>CURLOPT_TIMEVALUE</constant> 并始终返回页面。默认为
+            <parameter>CURL_TIMECOND_IFMODSINCE</parameter>。
+           </entry>
+           <entry valign="top">
+            在 cURL 7.46.0 之前，默认值为 <constant>CURL_TIMECOND_IFMODSINCE</constant>。
            </entry>
           </row>
           <row>
@@ -886,14 +957,14 @@
             如果 libcurl 编译时使用系统标准的名称解析器（ standard system name resolver），那部分的连接仍旧使用以秒计的超时解决方案，最小超时时间还是一秒钟。
            </entry>
            <entry valign="top">
-            在 cURL 7.16.2 中被加入。从 PHP 5.2.3 起可使用。
+            在 cURL 7.16.2 中被加入。
            </entry>
           </row>
           
           <row>
            <entry valign="top"><constant>CURLOPT_TIMEVALUE</constant></entry>
            <entry valign="top">
-            秒数，从 1970年1月1日开始。这个时间会被 <constant>CURLOPT_TIMECONDITION</constant>使。默认使用<parameter>CURL_TIMECOND_IFMODSINCE</parameter>。
+            秒数，从 1970年1月1日开始。这个时间将由 <constant>CURLOPT_TIMECONDITION</constant> 使用。
            </entry>
            <entry valign="top">
            </entry>
@@ -904,7 +975,7 @@
             如果下载速度超过了此速度(以每秒字节数来统计) ，即传输过程中累计的平均数，传输就会降速到这个参数的值。默认不限速。
            </entry>
            <entry valign="top">
-             cURL 7.15.5 中添加， PHP 5.4.0 有效。
+             cURL 7.15.5 中添加。
            </entry>
           </row>
           <row>
@@ -914,7 +985,7 @@
             ，传输就会降速到这个参数的值。默认不限速。
            </entry>
            <entry valign="top">
-             cURL 7.15.5 中添加， PHP 5.4.0 有效。
+             cURL 7.15.5 中添加。
            </entry>
           </row>
           <row>
@@ -953,7 +1024,7 @@
             <constant>CURLFTPMETHOD_SINGLECWD</constant>。
            </entry>
            <entry valign="top">
-            cURL 7.15.1 中添加， PHP 5.3.0 起有效。
+            cURL 7.15.1 中添加。
            </entry>
           </row>
          </tbody>
@@ -1011,6 +1082,19 @@
             连接结束后，比如，调用 curl_close 后，保存 cookie 信息的文件。
            </entry>
            <entry valign="top">
+           </entry>
+          </row>
+          <row>
+           <entry valign="top"><constant>CURLOPT_COOKIELIST</constant></entry>
+           <entry valign="top">
+            cookie 字符串（即 Netscape/Mozilla 格式的单行，或常规 HTTP 样式的 Set-Cookie 标头）将单个 cookie 添加到内部 cookie 存储中。
+            <literal>"ALL"</literal> 擦除内存中保存的所有 cookie。
+            <literal>"SESS"</literal> 擦除内存中保存的所有会话 cookie。
+            <literal>"FLUSH"</literal> 将所有已知的 cookie 写入到 <constant>CURLOPT_COOKIEJAR</constant> 指定的文件。
+            <literal>"RELOAD"</literal> 从 <constant>CURLOPT_COOKIEFILE</constant> 指定的文件中加载所有 cookie。
+           </entry>
+           <entry valign="top">
+            自 cURL 7.14.1 起可用。
            </entry>
           </row>
           <row>
@@ -1152,30 +1236,21 @@
            <entry valign="top"><constant>CURLOPT_POSTFIELDS</constant></entry>
            <entry valign="top">
             <simpara>
-            全部数据使用HTTP协议中的 "POST" 操作来发送。
-            要发送文件，在文件名前面加上<literal>@</literal>前缀并使用完整路径。
-            文件类型可在文件名后以 '<literal>;type=mimetype</literal>' 的格式指定。
-            
+            在 HTTP “POST”操作中要发送的所有数据。
             这个参数可以是 urlencoded 后的字符串，类似'<literal>para1=val1&amp;para2=val2&amp;...</literal>'，也可以使用一个以字段名为键值，字段数据为值的数组。
             如果<parameter>value</parameter>是一个数组，<literal>Content-Type</literal>头将会被设置成<literal>multipart/form-data</literal>。
             </simpara>
             <simpara>
-             从 PHP 5.2.0 开始，使用 <literal>@</literal>  前缀传递文件时，<parameter>value</parameter> 必须是个数组。
-            </simpara>
-            <simpara>
-             从 PHP 5.5.0 开始,  <literal>@</literal> 前缀已被废弃，文件可通过 <classname>CURLFile</classname> 发送。
-             设置 <constant>CURLOPT_SAFE_UPLOAD</constant> 为 &true; 可禁用  <literal>@</literal>  前缀发送文件，以增加安全性。
+             可以使用 <classname>CURLFile</classname> 或 <classname>CURLStringFile</classname> 发送文件，在这种情况下，<parameter>value</parameter> 必须是数组。
             </simpara>
            </entry>
            <entry valign="top">
            </entry>
           </row>
-          
           <row>
            <entry valign="top"><constant>CURLOPT_PRIVATE</constant></entry>
            <entry valign="top">
-            Any data that should be associated with this cURL handle.
-             This data
+            Any data that should be associated with this cURL handle. This data
             can subsequently be retrieved with the
             <constant>CURLINFO_PRIVATE</constant> option of
             <function>curl_getinfo</function>. cURL does nothing with this data.
@@ -1184,6 +1259,26 @@
            </entry>
            <entry valign="top">
             Added in cURL 7.10.3. 
+           </entry>
+          </row>
+          <row>
+           <entry valign="top"><constant>CURLOPT_PRE_PROXY</constant></entry>
+           <entry valign="top">
+            Set a <type>string</type> holding the host name or dotted numerical 
+            IP address to be used as the preproxy that curl connects to before 
+            it connects to the HTTP(S) proxy specified in the 
+            <constant>CURLOPT_PROXY</constant> option for the upcoming request.
+            The preproxy can only be a SOCKS proxy and it should be prefixed with
+            <literal>[scheme]://</literal> to specify which kind of socks is used.
+            A numerical IPv6 address must be written within [brackets].
+            Setting the preproxy to an empty string explicitly disables the use of a preproxy. 
+            To specify port number in this string, append <literal>:[port]</literal>
+            to the end of the host name. The proxy's port number may optionally be 
+            specified with the separate option <constant>CURLOPT_PROXYPORT</constant>. 
+            Defaults to using port 1080 for proxies if a port is not specified.
+           </entry>
+           <entry valign="top">
+            自 PHP 7.3.0 和 libcurl &gt;= cURL 7.52.0 起可用。
            </entry>
           </row>
           <row>
@@ -1200,7 +1295,7 @@
             代理验证服务的名称。
            </entry>
            <entry valign="top">
-            cURL 7.34.0 中添加，PHP 7.0.7 起有效。
+            在 cURL 7.43.0 中添加了 HTTP 代理，在 cURL 7.49.0 中添加了 SOCKS5 代理。自 PHP 7.0.7 起可用。
            </entry>
           </row>
           <row>
