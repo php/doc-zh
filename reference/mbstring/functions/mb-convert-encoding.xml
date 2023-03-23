@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: c9893954e17ec13bf66f54433e72c8af026406cf Maintainer: daijie Status: ready -->
-<!-- Reviewed: no -->
-
+<!-- EN-Revision: 99d758bd259fa80c2828cf8cc250984cb683ee8f Maintainer: daijie Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="function.mb-convert-encoding" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
   <refname>mb_convert_encoding</refname>
-  <refpurpose>转换字符的编码</refpurpose>
+  <refpurpose>转换字符串，从一个字符编码到另一个字符编码</refpurpose>
  </refnamediv>
    
  <refsect1 role="description">
@@ -18,8 +17,8 @@
    <methodparam choice="opt"><type class="union"><type>array</type><type>string</type><type>null</type></type><parameter>from_encoding</parameter><initializer>&null;</initializer></methodparam>
   </methodsynopsis>
   <para>
-   将 <type>string</type> 类型 <parameter>str</parameter> 的字符编码从可选的 <parameter>from_encoding</parameter> 转换到 <parameter>to_encoding</parameter>。
-   当参数 <parameter>string</parameter> 是一个 &array; 时，将递归转换它所有的 &string; 值。
+   转换 <type>string</type> 从 <parameter>from_encoding</parameter> 或当前内部编码转换到 <parameter>to_encoding</parameter>。
+   当参数 <parameter>string</parameter> 是 &array; 时，将递归转换它所有的 &string; 值。
   </para>
  </refsect1>
 
@@ -31,7 +30,7 @@
      <term><parameter>string</parameter></term>
      <listitem>
       <para>
-       要编码的 &string; 或 &array;。
+       要转换的 &string; 或 &array;。
       </para>
      </listitem>
     </varlistentry>
@@ -39,7 +38,7 @@
      <term><parameter>to_encoding</parameter></term>
      <listitem>
       <para>
-       <parameter>string</parameter> 要转换成的编码类型。
+       所需的结果编码。
       </para>
      </listitem>
     </varlistentry>
@@ -47,12 +46,15 @@
      <term><parameter>from_encoding</parameter></term>
      <listitem>
       <para>
-       在转换前通过字符代码名称来指定。它可以是一个 <type>array</type> 也可以是逗号分隔的枚举列表。
-       如果没有提供 <parameter>from_encoding</parameter>，则会使用内部（internal）编码。
-       <!-- link to internal encoding info -->
+       当前用于解释 <parameter>string</parameter> 的编码。可以将多个编码指定为 &array;
+       或逗号分隔列表，在这种情况下，将使用与 <function>mb_detect_encoding</function> 相同的算法来猜测正确的编码。
       </para>
       <para>
-      参见<link linkend="mbstring.supported-encodings">支持的编码</link>。
+       如果 <parameter>from_encoding</parameter> 为 &null; 或未指定，则将使用 <link linkend="ini.mbstring.internal-encoding">mbstring.internal_encoding
+       设置</link>，否则使用 <link linkend="ini.default-charset">default_charset 设置</link>。
+      </para>
+      <para>
+       有关 <parameter>to_encoding</parameter> 和 <parameter>from_encoding</parameter> 的有效值，请参阅<link linkend="mbstring.supported-encodings">支持的编码</link>。
       </para>
      </listitem>
     </varlistentry>
@@ -124,7 +126,7 @@
   &reftitle.examples;
   <para>
    <example>
-    <title><function>mb_convert_encoding</function> 例子</title>
+    <title><function>mb_convert_encoding</function> 示例</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -137,7 +139,7 @@ $str = mb_convert_encoding($str, "UTF-7", "EUC-JP");
 /* 从 JIS, eucjp-win, sjis-win 中自动检测编码，并转换 str 到 UCS-2LE */
 $str = mb_convert_encoding($str, "UCS-2LE", "JIS, eucjp-win, sjis-win");
 
-/* "auto" 扩展成 "ASCII,JIS,UTF-8,EUC-JP,SJIS" */
+/* 如果 mbstring.language 是 "Japanese"，"auto" 扩展成 "ASCII,JIS,UTF-8,EUC-JP,SJIS" */
 $str = mb_convert_encoding($str, "EUC-JP", "auto");
 ?>
 ]]>
@@ -151,6 +153,8 @@ $str = mb_convert_encoding($str, "EUC-JP", "auto");
   <para>
    <simplelist>
     <member><function>mb_detect_order</function></member>
+    <member><methodname>UConverter::transcode</methodname></member>
+    <member><function>iconv</function></member>
    </simplelist>
   </para>
  </refsect1>
