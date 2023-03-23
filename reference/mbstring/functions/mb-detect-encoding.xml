@@ -1,24 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: a07a17c15bc5fd5d01c704e768087028c7b05080 Maintainer: daijie Status: ready -->
-<!-- Reviewed: no -->
-
+<!-- EN-Revision: 16a1bdfd1c36108534b5af08dc4b751c7ac0fdaf Maintainer: daijie Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="function.mb-detect-encoding" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
   <refname>mb_detect_encoding</refname>
   <refpurpose>检测字符的编码</refpurpose>
  </refnamediv>
-   
+
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <type>string</type><methodname>mb_detect_encoding</methodname>
-   <methodparam><type>string</type><parameter>str</parameter></methodparam>
-   <methodparam choice="opt"><type>mixed</type><parameter>encoding_list</parameter><initializer>mb_detect_order()</initializer></methodparam>
-   <methodparam choice="opt"><type>bool</type><parameter>strict</parameter><initializer>false</initializer></methodparam>
+   <type class="union"><type>string</type><type>false</type></type><methodname>mb_detect_encoding</methodname>
+   <methodparam><type>string</type><parameter>string</parameter></methodparam>
+   <methodparam choice="opt"><type class="union"><type>array</type><type>string</type><type>null</type></type><parameter>encodings</parameter><initializer>&null;</initializer></methodparam>
+   <methodparam choice="opt"><type>bool</type><parameter>strict</parameter><initializer>&false;</initializer></methodparam>
   </methodsynopsis>
   <para>
-   检测<type>字符串</type> <parameter>str</parameter> 的编码。
+   从有序的候选列表中检测 <type>string</type>，<type>string</type> 最可能的字符编码。
+  </para>
+  <para>
+   Automatic detection of the intended character encoding can never be entirely reliable;
+   without some additional information, it is similar to decoding an encrypted string
+   without the key. It is always preferable to use an indication of character encoding
+   stored or transmitted with the data, such as a "Content-Type" HTTP header.
+  </para>
+  <para>
+   This function is most useful with multibyte encodings, where not all sequences of
+   bytes form a valid string. If the input string contains such a sequence, that
+   encoding will be rejected, and the next encoding checked.
   </para>
  </refsect1>
 
@@ -27,22 +37,25 @@
   <para>
    <variablelist>
     <varlistentry>
-     <term><parameter>str</parameter></term>
+     <term><parameter>string</parameter></term>
      <listitem>
       <para>
-       待检查的<type>字符串</type>。
+       要检测的 <type>string</type>。
       </para>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>encoding_list</parameter></term>
+     <term><parameter>encodings</parameter></term>
      <listitem>
       <para>
-       <parameter>encoding_list</parameter> 是一个字符编码列表。
-       编码顺序可以由数组或者逗号分隔的列表字符串指定。
+       A list of character encodings to try, in order. The list may be specified as
+       an array of strings, or a single string separated by commas.
       </para>
       <para>
-       如果省略了 <parameter>encoding_list</parameter> 将会使用 detect_order。
+       If <parameter>encodings</parameter> is omitted or &null;,
+       the current detect_order (set with the <link linkend="ini.mbstring.detect-order">
+       mbstring.detect_order</link> configuration option, or <function>mb_detect_order</function>
+       function) will be used.
       </para>
      </listitem>
     </varlistentry>
@@ -50,19 +63,28 @@
      <term><parameter>strict</parameter></term>
      <listitem>
       <para>
-       <parameter>strict</parameter> 指定了是否严格地检测编码。
-       默认是 &false;。
+       Controls the behaviour when <parameter>string</parameter>
+       is not valid in any of the listed <parameter>encodings</parameter>.
+       If <parameter>strict</parameter> is set to &false;, the closest matching
+       encoding will be returned; if <parameter>strict</parameter> is set to &true;,
+       &false; will be returned.
+      </para>
+      <para>
+       The default value for <parameter>strict</parameter> can be set
+       with the <link linkend="ini.mbstring.strict-detection">
+       mbstring.strict_detection</link> configuration option.
       </para>
      </listitem>
     </varlistentry>
    </variablelist>
   </para>
  </refsect1>
- 
+
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   检测到的字符编码，或者无法检测指定字符串的编码时返回 &false;。
+   检测到的字符编码，or &false; if the string is not valid
+   in any of the listed encodings.
   </para>
  </refsect1>
 
@@ -70,27 +92,104 @@
   &reftitle.examples;
   <para>
    <example>
-    <title><function>mb_detect_encoding</function> 例子</title>
+    <title><function>mb_detect_encoding</function> 示例</title>
     <programlisting role="php">
 <![CDATA[
 <?php
-/* 使用当前的 detect_order 来检测字符编码 */
+// 使用当前的 detect_order 来检测字符编码
 echo mb_detect_encoding($str);
 
-/* "auto" 将根据 mbstring.language 来扩展 */
+// "auto" 将根据 mbstring.language 来扩展
 echo mb_detect_encoding($str, "auto");
 
-/* 通过逗号分隔的列表来指定编码列表 encoding_list */
+// Specify "encodings" parameter by list separated by comma
 echo mb_detect_encoding($str, "JIS, eucjp-win, sjis-win");
 
-/* 使用数组来指定编码列表 encoding_list  */
-$ary[] = "ASCII";
-$ary[] = "JIS";
-$ary[] = "EUC-JP";
-echo mb_detect_encoding($str, $ary);
+// Use array to specify "encodings" parameter
+$encodings = [
+  "ASCII",
+  "JIS",
+  "EUC-JP"
+];
+echo mb_detect_encoding($str, $encodings);
 ?>
 ]]>
     </programlisting>
+   </example>
+  </para>
+  <para>
+   <example>
+    <title>Effect of <parameter>strict</parameter> parameter</title>
+    <programlisting role="php">
+     <![CDATA[
+<?php
+// 'áéóú' encoded in ISO-8859-1
+$str = "\xE1\xE9\xF3\xFA";
+
+// The string is not valid ASCII or UTF-8, but UTF-8 is considered a closer match
+var_dump(mb_detect_encoding($str, ['ASCII', 'UTF-8'], false));
+var_dump(mb_detect_encoding($str, ['ASCII', 'UTF-8'], true));
+
+// If a valid encoding is found, the strict parameter does not change the result
+var_dump(mb_detect_encoding($str, ['ASCII', 'UTF-8', 'ISO-8859-1'], false));
+var_dump(mb_detect_encoding($str, ['ASCII', 'UTF-8', 'ISO-8859-1'], true));
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+string(5) "UTF-8"
+bool(false)
+string(10) "ISO-8859-1"
+string(10) "ISO-8859-1"
+]]>
+    </screen>
+   </example>
+  </para>
+  <para>
+   In some cases, the same sequence of bytes may form a valid string in multiple
+   character encodings, and it is impossible to know which interpretation was
+   intended. For instance, among many others, the byte sequence "\xC4\xA2" could be:
+  </para>
+  <para>
+   <simplelist>
+    <member>
+     "Ä¢" (U+00C4 LATIN CAPITAL LETTER A WITH DIAERESIS followed by U+00A2 CENT SIGN)
+     encoded in any of ISO-8859-1, ISO-8859-15, or Windows-1252
+    </member>
+    <member>
+     "ФЂ" (U+0424 CYRILLIC CAPITAL LETTER EF followed by U+0402 CYRILLIC CAPITAL LETTER
+     DJE) encoded in ISO-8859-5
+    </member>
+    <member>
+     "Ģ" (U+0122 LATIN CAPITAL LETTER G WITH CEDILLA) encoded in UTF-8
+    </member>
+   </simplelist>
+  </para>
+  <para>
+   <example>
+    <title>Effect of order when multiple encodings match</title>
+    <programlisting role="php">
+     <![CDATA[
+<?php
+$str = "\xC4\xA2";
+
+// The string is valid in all three encodings, so the first one listed will be returned
+var_dump(mb_detect_encoding($str, ['UTF-8', 'ISO-8859-1', 'ISO-8859-5']));
+var_dump(mb_detect_encoding($str, ['ISO-8859-1', 'ISO-8859-5', 'UTF-8']));
+var_dump(mb_detect_encoding($str, ['ISO-8859-5', 'UTF-8', 'ISO-8859-1']));
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+string(5) "UTF-8"
+string(10) "ISO-8859-1"
+string(10) "ISO-8859-5"
+]]>
+    </screen>
    </example>
   </para>
  </refsect1>
@@ -105,7 +204,6 @@ echo mb_detect_encoding($str, $ary);
  </refsect1>
 
 </refentry>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
