@@ -1,56 +1,109 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
-  <refentry xml:id="function.pg-get-notify" xmlns="http://docbook.org/ns/docbook">
-   <refnamediv>
-    <refname>pg_get_notify</refname>
-    <refpurpose>Ping 数据库连接</refpurpose>
-   </refnamediv>
-   <refsect1>
-    <title>说明</title>
-     <methodsynopsis>
-      <type>array</type><methodname>pg_get_notify</methodname>
-      <methodparam><type>resource</type><parameter>connection</parameter></methodparam>
-      <methodparam choice="opt"><type>int</type><parameter>result_type</parameter></methodparam>
-     </methodsynopsis>
-    <para>
-     <function>pg_get_notify</function> 取得 SQL 命令
-     <literal>NOTIFY</literal>
-     发送的通告消息。要接收通告消息，必须发送 SQL 命令
-     <literal>LISTEN</literal>。如果连接中有通告消息，则数组包含消息名并且返回后端的
-     PID。如果没有消息则返回 &false;。
-    </para>
-    <para>
-     参见 <function>pg_get_pid</function>。
-    </para>
-    <para>
-     <example>
-      <title>PostgreSQL NOTIFY 消息</title>
-      <programlisting role="php">
+<!-- EN-Revision: cfeb14a38b666f6a3fc73da70f4a90fbe115e53f Maintainer: dallas Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
+<refentry xml:id="function.pg-get-notify" xmlns="http://docbook.org/ns/docbook">
+ <refnamediv>
+  <refname>pg_get_notify</refname>
+    <refpurpose>获取 SQL NOTIFY 消息</refpurpose>
+ </refnamediv>
+
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <type class="union"><type>array</type><type>false</type></type><methodname>pg_get_notify</methodname>
+   <methodparam><type>PgSql\Connection</type><parameter>connection</parameter></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>mode</parameter><initializer><constant>PGSQL_ASSOC</constant></initializer></methodparam>
+  </methodsynopsis>
+  <para>
+   <function>pg_get_notify</function> 取得 SQL 命令 <literal>NOTIFY</literal>
+   生成的消息。要接收通知，必须发送 SQL 命令 <literal>LISTEN</literal>。
+  </para>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>connection</parameter></term>
+     <listitem>
+      &pgsql.parameter.connection;
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>mode</parameter></term>
+     <listitem>
+      &pgsql.parameter.mode;
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   包含 <literal>NOTIFY</literal> 消息名称和后端 PID 的 <type>array</type>。如果服务器支持，该数组还包含服务器版本和有效负载。否则，如果没有
+   <literal>NOTIFY</literal> 正在等待，则返回 &false;。
+  </para>
+ </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <informaltable>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>&Version;</entry>
+      <entry>&Description;</entry>
+     </row>
+    </thead>
+    <tbody>
+     &pgsql.changelog.connection-object;
+    </tbody>
+   </tgroup>
+  </informaltable>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title>PostgreSQL NOTIFY 消息</title>
+    <programlisting role="php">
 <![CDATA[
 <?php 
 $conn = pg_pconnect("dbname=publisher");
 if (!$conn) {
-    echo "An error occured.\n";
-    exit;
+  echo "An error occurred.\n";
+  exit;
 }
 
-// Listen 'author_updated' message from other processes
-pq_query($conn, 'LISTEN author_updated;');
+// 从其它进程监听 'author_updated' 消息
+pg_query($conn, 'LISTEN author_updated;');
 $notify = pg_get_notify($conn);
-if (!$notify)
-    print("No messages\n");
-else
-    print_r($notify);
+if (!$notify) {
+  echo "No messages\n";
+} else {
+  print_r($notify);
+}
 ?>
 ]]>
-      </programlisting>
-     </example>
-    </para>
-   </refsect1>
-  </refentry>
+    </programlisting>
+   </example>
+  </para>
+ </refsect1>
 
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>pg_get_pid</function></member>
+   </simplelist>
+  </para>
+ </refsect1>
+</refentry>
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
