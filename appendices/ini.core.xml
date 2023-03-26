@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: fccc7eb7010120c17732c57f93df1f321245376c Maintainer: Avenger Status: partial -->
+<!-- EN-Revision: fccc7eb7010120c17732c57f93df1f321245376c Maintainer: Avenger Status: ready -->
 <!-- CREDITS: mowangjuanzi, Luffy -->
 <section xml:id="ini.core" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
   <title>&php.ini; 核心指令说明</title>
@@ -1032,14 +1032,8 @@ Fatal error: Maximum execution time of 30+2 seconds exceeded (terminated) in Unk
         环境变量：目录列表，在 Unix 中使用冒号分隔，在 Windows 中使用分号分隔。
        </para>
        <para>
-        PHP considers each entry in the include path separately when looking for
-        files to include. It will check the first path, and if it doesn't find
-        it, check the next path, until it either locates the included file or
-        returns with an
-        <constant>E_WARNING</constant>
-        or an <constant>E_ERROR</constant>. 
-        You may modify or set your include path at runtime using
-        <function>set_include_path</function>.
+        在查找要包含的文件时，PHP 会分别考虑 include 路径中的每个条目。它将检查第一个路径，如果没有找到它，则检查下一个路径，直到找到包含的文件或返回
+        <constant>E_WARNING</constant> 或 <constant>E_ERROR</constant>。可以在运行时使用 <function>set_include_path</function> 修改或设置 include 路径。
        </para>
        <para>
         <example>
@@ -1062,26 +1056,20 @@ include_path=".;c:\php\includes"
         </example>
        </para>
        <para>
-        Using a <literal>.</literal> in the include path allows for
-        relative includes as it means the current directory.  However,
-        it is more efficient to explicitly use <literal>include
-        './file'</literal> than having PHP always check the current
-        directory for every include.
+        在 include 路径中使用 <literal>.</literal> 允许相对 includes，因为其表示当前目录。但是，显式使用 <literal>include
+        './file'</literal> 比让 PHP 始终检查当前目录中的每个 include 更有效。
        </para>
        <note>
         <para>
-         <literal>ENV</literal> variables are also accessible in .ini files.
-         As such it is possible to reference the home directory using
-         <literal>${LOGIN}</literal> and <literal>${USER}</literal>.
+         ENV 变量也可以在 .ini 文件中访问。因此，可以使用 <literal>${LOGIN}</literal> 和 <literal>${USER}</literal> 引用 home 目录。
         </para>
         <para>
-         Environment variables may vary between Server APIs as those environments
-         may be different.
+         服务器 API 之间的环境变量可能会有所不同，因为这些环境可能不同。
         </para>       
        </note>
        <para>
         <example>
-         <title>Unix include_path using ${USER} env variable</title>
+         <title>Unix include_path 使用 ${USER} env 变量</title>
          <programlisting role="php.ini">
 <![CDATA[
 include_path = ".:${USER}/pear/php"
@@ -1099,65 +1087,43 @@ include_path = ".:${USER}/pear/php"
       </term>
       <listitem>
        <para>
-        Limit the files that can be accessed by PHP to the specified
-        directory-tree, including the file itself.
+        将 PHP 可以访问的文件限制在指定的目录树中，包括文件本身。
        </para>
        <para>
-        When a script tries to access the filesystem, for example using 
-        <function>include</function>, or <function>fopen</function>, the location of the file 
-        is checked.
-        When the file is outside the specified directory-tree, PHP will refuse to access it. 
-        All symbolic links are resolved, so it's not possible to avoid this restriction
-        with a symlink. If the file doesn't exist then the symlink couldn't be
-        resolved and the filename is compared to (a resolved) <option>open_basedir</option>.
+        当脚本尝试访问文件系统时，例如使用 <function>include</function> 或 <function>fopen</function>
+        时，将检查文件的位置。当文件位于指定的目录树之外时，PHP
+        将拒绝访问它。所有符号链接都已解析，因此无法通过符号链接避免此限制。如果文件不存在，则符号链接无法解析，文件名将与（已解析的）<option>open_basedir</option> 进行比较。
        </para>
        <para>
-        <option>open_basedir</option> can affect more than just filesystem functions; for example 
-        if <literal>MySQL</literal> is configured to use <literal>mysqlnd</literal> drivers,
-        <literal>LOAD DATA INFILE</literal> will be affected by <option>open_basedir</option>.
-        Much of the extended functionality of PHP uses <literal>open_basedir</literal> in this way.
+        <option>open_basedir</option> 不仅可以影响文件系统函数；例如，如果 <literal>MySQL</literal> 配置为使用 <literal>mysqlnd</literal> 驱动程序，则
+        <literal>LOAD DATA INFILE</literal> 将受到 <option>open_basedir</option> 的影响。PHP 的许多扩展功能都以这种方式使用 <literal>open_basedir</literal>。
        </para>
        <para>
-        The special value <systemitem class="filesystem">.</systemitem>
-        indicates that the working directory of the script will be used as the
-        base-directory. This is, however, a little dangerous as the working directory
-        of the script can easily be changed with <function>chdir</function>.
+        特殊值 <systemitem class="filesystem">.</systemitem> 表示脚本的工作目录将用作基础目录。然而，这有点危险，因为脚本的工作目录可以很容易地用 <function>chdir</function> 更改。
        </para>
        <para>
-        In <filename>httpd.conf</filename>, <option>open_basedir</option> can be turned off
-        (e.g. for some virtual hosts)
-        <link linkend="configuration.changes.apache">the same way</link> as
-        any other configuration directive with "<literal>php_admin_value open_basedir
-        none</literal>".
+        在 <filename>httpd.conf</filename> 中，<option>open_basedir</option> 可以被关闭（例如对于某些虚拟主机）。就像以<link
+        linkend="configuration.changes.apache">相同方式</link>使用“<literal>php_admin_value open_basedir none</literal>”的其它任何配置指令。
        </para>
        <para>
-        Under Windows, separate the directories with a semicolon. On all
-        other systems, separate the directories with a colon. As an Apache
-        module, <option>open_basedir</option> paths from parent directories are now
-        automatically inherited.
+        在 Windows 中，用分号分隔目录。在所有其它系统上，用冒号分隔目录。现在 Apache 模块将自动继承来自父目录的 <option>open_basedir</option> 路径。
        </para>
        <para>
-        The restriction specified with <option>open_basedir</option> is a
-        directory name, not a prefix.
+        <option>open_basedir</option> 指定的限制是目录名称，而不是前缀。
        </para>
        <para>
-        The default is to allow all files to be opened.
+        默认设置是允许打开所有文件。
        </para>
        <note>
         <para>
-         open_basedir can be tightened at run-time. This means
-         that if open_basedir is set to <literal>/www/</literal> in &php.ini;
-         a script can tighten the configuration to
-         <literal>/www/tmp/</literal> at run-time with
-         <function>ini_set</function>. When listing several directories, you
-         can use the <constant>PATH_SEPARATOR</constant> constant as a separator
-         regardless of the operating system.
+         open_basedir 可以在运行时限制更多。这意味着如果在 &php.ini; 中将 open_basedir 设置为 <literal>/www/</literal>，则脚本可以在运行时使用
+         <function>ini_set</function> 将配置限制到 <literal>/www/tmp/</literal>。当列出多个目录时，无论操作系统如何，都可以使用
+         <constant>PATH_SEPARATOR</constant> 常量作为分隔符。
         </para>
        </note>
        <note>
         <para>
-         Using open_basedir will set <link linkend="ini.realpath-cache-size">realpath_cache_size</link>
-         to <literal>0</literal> and thus <emphasis>disable</emphasis> the realpath cache.
+         使用 open_basedir 会将 <link linkend="ini.realpath-cache-size">realpath_cache_size</link> 设置为 <literal>0</literal>，从而<emphasis>禁用</emphasis> realpath 缓存。
         </para>
        </note>
        <caution>
@@ -1175,13 +1141,8 @@ include_path = ".:${USER}/pear/php"
       </term>
       <listitem>
        <para>
-        PHP's "root directory" on the server. Only used if
-        non-empty.
-        If PHP was not compiled with FORCE_REDIRECT, you <emphasis>should
-        </emphasis> set doc_root if you are running PHP as a CGI under any web
-        server (other than IIS). The alternative is to use the
-        <link linkend="ini.cgi.force-redirect">
-         cgi.force_redirect</link> configuration below.
+        PHP 在服务器上的“根目录”。仅在非空时使用。如果 PHP 未使用 FORCE_REDIRECT 编译，并且在任何 Web 服务器（IIS 除外）下将 PHP 作为 CGI
+        运行，则<emphasis>应</emphasis>设置 doc_root。另一种方法是使用下面的 <link linkend="ini.cgi.force-redirect">cgi.force_redirect</link> 配置。
        </para>
       </listitem>
      </varlistentry>
@@ -1215,9 +1176,7 @@ include_path = ".:${USER}/pear/php"
       </term>
       <listitem>
        <para>
-        The base name of the directory used on a user's home directory for PHP
-        files, for example <filename class="directory">public_html
-        </filename>.
+        用户 home 目录中用于 PHP 文件的基本目录名，例如 <filename class="directory">public_html</filename>。
        </para>
       </listitem>
      </varlistentry>
@@ -1242,7 +1201,7 @@ include_path = ".:${USER}/pear/php"
       </term>
       <listitem>
        <para>
-        Which dynamically loadable extensions to load when PHP starts up.
+        PHP 启动时要加载的动态可加载扩展。
        </para>
       </listitem>
      </varlistentry>
@@ -1254,8 +1213,7 @@ include_path = ".:${USER}/pear/php"
       </term>
       <listitem>
        <para>
-        Name of dynamically loadable Zend extension (for example
-        XDebug) to load when PHP starts up.
+        PHP 启动时要加载的动态可加载 Zend 扩展名（例如 XDebug）。
        </para>
       </listitem>
      </varlistentry>
@@ -1267,12 +1225,8 @@ include_path = ".:${USER}/pear/php"
       </term>
       <listitem>
        <para>
-        Controls whether <acronym>CGI</acronym> PHP checks for line starting
-        with <literal>#!</literal> (shebang) at the top of the running script.
-        This line might be needed if the script support running both as
-        stand-alone script and via PHP <acronym>CGI</acronym>. PHP in
-        <acronym>CGI</acronym> mode skips this line and ignores its content if
-        this directive is turned on.
+        控制 <acronym>CGI</acronym> PHP 是否检查以 <literal>#!</literal>（shebang）在运行脚本的顶部。如果脚本支持作为独立脚本和通过
+        PHP <acronym>CGI</acronym> 运行，则可能需要此行。如果此指令打开，<acronym>CGI</acronym> 模式下的 PHP 将跳过此行并忽略其内容。
        </para>
       </listitem>
      </varlistentry>
@@ -1284,8 +1238,7 @@ include_path = ".:${USER}/pear/php"
       </term>
       <listitem>
        <para>
-        If this is enabled, the PHP CGI binary can safely be placed outside of
-        the web tree and people will not be able to circumvent .htaccess security.
+        如果启用，PHP CGI 二进制文件可以安全地放置在 web 树之外，用户将无法绕过 .htaccess 安全性。
        </para>
       </listitem>
      </varlistentry>
@@ -1297,18 +1250,11 @@ include_path = ".:${USER}/pear/php"
       </term>
       <listitem>
        <para>
-        Provides <emphasis>real</emphasis> <literal>PATH_INFO</literal>/
-        <literal>PATH_TRANSLATED</literal> support for <acronym>CGI</acronym>.
-        PHP's previous behaviour was to set <literal>PATH_TRANSLATED</literal>
-        to <literal>SCRIPT_FILENAME</literal>, and to not grok what <literal>
-        PATH_INFO</literal> is. For more information on
-        <literal>PATH_INFO</literal>, see the <acronym>CGI</acronym> specs.
-        Setting this to <literal>1</literal> will cause PHP
-        <acronym>CGI</acronym> to fix its paths to conform to the spec. A
-        setting of zero causes PHP to behave as before. It is turned on by
-        default. You should fix your scripts to use
-        <literal>SCRIPT_FILENAME</literal> rather than
-        <literal>PATH_TRANSLATED</literal>.
+        为 <acronym>CGI</acronym> 提供<emphasis>真正的</emphasis> <literal>PATH_INFO</literal>/<literal>PATH_TRANSLATED</literal>
+        支持。PHP 以前的行为是将 <literal>PATH_TRANSLATED</literal> 设置为 <literal>SCRIPT_FILENAME</literal>，而不去理解 <literal>PATH_INFO</literal>
+        是什么。有关 <literal>PATH_INFO</literal> 的更多信息，请参阅 <acronym>CGI</acronym> 规范。将此设置为 <literal>1</literal> 将导致 PHP
+        <acronym>CGI</acronym> 修复其路径以符合规范。设置为 <literal>0</literal> 会导致 PHP 像以前一样运行。默认打开。应该修复脚本以使用
+        <literal>SCRIPT_FILENAME</literal> 而不是 <literal>PATH_TRANSLATED</literal>。
        </para>
       </listitem>
      </varlistentry>
@@ -1320,15 +1266,12 @@ include_path = ".:${USER}/pear/php"
       </term>
       <listitem>
        <para>
-        cgi.force_redirect is necessary to provide security running PHP as a
-        <acronym>CGI</acronym> under most web servers. Left undefined, PHP
-        turns this on by default. You can turn it off <emphasis>at your own
-        risk</emphasis>.
+        cgi.force_redirect 是在大多数 Web 服务器下提供将 PHP 作为 <acronym>CGI</acronym> 运行的安全性所必需的。如果未定义，PHP
+        默认开启。也可以关闭它<emphasis>自行承担风险</emphasis>。
        </para>
        <note>
         <para>
-         Windows Users: When using IIS this option <emphasis>must</emphasis>
-         be turned off. For OmniHTTPD or Xitami the same applies.
+         Windows 用户：使用 IIS 时<emphasis>必须</emphasis>关闭此选项。对于 OmniHTTPD 或 Xitami，同样适用。
         </para>
        </note>
       </listitem>
@@ -1341,8 +1284,7 @@ include_path = ".:${USER}/pear/php"
       </term>
       <listitem>
        <para>
-        If cgi.nph is enabled it will force cgi to always sent Status: 200 with
-        every request.
+        如果启用了 cgi.nph，对每个请求始终强制 cgi 发送 Status: 200。
         </para>
       </listitem>
      </varlistentry>
@@ -1354,15 +1296,12 @@ include_path = ".:${USER}/pear/php"
       </term>
       <listitem>
        <para>
-        If cgi.force_redirect is turned on, and you are not running under
-        Apache or Netscape (iPlanet) web servers, you <emphasis>may</emphasis>
-        need to set an environment variable name that PHP will look for to
-        know it is OK to continue execution.
+        如果打开了 cgi.force_redirect，并且没有在 Apache 或 Netscape (iPlanet) Web
+        服务器下运行，<emphasis>可能</emphasis>需要设置一个环境变量名称，PHP 将查找该名称以了解是否可以继续执行。
        </para>
        <note>
         <para>
-         Setting this variable <emphasis>may</emphasis> cause security issues,
-         <emphasis>know what you are doing first</emphasis>.
+         设置此变量<emphasis>可能</emphasis>会导致安全问题，<emphasis>首先要知道自己在做什么</emphasis>。
         </para>
        </note>
       </listitem>
@@ -1375,20 +1314,16 @@ include_path = ".:${USER}/pear/php"
       </term>
       <listitem>
       <para>
-        Tells PHP what type of headers to use when sending HTTP response
-        code. If it's set to 0, PHP sends a <link xlink:href="&url.rfc;3875">RFC 3875</link> 
-        "Status:" header that is supported by Apache and other web servers. When this option 
-        is set to 1, PHP will send <link xlink:href="&url.rfc;2616">RFC 2616</link> compliant
-        headers.  
+        告诉 PHP 在发送 HTTP 响应代码时使用什么样的标头类型。如果设置为 0，PHP 将发送 Apache 和其他 Web 服务器支持的
+        <link xlink:href="&url.rfc;3875">RFC 3875</link> "Status:" 标头。当此选项设置为 1 时，PHP 将发送
+        <link xlink:href="&url.rfc;2616">RFC 2616</link> 兼容标头。
        </para>
        <para>
-        If this option is enabled, and you are running PHP in a CGI environment (e.g. PHP-FPM)
-        you should not use standard RFC 2616 style HTTP status response headers, you should 
-        instead use their RFC 3875 equivalent e.g. instead of header("HTTP/1.0 404 Not found"); 
-        you should use header("Status: 404 Not Found");
+        如果启用此选项，并且在 CGI 环境（例如 PHP-FPM）中运行 PHP，则不应使用标准的 RFC 2616 样式的 HTTP 状态响应标头，而应使用其等效的
+        RFC 3875，例如不该使用 header("HTTP/1.0 404 Not found"); 应该使用 header("Status: 404 Not Found");
        </para>
        <para>
-        Leave it set to 0 unless you know what you're doing.
+        除非知道自己在做什么，否则请将其设置为 0。
        </para>
       </listitem>
      </varlistentry>
@@ -1400,11 +1335,8 @@ include_path = ".:${USER}/pear/php"
       </term>
       <listitem>
        <para>
-        FastCGI under IIS (on WINNT based OS) supports the ability to impersonate
-        security tokens of the calling client. This allows IIS to define the
-        security context that the request runs under. mod_fastcgi under Apache
-        does not currently support this feature (03/17/2002)
-        Set to 1 if running under IIS. Default is zero.
+        IIS 下的 FastCGI（在基于 WINNT 的操作系统上）支持模拟调用客户端的安全令牌的能力。这允许 IIS 定义请求在其下运行的安全上下文。Apache
+        下的 mod_fastcgi 目前不支持此功能（2002-03-17）。如果在 IIS 下运行，则设置为 1。默认为 0。
        </para>
       </listitem>
      </varlistentry>
@@ -1416,8 +1348,7 @@ include_path = ".:${USER}/pear/php"
       </term>
       <listitem>
        <para>
-        Turns on SAPI logging when using FastCGI. Default is 
-        to enable logging.
+        使用 FastCGI 时打开 SAPI 日志记录。默认是启用日志记录。
        </para>
       </listitem>
      </varlistentry>

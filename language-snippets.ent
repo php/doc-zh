@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 9244ee3baa2dec4b68fde272c22f09a2b05a8fdd Maintainer: Gregory Status: ready -->
+<!-- EN-Revision: 2226ad08fd93e3979efbba47c5ae3545eec97d25 Maintainer: Gregory Status: ready -->
 <!-- CREDITS: dallas, mowangjuanzi, Luffy -->
 <!-- 请保持此文件与英文文件中相应的每个 ENTITY 行号一一对应以便于对照，修改与更新！ -->
 
@@ -28,6 +28,28 @@
   和 <function>random_bytes</function> 函数提供了操作系统的 <acronym>CSPRNG</acronym> 支持的方便且安全的 <acronym>API</acronym>。
  </para>
 </caution>'>
+
+
+
+<!ENTITY caution.mt19937-tiny-seed '<caution xmlns="http://docbook.org/ns/docbook">
+ <para>
+  由于 Mt19937（“梅森旋转算法”）引擎仅接受 32 位整数作为种子，因此尽管 Mt19937 的范围为
+  2<superscript>19937</superscript>-1，但可能的随机序列数量仅限于 2<superscript>32</superscript>（即 4,294,967,296）。
+ </para>
+ <para>
+  当依赖隐式或显式随机播种时，重复会出现得更早。根据生日问题，在少于 80,000 个随机生成的种子后，预计重复种子的概率为
+  50&#37;。在随机生成大约 30,000 个种子后，重复种子的概率为 10&#37;。
+ </para>
+ <para>
+  This makes Mt19937 unsuitable for applications where duplicated sequences must not happen with
+  more than a negligible probability.
+  如果需要可重复的种子，<classname>Random\Engine\Xoshiro256StarStar</classname> 和
+  <classname>Random\Engine\PcgOneseq128XslRr64</classname> 引擎都支持更大的种子，它们不太可能随机碰撞。如果不需要再现性，<classname>Random\Engine\Secure</classname>
+  引擎提供加密安全随机性。
+ </para>
+</caution>'>
+
+
 
 
 
@@ -670,6 +692,20 @@ xmlns="http://docbook.org/ns/docbook"><simpara> 该函数自 PHP 8.1
 </varlistentry>
 '>
 
+<!ENTITY sort.callback.description '<para xmlns="http://docbook.org/ns/docbook">
+ &return.callbacksort;
+</para>
+&callback.cmp;
+<caution xmlns="http://docbook.org/ns/docbook">
+ <para>
+  从比较函数中返回<emphasis>非整数</emphasis>值，例如 <type>float</type>，将导致内部强制转换为 callback 返回值为
+  <type>int</type>。因此，诸如 <literal>0.99</literal> 和 <literal>0.1</literal> 之类的值都将被转换为整数值
+  <literal>0</literal>，将这些值比较的话将会是相等。
+ </para>
+</caution>'>
+
+
+
 <!ENTITY ini.shorthandbytes '<simpara xmlns="http://docbook.org/ns/docbook">当使用 <type>int</type>
 时, 其值以字节来衡量。还可以使用在 <link linkend="faq.using.shorthandbytes">FAQ</link> 中描述的速记符。</simpara>'>
 
@@ -708,6 +744,8 @@ DLL 文件从 PHP 文件夹复制到 Windows 系统目录也行，但不建议�
 
 <!ENTITY foreach '<link xmlns="http://docbook.org/ns/docbook" linkend="control-structures.foreach">foreach</link>'>
 
+<!ENTITY match '<link xmlns="http://docbook.org/ns/docbook" linkend="control-structures.match">match</link>'>
+
 <!ENTITY yield '<link xmlns="http://docbook.org/ns/docbook" linkend="control-structures.yield">yield</link>'>
 
 <!ENTITY parameter.context '<literal xmlns="http://docbook.org/ns/docbook">上下文（context）</literal>的说明请参考手册中的 <link
@@ -717,6 +755,13 @@ xmlns="http://docbook.org/ns/docbook" linkend="context">上下文（context）</
 <link xmlns="http://docbook.org/ns/docbook" linkend="ini.include-path">include_path</link>搜索文件名。'>
 
 <!-- Returns -->
+
+<!ENTITY return.type.true '<row xmlns="http://docbook.org/ns/docbook">
+ <entry>8.2.0</entry>
+ <entry>
+  现在返回类型为 &true;；之前是 <type>bool</type>。
+ </entry>
+</row>'>
 
 <!ENTITY return.falseforfailure ' 或者在失败时返回 &false;'>
 <!ENTITY return.falseforfailure.style.procedural '&style.procedural;在失败时返回 &false;。'>
@@ -961,10 +1006,10 @@ purposes.</simpara></warning>'>
 <!ENTITY gd.changelog.image-param '<row xmlns="http://docbook.org/ns/docbook">
  <entry>8.0.0</entry>
  <entry>
-  <parameter>image</parameter> expects a <classname>GdImage</classname>
-  instance now; previously, a <type>resource</type> was expected.
+  <parameter>image</parameter> 现在需要 <classname>GdImage</classname> 实例；之前需要有效的 <literal>gd</literal> <type>resource</type>。
  </entry>
 </row>'>
+
 
 <!-- DBM notes -->
 
@@ -1095,7 +1140,7 @@ purposes.</simpara></warning>'>
  <entry>8.1.0</entry>
  <entry>
   现在 <parameter>imap</parameter> 参数接受 <classname>IMAP\Connection</classname>
-  实例，之前接受 &resource;。
+  实例，之前接受有效的 <literal>imap</literal> &resource;。
  </entry>
 </row>'>
 
@@ -1170,7 +1215,7 @@ Passing untrusted data to this parameter is <emphasis>insecure</emphasis>, unles
  <entry>8.1.0</entry>
  <entry>
   现在 <parameter>ldap</parameter> 参数接受 <classname>LDAP\Connection</classname>
-  实例，之前接受 &resource;。
+  实例，之前接受有效的 <literal>ldap link</literal> &resource;。
  </entry>
 </row>'>
 
@@ -1178,7 +1223,7 @@ Passing untrusted data to this parameter is <emphasis>insecure</emphasis>, unles
  <entry>8.1.0</entry>
  <entry>
   The <parameter>entry</parameter> parameter expects an <classname>LDAP\ResultEntry</classname>
-  instance now; previously, a &resource; was expected.
+  instance now; previously, a valid <literal>ldap result entry</literal> &resource; was expected.
  </entry>
 </row>'>
 
@@ -1186,7 +1231,7 @@ Passing untrusted data to this parameter is <emphasis>insecure</emphasis>, unles
  <entry>8.1.0</entry>
  <entry>
   The <parameter>result</parameter> parameter expects an <classname>LDAP\Result</classname>
-  instance now; previously, a &resource; was expected.
+  instance now; previously, a valid <literal>ldap result</literal> &resource; was expected.
  </entry>
 </row>'>
 
@@ -1814,6 +1859,17 @@ PHP 会在执行脚本时检查被脚本操作的目录是否与被执行的脚�
 
 <!ENTITY pdo.errors.exception-not-errmode '<note xmlns="http://docbook.org/ns/docbook"><simpara><constant>PDO::ATTR_ERRMODE</constant> 属性不是 <constant>PDO::ERRMODE_EXCEPTION</constant> 时会抛出一个异常。</simpara></note>'>
 
+<!-- PDO errors -->
+
+<!ENTITY pdo.errors '<para xmlns="http://docbook.org/ns/docbook">
+如果属性 <constant>PDO::ATTR_ERRMODE</constant> 设置为 <constant>PDO::ERRMODE_WARNING</constant>，则发出级别为 <constant>E_WARNING</constant> 的错误。
+</para>
+<para xmlns="http://docbook.org/ns/docbook">
+如果属性 <constant>PDO::ATTR_ERRMODE</constant> 设置为 <constant>PDO::ERRMODE_EXCEPTION</constant>，则抛出 <classname>PDOException</classname>。
+</para>'>
+
+
+
 <!-- PECL entities -->
 <!ENTITY pecl.moved '此 <link xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="&url.pecl;">PECL</link> 扩展未与
 PHP 捆绑。'>
@@ -1993,9 +2049,13 @@ the number will be returned as a &string;.</para></note>'>
 <title>Security warning: SQL injection</title><para>If the query contains any variable
 input then <link linkend="mysqli.quickstart.prepared-statements">parameterized
 prepared statements</link> should be used instead. Alternatively, the
-data must be properly formatted and all strings must be escaped using 
+data must be properly formatted and all strings must be escaped using
 the <function>mysqli_real_escape_string</function>
 function.</para></warning>'>
+<!ENTITY mysqli.conditionalexception '<para xmlns="http://docbook.org/ns/docbook">
+If mysqli error reporting is enabled (<constant>MYSQLI_REPORT_ERROR</constant>) and the requested operation fails,
+a warning is generated. If, in addition, the mode is set to <constant>MYSQLI_REPORT_STRICT</constant>,
+a <classname>mysqli_sql_exception</classname> is thrown instead.</para>'>
 
 <!-- Notes for PCRE -->
 <!ENTITY pcre.pattern.warning '<para xmlns="http://docbook.org/ns/docbook">
@@ -2496,6 +2556,34 @@ PHP 5.1.0 或 PHP 5.0 的特别修补版本，并需启用线程安全。更多�
 
 <!ENTITY reflection.export.param.name '导出的反射。'>
 
+<!ENTITY reflection.getattributes.param.name '<varlistentry xmlns="http://docbook.org/ns/docbook">
+<term><parameter>name</parameter></term>
+<listitem>
+ <para>
+  过滤结果，匹配此类名，仅包含 <classname>ReflectionAttribute</classname> 实例的属性。
+ </para>
+</listitem>
+</varlistentry>'>
+
+
+<!ENTITY reflection.getattributes.param.flags '<varlistentry xmlns="http://docbook.org/ns/docbook">
+<term><parameter>flags</parameter></term>
+<listitem>
+ <para>
+  如果提供了 <parameter>name</parameter>，则用于确定如何过滤结果的 flag。
+ </para>
+ <para>
+  默认值为 <literal>0</literal>，这将导致返回的结果只属于类 <parameter>name</parameter> 的属性。
+ </para>
+ <para>
+  唯一可用的其他选项是使用 <constant>ReflectionAttribute::IS_INSTANCEOF</constant>，它将改为使用 <literal>instanceof</literal> 进行过滤。
+ </para>
+</listitem>
+</varlistentry>'>
+
+
+
+
 <!-- SPL -->
 <!ENTITY spl.datastructures.intro.title '<title xmlns="http://docbook.org/ns/docbook">数据结构</title>'>
 
@@ -2707,9 +2795,9 @@ xmlns="http://docbook.org/ns/docbook"><simpara xmlns="http://docbook.org/ns/docb
 <!ENTITY mongo.gridfs.store.return '<para xmlns="http://docbook.org/ns/docbook">Returns the <literal>_id</literal> of the saved file document. This will be a generated <classname>MongoId</classname> unless an <literal>_id</literal> was explicitly specified in the <parameter>metadata</parameter> parameter.</para>'>
 <!ENTITY mongo.mongowritebatch.writeoptions.description '<listitem xmlns="http://docbook.org/ns/docbook"><para>An array of Write Options.<informaltable><thead><row><entry>key</entry><entry>value meaning</entry></row></thead><tbody><row><entry>w (int|string)</entry><entry><link linkend="mongo.writeconcerns">Write concern</link> value</entry></row><row><entry>wtimeout (int)</entry><entry><link linkend="mongo.writeconcerns">Maximum time to wait for replication</link></entry></row><row><entry>ordered</entry><entry>Determines if MongoDB must apply this batch in order. Ordered writes execute serially (i.e. one at a time) and execution will stop after the first error. Unordered writes may execute in parallel and execution will not stop after the first error. Defaults to &true;</entry></row><row><entry>j (bool)</entry><entry>Wait for journaling on the primary. This value is discouraged, use WriteConcern instead</entry></row><row><entry>fsync (bool)</entry><entry>Wait for fsync on the primary. This value is discouraged, use WriteConcern instead</entry></row></tbody></informaltable></para></listitem>'>
 <!ENTITY mongo.mongowritebatch.collection.description '<listitem xmlns="http://docbook.org/ns/docbook"><para>The <classname>MongoCollection</classname> to execute the batch on. Its <link linkend="mongo.writeconcerns">write concern</link> will be copied and used as the default write concern if none is given as <parameter>$write_options</parameter> or during <methodname>MongoWriteBatch::execute</methodname>.</para></listitem>'>
-<!ENTITY mongo.context.server ' <varlistentry xmlns="http://docbook.org/ns/docbook"> <term> <parameter>server</parameter> </term> <listitem> <para> An array containing the basic information about the server that was picked. <informaltable> <tgroup cols="2"> <thead> <row> <entry>key</entry> <entry>value</entry> </row> </thead> <tbody> <row> <entry>hash</entry> <entry>server hash, example: <literal>localhost:27017;-;X;56052</literal></entry> </row> <row> <entry>type</entry> <entry>Node type (primary/secondary/mongos/arbiter): <literal>2</literal></entry> </row> <row> <entry>max_bson_size</entry> <entry>The maximum BSON Size over the wire this node accepts: <literal>16777216</literal></entry> </row> <row> <entry>max_message_size</entry> <entry>The maximum Message Size over the wire this node accepts: <literal>48000000</literal></entry> </row> <row> <entry>request_id</entry> <entry>The request identifier for this message: <literal>42</literal></entry> </row> </tbody> </tgroup> </informaltable> </para> </listitem> </varlistentry>'> 
-<!ENTITY mongo.context.writeoptions '<varlistentry xmlns="http://docbook.org/ns/docbook"> <term> <parameter>writeOptions</parameter> </term> <listitem> <para> <informaltable> <tgroup cols="2"> <thead> <row> <entry>key</entry> <entry>value</entry> </row> </thead> <tbody> <row> <entry>ordered</entry> <entry>boolean, if the operation (in case of batch operation) must be executed sequentually (ordered=true)</entry> </row> <row> <entry>writeConcern</entry> <entry>An array of writeConcern options (see below)</entry> </row> </tbody> </tgroup> </informaltable> <table> <title>writeConcern array values</title> <tgroup cols="2"> <thead> <row> <entry>key</entry> <entry>value</entry> </row> </thead> <tbody> <row> <entry>fsync</entry> <entry>boolean, force flushing to disk before returning</entry> </row> <row> <entry>j</entry> <entry>boolean, force journal write before returning</entry> </row> <row> <entry>wtimeout</entry> <entry>integer, milliseconds, maximum time the primary is allowed to wait to verify replication</entry> </row> <row> <entry>w</entry> <entry>integer=server count, or string=replication-tag</entry> </row> </tbody> </tgroup> </table> </para> </listitem> </varlistentry>'> 
-<!ENTITY mongo.context.protocoloptions ' <varlistentry xmlns="http://docbook.org/ns/docbook"> <term> <parameter>protocolOptions</parameter> </term> <listitem> <para> <informaltable> <tgroup cols="2"> <thead> <row> <entry>key</entry> <entry>value</entry> </row> </thead> <tbody> <row> <entry>message_length</entry> <entry>The total size (in bytes) of the encoded message being sent over the wire</entry> </row> <row> <entry>request_id</entry> <entry>The request identifier for this message: <literal>42</literal></entry> </row> <row> <entry>namespace</entry> <entry>The MongoDB namespace used for the protocol message <literal>dbname.collectionname</literal></entry> </row> </tbody> </tgroup> </informaltable> </para> </listitem> </varlistentry>'> 
+<!ENTITY mongo.context.server ' <varlistentry xmlns="http://docbook.org/ns/docbook"> <term> <parameter>server</parameter> </term> <listitem> <para> An array containing the basic information about the server that was picked. <informaltable> <tgroup cols="2"> <thead> <row> <entry>key</entry> <entry>value</entry> </row> </thead> <tbody> <row> <entry>hash</entry> <entry>server hash, example: <literal>localhost:27017;-;X;56052</literal></entry> </row> <row> <entry>type</entry> <entry>Node type (primary/secondary/mongos/arbiter): <literal>2</literal></entry> </row> <row> <entry>max_bson_size</entry> <entry>The maximum BSON Size over the wire this node accepts: <literal>16777216</literal></entry> </row> <row> <entry>max_message_size</entry> <entry>The maximum Message Size over the wire this node accepts: <literal>48000000</literal></entry> </row> <row> <entry>request_id</entry> <entry>The request identifier for this message: <literal>42</literal></entry> </row> </tbody> </tgroup> </informaltable> </para> </listitem> </varlistentry>'>
+<!ENTITY mongo.context.writeoptions '<varlistentry xmlns="http://docbook.org/ns/docbook"> <term> <parameter>writeOptions</parameter> </term> <listitem> <para> <informaltable> <tgroup cols="2"> <thead> <row> <entry>key</entry> <entry>value</entry> </row> </thead> <tbody> <row> <entry>ordered</entry> <entry>boolean, if the operation (in case of batch operation) must be executed sequentually (ordered=true)</entry> </row> <row> <entry>writeConcern</entry> <entry>An array of writeConcern options (see below)</entry> </row> </tbody> </tgroup> </informaltable> <table> <title>writeConcern array values</title> <tgroup cols="2"> <thead> <row> <entry>key</entry> <entry>value</entry> </row> </thead> <tbody> <row> <entry>fsync</entry> <entry>boolean, force flushing to disk before returning</entry> </row> <row> <entry>j</entry> <entry>boolean, force journal write before returning</entry> </row> <row> <entry>wtimeout</entry> <entry>integer, milliseconds, maximum time the primary is allowed to wait to verify replication</entry> </row> <row> <entry>w</entry> <entry>integer=server count, or string=replication-tag</entry> </row> </tbody> </tgroup> </table> </para> </listitem> </varlistentry>'>
+<!ENTITY mongo.context.protocoloptions ' <varlistentry xmlns="http://docbook.org/ns/docbook"> <term> <parameter>protocolOptions</parameter> </term> <listitem> <para> <informaltable> <tgroup cols="2"> <thead> <row> <entry>key</entry> <entry>value</entry> </row> </thead> <tbody> <row> <entry>message_length</entry> <entry>The total size (in bytes) of the encoded message being sent over the wire</entry> </row> <row> <entry>request_id</entry> <entry>The request identifier for this message: <literal>42</literal></entry> </row> <row> <entry>namespace</entry> <entry>The MongoDB namespace used for the protocol message <literal>dbname.collectionname</literal></entry> </row> </tbody> </tgroup> </informaltable> </para> </listitem> </varlistentry>'>
 <!ENTITY mongo.alternative.class.note '<para
 xmlns="http://docbook.org/ns/docbook">This extension that defines this class
 is deprecated. Instead, the <link linkend="set.mongodb">MongoDB</link> extension should be used.
@@ -2792,7 +2880,7 @@ used.</para>'>
          <row xmlns="http://docbook.org/ns/docbook">
           <entry>keyVaultNamespace</entry>
           <entry><type>string</type></entry>
-          <entry>A fully qualified namespace (e.g. <literal>"databaseName.collectionName"</literal>) denoting the collection that contains all data keys used for encryption and decryption.</entry>
+          <entry>A fully qualified namespace (e.g. <literal>"databaseName.collectionName"</literal>) denoting the collection that contains all data keys used for encryption and decryption. This option is required.</entry>
          </row>
 '>
 <!ENTITY mongodb.option.encryption.kmsProviders '
@@ -3013,7 +3101,8 @@ local: {
 <provider>: {
     tlsCaFile: <optional string>,
     tlsCertificateKeyFile: <optional string>,
-    tlsCertificateKeyFilePassword: <optional string>
+    tlsCertificateKeyFilePassword: <optional string>,
+    tlsDisableOCSPEndpointCheck: <optional bool>
 }
 ]]>
            </programlisting>
@@ -3349,7 +3438,7 @@ local: {
     整数后跟美元符号 <literal>$</literal>，用于指定转换中要处理的参数数量。
    </para>
   </formalpara>
-  
+
   <para>
    <table>
     <title>标志</title>
@@ -3837,7 +3926,7 @@ xmlns="http://docbook.org/ns/docbook"><simpara>This function has been
 <!ENTITY xml.changelog.parser-param '<row xmlns="http://docbook.org/ns/docbook">
  <entry>8.0.0</entry>
  <entry>
-  <parameter>parser</parameter> 现在接受 <classname>XMLParser</classname> 实例；之前接受 <type>resource</type>。
+  <parameter>parser</parameter> 现在接受 <classname>XMLParser</classname> 实例；之前接受有效的 <literal>xml</literal> <type>resource</type>。
  </entry>
 </row>'>
 
@@ -3851,7 +3940,7 @@ xmlns="http://docbook.org/ns/docbook"><simpara>This function has been
     with servers with valid SSL certificates, as distributors generally
     configure OpenSSL to use known good CA bundles.
    </para>
-   
+
    <para xmlns="http://docbook.org/ns/docbook">
     The default CA bundle may be overridden on a global basis by setting
     either the openssl.cafile or openssl.capath configuration setting, or on a
