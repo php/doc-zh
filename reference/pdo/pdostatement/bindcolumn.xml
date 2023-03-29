@@ -1,8 +1,7 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 45bc78be1c290e1f53a5a330652b62e8d00a484c Maintainer: ichenshy Status: ready -->
-<!-- Reviewed: no -->
-
+<!-- EN-Revision: 082ddc19f53e6e254010de1a1fbbe485ff744ec1 Maintainer: ichenshy Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="pdostatement.bindcolumn" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>PDOStatement::bindColumn</refname>
@@ -12,24 +11,25 @@
  </refnamediv>
  <refsect1 role="description">
   &reftitle.description;
-   <methodsynopsis>
-    <type>bool</type><methodname>PDOStatement::bindColumn</methodname>
-    <methodparam><type>mixed</type><parameter>column</parameter></methodparam>
-    <methodparam><type>mixed</type><parameter role="reference">param</parameter></methodparam>
-    <methodparam choice="opt"><type>int</type><parameter>type</parameter></methodparam>
-    <methodparam choice="opt"><type>int</type><parameter>maxlen</parameter></methodparam>
-    <methodparam choice="opt"><type>mixed</type><parameter>driverdata</parameter></methodparam>
-   </methodsynopsis>
+   <methodsynopsis role="PDOStatement">
+   <modifier>public</modifier> <type>bool</type><methodname>PDOStatement::bindColumn</methodname>
+   <methodparam><type class="union"><type>string</type><type>int</type></type><parameter>column</parameter></methodparam>
+   <methodparam><type>mixed</type><parameter role="reference">var</parameter></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>type</parameter><initializer>PDO::PARAM_STR</initializer></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>maxLength</parameter><initializer>0</initializer></methodparam>
+   <methodparam choice="opt"><type>mixed</type><parameter>driverOptions</parameter><initializer>&null;</initializer></methodparam>
+  </methodsynopsis>
 
   <para>
-    安排一个特定的变量绑定到一个查询结果集中给定的列。每次调用 <function>PDOStatement::fetch</function> 或 <function>PDOStatement::fetchAll</function> 都将更新所有绑定到列的变量。
+   <methodname>PDOStatement::bindColumn</methodname> 安排特定变量绑定到查询结果集中的指定列。每次调用 <methodname>PDOStatement::fetch</methodname>
+   或 <methodname>PDOStatement::fetchAll</methodname> 都将更新所有绑定到列的变量。
   </para>
   <note>
    <para>
-   在语句执行前 PDO 有关列的信息并非总是可用，可移植的应用应在 <function>PDOStatement::execute</function> <emphasis>之后</emphasis> 调用此函数（方法）。
+    在语句执行前 PDO 有关列的信息并非总是可用，可移植的应用应在 <methodname>PDOStatement::execute</methodname> <emphasis>之后</emphasis> 调用此函数（方法）。
    </para>
    <para>
-   但是，当使用 <emphasis>PgSQL 驱动</emphasis> 时，要想能绑定一个 LOB 列作为流，应用程序必须在调用 <function>PDOStatement::execute</function> <emphasis>之前</emphasis> 调用此方法，否则大对象 OID 作为一个整数返回。
+   但是，当使用 <emphasis>PgSQL 驱动</emphasis>时，要想能绑定 LOB 列作为流，应用程序必须在调用 <methodname>PDOStatement::execute</methodname> <emphasis>之前</emphasis> 调用此方法，否则大对象 OID 作为整数返回。
    </para>
   </note>
  </refsect1>
@@ -47,7 +47,7 @@
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>param</parameter></term>
+     <term><parameter>var</parameter></term>
      <listitem>
       <para>
        将绑定到列的 PHP 变量名称
@@ -58,12 +58,12 @@
      <term><parameter>type</parameter></term>
      <listitem>
       <para>
-       通过 PDO::PARAM_* 常量指定的参数的数据类型。
+       通过 <link linkend="pdo.constants"><literal>PDO::PARAM_*</literal> 常量</link>指定的参数的数据类型。
       </para>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>maxlen</parameter></term>
+     <term><parameter>maxLength</parameter></term>
      <listitem>
       <para>
        预分配提示。
@@ -71,7 +71,7 @@
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>driverdata</parameter></term>
+     <term><parameter>driverOptions</parameter></term>
      <listitem>
       <para>
         驱动的可选参数。
@@ -89,44 +89,38 @@
   </para>
  </refsect1>
 
+ <refsect1 role="errors">
+  &reftitle.errors;
+  &pdo.errors;
+ </refsect1>
+
  <refsect1 role="examples">
   &reftitle.examples;
   <para>
    <example>
     <title>把结果集输出绑定到 PHP 变量</title>
     <para>
-    绑定结果集中的列到PHP变量是一种使每行包含的数据在应用程序中立即可用的有效方法。下面的例子演示了 PDO 怎样用多种选项和缺省值绑定和检索列。
+    绑定结果集中的列到PHP变量是一种使每行包含的数据在应用程序中立即可用的有效方法。下面的示例演示了 PDO 怎样用多种选项和缺省值绑定和检索列。
     </para>
     <programlisting role="php">
 <![CDATA[
 <?php
-function readData($dbh) {
-  $sql = 'SELECT name, colour, calories FROM fruit';
-  try {
-    $stmt = $dbh->prepare($sql);
-    $stmt->execute();
+$stmt = $dbh->prepare('SELECT name, colour, calories FROM fruit');
+$stmt->execute();
 
-    /*  通过列号绑定  */
-    $stmt->bindColumn(1, $name);
-    $stmt->bindColumn(2, $colour);
-    
-    /*  通过列名绑定  */
-    $stmt->bindColumn('calories', $cals);
+/* 通过列号绑定 */
+$stmt->bindColumn(1, $name);
+$stmt->bindColumn(2, $colour);
 
-    while ($row = $stmt->fetch(PDO::FETCH_BOUND)) {
-      $data = $name . "\t" . $colour . "\t" . $cals . "\n";
-      print $data;
-    }
-  }
-  catch (PDOException $e) {
-    print $e->getMessage();
-  }
+/* 通过列名绑定 */
+$stmt->bindColumn('calories', $cals);
+
+while ($stmt->fetch(PDO::FETCH_BOUND)) {
+    print $name . "\t" . $colour . "\t" . $cals . "\n";
 }
-readData($dbh);
-?>
-  ]]>
+]]>
     </programlisting>
-    &example.outputs;
+    &example.outputs.similar;
     <screen>
 <![CDATA[
 apple   red     150
@@ -145,10 +139,10 @@ strawberry      red     25
   &reftitle.seealso;
   <para>
    <simplelist>
-    <member><function>PDOStatement::execute</function></member>
-    <member><function>PDOStatement::fetch</function></member>
-    <member><function>PDOStatement::fetchAll</function></member>
-    <member><function>PDOStatement::fetchColumn</function></member>
+    <member><methodname>PDOStatement::execute</methodname></member>
+    <member><methodname>PDOStatement::fetch</methodname></member>
+    <member><methodname>PDOStatement::fetchAll</methodname></member>
+    <member><methodname>PDOStatement::fetchColumn</methodname></member>
    </simplelist>
   </para>
  </refsect1>
