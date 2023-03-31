@@ -1,24 +1,39 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 45bc78be1c290e1f53a5a330652b62e8d00a484c Maintainer: ichenshy Status: ready -->
-<!-- Reviewed: no -->
-
+<!-- EN-Revision: 082ddc19f53e6e254010de1a1fbbe485ff744ec1 Maintainer: ichenshy Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="pdostatement.fetchall" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>PDOStatement::fetchAll</refname>
   <refpurpose>
-   返回一个包含结果集中所有行的数组
+   从结果集中获取剩余的行
   </refpurpose>
  </refnamediv>
  <refsect1 role="description">
   &reftitle.description;
-  <methodsynopsis>
-   <type>array</type><methodname>PDOStatement::fetchAll</methodname>
-   <methodparam choice="opt"><type>int</type><parameter>fetch_style</parameter></methodparam>
-   <methodparam choice="opt"><type>mixed</type><parameter>fetch_argument</parameter></methodparam>
-   <methodparam choice="opt"><type>array</type><parameter>ctor_args</parameter><initializer>array()</initializer></methodparam>
+  <methodsynopsis role="PDOStatement">
+   <modifier>public</modifier> <type>array</type><methodname>PDOStatement::fetchAll</methodname>
+   <methodparam choice="opt"><type>int</type><parameter>mode</parameter><initializer>PDO::FETCH_DEFAULT</initializer></methodparam>
   </methodsynopsis>
 
+  <methodsynopsis role="PDOStatement">
+   <modifier>public</modifier> <type>array</type><methodname>PDOStatement::fetchAll</methodname>
+   <methodparam><type>int</type><parameter>mode</parameter><initializer>PDO::FETCH_COLUMN</initializer></methodparam>
+   <methodparam><type>int</type><parameter>column</parameter></methodparam>
+  </methodsynopsis>
+
+  <methodsynopsis role="PDOStatement">
+   <modifier>public</modifier> <type>array</type><methodname>PDOStatement::fetchAll</methodname>
+   <methodparam><type>int</type><parameter>mode</parameter><initializer>PDO::FETCH_CLASS</initializer></methodparam>
+   <methodparam><type>string</type><parameter>class</parameter></methodparam>
+   <methodparam><type class="union"><type>array</type><type>null</type></type><parameter>constructorArgs</parameter></methodparam>
+  </methodsynopsis>
+
+  <methodsynopsis role="PDOStatement">
+   <modifier>public</modifier> <type>array</type><methodname>PDOStatement::fetchAll</methodname>
+   <methodparam><type>int</type><parameter>mode</parameter><initializer>PDO::FETCH_FUNC</initializer></methodparam>
+   <methodparam><type>callable</type><parameter>callback</parameter></methodparam>
+  </methodsynopsis>
  </refsect1>
 
  <refsect1 role="parameters">
@@ -26,13 +41,13 @@
   <para>
    <variablelist>
     <varlistentry>
-     <term><parameter>fetch_style</parameter></term>
+     <term><parameter>mode</parameter></term>
      <listitem>
       <para>
-       控制返回数组的内容如同 <function>PDOStatement::fetch</function> 文档中记载的一样。默认为 <constant>PDO::ATTR_DEFAULT_FETCH_MODE</constant> 的值（ 其缺省值为 <constant>PDO::FETCH_BOTH</constant> ）
+       控制返回数组的内容如同 <methodname>PDOStatement::fetch</methodname> 文档中记载的一样。默认为 <constant>PDO::ATTR_DEFAULT_FETCH_MODE</constant> 的值（ 其缺省值为 <constant>PDO::FETCH_BOTH</constant> ）
       </para>
       <para>
-       想要返回一个包含结果集中单独一列所有值的数组，需要指定 <constant>PDO::FETCH_COLUMN</constant> 。通过指定  <parameter>column-index</parameter>  参数获取想要的列。
+       想要返回一个包含结果集中单独一列所有值的数组，需要指定 <constant>PDO::FETCH_COLUMN</constant> 。通过指定 <parameter>column</parameter> 参数获取想要的列。
       </para>
       <para>
       想要获取结果集中单独一列的唯一值，需要将 <constant>PDO::FETCH_COLUMN</constant> 和 <constant>PDO::FETCH_UNIQUE</constant> 按位或。
@@ -42,36 +57,38 @@
       </para>
      </listitem>
     </varlistentry>
+   </variablelist>
+   以下是依赖获取模式的动态参数。它们不能与命名参数一起使用。
+   <variablelist>
     <varlistentry>
-     <term><parameter>fetch_argument</parameter></term>
+     <term><parameter>column</parameter></term>
      <listitem>
       <para>
-       根据 <parameter>fetch_style</parameter> 参数的值，此参数有不同的意义：
-       <itemizedlist>
-        <listitem>
-         <para>
-          <constant>PDO::FETCH_COLUMN</constant>：返回指定以0开始索引的列。
-         </para>
-        </listitem>
-        <listitem>
-         <para>
-          <constant>PDO::FETCH_CLASS</constant>：返回指定类的实例，映射每行的列到类中对应的属性名。
-         </para>
-        </listitem>
-        <listitem>
-         <para>
-          <constant>PDO::FETCH_FUNC</constant>：将每行的列作为参数传递给指定的函数，并返回调用函数后的结果。
-         </para>
-        </listitem>
-       </itemizedlist>
+       与 <constant>PDO::FETCH_COLUMN</constant>一起使用。返回指定以 0 开始索引的列。
       </para>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>ctor_args</parameter></term>
+     <term><parameter>class</parameter></term>
      <listitem>
       <para>
-       当 <parameter>fetch_style</parameter> 参数为 <constant>PDO::FETCH_CLASS</constant> 时，自定义类的构造函数的参数。
+       与 <constant>PDO::FETCH_CLASS</constant>一起使用。返回指定类的实例，映射每行的列到类中对应的属性名。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>constructorArgs</parameter></term>
+     <listitem>
+      <para>
+       当 <parameter>mode</parameter> 参数为 <constant>PDO::FETCH_CLASS</constant> 时自定义类构造方法的参数。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>callback</parameter></term>
+     <listitem>
+      <para>
+       与 <constant>PDO::FETCH_FUNC</constant>一起使用。将每行的列作为参数传递给指定的函数，并返回调用函数后的结果。
       </para>
      </listitem>
     </varlistentry>
@@ -82,11 +99,38 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   <function>PDOStatement::fetchAll</function> 返回一个包含结果集中所有剩余行的数组。此数组的每一行要么是一个列值的数组，要么是属性对应每个列名的一个对象。
+   <methodname>PDOStatement::fetchAll</methodname> 返回一个包含结果集中所有剩余行的数组。此数组的每一行要么是一个列值的数组，要么是属性对应每个列名的一个对象。如果获取到的结果为 0，则返回空数组。
   </para>
   <para>
    使用此方法获取大结果集将导致系统负担加重且可能占用大量网络资源。与其取回所有数据后用PHP来操作，倒不如考虑使用数据库服务来处理结果集。例如，在取回数据并通过PHP处理前，在 SQL 中使用 WHERE  和 ORDER BY 子句来限定结果。
   </para>
+ </refsect1>
+
+ <refsect1 role="errors">
+  &reftitle.errors;
+  &pdo.errors;
+ </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <informaltable>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>&Version;</entry>
+      <entry>&Description;</entry>
+     </row>
+    </thead>
+    <tbody>
+     <row>
+      <entry>8.0.0</entry>
+      <entry>
+       现在此方法始终返回 &array;，之前可能在失败时返回 &false;。
+      </entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </informaltable>
  </refsect1>
 
  <refsect1 role="examples">
@@ -114,17 +158,25 @@ Array
 (
     [0] => Array
         (
-            [NAME] => pear
-            [0] => pear
-            [COLOUR] => green
-            [1] => green
+            [name] => apple
+            [0] => apple
+            [colour] => red
+            [1] => red
         )
 
     [1] => Array
         (
-            [NAME] => watermelon
+            [name] => pear
+            [0] => pear
+            [colour] => green
+            [1] => green
+        )
+
+    [2] => Array
+        (
+            [name] => watermelon
             [0] => watermelon
-            [COLOUR] => pink
+            [colour] => pink
             [1] => pink
         )
 
@@ -203,7 +255,7 @@ array(3) {
   ["watermelon"]=>
   array(1) {
     [0]=>
-    string(5) "green"
+    string(5) "pink"
   }
 }
 
@@ -255,11 +307,25 @@ array(3) {
     ["colour"]=>
     string(4) "pink"
   }
+  [3]=>
+  object(fruit)#4 (2) {
+    ["name"]=>
+    string(5) "apple"
+    ["colour"]=>
+    string(3) "red"
+  }
+  [4]=>
+  object(fruit)#5 (2) {
+    ["name"]=>
+    string(4) "pear"
+    ["colour"]=>
+    string(5) "green"
+  }
 }
 ]]>
     </screen>
    </example>
-   <example><title> 每行调用一次函数</title>
+   <example><title>每行调用一次函数</title>
     <para>
      下面列子演示了 <constant>PDO::FETCH_FUNC</constant> 获取风格的行为。
     </para>
@@ -288,6 +354,10 @@ array(3) {
   string(12) "pear: yellow"
   [2]=>
   string(16) "watermelon: pink"
+  [3]=>
+  string(10) "apple: red"
+  [4]=>
+  string(11) "pear: green"
 }
 ]]>
     </screen>
@@ -300,16 +370,15 @@ array(3) {
   &reftitle.seealso;
   <para>
    <simplelist>
-    <member><function>PDO::query</function></member>
-    <member><function>PDOStatement::fetch</function></member>
-    <member><function>PDOStatement::fetchColumn</function></member>
-    <member><function>PDO::prepare</function></member>
-    <member><function>PDOStatement::setFetchMode</function></member>
+    <member><methodname>PDO::query</methodname></member>
+    <member><methodname>PDOStatement::fetch</methodname></member>
+    <member><methodname>PDOStatement::fetchColumn</methodname></member>
+    <member><methodname>PDO::prepare</methodname></member>
+    <member><methodname>PDOStatement::setFetchMode</methodname></member>
    </simplelist>
   </para>
  </refsect1>
 </refentry>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
