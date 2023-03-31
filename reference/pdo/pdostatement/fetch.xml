@@ -1,8 +1,7 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 45bc78be1c290e1f53a5a330652b62e8d00a484c Maintainer: ichenshy Status: ready -->
-<!-- Reviewed: no -->
-
+<!-- EN-Revision: 082ddc19f53e6e254010de1a1fbbe485ff744ec1 Maintainer: ichenshy Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="pdostatement.fetch" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>PDOStatement::fetch</refname>
@@ -12,15 +11,15 @@
  </refnamediv>
  <refsect1 role="description">
   &reftitle.description;
-  <methodsynopsis>
-   <type>mixed</type><methodname>PDOStatement::fetch</methodname>
-   <methodparam choice="opt"><type>int</type><parameter>fetch_style</parameter></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter>cursor_orientation</parameter><initializer>PDO::FETCH_ORI_NEXT</initializer></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter>cursor_offset</parameter><initializer>0</initializer></methodparam>
+  <methodsynopsis role="PDOStatement">
+   <modifier>public</modifier> <type>mixed</type><methodname>PDOStatement::fetch</methodname>
+   <methodparam choice="opt"><type>int</type><parameter>mode</parameter><initializer>PDO::FETCH_DEFAULT</initializer></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>cursorOrientation</parameter><initializer>PDO::FETCH_ORI_NEXT</initializer></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>cursorOffset</parameter><initializer>0</initializer></methodparam>
   </methodsynopsis>
 
   <para>
-   从一个 PDOStatement 对象相关的结果集中获取下一行。<parameter>fetch_style</parameter> 参数决定 POD 如何返回行。
+   从一个 PDOStatement 对象相关的结果集中获取下一行。<parameter>mode</parameter> 参数决定 POD 如何返回行。
   </para>
  </refsect1>
 
@@ -29,7 +28,7 @@
   <para>
    <variablelist>
     <varlistentry>
-     <term><parameter>fetch_style</parameter></term>
+     <term><parameter>mode</parameter></term>
      <listitem>
       <para>
        控制下一行如何返回给调用者。此值必须是 <literal>PDO::FETCH_*</literal> 系列常量中的一个，缺省为 <literal>PDO::ATTR_DEFAULT_FETCH_MODE</literal> 的值 （默认为 <literal>PDO::FETCH_BOTH</literal> ）。
@@ -41,10 +40,11 @@
          <literal>PDO::FETCH_BOTH</literal>（默认）：返回一个索引为结果集列名和以0开始的列号的数组
         </para></listitem>
         <listitem><para>
-         <literal>PDO::FETCH_BOUND</literal>：返回 &true; ，并分配结果集中的列值给 <function>PDOStatement::bindColumn</function> 方法绑定的 PHP 变量。
+         <literal>PDO::FETCH_BOUND</literal>：返回 &true; ，并分配结果集中的列值给 <methodname>PDOStatement::bindColumn</methodname> 方法绑定的 PHP 变量。
         </para></listitem>
         <listitem><para>
-         <literal>PDO::FETCH_CLASS</literal>：返回一个请求类的新实例，映射结果集中的列名到类中对应的属性名。如果 <parameter>fetch_style</parameter> 包含 PDO::FETCH_CLASSTYPE（例如：<literal>PDO::FETCH_CLASS |
+         <literal>PDO::FETCH_CLASS</literal>：返回一个请求类的新实例，映射结果集中的列名到类中对应的属性名，然后调用构造函数，除非指定
+         <literal>PDO::FETCH_PROPS_LATE</literal>。如果 <parameter>mode</parameter> 包含 PDO::FETCH_CLASSTYPE（例如：<literal>PDO::FETCH_CLASS |
          PDO::FETCH_CLASSTYPE</literal>），则类名由第一列的值决定
         </para></listitem>
         <listitem><para>
@@ -54,31 +54,38 @@
          <literal>PDO::FETCH_LAZY</literal>：结合使用 <literal>PDO::FETCH_BOTH</literal> 和 <literal>PDO::FETCH_OBJ</literal>，创建供用来访问的对象变量名
         </para></listitem>
         <listitem><para>
+         <literal>PDO::FETCH_NAMED</literal>：返回与 <literal>PDO::FETCH_ASSOC</literal>
+         具有相同形式的数组，除了如果有多个同名列，则该键引用的值将是具有该列名的行中所有值的数组
+        </para></listitem>
          <literal>PDO::FETCH_NUM</literal>：返回一个索引为以0开始的结果集列号的数组
         </para></listitem>
         <listitem><para>
          <literal>PDO::FETCH_OBJ</literal>：返回一个属性名对应结果集列名的匿名对象
+        </para></listitem>
+        <listitem><para>
+         <literal>PDO::FETCH_PROPS_LATE</literal>：当与 <literal>PDO::FETCH_CLASS</literal>
+         一起使用时，类的构造方法在从相应的列值分配属性之前被调用。
         </para></listitem>
        </itemizedlist>
       </para>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>cursor_orientation</parameter></term>
+     <term><parameter>cursorOrientation</parameter></term>
      <listitem>
       <para>
-       对于 一个 PDOStatement 对象表示的可滚动游标，该值决定了哪一行将被返回给调用者。此值必须是 <literal>PDO::FETCH_ORI_*</literal> 系列常量中的一个，默认为 <literal>PDO::FETCH_ORI_NEXT</literal>。要想让 PDOStatement 对象使用可滚动游标，必须在用 <function>PDO::prepare</function> 预处理SQL语句时，设置 <literal>PDO::ATTR_CURSOR</literal> 属性为 <literal>PDO::CURSOR_SCROLL</literal>。
+       对于 一个 PDOStatement 对象表示的可滚动游标，该值决定了哪一行将被返回给调用者。此值必须是 <literal>PDO::FETCH_ORI_*</literal> 系列常量中的一个，默认为 <literal>PDO::FETCH_ORI_NEXT</literal>。要想让 PDOStatement 对象使用可滚动游标，必须在用 <methodname>PDO::prepare</methodname> 预处理SQL语句时，设置 <literal>PDO::ATTR_CURSOR</literal> 属性为 <literal>PDO::CURSOR_SCROLL</literal>。
       </para>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>offset</parameter></term>
+     <term><parameter>cursorOffset</parameter></term>
      <listitem>
       <para> 
-       对于一个 <literal>cursor_orientation</literal> 参数设置为 <literal>PDO::FETCH_ORI_ABS</literal> 的PDOStatement 对象代表的可滚动游标，此值指定结果集中想要获取行的绝对行号。
+       对于一个 <parameter>cursorOrientation</parameter> 参数设置为 <literal>PDO::FETCH_ORI_ABS</literal> 的 PDOStatement 对象代表的可滚动游标，此值指定结果集中想要获取行的绝对行号。
       </para>
       <para>
-       对于一个 <literal>cursor_orientation</literal> 参数设置为 <literal>PDO::FETCH_ORI_REL</literal> 的PDOStatement 对象代表的可滚动游标，此值指定想要获取行相对于调用 <function>PDOStatement::fetch</function> 前游标的位置
+       对于一个 <parameter>cursorOrientation</parameter> 参数设置为 <literal>PDO::FETCH_ORI_REL</literal> 的 PDOStatement 对象代表的可滚动游标，此值指定想要获取行相对于调用 <methodname>PDOStatement::fetch</methodname> 前游标的位置
       </para>
      </listitem>
     </varlistentry>
@@ -89,8 +96,13 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   此函数（方法）成功时返回的值依赖于提取类型。在所有情况下，失败都返回 &false; 。
+   此方法成功时返回的值依赖于获取类型。在所有情况下，失败或没有更多记录时都返回 &false;。
   </para>
+ </refsect1>
+
+ <refsect1 role="errors">
+  &reftitle.errors;
+  &pdo.errors;
  </refsect1>
 
  <refsect1 role="examples">
@@ -125,7 +137,7 @@ print("\n");
 print("PDO::FETCH_OBJ: ");
 print("Return next row as an anonymous object with column names as properties\n");
 $result = $sth->fetch(PDO::FETCH_OBJ);
-print $result->NAME;
+print $result->name;
 print("\n");
 ?>
 ]]>
@@ -136,24 +148,24 @@ print("\n");
 PDO::FETCH_ASSOC: Return next row as an array indexed by column name
 Array
 (
-    [NAME] => apple
-    [COLOUR] => red
+    [name] => apple
+    [colour] => red
 )
 
 PDO::FETCH_BOTH: Return next row as an array indexed by both column name and number
 Array
 (
-    [NAME] => banana
+    [name] => banana
     [0] => banana
-    [COLOUR] => yellow
+    [colour] => yellow
     [1] => yellow
 )
 
 PDO::FETCH_LAZY: Return next row as an anonymous object with column names as properties
 PDORow Object
 (
-    [NAME] => orange
-    [COLOUR] => orange
+    [name] => orange
+    [colour] => orange
 )
 
 PDO::FETCH_OBJ: Return next row as an anonymous object with column names as properties
@@ -166,35 +178,23 @@ kiwi
 <![CDATA[
 <?php
 function readDataForwards($dbh) {
-  $sql = 'SELECT hand, won, bet FROM mynumbers ORDER BY BET';
-  try {
+    $sql = 'SELECT hand, won, bet FROM mynumbers ORDER BY BET';
     $stmt = $dbh->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
     $stmt->execute();
     while ($row = $stmt->fetch(PDO::FETCH_NUM, PDO::FETCH_ORI_NEXT)) {
-      $data = $row[0] . "\t" . $row[1] . "\t" . $row[2] . "\n";
-      print $data;
+        $data = $row[0] . "\t" . $row[1] . "\t" . $row[2] . "\n";
+        print $data;
     }
-    $stmt = null;
-  }
-  catch (PDOException $e) {
-    print $e->getMessage();
-  }
 }
 function readDataBackwards($dbh) {
-  $sql = 'SELECT hand, won, bet FROM mynumbers ORDER BY bet';
-  try {
+    $sql = 'SELECT hand, won, bet FROM mynumbers ORDER BY bet';
     $stmt = $dbh->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
     $stmt->execute();
     $row = $stmt->fetch(PDO::FETCH_NUM, PDO::FETCH_ORI_LAST);
     do {
-      $data = $row[0] . "\t" . $row[1] . "\t" . $row[2] . "\n";
-      print $data;
+        $data = $row[0] . "\t" . $row[1] . "\t" . $row[2] . "\n";
+        print $data;
     } while ($row = $stmt->fetch(PDO::FETCH_NUM, PDO::FETCH_ORI_PRIOR));
-    $stmt = null;
-  }
-  catch (PDOException $e) {
-    print $e->getMessage();
-  }
 }
 
 print "Reading forwards:\n";
@@ -221,6 +221,53 @@ Reading backwards:
     </screen>
    </example>
 
+   <example><title>构造顺序</title>
+    <simpara>
+     当通过 <literal>PDO::FETCH_CLASS</literal> 获取对象时，首先分配对象属性，然后调用类的构造函数。如果还指定了
+     <literal>PDO::FETCH_PROPS_LATE</literal>，则此顺序相反，即首先调用构造方法，然后分配属性。
+    </simpara>
+    <programlisting role="php">
+<![CDATA[
+<?php
+class Person
+{
+    private $name;
+
+    public function __construct()
+    {
+        $this->tell();
+    }
+
+    public function tell()
+    {
+        if (isset($this->name)) {
+            echo "I am {$this->name}.\n";
+        } else {
+            echo "I don't have a name yet.\n";
+        }
+    }
+}
+
+$sth = $dbh->query("SELECT * FROM people");
+$sth->setFetchMode(PDO::FETCH_CLASS, 'Person');
+$person = $sth->fetch();
+$person->tell();
+$sth->setFetchMode(PDO::FETCH_CLASS|PDO::FETCH_PROPS_LATE, 'Person');
+$person = $sth->fetch();
+$person->tell();
+?>
+]]>
+    </programlisting>
+    &example.outputs.similar;
+    <screen>
+<![CDATA[
+I am Alice.
+I am Alice.
+I don't have a name yet.
+I am Bob.
+]]>
+    </screen>
+   </example>
   </para>
  </refsect1>
 
@@ -228,17 +275,16 @@ Reading backwards:
   &reftitle.seealso;
   <para>
    <simplelist>
-    <member><function>PDO::prepare</function></member>
-    <member><function>PDOStatement::execute</function></member>
-    <member><function>PDOStatement::fetchAll</function></member>
-    <member><function>PDOStatement::fetchColumn</function></member>
-    <member><function>PDOStatement::fetchObject</function></member>
-    <member><function>PDOStatement::setFetchMode</function></member>
+    <member><methodname>PDO::prepare</methodname></member>
+    <member><methodname>PDOStatement::execute</methodname></member>
+    <member><methodname>PDOStatement::fetchAll</methodname></member>
+    <member><methodname>PDOStatement::fetchColumn</methodname></member>
+    <member><methodname>PDOStatement::fetchObject</methodname></member>
+    <member><methodname>PDOStatement::setFetchMode</methodname></member>
    </simplelist>
   </para>
  </refsect1>
 </refentry>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
