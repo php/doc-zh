@@ -1,26 +1,32 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 45bc78be1c290e1f53a5a330652b62e8d00a484c Maintainer: anonymous #27375 Status: ready -->
-<!-- Reviewed: no -->
-
+<!-- EN-Revision: 082ddc19f53e6e254010de1a1fbbe485ff744ec1 Maintainer: anonymous #27375 Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="pdostatement.fetchcolumn" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>PDOStatement::fetchColumn</refname>
   <refpurpose>
-  从结果集中的下一行返回单独的一列。
+  从结果集中的下一行返回单独的一列
   </refpurpose>
  </refnamediv>
 
  <refsect1 role="description">
   &reftitle.description;
-  <methodsynopsis>
-   <type>string</type><methodname>PDOStatement::fetchColumn</methodname>
-   <methodparam choice="opt"><type>int</type><parameter>column_number</parameter><initializer>0</initializer></methodparam>
+  <methodsynopsis role="PDOStatement">
+   <modifier>public</modifier> <type>mixed</type><methodname>PDOStatement::fetchColumn</methodname>
+   <methodparam choice="opt"><type>int</type><parameter>column</parameter><initializer>0</initializer></methodparam>
   </methodsynopsis>
 
   <para>
    从结果集中的下一行返回单独的一列，如果没有了，则返回 &false; 。
   </para>
+
+  <note>
+   <para>
+    <methodname>PDOStatement::fetchColumn</methodname> 不应该用于检索 boolean 列，因为无法区分 &false;
+    值和没有更多行可检索。请改用 <methodname>PDOStatement::fetch</methodname>。
+   </para>
+  </note>
  </refsect1>
 
  <refsect1 role="parameters">
@@ -28,10 +34,10 @@
   <para>
    <variablelist>
     <varlistentry>
-     <term><parameter>column_number</parameter></term>
+     <term><parameter>column</parameter></term>
      <listitem>
       <para>
-       你想从行里取回的列的索引数字（以0开始的索引）。如果没有提供值，则 <function>PDOStatement::fetchColumn</function> 获取第一列。
+       你想从行里取回的列的索引数字（以0开始的索引）。如果没有提供值，则 <methodname>PDOStatement::fetchColumn</methodname> 获取第一列。
       </para>
      </listitem>
     </varlistentry>
@@ -42,13 +48,18 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   <function>PDOStatement::fetchColumn</function> 从结果集中的下一行返回单独的一列。
+   <methodname>PDOStatement::fetchColumn</methodname> 从结果集中的下一行返回单独的一列，如果没有更多行，则返回 &false;。
   </para>
   <warning>
    <para>
-    如果使用 <function>PDOStatement::fetchColumn</function> 取回数据，则没有办法返回同一行的另外一列。
+    如果使用 <methodname>PDOStatement::fetchColumn</methodname> 取回数据，则没有办法返回同一行的另外一列。
    </para>
   </warning>
+ </refsect1>
+
+ <refsect1 role="errors">
+  &reftitle.errors;
+  &pdo.errors;
  </refsect1>
 
  <refsect1 role="examples">
@@ -61,12 +72,11 @@
 $sth = $dbh->prepare("SELECT name, colour FROM fruit");
 $sth->execute();
 
-/* 从结果集中的下一行获取第一列  */
-print("从结果集中的下一行获取第一列：\n");
+print("Fetch the first column from the first row in the result set:\n");
 $result = $sth->fetchColumn();
 print("name = $result\n");
 
-print("从结果集中的下一行获取第二列：\n");
+print("Fetch the second column from the second row in the result set:\n");
 $result = $sth->fetchColumn(1);
 print("colour = $result\n");
 ?>
@@ -75,9 +85,9 @@ print("colour = $result\n");
     &example.outputs;
     <screen>
 <![CDATA[
-从结果集中的下一行获取第一列：
+Fetch the first column from the first row in the result set:
 name = lemon
-从结果集中的下一行获取第二列：
+Fetch the second column from the second row in the result set:
 colour = red
 ]]>
     </screen>
@@ -89,16 +99,15 @@ colour = red
   &reftitle.seealso;
   <para>
    <simplelist>
-    <member><function>PDO::query</function></member>
-    <member><function>PDOStatement::fetch</function></member>
-    <member><function>PDOStatement::fetchAll</function></member>
-    <member><function>PDO::prepare</function></member>
-    <member><function>PDOStatement::setFetchMode</function></member>
+    <member><methodname>PDO::query</methodname></member>
+    <member><methodname>PDOStatement::fetch</methodname></member>
+    <member><methodname>PDOStatement::fetchAll</methodname></member>
+    <member><methodname>PDO::prepare</methodname></member>
+    <member><methodname>PDOStatement::setFetchMode</methodname></member>
    </simplelist>
   </para>
  </refsect1>
 </refentry>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
