@@ -1,35 +1,113 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
-  <refentry xml:id="function.pg-last-oid" xmlns="http://docbook.org/ns/docbook">
-   <refnamediv>
-    <refname>pg_last_oid</refname> 
-    <refpurpose>返回上一个对象的 oid</refpurpose>
-   </refnamediv>
-   <refsect1>
-    <title>说明</title>
-     <methodsynopsis>
-      <type>int</type><methodname>pg_last_oid</methodname>
-      <methodparam><type>resource</type><parameter>result</parameter></methodparam>
-     </methodsynopsis>
-    <para>
-     <function>pg_last_oid</function> 在上一条通过 <function>pg_query</function> 发送的命令是 SQL INSERT 的情况下用来取得分配给所插入记录的 <varname>oid</varname>。如果存在有效的 <varname>oid</varname> 则返回一个正整数，如果出错或者上一条通过 <function>pg_query</function> 发送的命令不是 INSERT 或者该 INSERT 失败则返回 &false;。
-    </para>
-    <para>
-     从 PostgreSQL 7.2 版开始 OID 字段成为可选项。如果一个表中没有定义 OID 字段，程序员必须用 <function>pg_result_status</function> 函数来检查记录是否被成功插入。
-    </para>
-    <note>
-     <para>
-      本函数以前的名字为 <literal>pg_getlastoid()</literal>。
-     </para>
-    </note>
-    <para>
-     参见 <function>pg_query</function> 和 <function>pg_result_status</function>。
-    </para>
-   </refsect1>
-  </refentry>
+<!-- EN-Revision: c2eca73ef79ebe78cebb34053e41b565af504c4f Maintainer: dallas Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
+<!-- splitted from ./en/functions/pgsql.xml, last change in rev 1.82 -->
+<refentry xml:id="function.pg-last-oid" xmlns="http://docbook.org/ns/docbook">
+ <refnamediv>
+  <refname>pg_last_oid</refname> 
+  <refpurpose>返回上一条记录的 oid</refpurpose>
+ </refnamediv>
 
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <type class="union"><type>string</type><type>int</type><type>false</type></type><methodname>pg_last_oid</methodname>
+   <methodparam><type>PgSql\Result</type><parameter>result</parameter></methodparam>
+  </methodsynopsis>
+  <para>
+   <function>pg_last_oid</function> 用于检索分配给插入行的 <varname>OID</varname>。
+  </para>
+  <para>
+   从 PostgreSQL 7.2 开始 OID 字段成为可选项，在 PostgreSQL 8.1 中默认不存在。如果表中没有定义 OID 字段，程序员必须用 <function>pg_result_status</function> 函数来检查记录是否被成功插入。
+  </para>
+  <para>
+   要在插入的行中获取 <literal>SERIAL</literal> 字段的值，必须使用 PostgreSQL <literal>CURRVAL</literal>
+   函数，命名需要最后一个值的序列。如果序列名称未知，则需要 <literal>pg_get_serial_sequence</literal> PostgreSQL 8.0 函数。
+  </para>
+  <para>
+   PostgreSQL 8.1 有一个函数 <literal>LASTVAL</literal>，它返回会话中最近使用的序列的值。这避免了对序列、表或列的命名需求。
+  </para>
+  <note>
+   <para>
+    本函数以前的名字为 <literal>pg_getlastoid()</literal>。
+   </para>
+  </note>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>result</parameter></term>
+     <listitem>
+      &pgsql.parameter.result;
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   <type>int</type> 或 <type>string</type>，包含分配给指定 <parameter>connection</parameter> 中最近插入的行的 OID，如果出错或没有可用的 OID，则为 &false;。
+  </para>
+ </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <informaltable>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>&Version;</entry>
+      <entry>&Description;</entry>
+     </row>
+    </thead>
+    <tbody>
+     &pgsql.changelog.result-object;
+    </tbody>
+   </tgroup>
+  </informaltable>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title><function>pg_last_oid</function> 示例</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+  // Connect to the database
+  pg_connect("dbname=mark host=localhost");
+
+  // Create a sample table
+  pg_query("CREATE TABLE test (a INTEGER) WITH OIDS");
+
+  // Insert some data into it
+  $res = pg_query("INSERT INTO test VALUES (1)");
+
+  $oid = pg_last_oid($res);
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>pg_query</function></member>
+    <member><function>pg_result_status</function></member>
+   </simplelist>
+  </para>
+ </refsect1>
+</refentry>
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
