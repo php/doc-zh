@@ -1,37 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: f6a146d76c3f01496914f2019db0b97fa1f9440b Maintainer: yuanyuqiang Status: ready -->
-<!-- Reviewed: no -->
-
+<!-- EN-Revision: 4d1c34c9b7a30cfc3a59641122c707a2812cfed7 Maintainer: yuanyuqiang Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="function.ftp-ssl-connect" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>ftp_ssl_connect</refname>
-  <refpurpose>打开 SSL-FTP 连接</refpurpose>
+  <refpurpose>打开安全 SSL-FTP 连接</refpurpose>
  </refnamediv>
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <type>resource</type><methodname>ftp_ssl_connect</methodname>
-   <methodparam><type>string</type><parameter>host</parameter></methodparam>
+   <type class="union"><type>FTP\Connection</type><type>false</type></type><methodname>ftp_ssl_connect</methodname>
+   <methodparam><type>string</type><parameter>hostname</parameter></methodparam>
    <methodparam choice="opt"><type>int</type><parameter>port</parameter><initializer>21</initializer></methodparam>
    <methodparam choice="opt"><type>int</type><parameter>timeout</parameter><initializer>90</initializer></methodparam>
   </methodsynopsis>
   <para>
-   <function>ftp_ssl_connect</function> <emphasis>显式</emphasis>的打开一个到
-   <parameter>host</parameter> 的安全 FTP 连接（SSL-FTP）。
-   即使服务器未配置 SSL-FTP，或者服务器的证书无效，<function>ftp_ssl_connect</function>
-   函数也会成功的建立到服务器的连接。直到调用 <function>ftp_login</function> 函数的时候，
-   客户端才会发送对应的 AUTH FTP 命令，此时，如果服务器未配置 SSL-FTP 或者整数无效，
-   <function>ftp_login</function> 函数会失败。
+   <function>ftp_ssl_connect</function> 打开到指定 <parameter>hostname</parameter> 的 <emphasis>显式</emphasis>
+   SSL-FTP 连接。即使服务器没有为 SSL-FTP 配置，或者服务器的证书无效，<function>ftp_ssl_connect</function>
+   也会成功。只有调用 <function>ftp_login</function> 时，客户端才会发送对应的 AUTH FTP
+   命令，因此在上述情况下 <function>ftp_login</function> 会失败。
   </para>
   <note>
    <title>为何本函数有可能不存在？</title>
    <para>
-    只有 PHP 构建时同时包含了 ftp 模块
-    和 <link linkend="ref.openssl">OpenSSL</link> 模块时，
-    <function>ftp_ssl_connect</function> 函数才可用。
-    也就是说，在 Windows 平台上，官方发布的 PHP 构建中本函数不可用。
-    如果需要在 Windows 平台使用本函数，需要自行编译 PHP。
+    在 PHP 7.0 之前，只有 ftp 模块和 <link linkend="ref.openssl">OpenSSL</link> 模块都静态编译到 PHP
+    时，<function>ftp_ssl_connect</function> 才可用；也就是说，在 Windows 平台上，此函数在官方 PHP
+    编译中未定义。如果需要在 Windows 平台使用本函数，需要自行编译 PHP 二进制文件。
    </para>
   </note>
   <note>
@@ -46,7 +41,7 @@
   <para>
    <variablelist>
     <varlistentry>
-     <term><parameter>host</parameter></term>
+     <term><parameter>hostname</parameter></term>
      <listitem>
       <para>
        FTP 服务器地址。
@@ -79,33 +74,30 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   操作成功返回 SSL-FTP 流，操作失败返回 &false; 。
+   成功时返回 <classname>FTP\Connection</classname> 实例，&return.falseforfailure;。
   </para>
  </refsect1>
 
  <refsect1 role="changelog">
   &reftitle.changelog;
-  <para>
-   <informaltable>
-    <tgroup cols="2">
-     <thead>
-      <row>
-       <entry>&Version;</entry>
-       <entry>&Description;</entry>
-      </row>
-     </thead>
-     <tbody>
-      <row>
-       <entry>5.2.2</entry>
-       <entry>
-        以前版本中，如果无法使用 SSL 连接，将会返回一个非 SSL 的连接，
-        在 5.2.2 版本中修改为返回 &false;
-       </entry>
-      </row>
-     </tbody>
-    </tgroup>
-   </informaltable>
-  </para>
+  <informaltable>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>&Version;</entry>
+      <entry>&Description;</entry>
+     </row>
+    </thead>
+    <tbody>
+     <row>
+      <entry>8.1.0</entry>
+      <entry>
+       现在返回 <classname>FTP\Connection</classname> 实例；之前返回 &resource;。
+      </entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </informaltable>
  </refsect1>
 
  <refsect1 role="examples">
