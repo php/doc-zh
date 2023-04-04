@@ -1,40 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: a978bf5ba5179cddd07cc981af27fb3b900eb78c Maintainer: HonestQiao Status: ready -->
-<!-- Reviewed: no Maintainer: HonestQiao -->
+<!-- EN-Revision: 4d1c34c9b7a30cfc3a59641122c707a2812cfed7 Maintainer: HonestQiao Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="function.ftp-fput" xmlns="http://docbook.org/ns/docbook">
-   <refnamediv>
-    <refname>ftp_fput</refname>
-    <refpurpose>上传一个已经打开的文件到 FTP 服务器</refpurpose>
-   </refnamediv>
+ <refnamediv>
+  <refname>ftp_fput</refname>
+  <refpurpose>上传已打开的文件到 FTP 服务器</refpurpose>
+ </refnamediv>
  <refsect1 role="description">
   &reftitle.description;
-    <methodsynopsis>
-     <type>bool</type><methodname>ftp_fput</methodname>
-     <methodparam><type>resource</type><parameter>ftp_stream</parameter></methodparam>
-     <methodparam><type>string</type><parameter>remote_file</parameter></methodparam>
-     <methodparam><type>resource</type><parameter>handle</parameter></methodparam>
-     <methodparam><type>int</type><parameter>mode</parameter></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter>startpos</parameter><initializer>0</initializer></methodparam>
-    </methodsynopsis>
-    <para>
-     <function>ftp_fput</function> 函数用来上传一个在已经打开的文件中的数据到 FTP 服务器。
-    </para>
-   </refsect1>
+  <methodsynopsis>
+   <type>bool</type><methodname>ftp_fput</methodname>
+   <methodparam><type>FTP\Connection</type><parameter>ftp</parameter></methodparam>
+   <methodparam><type>string</type><parameter>remote_filename</parameter></methodparam>
+   <methodparam><type>resource</type><parameter>stream</parameter></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>mode</parameter><initializer><constant>FTP_BINARY</constant></initializer></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>offset</parameter><initializer>0</initializer></methodparam>
+  </methodsynopsis>
+  <para>
+   <function>ftp_fput</function> 函数用来上传一个在已经打开的文件中的数据到 FTP 服务器。
+  </para>
+ </refsect1>
  <refsect1 role="parameters">
   &reftitle.parameters;
   <para>
    <variablelist>
     <varlistentry>
-     <term><parameter>ftp_stream</parameter></term>
+     <term><parameter>ftp</parameter></term>
      <listitem>
-      <para>
-       FTP 连接的链接标识符。
-      </para>
+       &ftp.parameter.ftp;
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>remote_file</parameter></term>
+     <term><parameter>remote_filename</parameter></term>
      <listitem>
       <para>
        远程文件路径。
@@ -42,7 +40,7 @@
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>handle</parameter></term>
+     <term><parameter>stream</parameter></term>
      <listitem>
       <para>
        打开的本地文件句柄，读取到文件末尾。
@@ -53,13 +51,12 @@
      <term><parameter>mode</parameter></term>
      <listitem>
       <para>
-       传输模式只能为 (文本模式) <constant>FTP_ASCII</constant> 或
-     (二进制模式) <constant>FTP_BINARY</constant> 其中的一个。
+       传输模式只能为（文本模式）<constant>FTP_ASCII</constant> 或（二进制模式）<constant>FTP_BINARY</constant> 其中的一个。
       </para>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>startpos</parameter></term>
+     <term><parameter>offset</parameter></term>
      <listitem>
       <para>
       远程文件上传的开始位置。
@@ -75,11 +72,35 @@
    &return.success;
   </para>
  </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <informaltable>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>&Version;</entry>
+      <entry>&Description;</entry>
+     </row>
+    </thead>
+    <tbody>
+     &ftp.changelog.ftp-param;
+     <row>
+      <entry>7.3.0</entry>
+      <entry>
+       <parameter>mode</parameter> 参数现在可选。以前强制。
+      </entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </informaltable>
+ </refsect1>
+
  <refsect1 role="examples">
   &reftitle.examples;
   <para>
    <example>
-    <title><function>ftp_fput</function> 例子</title>
+    <title><function>ftp_fput</function> 示例</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -89,50 +110,26 @@ $file = 'somefile.txt';
 $fp = fopen($file, 'r');
 
 // set up basic connection
-$conn_id = ftp_connect($ftp_server);
+$ftp = ftp_connect($ftp_server);
 
 // login with username and password
-$login_result = ftp_login($conn_id, $ftp_user_name, $ftp_user_pass);
+$login_result = ftp_login($ftp, $ftp_user_name, $ftp_user_pass);
 
 // try to upload $file
-if (ftp_fput($conn_id, $file, $fp, FTP_ASCII)) {
+if (ftp_fput($ftp, $file, $fp, FTP_ASCII)) {
     echo "Successfully uploaded $file\n";
 } else {
     echo "There was a problem while uploading $file\n";
 }
 
 // close the connection and the file handler
-ftp_close($conn_id);
+ftp_close($ftp);
 fclose($fp);
 
 ?>
 ]]>
     </programlisting>
    </example>
-  </para>
- </refsect1>
- <refsect1 role="changelog">
-  &reftitle.changelog;
-  <para>
-   <informaltable>
-    <tgroup cols="2">
-     <thead>
-      <row>
-       <entry>&Version;</entry>
-       <entry>&Description;</entry>
-      </row>
-     </thead>
-     <tbody>
-      <row>
-       <entry>4.3.0</entry>
-       <entry>
-
-        添加了 <parameter>startpos</parameter> 的支持。
-       </entry>
-      </row>
-     </tbody>
-    </tgroup>
-   </informaltable>
   </para>
  </refsect1>
  <refsect1 role="seealso">
@@ -145,8 +142,7 @@ fclose($fp);
    </simplelist>
   </para>
  </refsect1>
-  </refentry>
-
+</refentry>
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
