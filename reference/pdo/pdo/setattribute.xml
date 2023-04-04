@@ -1,8 +1,7 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 3220ceeae8a434abebc5b2dfb1fb08af8a731d36 Maintainer: anonymous #27375 Status: ready -->
-<!-- Reviewed: no -->
-
+<!-- EN-Revision: c60137e9d56c40861f6235d60c4553937c77af22 Maintainer: anonymous #27375 Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="pdo.setattribute" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>PDO::setAttribute</refname>
@@ -12,80 +11,232 @@
  </refnamediv>
  <refsect1 role="description">
   &reftitle.description;
-  <methodsynopsis>
-   <type>bool</type><methodname>PDO::setAttribute</methodname>
+  <methodsynopsis role="PDO">
+   <modifier>public</modifier> <type>bool</type><methodname>PDO::setAttribute</methodname>
    <methodparam><type>int</type><parameter>attribute</parameter></methodparam>
    <methodparam><type>mixed</type><parameter>value</parameter></methodparam>
   </methodsynopsis>
 
   <para>
    设置数据库句柄属性。下面列出了一些可用的通用属性；有些驱动可能使用另外的特定属性。
-   <itemizedlist>
-    <listitem><para>
-     <literal>PDO::ATTR_CASE</literal>：强制列名为指定的大小写。
-     <itemizedlist>
-      <listitem><para>
-       <literal>PDO::CASE_LOWER</literal>：强制列名小写。
-      </para></listitem>
-      <listitem><para>
-       <literal>PDO::CASE_NATURAL</literal>：保留数据库驱动返回的列名。
-      </para></listitem>
-      <listitem><para>
-       <literal>PDO::CASE_UPPER</literal>：强制列名大写。
-      </para></listitem>
-     </itemizedlist>
-    </para></listitem>
-    <listitem><para><literal>PDO::ATTR_ERRMODE</literal>：错误报告。
-     <itemizedlist>
-      <listitem><para><literal>PDO::ERRMODE_SILENT</literal>：
-       仅设置错误代码。</para></listitem>
-      <listitem><para><literal>PDO::ERRMODE_WARNING</literal>:
-       引发 <link linkend="errorfunc.constants.errorlevels.e-warning">E_WARNING</link> 错误</para></listitem>
-      <listitem><para><literal>PDO::ERRMODE_EXCEPTION</literal>:
-       抛出 <link linkend="class.pdoexception">exceptions</link> 异常。</para></listitem>
-     </itemizedlist>
-    </para></listitem>
-    <listitem><para><literal>PDO::ATTR_ORACLE_NULLS</literal>
-    （在所有驱动中都可用，不仅限于Oracle）：
-     转换 NULL 和空字符串。
-     <itemizedlist>
-      <listitem><para><literal>PDO::NULL_NATURAL</literal>:
-       不转换。</para></listitem>
-      <listitem><para><literal>PDO::NULL_EMPTY_STRING</literal>：
-       将空字符串转换成 &null;。</para></listitem>
-      <listitem><para><literal>PDO::NULL_TO_STRING</literal>:
-       将 NULL 转换成空字符串。</para></listitem>
-     </itemizedlist>
-    </para></listitem>
-    <listitem><para><literal>PDO::ATTR_STRINGIFY_FETCHES</literal>:
-     提取的时候将数值转换为字符串。
-     Requires <type>bool</type>.
-    </para></listitem>
-    <listitem><para><literal>PDO::ATTR_STATEMENT_CLASS</literal>：
-    设置从PDOStatement派生的用户提供的语句类。
-     不能用于持久的PDO实例。
-     需要 <literal>array(string 类名, array(mixed 构造函数的参数))</literal>。
-    </para></listitem>
-    <listitem><para><literal>PDO::ATTR_TIMEOUT</literal>：
-     指定超时的秒数。并非所有驱动都支持此选项，这意味着驱动和驱动之间可能会有差异。比如，SQLite等待的时间达到此值后就放弃获取可写锁，但其他驱动可能会将此值解释为一个连接或读取超时的间隔。 
-     需要 <type>int</type> 类型。
-    </para></listitem>
-    <listitem><para><literal>PDO::ATTR_AUTOCOMMIT</literal>
-     （在OCI，Firebird 以及 MySQL中可用）：
-     是否自动提交每个单独的语句。
-    </para></listitem>
-    <listitem><para><literal>PDO::ATTR_EMULATE_PREPARES</literal>
-     启用或禁用预处理语句的模拟。 有些驱动不支持或有限度地支持本地预处理。使用此设置强制PDO总是模拟预处理语句（如果为 &true; ），或试着使用本地预处理语句（如果为 &false;）。如果驱动不能成功预处理当前查询，它将总是回到模拟预处理语句上。
-     需要 <type>bool</type> 类型。
-     </para></listitem>
-    <listitem><para><literal>PDO::MYSQL_ATTR_USE_BUFFERED_QUERY</literal>
-   （在MySQL中可用）：
-    使用缓冲查询。
-    </para></listitem>
-    <listitem><para><literal>PDO::ATTR_DEFAULT_FETCH_MODE</literal>：
-    设置默认的提取模式。关于模式的说明可以在 <function>PDOStatement::fetch</function> 文档找到。
-    </para></listitem>
-   </itemizedlist>
+   请注意，特定的驱动程序属性<emphasis>不得</emphasis>用于其他驱动程序。
+   <variablelist>
+    <varlistentry>
+     <term><constant>PDO::ATTR_CASE</constant></term>
+     <listitem>
+      <para>
+       强制列名为指定的大小写。可以采用以下某个值：
+      </para>
+      <variablelist>
+       <varlistentry>
+        <term><constant>PDO::CASE_LOWER</constant></term>
+        <listitem>
+         <simpara>
+          强制列名小写。
+         </simpara>
+        </listitem>
+       </varlistentry>
+       <varlistentry>
+        <term><constant>PDO::CASE_NATURAL</constant></term>
+        <listitem>
+         <simpara>
+          保留数据库驱动返回的列名。
+         </simpara>
+        </listitem>
+       </varlistentry>
+       <varlistentry>
+        <term><constant>PDO::CASE_UPPER</constant></term>
+        <listitem>
+         <simpara>
+          强制列名大写。
+         </simpara>
+        </listitem>
+       </varlistentry>
+      </variablelist>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><constant>PDO::ATTR_ERRMODE</constant></term>
+     <listitem>
+      <para>
+       PDO 的报错方式。可以采用以下某个值：
+      </para>
+      <variablelist>
+       <varlistentry>
+        <term><constant>PDO::ERRMODE_SILENT</constant></term>
+        <listitem>
+         <simpara>
+          仅设置错误代码。
+         </simpara>
+        </listitem>
+       </varlistentry>
+       <varlistentry>
+        <term><constant>PDO::ERRMODE_WARNING</constant></term>
+        <listitem>
+         <simpara>
+          引发 <constant>E_WARNING</constant> 警告。
+         </simpara>
+        </listitem>
+       </varlistentry>
+       <varlistentry>
+        <term><constant>PDO::ERRMODE_EXCEPTION</constant></term>
+        <listitem>
+         <simpara>
+          抛出 <classname>PDOException</classname>。
+         </simpara>
+        </listitem>
+       </varlistentry>
+      </variablelist>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><constant>PDO::ATTR_ORACLE_NULLS</constant></term>
+     <listitem>
+      <note>
+       <simpara>
+        此属性适用于所有驱动程序，而不仅仅是 Oracle。
+       </simpara>
+      </note>
+      <para>
+       确定是否以及如何转换 &null; 和空字符串。可以采用以下值之一：
+      </para>
+      <variablelist>
+       <varlistentry>
+        <term><constant>PDO::NULL_NATURAL</constant></term>
+        <listitem>
+         <simpara>
+          不发生转换。
+         </simpara>
+        </listitem>
+       </varlistentry>
+       <varlistentry>
+        <term><constant>PDO::NULL_EMPTY_STRING</constant></term>
+        <listitem>
+         <simpara>
+          空字符串转换为 &null;。
+         </simpara>
+        </listitem>
+       </varlistentry>
+       <varlistentry>
+        <term><constant>PDO::NULL_TO_STRING</constant></term>
+        <listitem>
+         <simpara>
+          &null; 被转换为空字符串。
+         </simpara>
+        </listitem>
+       </varlistentry>
+      </variablelist>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><constant>PDO::ATTR_STRINGIFY_FETCHES</constant></term>
+     <listitem>
+      <para>
+       获取时是否将数值转换为字符串。值采用 <type>bool</type> 类型：&true; 表示启用，&false; 表示禁用。<!-- By default, ??? TODO. -->
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><constant>PDO::ATTR_STATEMENT_CLASS</constant></term>
+     <listitem>
+      <para>
+       设置从 PDOStatement 派生的用户提供的语句类。
+       <!-- TODO improve description of the value it takes, or refer to other docs -->
+       需要 <literal>array(string classname, array(mixed constructor_args))</literal>。
+      </para>
+      <caution>
+       <simpara>
+        不能用于持久 PDO 实例。
+       </simpara>
+      </caution>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><constant>PDO::ATTR_TIMEOUT</constant></term>
+     <listitem>
+      <para>
+       指定超时的秒数。需要 <type>int</type> 类型的值。
+      </para>
+      <note>
+       <para>
+        并非所有驱动都支持此选项，这意味着驱动和驱动之间可能会有差异。比如，SQLite 等待的时间达到此值后就放弃获取可写锁，但其他驱动可能会将此值解释为一个连接或读取超时的间隔。 
+       </para>
+      </note>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><constant>PDO::ATTR_AUTOCOMMIT</constant></term>
+     <listitem>
+      <note>
+       <simpara>
+        仅适用于 OCI、Firebird 和 MySQL 驱动程序。
+       </simpara>
+      </note>
+      <para>
+       是否自动提交每个单独的语句。采用 <type>bool</type> 类型的值：&true; 表示启用，&false; 表示禁用。默认为 &true;。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><constant>PDO::ATTR_EMULATE_PREPARES</constant></term>
+     <listitem>
+      <note>
+       <simpara>
+        仅适用于 OCI、Firebird 和 MySQL 驱动程序。
+       </simpara>
+      </note>
+      <para>
+       是否启用或禁用预处理语句的模拟。有些驱动天然不支持或有限度地支持预处理语句。如果设置为 &true;，PDO
+       始终模拟预处理语句，否则 PDO 将会尝试使用本地预处理语句。如果驱动不能成功预处理当前查询，PDO 将始终回退到模拟预处理语句上。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><constant>PDO::MYSQL_ATTR_USE_BUFFERED_QUERY</constant></term>
+     <listitem>
+      <note>
+       <simpara>
+        仅适用于 MySQL 驱动程序。
+       </simpara>
+      </note>
+      <para>
+       是否使用缓冲查询。采用 <type>bool</type> 类型的值：&true; 表示启用，&false; 表示禁用。默认情况下，默认为 &true;。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><constant>PDO::ATTR_DEFAULT_FETCH_MODE</constant></term>
+     <listitem>
+      <para>
+       设置默认获取模式。关于模式的说明以及如何使用可以在 <methodname>PDOStatement::fetch</methodname> 文档找到。
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>attribute</parameter></term>
+     <listitem>
+      <para>
+       要修改的属性。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>value</parameter></term>
+     <listitem>
+      <para>
+       设置 <parameter>attribute</parameter> 的值，属性的不同导致需要的类型也会不同。
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
   </para>
  </refsect1>
 
@@ -96,8 +247,18 @@
   </para>
  </refsect1>
 
-</refentry>
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>PDO::getAttribute</function></member>
+    <member><function>PDOStatement::getAttribute</function></member>
+    <member><function>PDOStatement::setAttribute</function></member>
+   </simplelist>
+  </para>
+ </refsect1>
 
+</refentry>
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
