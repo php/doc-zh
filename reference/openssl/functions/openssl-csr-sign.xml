@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: e41806c30bf6975e452c0d4ce35ab0984c2fa68c Maintainer: duanxiaoqiang Status: ready -->
-<!-- Reviewed: no -->
-
-<refentry xmlns="http://docbook.org/ns/docbook" xml:id="function.openssl-csr-sign">
+<!-- EN-Revision: c7d18f5a16306694c33a5170b35457c13e39fc92 Maintainer: duanxiaoqiang Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
+<refentry xml:id="function.openssl-csr-sign" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>openssl_csr_sign</refname>
   <refpurpose>用另一个证书签署 CSR (或者本身) 并且生成一个证书</refpurpose>
@@ -12,16 +11,16 @@
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <type>resource</type><methodname>openssl_csr_sign</methodname>
-   <methodparam><type>mixed</type><parameter>csr</parameter></methodparam>
-   <methodparam><type>mixed</type><parameter>cacert</parameter></methodparam>
-   <methodparam><type>mixed</type><parameter>priv_key</parameter></methodparam>
+   <type class="union"><type>OpenSSLCertificate</type><type>false</type></type><methodname>openssl_csr_sign</methodname>
+   <methodparam><type class="union"><type>OpenSSLCertificateSigningRequest</type><type>string</type></type><parameter>csr</parameter></methodparam>
+   <methodparam><type class="union"><type>OpenSSLCertificate</type><type>string</type><type>null</type></type><parameter>ca_certificate</parameter></methodparam>
+   <methodparam><type class="union"><type>OpenSSLAsymmetricKey</type><type>OpenSSLCertificate</type><type>array</type><type>string</type></type><parameter>private_key</parameter></methodparam>
    <methodparam><type>int</type><parameter>days</parameter></methodparam>
-   <methodparam choice="opt"><type>array</type><parameter>configargs</parameter></methodparam>
+   <methodparam choice="opt"><type class="union"><type>array</type><type>null</type></type><parameter>options</parameter><initializer>&null;</initializer></methodparam>
    <methodparam choice="opt"><type>int</type><parameter>serial</parameter><initializer>0</initializer></methodparam>
   </methodsynopsis>
   <para>
-   <function>openssl_csr_sign</function> 从给定的 CSR 生成一个x509证书资源
+   <function>openssl_csr_sign</function> 从给定的 CSR 生成 x509 证书。
   </para>
   &note.openssl.cnf;
  </refsect1>
@@ -40,19 +39,19 @@
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>cacert</parameter></term>
+     <term><parameter>ca_certificate</parameter></term>
      <listitem>
       <para>
-       生成的证书将由<parameter>cacert</parameter>签名。
-       如果<parameter>cacert</parameter> 为 &null;, 生成的证书将是自签名证书。
+       生成的证书将由<parameter>ca_certificate</parameter>签名。
+       如果<parameter>ca_certificate</parameter> 为 &null;, 生成的证书将是自签名证书。
       </para>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>priv_key</parameter></term>
+     <term><parameter>private_key</parameter></term>
      <listitem>
       <para>
-       <parameter>priv_key</parameter>是<parameter>cacert</parameter>证书对应的私钥。
+       <parameter>private_key</parameter> 是 <parameter>ca_certificate</parameter> 证书对应的私钥。
       </para>
      </listitem>
     </varlistentry>
@@ -65,12 +64,12 @@
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>configargs</parameter></term>
+     <term><parameter>options</parameter></term>
      <listitem>
       <para>
-       你可以通过<parameter>configargs</parameter>确定CSR签名。
-       查看<function>openssl_csr_new</function> 方法获取
-       <parameter>configargs</parameter>的更多相关信息。
+       你可以通过 <parameter>options</parameter> 确定 CSR 签名。
+       查看 <function>openssl_csr_new</function> 方法获取
+       <parameter>options</parameter> 的更多相关信息。
       </para>
      </listitem>
     </varlistentry>
@@ -89,16 +88,60 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   成功，返回一个 x509 证书资源，失败则返回 &false; .
+   成功时返回 <classname>OpenSSLCertificate</classname>，失败则返回 &false;。
   </para>
+ </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <informaltable>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>&Version;</entry>
+      <entry>&Description;</entry>
+     </row>
+    </thead>
+    <tbody>
+     <row>
+      <entry>8.0.0</entry>
+      <entry>
+       成功时，此函数现在返回 <classname>OpenSSLCertificate</classname>
+       实例；之前返回类型 <literal>OpenSSL X.509</literal> 的 &resource;。
+      </entry>
+     </row>
+     <row>
+      <entry>8.0.0</entry>
+      <entry>
+       <parameter>csr</parameter> 现在接受 <classname>OpenSSLCertificateSigningRequest</classname>
+       实例；之前接受类型 <literal>OpenSSL X.509 CSR</literal> 的 &resource;。
+      </entry>
+     </row>
+     <row>
+      <entry>8.0.0</entry>
+      <entry>
+       <parameter>ca_certificate</parameter> 现在接受 <classname>OpenSSLCertificate</classname>
+       实例；之前接受类型 <literal>OpenSSL X.509</literal> 的 &resource;。
+      </entry>
+     </row>
+     <row>
+      <entry>8.0.0</entry>
+      <entry>
+       <parameter>private_key</parameter> 现在接受 <classname>OpenSSLAsymmetricKey</classname>
+       或 <classname>OpenSSLCertificate</classname> 实例；之前接受类型 <literal>OpenSSL key</literal> 或
+       <literal>OpenSSL X.509</literal> 的 &resource;。
+      </entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </informaltable>
  </refsect1>
 
  <refsect1 role="examples">
   &reftitle.examples;
   <para>
    <example>
-    <title><function>openssl_csr_sign</function> example - signing a
-     CSR (how to implement your own CA)</title>
+    <title><function>openssl_csr_sign</function> 示例——签署 CSR（如何实现自己的 CA）</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -135,7 +178,6 @@ while (($e = openssl_error_string()) !== false) {
  </refsect1>
 
 </refentry>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
