@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: f8cde5e160ab14cdb756f64ee805d63c6f90cc69 Maintainer: yuanyuqiang Status: ready -->
-<!-- Reviewed: no -->
-
+<!-- EN-Revision: 4d1c34c9b7a30cfc3a59641122c707a2812cfed7 Maintainer: yuanyuqiang Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="function.ftp-nb-fput" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>ftp_nb_fput</refname>
@@ -12,11 +11,11 @@
   &reftitle.description;
   <methodsynopsis>
    <type>int</type><methodname>ftp_nb_fput</methodname>
-   <methodparam><type>resource</type><parameter>ftp_stream</parameter></methodparam>
-   <methodparam><type>string</type><parameter>remote_file</parameter></methodparam>
-   <methodparam><type>resource</type><parameter>handle</parameter></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter>mode</parameter><initializer><constant>FTP_IMAGE</constant></initializer></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter>startpos</parameter><initializer>0</initializer></methodparam>
+   <methodparam><type>FTP\Connection</type><parameter>ftp</parameter></methodparam>
+   <methodparam><type>string</type><parameter>remote_filename</parameter></methodparam>
+   <methodparam><type>resource</type><parameter>stream</parameter></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>mode</parameter><initializer><constant>FTP_BINARY</constant></initializer></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>offset</parameter><initializer>0</initializer></methodparam>
   </methodsynopsis>
   <para>
    <function>ftp_nb_fput</function> 把已打开的文件内容存储到远程 FTP 服务器
@@ -32,15 +31,13 @@
   <para>
    <variablelist>
     <varlistentry>
-     <term><parameter>ftp_stream</parameter></term>
+     <term><parameter>ftp</parameter></term>
      <listitem>
-      <para>
-       FTP 连接标示符。
-      </para>
+       &ftp.parameter.ftp;
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>remote_file</parameter></term>
+     <term><parameter>remote_filename</parameter></term>
      <listitem>
       <para>
        远程文件路径。
@@ -48,7 +45,7 @@
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>handle</parameter></term>
+     <term><parameter>stream</parameter></term>
      <listitem>
       <para>
        已经打开的本地文件指针，当读取到文件末尾时结束。
@@ -65,7 +62,7 @@
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>startpos</parameter></term>
+     <term><parameter>offset</parameter></term>
      <listitem>
       <para>要将文件存储到远程文件的开始位置（即从远程文件的哪个字节位置开始存储）。</para>
      </listitem>
@@ -92,6 +89,7 @@
      </row>
     </thead>
     <tbody>
+     &ftp.changelog.ftp-param;
      <row>
       <entry>7.3.0</entry>
       <entry>
@@ -117,19 +115,19 @@ $file = 'index.php';
 
 $fp = fopen($file, 'r');
 
-$conn_id = ftp_connect($ftp_server);
+$$ftp = ftp_connect($ftp_server);
 
-$login_result = ftp_login($conn_id, $ftp_user_name, $ftp_user_pass);
+$login_result = ftp_login($$ftp, $ftp_user_name, $ftp_user_pass);
 
 // 初始化上传
-$ret = ftp_nb_fput($conn_id, $file, $fp, FTP_BINARY);
+$ret = ftp_nb_fput($$ftp, $file, $fp, FTP_BINARY);
 while ($ret == FTP_MOREDATA) {
 
    // 任何其他需要做的操作
    echo ".";
 
    // 继续上传...
-   $ret = ftp_nb_continue($conn_id);
+   $ret = ftp_nb_continue($$ftp);
 }
 if ($ret != FTP_FINISHED) {
    echo "There was an error uploading the file...";
@@ -155,7 +153,6 @@ fclose($fp);
   </para>
  </refsect1>
 </refentry>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
