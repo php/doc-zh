@@ -1,61 +1,76 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: e1b57a19509f9b7a09d5945e601837e0211671ca Maintainer: Avenger Status: ready -->
-  <refentry xml:id="function.ftp-pasv" xmlns="http://docbook.org/ns/docbook">
-   <refnamediv>
-    <refname>ftp_pasv</refname>
-    <refpurpose>返回当前 FTP 被动模式是否打开</refpurpose>
-   </refnamediv>
-   <refsect1 role="description">
-    &reftitle.description;
-     <methodsynopsis>
-      <type>bool</type><methodname>ftp_pasv</methodname>
-      <methodparam><type>resource</type><parameter>ftp_stream</parameter></methodparam>
-      <methodparam><type>bool</type><parameter>pasv</parameter></methodparam>
-     </methodsynopsis>
-    <para>
-     在被动模式打开的情况下，数据的传送由客户机启动，而不是由服务器开始。
-    </para>
-    <para>
-     请注意 <function>ftp_pasv</function> 只能在 FTP
-     登录成功后方可调用，否则会失败。
-    </para>
-   </refsect1>
-   <refsect1 role="parameters">
-   &reftitle.parameters;
-   <para>
-    <variablelist>
-     <varlistentry>
-      <term><parameter>ftp_stream</parameter></term>
-      <listitem>
-       <para>
-        FTP 连接资源。
-       </para>
-      </listitem>
-     </varlistentry>
-     <varlistentry>
-      <term><parameter>pasv</parameter></term>
-      <listitem>
-       <para>
-        如果参数 <parameter>pasv</parameter> 为 &true;，打开被动模式传输 (PASV MODE)
-     ，否则则关闭被动传输模式。  
-       </para>
-      </listitem>
-     </varlistentry>
-    </variablelist> 
-   </para>
-   </refsect1>
-   <refsect1 role="returnvalues">
-   &reftitle.returnvalues; 
-    <para>
-     &return.success;
-    </para>
-   </refsect1>
-  <refsect1 role="examples">
+<!-- EN-Revision: 4d1c34c9b7a30cfc3a59641122c707a2812cfed7 Maintainer: Avenger Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
+<refentry xml:id="function.ftp-pasv" xmlns="http://docbook.org/ns/docbook">
+ <refnamediv>
+  <refname>ftp_pasv</refname>
+  <refpurpose>返回当前 FTP 被动模式是否打开</refpurpose>
+ </refnamediv>
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <type>bool</type><methodname>ftp_pasv</methodname>
+   <methodparam><type>FTP\Connection</type><parameter>ftp</parameter></methodparam>
+   <methodparam><type>bool</type><parameter>enable</parameter></methodparam>
+  </methodsynopsis>
+  <para>
+   在被动模式打开的情况下，数据的传送由客户机启动，而不是由服务器开始。
+  </para>
+  <para>
+   请注意 <function>ftp_pasv</function> 只能在 FTP 登录成功后方可调用，否则会失败。
+  </para>
+ </refsect1>
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>ftp</parameter></term>
+     <listitem>
+       &ftp.parameter.ftp;
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>enable</parameter></term>
+     <listitem>
+      <para>
+       如果参数 <parameter>pasv</parameter> 为 &true;，打开被动模式传输（PASV MODE），否则则关闭被动传输模式。  
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   &return.success;
+  </para>
+ </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <informaltable>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>&Version;</entry>
+      <entry>&Description;</entry>
+     </row>
+    </thead>
+    <tbody>
+     &ftp.changelog.ftp-param;
+    </tbody>
+   </tgroup>
+  </informaltable>
+ </refsect1>
+ 
+ <refsect1 role="examples">
   &reftitle.examples;
   <para>
    <example>
-    <title><function>ftp_pasv</function> 实例</title>
+    <title><function>ftp_pasv</function> 示例</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -63,23 +78,23 @@ $file = 'somefile.txt';
 $remote_file = 'readme.txt';
 
 // set up basic connection
-$conn_id = ftp_connect($ftp_server);
+$ftp = ftp_connect($ftp_server);
 
 // login with username and password
-$login_result = ftp_login($conn_id, $ftp_user_name, $ftp_user_pass);
+$login_result = ftp_login($ftp, $ftp_user_name, $ftp_user_pass);
 
 // turn passive mode on
-ftp_pasv($conn_id, true);
+ftp_pasv($ftp, true);
 
 // upload a file
-if (ftp_put($conn_id, $remote_file, $file, FTP_ASCII)) {
+if (ftp_put($ftp, $remote_file, $file, FTP_ASCII)) {
  echo "successfully uploaded $file\n";
 } else {
  echo "There was a problem while uploading $file\n";
 }
 
 // close the connection
-ftp_close($conn_id);
+ftp_close($ftp);
 ?>
 ]]>
     </programlisting>
@@ -87,7 +102,6 @@ ftp_close($conn_id);
   </para>
  </refsect1>
 </refentry>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml

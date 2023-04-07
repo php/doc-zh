@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: ba38a95b6a5392bf8562b8148426864bdacd5ef1 Maintainer: Avenger Status: ready -->
+<!-- EN-Revision: 4d1c34c9b7a30cfc3a59641122c707a2812cfed7 Maintainer: Avenger Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="function.ftp-nb-get" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>ftp_nb_get</refname>
@@ -10,11 +11,11 @@
   &reftitle.description;
   <methodsynopsis>
    <type>int</type><methodname>ftp_nb_get</methodname>
-   <methodparam><type>resource</type><parameter>ftp_stream</parameter></methodparam>
-   <methodparam><type>string</type><parameter>local_file</parameter></methodparam>
-   <methodparam><type>string</type><parameter>remote_file</parameter></methodparam>
+   <methodparam><type>FTP\Connection</type><parameter>ftp</parameter></methodparam>
+   <methodparam><type>string</type><parameter>local_filename</parameter></methodparam>
+   <methodparam><type>string</type><parameter>remote_filename</parameter></methodparam>
    <methodparam choice="opt"><type>int</type><parameter>mode</parameter><initializer><constant>FTP_BINARY</constant></initializer></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter>resumepos</parameter><initializer>0</initializer></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>offset</parameter><initializer>0</initializer></methodparam>
   </methodsynopsis>
   <para>
    <function>ftp_nb_get</function> 在 FTP 服务器上获取指定的远程文件，并保存到本地。
@@ -28,15 +29,13 @@
   <para>
    <variablelist>
     <varlistentry>
-     <term><parameter>ftp_stream</parameter></term>
+     <term><parameter>ftp</parameter></term>
      <listitem>
-      <para>
-        FTP 连接句柄。
-      </para>
+       &ftp.parameter.ftp;
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>local_file</parameter></term>
+     <term><parameter>local_filename</parameter></term>
      <listitem>
       <para>
         保存到的本地文件路径（如果文件已存在会被覆盖）。
@@ -44,7 +43,7 @@
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>remote_file</parameter></term>
+     <term><parameter>remote_filename</parameter></term>
      <listitem>
       <para>
         远程文件路径。
@@ -60,7 +59,7 @@
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>resumepos</parameter></term>
+     <term><parameter>offset</parameter></term>
      <listitem>
       <para>开始下载文件的起始位置。</para>
      </listitem>
@@ -87,6 +86,7 @@
      </row>
     </thead>
     <tbody>
+     &ftp.changelog.ftp-param;
      <row>
       <entry>7.3.0</entry>
       <entry>
@@ -108,14 +108,14 @@
 <?php
 
 // 初始化
-$ret = ftp_nb_get($my_connection, "test", "README", FTP_BINARY);
+$ret = ftp_nb_get($ftp, "test", "README", FTP_BINARY);
 while ($ret == FTP_MOREDATA) {
    
    // 可以同步干其它事
    echo ".";
 
    // 继续下载...
-   $ret = ftp_nb_continue($my_connection);
+   $ret = ftp_nb_continue($ftp);
 }
 if ($ret != FTP_FINISHED) {
    echo "下载文件出错...";
@@ -132,9 +132,9 @@ if ($ret != FTP_FINISHED) {
 <?php
 
 // 初始化 
-$ret = ftp_nb_get($my_connection, "test", "README", FTP_BINARY, 
+$ret = ftp_nb_get($ftp, "test", "README", FTP_BINARY, 
                       filesize("test"));
-// OR: $ret = ftp_nb_get($my_connection, "test", "README", 
+// OR: $ret = ftp_nb_get($ftp, "test", "README", 
 //                           FTP_BINARY, FTP_AUTORESUME);
 while ($ret == FTP_MOREDATA) {
    
@@ -142,7 +142,7 @@ while ($ret == FTP_MOREDATA) {
    echo ".";
 
    // 继续下载Ing...
-   $ret = ftp_nb_continue($my_connection);
+   $ret = ftp_nb_continue($ftp);
 }
 if ($ret != FTP_FINISHED) {
    echo "下载文件出错...";
@@ -161,16 +161,16 @@ if ($ret != FTP_FINISHED) {
 <?php
 
 // 禁止 Autoseek
-ftp_set_option($my_connection, FTP_AUTOSEEK, false);
+ftp_set_option($ftp, FTP_AUTOSEEK, false);
 
 // 初始化
-$ret = ftp_nb_get($my_connection, "newfile", "README", FTP_BINARY, 100);
+$ret = ftp_nb_get($ftp, "newfile", "README", FTP_BINARY, 100);
 while ($ret == FTP_MOREDATA) {
 
    /* ... */
    
    // 继续下载...
-   $ret = ftp_nb_continue($my_connection);
+   $ret = ftp_nb_continue($ftp);
 }
 ?>
 ]]>
@@ -196,7 +196,6 @@ while ($ret == FTP_MOREDATA) {
   </para>
  </refsect1>
 </refentry>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
