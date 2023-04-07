@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 96c9d88bad9a7d7d44bfb7f26c226df7ee9ddf26 Maintainer: Avenger Status: ready -->
+<!-- EN-Revision: 4d1c34c9b7a30cfc3a59641122c707a2812cfed7 Maintainer: Avenger Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="function.ftp-mdtm" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>ftp_mdtm</refname>
@@ -10,8 +11,8 @@
   &reftitle.description;
   <methodsynopsis>
    <type>int</type><methodname>ftp_mdtm</methodname>
-   <methodparam><type>resource</type><parameter>ftp_stream</parameter></methodparam>
-   <methodparam><type>string</type><parameter>remote_file</parameter></methodparam>
+   <methodparam><type>FTP\Connection</type><parameter>ftp</parameter></methodparam>
+   <methodparam><type>string</type><parameter>filename</parameter></methodparam>
   </methodsynopsis>
   <para>
    <function>ftp_mdtm</function> 获取远程文件的最后修改时间。
@@ -32,15 +33,13 @@
   <para>
    <variablelist>
     <varlistentry>
-     <term><parameter>ftp_stream</parameter></term>
+     <term><parameter>ftp</parameter></term>
      <listitem>
-      <para>
-        FTP 连接句柄。
-      </para>
+       &ftp.parameter.ftp;
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>remote_file</parameter></term>
+     <term><parameter>filename</parameter></term>
      <listitem>
       <para>
         要检查的远程文件。
@@ -53,9 +52,27 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-    返回指定文件的最后修改时间，以 UNIX 时间戳的方式返回。如果发生错误，或文件不存在则返回 -1。
+   返回指定文件的最后修改时间，以 <emphasis>local</emphasis> UNIX 时间戳的方式返回。如果发生错误，或文件不存在则返回 -1。
   </para>
  </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <informaltable>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>&Version;</entry>
+      <entry>&Description;</entry>
+     </row>
+    </thead>
+    <tbody>
+     &ftp.changelog.ftp-param;
+    </tbody>
+   </tgroup>
+  </informaltable>
+ </refsect1>
+ 
  <refsect1 role="examples">
   &reftitle.examples;
   <para>
@@ -68,13 +85,13 @@
 $file = 'somefile.txt';
 
 // set up basic connection
-$conn_id = ftp_connect($ftp_server);
+$ftp = ftp_connect($ftp_server);
 
 // login with username and password
-$login_result = ftp_login($conn_id, $ftp_user_name, $ftp_user_pass);
+$login_result = ftp_login($ftp, $ftp_user_name, $ftp_user_pass);
 
 //  get the last modified time
-$buff = ftp_mdtm($conn_id, $file);
+$buff = ftp_mdtm($ftp, $file);
 
 if ($buff != -1) {
     // somefile.txt was last modified on: March 26 2003 14:16:41.
@@ -84,7 +101,7 @@ if ($buff != -1) {
 }
 
 // close the connection
-ftp_close($conn_id);
+ftp_close($ftp);
 
 ?>
 ]]>
@@ -93,7 +110,6 @@ ftp_close($conn_id);
   </para>
  </refsect1>
 </refentry>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
