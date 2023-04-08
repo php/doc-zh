@@ -1,24 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 9e5c6d9150a2fff81dae5d92880740d68f2913f8 Maintainer: daijie Status: ready -->
-<!-- Reviewed: no -->
-
+<!-- EN-Revision: a223531900823441f82d178ca4e94c0444f24576 Maintainer: daijie Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="function.iconv" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>iconv</refname>
-  <refpurpose>字符串按要求的字符编码来转换</refpurpose>
+  <refpurpose>将字符串从一个字符编码转换到另一个字符编码</refpurpose>
  </refnamediv>
  
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <type>string</type><methodname>iconv</methodname>
-   <methodparam><type>string</type><parameter>in_charset</parameter></methodparam>
-   <methodparam><type>string</type><parameter>out_charset</parameter></methodparam>
-   <methodparam><type>string</type><parameter>str</parameter></methodparam>
+   <type class="union"><type>string</type><type>false</type></type><methodname>iconv</methodname>
+   <methodparam><type>string</type><parameter>from_encoding</parameter></methodparam>
+   <methodparam><type>string</type><parameter>to_encoding</parameter></methodparam>
+   <methodparam><type>string</type><parameter>string</parameter></methodparam>
   </methodsynopsis>
   <para>
-   将字符串 <parameter>str</parameter> 从 <parameter>in_charset</parameter> 转换编码到 <parameter>out_charset</parameter>。
+   将 <parameter>string</parameter> 从 <parameter>from_encoding</parameter> 转换到 <parameter>to_encoding</parameter>。
   </para>
  </refsect1>
 
@@ -27,37 +26,36 @@
   <para>
    <variablelist>
     <varlistentry>
-     <term><parameter>in_charset</parameter></term>
+     <term><parameter>from_encoding</parameter></term>
      <listitem>
       <para>
-       输入的字符集。
+       用于解释 <parameter>string</parameter> 的当前编码。
       </para>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>out_charset</parameter></term>
+     <term><parameter>to_encoding</parameter></term>
      <listitem>
       <para>
-       输出的字符集。
+       所需的结果编码。
       </para>
       <para>
-       如果你在 <parameter>out_charset</parameter> 后添加了字符串 <literal>//TRANSLIT</literal>，将启用转写（transliteration）功能。这个意思是，当一个字符不能被目标字符集所表示时，它可以通过一个或多个形似的字符来近似表达。
-       如果你添加了字符串 <literal>//IGNORE</literal>，不能以目标字符集表达的字符将被默默丢弃。
-       否则，会导致一个 <constant>E_NOTICE</constant>并返回 &false;。
+       如果字符串 <literal>//TRANSLIT</literal> 追加到 <parameter>to_encoding</parameter> ，然后将启用转写（transliteration）功能。这意味着当字符不能被目标字符集所表示时，它可以通过一个或多个形似的字符来近似表达。
+       如果追加字符串 <literal>//IGNORE</literal>，不能以目标字符集表达的字符将被默默丢弃。否则，会导致 <constant>E_NOTICE</constant> 并返回 &false;。
       </para>
       <caution>
        <para>
         <literal>//TRANSLIT</literal> 运行细节高度依赖于系统的  iconv() 实现（参见 <constant>ICONV_IMPL</constant>）。
-        据悉，某些系统上的实现会直接忽略 <literal>//TRANSLIT</literal>，所以转换也有可能失败，<parameter>out_charset</parameter> 会是不合格的。
+        据悉，某些系统上的实现会直接忽略 <literal>//TRANSLIT</literal>，所以转换也有可能失败，<parameter>to_encoding</parameter> 会是不合格的。
        </para>
       </caution>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>str</parameter></term>
+     <term><parameter>string</parameter></term>
      <listitem>
       <para>
-       要转换的字符串。
+       要转换的 &string;。
       </para>
      </listitem>
     </varlistentry>
@@ -72,36 +70,11 @@
   </para>
  </refsect1>
 
- <refsect1 role="changelog">
-   &reftitle.changelog;
-   <para>
-    <informaltable>
-     <tgroup cols="2">
-      <thead>
-       <row>
-        <entry>&Version;</entry>
-        <entry>&Description;</entry>
-       </row>
-      </thead>
-      <tbody>
-       <row>
-        <entry>5.4.0</entry>
-        <entry>
-         这个版本起，字符非法时候会返回  &false;，除非在输出字符里指定了 <literal>//IGNORE</literal> 。
-         在之前版本，它会返回一部分字符串。
-        </entry>
-       </row>
-    </tbody>
-   </tgroup>
-  </informaltable>
- </para>
-</refsect1>
-
  <refsect1 role="examples">
   &reftitle.examples;
   <para>
    <example>
-    <title><function>iconv</function> 例子</title>
+    <title><function>iconv</function> 示例</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -129,8 +102,26 @@ Notice: iconv(): Detected an illegal character in input string in .\iconv-exampl
   </para>
  </refsect1>
 
-</refentry>
+ <refsect1 role="notes">
+  &reftitle.notes;
+  <note>
+   <para>
+    可用的字符编码和选项取决于已安装的 iconv 实现。如果当前系统不支持 <parameter>from_encoding</parameter> 或 <parameter>to_encoding</parameter> 的参数，则返回 &false;。
+   </para>
+  </note>
+ </refsect1>
 
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>mb_convert_encoding</function></member>
+    <member><methodname>UConverter::transcode</methodname></member>
+   </simplelist>
+  </para>
+ </refsect1>
+
+</refentry>
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
