@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: e41aab5ecacf449e51179886c17f1d41735b0234 Maintainer: daijie Status: ready -->
-<!-- Reviewed: no -->
-
+<!-- EN-Revision: 92f1b8b177eb5730382abf9f27bae868f1bb636f Maintainer: daijie Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="function.mb-send-mail" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
   <refname>mb_send_mail</refname>
@@ -11,13 +10,13 @@
    
  <refsect1 role="description">
   &reftitle.description;
-   <methodsynopsis>
+  <methodsynopsis>
    <type>bool</type><methodname>mb_send_mail</methodname>
    <methodparam><type>string</type><parameter>to</parameter></methodparam>
    <methodparam><type>string</type><parameter>subject</parameter></methodparam>
    <methodparam><type>string</type><parameter>message</parameter></methodparam>
-   <methodparam choice="opt"><type>string</type><parameter>additional_headers</parameter><initializer>&null;</initializer></methodparam>
-   <methodparam choice="opt"><type>string</type><parameter>additional_parameter</parameter><initializer>&null;</initializer></methodparam>
+   <methodparam choice="opt"><type class="union"><type>array</type><type>string</type></type><parameter>additional_headers</parameter><initializer>[]</initializer></methodparam>
+   <methodparam choice="opt"><type class="union"><type>string</type><type>null</type></type><parameter>additional_params</parameter><initializer>&null;</initializer></methodparam>
   </methodsynopsis>
   <para> 
    发送邮件。邮件头和内容根据 <function>mb_language</function> 设置来转换编码。
@@ -55,55 +54,44 @@
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>additional_headers</parameter>(可选)</term>
+     <term><parameter>additional_headers</parameter>（可选）</term>
      <listitem>
       <para>
-       String to be inserted at the end of the email header.
+       要插入到电子邮件标头末尾的 <type>string</type> 或 <type>array</type>。
       </para>
       <para>
-       This is typically used to add extra headers (From, Cc, and Bcc).
-       Multiple extra headers should be separated with a CRLF (\r\n).
-       Validate parameter not to be injected unwanted headers by attackers.
+       这通常用于添加额外的标头（发件人、抄送和密件抄送）。多个额外的标头应该用 CRLF（\r\n）分隔。验证参数不会被攻击者注入不需要的标头。
+      </para>
+      <para>
+       如果传递 <type>array</type>，则其键是标头名称，其值是相应的标头值。
       </para>
       <note>
        <para>
-        When sending mail, the mail <emphasis>must</emphasis> contain
-        a <literal>From</literal> header. This can be set with the 
-        <parameter>additional_headers</parameter> parameter, or a default
-        can be set in &php.ini;.
+        发送邮件时，邮件<emphasis>必须</emphasis>包含 <literal>From</literal> 标头。这可以使用
+        <parameter>additional_headers</parameter> 参数设置，或者可以在 &php.ini; 中设置默认值。
        </para>
        <para>
-        Failing to do this will result in an error
-        message similar to <literal>Warning: mail(): "sendmail_from" not
-        set in php.ini or custom "From:" header missing</literal>.
-        The <literal>From</literal> header sets also
-        <literal>Return-Path</literal> under Windows.
+        如果不这样做，将导致类似于 <literal>Warning: mail(): "sendmail_from" not
+        set in php.ini or custom "From:" header missing</literal> 的错误消息。<literal>From</literal> 标头还设置了 Windows 下的 <literal>Return-Path</literal>。
        </para>
       </note>
       <note>
        <para>
-        If messages are not received, try using a LF (\n) only.
-        Some Unix mail transfer agents (most notably
-        <link xlink:href="&url.qmail;">qmail</link>) replace LF by CRLF
-        automatically (which leads to doubling CR if CRLF is used).
-        This should be a last resort, as it does not comply with
-        <link xlink:href="&url.rfc;2822">RFC 2822</link>.
+        如果未收到消息，请尝试仅使用 LF（\n）。一些 Unix 邮件传输代理（最著名的是 <link xlink:href="&url.qmail;">qmail</link>）自动将 LF 替换为 CRLF（如果使用
+        CRLF，这会导致两个 CR）。这应该是最后的手段，因为它不符合 <link xlink:href="&url.rfc;2822">RFC 2822</link>。
        </para>
       </note>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>additional_parameter</parameter></term>
+     <term><parameter>additional_params</parameter></term>
      <listitem>
       <para>
-       <parameter>additional_parameter</parameter> 是一个 MTA 命令行参数。
-       在使用 sendmail 时对设置正确的返回路径头很有帮助。
+       <parameter>additional_params</parameter> 是一个 MTA 命令行参数。在使用
+       sendmail 时对设置正确的返回路径头很有帮助。
       </para>
       <para>
-       This parameter is escaped by <function>escapeshellcmd</function> internally
-       to prevent command execution. <function>escapeshellcmd</function> prevents
-       command execution, but allows to add addtional parameters. For security reason,
-       this parameter should be validated.
+       该参数由 <function>escapeshellcmd</function> 内部转义以防止命令执行。<function>escapeshellcmd</function> 阻止命令执行，但允许添加额外的参数。出于安全原因，应该验证此参数。
       </para>
       <para>
        Since <function>escapeshellcmd</function> is applied automatically, some characters
@@ -111,10 +99,8 @@
        that are required to use these characters <function>mail</function> cannot be used.
       </para>
       <para>
-       The user that the webserver runs as should be added as a trusted user to the
-       sendmail configuration to prevent a 'X-Warning' header from being added
-       to the message when the envelope sender (-f) is set using this method.
-       For sendmail users, this file is <filename>/etc/mail/trusted-users</filename>.
+       Web 服务器运行的用户应作为受信任的用户添加到 sendmail 配置中，以防止在使用此方法设置信封发件人（-f）时将“X-Warning”标头添加到邮件中。对于
+       sendmail 用户，此文件为 <filename>/etc/mail/trusted-users</filename>。
       </para>
      </listitem>
     </varlistentry>
@@ -128,7 +114,36 @@
    &return.success;
   </para>
  </refsect1>
- 
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <para>
+   <informaltable>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>&Version;</entry>
+       <entry>&Description;</entry>
+      </row>
+     </thead>
+     <tbody>
+     <row>
+      <entry>8.0.0</entry>
+      <entry>
+       <parameter>additional_params</parameter> 现在可为 null。
+      </entry>
+     </row>
+      <row>
+       <entry>7.2.0</entry>
+       <entry>
+        <parameter>additional_headers</parameter> 参数现在也接受 <type>array</type>。
+       </entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </informaltable>
+  </para>
+ </refsect1>
 
  <refsect1 role="seealso">
   &reftitle.seealso;
@@ -142,7 +157,6 @@
  </refsect1>
 
 </refentry>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
