@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 5b848aeb03fc31ee104960eea4d1c7367b4ee83a Maintainer: duanxiaoqiang Status: ready -->
-<!-- Reviewed: no -->
-
+<!-- EN-Revision: 9fc8bcc0836f56a98cf432c8f933e0d96c8d680a Maintainer: duanxiaoqiang Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="function.openssl-decrypt" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
   <refname>openssl_decrypt</refname>
@@ -12,13 +11,13 @@
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <type>string</type><methodname>openssl_decrypt</methodname>
+   <type class="union"><type>string</type><type>false</type></type><methodname>openssl_decrypt</methodname>
    <methodparam><type>string</type><parameter>data</parameter></methodparam>
-   <methodparam><type>string</type><parameter>method</parameter></methodparam>
-   <methodparam><type>string</type><parameter>key</parameter></methodparam>
+   <methodparam><type>string</type><parameter>cipher_algo</parameter></methodparam>
+   <methodparam><type>string</type><parameter>passphrase</parameter></methodparam>
    <methodparam choice="opt"><type>int</type><parameter>options</parameter><initializer>0</initializer></methodparam>
    <methodparam choice="opt"><type>string</type><parameter>iv</parameter><initializer>""</initializer></methodparam>
-   <methodparam choice="opt"><type>string</type><parameter>tag</parameter><initializer>""</initializer></methodparam>
+   <methodparam choice="opt"><type class="union"><type>string</type><type>null</type></type><parameter>tag</parameter><initializer>&null;</initializer></methodparam>
    <methodparam choice="opt"><type>string</type><parameter>aad</parameter><initializer>""</initializer></methodparam>
   </methodsynopsis>
   <para>
@@ -40,7 +39,7 @@
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>method</parameter></term>
+     <term><parameter>cipher_algo</parameter></term>
      <listitem>
       <para>
        加密算法，使用<function>openssl_get_cipher_methods</function>函数获取可用的加密算法列表。  
@@ -48,7 +47,7 @@
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>key</parameter></term>
+     <term><parameter>passphrase</parameter></term>
      <listitem>
       <para>
        密钥。
@@ -79,6 +78,12 @@
       <para>
        AEAD密码模式中的身份验证标签。 如果是错误的，验证失败，函数返回&false;.
       </para>
+      <caution>
+       <simpara>
+        函数不检查 <parameter>tag</parameter> 的长度。调用者有责任确保 tag 的长度与调用 <function>openssl_encrypt</function>
+        时检索到的标记的长度相匹配。否则，如果给定的 tag 仅匹配正确 tag 的开头，解密可能会成功。
+       </simpara>
+      </caution>
      </listitem>
     </varlistentry>
     <varlistentry>
@@ -96,14 +101,14 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   The decrypted string on success&return.falseforfailure;.
+   成功时已解密的字符串&return.falseforfailure;。
   </para>
  </refsect1>
 
  <refsect1 role="errors">
   &reftitle.errors;
   <para>
-   如果通过<parameter>method</parameter>参数传递的是一个未知的加密算法，将会抛出一个 <constant>E_WARNING</constant> 等级的错误。
+   如果通过 <parameter>cipher_algo</parameter> 参数传递的是未知的加密算法，将会抛出 <constant>E_WARNING</constant> 等级的错误。
   </para>
   <para>
    如果通过<parameter>iv</parameter>参数传递的是一个空值，将会抛出一个 <constant>E_WARNING</constant> 等级的错误。
@@ -122,16 +127,8 @@
     </thead>
     <tbody>
      <row>
-      <entry>5.3.3</entry>
-      <entry>
-       添加 <parameter>iv</parameter> 参数。
-      </entry>
-     </row>
-     <row>
-      <entry>5.4.0</entry>
-      <entry>
-       将 <parameter>raw_output</parameter> 更改至 <parameter>options</parameter>。
-      </entry>
+      <entry>8.1.0</entry>
+      <entry><parameter>tag</parameter> 现在可为 null。</entry>
      </row>
      <row>
       <entry>7.1.0</entry>
@@ -152,7 +149,6 @@
  </refsect1>
 
 </refentry>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
