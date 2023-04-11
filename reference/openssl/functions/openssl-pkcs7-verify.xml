@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: 53bdffa6b9f8ce5ffdaf476c9d450f7cd0d1afa2 Maintainer: duanxiaoqiang Status: ready -->
-<!-- Reviewed: no -->
-<refentry xmlns="http://docbook.org/ns/docbook" xml:id="function.openssl-pkcs7-verify">
+<!-- EN-Revision: 7ae2b3f82dfae417a0107b69a1ae7d7658652a7a Maintainer: duanxiaoqiang Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
+<refentry xml:id="function.openssl-pkcs7-verify" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>openssl_pkcs7_verify</refname>
   <refpurpose>校验一个已签名的 S/MIME 消息的签名</refpurpose>
@@ -12,14 +11,14 @@
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <type>mixed</type><methodname>openssl_pkcs7_verify</methodname>
-   <methodparam><type>string</type><parameter>filename</parameter></methodparam>
+   <type class="union"><type>bool</type><type>int</type></type><methodname>openssl_pkcs7_verify</methodname>
+   <methodparam><type>string</type><parameter>input_filename</parameter></methodparam>
    <methodparam><type>int</type><parameter>flags</parameter></methodparam>
-   <methodparam choice="opt"><type>string</type><parameter>outfilename</parameter></methodparam>
-   <methodparam choice="opt"><type>array</type><parameter>cainfo</parameter></methodparam>
-   <methodparam choice="opt"><type>string</type><parameter>extracerts</parameter></methodparam>
-   <methodparam choice="opt"><type>string</type><parameter>content</parameter></methodparam>
-   <methodparam choice="opt"><type>string</type><parameter>p7bfilename</parameter></methodparam>
+   <methodparam choice="opt"><type class="union"><type>string</type><type>null</type></type><parameter>signers_certificates_filename</parameter><initializer>&null;</initializer></methodparam>
+   <methodparam choice="opt"><type>array</type><parameter>ca_info</parameter><initializer>[]</initializer></methodparam>
+   <methodparam choice="opt"><type class="union"><type>string</type><type>null</type></type><parameter>untrusted_certificates_filename</parameter><initializer>&null;</initializer></methodparam>
+   <methodparam choice="opt"><type class="union"><type>string</type><type>null</type></type><parameter>content</parameter><initializer>&null;</initializer></methodparam>
+   <methodparam choice="opt"><type class="union"><type>string</type><type>null</type></type><parameter>output_filename</parameter><initializer>&null;</initializer></methodparam>
   </methodsynopsis>
   <para>
    <function>openssl_pkcs7_verify</function>
@@ -32,7 +31,7 @@
   <para>
    <variablelist>
     <varlistentry>
-     <term><parameter>filename</parameter></term>
+     <term><parameter>input_filename</parameter></term>
      <listitem>
       <para>
        消息的路径。
@@ -50,29 +49,29 @@
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>outfilename</parameter></term>
+     <term><parameter>signers_certificates_filename</parameter></term>
      <listitem>
       <para>
-       如果已指定 <parameter>outfilename</parameter>
+       如果已指定 <parameter>signers_certificates_filename</parameter>
        输出文件，它应该是一个用以保存文件的字符串名称，签名消息的个人证书将以 PEM 的格式保存起来。
       </para>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>cainfo</parameter></term>
+     <term><parameter>ca_info</parameter></term>
      <listitem>
       <para>
-       如果 <parameter>cainfo</parameter> 被指定了，它应该保存关于受信任的CA证书的信息供在验证过程中使用 - 参见
+       如果 <parameter>ca_info</parameter> 被指定了，它应该保存关于受信任的CA证书的信息供在验证过程中使用 - 参见
        <link linkend="openssl.cert.verification">证书校验</link>
        获取关于该参数的更多信息。
       </para>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>extracerts</parameter></term>
+     <term><parameter>untrusted_certificates_filename</parameter></term>
      <listitem>
       <para>
-       如果 <parameter>extracerts</parameter> 被指定了，该文件包含了一堆会被作为不受信任的ca使用的证书。
+       如果 <parameter>untrusted_certificates_filename</parameter> 被指定了，该文件包含了一堆会被作为不受信任的ca使用的证书。
       </para>
      </listitem>
     </varlistentry>
@@ -85,7 +84,7 @@
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>p7bfilename</parameter></term>
+     <term><parameter>output_filename</parameter></term>
      <listitem>
       <para>
 
@@ -106,39 +105,43 @@
 
  <refsect1 role="changelog">
   &reftitle.changelog;
-  <para>
-   <informaltable>
-    <tgroup cols="2">
-     <thead>
-      <row>
-       <entry>&Version;</entry>
-       <entry>&Description;</entry>
-      </row>
-     </thead>
-     <tbody>
-      <row>
-       <entry>7.2.0</entry>
-       <entry>
-        新增 <parameter>p7bfilename</parameter> 参数。
-       </entry>
-      </row>
-     </tbody>
-    </tgroup>
-   </informaltable>
-  </para>
+  <informaltable>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>&Version;</entry>
+      <entry>&Description;</entry>
+     </row>
+    </thead>
+    <tbody>
+     <row>
+      <entry>8.0.0</entry>
+      <entry>
+       <parameter>signers_certificates_filename</parameter>、<parameter>untrusted_certificates_filename</parameter>、<parameter>content</parameter>
+       和 <parameter>output_filename</parameter> 现在可为 null。
+      </entry>
+     </row>
+     <row>
+      <entry>7.2.0</entry>
+      <entry>
+       新增 <parameter>output_filename</parameter> 参数。
+      </entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </informaltable>
  </refsect1>
 
  <refsect1 role="notes">
   &reftitle.notes;
   <note>
    <simpara>
-    正如 RFC 2045 中指定的，<parameter>filename</parameter> 参数最多不可超过 76 个字符串。
+    正如 RFC 2045 中指定的，<parameter>input_filename</parameter> 参数最多不可超过 76 个字符串。
    </simpara>
   </note>
  </refsect1>
 
 </refentry>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
