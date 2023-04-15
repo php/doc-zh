@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: a48bfbee2a121bdf25ceee2946aa27728e611365 Maintainer: HonestQiao Status: ready -->
-<!-- Reviewed: no Maintainer: HonestQiao -->
-<!-- CREDITS: xuke, Gregory, dallas -->
+<!-- EN-Revision: 9d29b382865dca44919ae9803ef5dfdcbba185fe Maintainer: HonestQiao Status: ready -->
+<!-- CREDITS: xuke, Gregory, dallas, mowangjuanzi -->
 <refentry xml:id="function.oci-bind-by-name" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>oci_bind_by_name</refname>
@@ -13,254 +12,50 @@
   <methodsynopsis>
    <type>bool</type><methodname>oci_bind_by_name</methodname>
    <methodparam><type>resource</type><parameter>statement</parameter></methodparam>
-   <methodparam><type>string</type><parameter>bv_name</parameter></methodparam>
-   <methodparam><type>mixed</type><parameter role="reference">variable</parameter></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter>maxlength</parameter><initializer>-1</initializer></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter>type</parameter><initializer>SQLT_CHR</initializer></methodparam>
+   <methodparam><type>string</type><parameter>param</parameter></methodparam>
+   <methodparam><type>mixed</type><parameter role="reference">var</parameter></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>max_length</parameter><initializer>-1</initializer></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>type</parameter><initializer>0</initializer></methodparam>
   </methodsynopsis>
   <para>
-    将 PHP 变量 <parameter>variable</parameter> 绑定到
-   Oracle 位置标志符 <parameter>bv_name</parameter>。绑定操作对 Oracle 数据库性能很重要，同时也是避免 SQL 注入安全问题的一种方式。
+   将 PHP 变量 <parameter>var</parameter> 绑定到 Oracle 位置占位符 <parameter>param</parameter>。绑定对
+   Oracle 数据库性能很重要，同时也是避免 SQL 注入安全问题的一种方式。
   </para>
 
   <para>
-   <function>oci_bind_by_name</function> 将 PHP 变量
-   <parameter>variable</parameter> 绑定到  Oracle 的位置标志符
-   <parameter>ph_name</parameter>。该变量是否会被用作输入输出是在运行时决定的，并且函数给该变量分配必要的存储空间。<parameter>length</parameter>
-   参数确定该绑定的最大长度，如果将 <parameter>length</parameter>
-   设为 -1，<function>oci_bind_by_name</function> 会用
-   <parameter>variable</parameter> 变量的当前长度确定绑定的最大长度。
+    绑定允许数据库重用语句上下文和以前执行语句的缓存，即使另一个用户或进程最初（originally）执行它也是如此。绑定减少了 SQL
+    注入问题，因为与绑定变量关联的数据永远不会被视为 SQL 语句的一部分。不需要引用或转义。
   </para>
+
   <para>
-   如果要绑定一个抽象数据类型（LOB/ROWID/BFILE），需要先用
-   <function>oci_new_descriptor</function> 函数分配空间。<parameter>length</parameter>
-   没有用于抽象数据类型，应被设为 -1。<parameter>type</parameter>
-   参数告诉 Oracle 要使用什么样的描述符。可能的值为：
-   <itemizedlist>
-    <listitem>
-     <para>
-      <constant>SQLT_FILE</constant> - 对应于 BFILE；
-     </para>
-    </listitem>
-    <listitem>
-     <para>
-      <constant>SQLT_CFILE</constant> - 对应于 CFILE；
-     </para>
-    </listitem>
-    <listitem>
-     <para>
-      <constant>SQLT_CLOB</constant> - 对应于 CLOB；
-     </para>
-    </listitem>
-    <listitem>
-     <para>
-      <constant>SQLT_BLOB</constant> - 对应于 BLOB；
-     </para>
-    </listitem>
-    <listitem>
-     <para>
-      <constant>SQLT_ROWID</constant> - 对应于 ROWID；
-     </para>
-    </listitem>
-    <listitem>
-     <para>
-      <constant>SQLT_NTY</constant> - 对应于有名字的数据类型；
-     </para>
-    </listitem>
-      <listitem>
-       <para>
-        <constant>SQLT_INT</constant> - 对应于 integers；
-       </para>
-      </listitem>
-      <listitem>
-       <para>
-        <constant>SQLT_CHR</constant> - 对应于 VARCHARs；
-       </para>
-      </listitem>
-      <listitem>
-       <para>
-        <constant>SQLT_BIN</constant> - 对应于 RAW 列；
-       </para>
-      </listitem>
-      <listitem>
-       <para>
-        <constant>SQLT_LNG</constant> - 对应于 LONG 列；
-       </para>
-      </listitem>
-      <listitem>
-       <para>
-        <constant>SQLT_LBI</constant> - 对应于 LONG RAW 列；
-       </para>
-      </listitem>
-      <listitem>
-       <para>
-        <constant>SQLT_RSET</constant> - 对应于游标，是之前由
-      <function>oci_new_cursor</function> 创建的。
-       </para>
-      </listitem>
-   </itemizedlist>
+    已经绑定的 PHP 变量可以改变，语句重新执行，而不需要重新解析语句或重新绑定。
   </para>
+
   <para>
-   <example>
-    <title><function>oci_bind_by_name</function> 例子</title>
-    <programlisting role="php">
-<![CDATA[
-<?php
-/* oci_bind_by_name example thies at thieso dot net (980221)
-  inserts 3 records into emp, and uses the ROWID for updating the
-  records just after the insert.
-*/
-
-$conn = oci_connect("scott", "tiger");
-
-$stmt = oci_parse($conn, "
-                          INSERT INTO
-                                     emp (empno, ename)
-                                              VALUES
-                                     (:empno,:ename)
-                            RETURNING
-                                     ROWID
-                                 INTO
-                                     :rid
-                                         ");
-
-$data = array(
-              1111 => "Larry",
-              2222 => "Bill",
-              3333 => "Jim"
-             );
-
-$rowid = oci_new_descriptor($conn, OCI_D_ROWID);
-
-oci_bind_by_name($stmt, ":empno", $empno, 32);
-oci_bind_by_name($stmt, ":ename", $ename, 32);
-oci_bind_by_name($stmt, ":rid",   $rowid, -1, OCI_B_ROWID);
-
-$update = oci_parse($conn, "
-                            UPDATE
-                                  emp
-                               SET
-                                  sal = :sal
-                             WHERE
-                                  ROWID = :rid
-                             ");
-oci_bind_by_name($update, ":rid", $rowid, -1, OCI_B_ROWID);
-oci_bind_by_name($update, ":sal", $sal,   32);
-
-$sal = 10000;
-
-foreach ($data as $empno => $ename) {
-    oci_execute($stmt);
-    oci_execute($update);
-}
-
-$rowid->free();
-
-oci_free_statement($update);
-oci_free_statement($stmt);
-
-$stmt = oci_parse($conn, "
-                          SELECT
-                                *
-                            FROM
-                                emp
-                           WHERE
-                                empno
-                              IN
-                                (1111,2222,3333)
-                              ");
-oci_execute($stmt);
-
-while ($row = oci_fetch_assoc($stmt)) {
-    var_dump($row);
-}
-
-oci_free_statement($stmt);
-
-/* delete our "junk" from the emp table.... */
-$stmt = oci_parse($conn, "
-                          DELETE FROM
-                                     emp
-                                WHERE
-                                     empno
-                                   IN
-                                     (1111,2222,3333)
-                                   ");
-oci_execute($stmt);
-oci_free_statement($stmt);
-
-oci_close($conn);
-?>
-]]>
-    </programlisting>
-   </example>
+    在 Oracle 中，绑定变量通常分为用于传递到数据库的值的 <literal>IN</literal> 绑定和用于返回给 PHP 的值的 <literal>OUT</literal>
+    绑定。绑定变量可以同时为 <literal>IN</literal> 和 <literal>OUT</literal>。绑定变量是用于输入还是输出是在运行时确定的。
   </para>
+
   <para>
-   记住，本函数删除了行尾的空白字符。见以下例子：
+    使用 <literal>OUT</literal> 绑定时必须指定 <parameter>max_length</parameter> 以便 PHP 分配足够的内存来保存返回值。
   </para>
-  <para>
-   <example>
-    <title><function>oci_bind_by_name</function> 例子</title>
-    <programlisting role="php">
-<![CDATA[
-<?php
-$connection = oci_connect('apelsin','kanistra');
-$query = "INSERT INTO test_table VALUES(:id, :text)";
 
-$statement = oci_parse($query);
-oci_bind_by_name($statement, ":id", 1);
-oci_bind_by_name($statement, ":text", "trailing spaces follow     ");
-oci_execute($statement);
-/*
- This code will insert into DB string 'trailing spaces follow', without
- trailing spaces
-*/
-?>
-]]>
-    </programlisting>
-   </example>
-  </para>
   <para>
-   <example>
-    <title><function>oci_bind_by_name</function> 例子</title>
-    <programlisting role="php">
-<![CDATA[
-<?php
-$connection = oci_connect('apelsin','kanistra');
-$query = "INSERT INTO test_table VALUES(:id, 'trailing spaces follow      ')";
+    对于 <literal>IN</literal> 绑定，如果使用不同的 PHP 变量值多次重新执行该语句，建议设置 <parameter>max_length</parameter> 长度。否则
+    Oracle 可能会将数据截断为初始 PHP 变量值的长度。如果不知道最大长度是多少，则在每次调用 <function>oci_execute</function> 之前使用当前数据大小重新调用
+    <function>oci_bind_by_name</function>。绑定不必要的大长度将对数据库中的进程内存产生影响。
+  </para>
 
-$statement = oci_parse($query);
-oci_bind_by_name($statement, ":id", 1);
-oci_execute($statement);
-/*
- And this code will add 'trailing spaces follow      ', preserving
- trailing whitespaces
-*/
-?>
-]]>
-    </programlisting>
-   </example>
-  </para>
-  <warning>
-   <para>
-    不要将
-    <link linkend="ini.magic-quotes-gpc">magic_quotes_gpc</link> 或
-    <function>addslashes</function> 与 <function>oci_bind_by_name</function>
-    同时使用，因为不需要转义，任何自动加上的引号都会被写入数据库中，因为
-    <function>oci_bind_by_name</function>
-    不能分辨有意加上的引号和魔术引号。
-   </para>
-  </warning>
   <para>
-   &return.success;
+    绑定调用告诉 Oracle 从哪个内存地址读取数据。对于 <literal>IN</literal> 绑定，调用 <function>oci_execute</function>
+    时地址需要包含有效数据。这意味着变量绑定必须保留在作用域内直到执行。否则，可能会出现意外结果或错误，例如“ORA-01460：未实现或不合理的转换请求”。对于
+    <literal>OUT</literal> 绑定，一个问题是没有在 PHP 变量中设置值。
   </para>
-  <note>
-   <para>
-    在 PHP 5.0.0 之前的版本必须使用 <function>ocibindbyname</function>
-    替代本函数。该函数名仍然可用，为向下兼容作为
-    <function>oci_bind_by_name</function> 的别名。不过其已被废弃，不推荐使用。
-   </para>
-  </note>
+
+  <para>
+    对于重复执行的语句，永远不变的绑定值可能会降低 Oracle 优化器选择最佳语句执行计划的能力。很少重新执行的长时间运行的语句可能无法从绑定中获益。但是，在这两种情况下，绑定可能比将字符串连接到
+    SQL 语句中更安全，因为如果连接未过滤的用户文本，这可能会带来安全风险。
+  </para>
  </refsect1>
 
  <refsect1 role="parameters">
@@ -271,39 +66,33 @@ oci_execute($statement);
      <term><parameter>statement</parameter></term>
      <listitem>
       <para>
-       A valid OCI8 statement identifer.
+       有效的 OCI8 语句标识符。
       </para>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>bv_name</parameter></term>
+     <term><parameter>param</parameter></term>
      <listitem>
       <para>
-       The colon-prefixed bind variable placeholder used in the
-       statement.  The colon is optional
-       in <parameter>bv_name</parameter>. Oracle does not use question
-       marks for placeholders.
+       语句中使用以冒号为前缀的绑定变量占位符。冒号在 <parameter>param</parameter> 中是可选的。Oracle 不使用问号作为占位符。
       </para>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>variable</parameter></term> 
+     <term><parameter>var</parameter></term>
      <listitem>
       <para>
-       The PHP variable to be associated with <parameter>bv_name</parameter>
+       与 <parameter>param</parameter> 关联的 PHP 变量
       </para>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>maxlength</parameter></term>
+     <term><parameter>max_length</parameter></term>
      <listitem>
       <para>
-       Sets the maximum length for the data. If you set it to -1, this
-       function will use the current length
-       of <parameter>variable</parameter> to set the maximum
-       length. In this case the <parameter>variable</parameter> must
-       exist and contain data
-       when <function>oci_bind_by_name</function> is called.
+       设置数据的最大长度。 如果将其设置为 -1，则此函数将使用 <parameter>var</parameter>
+       的当前长度来设置最大长度。在这种情况下，<parameter>var</parameter> 必须存在并且在调用
+       <function>oci_bind_by_name</function> 时包含数据。
       </para>
      </listitem>
     </varlistentry>
@@ -311,94 +100,82 @@ oci_execute($statement);
      <term><parameter>type</parameter></term>
      <listitem>
       <para>
-       The datatype that Oracle will treat the data as.  The
-       default <parameter>type</parameter> used
-       is <constant>SQLT_CHR</constant>. Oracle will convert the data
-       between this type and the database column (or PL/SQL variable
-       type), when possible.
+       Oracle 处理数据的数据类型。使用的默认 <parameter>type</parameter> 是 <constant>SQLT_CHR</constant>。可能的话，Oracle
+       将在此类型和数据库列（或 PL/SQL 变量类型）之间转换数据。
       </para>
       <para>
-       If you need to bind an abstract datatype (LOB/ROWID/BFILE) you
-       need to allocate it first using the
-       <function>oci_new_descriptor</function> function. The
-       <parameter>length</parameter> is not used for abstract datatypes
-       and should be set to -1.
+       如果要绑定抽象数据类型（LOB/ROWID/BFILE），需要先用 <function>oci_new_descriptor</function>
+       函数分配空间。<parameter>length</parameter> 没有用于抽象数据类型，应被设为 -1。
       </para>
       <para>
-       Possible values for <parameter>type</parameter> are:
+       <parameter>type</parameter> 的可能值为：
        <itemizedlist>
         <listitem>
          <para>
-          <constant>SQLT_BFILEE</constant> or <constant>OCI_B_BFILE</constant>
+          <constant>SQLT_BFILEE</constant> 或 <constant>OCI_B_BFILE</constant>
           <!-- really only single E --> - for BFILEs;
          </para>
         </listitem>
         <listitem>
          <para>
-          <constant>SQLT_CFILEE</constant> or <constant>OCI_B_CFILEE</constant>
+          <constant>SQLT_CFILEE</constant> 或 <constant>OCI_B_CFILEE</constant>
           - for CFILEs;
          </para>
         </listitem>
         <listitem>
          <para>
-          <constant>SQLT_CLOB</constant> or <constant>OCI_B_CLOB</constant>
-          - for CLOBs;
+          <constant>SQLT_CLOB</constant> 或 <constant>OCI_B_CLOB</constant> 对应 CLOB；
          </para>
         </listitem>
         <listitem>
          <para>
-          <constant>SQLT_BLOB</constant> or <constant>OCI_B_BLOB</constant>
-          - for BLOBs;
+          <constant>SQLT_BLOB</constant> 或 <constant>OCI_B_BLOB</constant> 对应 BLOB；
          </para>
         </listitem>
         <listitem>
          <para>
-          <constant>SQLT_RDD</constant> or <constant>OCI_B_ROWID</constant>
-          - for ROWIDs;
+          <constant>SQLT_RDD</constant> 或 <constant>OCI_B_ROWID</constant> 对应 ROWID；
          </para>
         </listitem>
         <listitem>
          <para>
-          <constant>SQLT_NTY</constant> or <constant>OCI_B_NTY</constant>
-          - for named datatypes;
+          <constant>SQLT_NTY</constant> 或 <constant>OCI_B_NTY</constant> 对应命名数据类型；
          </para>
         </listitem>
         <listitem>
          <para>
-          <constant>SQLT_INT</constant> or <constant>OCI_B_INT</constant> - for integers;
+          <constant>SQLT_INT</constant> 或 <constant>OCI_B_INT</constant> 对应整型；
          </para>
         </listitem>
         <listitem>
          <para>
-          <constant>SQLT_CHR</constant> - for VARCHARs;
+          <constant>SQLT_CHR</constant> 对应 VARCHAR；
          </para>
         </listitem>
         <listitem>
          <para>
-          <constant>SQLT_BIN</constant> or <constant>OCI_B_BIN</constant>
-          - for RAW columns;
+          <constant>SQLT_BIN</constant> 或 <constant>OCI_B_BIN</constant>
+          对应 RAW 列；
          </para>
         </listitem>
         <listitem>
          <para>
-          <constant>SQLT_LNG</constant> - for LONG columns;
+          <constant>SQLT_LNG</constant> 对应 LONG 列；
          </para>
         </listitem>
         <listitem>
          <para>
-          <constant>SQLT_LBI</constant> - for LONG RAW columns;
+          <constant>SQLT_LBI</constant> 对应 LONG RAW 列；
          </para>
         </listitem>
         <listitem>
          <para>
-          <constant>SQLT_RSET</constant> - for cursors created
-          with <function>oci_new_cursor</function>.
+          <constant>SQLT_RSET</constant> 对应使用 <function>oci_new_cursor</function> 创建的游标；
          </para>
         </listitem>
         <listitem>
          <para>
-          <constant>SQLT_BOL</constant> or <constant>OCI_B_BOL</constant>
-          - for PL/SQL BOOLEANs (Requires OCI8 2.0.7 and Oracle Database 12c)
+          <constant>SQLT_BOL</constant> 或 <constant>OCI_B_BOL</constant> 对应 PL/SQL BOOLEAN（需要 OCI8 2.0.7 和 Oracle Database 12c）
          </para>
         </listitem>
        </itemizedlist>
@@ -420,7 +197,7 @@ oci_execute($statement);
   &reftitle.examples;
   <para>
    <example>
-    <title>Inserting data with <function>oci_bind_by_name</function></title>
+    <title>使用 <function>oci_bind_by_name</function> 插入数据</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -452,7 +229,7 @@ oci_execute($stid);
 
   <para>
    <example>
-    <title>Binding once for multiple executions</title>
+    <title>一次绑定多次执行</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -488,7 +265,7 @@ oci_close($conn);
 
   <para>
    <example>
-    <title>Binding with a <function>foreach</function> loop</title>
+    <title>使用 <literal>foreach</literal> 循环绑定</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -529,7 +306,7 @@ oci_close($conn);
 
   <para>
    <example>
-    <title>Binding in a WHERE clause</title>
+    <title>在 WHERE 子句中绑定</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -567,7 +344,7 @@ oci_close($conn);
 
   <para>
    <example>
-    <title>Binding with a LIKE clause</title>
+    <title>使用 LIKE 子句绑定</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -604,7 +381,7 @@ oci_close($conn);
 
   <para>
    <example>
-    <title>Binding with REGEXP_LIKE</title>
+    <title>与 REGEXP_LIKE 绑定</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -639,15 +416,12 @@ oci_close($conn);
   </para>
 
   <para>
-    For a small, fixed number of IN clause conditions, use individual
-    bind variables. Values unknown at run time can be set to NULL.
-    This allows a single statement to be used by all application
-    users, maximizing Oracle DB cache efficiency.
+    对于少量固定数量的 IN 子句条件，请使用单独的绑定变量。运行时未知的值可以设置为 NULL。这允许所有应用程序用户使用单个语句，从而最大限度地提高 Oracle 数据库缓存效率。
   </para>
 
   <para>
    <example>
-    <title>Binding Multiple Values in an IN Clause</title>
+    <title>在 IN 子句中绑定多个值</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -731,7 +505,7 @@ oci_close($conn);
 
   <para>
    <example>
-    <title>Binding a ROWID on INSERT</title>
+    <title>INSERT 时绑定 ROWID</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -938,7 +712,7 @@ print '</table>';
   </example>
   </para>
 
-<para>
+  <para>
   <example>
    <title>Binding a PL/SQL BOOLEAN</title>
     <programlisting role="php">
@@ -972,41 +746,25 @@ var_dump($output2);  // false
 
  </refsect1>
 
- <refsect1 role="returnvalues">
-  &reftitle.returnvalues;
-  <para>
-   &return.success;
-  </para>
- </refsect1>
-
  <refsect1 role="notes">
   &reftitle.notes;
   <warning>
    <para>
-    Do not use <link
-     linkend="ini.magic-quotes-gpc">magic_quotes_gpc</link> or
-    <function>addslashes</function>
-    and <function>oci_bind_by_name</function> simultaneously as no
-    quoting is needed. Any magically applied quotes will be written
-    into your database because <function>oci_bind_by_name</function>
-    inserts data verbatim and does not remove quotes or escape
-    characters.
+    不要同时使用 <function>addslashes</function> 和 <function>oci_bind_by_name</function>，因为不需要引号。任何应用的引号都将写入数据库，因为
+    <function>oci_bind_by_name</function> 逐字插入数据并且不会删除引号或转义字符。
    </para>
   </warning>
   <note>
    <para>
-    If you bind a string to a <literal>CHAR</literal> column in
-    a <literal>WHERE</literal> clause, remember that Oracle uses
-    blank-padded comparison semantics for <literal>CHAR</literal>
-    columns.  Your PHP variable should be blank padded to the same
+    如果将字符串绑定到 <literal>WHERE</literal> 子句中的 <literal>CHAR</literal> 列，请记住 Oracle 对 <literal>CHAR</literal> 列使用空白填充的比较语义。
+    Your PHP variable should be blank padded to the same
     width as the column for the <literal>WHERE</literal> clause to
     succeed.
    </para>
   </note>
   <note>
    <para>
-     The PHP <parameter>variable</parameter> argument is a reference.  Some
-     forms of loops do not work as expected:
+     PHP <parameter>var</parameter> 参数是引用。某些形式的循环无法按预期工作：
    </para>
    <informalexample>
      <programlisting role="php">
@@ -1020,9 +778,7 @@ foreach ($myarray as $key => $value)  {
      </programlisting>
    </informalexample>
    <para>
-     This binds each key to the location of $value, so all bound
-     variables end up pointing to the last loop iteration's
-     value. Instead use the following:
+    这会将每个键绑定到 $value 的位置，因此所有绑定变量最终都指向最后一个循环迭代的值。应该使用以下内容：
    </para>
    <informalexample>
      <programlisting role="php">
@@ -1047,8 +803,8 @@ foreach ($myarray as $key => $value) {
    </simplelist>
   </para>
  </refsect1>
-</refentry>
 
+</refentry>
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
