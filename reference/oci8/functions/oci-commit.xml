@@ -5,8 +5,9 @@
 <refentry xml:id="function.oci-commit" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>oci_commit</refname>
-  <refpurpose>提交未执行的事务处理</refpurpose>
+  <refpurpose>提交未完成的数据库事务</refpurpose>
  </refnamediv>
+ 
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
@@ -14,72 +15,15 @@
    <methodparam><type>resource</type><parameter>connection</parameter></methodparam>
   </methodsynopsis>
   <para>
-   <function>oci_commit</function> 将 Oracle 连接 <parameter>connection</parameter>
-   上正在运行的事务中所有未执行的语句提交处理。
+   为 Oracle <parameter>connection</parameter> 提交未完成的事务。提交结束当前事务并使所有更改永久化。释放所有持有的锁。
   </para>
   <para>
-   <example>
-    <title><function>oci_commit</function> 例子</title>
-    <programlisting role="php">
-<![CDATA[
-<?php
-    // Login to Oracle server
-    $conn = oci_connect('scott', 'tiger');
-
-    // Parse SQL
-    $stmt = oci_parse($conn, "
-                              INSERT INTO
-                                         employees (name, surname)
-                                   VALUES
-                                         ('Maxim', 'Maletsky')
-                             ");
-
-    /* Execute statement
-       OCI_DEFAULT tells oci_execute()
-       not to commit statement immediately */
-    oci_execute($stmt, OCI_DEFAULT);
-
-    /*
-    ....
-    Parsing and executing other statements here ...
-    ....
-    */
-
-    // Commit transaction
-    $committed = oci_commit($conn);
-
-    // Test whether commit was successful. If error occurred, return error message
-    if (!$committed) {
-        $error = oci_error($conn);
-        echo 'Commit failed. Oracle reports: ' . $error['message'];
-    }
-
-?>
-]]>
-    </programlisting>
-   </example>
+   当使用 <constant>OCI_NO_AUTO_COMMIT</constant> flag 通过 <function>oci_execute</function> 执行第一个更改数据的 SQL
+   语句时，事务开始。其他语句所做的进一步数据更改成为同一事务的一部分。在事务提交或回滚之前，事务中所做的数据更改是临时的。在提交之前，数据库的其他用户将看不到更改。
   </para>
   <para>
-   &return.success;
+   插入或更新数据时，出于关系数据一致性和性能原因，建议使用事务。
   </para>
-  <note>
-   <para>
-    当关闭连接或脚本结束时（看哪个先）事务会自动回卷。需要明确地调用
-    <function>oci_commit</function> 来提交事务，或
-    <function>oci_rollback</function> 来中止事务。
-   </para>
-  </note>
-  <note>
-   <para>
-    在 PHP 5.0.0 之前的版本必须使用 <function>ocicommit</function>
-    替代本函数。该函数名仍然可用，为向下兼容作为
-    <function>oci_commit</function> 的别名。不过其已被废弃，不推荐使用。
-   </para>
-  </note>
-  <simpara>
-   参见 <function>oci_rollback</function> 和
-   <function>oci_execute</function>。
-  </simpara>
  </refsect1>
 
  <refsect1 role="parameters">
@@ -90,8 +34,7 @@
      <term><parameter>connection</parameter></term>
      <listitem>
       <para>
-       An Oracle connection identifier, returned by
-       <function>oci_connect</function>, <function>oci_pconnect</function>, or <function>oci_new_connect</function>.
+       <function>oci_connect</function>、<function>oci_pconnect</function> 或 <function>oci_new_connect</function> 返回的 Oracle 连接标识符。
       </para>
      </listitem>
     </varlistentry>
@@ -110,7 +53,7 @@
   &reftitle.examples;
   <para>
    <example>
-    <title><function>oci_commit</function> example</title>
+    <title><function>oci_commit</function> 示例</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -155,10 +98,8 @@ if (!$r) {
   &reftitle.notes;
   <note>
    <para>
-    Transactions are automatically rolled back when you close the
-    connection, or when the script ends, whichever is soonest. You
-    need to explicitly call <function>oci_commit</function> to commit
-    the transaction.
+    当关闭连接或脚本结束时（看哪个先）事务会自动回滚。需要明确地调用
+    <function>oci_commit</function> 来提交事务。
    </para>
    <para>
     Any call to <function>oci_execute</function> that uses
@@ -182,6 +123,7 @@ if (!$r) {
    </simplelist>
   </para>
  </refsect1>
+
 </refentry>
 
 <!-- Keep this comment at the end of the file
