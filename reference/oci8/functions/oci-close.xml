@@ -1,41 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 96c9d88bad9a7d7d44bfb7f26c226df7ee9ddf26 Maintainer: HonestQiao Status: ready -->
-<!-- Reviewed: no Maintainer: HonestQiao -->
-<!-- CREDITS: dallas -->
+<!-- EN-Revision: ed6de1ae20ce16c0c7be0b3fef282b6065bebfac Maintainer: HonestQiao Status: ready -->
+<!-- CREDITS: dallas, mowangjuanzi -->
 <refentry xml:id="function.oci-close" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>oci_close</refname>
   <refpurpose>关闭 Oracle 连接</refpurpose>
  </refnamediv>
+ 
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <type>bool</type><methodname>oci_close</methodname>
+   <type class="union"><type>bool</type><type>null</type></type><methodname>oci_close</methodname>
    <methodparam><type>resource</type><parameter>connection</parameter></methodparam>
   </methodsynopsis>
   <para>
-   <function>oci_close</function> 将 Oracle 连接
-   <parameter>connection</parameter> 关闭。
+   取消 <parameter>connection</parameter>。如果没有其他资源正在使用底层数据库连接并且它是使用 <function>oci_connect</function>
+   或 <function>oci_new_connect</function> 创建的，则关闭底层数据库连接。
   </para>
-  <note>
-   <para>
-    自版本 1.1 起 <function>oci_close</function> 正确关闭
-    Oracle 连接。使用 <link
-    linkend="ini.oci8.old-oci-close-semantics">oci8.old_oci_close_semantics</link>
-    选项来恢复本函数的旧行为。
-   </para>
-  </note>
   <para>
-   &return.success;
-   </para>
-  <note>
-   <para>
-    在 PHP 5.0.0 之前的版本必须使用 <function>ocilogoff</function>
-    替代本函数。该函数名仍然可用，为向下兼容作为
-    <function>oci_close</function> 的别名。不过其已被废弃，不推荐使用。
-   </para>
-  </note>
+   建议关闭不再需要的连接，因为这可以让其他用户使用数据库资源。
+  </para>
  </refsect1>
 
  <refsect1 role="parameters">
@@ -46,9 +31,7 @@
      <term><parameter>connection</parameter></term>
      <listitem>
       <para>
-       An Oracle connection identifier returned by 
-       <function>oci_connect</function>, <function>oci_pconnect</function>,
-       or <function>oci_new_connect</function>.
+       <function>oci_connect</function>、<function>oci_pconnect</function> 或 <function>oci_new_connect</function> 返回的 Oracle 连接标识符。
       </para>
      </listitem>
     </varlistentry>
@@ -59,18 +42,16 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   &return.success;
+   启用 <link linkend="ini.oci8.old-oci-close-semantics">oci8.old_oci_close_semantics</link> 时返回 &null;，否则返回 &true;。
   </para>
  </refsect1>
 
  <refsect1 role="examples">
   &reftitle.examples;
   <example>
-   <title>Closing a connection</title>
+   <title>关闭连接</title>
    <para>
-    Resources associated with a connection should be closed to ensure
-    the underlying database connection is properly terminated and the
-    database resources are released.
+    应关闭与连接关联的资源，以确保正确终止底层数据库连接并释放数据库资源。
    </para>
    <programlisting role="php">
 <![CDATA[
@@ -97,10 +78,9 @@ oci_close($conn);
   </example>
 
   <example>
-   <title>Database connections are not closed until all references are closed</title>
+   <title>在关闭所有引用之前不会关闭数据库连接</title>
    <para>
-    The internal refcount of a connection identifier must be zero
-    before the underlying connection to the database is closed.
+    在关闭与数据库的底层连接之前，连接标识符的内部引用数必须为零。
    </para>
    <programlisting role="php">
 <![CDATA[
@@ -119,7 +99,7 @@ var_dump($res);
 
 oci_close($conn);
 
-// $conn is no long usable in the script but the underlying database
+// $conn is no longer usable in the script but the underlying database
 // connection is still held open until $stid is freed.
 var_dump($conn);  // prints NULL  
 
@@ -140,10 +120,9 @@ sleep(10);
   </example>
 
   <example>
-   <title>Closing a connection opened more than once</title>
+   <title>关闭多次打开的连接</title>
    <para>
-     When database credentials are reused, both connections must be closed
-     before the underlying database connection is closed.
+     当重新使用数据库凭据时，必须在关闭底层数据库连接之前关闭两个连接。
    </para>
    <programlisting role="php">
 <![CDATA[
@@ -169,11 +148,9 @@ var_dump($conn2);  // displays that $conn2 is still a valid connection resource
   </example>
 
   <example>
-   <title>Connections are closed when variables go out of scope</title>
+   <title>当变量超出作用域时关闭连接</title>
    <para>
-    When all variables referencing a connection go out of scope and
-    are freed by PHP, a rollback occurs (if necessary) and the
-    underlying connection to the database is closed.
+    当 PHP 释放了所有超出作用域的引用连接的变量时，将发生回滚（如果需要）并关闭与数据库的底层连接。
    </para>
    <programlisting role="php">
 <![CDATA[
@@ -206,32 +183,18 @@ print $r;  // displays the function return value "Finished"
   &reftitle.notes;
   <note>
    <para>
-    Variables that have a dependency on the connection identifier,
-    such as statement identifiers returned
-    by <function>oci_parse</function>, must also be freed before the
-    underlying database connection is closed.
+    依赖于连接标识符的变量，例如 <function>oci_parse</function> 返回的语句标识符，也必须在底层数据库连接关闭之前释放。
    </para>
   </note>
   <note>
    <para>
-    Prior to version PHP 5.1.2 (PECL OCI8
-    1.1) <function>oci_close</function> was a no-op. In more recent
-    versions it correctly closes the Oracle
-    connection. Use <link linkend="ini.oci8.old-oci-close-semantics">oci8.old_oci_close_semantics</link>
-    option to restore old behavior of this function.
+    在 PHP 5.1.2 (PECL OCI8 1.1) 版本之前，<function>oci_close</function> 是空操作。在升级后的版本中，其正确地关闭了 Oracle 连接。使用
+    <link linkend="ini.oci8.old-oci-close-semantics">oci8.old_oci_close_semantics</link> 选项恢复此函数的旧行为。
    </para>
   </note>
   <note>
    <para>
-    The <function>oci_close</function> function does not close the
-    underlying database connections created
-    with <function>oci_pconnect</function>.
-   </para>
-  </note>
-  <note>
-   <para>
-    In PHP versions before 5.0.0 you must
-    use <function>ocilogoff</function> instead.
+    <function>oci_close</function> 函数不会关闭使用 <function>oci_pconnect</function> 创建的底层数据库连接。
    </para>
   </note>
 
@@ -246,8 +209,8 @@ print $r;  // displays the function return value "Finished"
    </simplelist>
   </para>
  </refsect1>
-</refentry>
 
+</refentry>
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml

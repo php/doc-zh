@@ -1,160 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 96c9d88bad9a7d7d44bfb7f26c226df7ee9ddf26 Maintainer: HonestQiao Status: ready -->
-<!-- Reviewed: no Maintainer: HonestQiao -->
-<!-- CREDITS: dallas -->
+<!-- EN-Revision: ed6de1ae20ce16c0c7be0b3fef282b6065bebfac Maintainer: HonestQiao Status: ready -->
+<!-- CREDITS: dallas, mowangjuanzi -->
 <refentry xml:id="function.oci-connect" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
   <refname>oci_connect</refname>
   <refpurpose>建立一个到 Oracle 服务器的连接</refpurpose>
  </refnamediv>
+
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <type>resource</type><methodname>oci_connect</methodname>
+   <type class="union"><type>resource</type><type>false</type></type><methodname>oci_connect</methodname>
    <methodparam><type>string</type><parameter>username</parameter></methodparam>
    <methodparam><type>string</type><parameter>password</parameter></methodparam>
-   <methodparam choice="opt"><type>string</type><parameter>db</parameter></methodparam>
-   <methodparam choice="opt"><type>string</type><parameter>charset</parameter></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter>session_mode</parameter></methodparam>
+   <methodparam choice="opt"><type class="union"><type>string</type><type>null</type></type><parameter>connection_string</parameter><initializer>&null;</initializer></methodparam>
+   <methodparam choice="opt"><type>string</type><parameter>encoding</parameter><initializer>""</initializer></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>session_mode</parameter><initializer><constant>OCI_DEFAULT</constant></initializer></methodparam>
   </methodsynopsis>
   <para>
-   <function>oci_connect</function> 返回一个大多数 OCI
-   调用都需要的连接标识符。可选的第三个参数可以包含想要连接的本地
-   Oracle 的实例的或者在 <filename>tnsnames.ora</filename>
-   中的条目的名字。如果没有指定可选的第三个参数，PHP
-   使用环境变量 <constant>ORACLE_SID</constant>（Oracle 实例）或
-   <constant>TWO_TASK</constant>（<filename>tnsnames.ora</filename>）来确定连接哪一个数据库。
+   返回大多数其他 OCI8 操作所需的连接标识符。
   </para>
   <para>
-   <parameter>session_mode</parameter> 参数自版本 1.1
-   起可用并接受如下值：<constant>OCI_DEFAULT</constant>，<constant>OCI_SYSOPER</constant>
-   和 <constant>OCI_SYSDBA</constant>。如果指定了
-   <constant>OCI_SYSOPER</constant> 或 <constant>OCI_SYSDBA</constant>
-   其中之一，<function>oci_connect</function>
-   将尝试使用外部认证信息建立特权连接。特权连接默认被禁止。要启用，需要将
-   <link linkend="ini.oci8.privileged-connect">oci8.privileged_connect</link>
-   设为 On。
-  </para>
-  <note>
-   <simpara>
-    对 <function>oci_connect</function>
-    用同样的参数第二次及之后的调用将返回第一次调用所返回的连接句柄。也就是说对一个句柄发出的查询也适用于另一个句柄，因为它们是<emphasis>同一个</emphasis>句柄。此行为演示于下面的例
-    1。如果需要两个句柄在事务上互相隔离开，应该使用
-    <function>oci_new_connect</function> 来替代。
-   </simpara>
-  </note>
-  &oci.charset;
-  <para>
-   <example>
-    <title><function>oci_connect</function> 例子</title>
-    <programlisting role="php">
-<![CDATA[
-<?php
-echo "<pre>";
-$db = "";
-
-$c1 = oci_connect("scott", "tiger", $db);
-$c2 = oci_connect("scott", "tiger", $db);
-
-function create_table($conn)
-{
-  $stmt = oci_parse($conn, "create table scott.hallo (test varchar2(64))");
-  oci_execute($stmt);
-  echo $conn . " created table\n\n";
-}
-
-function drop_table($conn)
-{
-  $stmt = oci_parse($conn, "drop table scott.hallo");
-  oci_execute($stmt);
-  echo $conn . " dropped table\n\n";
-}
-
-function insert_data($conn)
-{
-  $stmt = oci_parse($conn, "insert into scott.hallo
-            values('$conn' || ' ' || to_char(sysdate,'DD-MON-YY HH24:MI:SS'))");
-  oci_execute($stmt, OCI_DEFAULT);
-  echo $conn . " inserted hallo\n\n";
-}
-
-function delete_data($conn)
-{
-  $stmt = oci_parse($conn, "delete from scott.hallo");
-  oci_execute($stmt, OCI_DEFAULT);
-  echo $conn . " deleted hallo\n\n";
-}
-
-function commit($conn)
-{
-  oci_commit($conn);
-  echo $conn . " committed\n\n";
-}
-
-function rollback($conn)
-{
-  oci_rollback($conn);
-  echo $conn . " rollback\n\n";
-}
-
-function select_data($conn)
-{
-  $stmt = oci_parse($conn, "select * from scott.hallo");
-  oci_execute($stmt, OCI_DEFAULT);
-  echo $conn."----selecting\n\n";
-  while (oci_fetch($stmt)) {
-    echo $conn . " [" . oci_result($stmt, "TEST") . "]\n\n";
-  }
-  echo $conn . "----done\n\n";
-}
-
-create_table($c1);
-insert_data($c1);   // Insert a row using c1
-insert_data($c2);   // Insert a row using c2
-
-select_data($c1);   // Results of both inserts are returned
-select_data($c2);
-
-rollback($c1);      // Rollback using c1
-
-select_data($c1);   // Both inserts have been rolled back
-select_data($c2);
-
-insert_data($c2);   // Insert a row using c2
-commit($c2);        // Commit using c2
-
-select_data($c1);   // Result of c2 insert is returned
-
-delete_data($c1);   // Delete all rows in table using c1
-select_data($c1);   // No rows returned
-select_data($c2);   // No rows returned
-commit($c1);        // Commit using c1
-
-select_data($c1);   // No rows returned
-select_data($c2);   // No rows returned
-
-drop_table($c1);
-echo "</pre>";
-?>
-]]>
-    </programlisting>
-   </example>
+   为了提高性能，大多数应用程序应该使用 <function>oci_pconnect</function> 的持久连接而不是
+   <function>oci_connect</function>。有关连接管理和连接池的基本信息，请参阅<link linkend="oci8.connection">连接处理</link>。
   </para>
   <para>
-   <function>oci_connect</function> 如果出错则返回 &false;。
+   从 PHP 5.1.2（PECL OCI8 1.1）开始，<function>oci_close</function> 可用于关闭连接。
   </para>
-  <note>
-   <para>
-    在 PHP 5.0.0 之前的版本必须使用 <function>ocilogon</function>
-    替代本函数。该函数名仍然可用，为向下兼容作为
-    <function>oci_connect</function> 的别名。不过其已被废弃，不推荐使用。
-   </para>
-  </note>
-  <simpara>
-   参见 <function>oci_pconnect</function>，<function>oci_new_connect</function>
-   和 <function>oci_close</function>。
-  </simpara>
+  <para>
+   使用相同参数对 <function>oci_connect</function> 的第二次和后续调用将返回从第一次调用返回的连接句柄。这意味着一个句柄中的事务也在其他句柄中，因为它们使用<emphasis
+   >相同的</emphasis>底层数据库连接。如果两个句柄需要在事务上相互隔离，请改用 <function>oci_new_connect</function>。
+  </para>
  </refsect1>
 
  <refsect1 role="parameters">
@@ -165,7 +42,7 @@ echo "</pre>";
      <term><parameter>username</parameter></term>
      <listitem>
       <para>
-       The Oracle user name.
+       Oracle 用户名。
       </para>
      </listitem>
     </varlistentry>
@@ -173,7 +50,7 @@ echo "</pre>";
      <term><parameter>password</parameter></term>
      <listitem>
       <para>
-       The password for <parameter>username</parameter>.
+       <parameter>username</parameter> 的密码。
       </para>
      </listitem>
     </varlistentry>
@@ -184,7 +61,7 @@ echo "</pre>";
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>character_set</parameter></term>
+     <term><parameter>encoding</parameter></term>
      <listitem>
       &oci.charset;
      </listitem>
@@ -202,15 +79,37 @@ echo "</pre>";
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   Returns a connection identifier or &false; on error.
+   返回连接标识符或出错时为 &false;。
   </para>
+ </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <informaltable>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>&Version;</entry>
+      <entry>&Description;</entry>
+     </row>
+    </thead>
+    <tbody>
+     <row>
+      <entry>8.0.0、PECL OCI8 3.0.0</entry>
+      <entry>
+       <parameter>connection_string</parameter> 现在可为 null。
+      </entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </informaltable>
  </refsect1>
 
  <refsect1 role="examples">
   &reftitle.examples;
   <para>
    <example>
-    <title>Basic <function>oci_connect</function> using Easy Connect syntax</title>
+    <title>使用 Easy Connect 语法的基础 <function>oci_connect</function></title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -242,7 +141,7 @@ echo "</table>\n";
   </para>
   <para>
    <example>
-    <title>Basic <function>oci_connect</function> using a Network Connect name</title>
+    <title>使用 Network Connect 名称的基础 <function>oci_connect</function></title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -284,7 +183,7 @@ echo "</table>\n";
   </para>
   <para>
    <example>
-    <title><function>oci_connect</function> with an explicit character set</title>
+    <title>带有显式字符集的 <function>oci_connect</function></title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -315,7 +214,7 @@ echo "</table>\n";
   </para>
   <para>
    <example>
-    <title>Using multiple calls to <function>oci_connect</function></title>
+    <title>多次调用 <function>oci_connect</function></title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -410,7 +309,7 @@ echo "c2 is $c2<br>\n";
 //    c2 ----selecting
 //    c2 ----done
 //    Dropped table
-//    c1 is 
+//    c1 is
 //    c2 is Resource id #5
 
 ?>
@@ -424,16 +323,7 @@ echo "c2 is $c2<br>\n";
   &reftitle.notes;
   <note>
    <para>
-    An incorrectly installed or configured OCI8 extension will often
-    manifest itself as a connection problem or error.
-    See <link linkend="oci8.setup">Installing/Configuring</link> for
-    troubleshooting information.
-   </para>
-  </note>
-  <note>
-   <para>
-    In PHP versions before 5.0.0 use <function>ocilogon</function>
-    instead.
+    错误安装或配置的 OCI8 扩展通常会表现为连接问题或错误。有关故障排除信息，请参阅<link linkend="oci8.setup">安装/配置</link>。
    </para>
   </note>
  </refsect1>
@@ -448,8 +338,8 @@ echo "c2 is $c2<br>\n";
    </simplelist>
   </para>
  </refsect1>
-</refentry>
 
+</refentry>
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
