@@ -1,71 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 96c9d88bad9a7d7d44bfb7f26c226df7ee9ddf26 Maintainer: HonestQiao Status: ready -->
-<!-- Reviewed: no Maintainer: HonestQiao -->
-<!-- CREDITS: dallas -->
+<!-- EN-Revision: ed6de1ae20ce16c0c7be0b3fef282b6065bebfac Maintainer: HonestQiao Status: ready -->
+<!-- CREDITS: dallas, mowangjuanzi -->
 <refentry xml:id="function.oci-pconnect" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
   <refname>oci_pconnect</refname>
-  <refpurpose>使用一个持久连接连到 Oracle 数据库</refpurpose>
+  <refpurpose>使用持久连接连，连接到 Oracle 数据库</refpurpose>
  </refnamediv>
+ 
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <type>resource</type><methodname>oci_pconnect</methodname>
+   <type class="union"><type>resource</type><type>false</type></type><methodname>oci_pconnect</methodname>
    <methodparam><type>string</type><parameter>username</parameter></methodparam>
    <methodparam><type>string</type><parameter>password</parameter></methodparam>
-   <methodparam choice="opt"><type>string</type><parameter>db</parameter></methodparam>
-   <methodparam choice="opt"><type>string</type><parameter>charset</parameter></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter>session_mode</parameter></methodparam>
+   <methodparam choice="opt"><type class="union"><type>string</type><type>null</type></type><parameter>connection_string</parameter><initializer>&null;</initializer></methodparam>
+   <methodparam choice="opt"><type>string</type><parameter>encoding</parameter><initializer>""</initializer></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>session_mode</parameter><initializer><constant>OCI_DEFAULT</constant></initializer></methodparam>
   </methodsynopsis>
   <para>
-   <function>oci_pconnect</function> 创建一个到 Oracle
-   服务器的持久连接并登录。持久连接会被缓冲并在请求之间重复使用，可以降低每个页面加载的消耗。一个典型的
-   PHP 应用程序对于每个 Apache 子进程（或者 PHP FastCGI/CGI
-   进程）会有一个打开的持久连接到 Oracle 服务器。更多信息见<link
-   linkend="features.persistent-connections">数据库持久连接</link>一节。
-  </para>
-  <note>
-   <simpara>
-    自 OCI8 扩展库版本 1.1 起，持久 Oracle
-    连接的生命周期和最大数目可以通过设定以下配置选项来调整：<link
-    linkend="ini.oci8.persistent-timeout">oci8.persistent_timeout</link>，<link
-    linkend="ini.oci8.ping-interval">oci8.ping_interval</link>
-    和 <link linkend="ini.oci8.max-persistent">oci8.max_persistent</link>。
-   </simpara>
-  </note>
-  <para>
-   可选的第三个参数可以是本地 Oracle 实例的名字或者是在
-   <filename>tnsnames.ora</filename>
-   的条目中的名字。如果没有指定第三个参数， PHP 使用环境变量
-   <literal>ORACLE_SID</literal> 和 <literal>TWO_TASK</literal>
-   来分别确定本地 Oracle 实例的名字和
-   <filename>tnsnames.ora</filename> 的位置。
+   创建到 Oracle 服务器的持久连接并登录。
   </para>
   <para>
-   <parameter>session_mode</parameter> 参数自版本 1.1
-   起可用并接受如下值：<constant>OCI_DEFAULT</constant>，<constant>OCI_SYSOPER</constant>
-   和 <constant>OCI_SYSDBA</constant>。如果指定了
-   <constant>OCI_SYSOPER</constant> 或 <constant>OCI_SYSDBA</constant>
-   其中之一，<function>oci_new_connect</function>
-   将尝试使用外部认证信息建立特权连接。特权连接默认被禁止。要启用，需要将
-   <link linkend="ini.oci8.privileged-connect">oci8.privileged_connect</link>
-   设为 On。
-  </para>
-  &oci.charset;
-  <para>
-   <function>oci_pconnect</function> 返回连接标识符，出错则返回 &false;。
-  </para>
-  <note>
-   <para>
-    在 PHP 5.0.0 之前的版本必须使用 <function>ociplogon</function>
-    替代本函数。该函数名仍然可用，为向下兼容作为
-    <function>oci_pconnect</function> 的别名。不过其已被废弃，不推荐使用。
-   </para>
-  </note>
-  <para>
-   参见 <function>oci_connect</function> 和
-   <function>oci_new_connect</function>。
+   持久连接会被缓冲并在请求之间重复使用，可以降低每个页面加载的消耗；一个典型的 PHP 应用程序对于每个 Apache 子进程（或者 PHP FastCGI
+   进程）会有打开的持久连接到 Oracle 服务器。更多信息见<link linkend="oci8.connection">连接处理和连接池</link>一节。
   </para>
  </refsect1>
 
@@ -77,7 +35,7 @@
      <term><parameter>username</parameter></term>
      <listitem>
       <para>
-       The Oracle user name.
+       Oracle 用户名。
       </para>
      </listitem>
     </varlistentry>
@@ -85,7 +43,7 @@
      <term><parameter>password</parameter></term>
      <listitem>
       <para>
-       The password for <parameter>username</parameter>.
+       <parameter>username</parameter> 的密码。
       </para>
      </listitem>
     </varlistentry>
@@ -96,7 +54,7 @@
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>character_set</parameter></term>
+     <term><parameter>encoding</parameter></term>
      <listitem>
       &oci.charset;
      </listitem>
@@ -114,7 +72,46 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   Returns a connection identifier or &false; on error.
+   返回连接标识符或错误时为 &false;。
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title>基础 <function>oci_pconnect</function> 示例，使用 Easy Connect 语法</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+
+// Connects to the XE service (i.e. database) on the "localhost" machine
+$conn = oci_pconnect('hr', 'welcome', 'localhost/XE');
+if (!$conn) {
+    $e = oci_error();
+    trigger_error(htmlentities($e['message'], ENT_QUOTES), E_USER_ERROR);
+}
+
+$stid = oci_parse($conn, 'SELECT * FROM employees');
+oci_execute($stid);
+
+echo "<table border='1'>\n";
+while ($row = oci_fetch_array($stid, OCI_ASSOC+OCI_RETURN_NULLS)) {
+    echo "<tr>\n";
+    foreach ($row as $item) {
+        echo "    <td>" . ($item !== null ? htmlentities($item, ENT_QUOTES) : "&nbsp;") . "</td>\n";
+    }
+    echo "</tr>\n";
+}
+echo "</table>\n";
+
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+    有关参数使用的更多示例，请参见 <function>oci_connect</function>。
   </para>
  </refsect1>
 
@@ -122,19 +119,12 @@
   &reftitle.notes;
   <note>
    <simpara>
-    Starting with PHP 5.1.2 and PECL oci8 1.1, the lifetime and
-    maximum number of persistent Oracle connections can be tuned by setting
-    the following configuration values: <link
-     linkend="ini.oci8.persistent-timeout">oci8.persistent_timeout</link>,
-    <link linkend="ini.oci8.ping-interval">oci8.ping_interval</link> and
-    <link linkend="ini.oci8.max-persistent">oci8.max_persistent</link>.
+    自 PHP 5.1.2O 和 PECL OCI8 1.1 起，每个 PHP 进程的持久 Oracle
+    连接的生命周期和最大数目可以通过以下配置选项来调整：<link
+    linkend="ini.oci8.persistent-timeout">oci8.persistent_timeout</link>，<link
+    linkend="ini.oci8.ping-interval">oci8.ping_interval</link>
+    和 <link linkend="ini.oci8.max-persistent">oci8.max_persistent</link>。
    </simpara>
-  </note>
-  <note>
-   <para>
-    In PHP versions before 5.0.0 you must
-    use <function>ociplogon</function> instead.
-   </para>
   </note>
  </refsect1>
 
@@ -147,8 +137,8 @@
    </simplelist>
   </para>
  </refsect1>
-</refentry>
 
+</refentry>
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
