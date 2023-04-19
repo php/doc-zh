@@ -1,159 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 96c9d88bad9a7d7d44bfb7f26c226df7ee9ddf26 Maintainer: HonestQiao Status: ready -->
-<!-- Reviewed: no Maintainer: HonestQiao -->
-<!-- CREDITS: dallas -->
+<!-- EN-Revision: ed6de1ae20ce16c0c7be0b3fef282b6065bebfac Maintainer: HonestQiao Status: ready -->
+<!-- CREDITS: dallas, mowangjuanzi -->
 <refentry xml:id="function.oci-new-connect" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
   <refname>oci_new_connect</refname>
-  <refpurpose>建定一个到 Oracle 服务器的新连接</refpurpose>
+  <refpurpose>使用唯一连接，连接到 Oracle 服务器</refpurpose>
  </refnamediv>
+ 
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <type>resource</type><methodname>oci_new_connect</methodname>
+   <type class="union"><type>resource</type><type>false</type></type><methodname>oci_new_connect</methodname>
    <methodparam><type>string</type><parameter>username</parameter></methodparam>
    <methodparam><type>string</type><parameter>password</parameter></methodparam>
-   <methodparam choice="opt"><type>string</type><parameter>db</parameter></methodparam>
-   <methodparam choice="opt"><type>string</type><parameter>charset</parameter></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter>session_mode</parameter></methodparam>
+   <methodparam choice="opt"><type class="union"><type>string</type><type>null</type></type><parameter>connection_string</parameter><initializer>&null;</initializer></methodparam>
+   <methodparam choice="opt"><type>string</type><parameter>encoding</parameter><initializer>""</initializer></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>session_mode</parameter><initializer><constant>OCI_DEFAULT</constant></initializer></methodparam>
   </methodsynopsis>
   <para>
-   <function>oci_new_connect</function> 创建一个到 Oracle
-   服务器的新连接并登录。与 <function>oci_connect</function>
-   和 <function>oci_pconnect</function> 不同，<function>oci_new_connect</function>
-   不会缓冲连接，总是会返回一个全新的刚打开的连接句柄。这在应用程序需要在两组查询之间实现事务隔离很有用。
+   建立与 Oracle 服务器的新连接并登录。
   </para>
   <para>
-   可选的第三个参数可以是本地 Oracle 实例的名字或者是在
-   <filename>tnsnames.ora</filename>
-   的条目中的名字。如果没有指定第三个参数， PHP 使用环境变量
-   <literal>ORACLE_SID</literal> 和 <literal>TWO_TASK</literal>
-   来分别确定本地 Oracle 实例的名字和
-   <filename>tnsnames.ora</filename> 的位置。
+   与 <function>oci_connect</function> 和 <function>oci_pconnect</function> 不同，<function>oci_new_connect</function>
+   不缓存连接并且始终返回全新的刚打开的连接句柄。如果应用程序需要在两组查询之间进行事务隔离，这将很有用。
   </para>
-  <para>
-   <parameter>session_mode</parameter> 参数自版本 1.1
-   起可用并接受如下值：<constant>OCI_DEFAULT</constant>，<constant>OCI_SYSOPER</constant>
-   和 <constant>OCI_SYSDBA</constant>。如果指定了
-   <constant>OCI_SYSOPER</constant> 或 <constant>OCI_SYSDBA</constant>
-   其中之一，<function>oci_new_connect</function>
-   将尝试使用外部认证信息建立特权连接。特权连接默认被禁止。要启用，需要将
-   <link linkend="ini.oci8.privileged-connect">oci8.privileged_connect</link>
-   设为 On。
-  </para>
-  &oci.charset;
-  <para>
-   下面例子演示了怎样隔离连接。
-   <example>
-    <title><function>oci_new_connect</function> 例子</title>
-    <programlisting role="php">
-<![CDATA[
-<?php
-echo "<html><pre>";
-$db = "";
-
-$c1 = oci_connect("scott", "tiger", $db);
-$c2 = oci_new_connect("scott", "tiger", $db);
-
-function create_table($conn)
-{
-  $stmt = oci_parse($conn, "create table scott.hallo (test
-varchar2(64))");
-  oci_execute($stmt);
-  echo $conn . " created table\n\n";
-}
-
-function drop_table($conn)
-{
-  $stmt = oci_parse($conn, "drop table scott.hallo");
-  oci_execute($stmt);
-  echo $conn . " dropped table\n\n";
-}
-
-function insert_data($conn)
-{
-  $stmt = oci_parse($conn, "insert into scott.hallo
-            values('$conn' || ' ' || to_char(sysdate,'DD-MON-YY HH24:MI:SS'))");
-  oci_execute($stmt, OCI_DEFAULT);
-  echo $conn . " inserted hallo\n\n";
-}
-
-function delete_data($conn)
-{
-  $stmt = oci_parse($conn, "delete from scott.hallo");
-  oci_execute($stmt, OCI_DEFAULT);
-  echo $conn . " deleted hallo\n\n";
-}
-
-function commit($conn)
-{
-  oci_commit($conn);
-  echo $conn . " committed\n\n";
-}
-
-function rollback($conn)
-{
-  oci_rollback($conn);
-  echo $conn . " rollback\n\n";
-}
-
-function select_data($conn)
-{
-  $stmt = oci_parse($conn, "select * from scott.hallo");
-  oci_execute($stmt, OCI_DEFAULT);
-  echo $conn . "----selecting\n\n";
-  while (oci_fetch($stmt)) {
-    echo $conn . " <" . oci_result($stmt, "TEST") . ">\n\n";
-  }
-  echo $conn . "----done\n\n";
-}
-
-create_table($c1);
-insert_data($c1);
-
-select_data($c1);
-select_data($c2);
-
-rollback($c1);
-
-select_data($c1);
-select_data($c2);
-
-insert_data($c2);
-commit($c2);
-
-select_data($c1);
-
-delete_data($c1);
-select_data($c1);
-select_data($c2);
-commit($c1);
-
-select_data($c1);
-select_data($c2);
-
-drop_table($c1);
-echo "</pre></html>";
-?>
-]]>
-    </programlisting>
-   </example>
-  </para>
-  <para>
-   <function>oci_new_connect</function> 在出错时返回 &false;。
-  </para>
-  <note>
-   <para>
-    在 PHP 5.0.0 之前的版本必须使用 <function>ocinlogon</function>
-    替代本函数。该函数名仍然可用，为向下兼容作为
-    <function>oci_new_connect</function> 的别名。不过其已被废弃，不推荐使用。
-   </para>
-  </note>
-  <simpara>
-   参见 <function>oci_connect</function> 和
-   <function>oci_pconnect</function>。
-  </simpara>
  </refsect1>
 
  <refsect1 role="parameters">
@@ -164,7 +35,7 @@ echo "</pre></html>";
      <term><parameter>username</parameter></term>
      <listitem>
       <para>
-       The Oracle user name.
+       Oracle 用户名。
       </para>
      </listitem>
     </varlistentry>
@@ -172,7 +43,7 @@ echo "</pre></html>";
      <term><parameter>password</parameter></term>
      <listitem>
       <para>
-       The password for <parameter>username</parameter>.
+       <parameter>username</parameter> 的密码。
       </para>
      </listitem>
     </varlistentry>
@@ -183,7 +54,7 @@ echo "</pre></html>";
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>character_set</parameter></term>
+     <term><parameter>encoding</parameter></term>
      <listitem>
       &oci.charset;
      </listitem>
@@ -201,119 +72,88 @@ echo "</pre></html>";
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   Returns a connection identifier or &false; on error.
+   返回连接标识符或错误时为 &false;。
   </para>
+ </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <informaltable>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>&Version;</entry>
+      <entry>&Description;</entry>
+     </row>
+    </thead>
+    <tbody>
+     <row>
+      <entry>8.0.0、PECL OCI8 3.0.0</entry>
+      <entry>
+       <parameter>connection_string</parameter> 现在可为 null。
+      </entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </informaltable>
  </refsect1>
 
  <refsect1 role="examples">
   &reftitle.examples;
   <para>
-   The following demonstrates how you can separate connections.
+   下面演示了如何分离连接。
    <example>
-    <title><function>oci_new_connect</function> example</title>
+    <title><function>oci_new_connect</function> 示例</title>
     <programlisting role="php">
 <![CDATA[
 <?php
-echo "<html><pre>";
-$db = "";
 
-$c1 = oci_connect("scott", "tiger", $db);
-$c2 = oci_new_connect("scott", "tiger", $db);
+// create table mytab (mycol number);
 
-function create_table($conn)
+function query($name, $c)
 {
-  $stmt = oci_parse($conn, "create table scott.hallo (test
-varchar2(64))");
-  oci_execute($stmt);
-  echo $conn . " created table\n\n";
+    echo "Querying $name\n";
+    $s = oci_parse($c, "select * from mytab");
+    oci_execute($s, OCI_NO_AUTO_COMMIT);
+    $row = oci_fetch_array($s, OCI_ASSOC);
+    if (!$row) {
+        echo "No rows\n";
+    } else {
+        do {
+            foreach ($row as $item)
+                echo $item . " ";
+            echo "\n";
+        } while (($row = oci_fetch_array($s, OCI_ASSOC)) != false);
+    }
 }
 
-function drop_table($conn)
-{
-  $stmt = oci_parse($conn, "drop table scott.hallo");
-  oci_execute($stmt);
-  echo $conn . " dropped table\n\n";
-}
+$c1 = oci_connect("hr", "welcome", "localhost/orcl");
+$c2 = oci_new_connect("hr", "welcome", "localhost/orcl");
 
-function insert_data($conn)
-{
-  $stmt = oci_parse($conn, "insert into scott.hallo
-            values('$conn' || ' ' || to_char(sysdate,'DD-MON-YY HH24:MI:SS'))");
-  oci_execute($stmt, OCI_DEFAULT);
-  echo $conn . " inserted hallo\n\n";
-}
+$s = oci_parse($c1, "insert into mytab values(1234)");
+oci_execute($s, OCI_NO_AUTO_COMMIT);
 
-function delete_data($conn)
-{
-  $stmt = oci_parse($conn, "delete from scott.hallo");
-  oci_execute($stmt, OCI_DEFAULT);
-  echo $conn . " deleted hallo\n\n";
-}
+query("basic connection", $c1);
+query("new connection", $c2);
+oci_commit($c1);
+query("new connection after commit", $c2);
 
-function commit($conn)
-{
-  oci_commit($conn);
-  echo $conn . " committed\n\n";
-}
+// Output is:
+//   Querying basic connection
+//   1234 
+//   Querying new connection
+//   No rows
+//   Querying new connection after commit
+//   1234 
 
-function rollback($conn)
-{
-  oci_rollback($conn);
-  echo $conn . " rollback\n\n";
-}
-
-function select_data($conn)
-{
-  $stmt = oci_parse($conn, "select * from scott.hallo");
-  oci_execute($stmt, OCI_DEFAULT);
-  echo $conn . "----selecting\n\n";
-  while (oci_fetch($stmt)) {
-    echo $conn . " <" . oci_result($stmt, "TEST") . ">\n\n";
-  }
-  echo $conn . "----done\n\n";
-}
-
-create_table($c1);
-insert_data($c1);
-
-select_data($c1);
-select_data($c2);
-
-rollback($c1);
-
-select_data($c1);
-select_data($c2);
-
-insert_data($c2);
-commit($c2);
-
-select_data($c1);
-
-delete_data($c1);
-select_data($c1);
-select_data($c2);
-commit($c1);
-
-select_data($c1);
-select_data($c2);
-
-drop_table($c1);
-echo "</pre></html>";
 ?>
 ]]>
     </programlisting>
    </example>
   </para>
- </refsect1>
-
- <refsect1 role="notes">
-  &reftitle.notes;
-  <note>
-   <para>
-    In PHP versions before 5.0.0 you must
-    use <function>ocinlogon</function> instead.
-   </para>
-  </note>
+  <para>
+    有关参数使用的更多示例，请参见 <function>oci_connect</function>。
+  </para>
  </refsect1>
 
  <refsect1 role="seealso">
@@ -325,8 +165,8 @@ echo "</pre></html>";
    </simplelist>
   </para>
  </refsect1>
-</refentry>
 
+</refentry>
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
