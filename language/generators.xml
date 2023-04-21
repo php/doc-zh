@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: d24be1452e194210bff3578603c34ac104dc3617 Maintainer: 虾米 Status: ready -->
-<!-- CREDITS: Luffy -->
+<!-- EN-Revision: 5f2da51e3cc91d9459ecd064203afb8cac3ac5cc Maintainer: 虾米 Status: ready -->
+<!-- CREDITS: Luffy, mowangjuanzi -->
 <chapter xml:id="language.generators" xmlns="http://docbook.org/ns/docbook">
  <title>生成器</title>
 
@@ -80,8 +80,8 @@ foreach (xrange(1, 9, 2) as $number) {
    &example.outputs;
    <screen>
 <![CDATA[
-Single digit odd numbers from range():  1 3 5 7 9 
-Single digit odd numbers from xrange(): 1 3 5 7 9 
+Single digit odd numbers from range():  1 3 5 7 9
+Single digit odd numbers from xrange(): 1 3 5 7 9
 ]]>
    </screen>
   </example>
@@ -160,13 +160,6 @@ foreach ($generator as $value) {
     </para>
    </note>
 
-   <caution>
-    <para>
-      传入 <methodname>Generator::send</methodname> 的值会被赋值到 <varname>$data</varname>，
-      或者直接调用 <methodname>Generator::next</methodname> 时，赋的值将是 &null;。
-    </para>
-   </caution>
-   
    <sect3 xml:id="control-structures.yield.associative">
     <title>指定键名来生成值</title>
     
@@ -225,22 +218,8 @@ foreach (input_parser($input) as $id => $fields) {
 ]]>
      </screen>
     </example>
-
-    <caution>
-     <para>
-      和之前生成简单值类型一样，在一个表达式上下文中生成键值对也需要使用圆括号进行包围：
-     </para>
-
-     <informalexample>
-      <programlisting role="php">
-<![CDATA[
-      $data = (yield $key => $value);
-]]>
-      </programlisting>
-     </informalexample>
-    </caution>
    </sect3>
-   
+
    <sect3 xml:id="control-structures.yield.null">
     <title>生成 null 值</title>
     
@@ -311,7 +290,7 @@ foreach (gen_reference() as &$number) {
      &example.outputs;
      <screen>
 <![CDATA[
-2... 1... 0... 
+2... 1... 0...
 ]]>
      </screen>
     </example>
@@ -335,22 +314,22 @@ foreach (gen_reference() as &$number) {
     <caution>
       <title>存储到 array （例如使用 <function>iterator_to_array</function>）</title>
 
-        <para>
-        <command>yield from</command> 不能重置 key。它保留 <classname>Traversable</classname>
-        对象或者 <type>array</type> 返回的 key。因此，某些值可能会与其他的 <command>yield</command> 或者 
-        <command>yield from</command> 共享公共的 key，因此，在插入数组时将会用这个 key 覆盖以前的值。
-       </para>
+      <para>
+       <command>yield from</command> 不能重置 key。它保留 <classname>Traversable</classname>
+       对象或者 <type>array</type> 返回的 key。因此，某些值可能会与其他的 <command>yield</command> 或者 
+       <command>yield from</command> 共享公共的 key，因此，在插入数组时将会用这个 key 覆盖以前的值。
+      </para>
 
-        <para>
-        一个非常重要的常见情况是 <function>iterator_to_array</function> 默认返回带 key 的 array ，
-        这可能会造成无法预料的结果。 <function>iterator_to_array</function> 还有第二个参数 
-        <parameter>preserve_keys</parameter> ，可以设置为 &false; 来收集 <classname>Generator</classname>
-        返回的不带 key 的所有值。
-       </para>
+      <para>
+       一个非常重要的常见情况是 <function>iterator_to_array</function> 默认返回带 key 的 array ，
+       这可能会造成无法预料的结果。 <function>iterator_to_array</function> 还有第二个参数 
+       <parameter>preserve_keys</parameter> ，可以设置为 &false; 来收集 <classname>Generator</classname>
+       返回的不带 key 的所有值。
+      </para>
 
-        <example>
-        <title>使用 <function>iterator_to_array</function> 的 <command>yield from</command> </title>
-        <programlisting role="php">
+      <example>
+       <title>使用 <function>iterator_to_array</function> 的 <command>yield from</command> </title>
+       <programlisting role="php">
  <![CDATA[
  <?php
  function inner() {
@@ -417,7 +396,7 @@ foreach (count_to_ten() as $num) {
      &example.outputs;
      <screen>
 <![CDATA[
-1 2 3 4 5 6 7 8 9 10 
+1 2 3 4 5 6 7 8 9 10
 ]]>
      </screen>
     </example>
@@ -486,11 +465,11 @@ function getLinesFromFile($fileName) {
     if (!$fileHandle = fopen($fileName, 'r')) {
         return;
     }
- 
+
     while (false !== $line = fgets($fileHandle)) {
         yield $line;
     }
- 
+
     fclose($fileHandle);
 }
 
@@ -498,41 +477,41 @@ function getLinesFromFile($fileName) {
 
 class LineIterator implements Iterator {
     protected $fileHandle;
- 
+
     protected $line;
     protected $i;
- 
+
     public function __construct($fileName) {
         if (!$this->fileHandle = fopen($fileName, 'r')) {
             throw new RuntimeException('Couldn\'t open file "' . $fileName . '"');
         }
     }
- 
+
     public function rewind() {
         fseek($this->fileHandle, 0);
         $this->line = fgets($this->fileHandle);
         $this->i = 0;
     }
- 
+
     public function valid() {
         return false !== $this->line;
     }
- 
+
     public function current() {
         return $this->line;
     }
- 
+
     public function key() {
         return $this->i;
     }
- 
+
     public function next() {
         if (false !== $this->line) {
             $this->line = fgets($this->fileHandle);
             $this->i++;
         }
     }
- 
+
     public function __destruct() {
         fclose($this->fileHandle);
     }
