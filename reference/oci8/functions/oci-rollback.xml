@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: f453f7036c74f5f8ce5e15d3d5abbaf8dfd599e2 Maintainer: HonestQiao Status: ready -->
-<!-- Reviewed: no Maintainer: HonestQiao -->
-<!-- CREDITS: dallas -->
+<!-- EN-Revision: 5a3f0c18ac46e6d4313367e44866527badac5b73 Maintainer: HonestQiao Status: ready -->
+<!-- CREDITS: dallas, mowangjuanzi -->
 <refentry xml:id="function.oci-rollback" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>oci_rollback</refname>
-  <refpurpose>回滚未提交的事务</refpurpose>
+  <refpurpose>回滚未完成的事务</refpurpose>
  </refnamediv>
+ 
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
@@ -15,28 +15,14 @@
    <methodparam><type>resource</type><parameter>connection</parameter></methodparam>
   </methodsynopsis>
   <para>
-   <function>oci_rollback</function> 回滚 Oracle 连接
-   <parameter>connection</parameter> 上所有未提交的语句。
+   恢复 Oracle <parameter>connection</parameter> 的所有未提交更改并结束事务。释放所有持有的锁。所有 Oracle <literal>SAVEPOINTS</literal> 都被擦除。
   </para>
   <para>
-   &return.success;
+   当使用 <constant>OCI_NO_AUTO_COMMIT</constant> flag 通过 <function>oci_execute</function> 执行第一个更改数据的 SQL
+   语句时，事务开始。其他语句所做的后续数据更改成为同一事务的一部分。在事务提交或回滚之前，事务中所做的数据更改是临时的。在提交之前，数据库的其他用户将看不到更改。
   </para>
-  <note>
-   <para>
-    当关闭连接或脚本结束时（看哪个先）事务会自动回卷。需要明确地调用
-    <function>oci_commit</function> 来提交事务，或
-    <function>oci_rollback</function> 来中止事务。
-   </para>
-  </note>
-  <note>
-   <para>
-    在 PHP 5.0.0 之前的版本必须使用 <function>ocirollback</function>
-    替代本函数。该函数名仍然可用，为向下兼容作为
-    <function>oci_rollback</function> 的别名。不过其已被废弃，不推荐使用。
-   </para>
-  </note>
   <para>
-   参见 <function>oci_commit</function>。
+   插入或更新数据时，出于关系数据一致性和性能原因，建议使用事务。
   </para>
  </refsect1>
 
@@ -48,9 +34,7 @@
      <term><parameter>connection</parameter></term>
      <listitem>
       <para>
-       An Oracle connection identifier, returned by
-       <function>oci_connect</function>, <function>oci_pconnect</function>
-       or <function>oci_new_connect</function>.
+       <function>oci_connect</function>、<function>oci_pconnect</function> 或 <function>oci_new_connect</function> 返回的 Oracle 连接标识符。
       </para>
      </listitem>
     </varlistentry>
@@ -69,7 +53,7 @@
   &reftitle.examples;
   <para>
    <example>
-    <title><function>oci_rollback</function> example</title>
+    <title><function>oci_rollback</function> 示例</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -110,7 +94,7 @@ if (!r) {
   </para>
   <para>
    <example>
-    <title>Rolling back to a <literal>SAVEPOINT</literal> example</title>
+    <title>回滚到 <literal>SAVEPOINT</literal> 示例</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -140,10 +124,7 @@ oci_commit($conn);  // mytab now has id of 1111
   &reftitle.notes;
   <note>
    <para>
-    Transactions are automatically rolled back when you close the
-    connection, or when the script ends, whichever is soonest. You
-    need to explicitly call <function>oci_commit</function> to commit
-    the transaction.
+    当关闭连接或脚本结束时，事务会自动回滚。需要显式调用 <function>oci_commit</function> 提交事务。
    </para>
    <para>
     Any call to <function>oci_execute</function> that uses
@@ -151,16 +132,7 @@ oci_commit($conn);  // mytab now has id of 1111
     default will commit any previous uncommitted transaction.
    </para>
    <para>
-    Any Oracle DDL statement such as <literal>CREATE</literal>
-    or <literal>DROP</literal> will automatically commit any
-    uncommitted transaction.
-   </para>
-  </note>
-  <note>
-   <para>
-    In PHP versions before 5.0.0 you must
-    use <function>ocirollback</function>
-    instead.
+    任何 Oracle DDL 语句（例如 <literal>CREATE</literal> 或 <literal>DROP</literal>）都会自动提交任何未提交的事务。
    </para>
   </note>
  </refsect1>
@@ -174,6 +146,7 @@ oci_commit($conn);  // mytab now has id of 1111
    </simplelist>
   </para>
  </refsect1>
+
 </refentry>
 
 <!-- Keep this comment at the end of the file
