@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: b9271c0d58c90c9359444348192c7c3f7d9e178f Maintainer: duanxiaoqiang Status: ready -->
-<!-- Reviewed: no -->
-
-<refentry xmlns="http://docbook.org/ns/docbook" xml:id="function.openssl-random-pseudo-bytes">
+<!-- EN-Revision: 52c495140bdb84f45f186bfb1cccf09788b0121e Maintainer: duanxiaoqiang Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
+<refentry xml:id="function.openssl-random-pseudo-bytes" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>openssl_random_pseudo_bytes</refname>
   <refpurpose>生成一个伪随机字节串</refpurpose>
@@ -14,13 +13,13 @@
   <methodsynopsis>
    <type>string</type><methodname>openssl_random_pseudo_bytes</methodname>
    <methodparam><type>int</type><parameter>length</parameter></methodparam>
-   <methodparam choice="opt"><type>bool</type><parameter role="reference">crypto_strong</parameter></methodparam>
+   <methodparam choice="opt"><type>bool</type><parameter role="reference">strong_result</parameter><initializer>&null;</initializer></methodparam>
   </methodsynopsis>
   <para>
    生成一个伪随机字节串 <type>string</type> ，字节数由 <parameter>length</parameter> 参数指定。 
   </para>
   <para>
-   通过 <parameter>crypto_strong</parameter> 参数可以表示在生成随机字节的过程中是否使用了强加密算法。返回值为&false;的情况很少见，但已损坏或老化的有些系统上会出现。
+   通过 <parameter>strong_result</parameter> 参数可以表示在生成随机字节的过程中是否使用了强加密算法。返回值为 &false; 的情况很少见，但已损坏或老化的有些系统上会出现。
   </para>
  </refsect1>
 
@@ -32,15 +31,15 @@
      <term><parameter>length</parameter></term>
      <listitem>
       <para>
-       所需字节串的长度，必须为正整数。PHP会试着将该参数转换为非空整数来使用它。
+       所需字节串的长度，必须为正整数且小于等于 <literal>2147483647</literal>。PHP 会试着将该参数转换为非空整数来使用它。
       </para>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>crypto_strong</parameter></term>
+     <term><parameter>strong_result</parameter></term>
      <listitem>
       <para>
-       如果传递到该函数中，将会保存为一个 <type>boolean</type> 值来表明是否使用了“强加密”，如果被用于GPG和密码之类的将返回&true; , 否则返回 &false;
+       如果传递到该函数中，将会保存为一个 <type>bool</type> 值来表明是否使用了“强加密”，如果被用于GPG和密码之类的将返回 &true;，否则返回 &false;
       </para>
      </listitem>
     </varlistentry>
@@ -51,19 +50,53 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   成功，返回生成的字节串 &string; ， &return.falseforfailure;.
+   返回生成的字节 &string;。
   </para>
  </refsect1>
  
+ <refsect1 role="errors">
+  &reftitle.errors;
+  <para>
+   <function>openssl_random_pseudo_bytes</function> 失败时抛出 <classname>Exception</classname>。
+  </para>
+ </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <informaltable>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>&Version;</entry>
+      <entry>&Description;</entry>
+     </row>
+    </thead>
+    <tbody>
+     <row>
+      <entry>8.0.0</entry>
+      <entry>
+       <parameter>strong_result</parameter> 现在可为 null。
+      </entry>
+     </row>
+     <row>
+      <entry>7.4.0</entry>
+      <entry>
+       此函数失败时不再返回 &false;，而是会抛出 <classname>Exception</classname>。
+      </entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </informaltable>
+ </refsect1>
  <refsect1 role="examples">
   &reftitle.examples;
   <para>
    <example>
-    <title><function>openssl_random_pseudo_bytes</function> 范例：</title>
+    <title><function>openssl_random_pseudo_bytes</function> 示例</title>
     <programlisting role="php">
 <![CDATA[
 <?php
-for ($i = -1; $i <= 4; $i++) {
+for ($i = 1; $i <= 4; $i++) {
     $bytes = openssl_random_pseudo_bytes($i, $cstrong);
     $hex   = bin2hex($bytes);
 
@@ -78,14 +111,6 @@ for ($i = -1; $i <= 4; $i++) {
     &example.outputs.similar;
     <screen>
 <![CDATA[
-Lengths: Bytes: -1 and Hex: 0
-string(0) ""
-NULL
-
-Lengths: Bytes: 0 and Hex: 0
-string(0) ""
-NULL
-
 Lengths: Bytes: 1 and Hex: 2
 string(2) "42"
 bool(true)
@@ -114,12 +139,10 @@ bool(true)
    <member><function>random_bytes</function></member>
    <member><function>bin2hex</function></member>
    <member><function>crypt</function></member>
-   <member><function>mt_rand</function></member>
-   <member><function>uniqid</function></member>
+   <member><function>random_int</function></member>
   </simplelist>
  </refsect1>
 </refentry>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
