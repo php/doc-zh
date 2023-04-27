@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: d91faeacc8fd631cd8cd45e5bbd89207bcacbbfa Maintainer: duanxiaoqiang Status: ready -->
-<!-- Reviewed: no -->
-
-<refentry xmlns="http://docbook.org/ns/docbook" xml:id="function.openssl-seal">
+<!-- EN-Revision: d1e3ea622e5d4f542cd36eca59a9f22aa0142633 Maintainer: duanxiaoqiang Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
+<refentry xml:id="function.openssl-seal" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>openssl_seal</refname>
   <refpurpose>密封 (加密) 数据</refpurpose>
@@ -12,17 +11,18 @@
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <type>int</type><methodname>openssl_seal</methodname>
+   <type class="union"><type>int</type><type>false</type></type><methodname>openssl_seal</methodname>
    <methodparam><type>string</type><parameter>data</parameter></methodparam>
    <methodparam><type>string</type><parameter role="reference">sealed_data</parameter></methodparam>
-   <methodparam><type>array</type><parameter role="reference">env_keys</parameter></methodparam>
-   <methodparam><type>array</type><parameter>pub_key_ids</parameter></methodparam>
-   <methodparam choice="opt"><type>string</type><parameter>method</parameter><initializer>"RC4"</initializer></methodparam>
-   <methodparam choice="opt"><type>string</type><parameter role="reference">iv</parameter></methodparam>
+   <methodparam><type>array</type><parameter role="reference">encrypted_keys</parameter></methodparam>
+   <methodparam><type>array</type><parameter>public_key</parameter></methodparam>
+   <methodparam><type>string</type><parameter>cipher_algo</parameter></methodparam>
+   <methodparam choice="opt"><type>string</type><parameter role="reference">iv</parameter><initializer>&null;</initializer></methodparam>
   </methodsynopsis>
   <para>
-   <function>openssl_seal</function> 使用随机生成的密钥和给定的 <parameter>method</parameter> 方法密封 (加密)
-   <parameter>data</parameter> 数据。 密钥用与<parameter>pub_key_ids</parameter>中的标识符相关联的每个公共密钥加密，并且每个加密密钥在<parameter>env_keys</parameter>中返回。 这意味着一个人可以将密封的数据发送给多个接收者(如果一个人已经获得了他们的公钥)。每个接收方都必须同时接收加密的数据和用接收方的公钥加密的信封密钥。
+   <function>openssl_seal</function> 使用随机生成的密钥和给定的 <parameter>cipher_algo</parameter> 方法密封（加密）<parameter>data</parameter>
+   数据。密钥用与 <parameter>public_key</parameter> 中的标识符相关联的每个公共密钥加密，并且每个加密密钥在 <parameter>encrypted_keys</parameter>
+   中返回。这意味着一个人可以将密封的数据发送给多个接收者(如果一个人已经获得了他们的公钥)。每个接收方都必须同时接收加密的数据和用接收方的公钥加密的信封密钥。
   </para>
  </refsect1>
 
@@ -47,7 +47,7 @@
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>env_keys</parameter></term>
+     <term><parameter>encrypted_keys</parameter></term>
      <listitem>
       <para>
        已被加密的密钥数组。
@@ -55,18 +55,23 @@
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>pub_key_ids</parameter></term>
+     <term><parameter>public_key</parameter></term>
      <listitem>
       <para>
-       公钥资源标识符组成的数组。
+       包含公钥的 <classname>OpenSSLAsymmetricKey</classname> 实例数组。
       </para>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>method</parameter></term>
+     <term><parameter>cipher_algo</parameter></term>
      <listitem>
       <para>
        加密算法。
+       <caution>
+        <simpara>
+         默认值（<literal>'RC4'</literal>）认为不安全。强烈建议明确指定安全密码方法。
+        </simpara>
+       </caution>
       </para>
      </listitem>
     </varlistentry>
@@ -86,11 +91,11 @@
   &reftitle.returnvalues;
   <para>
    成功，返回密封后数据的长度，错误，返回 &false; .
-   如果密封后的数据成功地通过<parameter>sealed_data</parameter>变量返回，那么信封密钥也将会通过 <parameter>env_keys</parameter> 变量返回。
+   如果密封后的数据成功地通过 <parameter>sealed_data</parameter> 变量返回，那么信封密钥也将会通过 <parameter>encrypted_keys</parameter> 变量返回。
   </para>
  </refsect1>
 
- <refsect1 role="changelog"><!-- {{{ -->
+ <refsect1 role="changelog">
   &reftitle.changelog;
   <informaltable>
    <tgroup cols="2">
@@ -102,27 +107,34 @@
     </thead>
     <tbody>
      <row>
-      <entry>7.0.0</entry>
+      <entry>8.0.0</entry>
       <entry>
-       添加 <parameter>iv</parameter> 变量。
+       <parameter>public_key</parameter> 现在接受 <classname>OpenSSLAsymmetricKey</classname>
+       实例；之前接受类型 <literal>OpenSSL key</literal> 的 &resource;。
       </entry>
      </row>
      <row>
-      <entry>5.3.0</entry>
+      <entry>8.0.0</entry>
       <entry>
-       添加 <parameter>method</parameter> 变量。
+       <parameter>cipher_algo</parameter> 不再是可选参数。
+      </entry>
+     </row>
+     <row>
+      <entry>8.0.0</entry>
+      <entry>
+       <parameter>iv</parameter> 现在可为 null。
       </entry>
      </row>
     </tbody>
    </tgroup>
   </informaltable>
- </refsect1><!-- }}} -->
+ </refsect1>
 
  <refsect1 role="examples">
   &reftitle.examples;
   <para>
    <example>
-    <title><function>openssl_seal</function> 范例：</title>
+    <title><function>openssl_seal</function> 示例</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -163,7 +175,6 @@ openssl_free_key($pk2);
  </refsect1>
 
 </refentry>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
