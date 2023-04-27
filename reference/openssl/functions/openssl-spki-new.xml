@@ -1,24 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 9de4705b5c6af1cc221ba14c16af1e236b56358f Maintainer: duanxiaoqiang Status: ready -->
-<!-- Reviewed: no -->
-
+<!-- EN-Revision: 7f99d5e488d161ce3b12d1dae405a283728933c3 Maintainer: duanxiaoqiang Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="function.openssl-spki-new" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
   <refname>openssl_spki_new</refname>
-  <refpurpose>生成一个新的签名公钥和挑战</refpurpose>
+  <refpurpose>生成新的签名公钥和 challenge</refpurpose>
  </refnamediv>
 
  <refsect1 role="description">
   &reftitle.description;
-  <methodsynopsis role="procedural">
-   <type>string</type><methodname>openssl_spki_new</methodname>
-   <methodparam><type>resource</type><parameter role="reference">privkey</parameter></methodparam>
-   <methodparam><type>string</type><parameter role="reference">challenge</parameter></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter>algorithm</parameter><initializer>0</initializer></methodparam>
+  <methodsynopsis>
+   <type class="union"><type>string</type><type>false</type></type><methodname>openssl_spki_new</methodname>
+   <methodparam><type>OpenSSLAsymmetricKey</type><parameter>private_key</parameter></methodparam>
+   <methodparam><type>string</type><parameter>challenge</parameter></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>digest_algo</parameter><initializer><constant>OPENSSL_ALGO_MD5</constant></initializer></methodparam>
   </methodsynopsis>
   <para>
-   使用指定的哈希算法生成一个新的签名公钥和挑战。
+   使用指定散列算法生成新的签名公钥和 challenge。
   </para>
  </refsect1>
 
@@ -26,10 +25,11 @@
   &reftitle.parameters;
   <variablelist>
    <varlistentry>
-     <term><parameter>privkey</parameter></term>
+     <term><parameter>private_key</parameter></term>
      <listitem>
       <para>
-       <parameter>privkey</parameter> 应该被设置为由<function>openssl_pkey_new</function>函数预先生成(或者以其他方式从openssl_pkey函数集中获得)的私钥。该密钥的相应公共部分将用于签署CSR.
+       <parameter>private_key</parameter> 应该被设置为由 <function>openssl_pkey_new</function> 函数预先生成（或者以其他方式从
+       openssl_pkey 函数家族集中获得）的私钥。该密钥的相应公共部分将用于签署CSR.
       </para>
      </listitem>
     </varlistentry>
@@ -37,15 +37,15 @@
      <term><parameter>challenge</parameter></term>
      <listitem>
       <para>
-       与SPKAC有关的挑战。
+       与 SPKAC 有关的 challenge。
       </para>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>algorithm</parameter></term>
+     <term><parameter>digest_algo</parameter></term>
      <listitem>
       <para>
-       摘要算法。参见 openssl_get_md_method()函数。
+       摘要算法。参见 openssl_get_md_method()。
       </para>
      </listitem>
     </varlistentry>
@@ -55,23 +55,46 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   成功，返回一个签名的公钥和挑战，失败返回 NULL .
+   返回签名的公钥和 challenge，失败返回 &false;。
   </para>
  </refsect1>
 
   <refsect1 role="errors">
   &reftitle.errors;
   <para>
-   如果 <parameter>algorithm</parameter> 参数是一个未知的签名算法，将会抛出一个 <constant>E_WARNING</constant> 级的错误。
+   如果 <parameter>digest_algo</parameter> 参数是未知的签名算法，将会抛出 <constant>E_WARNING</constant> 级别的错误。
   </para>
+ </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <informaltable>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>&Version;</entry>
+      <entry>&Description;</entry>
+     </row>
+    </thead>
+    <tbody>
+     <row>
+      <entry>8.0.0</entry>
+      <entry>
+       <parameter>private_key</parameter> 现在接受 <classname>OpenSSLAsymmetricKey</classname>
+       实例；之前接受类型 <literal>OpenSSL key</literal> 的 &resource;。
+      </entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </informaltable>
  </refsect1>
 
  <refsect1 role="examples">
   &reftitle.examples;
   <example xml:id="openssl_spki_new.example.basic">
-   <title><function>openssl_spki_new</function> 范例：</title>
+   <title><function>openssl_spki_new</function> 示例</title>
    <para>
-     使用默认的摘要算法(MD5)生成一个新的SPKAC
+     使用默认的摘要算法（MD5）生成新的 SPKAC
    </para>
    <programlisting role="php">
 <![CDATA[
@@ -112,9 +135,10 @@ MML5G2iNVgNozAo=
   &reftitle.seealso;
   <para>
    <simplelist>
-    <member><function>openssl_spki_new</function></member>
+    <member><function>openssl_spki_verify</function></member>
     <member><function>openssl_spki_export_challenge</function></member>
     <member><function>openssl_spki_export</function></member>
+    <member><function>openssl_get_md_methods</function></member>
     <member><function>openssl_csr_new</function></member>
     <member><function>openssl_csr_sign</function></member>
    </simplelist>
@@ -122,7 +146,6 @@ MML5G2iNVgNozAo=
  </refsect1>
 
 </refentry>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
