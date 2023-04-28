@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 2d4b995d680332b66a53f8278439ba1d6454a9eb Maintainer: duanxiaoqiang Status: ready -->
-<!-- Reviewed: no -->
-
-<refentry xmlns="http://docbook.org/ns/docbook" xml:id="function.openssl-verify">
+<!-- EN-Revision: d1e3ea622e5d4f542cd36eca59a9f22aa0142633 Maintainer: duanxiaoqiang Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
+<refentry xml:id="function.openssl-verify" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>openssl_verify</refname>
   <refpurpose>验证签名</refpurpose>
@@ -12,14 +11,15 @@
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <type>int</type><methodname>openssl_verify</methodname>
+   <type class="union"><type>int</type><type>false</type></type><methodname>openssl_verify</methodname>
    <methodparam><type>string</type><parameter>data</parameter></methodparam>
    <methodparam><type>string</type><parameter>signature</parameter></methodparam>
-   <methodparam><type>mixed</type><parameter>pub_key_id</parameter></methodparam>
-   <methodparam choice="opt"><type>mixed</type><parameter>signature_alg</parameter><initializer>OPENSSL_ALGO_SHA1</initializer></methodparam>
+   <methodparam><type class="union"><type>OpenSSLAsymmetricKey</type><type>OpenSSLCertificate</type><type>array</type><type>string</type></type><parameter>public_key</parameter></methodparam>
+   <methodparam choice="opt"><type class="union"><type>string</type><type>int</type></type><parameter>algorithm</parameter><initializer><constant>OPENSSL_ALGO_SHA1</constant></initializer></methodparam>
   </methodsynopsis>
   <para>
-   <function>openssl_verify</function> 使用与<parameter>pub_key_id</parameter>关联的公钥验证指定数据<parameter>data</parameter>的签名<parameter>signature</parameter>是否正确。这必须是与用于签名的私钥相对应的公钥。
+   <function>openssl_verify</function> 使用与 <parameter>public_key</parameter> 关联的公钥验证指定数据 <parameter>data</parameter>
+   的签名 <parameter>signature</parameter> 是否正确。这必须是与用于签名的私钥相对应的公钥。
   </para>
  </refsect1>
 
@@ -39,15 +39,15 @@
      <term><parameter>signature</parameter></term>
      <listitem>
       <para>
-       原始二进制字符串，通过<function>openssl_sign</function>或类似的函数生成。
+       原始二进制字符串，通过 <function>openssl_sign</function> 或类似的函数生成。
       </para>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>pub_key_id</parameter></term>
+     <term><parameter>public_key</parameter></term>
      <listitem>
       <para>
-       <type>resource</type> - 一个密钥, 通过 <function>openssl_get_publickey</function> 函数返回。
+       <classname>OpenSSLAsymmetricKey</classname> - 一个密钥, 通过 <function>openssl_get_publickey</function> 函数返回。
       </para>
       <para>
        <type>string</type> - 一个 PEM 格式的密钥, 比如, "-----BEGIN PUBLIC KEY-----
@@ -56,13 +56,13 @@ MIIBCgK..."
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>signature_alg</parameter></term>
+     <term><parameter>algorithm</parameter></term>
      <listitem>
       <para>
-       <type>int</type> - 以下签名算法之一<link linkend="openssl.signature-algos">Signature Algorithms</link>.
+       <type>int</type> - 以下签名算法之一 <link linkend="openssl.signature-algos">Signature Algorithms</link>.
       </para>
       <para>
-       <type>string</type> - 由<function>openssl_get_md_methods</function>函数返回的可用字符串，比如， "sha1WithRSAEncryption" 或者 "sha512".
+       <type>string</type> - 由 <function>openssl_get_md_methods</function> 函数返回的可用字符串，比如，"sha1WithRSAEncryption" 或者 "sha512".
       </para>
      </listitem>
     </varlistentry>
@@ -73,39 +73,39 @@ MIIBCgK..."
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   如果签名正确返回 1, 签名错误返回 0, 内部发生错误则返回-1.
+   如果签名正确返回 1，签名错误返回 0，错误时返回 -1 或 &false;。
   </para>
  </refsect1>
 
  <refsect1 role="changelog">
   &reftitle.changelog;
-  <para>
-   <informaltable>
-    <tgroup cols="2">
-     <thead>
-      <row>
-       <entry>&Version;</entry>
-       <entry>&Description;</entry>
-      </row>
-     </thead>
-     <tbody>
-      <row>
-       <entry>5.2.0</entry>
-       <entry>
-        添加了 <parameter>signature_alg</parameter> 参数。
-       </entry>
-      </row>
-     </tbody>
-    </tgroup>
-   </informaltable>
-  </para>
+  <informaltable>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>&Version;</entry>
+      <entry>&Description;</entry>
+     </row>
+    </thead>
+    <tbody>
+     <row>
+      <entry>8.0.0</entry>
+      <entry>
+       <parameter>public_key</parameter> 现在接受 <classname>OpenSSLAsymmetricKey</classname>
+       或 <classname>OpenSSLCertificate</classname> 实例；之前接受类型 <literal>OpenSSL key</literal> 或
+       <literal>OpenSSL X.509</literal> 的 &resource;。
+      </entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </informaltable>
  </refsect1>
 
  <refsect1 role="examples">
   &reftitle.examples;
   <para>
    <example>
-    <title><function>openssl_verify</function> 范例：</title>
+    <title><function>openssl_verify</function> 示例</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -130,7 +130,7 @@ openssl_free_key($pubkeyid);
     </programlisting>
    </example>
    <example>
-    <title><function>openssl_verify</function> 范例：</title>
+    <title><function>openssl_verify</function> 示例</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -146,10 +146,10 @@ $details = openssl_pkey_get_details($private_key_res);
 $public_key_res = openssl_pkey_get_public($details['key']);
 
 //create signature
-openssl_sign($data, $signature, $private_key_res, "sha1WithRSAEncryption");
+openssl_sign($data, $signature, $private_key_res, "sha256WithRSAEncryption");
 
 //verify signature
-$ok = openssl_verify($data, $signature, $public_key_res, OPENSSL_ALGO_SHA1);
+$ok = openssl_verify($data, $signature, $public_key_res, OPENSSL_ALGO_SHA256);
 if ($ok == 1) {
     echo "valid";
 } elseif ($ok == 0) {
@@ -174,7 +174,6 @@ if ($ok == 1) {
  </refsect1>
 
 </refentry>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
