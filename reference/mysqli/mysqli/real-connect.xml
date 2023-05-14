@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 63b99082ef83eade08151f8cb528246fded81db9 Maintainer: 谢毅斌 Status: ready -->
+<!-- EN-Revision: 2d77c9fe145f74663128006eb71662b0c44e8987 Maintainer: 谢毅斌 Status: ready -->
 <!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="mysqli.real-connect" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
@@ -14,25 +14,25 @@
   <para>&style.oop;</para>
   <methodsynopsis role="mysqli">
    <modifier>public</modifier> <type>bool</type><methodname>mysqli::real_connect</methodname>
-   <methodparam choice="opt"><type>string</type><parameter>host</parameter></methodparam>
-   <methodparam choice="opt"><type>string</type><parameter>username</parameter></methodparam>
-   <methodparam choice="opt"><type>string</type><parameter>passwd</parameter></methodparam>
-   <methodparam choice="opt"><type>string</type><parameter>dbname</parameter></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter>port</parameter></methodparam>
-   <methodparam choice="opt"><type>string</type><parameter>socket</parameter></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter>flags</parameter></methodparam>
+   <methodparam choice="opt"><type class="union"><type>string</type><type>null</type></type><parameter>hostname</parameter><initializer>&null;</initializer></methodparam>
+   <methodparam choice="opt"><type class="union"><type>string</type><type>null</type></type><parameter>username</parameter><initializer>&null;</initializer></methodparam>
+   <methodparam choice="opt"><type class="union"><type>string</type><type>null</type></type><parameter>password</parameter><initializer>&null;</initializer></methodparam>
+   <methodparam choice="opt"><type class="union"><type>string</type><type>null</type></type><parameter>database</parameter><initializer>&null;</initializer></methodparam>
+   <methodparam choice="opt"><type class="union"><type>int</type><type>null</type></type><parameter>port</parameter><initializer>&null;</initializer></methodparam>
+   <methodparam choice="opt"><type class="union"><type>string</type><type>null</type></type><parameter>socket</parameter><initializer>&null;</initializer></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>flags</parameter><initializer>0</initializer></methodparam>
   </methodsynopsis>
   <para>&style.procedural;</para>
   <methodsynopsis>
    <type>bool</type><methodname>mysqli_real_connect</methodname>
-   <methodparam><type>mysqli</type><parameter>link</parameter></methodparam>
-   <methodparam choice="opt"><type>string</type><parameter>host</parameter></methodparam>
-   <methodparam choice="opt"><type>string</type><parameter>username</parameter></methodparam>
-   <methodparam choice="opt"><type>string</type><parameter>passwd</parameter></methodparam>
-   <methodparam choice="opt"><type>string</type><parameter>dbname</parameter></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter>port</parameter></methodparam>
-   <methodparam choice="opt"><type>string</type><parameter>socket</parameter></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter>flags</parameter></methodparam>
+   <methodparam><type>mysqli</type><parameter>mysql</parameter></methodparam>
+   <methodparam choice="opt"><type class="union"><type>string</type><type>null</type></type><parameter>hostname</parameter><initializer>&null;</initializer></methodparam>
+   <methodparam choice="opt"><type class="union"><type>string</type><type>null</type></type><parameter>username</parameter><initializer>&null;</initializer></methodparam>
+   <methodparam choice="opt"><type class="union"><type>string</type><type>null</type></type><parameter>password</parameter><initializer>&null;</initializer></methodparam>
+   <methodparam choice="opt"><type class="union"><type>string</type><type>null</type></type><parameter>database</parameter><initializer>&null;</initializer></methodparam>
+   <methodparam choice="opt"><type class="union"><type>int</type><type>null</type></type><parameter>port</parameter><initializer>&null;</initializer></methodparam>
+   <methodparam choice="opt"><type class="union"><type>string</type><type>null</type></type><parameter>socket</parameter><initializer>&null;</initializer></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>flags</parameter><initializer>0</initializer></methodparam>
   </methodsynopsis>
   <para>
    建立一个到 MySQL 服务器的链接。
@@ -66,11 +66,11 @@
    <variablelist>
     &mysqli.link.description;
     <varlistentry>
-     <term><parameter>host</parameter></term>
+     <term><parameter>hostname</parameter></term>
      <listitem>
       <para>
-       可以使用域名、IP 地址。如果传送 &null; 或者字符串 "localhost" 那么会使用
-       通道替代 TCP/IP 连接本地服务器。
+       可以使用域名、IP 地址。如果传递 &null;，值将从 <link linkend="ini.mysqli.default-host">mysqli.default_host</link>
+       中检索。如果可能，将使用管道代替 TCP/IP 协议。如果同时提供主机名和端口号，则使用 TCP/IP 协议，例如 <literal>localhost:3308</literal>。
       </para>
      </listitem>
     </varlistentry>
@@ -78,24 +78,23 @@
      <term><parameter>username</parameter></term>
      <listitem>
       <para>
-       MySQL 登录用户名
+       MySQL 登录用户名，为 &null; 时则假设是基于 <link linkend="ini.mysqli.default-user">mysqli.default_user</link> ini 选项的用户名。
       </para>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>passwd</parameter></term>
+     <term><parameter>password</parameter></term>
      <listitem>
       <para>
-       如果设置 &null;，那么会使用没有密码验证的方式尝试登录。这样可以为一个用户
-       提供不同的权限，基于他是否提供了密码。
+       MySQL 密码，为 &null; 时则假设是基于 <link linkend="ini.mysqli.default-user">mysqli.default_port</link> ini 选项的密码。
       </para>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><parameter>dbname</parameter></term>
+     <term><parameter>database</parameter></term>
      <listitem>
       <para>
-       设置执行查询语句的默认数据库。
+       执行查询语句的默认数据库或为 &null;。
       </para>
      </listitem>
     </varlistentry>
@@ -103,7 +102,7 @@
      <term><parameter>port</parameter></term>
      <listitem>
       <para>
-       指定 MySQL 服务器的端口
+       MySQL 服务器的端口，为 &null; 时则假设是基于 <link linkend="ini.mysqli.default-user">mysqli.default_socket</link> ini 选项的套接字。
       </para>
      </listitem>
     </varlistentry>
@@ -116,7 +115,7 @@
       <note>
        <para>
         指定 <parameter>socket</parameter> 参数并不能说明要采用何种方式连接数据库。
-        连接数据的方式由 <parameter>host</parameter> 设定。
+        连接数据的方式由 <parameter>hostname</parameter> 设定。
        </para>
       </note>
      </listitem>
@@ -192,6 +191,30 @@
  <refsect1 role="errors">
   &reftitle.errors;
   &mysqli.conditionalexception;
+ </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <para>
+   <informaltable>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>&Version;</entry>
+       <entry>&Description;</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>7.4.0</entry>
+       <entry>
+        所有的参数都可为 null。
+       </entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </informaltable>
+  </para>
  </refsect1>
 
  <refsect1 role="examples">
