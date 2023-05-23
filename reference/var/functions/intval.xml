@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 0c9c2dd669fe9395eaa73d487fbd160f9057429a Maintainer: daijie Status: ready -->
+<!-- EN-Revision: bd57732fa1326ec849fe59b5bc08d2e660175b85 Maintainer: daijie Status: ready -->
 <refentry xml:id="function.intval" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>intval</refname>
@@ -18,7 +18,7 @@
    通过使用指定的进制 <parameter>base</parameter> 转换（默认是十进制），返回变量 <parameter>value</parameter>
    的 <type>int</type> 数值。
    <function>intval</function> 不能用于 object，否则会产生
-   <constant>E_NOTICE</constant> 错误并返回 1。
+   <constant>E_WARNING</constant> 错误并返回 1。
   </para>
  </refsect1>
 
@@ -87,13 +87,35 @@
   </para>
  </refsect1>
 
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <informaltable>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>&Version;</entry>
+      <entry>&Description;</entry>
+     </row>
+    </thead>
+    <tbody>
+     <row>
+      <entry>8.0.0</entry>
+      <entry>
+       对象转换时的错误级别已从 <constant>E_NOTICE</constant> 更改为 <constant>E_WARNING</constant>。
+      </entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </informaltable>
+ </refsect1>
+
  <refsect1 role="examples">
   &reftitle.examples;
   <para>
    <example>
     <title><function>intval</function> 例子</title>
     <para>
-     下面的例子运行于 32 位系统上。
+     下面的例子运行于 64 位系统上。
     </para>
     <programlisting role="php">
 <![CDATA[
@@ -105,12 +127,14 @@ echo intval('+42');                   // 42
 echo intval('-42');                   // -42
 echo intval(042);                     // 34
 echo intval('042');                   // 42
-echo intval(1e10);                    // 1410065408
-echo intval('1e10');                  // 1
+echo intval(1e10);                    // 10000000000
+echo intval('1e10');                  // 10000000000
 echo intval(0x1A);                    // 26
+echo intval('0x1A');                  // 0
+echo intval('0x1A', 0);               // 26
 echo intval(42000000);                // 42000000
-echo intval(420000000000000000000);   // 0
-echo intval('420000000000000000000'); // 2147483647
+echo intval(420000000000000000000);   // -4275113695319687168
+echo intval('420000000000000000000'); // 9223372036854775807
 echo intval(42, 8);                   // 42
 echo intval('42', 8);                 // 34
 echo intval(array());                 // 0
