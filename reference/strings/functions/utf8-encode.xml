@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: b6f10b97e0d9405144b6100110e935af24161ab6 Maintainer: Gregory Status: ready -->
+<!-- EN-Revision: b676d0b9c968ebb0b7429835f2f6bd364275eed1 Maintainer: Gregory Status: ready -->
 <!-- CREDITS: mowangjuanzi -->
  <refentry xml:id="function.utf8-encode" xmlns="http://docbook.org/ns/docbook">
   <refnamediv>
@@ -11,7 +11,7 @@
  <refsynopsisdiv>
   &warn.deprecated.function-8-2-0;
  </refsynopsisdiv>
- 
+
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
@@ -121,6 +121,83 @@ echo bin2hex($utf8_string), "\n";
 ]]>
    </screen>
   </example>
+ </refsect1>
+
+ <refsect1 role="notes">
+  &reftitle.notes;
+  <note>
+   <title>弃用和替代方案</title>
+   <para>
+    从 PHP 8.2.0 开始，<emphasis>弃用</emphasis>此函数，并将在未来的版本中删除。应检查现有用途并用适当的替代方案。
+   </para>
+   <para>
+    类似的功能可以通过 <function>mb_convert_encoding</function> 实现，支持 ISO-8859-1 和许多其他字符编码。
+    <informalexample>
+     <programlisting role="php">
+ <![CDATA[
+<?php
+$iso8859_1_string = "\xEB"; // 'ë' (e with diaeresis) in ISO-8859-1
+$utf8_string = mb_convert_encoding($iso8859_1_string, 'UTF-8', 'ISO-8859-1');
+echo bin2hex($utf8_string), "\n";
+
+$iso8859_7_string = "\xEB"; // the same string in ISO-8859-7 represents 'λ' (Greek lower-case lambda)
+$utf8_string = mb_convert_encoding($iso8859_7_string, 'UTF-8', 'ISO-8859-7');
+echo bin2hex($utf8_string), "\n";
+
+$windows_1252_string = "\x80"; // '€' (Euro sign) in Windows-1252, but not in ISO-8859-1
+$utf8_string = mb_convert_encoding($windows_1252_string, 'UTF-8', 'Windows-1252');
+echo bin2hex($utf8_string), "\n";
+?>
+]]>
+     </programlisting>
+     &example.outputs;
+     <screen>
+<![CDATA[
+c3ab
+cebb
+e282ac
+]]>
+     </screen>
+    </informalexample>
+   </para>
+   <para>
+    根据安装的扩展，其他有效选项是
+    <methodname>UConverter::transcode</methodname> 和 <function>iconv</function>。
+   </para>
+   <para>
+    以下都给出相同的结果：
+    <informalexample>
+     <programlisting role="php">
+<![CDATA[
+<?php
+$iso8859_1_string = "\x5A\x6F\xEB"; // 'Zoë' in ISO-8859-1
+
+$utf8_string = utf8_encode($iso8859_1_string);
+echo bin2hex($utf8_string), "\n";
+
+$utf8_string = mb_convert_encoding($iso8859_1_string, 'UTF-8', 'ISO-8859-1');
+echo bin2hex($utf8_string), "\n";
+
+$utf8_string = UConverter::transcode($iso8859_1_string, 'UTF8', 'ISO-8859-1');
+echo bin2hex($utf8_string), "\n";
+
+$utf8_string = iconv('ISO-8859-1', 'UTF-8', $iso8859_1_string);
+echo bin2hex($utf8_string), "\n";
+?>
+]]>
+     </programlisting>
+     &example.outputs;
+     <screen>
+<![CDATA[
+5a6fc3ab
+5a6fc3ab
+5a6fc3ab
+5a6fc3ab
+]]>
+     </screen>
+    </informalexample>
+   </para>
+  </note>
  </refsect1>
 
  <refsect1 role="seealso">
