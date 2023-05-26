@@ -1,55 +1,168 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
-  <refentry xml:id="function.pg-query" xmlns="http://docbook.org/ns/docbook">
-   <refnamediv>
-    <refname>pg_query</refname>
-    <refpurpose>执行查询</refpurpose>
-   </refnamediv>
-   <refsect1>
-    <title>说明</title>
-     <methodsynopsis>
-      <type>resource</type><methodname>pg_query</methodname>
-      <methodparam><type>resource</type><parameter>connection</parameter></methodparam>
-      <methodparam><type>string</type><parameter>query</parameter></methodparam>
-     </methodsynopsis>
-    <para>
-     <function>pg_query</function>
-     在查询可以执行时返回查询结果资源号。如果查询失败或者提供的连接号无效则返回
-     &false;。如果连接号有效，则可以用 <function>pg_last_error</function>
-     函数来提取详细的错误信息。<function>pg_query</function>
-     发送一条 SQL 语句到 <parameter>connection</parameter>
-     资源指定的 PostgreSQL 数据库。<parameter>connection</parameter>
-     必须是由 <function>pg_connect</function> 或 <function>pg_pconnect</function>
-     返回的合法连接号。本函数返回值是一个其它 PostgreSQL 函数例如
-     <function>pg_fetch_array</function> 可以用来访问查询结果的查询结果资源号。
-     <note>
-      <simpara>
-       <parameter>connection</parameter> 是 <function>pg_query</function>
-       中的可选参数。如果没有指定
-       <parameter>connection</parameter>，则使用默认连接。默认连接是
-       <function>pg_connect</function> 或 <function>pg_pconnect</function>
-       所打开的最后一个连接。
-      </simpara>
-      <simpara>
-       尽管 <parameter>connection</parameter>
-       参数可以省略，但不推荐这样做。因为这样可能会导致很难发现脚本中的错误。
-      </simpara>
-     </note>
-    </para>
-    <note>
-     <para>
-      本函数以前的名字为 <literal>pg_exec()</literal>。<literal>pg_exec()</literal>
-      函数为了兼容性的原因仍然可以使用，但是鼓励用户使用新的名字。
-     </para>
-    </note>
-    <para>
-     参见 <function>pg_connect</function>，<function>pg_pconnect</function>，<function>pg_fetch_array</function>，<function>pg_fetch_object</function>，<function>pg_num_rows</function>
-     和 <function>pg_affected_rows</function>。
-    </para>
-   </refsect1>
-  </refentry>
+<!-- EN-Revision: c2eca73ef79ebe78cebb34053e41b565af504c4f Maintainer: dallas Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
+<!-- splitted from ./en/functions/pgsql.xml, last change in rev 1.2 -->
+<refentry xml:id="function.pg-query" xmlns="http://docbook.org/ns/docbook">
+ <refnamediv>
+  <refname>pg_query</refname>
+  <refpurpose>执行查询</refpurpose>
+ </refnamediv>
+
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <type class="union"><type>PgSql\Result</type><type>false</type></type><methodname>pg_query</methodname>
+   <methodparam choice="opt"><type>PgSql\Connection</type><parameter>connection</parameter></methodparam>
+   <methodparam><type>string</type><parameter>query</parameter></methodparam>
+  </methodsynopsis>
+  <para>
+   <function>pg_query</function> 在特定数据库 <parameter>connection</parameter> 上执行
+   <parameter>query</parameter>。<function>pg_query_params</function> 在大多数情况下应该是首选。
+  </para>
+  <para>
+   如果发生错误并返回 &false;，那么在连接有效时可以使用 <function>pg_last_error</function> 函数检索错误的详细信息。
+  </para>
+  <para>
+   <note>
+    <simpara>
+     尽管可以省略 <parameter>connection</parameter>，但不建议这样做，因为可能会导致脚本中的错误难以发现。
+    </simpara>
+   </note>
+  </para>
+  <note>
+   <para>
+    本函数以前的名字为 <function>pg_exec</function>。<function>pg_exec</function>
+    因为兼容性原因仍可使用，但鼓励用户使用新名称。
+   </para>
+  </note>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>connection</parameter></term>
+     <listitem>
+      &pgsql.parameter.connection-with-unspecified-default;
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>query</parameter></term>
+     <listitem>
+      <para>
+       要执行的 SQL 语句。当多个语句传递给函数时，将作为一个事务自动执行，除非查询字符串中包含明确的 BEGIN/COMMIT 命令。但是，不建议在一个函数调用中使用多个事务。
+      </para>
+      <warning>
+       <para>
+        用户提供的数据作为字符串插入值非常危险，很可能导致 <link linkend="security.database.sql-injection">SQL
+        注入</link>漏洞。在大多数情况下，应该首选 <function>pg_query_params</function>，将用户提供的值作为参数传递，而不是将它们替换为查询字符串。
+       </para>
+       <para>
+        任何用户提供的数据，都应该<link linkend="function.pg-escape-string">正确转义</link>，然后直接替换为查询字符串。
+       </para>
+      </warning>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   成功时为 <classname>PgSql\Result</classname> 实例，&return.falseforfailure;。
+  </para>
+ </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <informaltable>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>&Version;</entry>
+      <entry>&Description;</entry>
+     </row>
+    </thead>
+    <tbody>
+     &pgsql.changelog.return-result-object;
+     &pgsql.changelog.connection-object;
+    </tbody>
+   </tgroup>
+  </informaltable>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title><function>pg_query</function> 示例</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+
+$conn = pg_pconnect("dbname=publisher");
+if (!$conn) {
+  echo "An error occurred.\n";
+  exit;
+}
+
+$result = pg_query($conn, "SELECT author, email FROM authors");
+if (!$result) {
+  echo "An error occurred.\n";
+  exit;
+}
+
+while ($row = pg_fetch_row($result)) {
+  echo "Author: $row[0]  E-mail: $row[1]";
+  echo "<br />\n";
+}
+
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   <example>
+    <title>使用多条语句的 <function>pg_query</function></title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+
+$conn = pg_pconnect("dbname=publisher");
+
+// 这些语句将作为一个事务执行
+
+$query = "UPDATE authors SET author=UPPER(author) WHERE id=1;";
+$query .= "UPDATE authors SET author=LOWER(author) WHERE id=2;";
+$query .= "UPDATE authors SET author=NULL WHERE id=3;";
+
+pg_query($conn, $query);
+
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>pg_connect</function></member>
+    <member><function>pg_pconnect</function></member>
+    <member><function>pg_fetch_array</function></member>
+    <member><function>pg_fetch_object</function></member>
+    <member><function>pg_num_rows</function></member>
+    <member><function>pg_affected_rows</function></member>
+   </simplelist>
+  </para>
+ </refsect1>
+</refentry>
 
 <!-- Keep this comment at the end of the file
 Local variables:
