@@ -1,46 +1,96 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
-  <refentry xml:id='function.pg-unescape-bytea' xmlns="http://docbook.org/ns/docbook">
-   <refnamediv>
-    <refname>pg_unescape_bytea</refname>
-    <refpurpose>
-     取消 bytea 类型中的字符串转义
-    </refpurpose>
-   </refnamediv>
-   <refsect1>
-    <title>说明</title>
-     <methodsynopsis>
-      <type>string</type><methodname>pg_unescape_bytea</methodname>
-      <methodparam><type>string</type><parameter>data</parameter></methodparam>
-     </methodsynopsis>
-    <para>
-     <function>pg_unescape_bytea</function> 将
-     bytea 数据类型中的字符串取消转义。返回未转义的字符串（二进制）。
-    </para>
-    <note>
-     <para>
-      当 SELECT bytea 类型，PostgreSQL
-      返回用 \ 前导的八进制字节值（例如 \032）。用户需要自行将其转换回二进制格式。
-     </para>
-     <para>
-      本函数需要
-      PostgreSQL 7.2 或更新版本。在
-      PostgreSQL 7.2.0 和 7.2.1
-      中，当激活了多字节支持时必须强制转换为 bytea 类型，例如
-      <literal>INSERT INTO test_table (image)
-      VALUES ('$image_escaped'::bytea);</literal>。PostgreSQL 7.2.2
-      或更新版本不需要强制转换。例外是当客户端和后端的字符编码不匹配时，有可能出现多字节流错误。用户必须强制转换为 bytea 来避免此错误。
-     </para>
-    </note>
-    <para>
-     参见 <function>pg_escape_bytea</function> 和
-     <function>pg_escape_string</function>。
-    </para>
-   </refsect1>
-  </refentry>
+<!-- EN-Revision: 58645a79f1993effc0571f7b49acc9aace0e417f Maintainer: dallas Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
+<!-- splitted from ./en/functions/pgsql.xml, last change in rev 1.61 -->
+<refentry xml:id="function.pg-unescape-bytea" xmlns="http://docbook.org/ns/docbook">
+ <refnamediv>
+  <refname>pg_unescape_bytea</refname>
+  <refpurpose>
+   反转义 bytea 类型的二进制数据
+  </refpurpose>
+ </refnamediv>
 
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <type>string</type><methodname>pg_unescape_bytea</methodname>
+   <methodparam><type>string</type><parameter>string</parameter></methodparam>
+  </methodsynopsis>
+  <para>
+   <function>pg_unescape_bytea</function> 反转义 PostgreSQL bytea 数据值。返回反转义后的字符串，可能包含二进制数据。
+  </para>
+  <note>
+   <para>
+    当 <literal>SELECT</literal> bytea 类型时，PostgreSQL
+    返回前缀为“\”的八进制字节值（例如 \032）。用户需要手动将其转换回二进制格式。
+   </para>
+   <para>
+    本函数需要 PostgreSQL 7.2 及其以后的版本。在 PostgreSQL 7.2.0 和 7.2.1 中，当启用了多字节支持时 bytea 值必需进行类型转换，例如
+    <literal>INSERT INTO test_table (image) VALUES ('$image_escaped'::bytea);</literal> ；PostgreSQL 7.2.2
+    及其以后的版本不需要类型转换。唯一的例外是当客户端和后端的字符编码不匹配时，有可能出现多字节流错误。用户必须将其转换为 bytea 来避免此错误。
+   </para>
+  </note>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>string</parameter></term>
+     <listitem>
+      <para>
+       <type>string</type>，包含 PostgreSQL bytea 数据，需要转换为 PHP 二进制字符串。
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   包含反转义数据的 <type>string</type>。
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title><function>pg_unescape_bytea</function> 示例</title>
+    <programlisting role="php">
+<![CDATA[
+<?php 
+  // Connect to the database
+  $dbconn = pg_connect('dbname=foo');
+  
+  // Get the bytea data
+  $res = pg_query("SELECT data FROM gallery WHERE name='Pine trees'");  
+  $raw = pg_fetch_result($res, 'data');
+  
+  // Convert to binary and send to the browser
+  header('Content-type: image/jpeg');
+  echo pg_unescape_bytea($raw);
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>pg_escape_bytea</function></member>
+    <member><function>pg_escape_string</function></member>
+   </simplelist>
+  </para>
+ </refsect1>
+</refentry>
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
