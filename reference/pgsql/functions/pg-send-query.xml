@@ -1,78 +1,141 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
-  <refentry xml:id='function.pg-send-query' xmlns="http://docbook.org/ns/docbook">
-   <refnamediv>
-    <refname>pg_send_query</refname>
-    <refpurpose>
-     发送异步查询
-    </refpurpose>
-   </refnamediv>
-   <refsect1>
-    <title>说明</title>
-     <methodsynopsis>
-      <type>bool</type><methodname>pg_send_query</methodname>
-      <methodparam><type>resource</type><parameter>connection</parameter></methodparam>
-      <methodparam><type>string</type><parameter>query</parameter></methodparam>
-     </methodsynopsis>
-     <methodsynopsis>
-      <type>bool</type><methodname>pg_send_query</methodname>
-      <methodparam><type>string</type><parameter>query</parameter></methodparam>
-     </methodsynopsis>
-    <para>
-     <function>pg_send_query</function> 向 <parameter>connection</parameter>
-     连接发送异步查询。和 <function>pg_query</function> 不同，它可以向 PostgreSQL
-     发送多个查询并用 <function>pg_get_result</function>
-     依次得到结果。当执行查询时脚本的执行不会被锁定。用
-     <function>pg_connection_busy</function> 来检查连接连接是否为忙（即查询正在执行中）。调用
-     <function>pg_cancel_query</function> 则有可能取消查询。
-    </para>
-    <para>
-     尽管用户可以一次发送多个查询，但用户不能通过正忙的连接发送多个查询。如果向正忙的连接发送了查询，则会等待上一条查询结束并丢弃所有结果。
-    </para>
-    <para>
-     <example>
-      <title>异步查询</title>
-      <programlisting role="php">
+<!-- EN-Revision: c2eca73ef79ebe78cebb34053e41b565af504c4f Maintainer: dallas Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
+<!-- splitted from ./en/functions/pgsql.xml, last change in rev 1.2 -->
+<refentry xml:id="function.pg-send-query" xmlns="http://docbook.org/ns/docbook">
+ <refnamediv>
+  <refname>pg_send_query</refname>
+  <refpurpose>
+   发送异步查询
+  </refpurpose>
+ </refnamediv>
+
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <type class="union"><type>int</type><type>bool</type></type><methodname>pg_send_query</methodname>
+   <methodparam><type>PgSql\Connection</type><parameter>connection</parameter></methodparam>
+   <methodparam><type>string</type><parameter>query</parameter></methodparam>
+  </methodsynopsis>
+  <para>
+   <function>pg_send_query</function> 向 <parameter>connection</parameter>
+   发送查询或者异步查询。和 <function>pg_query</function> 不同，它可以一次向 PostgreSQL
+   发送多个查询并用 <function>pg_get_result</function>
+   依次得到结果。
+  </para>
+  <para>
+   当执行查询时不会阻塞脚本执行。用
+   <function>pg_connection_busy</function> 来检查连接是否繁忙（即查询正在执行中）。可以使用
+   <function>pg_cancel_query</function> 取消查询。
+  </para>
+  <para>
+   尽管用户可以同时发送多个查询，但连接繁忙的情况下无法发送多个查询。如果向连接繁忙时发送了查询，则会等待上一个查询结束并丢弃所有结果。
+  </para>
+ </refsect1>
+ 
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>connection</parameter></term>
+     <listitem>
+      &pgsql.parameter.connection;
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>query</parameter></term>
+     <listitem>
+      <para>
+       要执行的 SQL 语句或者语句集合。
+      </para>
+      <para>
+       应该<link linkend="function.pg-escape-string">正确转义</link>查询中的数据。
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   成功时返回 &true;，失败时返回 &false; 或 <literal>0</literal>。使用 <function>pg_get_result</function>
+   来确定查询结果。
+  </para>
+ </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <informaltable>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>&Version;</entry>
+      <entry>&Description;</entry>
+     </row>
+    </thead>
+    <tbody>
+     &pgsql.changelog.connection-object;
+    </tbody>
+   </tgroup>
+  </informaltable>
+ </refsect1>
+ 
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title><function>pg_send_query</function> 示例</title>
+    <programlisting role="php">
 <![CDATA[
 <?php
-    $dbconn = pg_connect("dbname=publisher") or die("Could not connect");
-    if (!pg_connection_busy($dbconn)) {
-        pg_send_query($dbconn,"select * from authors; select count(*) from authors;");
-    }
-    $res1 = pg_get_result($dbconn);
-    echo "First call to pg_get_result(): $res1\n";
-    $rows1 = pg_num_rows($res1);
-    echo "$res1 has $rows1 records\n\n";
-    $res2 = pg_get_result($dbconn);
-    echo "second call to pg_get_result(): $res2\n";
-    $rows2 = pg_num_rows($res2);
-    echo "$res2 has $rows2 records\n";
+  $dbconn = pg_connect("dbname=publisher") or die("Could not connect");
+
+  if (!pg_connection_busy($dbconn)) {
+      pg_send_query($dbconn, "select * from authors; select count(*) from authors;");
+  }
+  
+  $res1 = pg_get_result($dbconn);
+  echo "First call to pg_get_result(): $res1\n";
+  $rows1 = pg_num_rows($res1);
+  echo "$res1 has $rows1 records\n\n";
+  
+  $res2 = pg_get_result($dbconn);
+  echo "Second call to pg_get_result(): $res2\n";
+  $rows2 = pg_num_rows($res2);
+  echo "$res2 has $rows2 records\n";
 ?>
 ]]>
-      </programlisting>
-      <para>
-       上例输出如下：
-      </para>
-      <screen>
+    </programlisting>
+    &example.outputs;
+    <screen>
 <![CDATA[
-first call to pg_get_result(): Resource id #3
+First call to pg_get_result(): Resource id #3
 Resource id #3 has 3 records
 
-second call to pg_get_result(): Resource id #4
+Second call to pg_get_result(): Resource id #4
 Resource id #4 has 1 records
 ]]>
-      </screen>
-     </example>
-    </para>
-    <para>
-     参见 <function>pg_query</function>，<function>pg_cancel_query</function>，<function>pg_get_result</function>
-     和 <function>pg_connection_busy</function>。
-    </para>
-   </refsect1>
-  </refentry>
+    </screen>
+   </example> 
+  </para>
+ </refsect1>
 
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>pg_query</function></member>
+    <member><function>pg_cancel_query</function></member>
+    <member><function>pg_get_result</function></member>
+    <member><function>pg_connection_busy</function></member>
+   </simplelist>
+  </para>
+ </refsect1>
+</refentry>
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
