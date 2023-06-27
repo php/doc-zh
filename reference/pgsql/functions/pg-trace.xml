@@ -1,36 +1,127 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
-  <refentry xml:id="function.pg-trace" xmlns="http://docbook.org/ns/docbook">
-   <refnamediv>
-    <refname>pg_trace</refname>
-    <refpurpose>启动一个 PostgreSQL 连接的追踪功能</refpurpose>
-   </refnamediv>
-   <refsect1>
-    <title>说明</title>
-     <methodsynopsis>
-      <type>bool</type><methodname>pg_trace</methodname>
-      <methodparam><type>string</type><parameter>pathname</parameter></methodparam>
-      <methodparam choice="opt"><type>string</type><parameter>mode</parameter></methodparam>
-      <methodparam choice="opt"><type>resource</type><parameter>connection</parameter></methodparam>
-     </methodsynopsis>
-    <para>
-     <function>pg_trace</function> 启动 PostgreSQL 前端／后端通讯的追踪并记录到 <parameter>pathname</parameter> 指定的文件中。要完全理解结果，用户需要熟悉 PostgreSQL 通讯协议的本质。对不熟悉的用户来说，追踪发送到服务器的查询错误依然有用，例如可以用 <command>grep '^To backend' trace.log</command> 来查看哪些查询实际上被发送到了 PostgreSQL 服务器。更多信息参考 PostgreSQL 手册。
-    </para>
-    <para>
-     参数 <parameter>pathname</parameter> 和 <parameter>mode</parameter> 和 <function>fopen</function>(<parameter>mode</parameter> 默认为 'w') 中的一样。<parameter>connection</parameter> 指定了要追踪的连接，默认为上一个打开的连接。
-    </para>
-    <para>
-     如果 <parameter>pathname</parameter> 可以作为日志文件打开，则
-     <function>pg_trace</function> 返回 &true;，否则返回 &false;。
-    </para>
-    <para>
-     参见 <function>fopen</function> 和 <function>pg_untrace</function>。
-    </para>
-   </refsect1>
-  </refentry>
+<!-- EN-Revision: c2eca73ef79ebe78cebb34053e41b565af504c4f Maintainer: dallas Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
+<!-- splitted from ./en/functions/pgsql.xml, last change in rev 1.7 -->
+<refentry xml:id="function.pg-trace" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <refnamediv>
+  <refname>pg_trace</refname>
+  <refpurpose>启用 PostgreSQL 连接的追踪</refpurpose>
+ </refnamediv>
 
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <type>bool</type><methodname>pg_trace</methodname>
+   <methodparam><type>string</type><parameter>filename</parameter></methodparam>
+   <methodparam choice="opt"><type>string</type><parameter>mode</parameter><initializer>"w"</initializer></methodparam>
+   <methodparam choice="opt"><type class="union"><type>PgSql\Connection</type><type>null</type></type><parameter>connection</parameter><initializer>&null;</initializer></methodparam>
+  </methodsynopsis>
+  <para>
+   <function>pg_trace</function> 启用 PostgreSQL 前后端通讯的追踪并记录到文件。要完全理解结果，需要熟悉 PostgreSQL 通讯协议的内部工作原理。
+  </para>
+  <para>
+   对不熟悉的人来说，追踪发送到服务器的查询错误依然有用，例如可以用 <command>grep '^To backend' trace.log</command> 来查看实际发送到 PostgreSQL
+   服务器的查询。更多信息参考 <link xlink:href="&url.pgsql.manual;">PostgreSQL 手册</link>。
+  </para>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>filename</parameter></term>
+     <listitem>
+      <para>
+       写入追踪日志的文件完整路径和文件名，与 <function>fopen</function> 一致。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>mode</parameter></term>
+     <listitem>
+      <para>
+       可选的文件访问模式，同 <function>fopen</function>。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>connection</parameter></term>
+     <listitem>
+      &pgsql.parameter.connection-with-nullable-default;
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   &return.success;
+  </para>
+ </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <informaltable>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>&Version;</entry>
+      <entry>&Description;</entry>
+     </row>
+    </thead>
+    <tbody>
+     &pgsql.changelog.connection-object;
+     <row>
+      <entry>8.0.0</entry>
+      <entry>
+       <parameter>connection</parameter> 现在可为 null。
+      </entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </informaltable>
+ </refsect1>
+ 
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title><function>pg_trace</function> 示例</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$pgsql_conn = pg_connect("dbname=mark host=localhost");
+
+if ($pgsql_conn) {
+   pg_trace('/tmp/trace.log', 'w', $pgsql_conn);
+   pg_query("SELECT 1");
+   pg_untrace($pgsql_conn);
+   // Now /tmp/trace.log will contain backend communication
+} else {
+   print pg_last_error($pgsql_conn);
+   exit;
+}
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+ </refsect1>
+ 
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>fopen</function></member>
+    <member><function>pg_untrace</function></member>
+   </simplelist>
+  </para>
+ </refsect1>
+</refentry>
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml

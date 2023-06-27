@@ -1,29 +1,123 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
-  <refentry xml:id='function.pg-result-status' xmlns="http://docbook.org/ns/docbook">
-   <refnamediv>
-    <refname>pg_result_status</refname>
-    <refpurpose>
-     获得查询结果的状态
-    </refpurpose>
-   </refnamediv>
-   <refsect1>
-    <title>说明</title>
-     <methodsynopsis>
-      <type>int</type><methodname>pg_result_status</methodname>
-      <methodparam><type>resource</type><parameter>result</parameter></methodparam>
-     </methodsynopsis>
-    <para>
-     <function>pg_result_status</function> 返回该查询结果资源的状态。可能的返回值有 PGSQL_EMPTY_QUERY，PGSQL_COMMAND_OK，PGSQL_TUPLES_OK，PGSQL_COPY_TO，PGSQL_COPY_FROM，PGSQL_BAD_RESPONSE，PGSQL_NONFATAL_ERROR 和 PGSQL_FATAL_ERROR。
-    </para>
-    <para>
-     参见 <function>pg_connection_status</function>。
-    </para>
-   </refsect1>
-  </refentry>
+<!-- EN-Revision: c2eca73ef79ebe78cebb34053e41b565af504c4f Maintainer: dallas Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
+<!-- splitted from ./en/functions/pgsql.xml, last change in rev 1.58 -->
+<refentry xml:id="function.pg-result-status" xmlns="http://docbook.org/ns/docbook">
+ <refnamediv>
+  <refname>pg_result_status</refname>
+  <refpurpose>
+   获得查询结果的状态
+  </refpurpose>
+ </refnamediv>
 
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <type class="union"><type>string</type><type>int</type></type><methodname>pg_result_status</methodname>
+   <methodparam><type>PgSql\Result</type><parameter>result</parameter></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>mode</parameter><initializer><constant>PGSQL_STATUS_LONG</constant></initializer></methodparam>
+  </methodsynopsis>
+  <para>
+   <function>pg_result_status</function> 返回 <classname>PgSql\Result</classname> 实例的状态，或者与 result 相关的 PostgreSQL 命令完成标记。
+  </para>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>result</parameter></term>
+     <listitem>
+      &pgsql.parameter.result;
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>mode</parameter></term>
+     <listitem>
+      <para>
+       要么指定 <constant>PGSQL_STATUS_LONG</constant> 返回 <parameter>result</parameter> 的数字状态，要么指定 <constant>PGSQL_STATUS_STRING</constant> 
+       返回 <parameter>result</parameter> 的命令标记。如果未指定，默认是 <constant>PGSQL_STATUS_LONG</constant>。
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   如果指定 <constant>PGSQL_STATUS_LONG</constant>，可能返回的值是
+   <constant>PGSQL_EMPTY_QUERY</constant>、<constant>PGSQL_COMMAND_OK</constant>、<constant>PGSQL_TUPLES_OK</constant>、<constant>PGSQL_COPY_OUT</constant>、<constant>PGSQL_COPY_IN</constant>、<constant>PGSQL_BAD_RESPONSE</constant>、<constant>PGSQL_NONFATAL_ERROR</constant>
+   和 <constant>PGSQL_FATAL_ERROR</constant>。否则，返回包含 PostgreSQL 命令标记的 <type>string</type>。
+  </para>
+ </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <informaltable>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>&Version;</entry>
+      <entry>&Description;</entry>
+     </row>
+    </thead>
+    <tbody>
+     &pgsql.changelog.result-object;
+    </tbody>
+   </tgroup>
+  </informaltable>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title><function>pg_result_status</function> 示例</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+
+// Connect to the database
+$conn = pg_pconnect("dbname=publisher");
+
+// Execute a COPY
+$result = pg_query($conn, "COPY authors FROM STDIN;");
+
+// Get the result status
+$status = pg_result_status($result);
+
+// Determine status
+if ($status == PGSQL_COPY_IN)
+   echo "Copy began.";
+else
+   echo "Copy failed.";
+ 
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+Copy began.
+]]>
+    </screen>
+   </example>
+  </para>
+ </refsect1>
+ 
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>pg_connection_status</function></member>
+   </simplelist>
+  </para>
+ </refsect1>
+</refentry>
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
