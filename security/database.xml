@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: fa6c0138655159c9a360fbbf0364ac0f38274abd Maintainer: lm92 Status: ready -->
-<!-- CREDITS: dallas -->
+<!-- EN-Revision: 5f7a949cfc6f43d481d3a9513f9ee19db9afe21d Maintainer: lm92 Status: ready -->
+<!-- CREDITS: dallas, mowangjuanzi -->
   <chapter xml:id="security.database" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
    <title>数据库安全</title>
 
@@ -120,27 +119,23 @@ if ($row && password_verify($password, $row['pwd'])) {
    <sect1 xml:id="security.database.sql-injection">
     <title>SQL 注入</title>
     <simpara>
-     很多 web 开发者没有注意到 SQL 查询是可以被篡改的，因而把 SQL
-     查询当作可信任的命令。殊不知道，SQL
-     查询可以绕开访问控制，从而绕过身份验证和权限检查。更有甚者，有可能通过 SQL
-     查询去运行主机操作系统级的命令。
-    </simpara>
-    <simpara>
-     直接 SQL 命令注入就是攻击者常用的一种创建或修改已有 SQL
-     语句的技术，从而达到取得隐藏数据，或覆盖关键的值，甚至执行数据库主机操作系统命令的目的。这是通过应用程序取得用户输入并与静态参数组合成
-     SQL 查询来实现的。下面将会给出一些真实的例子。
+     SQL 注入是一种攻击技术，攻击者利用应用程序代码中构建动态 SQL
+     查询的缺陷。攻击者可以访问应用程序的特权部分，从数据库检索所有信息，篡改现有数据，甚至在数据库主机上执行危险的系统级命令。当开发人员在他们的
+     SQL 语句中连接或插入任意输入时，这种漏洞就会发生。
     </simpara>
     <para>
-     由于在缺乏对输入的数据进行验证，并且使用了超级用户或其它有权创建新用户的数据库帐号来连接，攻击者可以在数据库中新建一个超级用户。
      <example>
       <title>
-       一段实现数据分页显示的代码…… 也可以被用作创建一个超级用户（PostgreSQL 数据库）。
+       将结果集切割成页面……并创建超级用户（PostgreSQL）。
       </title>
+      <simpara>
+       在下面的示例中，用户输入直接插入到 SQL 查询中，使得攻击者能够在数据库中获得超级用户账户。
+      </simpara>
       <programlisting role="php">
 <![CDATA[
 <?php
 
-$offset = $argv[0]; // 注意，没有输入验证！
+$offset = $_GET['offset']; // 注意，没有输入验证！
 $query  = "SELECT id, name FROM products ORDER BY name LIMIT 20 OFFSET $offset;";
 $result = pg_query($conn, $query);
 
@@ -148,10 +143,8 @@ $result = pg_query($conn, $query);
 ]]>
       </programlisting>
      </example>
-      一般的用户会点击 <varname>$offset</varname>
-      已被斌值的“上一页”、“下一页”的链接。原本代码只会认为 <varname>$offset</varname>
-      是一个数值。然而，如果有人尝试把以下语句先经过 <function>urlencode</function>
-      处理，然后加入URL中的话：
+      普通用户会点击“上一页”、“下一页”，<varname>$offset</varname> 已经编码到 URL 的链接。脚本期望传入的 <varname>$offset</varname>
+      是数字。然而，如果有人尝试把以下语句追加入 URL 中的话：
       <informalexample>
        <programlisting role="sql">
 <![CDATA[
@@ -163,24 +156,21 @@ insert into pg_shadow(usename,usesysid,usesuper,usecatupd,passwd)
 ]]>
        </programlisting>
       </informalexample>
-      那么他就可以创建一个超级用户了。注意那个 <literal>0;</literal>
-      只不过是为了提供一个正确的偏移量以便补充完整原来的查询，使它不要出错而已。
+      如果发生，脚本将向攻击者提供超级用户访问权限。注意那个 <literal>0;</literal> 是为了向原始查询提供有效的偏移量并终止。
     </para>
     <note>
      <para>
-      <literal>--</literal> 是 SQL 的注释标记，一般可以使用来它告诉 SQL 解释器忽略后面的语句。
+      这是常见的技术，使用 SQL 中的注释符号 <literal>--</literal>，强制 SQL 解析器忽略开发者编写的查询的其余部分。
      </para>
     </note>
     <para>
-     对显示搜索结果的页面下手是一个能得到密码的可行办法。攻击者所要做的只不过是找出哪些提交上去的变量是用于
-     SQL 语句并且处理不当的。而这类的变量通常都被用于 <literal>SELECT</literal>
-     查询中的条件语句，如 <literal>WHERE, ORDER BY, LIMIT</literal> 和
-     <literal>OFFSET</literal>。如果数据库支持 <literal>UNION</literal>
-     构造的话，攻击者还可能会把一个完整的 SQL
-     查询附加到原来的语句上以便从任意数据表中得到密码。因此，对密码字段加密是很重要的。
+     获取密码的一种可行方式是欺骗搜索结果页面。攻击者只需查看是否有已提交的未经适当处理变量在 SQL
+     语句中使用。这些过滤器通常可以在先前的表单中设置，以定制 <literal>SELECT</literal> 语句中的
+     <literal>WHERE、ORDER BY、LIMIT</literal> 和 <literal>OFFSET</literal> 子句。如果数据库支持
+     <literal>UNION</literal> 构造，攻击者可能会尝试将整个查询附加到原始查询中，以从任意表中列出密码。强烈建议仅存储密码的安全散列值，而不是密码本身。
      <example>
       <title>
-       显示文章……以及一些密码（任何数据库系统）
+       列出文章……以及一些密码（任何数据库服务器）
       </title>
       <programlisting role="php">
 <![CDATA[
@@ -194,8 +184,7 @@ $result = odbc_exec($conn, $query);
 ]]>
       </programlisting>
      </example>
-     可以在原来的查询的基础上添加另一个
-     <literal>SELECT</literal> 查询来获得密码：
+     查询的静态部分可以与另一个 <literal>SELECT</literal> 语句组合来显示所有密码：
      <informalexample>
       <programlisting role="sql">
 <![CDATA[
@@ -205,18 +194,12 @@ union select '1', concat(uname||'-'||passwd) as name, '1971-01-01', '0' from use
 ]]>
       </programlisting>
      </informalexample>
-     假如上述语句（使用 <literal>'</literal> 和
-     <literal>--</literal>）被加入到 <varname>$query</varname>
-     中的任意一个变量的话，那么就麻烦了。
     </para>
     <para>
-     SQL 中的 UPDATE
-     也会受到攻击。这种查询也可能像上面的例子那样被插入或附加上另一个完整的请求。但是攻击者更愿意对
-     <literal>SET</literal>
-     子句下手，这样他们就可以更改数据表中的一些数据。这种情况下必须要知道数据库的结构才能修改查询成功进行。可以通过表单上的变量名对字段进行猜测，或者进行暴力破解。对于存放用户名和密码的字段，命名的方法并不多。
+     <literal>UPDATE</literal> 和 <literal>INSERT</literal> 语句也容易受到这种攻击的影响。
      <example>
      <title>
-      从重设密码……到获得更多权限（任何数据库系统）
+      从重置密码……到获得更多权限（任何数据库服务器）
      </title>
       <programlisting role="php">
 <![CDATA[
@@ -226,10 +209,10 @@ $query = "UPDATE usertable SET pwd='$pwd' WHERE uid='$uid';";
 ]]>
       </programlisting>
      </example>
-     但是恶意的用户会把 <literal>' or uid like'%admin%'; --</literal>
-     作为变量的值提交给 <varname>$uid</varname> 来改变 admin 的密码，或者把
-     <varname>$pwd</varname> 的值提交为 <literal>"hehehe', admin='yes',
-     trusted=100 "</literal>（后面有个空格）去获得更多的权限。这样做的话，查询语句实际上就变成了：
+     如果恶意的用户提交值 <literal>' or uid like'%admin%</literal>
+     给 <varname>$uid</varname> 来改变 admin 的密码，或者简单设置
+     <varname>$pwd</varname> 为 <literal>hehehe', trusted=100, admin='yes</literal>
+     去获得更多权限，然后查询语句实际上就变成了：
      <informalexample>
       <programlisting role="php">
 <![CDATA[
@@ -247,10 +230,16 @@ $query = "UPDATE usertable SET pwd='hehehe', trusted=100, admin='yes' WHERE
       </programlisting>
      </informalexample>
     </para>
+    <simpara>
+     虽然攻击者必须具备至少一些关于数据库架构的知识才能进行成功的攻击，但获取这些信息通常非常简单。例如代码可以是开源软件的一部分并且公开可用。这些信息也可能通过闭源代码泄露——即使它经过了编码、混淆或编译——甚至通过自己的代码显示错误消息来泄露。其他方法包括使用典型的
+     table 和列名。例如，使用“users” table 和列名“id”、“username”和“password”的登录表单。
+    </simpara>
     <para>
-     下面这个可怕的例子将会演示如何在某些数据库上执行系统命令。
      <example>
-     <title>攻击数据库所在主机的操作系统（MSSQL Server 数据库）</title>
+     <title>攻击数据库主机操作系统（MSSQL Server）</title>
+      <simpara>
+       一种可怕的示例是一些数据库主机上可以访问操作系统级别的命令。
+      </simpara>
       <programlisting role="php">
 <![CDATA[
 <?php
@@ -262,10 +251,9 @@ $result = mssql_query($query);
 ]]>
       </programlisting>
      </example>
-     如果攻击提交
+     如果攻击者提交
      <literal>a%' exec master..xp_cmdshell 'net user test testpass /ADD' --</literal>
-     作为变量 <varname>$prod</varname>的值，那么
-     <varname>$query</varname> 将会变成
+     作为变量 <varname>$prod</varname> 的值，那么 <varname>$query</varname> 将会变成
      <informalexample>
       <programlisting role="php">
 <![CDATA[
@@ -280,101 +268,102 @@ $result = mssql_query($query);
 ]]>
       </programlisting>
      </informalexample>
-     MSSQL 服务器会执行这条 SQL
-     语句，包括它后面那个用于向系统添加用户的命令。如果这个程序是以
-     <literal>sa</literal> 运行而 MSSQLSERVER
-     服务又有足够的权限的话，攻击者就可以获得一个系统帐号来访问主机了。
+     MSSQL Server 执行批处理中的 SQL 语句，其中包括向本地账户数据库添加新用户的命令。如果该应用程序以 <literal>sa</literal>
+     身份运行，并且 MSSQLSERVER 服务以足够的权限运行，则攻击者现在将拥有一个账户，可以用此账户访问这台机器。
     </para>
     <note>
      <para>
-      虽然以上的例子是针对某一特定的数据库系统的，但是这并不代表不能对其它数据库系统实施类似的攻击。使用不同的方法，各种数据库都有可能遭殃。
+      以上的一些示例与特定的数据库服务器相关联，这并不意味着不能对其他产品进行类似的攻击。用户的数据库服务器可能以其他方式同样存在漏洞。
      </para>
     </note>
     <para>
      <mediaobject>
-      <alt>关于 SQL 注入问题的工作实例</alt>
+      <alt>关于 SQL 注入问题的有趣示例</alt>
       <imageobject>
        <imagedata fileref="en/security/figures/xkcd-bobby-tables.png" format="PNG"/>
       </imageobject>
      </mediaobject>
-     Image courtesy of <link xlink:href="&url.xkcd;327">xkcd</link>
+     图片由 <link xlink:href="&url.xkcd;327">xkcd</link> 提供
     </para>
 
     <sect2 xml:id="security.database.avoiding">
      <title>预防措施</title>
-     <simpara>
-      也许有人会自我安慰，说攻击者要知道数据库结构的信息才能实施上面的攻击。没错，确实如此。但没人能保证攻击者一定得不到这些信息，一但他们得到了，数据库有泄露的危险。如果你在用开放源代码的软件包来访问数据库，比如论坛程序，攻击者就很容得到到相关的代码。如果这些代码设计不良的话，风险就更大了。
-     </simpara>
-     <simpara>
-      这些攻击总是建立在发掘安全意识不强的代码上的。所以，永远不要信任外界输入的数据，特别是来自于客户端的，包括选择框、表单隐藏域和
-      cookie。就如上面的第一个例子那样，就算是正常的查询也有可能造成灾难。
-     </simpara>
-
-     <itemizedlist>
-      <listitem>
-       <simpara>
-        永远不要使用超级用户或所有者帐号去连接数据库。要用权限被严格限制的帐号。
-       </simpara>
-      </listitem>
-      <listitem>
-       <simpara>
-        检查输入的数据是否具有所期望的数据格式。PHP
-        有很多可以用于检查输入的函数，从简单的
-        <link linkend="ref.var">变量函数</link> 和
-        <link linkend="ref.ctype">字符类型函数</link>（比如
-        <function>is_numeric</function>，<function>ctype_digit</function>）到复杂的
-        <link linkend="ref.pcre">Perl 兼容正则表达式函数</link>都可以完成这个工作。
-       </simpara>
-      </listitem>
-      <listitem>
-       <para>
-        如果程序等待输入一个数字，可以考虑使用 <function>is_numeric</function>
-        来检查，或者直接使用 <function>settype</function> 来转换它的类型，也可以用
-        <function>sprintf</function> 把它格式化为数字。
-        <example>
-         <title>一个实现分页更安全的方法</title>
-         <programlisting role="php">
+     <para>
+      避免 SQL 注入的推荐方法是通过使用预处理语句绑定所有数据。仅仅使用参数化查询并不能完全避免 SQL 注入，但它是提供输入给
+      SQL 语句的最简单和最安全的方式。在 <literal>WHERE</literal>、<literal>SET</literal> 和 <literal>VALUES</literal>
+      子句中，所有动态数据常量都必须替换为占位符。实际数据将在执行过程中进行绑定，并与 SQL 命令分开发送。
+     </para>
+     <para>
+      参数绑定只能用于数据。SQL 查询的其他动态部分必须根据已知的允许值列表进行筛选。
+     </para>
+     <para>
+      <example>
+      <title>通过使用 PDO 预处理语句来避免 SQL 注入</title>
+       <programlisting role="php">
 <![CDATA[
 <?php
 
-settype($offset, 'integer');
-$query = "SELECT id, name FROM products ORDER BY name LIMIT 20 OFFSET $offset;";
-
-// 请注意格式字符串中的 %d，如果用 %s 就毫无意义了
-$query = sprintf("SELECT id, name FROM products ORDER BY name LIMIT 20 OFFSET %d;",
-                 $offset);
+// The dynamic SQL part is validated against expected values
+$sortingOrder = $_GET['sortingOrder'] === 'DESC' ? 'DESC' : 'ASC';
+$productId = $_GET['productId'];
+// The SQL is prepared with a placeholder
+$stmt = $pdo->prepare("SELECT * FROM products WHERE id LIKE ? ORDER BY price {$sortingOrder}");
+// The value is provided with LIKE wildcards
+$stmt->execute(["%{$productId}%"]);
 
 ?>
 ]]>
-         </programlisting>
-        </example>
-       </para>
-      </listitem>
-      <listitem>
-       <simpara>
-        使用数据库特定的敏感字符转义函数（比如 <function>mysql_escape_string</function> 和
-        <function>sql_escape_string</function>）把用户提交上来的非数字数据进行转义。如果数据库没有专门的敏感字符转义功能的话
-        <function>addslashes</function> 和 <function>str_replace</function>
-        可以代替完成这个工作。看看<link
-        linkend="security.database.storage">第一个例子</link>，此例显示仅在查询的静态部分加上引号是不够的，查询很容易被攻破。
-       </simpara>
-      </listitem>
-      <listitem>
-       <simpara>
-        要不择手段避免显示出任何有关数据库的信心，尤其是数据库结构。参见<link
-        linkend="security.errors">错误报告</link>和<link
-        linkend="ref.errorfunc">错误处理函数</link>。
-       </simpara>
-      </listitem>
-      <listitem>
-       <simpara>
-        也可以选择使用数据库的存储过程和预定义指针等特性来抽象数库访问，使用户不能直接访问数据表和视图。但这个办法又有别的影响。
-       </simpara>
-      </listitem>
-     </itemizedlist>
+       </programlisting>
+      </example>
+     </para>
 
      <simpara>
-      除此之外，在允许的情况下，使用代码或数据库系统保存查询日志也是一个好办法。显然，日志并不能防止任何攻击，但利用它可以跟踪到哪个程序曾经被尝试攻击过。日志本身没用，要查阅其中包含的信息才行。毕竟，更多的信息总比没有要好。
+      预处理语句由 <link linkend="pdo.prepared-statements">PDO</link>、<link linkend="mysqli.quickstart.prepared-statements">MySQLi</link> 和其他数据库库提供。
+     </simpara>
+
+     <simpara>
+      SQL 注入攻击主要是基于利用代码在编写时没有考虑安全性。永远不要相信任何输入，特别是来自客户端的输入，即使它来自于选择框、隐藏的输入字段或 cookie。第一个示例表明，即使是如此简单的查询也可能带来灾难。
+     </simpara>
+
+     <para>
+      深度防御策略涉及几种良好的编程实践：
+      <itemizedlist>
+       <listitem>
+        <simpara>
+         永远不要以超级用户或数据库所有者的身份连接到数据库。始终使用具有最低权限的自定义用户。
+        </simpara>
+       </listitem>
+       <listitem>
+        <simpara>
+         检查指定输入是否具有预期的数据类型。PHP 拥有很多输入验证函数，从最简单的<link linkend="ref.var">变量函数</link>和<link
+         linkend="ref.ctype">字符类型函数</link>（例如 <function>is_numeric</function>、<function>ctype_digit</function>）到支持
+         <link linkend="ref.pcre">Perl 兼容正则表达式</link>的函数。
+        </simpara>
+       </listitem>
+       <listitem>
+        <simpara>
+         如果应用程序期望数字输入，可以考虑使用 <function>ctype_digit</function> 验证数据，使用
+         <function>settype</function>更改其类型，或者使用 <function>sprintf</function> 打印其数字表示形式。
+        </simpara>
+       </listitem>
+       <listitem>
+        <simpara>
+         如果数据库层不支持绑定变量，则应使用特定于数据库的字符串转义函数（例如 <function>mysql_real_escape_string</function>、<function>sqlite_escape_string</function>
+         等）对传递给数据库的用户提供的非数字值进行转义。通用的函数如 <function>addslashes</function> 只在非常特定的环境中有用（例如在禁用了 <varname>NO_BACKSLASH_ESCAPES</varname>
+         的单字节字符集 MySQL），因此最好避免使用它们。
+        </simpara>
+       </listitem>
+       <listitem>
+        <simpara>
+         请勿以正当或非正当手段打印出任何特定于数据库的信息，特别是关于 schema 的信息。另请参阅<link
+         linkend="security.errors">错误报告</link>和<link linkend="ref.errorfunc">错误处理以及日志记录函数</link>。
+        </simpara>
+       </listitem>
+      </itemizedlist>
+     </para>
+
+     <simpara>
+      除此之外，如果数据库支持日志记录，还可以从脚本里或通过数据库自身记录查询语句。显然，日志记录无法阻止任何有害尝试，但它可以帮助追踪绕过了哪个应用程序。日志本身并没有用处，但通过其中包含的信息可以得到帮助。通常情况下，更详细的信息比较少的信息更好。
      </simpara>
     </sect2>
    </sect1>
