@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 21a6e32de516563e314a7f1177312bec4737b291 Maintainer: zhoumengkang Status: ready -->
-<!-- CREDITS: Luffy -->
+<!-- EN-Revision: 5832a97c699c5e1bc808ee900447fe751af0d540 Maintainer: zhoumengkang Status: ready -->
+<!-- CREDITS: Luffy, mowangjuanzi -->
 <refentry xml:id="function.call-user-func-array" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>call_user_func_array</refname>
@@ -36,8 +36,17 @@
      <term><parameter>args</parameter></term>
      <listitem>
       <para>
-       要被传入回调函数的数组，这个数组得是索引数组。
+       要被传入回调函数的数组。
       </para>
+      <para>
+       如果 <parameter>args</parameter> 的 key 都是数字，则会忽略 key，并按顺序将每个元素作为位置参数传递给 <parameter>callback</parameter> 。
+      </para>
+      <para>
+       如果 <parameter>args</parameter> 的任一 key 是字符串，则这些元素将作为命名参数传递给 <parameter>callback</parameter>，名称由 key 指定。
+      </para>
+      <para>
+       在 <parameter>args</parameter> 中，如果数字 key 在 字符串 key 之后出现，或者字符串 key
+       与 <parameter>callback</parameter> 的任何参数名称不匹配，将会导致 fatal error。
      </listitem>
     </varlistentry>
    </variablelist>
@@ -183,6 +192,37 @@ echo "global \$bar=$bar\n";
 <![CDATA[
 function mega $a=55
 global $bar=55
+]]>
+    </screen>
+   </example>
+   <example>
+    <title><function>call_user_func_array</function> 使用命名参数</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+function foobar($first, $second) {
+    echo __FUNCTION__, " got $first and $second\n";
+}
+
+// Call the foobar() function with named arguments in non-positional order
+call_user_func_array("foobar", array("second" => "two", "first" => "one"));
+
+// Call the foobar() function with one named argument
+call_user_func_array("foobar", array("foo", "second" => "bar"));
+
+// Fatal error: Cannot use positional argument after named argument
+call_user_func_array("foobar", array("first" => "one", "bar"));
+
+?>
+]]>
+    </programlisting>
+    &example.outputs.similar;
+    <screen>
+<![CDATA[
+foobar got one and two
+foobar got foo and bar
+
+Fatal error: Uncaught Error: Cannot use positional argument after named argument
 ]]>
     </screen>
    </example>
