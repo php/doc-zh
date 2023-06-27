@@ -1,16 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
-  <refentry xml:id="function.mysql-real-escape-string" xmlns="http://docbook.org/ns/docbook">
-   <refnamediv>
-    <refname>mysql_real_escape_string</refname>
-    <refpurpose>
-     转义 SQL 语句中使用的字符串中的特殊字符，并考虑到连接的当前字符集
-    </refpurpose>
-   </refnamediv>
-   
-   <refsynopsisdiv>
+<!-- EN-Revision: 62aa2694baf7fe904744a9b0f8a2a26e7fc3cf12 Maintainer: dallas Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
+<refentry xml:id="function.mysql-real-escape-string" xmlns="http://docbook.org/ns/docbook">
+ <refnamediv>
+  <refname>mysql_real_escape_string</refname>
+  <refpurpose>将字符串中的特殊字符进行转义，以在 SQL 语句中使用</refpurpose>
+ </refnamediv>
+
+ <refsynopsisdiv>
   <warning>
    &mysql.alternative.note;
    <simplelist role="alternatives">
@@ -19,34 +17,28 @@
    </simplelist>
   </warning>
  </refsynopsisdiv>
-   
-   <refsect1 role="description">
-  &reftitle.description;
-     <methodsynopsis>
-      <type>string</type><methodname>mysql_real_escape_string</methodname>
-      <methodparam><type>string</type><parameter>unescaped_string</parameter></methodparam>
-      <methodparam choice="opt"><type>resource</type><parameter>link_identifier</parameter><initializer>NULL</initializer></methodparam>
-     </methodsynopsis>
-    <para>
-     本函数将
-     <parameter>unescaped_string</parameter>
-     中的特殊字符转义，并计及连接的当前字符集，因此可以安全用于
-     <function>mysql_query</function>。
-    </para>
 
-    <para>
-   <function>mysql_real_escape_string</function> 调用mysql库的函数
-   mysql_real_escape_string, 在以下字符前添加反斜杠:
-   <literal>\x00</literal>, <literal>\n</literal>,
-   <literal>\r</literal>, <literal>\</literal>, <literal>'</literal>,
-   <literal>"</literal> 和 <literal>\x1a</literal>.
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <type>string</type><methodname>mysql_real_escape_string</methodname>
+   <methodparam><type>string</type><parameter>unescaped_string</parameter></methodparam>
+   <methodparam choice="opt"><type>resource</type><parameter>link_identifier</parameter><initializer>NULL</initializer></methodparam>
+  </methodsynopsis>
+  <para>
+   考虑到连接的当前字符集，对 <parameter>unescaped_string</parameter> 进行特殊字符转义，以便安全地将其放置在 <function>mysql_query</function> 中。如果要插入二进制数据，则必须使用此函数。
   </para>
   <para>
-   为了安全起见，在像MySQL传送查询前，必须调用这个函数（除了少数例外情况）。
+   <function>mysql_real_escape_string</function> 调用 mysql 库的函数
+   mysql_real_escape_string, 在以下字符前添加反斜线：<literal>\x00</literal>、<literal>\n</literal>、<literal>\r</literal>、<literal>\</literal>、<literal>'</literal>、<literal>"</literal>
+   和 <literal>\x1a</literal>.
+  </para>
+  <para>
+   在向 MySQL 发送查询之前，必须始终（有少数例外）使用此函数来确保数据的安全。
   </para>
   
   <caution>
-   <title>安全提示: 默认字符集</title>
+   <title>安全: 默认字符集</title>
    <para>
     The character set must be set either at the server level, or with
     the API function <function>mysql_set_charset</function> for it to affect
@@ -92,11 +84,10 @@
  
  <refsect1 role="examples">
   &reftitle.examples;
-
-    <para>
-     <example>
-      <title><function>mysql_real_escape_string</function> 例子</title>
-      <programlisting role="php">
+  <para>
+   <example>
+    <title>简单 <function>mysql_real_escape_string</function> 示例</title>
+    <programlisting role="php">
 <![CDATA[
 <?php
 // Connect
@@ -193,13 +184,6 @@ SELECT * FROM users WHERE user='aidan' AND password='' OR ''=''
   </note>
   <note>
    <para>
-    If <link linkend="ini.magic-quotes-gpc">magic_quotes_gpc</link> is enabled,
-    first apply <function>stripslashes</function> to the data. Using this function
-    on data which has already been escaped will escape the data twice.
-   </para>
-  </note>
-  <note>
-   <para>
     If this function is not used to escape data, the query is vulnerable to
     <link linkend="security.database.sql-injection">SQL Injection Attacks</link>.
    </para>
@@ -220,10 +204,6 @@ SELECT * FROM users WHERE user='aidan' AND password='' OR ''=''
    <simplelist>
     <member><function>mysql_set_charset</function></member>
     <member><function>mysql_client_encoding</function></member>
-    <member><function>addslashes</function></member>
-    <member><function>stripslashes</function></member>
-    <member>The <link linkend="ini.magic-quotes-gpc">magic_quotes_gpc</link> directive</member>
-    <member>The <link linkend="ini.magic-quotes-runtime">magic_quotes_runtime</link> directive</member>
    </simplelist>
   </para>
  </refsect1>
