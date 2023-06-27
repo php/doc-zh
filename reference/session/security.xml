@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 184f3f7bd45643cb80f828d0bb001991ec3a5fad Maintainer: yuanyuqiang Status: ready -->
-<!-- Reviewed: no -->
+<!-- EN-Revision: ccb379494533c9b7d63a81f0221231a9e526eee9 Maintainer: yuanyuqiang Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <chapter xml:id="session.security" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <title>会话和安全</title>
  <para>
@@ -9,7 +9,7 @@
  </para>
  <para>
   HTTP 会话管理是 web 应用安全的核心内容，
-  要采用尽可能的手段来确保会话安全。
+  <emphasis>应</emphasis>采用尽可能的手段来确保会话安全。
   开发人员应该合理的启用或使用可接受的设置。
  </para>
  <sect1 xml:id="features.session.security.management">
@@ -31,7 +31,7 @@
      以及为此增加额外的保护机制，
      通常需要付出一定的代价，同时会降低便利性。
      例如，如果你需要保护用户免受社会工程学攻击，
-     你需要启用 <literal>session.use_only_cookies</literal> 选项。
+     你需要启用 <link linkend="ini.session.use-only-cookies">session.use_only_cookies</link> 选项。
      这就要求用户在使用过程中，必须把浏览器设置为接受 cookie，
      否则就无法正常使用会话功能了。
     </para>
@@ -64,7 +64,7 @@
  </sect2>
  
    <sect2 xml:id="features.session.security.management.non-adaptive-session">
-   <title>严格会话管理</title>
+   <title>非自适应会话管理</title>
 
    <para>
     目前，默认情况下，PHP 是以自适应的方式来管理会话的，
@@ -156,7 +156,7 @@
 
    <note>
     <simpara>
-     对于 PHP 7.1.0 之前的用户，应该使用 CSPRNG（例如 /dev/urandom）
+     对于 PHP 7.1.0 之前的用户，<emphasis>应该</emphasis>使用 <acronym>CSPRNG</acronym>（例如 <filename>/dev/urandom</filename>）
      或者 <function>random_bytes</function> 函数以及哈希函数
      来产生新的会话 ID。
      <function>session_create_id</function> 函数本身包含碰撞检测的能力，
@@ -188,7 +188,7 @@
 
    <para>
     当用户成功通过认证之后，<emphasis>必须</emphasis>为其重新生成会话 ID。
-    并且，必须在向 $_SESSION 中保存用户认证信息之前
+    并且，必须在向 <varname>$_SESSION</varname> 中保存用户认证信息之前
     调用 <function>session_regenerate_id</function> 函数（
     <function>session_regenerate_id</function> 函数
     会自动将重生之前的会话数据保存到新生成的会话）。
@@ -212,7 +212,7 @@
      在 GC 发生之前，旧的会话数据还得保存，
      同时，开发者还得保证过期的会话数据已经被移除。
      但是，开发者又不能立即移除活跃会话中的数据。
-     所以，不要同时在活跃会话上调用 <literal>session_regenerate_id(true);</literal> 
+     所以，不要同时在活跃会话上调用 <code>session_regenerate_id(true);</code>
      和 <function>session_destroy</function> 函数。
      这听起来有点儿自相矛盾，但是事实上必须得这么做。
     </simpara>
@@ -237,7 +237,7 @@
     </simpara>
     <simpara>
      作为替代方案，
-     你要在 $_SESSION 中设置一个很短的过期时间，
+     你要在 <varname>$_SESSION</varname> 中设置一个很短的过期时间，
      然后根据这个时间戳来判断后续的访问是被允许的还是被禁止的。
     </simpara>
     <simpara>
@@ -265,8 +265,8 @@
    <warning>
     <simpara>
      请勿误解这里的拒绝服务攻击风险所指的含义。
-     通常来讲，要保护会话 ID 的安全，<literal>use_strict_mode=On</literal> 是必须要做的。
-     建议所有的站点都启用 <literal>use_strict_mode=On</literal>。
+     通常来讲，要保护会话 ID 的安全，<link linkend="ini.session.use-strict-mode">session.use_strict_mode</link>=On 是必须要做的。
+     建议所有的站点都启用 <link linkend="ini.session.use-strict-mode">session.use_strict_mode</link>。
     </simpara>
     <simpara>
      只有当账号处于被攻击的时候，才会发生拒绝服务的问题。
@@ -335,7 +335,7 @@
     为了降低这种风险，请在访问会话数据的时候，尽可能的缩短锁定的时间。
     当某个请求不需要更新会话数据的时候，使用只读模式访问会话数据。
     也就是说，在调用 <function>session_start</function> 函数的时候，
-    使用 'read_and_close' 选项：<literal>session_start(['read_and_close'=>1]);</literal>。
+    使用 'read_and_close' 选项：<code>session_start(['read_and_close'=>1]);</code>。
     另外，如果需要更新会话数据，那么在更新完毕之后，
     马上调用 <function>session_commit</function> 函数来释放对于会话数据的锁。
    </para>
@@ -413,7 +413,7 @@
     在使用 <function>setcookie</function> 的时候，传入安全的一次性摘要结果作为自动登录信息。
     建议使用比 SHA-2 更高强度的摘要算法（例如 SHA-256）
     对 <function>random_bytes</function> 随机生成的数据
-    （也可以读取 /dev/urandom 设备）进行摘要作为自动登录的信息。
+    （也可以读取 <filename>/dev/urandom</filename> 设备）进行摘要作为自动登录的信息。
    </para>
 
    <para>
@@ -513,9 +513,9 @@
       而且大部分应用也确实是只使用 cookie 来记录会话 ID 的。
      </para>
      <para>
-      如果 <literal>session.use_only_cookies</literal>=Off，
+      如果 <link linkend="ini.session.use-only-cookies">session.use_only_cookies</link>=Off，
       会话模块会在基于 cookie 的会话 ID 初始化之前
-      使用 GET/POST/URL 请求中的会话 ID（如果存在的话）。
+      使用 GET 或 POST 请求中的会话 ID（如果存在的话）。
      </para>
     </listitem>
 
@@ -524,7 +524,7 @@
       <link linkend="ini.session.use-strict-mode">session.use_strict_mode</link>=On
      </para>
      <para>
-      虽然启用 <literal>session.use_strict_mode</literal> 
+      虽然启用 <link linkend="ini.session.use-strict-mode">session.use_strict_mode</link>
       是必不可少的，但是默认情况下，这个配置项是未启用的。
      </para>
      <para>
@@ -534,17 +534,15 @@
       而拒绝由用户自己提供的会话 ID。
      </para>
      <para>
-      攻击者可以自行设置 cookie 
-      或者使用 JavaScript 注入的方式
-      来设置会话 ID 进行攻击。
-      启用 <literal>session.use_strict_mode</literal> 配置项
+      由于 cookie 规范，攻击者可以通过本地设置 cookie 数据库或 JavaScript 注入放置不可删除的会话 ID cookie。
+      启用 <link linkend="ini.session.use-strict-mode">session.use_strict_mode</link> 配置项
       可以阻止使用未经会话模块初始化的会话 ID。
      </para>
      <note>
       <para>
        攻击者可以使用自己的设备产生会话 ID，也可以使用受害者的会话 ID。
        攻击者也可以通过一些后续操作保证会话活跃。
-       因此，启用 <literal>session.use_strict_mode</literal> 配置项
+       因此，启用 <link linkend="ini.session.use-strict-mode">session.use_strict_mode</link> 配置项
        可以降低这种风险。
       </para>
      </note>
@@ -606,7 +604,7 @@
       <link linkend="ini.session.gc-maxlifetime">session.gc_maxlifetime</link>=[选择一个尽可能小的时间段]
      </para>
      <para>
-      <literal>session.gc_maxlifetime</literal>
+      <link linkend="ini.session.gc-maxlifetime">session.gc_maxlifetime</link>
       来设置删除过期会话数据的时间周期。
       <emphasis>来</emphasis>的删除，
       你需要自己来实现一套基于时间戳的会话数据生命周期管理机制。
@@ -689,8 +687,8 @@
       当启用 <link
       linkend="ini.session.use-trans-sid">session.use_trans_sid</link> 配置项的时候，
       这个设置可以降低会话 ID 注入的风险。
-      如果你的站点是 http://example.com/，
-      那么就把此项设置为 http://example.com/。
+      如果你的站点是 <literal>http://example.com/</literal>，
+      那么就把此项设置为 <literal>http://example.com/</literal>。
       需要注意的是，如果使用了 HTTPS 协议，
       那么浏览器在发起请求的时候不会包含 referrer 请求头。
       建议启用此配置项，虽然它并不是可靠的安全措施。
@@ -706,9 +704,9 @@
       应该仅针对公开内容允许缓存，
       否则将会面临内容泄露的风险。
       即使 HTTP 内容不包含敏感数据，
-      也可以把它设置为“private”。
-      注意，“private”可能会导致客户端缓存私有数据。
-      仅在 HTTP 内容中不包含任何私有数据的时候，可以使用“public”。
+      也可以把它设置为<literal>"private"</literal>。
+      注意，<literal>"private"</literal>可能会导致客户端缓存私有数据。
+      仅在 HTTP 内容中不包含任何私有数据的时候，可以使用<literal>"public"</literal>。
      </para>
     </listitem>
 
