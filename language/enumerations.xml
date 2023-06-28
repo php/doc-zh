@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- EN-Revision: cdc9d28d334bbc08386fecf8aade66080004a9dd Maintainer: daijie Status: ready -->
+<!-- EN-Revision: 16b11ae4604f3c38f9011c46137ddcbf9238154b Maintainer: daijie Status: ready -->
 <!-- CREDITS: Luffy, mowangjuanzi -->
 <chapter xml:id="language.enumerations" xmlns="http://docbook.org/ns/docbook">
  <title>枚举</title>
@@ -131,7 +131,14 @@ print Suit::Spades->name;
 ]]>
   </programlisting>
 
- </sect1>
+   <para>
+    It is also possible to use the <function>defined</function> and <function>constant</function>
+    functions to check for the existence of or read an enum case if the name is obtained dynamically.
+    This is, however, discouraged as using <link linkend="language.enumerations.backed">Backed enums</link>
+    should work for most use cases.
+   </para>
+
+  </sect1>
 
  <sect1 xml:id="language.enumerations.backed">
   <title>回退（Backed）枚举</title>
@@ -717,6 +724,98 @@ Baz Enum:int {
 ?>
 ]]>
   </programlisting>
+ </sect1>
+
+ <sect1 xml:id="language.enumerations.object-differences.inheritance">
+
+  <title>为什么枚举不可扩展</title>
+
+  <simpara>
+   类在方法有契约：
+  </simpara>
+
+  <programlisting role="php">
+<![CDATA[
+<?php
+
+class A {}
+class B extends A {}
+
+function foo(A $a) {}
+
+function bar(B $b) {
+    foo($b);
+}
+?>
+]]>
+ </programlisting>
+
+  <simpara>
+   这段代码类型安全，因为 B 遵循 A 的契约，并通过协变/逆变的逻辑，将会保留任何对方法的期望，除了异常。
+  </simpara>
+
+  <simpara>
+   枚举在其选项上有契约，而不是方法：
+  </simpara>
+
+  <programlisting role="php">
+<![CDATA[
+<?php
+enum ErrorCode {
+    case SOMETHING_BROKE;
+}
+
+function quux(ErrorCode $errorCode)
+{
+    // When written, this code appears to cover all cases
+    match ($errorCode) {
+        ErrorCode::SOMETHING_BROKE => true,
+    }
+}
+
+?>
+]]>
+  </programlisting>
+
+  <simpara>
+   在函数 <code>quux</code> 中，&match; 语句可以进行静态分析，以涵盖 ErrorCode 中的所有情况。
+  </simpara>
+
+  <simpara>
+   但是想一下，如果允许扩展枚举：
+  </simpara>
+
+
+  <programlisting role="php">
+<![CDATA[
+<?php
+// Thought experiment code where enums are not final.
+// Note, this won't actually work in PHP.
+enum MoreErrorCode extends ErrorCode {
+    case PEBKAC;
+}
+
+function fot(MoreErrorCode $errorCode) {
+    quux($errorCode);
+}
+
+fot(MoreErrorCode::PEBKAC);
+
+?>
+]]>
+ </programlisting>
+
+  <simpara>
+   根据正常的继承规则，继承另一个类的类将通过类型检查。
+  </simpara>
+
+  <simpara>
+   问题在于 <code>quux()</code> 中的 &match; 语句不再涵盖所有情况。因为它不知道 <code>MoreErrorCode::PEBKAC</code>，所以匹配语句会抛出异常。
+  </simpara>
+
+  <simpara>
+   因此，枚举是 final，不能扩展。
+  </simpara>
  </sect1>
 
  <sect1 xml:id="language.enumerations.examples">
