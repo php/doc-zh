@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision$ -->
+<!-- EN-Revision: d08d2e887fdc229f16748df96450c9b68c9a3076 Maintainer: mowangjuanzi Status: ready -->
+<refentry xml:id="function.debug-zval-dump" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <refnamediv>
+  <refname>debug_zval_dump</refname>
+  <refpurpose>将表示内部 zval 结构的字符串转储到输出</refpurpose>
+ </refnamediv>
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <type>void</type><methodname>debug_zval_dump</methodname>
+   <methodparam><type>mixed</type><parameter>value</parameter></methodparam>
+   <methodparam rep="repeat"><type>mixed</type><parameter>values</parameter></methodparam>
+  </methodsynopsis>
+  <para>
+   将表示内部 zval（Zend 值）结构的字符串转储到输出。这对于理解或调试 Zend 引擎或 PHP 扩展的实现细节非常有用。
+  </para>
+ </refsect1>
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>value</parameter></term>
+     <listitem>
+      <para>
+       要转储的变量或值。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>values</parameter></term>
+     <listitem>
+      <para>
+       要进一步转储的变量或值。
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   &return.void;
+  </para>
+ </refsect1>
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title><function>debug_zval_dump</function> 示例</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$var1 = 'Hello';
+$var1 .= ' World';
+$var2 = $var1;
+
+debug_zval_dump($var1);
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+string(11) "Hello World" refcount(3)
+]]>
+    </screen>
+   </example>
+  </para>
+  <note>
+   <title>理解 <literal>refcount</literal></title>
+   <para>
+    如果没有深入了解过引擎实现，该函数显示的 <literal>refcount</literal> 值可能会令人惊讶。
+   </para>
+   <para>
+    Zend 引擎使用引用计数来实现两个不同的目的：
+   </para>
+   <para>
+    <simplelist>
+     <member>
+      使用叫做“写时复制”的技术来优化内存使用，其中拥有相同值的多个变量指向内存中的同一个副本。当其中修改其中一个变量时，它会指向内存中的一个新副本，并且原始副本的引用计数会减少 1。
+     </member>
+     <member>
+      跟踪已分配或通过引用传递的变量（参见<link linkend="language.references">引用解释</link>）。这个 refcount
+      存储在单独的 reference zval 上，指向当前值的 zval。这个额外的 zval 目前不会在 <function>debug_zval_dump</function> 中显示。
+     </member>
+    </simplelist>
+   </para>
+   <para>
+    因为 <function>debug_zval_dump</function> 将输入作为普通参数传递，通过值传递，所以将使用写时复制技术来传递它们：而不是复制数据，refcount
+    将在函数调用的生命周期内增加 1。如果函数在接收参数后修改了它，那么将会进行复制；由于没有修改参数，所以在调用范围内显示的 refcount 会比较高。
+   </para>
+   <para>
+    参数传递也会阻止 <function>debug_zval_dump</function> 显示通过引用分配的变量。为了说明这一点，对上面示例进行略微修改：
+   </para>
+   <para>
+    <example>
+     <title/>
+     <programlisting role="php">
+<![CDATA[
+<?php
+$var1 = 'Hello';
+$var1 .= ' World';
+// Point three variables as references to the same value
+$var2 =& $var1;
+$var3 =& $var1;
+
+debug_zval_dump($var1);
+?>
+]]>
+     </programlisting>
+     &example.outputs;
+     <screen>
+<![CDATA[
+string(11) "Hello World" refcount(2)
+]]>
+     </screen>
+    </example>
+   </para>
+   <para>
+    尽管 <varname>$var1</varname>、<varname>$var2</varname> 和 <varname>$var3</varname> 是通过引用链接，但只有 <emphasis>value</emphasis>
+    传递给了 <function>debug_zval_dump</function>。这个值在引用集合中使用了一次，在 <function>debug_zval_dump</function> 内部使用了一次，所以显示的引用计数为 2。
+   </para>
+   <para> 
+    由于引擎针对不同数据类型进行的优化，还会出现进一步的复杂情况。比如一些像整数之类的类型，不使用"写时复制"，因此根本不会显示
+    refcount。在其他情况下，refcount 显示了内部使用的额外副本，比如当字面字符串或数组作为代码指令的一部分存储时。
+   </para>
+  </note>
+ </refsect1>
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>var_dump</function></member>
+    <member><function>debug_backtrace</function></member>
+    <member><link linkend="language.references">引用解释</link></member>
+    <member><link xlink:href="&url.derick.references;">引用解释（作者：Derick Rethans）</link></member>
+   </simplelist>
+  </para>
+ </refsect1>
+</refentry>
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->

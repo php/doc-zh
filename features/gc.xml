@@ -1,23 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
+<!-- EN-Revision: 3f93d2472fd7840299461246008b64982ebba5f1 Maintainer: mowangjuanzi Status: ready -->
  <chapter xml:id="features.gc" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-<!-- Reviewed: no Maintainer: Haohappy  Status: ready -->
-<!-- Reviewed: no Maintainer:  -->
-  <title>垃圾回收机制</title>
+  <title>垃圾回收</title>
 
   <para>
-   这部分将说明PHP 5.3的新的垃圾回收机制（也就是GC）的特点。
+   本节介绍了新垃圾回收（也称为 GC）机制作为 PHP 5.3 一部分的优点。
   </para>
 
   <sect1 xml:id="features.gc.refcounting-basics">
-   <title>引用计数基本知识</title>
+   <title>引用计数基本</title>
    <para>
-    每个php变量存在一个叫"zval"的变量容器中。一个zval变量容器，除了包含变量的类型和值，还包括两个字节的额外信息。第一个是"is_ref"，是个bool值，用来标识这个变量是否是属于引用集合(reference set)。通过这个字节，php引擎才能把普通变量和引用变量区分开来，由于php允许用户通过使用&amp;来使用自定义引用，zval变量容器中还有一个内部引用计数机制，来优化内存使用。第二个额外字节是"refcount"，用以表示指向这个zval变量容器的变量(也称符号即symbol)个数。所有的符号存在一个符号表中，其中每个符号都有作用域(scope)，那些主脚本(比如：通过浏览器请求的的脚本)和每个函数或者方法也都有作用域。
+    PHP 变量存储在称为“zval”的容器中。zval 容器除了变量的类型和值之外，还包含两个额外的信息位。第一个称为“is_ref”，是布尔值，表示变量是否是“引用集合”的一部分。通过这个位，PHP
+    引擎知道如何区分普通变量和引用。由于 PHP 允许用户自定义引用，使用 &amp; 运算符创建引用，zval 容器还有内部引用计数机制来优化内存使用。第二个称为“refcount”，表示有多少个变量名（也称为符号）指向这个
+    zval 容器。所有符号都存储在一个符号表中，每个作用域都有一个符号表。主脚本（即通过浏览器请求的脚本）有一个作用域，每个函数或方法也有一个作用域。
    </para>
    <para>
-    当一个变量被赋常量值时，就会生成一个zval变量容器，如下例这样：
+    当使用常量值创建新变量时，也会创建 zval 容器，例如
     <example>
-     <title>生成一个新的zval容器</title>
+     <title>创建新 zval 容器</title>
      <programlisting role="php">
 <![CDATA[
 <?php
@@ -28,14 +29,19 @@ $a = "new string";
     </example>
    </para>
    <para>
-    在上例中，新的变量<literal>a</literal>，是在当前作用域中生成的。并且生成了类型为 <type>string</type> 和值为<literal>new string</literal>的变量容器。在额外的两个字节信息中，"is_ref"被默认设置为 &false;，因为没有任何自定义的引用生成。"refcount" 被设定为 <literal>1</literal>，因为这里只有一个变量使用这个变量容器. 注意到当"refcount"的值是<literal>1</literal>时，"is_ref"的值总是&false;. 如果你已经安装了<link xlink:href="&url.xdebug;">Xdebug</link>，你能通过调用函数 <function>xdebug_debug_zval</function>显示"refcount"和"is_ref"的值。
+    在这种情况下，新的符号名称 <literal>a</literal> 会在当前作用域中创建，并且会创建新的变量容器，其类型为 <type>string</type>，值为
+    <literal>new string</literal>。由于没有创建用户定义的引用，“is_ref”位默认设置为 &false;。“refcount”设置为
+    <literal>1</literal>，因为只有一个符号使用了这个变量容器。请注意，具有“refcount”为 <literal>1</literal> 的引用（即"is_ref"为
+    &true;）会视为非引用（即“is_ref”为 &false;）。如果安装了 <link
+    xlink:href="&url.xdebug;">Xdebug</link>，可以通过调用 <function>xdebug_debug_zval</function> 来显示此信息。
    </para>
    <para>
     <example>
-     <title>显示zval信息</title>
+     <title>显示 zval 信息</title>
      <programlisting role="php">
 <![CDATA[
 <?php
+$a = "new string";
 xdebug_debug_zval('a');
 ?>
 ]]>
@@ -49,11 +55,11 @@ a: (refcount=1, is_ref=0)='new string'
     </example>
    </para>
    <para>
-    把一个变量赋值给另一变量将增加引用次数(refcount).
+    将这个变量赋值给另一变量名将增加 refcount 的计数。
    </para>
    <para>
     <example>
-     <title>增加一个zval的引用计数</title>
+     <title>增加 zval 的 refcount</title>
      <programlisting role="php">
 <![CDATA[
 <?php
@@ -72,18 +78,22 @@ a: (refcount=2, is_ref=0)='new string'
     </example>
    </para>
    <para>
-    这时，引用次数是<literal>2</literal>，因为同一个变量容器被变量 <varname>a</varname> 和变量 <varname>b</varname>关联.当没必要时，php不会去复制已生成的变量容器。变量容器在”refcount“变成0时就被销毁. 当任何关联到某个变量容器的变量离开它的作用域(比如：函数执行结束)，或者对变量调用了函数 <function>unset</function>时，”refcount“就会减1，下面的例子就能说明:
+    这里的 refcount 是 <literal>2</literal>，因为同一个变量容器链接到 <varname>a</varname> 和 <varname>b</varname>。PHP
+    很聪明，当不必要时，不会复制实际的变量容器。当“refcount”达到零时，就会销毁变量容器。当链接到变量容器的任何符号离开作用域（例如函数结束时）或取消符号赋值（例如通过调用
+    <function>unset</function>）时，“refcount”会减少一。以下是一个示例：
    </para>
    <para>
     <example>
-     <title>减少引用计数</title>
+     <title>减少 zval refcount</title>
      <programlisting role="php">
 <![CDATA[
 <?php
 $a = "new string";
 $c = $b = $a;
 xdebug_debug_zval( 'a' );
-unset( $b, $c );
+$b = 42;
+xdebug_debug_zval( 'a' );
+unset( $c );
 xdebug_debug_zval( 'a' );
 ?>
 ]]>
@@ -92,24 +102,26 @@ xdebug_debug_zval( 'a' );
      <screen>
 <![CDATA[
 a: (refcount=3, is_ref=0)='new string'
+a: (refcount=2, is_ref=0)='new string'
 a: (refcount=1, is_ref=0)='new string'
 ]]>
      </screen>
     </example>
    </para>
    <para>
-    如果我们现在执行 <literal>unset($a);</literal>，包含类型和值的这个变量容器就会从内存中删除。
+    如果现在调用 <literal>unset($a);</literal>，变量容器，包含类型和值，会从内存中移除。
    </para>
 
    <sect2 xml:id="features.gc.compound-types">
-    <title>复合类型(Compound Types)</title>
+    <title>复合类型</title>
 
     <para>
-     当考虑像 <type>array</type>和<type>object</type>这样的复合类型时，事情就稍微有点复杂. 与 <type>标量(scalar)</type>类型的值不同，<type>array</type>和 <type>object</type>类型的变量把它们的成员或属性存在自己的符号表中。这意味着下面的例子将生成三个zval变量容器。
+     对于 <type>array</type> 和 <type>object</type> 这样的复合类型，情况会稍微复杂一些。与 <type>scalar</type>
+     值不同，<type>array</type> 和 <type>object</type> 的属性存储在自己的符号表中。这意味着以下示例将创建三个 zval 容器：
     </para>
     <para>
      <example>
-      <title>Creating a <type>array</type> zval</title>
+      <title>创建 <type>array</type> zval</title>
       <programlisting role="php">
 <![CDATA[
 <?php
@@ -127,9 +139,9 @@ a: (refcount=1, is_ref=0)=array (
 )
 ]]>
       </screen>
-      <para>图示:</para>
+      <para>或图示</para>
       <mediaobject>
-       <alt>一个简单数组的zval</alt>
+       <alt>简单数组的 zval</alt>
        <imageobject>
         <imagedata fileref="en/features/figures/simple-array.png" format="PNG"/>
        </imageobject>
@@ -137,11 +149,12 @@ a: (refcount=1, is_ref=0)=array (
      </example>
     </para>
     <para>
-     这三个zval变量容器是: <varname>a</varname>，<varname>meaning</varname>和 <varname>number</varname>。增加和减少”refcount”的规则和上面提到的一样. 下面, 我们在数组中再添加一个元素,并且把它的值设为数组中已存在元素的值:
+     这三个 zval 变量容器是 <varname>a</varname>、<varname>meaning</varname> 和
+     <varname>number</varname>。增加和减少“refcounts”的规则也适用于此。下面，再向数组添加一个元素，并将其值设置为已存在元素的内容：
     </para>
     <para>
      <example>
-      <title>添加一个已经存在的元素到数组中</title>
+      <title>添加已存在的元素到数组</title>
       <programlisting role="php">
 <![CDATA[
 <?php
@@ -161,9 +174,9 @@ a: (refcount=1, is_ref=0)=array (
 )
 ]]>
       </screen>
-      <para>图示：</para>
+      <para>或图示</para>
       <mediaobject>
-       <alt>带有引用的简单数组的zval</alt>
+       <alt>带有引用的简单数组的 zvals</alt>
        <imageobject>
         <imagedata fileref="en/features/figures/simple-array2.png" format="PNG"/>
        </imageobject>
@@ -171,14 +184,16 @@ a: (refcount=1, is_ref=0)=array (
      </example>
     </para>
     <para>
-     从以上的xdebug输出信息，我们看到原有的数组元素和新添加的数组元素关联到同一个"refcount"<literal>2</literal>的zval变量容器. 尽管 Xdebug的输出显示两个值为<literal>'life'</literal>的 zval 变量容器，其实是同一个。 函数<function>xdebug_debug_zval</function>不显示这个信息，但是你能通过显示内存指针信息来看到。
+     从上面的 Xdebug 输出中，可以看到新旧的数组元素现在都指向“refcount”为 <literal>2</literal> 的 zval 容器。尽管 Xdebug
+     的输出显示了两个值为 <literal>'life'</literal> 的 zval 容器，但它们实际上是同一个。<function>xdebug_debug_zval</function>
+     函数没有显示这一点，但可以通过显示内存指针来看到它。
     </para>
     <para>
-     删除数组中的一个元素，就是类似于从作用域中删除一个变量. 删除后,数组中的这个元素所在的容器的“refcount”值减少，同样，当“refcount”为0时，这个变量容器就从内存中被删除，下面又一个例子可以说明：
+     从数组中删除元素就像从作用域中删除符号一样。删除后，数组元素指向的容器的“refcount”会减少。同样，当“refcount”达到零时，变量容器就会从内存中删除。再举一个例子来说明这一点：
     </para>
     <para>
      <example>
-      <title>从数组中删除一个元素</title>
+      <title>从数组中删除元素</title>
       <programlisting role="php">
 <![CDATA[
 <?php
@@ -200,11 +215,11 @@ a: (refcount=1, is_ref=0)=array (
      </example>
     </para>
     <para>
-     现在，当我们添加一个数组本身作为这个数组的元素时，事情就变得有趣，下个例子将说明这个。例中我们加入了引用操作符，否则php将生成一个复制。
+     现在，如果将数组本身作为数组的一个元素添加进去，情况就会变得有趣起来。在下一个例子中这样做，并且偷偷加入引用运算符，否则 PHP 会创建副本：
     </para>
     <para>
      <example>
-      <title> 把数组作为一个元素添加到自己</title>
+      <title>将数组本身作为其自身的一个元素添加进去</title>
       <programlisting role="php">
 <![CDATA[
 <?php
@@ -223,9 +238,9 @@ a: (refcount=2, is_ref=1)=array (
 )
 ]]>
       </screen>
-      <para>图示：</para>
+      <para>或图示</para>
       <mediaobject>
-       <alt>自引用(curcular reference,自己是自己的一个元素)的数组的zval</alt>
+       <alt>具有循环引用的数组的 zval</alt>
        <imageobject>
         <imagedata fileref="en/features/figures/loop-array.png" format="PNG"/>
        </imageobject>
@@ -233,14 +248,16 @@ a: (refcount=2, is_ref=1)=array (
      </example>
     </para>
     <para>
-     能看到数组变量 (<varname>a</varname>) 同时也是这个数组的第二个元素(<varname>1</varname>) 指向的变量容器中“refcount”为 <literal>2</literal>。上面的输出结果中的"..."说明发生了递归操作, 显然在这种情况下意味着"..."指向原始数组。
+     可以看到数组变量（<varname>a</varname>）以及第二个元素（<varname>1</varname>）现在都指向一个“refcount”为 <literal>2</literal>
+     的变量容器。上面显示的“...”表示存在递归，这在这种情况下意味着“...”指向原数组。
     </para>
     <para>
-     跟刚刚一样，对一个变量调用unset，将删除这个符号，且它指向的变量容器中的引用次数也减1。所以，如果我们在执行完上面的代码后，对变量<varname>$a</varname>调用unset, 那么变量 <varname>$a</varname> 和数组元素 "1" 所指向的变量容器的引用次数减1, 从"2"变成"1". 下例可以说明:
+     就像之前一样，清除变量会删除符号，并且指向的变量容器的引用计数会减少一。因此，如果在运行上述代码后清除变量 <varname>$a</varname>，那么
+     <varname>$a</varname> 和元素“1”所指向的变量容器的引用计数会减少一，从“2”变为“1”。可以表示为：
     </para>
     <para>
      <example>
-      <title>Unsetting <varname>$a</varname></title>
+      <title>清除 <varname>$a</varname></title>
       <screen>
 <![CDATA[
 (refcount=1, is_ref=1)=array (
@@ -249,9 +266,9 @@ a: (refcount=2, is_ref=1)=array (
 )
 ]]>
       </screen>
-      <para>图示：</para>
+      <para>或图示</para>
       <mediaobject>
-       <alt>Zvals after removal of array with a circular reference demonstrating the memory leak</alt>
+       <alt>在演示完内存泄漏的循环引用数组移除后的 zval</alt>
        <imageobject>
         <imagedata fileref="en/features/figures/leak-array.png" format="PNG"/>
        </imageobject>
@@ -274,7 +291,7 @@ a: (refcount=2, is_ref=1)=array (
   <sect1 xml:id="features.gc.collecting-cycles">
    <title>回收周期(Collecting Cycles)</title>
    <para>
-    传统上，像以前的 php 用到的引用计数内存机制，无法处理循环的引用内存泄漏。然而 5.3.0 PHP 使用文章<link xlink:href="&url.gc-paper;">引用计数系统中的同步周期回收(Concurrent Cycle Collection in Reference Counted Systems)</link>中的同步算法，来处理这个内存泄漏问题。  
+    传统上，像以前的 php 用到的引用计数内存机制，无法处理循环的引用内存泄漏；然而，自 5.3.0 起，PHP 使用文章<link xlink:href="&url.gc-paper;">引用计数系统中的同步周期回收(Concurrent Cycle Collection in Reference Counted Systems)</link>中的同步算法，来处理这个内存泄漏问题。  
    </para>
    <para>
     对算法的完全说明有点超出这部分内容的范围，将只介绍其中基础部分。首先，我们先要建立一些基本规则，如果一个引用计数增加，它将继续被使用，当然就不再在垃圾中。如果引用计数减少到零，所在变量容器将被清除(free)。就是说，仅仅在引用计数减少到非零值时，才会产生垃圾周期(garbage cycle)。其次，在一个垃圾周期中，通过检查引用计数是否减1，并且检查哪些变量容器的引用次数是零，来发现哪部分是垃圾。
