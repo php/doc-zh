@@ -294,10 +294,13 @@ a: (refcount=2, is_ref=1)=array (
   <sect1 xml:id="features.gc.collecting-cycles">
    <title>回收周期</title>
    <para>
-    传统上，像以前的 php 用到的引用计数内存机制，无法处理循环的引用内存泄漏；然而，自 5.3.0 起，PHP 使用文章<link xlink:href="&url.gc-paper;">引用计数系统中的同步周期回收(Concurrent Cycle Collection in Reference Counted Systems)</link>中的同步算法，来处理这个内存泄漏问题。  
+    传统上，像 PHP 之前使用的引用计数内存机制无法解决循环引用内存泄漏的问题；然而，从 5.3.0 版本开始，PHP 实施了<link
+    xlink:href="&url.gc-paper;">引用计数系统中的同步循环回收</link>论文中的同步算法来解决这个问题。
    </para>
    <para>
-    对算法的完全说明有点超出这部分内容的范围，将只介绍其中基础部分。首先，我们先要建立一些基本规则，如果一个引用计数增加，它将继续被使用，当然就不再在垃圾中。如果引用计数减少到零，所在变量容器将被清除(free)。就是说，仅仅在引用计数减少到非零值时，才会产生垃圾周期(garbage cycle)。其次，在一个垃圾周期中，通过检查引用计数是否减1，并且检查哪些变量容器的引用次数是零，来发现哪部分是垃圾。
+    对算法的完全说明有点超出这部分内容的范围，将只介绍其中基础部分。首先，需要确立一些基本规则。如果 refcount 增加，则该变量仍在使用中，因此不是垃圾。如果 refcount
+    减少到 0，则 zval 可以释放。这意味着只有当引用计数参数减少到非零值时，才能创建垃圾循环。其次，在垃圾循环中，可以通过检查是否可以将 refcount 减少 1，并检查哪些
+    zval 的 refcount 为 0 来确定哪些部分是垃圾。
    </para>
    <para>
      <mediaobject>
@@ -308,7 +311,7 @@ a: (refcount=2, is_ref=1)=array (
      </mediaobject>
    </para>
    <para>
-    为避免不得不检查所有引用计数可能减少的垃圾周期，这个算法把所有可能根(possible roots 都是zval变量容器),放在根缓冲区(root buffer)中(用紫色来标记，称为疑似垃圾)，这样可以同时确保每个可能的垃圾根(possible garbage root)在缓冲区中只出现一次。仅仅在根缓冲区满了时，才对缓冲区内部所有不同的变量容器执行垃圾回收操作。看上图的步骤 A。
+    为避免不得不检查所有引用计数可能减少的垃圾循环，这个算法把所有可能根(possible roots 都是zval变量容器),放在根缓冲区(root buffer)中(用紫色来标记，称为疑似垃圾)，这样可以同时确保每个可能的垃圾根(possible garbage root)在缓冲区中只出现一次。仅仅在根缓冲区满了时，才对缓冲区内部所有不同的变量容器执行垃圾回收操作。看上图的步骤 A。
    </para>
    <para>
     在步骤 B 中，模拟删除每个紫色变量。模拟删除时可能将不是紫色的普通变量引用数减"1"，如果某个普通变量引用计数变成0了，就对这个普通变量再做一次模拟删除。每个变量只能被模拟删除一次，模拟删除后标记为灰（原文说确保不会对同一个变量容器减两次"1",不对的吧）。
@@ -320,19 +323,24 @@ a: (refcount=2, is_ref=1)=array (
     算法中都是模拟删除、模拟恢复、真的删除，都使用简单的遍历即可（最典型的深搜遍历）。复杂度为执行模拟操作的节点数正相关，不只是紫色的那些疑似垃圾变量。
    </para>
    <para>
-    现在，你已经对这个算法有了基本了解，我们回头来看这个如何与PHP集成。默认的，PHP的垃圾回收机制是打开的，然后有个 &php.ini; 设置允许你修改它：<option>zend.enable_gc</option>。
+    对算法的工作原理有了基本的了解后，现在可以回顾一下如何与 PHP 集成。默认情况下，PHP 的垃圾回收器是打开的。然而，有个 &php.ini;
+    设置可以进行更改：<link linkend="ini.zend.enable-gc">zend.enable_gc</link>。
    </para>
    <para>
-    当垃圾回收机制打开时，每当根缓存区存满时，就会执行上面描述的循环查找算法。根缓存区有固定的大小，可存10,000个可能根,当然你可以通过修改PHP源码文件<literal>Zend/zend_gc.c</literal>中的常量<literal>GC_ROOT_BUFFER_MAX_ENTRIES</literal>，然后重新编译PHP，来修改这个10,000值。当垃圾回收机制关闭时，循环查找算法永不执行，然而，可能根将一直存在根缓冲区中，不管在配置中垃圾回收机制是否激活。
+    当打开垃圾回收器时，如上所述的循环查找算法将在根缓冲区满时执行。根缓冲区的大小是固定的，可以容纳 10,000 个可能的根（尽管可以通过更改
+    PHP 源代码中的 <literal>Zend/zend_gc.c</literal> 中的 <constant>GC_THRESHOLD_DEFAULT</constant> 常量并重新编译 PHP
+    来修改这个值）。当关闭垃圾回收器时，循环查找算法将永不运行。然而，无论是否使用此配置激活垃圾回收机制，可能根都将始终记录在根缓冲区中。
    </para>
    <para>
-    当垃圾回收机制关闭时，如果根缓冲区存满了可能根，更多的可能根显然不会被记录。那些没被记录的可能根，将不会被这个算法来分析处理。如果他们是循环引用周期的一部分，将永不能被清除进而导致内存泄漏。
+    如果在垃圾回收机制关闭时，根缓冲区存满了可能的根，那么将不会记录进一步的可能根。算法永远不会分析那些没有记录的可能根。如果他们是循环引用的一部分，将永不会清除从而导致内存泄漏的产生。
    </para>
    <para>
     即使在垃圾回收机制不可用时，可能根也被记录的原因是，相对于每次找到可能根后检查垃圾回收机制是否打开而言，记录可能根的操作更快。不过垃圾回收和分析机制本身要耗不少时间。
    </para>
    <para>    
-    除了修改配置<option>zend.enable_gc</option>，也能通过分别调用<function>gc_enable</function> 和 <function>gc_disable</function>函数来打开和关闭垃圾回收机制。调用这些函数，与修改配置项来打开或关闭垃圾回收机制的效果是一样的。即使在可能根缓冲区还没满时，也能强制执行周期回收。你能调用<function>gc_collect_cycles</function>函数达到这个目的。这个函数将返回使用这个算法回收的周期数。
+    除了改变配置中的 <link linkend="ini.zend.enable-gc">zend.enable_gc</link> 之外，还可以通过调用 <function>gc_enable</function>
+    或 <function>gc_disable</function> 来启用/禁用垃圾回收机制。调用这些函数与通过配置打开或关闭机制的效果相同。即使可能的根缓冲区尚未满，还可以强制回收循环。为此，可以使用
+    <function>gc_collect_cycles</function> 函数。该函数将返回算法回收的循环数量。
    </para>
    <para>
     允许打开和关闭垃圾回收机制并且允许自主的初始化的原因，是由于你的应用程序的某部分可能是高时效性的。在这种情况下，你可能不想使用垃圾回收机制。当然，对你的应用程序的某部分关闭垃圾回收机制，是在冒着可能内存泄漏的风险，因为一些可能根也许存不进有限的根缓冲区。因此，就在你调用<function>gc_disable</function>函数释放内存之前，先调用<function>gc_collect_cycles</function>函数可能比较明智。因为这将清除已存放在根缓冲区中的所有可能根，然后在垃圾回收机制被关闭时，可留下空缓冲区以有更多空间存储可能根。
@@ -361,7 +369,7 @@ a: (refcount=2, is_ref=1)=array (
 <?php
 class Foo
 {
-    public $var = '3.1415962654';
+    public $var = '3.14159265359';
 }
 
 $baseMemory = memory_get_usage();
@@ -404,7 +412,7 @@ for ( $i = 0; $i <= 100000; $i++ )
 <?php
 class Foo
 {
-    public $var = '3.1415962654';
+    public $var = '3.14159265359';
 }
 
 for ( $i = 0; $i <= 1000000; $i++ )
@@ -420,7 +428,7 @@ echo memory_get_peak_usage(), "\n";
      </example>
     </para>
     <para>
-     我们将运行这个脚本两次，一次通过配置<option>zend.enable_gc</option>打开垃圾回收机制时，另一次是它关闭时。
+     运行这个脚本两次，一次将 <link linkend="ini.zend.enable-gc">zend.enable_gc</link> 设置打开，一次关闭。
     </para>
     <para>
      <example>
