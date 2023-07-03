@@ -1,37 +1,115 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
-  <refentry xml:id="function.mysql-field-flags" xmlns="http://docbook.org/ns/docbook">
-   <refnamediv>
-    <refname>mysql_field_flags</refname>
-    <refpurpose>
-     从结果中取得和指定字段关联的标志
-    </refpurpose>
-   </refnamediv>
-   <refsect1>
-    <title>说明</title>
-     <methodsynopsis>
-      <type>string</type><methodname>mysql_field_flags</methodname>
-      <methodparam><type>resource</type><parameter>result</parameter></methodparam>
-      <methodparam><type>int</type><parameter>field_offset</parameter></methodparam>
-     </methodsynopsis>
-    <para>
-     <function>mysql_field_flags</function>
-     返回指定字段的字段标志。每个标志都用一个单词表示，之间用一个空格分开，因此可以用
-     <function>explode</function> 将其分开。
-    </para>
-    <para>
-     如果 MySQL 版本足够新，则会支持以下的标志："not_null", "primary_key",
-     "unique_key", "multiple_key", "blob", "unsigned", "zerofill",
-     "binary", "enum", "auto_increment", "timestamp"。
-    </para>
-    <para>
-     为向下兼容仍然可以使用
-     <function>mysql_fieldflags</function>，但反对这样做。
-    </para>
-   </refsect1>
-  </refentry>
+<!-- EN-Revision: b95d28e6ec86e4a71e012737d36ebdc1cf009180 Maintainer: dallas Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
+<refentry xml:id="function.mysql-field-flags" xmlns="http://docbook.org/ns/docbook">
+ <refnamediv>
+  <refname>mysql_field_flags</refname>
+  <refpurpose>从结果中取得和指定字段关联的 flags</refpurpose>
+ </refnamediv>
+
+ <refsynopsisdiv>
+  <warning>
+   &mysql.alternative.note;
+   <simplelist role="alternatives">
+    <member><function>mysqli_fetch_field_direct</function> [flags]</member>
+    <member><methodname>PDOStatement::getColumnMeta</methodname> [flags]</member>
+   </simplelist>
+  </warning>
+ </refsynopsisdiv>
+
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <type class="union"><type>string</type><type>false</type></type><methodname>mysql_field_flags</methodname>
+   <methodparam><type>resource</type><parameter>result</parameter></methodparam>
+   <methodparam><type>int</type><parameter>field_offset</parameter></methodparam>
+  </methodsynopsis>
+  <para>
+   <function>mysql_field_flags</function> 返回指定字段的字段 flags。每个 flag 都用一个单词表示，之间用一个空格分开，因此可以用
+   <function>explode</function> 将返回值分开。
+  </para>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    &mysql.result.description;
+    &mysql.field-offset.req.description;
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   Returns a string of flags associated with the result&return.falseforfailure;.
+  </para>
+  <para>
+   如果 MySQL 版本足够新，以便支持这些 flag，则会报告以下
+   flag：<literal>"not_null"</literal>、<literal>"primary_key"</literal>、<literal>"unique_key"</literal>、<literal>"multiple_key"</literal>、<literal>"blob"</literal>、<literal>"unsigned"</literal>、<literal>"zerofill"</literal>,<literal>"binary"</literal>、<literal>"enum"</literal>、<literal>"auto_increment"</literal>
+   和 <literal>"timestamp"</literal>。
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title><function>mysql_field_flags</function> 示例</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$result = mysql_query("SELECT id,email FROM people WHERE id = '42'");
+if (!$result) {
+    echo 'Could not run query: ' . mysql_error();
+    exit;
+}
+$flags = mysql_field_flags($result, 0);
+
+echo $flags;
+print_r(explode(' ', $flags));
+?>
+]]>
+    </programlisting>
+    &example.outputs.similar;
+    <screen>
+<![CDATA[
+not_null primary_key auto_increment
+Array
+(
+    [0] => not_null
+    [1] => primary_key
+    [2] => auto_increment
+)
+]]>
+    </screen>
+   </example>
+  </para>
+ </refsect1>
+
+ <refsect1 role="notes">
+  &reftitle.notes;
+  <note>
+   <para>
+    &info.deprecated.alias;
+    <function>mysql_fieldflags</function>
+   </para>
+  </note>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>mysql_field_type</function></member>
+    <member><function>mysql_field_len</function></member>
+   </simplelist>
+  </para>
+ </refsect1>
+
+</refentry>
 
 <!-- Keep this comment at the end of the file
 Local variables:
