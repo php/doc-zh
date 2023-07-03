@@ -1,36 +1,99 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
+<!-- EN-Revision: 5e41012cfdf8f2eff5fa56de446c7656afac536c Maintainer: dallas Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="function.oci-field-type-raw" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>oci_field_type_raw</refname>
   <refpurpose>返回字段的原始 Oracle 数据类型</refpurpose>
  </refnamediv>
- <refsect1>
-  <title>说明</title>
+ 
+ <refsect1 role="description">
+  &reftitle.description;
   <methodsynopsis>
-   <type>int</type><methodname>oci_field_type_raw</methodname>
+   <type class="union"><type>int</type><type>false</type></type><methodname>oci_field_type_raw</methodname>
    <methodparam><type>resource</type><parameter>statement</parameter></methodparam>
-   <methodparam><type>int</type><parameter>field</parameter></methodparam>
+   <methodparam><type class="union"><type>string</type><type>int</type></type><parameter>column</parameter></methodparam>
   </methodsynopsis>
   <para>
-   <function>oci_field_type_raw</function> 返回字段的原始 Oracle 数据类型。
+   返回 <parameter>column</parameter> 的 Oracle 原始“SQLT”数据类型。
   </para>
-  <note>
-   <para>
-    在 PHP 5.0.0 之前的版本必须使用 <function>ocicolumntyperaw</function>
-    替代本函数。该函数名仍然可用，为向下兼容作为
-    <function>oci_field_type_raw</function> 的别名。不过其已被废弃，不推荐使用。
-   </para>
-  </note>
   <para>
-   不过，如果需要取得字段的类型，<function>oci_field_type</function>
-   更为适合。更多信息见 <function>oci_field_type</function>。
+   如果想要字段的类型名称，然后使用 <function>oci_field_type</function> 代替。
+  </para>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>statement</parameter></term>
+     <listitem>
+      <para>
+       有效的 OCI 语句标识符。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>column</parameter></term>
+     <listitem>
+      <para>
+       可以是字段的索引（从1开始），也可以是名称。
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   返回数字类型的 Oracle 的原始数据类型，&return.falseforfailure;
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title><function>oci_field_type_raw</function> 示例</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+
+// Create the table with:
+//   CREATE TABLE mytab (number_col NUMBER, varchar2_col varchar2(1), clob_col CLOB, date_col DATE);
+
+$conn = oci_connect("hr", "hrpwd", "localhost/XE");
+if (!$conn) {
+    $m = oci_error();
+    trigger_error(htmlentities($m['message']), E_USER_ERROR);
+}
+
+$stid = oci_parse($conn, 'select * from mytab');
+oci_execute($stid, OCI_DESCRIBE_ONLY);  // Use OCI_DESCRIBE_ONLY if not fetching rows
+$n = oci_num_fields($stid);
+for ($i = 1; $i <= $n; ++$i) {
+    echo oci_field_name($stid, $i) . " is raw type: " . oci_field_type_raw($stid, $i) . "<br>\n";
+}
+
+// Output is:
+//    NUMBER_COL is raw type: 2
+//    VARCHAR2_COL is raw type: 1
+//    CLOB_COL is raw type: 112
+//    DATE_COL is raw type: 12
+
+oci_free_statement($stid);
+oci_close($conn);
+
+?>]]>
+    </programlisting>
+   </example>
   </para>
  </refsect1>
 </refentry>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
