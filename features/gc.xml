@@ -9,10 +9,10 @@
   </para>
 
   <sect1 xml:id="features.gc.refcounting-basics">
-   <title>引用计数基本</title>
+   <title>引用计数基础</title>
    <para>
-    PHP 变量存储在称为“zval”的容器中。zval 容器除了变量的类型和值之外，还包含两个额外的信息位。第一个称为“is_ref”，是布尔值，表示变量是否是“引用集合”的一部分。通过这个位，PHP
-    引擎知道如何区分普通变量和引用。由于 PHP 允许用户自定义引用，使用 &amp; 运算符创建引用，zval 容器还有内部引用计数机制来优化内存使用。第二个称为“refcount”，表示有多少个变量名（也称为符号）指向这个
+    PHP 变量存储在称为“zval”的容器中。zval 容器除了变量的类型和值之外，还包含两个额外的信息位。第一个是“is_ref”，是布尔值，表示变量是否是“引用集合”的一部分。通过这个位，PHP
+    引擎知道如何区分普通变量和引用。由于 PHP 允许用户自定义引用，通过 &amp; 运算符创建引用，zval 容器还有内部引用计数机制来优化内存使用。第二个是“refcount”，表示有多少个变量名（也称为符号）指向这个
     zval 容器。所有符号都存储在一个符号表中，每个作用域都有一个符号表。主脚本（即通过浏览器请求的脚本）有一个作用域，每个函数或方法也有一个作用域。
    </para>
    <para>
@@ -79,8 +79,8 @@ a: (refcount=2, is_ref=0)='new string'
    </para>
    <para>
     这里的 refcount 是 <literal>2</literal>，因为同一个变量容器链接到 <varname>a</varname> 和 <varname>b</varname>。PHP
-    很聪明，当不必要时，不会复制实际的变量容器。当“refcount”达到零时，就会销毁变量容器。当链接到变量容器的任何符号离开作用域（例如函数结束时）或取消符号赋值（例如通过调用
-    <function>unset</function>）时，“refcount”会减少一。以下是一个示例：
+    很聪明，当没有必要的时候，不会复制实际的变量容器。当“refcount”到 0 时，就会销毁变量容器。当链接到变量容器的任何符号离开作用域（例如函数结束时）或取消符号赋值（例如通过调用
+    <function>unset</function>）时，“refcount”会减少 1。以下是示例：
    </para>
    <para>
     <example>
@@ -139,7 +139,7 @@ a: (refcount=1, is_ref=0)=array (
 )
 ]]>
       </screen>
-      <para>或图示</para>
+      <para>图示：</para>
       <mediaobject>
        <alt>简单数组的 zval</alt>
        <imageobject>
@@ -174,7 +174,7 @@ a: (refcount=1, is_ref=0)=array (
 )
 ]]>
       </screen>
-      <para>或图示</para>
+      <para>图示：</para>
       <mediaobject>
        <alt>带有引用的简单数组的 zvals</alt>
        <imageobject>
@@ -189,7 +189,7 @@ a: (refcount=1, is_ref=0)=array (
      函数没有显示这一点，但可以通过显示内存指针来看到它。
     </para>
     <para>
-     从数组中删除元素就像从作用域中删除符号一样。删除后，数组元素指向的容器的“refcount”会减少。同样，当“refcount”达到零时，变量容器就会从内存中删除。再举一个例子来说明这一点：
+     从数组中删除元素就像从作用域中删除符号一样。删除后，数组元素指向的容器的“refcount”会减少。同样，当“refcount”到 0 时，变量容器就会从内存中删除。再举个例子来说明这一点：
     </para>
     <para>
      <example>
@@ -238,9 +238,9 @@ a: (refcount=2, is_ref=1)=array (
 )
 ]]>
       </screen>
-      <para>或图示</para>
+      <para>图示：</para>
       <mediaobject>
-       <alt>具有循环引用的数组的 zval</alt>
+       <alt>具有循环引用的数组 zval</alt>
        <imageobject>
         <imagedata fileref="en/features/figures/loop-array.png" format="PNG"/>
        </imageobject>
@@ -248,12 +248,12 @@ a: (refcount=2, is_ref=1)=array (
      </example>
     </para>
     <para>
-     可以看到数组变量（<varname>a</varname>）以及第二个元素（<varname>1</varname>）现在都指向一个“refcount”为 <literal>2</literal>
+     可以看到数组变量（<varname>a</varname>）以及第二个元素（<varname>1</varname>）现在都指向“refcount”为 <literal>2</literal>
      的变量容器。上面显示的“...”表示存在递归，这在这种情况下意味着“...”指向原数组。
     </para>
     <para>
-     就像之前一样，清除变量会删除符号，并且指向的变量容器的引用计数会减少一。因此，如果在运行上述代码后清除变量 <varname>$a</varname>，那么
-     <varname>$a</varname> 和元素“1”所指向的变量容器的引用计数会减少一，从“2”变为“1”。可以表示为：
+     就像之前一样，清除变量会删除符号，并且指向的变量容器的引用计数会减少 1。因此，如果在运行上述代码后清除变量 <varname>$a</varname>，那么
+     <varname>$a</varname> 和元素“1”所指向的变量容器的引用计数会减少 1，从“2”变为“1”。可以表示为：
     </para>
     <para>
      <example>
@@ -266,7 +266,7 @@ a: (refcount=2, is_ref=1)=array (
 )
 ]]>
       </screen>
-      <para>或图示</para>
+      <para>图示：</para>
       <mediaobject>
        <alt>在演示完内存泄漏的循环引用数组移除后的 zval</alt>
        <imageobject>
@@ -278,18 +278,21 @@ a: (refcount=2, is_ref=1)=array (
    </sect2>
 
    <sect2 xml:id="features.gc.cleanup-problems">
-    <title>清理变量容器的问题(Cleanup Problems)</title>
+    <title>清理问题</title>
     <para>
-     尽管不再有某个作用域中的任何符号指向这个结构(就是变量容器)，由于数组元素“1”仍然指向数组本身，所以这个容器不能被清除 。因为没有另外的符号指向它，用户没有办法清除这个结构，结果就会导致内存泄漏。庆幸的是，php将在脚本执行结束时清除这个数据结构，但是在php清除之前，将耗费不少内存。如果你要实现分析算法，或者要做其他像一个子元素指向它的父元素这样的事情，这种情况就会经常发生。当然，同样的情况也会发生在对象上，实际上对象更有可能出现这种情况，因为对象总是隐式的被引用。
+     虽然在任何作用域中都没有指向这个结构的符号，却无法清理它，因为数组元素“1”仍然指向同一个数组。由于没有外部符号指向它，用户无法清理该结构；因此会出现内存泄漏。幸运的是，PHP
+     会在请求结束时清理这个数据结构，但在此之前，它会占用宝贵的内存空间。如果你正在实现解析算法或其他需要子级元素指向"父级"元素的情况，会经常发生。当然，object
+     也可能出现相同的情况，因为 object 始终隐式引用。
     </para>
     <para>
-     如果上面的情况发生仅仅一两次倒没什么，但是如果出现几千次，甚至几十万次的内存泄漏，这显然是个大问题。这样的问题往往发生在长时间运行的脚本中，比如请求基本上不会结束的守护进程(deamons)或者单元测试中的大的套件(sets)中。后者的例子：在给巨大的eZ(一个知名的PHP Library) 组件库的模板组件做单元测试时，就可能会出现问题。有时测试可能需要耗用2GB的内存，而测试服务器很可能没有这么大的内存。
+     如果这种情况只发生一两次，可能不是问题，但如果出现数千次，甚至数百万次的内存损失，显然就成了问题。这在长时间运行的脚本中尤为棘手，比如守护进程，其中请求基本上永远不会结束，或者在大量的单元测试集中。后者在运行
+     eZ Components 库的模板组件的单元测试时出现了问题。在某些情况下，它需要超过 2GB 的内存，而测试服务器并没有那么多内存可用。
     </para>
    </sect2>
   </sect1>
 
   <sect1 xml:id="features.gc.collecting-cycles">
-   <title>回收周期(Collecting Cycles)</title>
+   <title>回收周期</title>
    <para>
     传统上，像以前的 php 用到的引用计数内存机制，无法处理循环的引用内存泄漏；然而，自 5.3.0 起，PHP 使用文章<link xlink:href="&url.gc-paper;">引用计数系统中的同步周期回收(Concurrent Cycle Collection in Reference Counted Systems)</link>中的同步算法，来处理这个内存泄漏问题。  
    </para>
