@@ -1,105 +1,89 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: yincheng Status: ready -->
-<!-- CREDITS: dallas -->
+<!-- EN-Revision: 5e41012cfdf8f2eff5fa56de446c7656afac536c Maintainer: yincheng Status: ready -->
+<!-- CREDITS: dallas, mowangjuanzi -->
 <refentry xml:id="function.oci-new-cursor" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>oci_new_cursor</refname>
-  <refpurpose>分配并返回一个新的游标（语句句柄）</refpurpose>
+  <refpurpose>分配并返回新的游标（语句句柄）</refpurpose>
  </refnamediv>
- <refsect1>
-  <title>说明</title>
+ 
+ <refsect1 role="description">
+  &reftitle.description;
   <methodsynopsis>
-   <type>resource</type><methodname>oci_new_cursor</methodname>
+   <type class="union"><type>resource</type><type>false</type></type><methodname>oci_new_cursor</methodname>
    <methodparam><type>resource</type><parameter>connection</parameter></methodparam>
   </methodsynopsis>
   <para>
-   <function>oci_new_cursor</function> 在指定的连接上分配一个新的语句句柄。
+   在指定连接上分配新的语句句柄。
   </para>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>connection</parameter></term>
+     <listitem>
+      <para>
+       Oracle 连接标识符，由 <function>oci_connect</function> 或 <function>oci_pconnect</function> 返回。
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   返回新的语句句柄，或者失败时返回 &false;。
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
   <para>
    <example>
-    <title>在 Oracle 的存储过程中使用 REF CURSOR</title>
+    <title>在调用 Oracle 存储过程中绑定 REF CURSOR</title>
     <programlisting role="php">
 <![CDATA[
 <?php
-// suppose your stored procedure info.output returns a ref cursor in :data
 
-$conn = oci_connect("scott", "tiger");
-$curs = oci_new_cursor($conn);
-$stmt = oci_parse($conn, "begin info.output(:data); end;");
+// Precreate:
+//   create or replace procedure myproc(myrc out sys_refcursor) as
+//   begin
+//     open myrc for select first_name from employees;
+//   end;
 
-oci_bind_by_name($stmt, "data", $curs, -1, OCI_B_CURSOR);
-oci_execute($stmt);
-oci_execute($curs);
-
-while ($data = oci_fetch_row($curs)) {
-    var_dump($data);
+$conn = oci_connect("hr", "hrpwd", "localhost/XE");
+if (!$conn) {
+    $m = oci_error();
+    trigger_error(htmlentities($m['message']), E_USER_ERROR);
 }
 
-oci_free_statement($stmt);
+$curs = oci_new_cursor($conn);
+$stid = oci_parse($conn, "begin myproc(:cursbv); end;");
+oci_bind_by_name($stid, ":cursbv", $curs, -1, OCI_B_CURSOR);
+oci_execute($stid);
+
+oci_execute($curs);  // Execute the REF CURSOR like a normal statement id
+while (($row = oci_fetch_array($curs, OCI_ASSOC+OCI_RETURN_NULLS)) != false) {
+    echo $row['FIRST_NAME'] . "<br />\n";
+}
+
+oci_free_statement($stid);
 oci_free_statement($curs);
 oci_close($conn);
+
 ?>
 ]]>
     </programlisting>
    </example>
   </para>
-  <para>
-   <example>
-    <title>在 Oracle 的 select 语句中使用 REF CURSOR</title>
-    <programlisting role="php">
-<![CDATA[
-<?php
-echo "<html><body>";
-$conn = oci_connect("scott", "tiger");
-$count_cursor = "CURSOR(select count(empno) num_emps from emp " .
-                "where emp.deptno = dept.deptno) as EMPCNT from dept";
-$stmt = oci_parse($conn, "select deptno,dname,$count_cursor");
-
-oci_execute($stmt);
-echo "<table border=\"1\">";
-echo "<tr>";
-echo "<th>DEPT NAME</th>";
-echo "<th>DEPT #</th>";
-echo "<th># EMPLOYEES</th>";
-echo "</tr>";
-
-while ($data = oci_fetch_assoc($stmt)) {
-    echo "<tr>";
-    $dname  = $data["DNAME"];
-    $deptno = $data["DEPTNO"];
-    echo "<td>$dname</td>";
-    echo "<td>$deptno</td>";
-    oci_execute($data["EMPCNT"]);
-    while ($subdata = oci_fetch_assoc($data["EMPCNT"])) {
-        $num_emps = $subdata["NUM_EMPS"];
-        echo  "<td>$num_emps</td>";
-    }
-    echo "</tr>";
-}
-echo "</table>";
-echo "</body></html>";
-oci_free_statement($stmt);
-oci_close($conn);
-?>
-]]>
-    </programlisting>
-   </example>
-  </para>
-  <para>
-   <function>oci_new_cursor</function> 如果出错返回 &false;。
-  </para>
-  <note>
-   <para>
-    在 PHP 5.0.0 之前的版本必须使用 <function>ocinewcursor</function>
-    替代本函数。该函数名仍然可用，为向下兼容作为
-    <function>oci_new_cursor</function> 的别名。不过其已被废弃，不推荐使用。
-   </para>
-  </note>
  </refsect1>
 </refentry>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml

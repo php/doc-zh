@@ -1,56 +1,90 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: yincheng Status: ready -->
-<!-- CREDITS: dallas -->
+<!-- EN-Revision: 5e41012cfdf8f2eff5fa56de446c7656afac536c Maintainer: yincheng Status: ready -->
+<!-- CREDITS: dallas, mowangjuanzi -->
 <refentry xml:id="function.oci-new-descriptor" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>oci_new_descriptor</refname>
-  <refpurpose>初始化一个新的空 LOB 或 FILE 描述符</refpurpose>
+  <refpurpose>初始化新的空 LOB 或 FILE 描述符</refpurpose>
  </refnamediv>
- <refsect1>
-  <title>说明</title>
+ 
+ <refsect1 role="description">
+  &reftitle.description;
   <methodsynopsis>
-   <type>OCI-Lob</type><methodname>oci_new_descriptor</methodname>
+   <type class="union"><type>OCILob</type><type>null</type></type><methodname>oci_new_descriptor</methodname>
    <methodparam><type>resource</type><parameter>connection</parameter></methodparam>
-   <methodparam choice="opt"><type>int</type><parameter>type</parameter></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>type</parameter><initializer><constant>OCI_DTYPE_LOB</constant></initializer></methodparam>
   </methodsynopsis>
   <para>
-   <function>oci_new_descriptor</function> 分配资源以保存描述符或
-   LOB 定位器。有效的 <parameter>type</parameter> 值是：<constant>OCI_D_FILE</constant>，<constant>OCI_D_LOB</constant>
-   以及 <constant>OCI_D_ROWID</constant>。
+   分配保存描述符或 LOB 定位器的资源。
   </para>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>connection</parameter></term>
+     <listitem>
+      <para>
+       Oracle 连接标识符，由 <function>oci_connect</function> 或 <function>oci_pconnect</function> 返回。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>type</parameter></term>
+     <listitem>
+      <para>
+       <parameter>type</parameter> 的有效值是：<constant>OCI_DTYPE_FILE</constant>、<constant>OCI_DTYPE_LOB</constant>
+       和 <constant>OCI_DTYPE_ROWID</constant>。
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   成功时返回新 LOB 或 FILE 描述符，失败时为 &null;。
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
   <para>
    <example>
-    <title><function>oci_new_descriptor</function> 例子</title>
+    <title><function>oci_new_descriptor</function> 示例</title>
     <programlisting role="php">
 <![CDATA[
 <?php
-    /* This script is designed to be called from a HTML form.
-     * It expects $user, $password, $table, $where, and $commitsize
-     * to be passed in from the form.  The script then deletes
-     * the selected rows using the ROWID and commits after each
-     * set of $commitsize rows. (Use with care, there is no rollback)
-     */
-    $conn = oci_connect($user, $password);
-    $stmt = oci_parse($conn, "select rowid from $table $where");
-    $rowid = oci_new_descriptor($conn, OCI_D_ROWID);
-    oci_define_by_name($stmt, "ROWID", $rowid);
-    oci_execute($stmt);
-    while (oci_fetch($stmt)) {
-       $nrows = oci_num_rows($stmt);
-       $delete = oci_parse($conn, "delete from $table where ROWID = :rid");
-       oci_bind_by_name($delete, ":rid", $rowid, -1, OCI_B_ROWID);
-       oci_execute($delete);
-       echo "$nrows\n";
-       if (($nrows % $commitsize) == 0) {
-           oci_commit($conn);
-       }
-    }
+/* This script is designed to be called from a HTML form.
+ * It expects $user, $password, $table, $where, and $commitsize
+ * to be passed in from the form.  The script then deletes
+ * the selected rows using the ROWID and commits after each
+ * set of $commitsize rows. (Use with care, there is no rollback)
+ */
+$conn = oci_connect($user, $password);
+$stmt = oci_parse($conn, "select rowid from $table $where");
+$rowid = oci_new_descriptor($conn, OCI_D_ROWID);
+oci_define_by_name($stmt, "ROWID", $rowid);
+oci_execute($stmt);
+while (oci_fetch($stmt)) {
     $nrows = oci_num_rows($stmt);
-    echo "$nrows deleted...\n";
-    oci_free_statement($stmt);
-    oci_close($conn);
+    $delete = oci_parse($conn, "delete from $table where ROWID = :rid");
+    oci_bind_by_name($delete, ":rid", $rowid, -1, OCI_B_ROWID);
+    oci_execute($delete);
+    echo "$nrows\n";
+    if (($nrows % $commitsize) == 0) {
+        oci_commit($conn);
+    }
+}
+$nrows = oci_num_rows($stmt);
+echo "$nrows deleted...\n";
+oci_free_statement($stmt);
+oci_close($conn);
 ?>
 ]]>
     </programlisting>
@@ -89,7 +123,7 @@ Upload file: <input type="file" name="lob_upload" /><br />
      }else{
         echo "Couldn't upload Blob\n";
      }
-     oci_free_descriptor($lob);
+     $lob->free();
      oci_free_statement($stmt);
      oci_close($conn);
   }
@@ -98,50 +132,48 @@ Upload file: <input type="file" name="lob_upload" /><br />
     </programlisting>
    </example>
    <example>
-    <title><function>oci_new_descriptor</function> 例子</title>
+    <title><function>oci_new_descriptor</function> 示例</title>
     <programlisting role="php">
 <![CDATA[
 <?php
-    /* Calling PL/SQL stored procedures which contain clobs as input
-     * parameters (PHP 4 >= 4.0.6).
-     * Example PL/SQL stored procedure signature is:
-     *
-     * PROCEDURE save_data
-     *   Argument Name                  Type                    In/Out Default?
-     *   ------------------------------ ----------------------- ------ --------
-     *   KEY                            NUMBER(38)              IN
-     *   DATA                           CLOB                    IN
-     *
-     */
+/* Calling PL/SQL stored procedures which contain clobs as input
+ * parameters.
+ * Example PL/SQL stored procedure signature is:
+ *
+ * PROCEDURE save_data
+ *   Argument Name                  Type                    In/Out Default?
+ *   ------------------------------ ----------------------- ------ --------
+ *   KEY                            NUMBER(38)              IN
+ *   DATA                           CLOB                    IN
+ *
+ */
 
-    $conn = oci_connect($user, $password);
-    $stmt = oci_parse($conn, "begin save_data(:key, :data); end;");
-    $clob = oci_new_descriptor($conn, OCI_D_LOB);
-    oci_bind_by_name($stmt, ':key', $key);
-    oci_bind_by_name($stmt, ':data', $clob, -1, OCI_B_CLOB);
-    $clob->write($data);
-    oci_execute($stmt, OCI_DEFAULT);
-    oci_commit($conn);
-    $clob->free();
-    oci_free_statement($stmt);
+$conn = oci_connect($user, $password);
+$stmt = oci_parse($conn, "begin save_data(:key, :data); end;");
+$clob = oci_new_descriptor($conn, OCI_D_LOB);
+oci_bind_by_name($stmt, ':key', $key);
+oci_bind_by_name($stmt, ':data', $clob, -1, OCI_B_CLOB);
+$clob->write($data);
+oci_execute($stmt, OCI_DEFAULT);
+oci_commit($conn);
+$clob->free();
+oci_free_statement($stmt);
 ?>
 ]]>
     </programlisting>
    </example>
   </para>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
   <para>
-   <function>oci_new_descriptor</function> 如果出错返回 &false;。
+   <simplelist>
+    <member><function>oci_bind_by_name</function></member>
+   </simplelist>
   </para>
-  <note>
-   <para>
-    在 PHP 5.0.0 之前的版本必须使用 <function>ocinewdescriptor</function>
-    替代本函数。该函数名仍然可用，为向下兼容作为
-    <function>oci_new_descriptor</function> 的别名。不过其已被废弃，不推荐使用。
-   </para>
-  </note>
  </refsect1>
 </refentry>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
