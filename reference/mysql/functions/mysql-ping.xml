@@ -1,32 +1,100 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
-  <refentry xml:id="function.mysql-ping" xmlns="http://docbook.org/ns/docbook">
-   <refnamediv>
-    <refname>mysql_ping</refname>
-    <refpurpose>Ping 一个服务器连接，如果没有连接则重新连接</refpurpose>
-   </refnamediv>
-   <refsect1>
-    <title>说明</title>
-     <methodsynopsis>
-      <type>bool</type><methodname>mysql_ping</methodname>
-      <methodparam choice="opt"><type>resource</type><parameter>
-       link_identifier
-       </parameter></methodparam>
-     </methodsynopsis>
-    <para>
-     <function>mysql_ping</function>
-     检查到服务器的连接是否正常。如果断开，则自动尝试连接。本函数可用于空闲很久的脚本来检查服务器是否关闭了连接，如果有必要则重新连接上。如果到服务器的连接可用则
-     <function>mysql_ping</function> 返回 &true;，否则返回 &false;。
-    </para>
-    <para>
-     参见
-     <function>mysql_thread_id</function> 和
-     <function>mysql_list_processes</function>。
-    </para>
-   </refsect1>
-  </refentry>
+<!-- EN-Revision: ed56c4e375ef51f88d578741f1b5074d31fc0988 Maintainer: dallas Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
+<refentry xml:id="function.mysql-ping" xmlns="http://docbook.org/ns/docbook">
+ <refnamediv>
+  <refname>mysql_ping</refname>
+  <refpurpose>Ping 服务器连接的状态，如果没有连接则重新连接</refpurpose>
+ </refnamediv>
+
+ <refsynopsisdiv>
+  <warning>
+   &mysql.alternative.note;
+   <simplelist role="alternatives">
+    <member><function>mysqli_ping</function></member>
+   </simplelist>
+  </warning>
+ </refsynopsisdiv>
+
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <type>bool</type><methodname>mysql_ping</methodname>
+   <methodparam choice="opt"><type>resource</type><parameter>link_identifier</parameter><initializer>NULL</initializer></methodparam>
+  </methodsynopsis>
+  <para>
+   检查到服务器的连接是否正常。如果断开，则自动尝试连接。本函数可用于空闲很久的脚本来检查服务器是否关闭了连接，如果有必要则重新连接上。。
+  </para>
+  <note>
+   <para>
+    从 MySQL 版本 5.0.3 开始，默认情况下不启用自动重新连接功能。
+   </para>
+  </note>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    &mysql.linkid.description;
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   如果到服务器的连接可用则，返回 &true;，否则返回 &false;。
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title><function>mysql_ping</function> 示例</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+set_time_limit(0);
+
+$conn = mysql_connect('localhost', 'mysqluser', 'mypass');
+$db   = mysql_select_db('mydb');
+
+/* Assuming this query will take a long time */
+$result = mysql_query($sql);
+if (!$result) {
+    echo 'Query #1 failed, exiting.';
+    exit;
+}
+
+/* Make sure the connection is still alive, if not, try to reconnect */
+if (!mysql_ping($conn)) {
+    echo 'Lost connection, exiting after query #1';
+    exit;
+}
+mysql_free_result($result);
+
+/* So the connection is still alive, let's run another query */
+$result2 = mysql_query($sql2);
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>mysql_thread_id</function></member>
+    <member><function>mysql_list_processes</function></member>
+   </simplelist>
+  </para>
+ </refsect1>
+</refentry>
 
 <!-- Keep this comment at the end of the file
 Local variables:
