@@ -1,46 +1,161 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: yincheng Status: ready -->
-<!-- CREDITS: dallas -->
+<!-- EN-Revision: ed6de1ae20ce16c0c7be0b3fef282b6065bebfac Maintainer: yincheng Status: ready -->
+<!-- CREDITS: dallas, mowangjuanzi -->
 <refentry xml:id="function.oci-parse" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>oci_parse</refname>
-  <refpurpose>配置 Oracle 语句预备执行</refpurpose>
+  <refpurpose>预处理用于执行的 Oracle 语句</refpurpose>
  </refnamediv>
- <refsect1>
-  <title>说明</title>
+ 
+ <refsect1 role="description">
+  &reftitle.description;
   <methodsynopsis>
-   <type>resource</type><methodname>oci_parse</methodname>
+   <type class="union"><type>resource</type><type>false</type></type><methodname>oci_parse</methodname>
    <methodparam><type>resource</type><parameter>connection</parameter></methodparam>
-   <methodparam><type>string</type><parameter>query</parameter></methodparam>
+   <methodparam><type>string</type><parameter>sql</parameter></methodparam>
   </methodsynopsis>
   <para>
-   <function>oci_parse</function> 在 <parameter>connection</parameter>
-   上配置 <parameter>query</parameter> 并返回语句标识符以用于
-   <function>oci_bind_by_name</function>，<function>oci_execute</function>
-   以及其它函数。
+   使用 <parameter>connection</parameter> 预处理 <parameter>sql</parameter>
+   并返回语句标识符，语句标识符可跟 <function>oci_bind_by_name</function>、<function>oci_execute</function>
+   和其它函数一起使用。
   </para>
-  <note>
-   <para>
-    本函数<emphasis>并不</emphasis>验证
-    <parameter>query</parameter>。要知道 <parameter>query</parameter>
-    是否是合法的 SQL 或 PL/SQL 语句的唯一方法是执行它。
-   </para>
-  </note>
   <para>
-   <function>oci_parse</function> 在出错时返回 &false;。
+   语句标识符可使用 <function>oci_free_statement</function> 或将变量设置为 &null; 来释放。
   </para>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>connection</parameter></term>
+     <listitem>
+      <para>
+       Oracle 连接标识符，由  <function>oci_connect</function>、<function>oci_pconnect</function>
+       或 <function>oci_new_connect</function> 返回。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>sql</parameter></term>
+     <listitem>
+      <para>
+       SQL 或 PL/SQL 语句。
+      </para>
+      <para>
+       SQL 语句<emphasis>不应</emphasis>以分号（&quot;;&quot;）结尾。PL/SQL 语句<emphasis>应</emphasis>以分号（&quot;;&quot;）结尾。
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   成功时返回语句句柄，错误时为 &false;。
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title><function>oci_parse</function> 的 SQL 语句示例</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+
+$conn = oci_connect('hr', 'welcome', 'localhost/XE');
+
+// Parse the statement. Note there is no final semi-colon in the SQL statement
+$stid = oci_parse($conn, 'SELECT * FROM employees');
+oci_execute($stid);
+
+echo "<table border='1'>\n";
+while ($row = oci_fetch_array($stid, OCI_ASSOC+OCI_RETURN_NULLS)) {
+    echo "<tr>\n";
+    foreach ($row as $item) {
+        echo "    <td>" . ($item !== null ? htmlentities($item, ENT_QUOTES) : "&nbsp;") . "</td>\n";
+    }
+    echo "</tr>\n";
+}
+echo "</table>\n";
+
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   <example>
+    <title><function>oci_parse</function> 的 PL/SQL 语句示例</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+
+/*
+  Before running the PHP program, create a stored procedure in
+  SQL*Plus or SQL Developer:
+
+  CREATE OR REPLACE PROCEDURE myproc(p1 IN NUMBER, p2 OUT NUMBER) AS
+  BEGIN
+      p2 := p1 * 2;
+  END;
+
+*/
+
+$conn = oci_connect('hr', 'welcome', 'localhost/XE');
+if (!$conn) {
+    $e = oci_error();
+    trigger_error(htmlentities($e['message'], ENT_QUOTES), E_USER_ERROR);
+}
+
+$p1 = 8;
+
+// When parsing PL/SQL programs, there should be a final semi-colon in the string
+$stid = oci_parse($conn, 'begin myproc(:p1, :p2); end;');
+oci_bind_by_name($stid, ':p1', $p1);
+oci_bind_by_name($stid, ':p2', $p2, 40);
+
+oci_execute($stid);
+
+print "$p2\n";   // prints 16
+
+oci_free_statement($stid);
+oci_close($conn);
+
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+ </refsect1>
+
+ <refsect1 role="notes">
+  &reftitle.notes;
   <note>
    <para>
-    在 PHP 5.0.0 之前的版本必须使用 <function>ociparse</function>
-    替代本函数。该函数名仍然可用，为向下兼容作为
-    <function>oci_parse</function> 的别名。不过其已被废弃，不推荐使用。
+    本函数<emphasis>并不</emphasis>验证 <parameter>sql</parameter>。要知道
+    <parameter>sql</parameter> 是否是合法的 SQL 或 PL/SQL 语句的唯一方法是执行它。
    </para>
   </note>
  </refsect1>
-</refentry>
 
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>oci_execute</function></member>
+    <member><function>oci_free_statement</function></member>
+   </simplelist>
+  </para>
+ </refsect1>
+
+</refentry>
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
