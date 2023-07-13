@@ -1,36 +1,106 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
-  <refentry xml:id="function.mysql-fetch-lengths" xmlns="http://docbook.org/ns/docbook">
-   <refnamediv>
-    <refname>mysql_fetch_lengths</refname>
-    <refpurpose>
-     取得结果集中每个输出的长度
-    </refpurpose>
-   </refnamediv>
-   <refsect1>
-    <title>说明</title>
-     <methodsynopsis>
-      <type>array</type><methodname>mysql_fetch_lengths</methodname>
-      <methodparam><type>resource</type><parameter>result</parameter></methodparam>
-     </methodsynopsis>
-    <para>
-     以数组返回上一次用
-     <function>mysql_fetch_row</function>
-     取得的行中每个字段的长度，如果出错返回 &false;。
-    </para>
-    <para>
-     <function>mysql_fetch_lengths</function> 将上一次
-     <function>mysql_fetch_row</function>，<function>mysql_fetch_array</function>
-     和 <function>mysql_fetch_object</function>
-     所返回的每个列的长度储存到一个数组中，偏移量从 0 开始。
-    </para>
-    <para>
-     参见 <function>mysql_fetch_row</function>。
-    </para>
-   </refsect1>
-  </refentry>
+<!-- EN-Revision: b95d28e6ec86e4a71e012737d36ebdc1cf009180 Maintainer: dallas Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
+<refentry xml:id="function.mysql-fetch-lengths" xmlns="http://docbook.org/ns/docbook">
+ <refnamediv>
+  <refname>mysql_fetch_lengths</refname>
+  <refpurpose>取得结果集中每个输出的长度</refpurpose>
+ </refnamediv>
+
+ <refsynopsisdiv>
+  <warning>
+   &mysql.alternative.note;
+   <simplelist role="alternatives">
+    <member><function>mysqli_fetch_lengths</function></member>
+    <member><methodname>PDOStatement::getColumnMeta</methodname></member>
+   </simplelist>
+  </warning>
+ </refsynopsisdiv>
+
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <type class="union"><type>array</type><type>false</type></type><methodname>mysql_fetch_lengths</methodname>
+   <methodparam><type>resource</type><parameter>result</parameter></methodparam>
+  </methodsynopsis>
+  <para>
+   返回数组，对应 MySQL 查询中获取的最后一行的每个字段的长度。
+  </para>
+  <para>
+   <function>mysql_fetch_lengths</function> 将上一次
+   <function>mysql_fetch_row</function>、<function>mysql_fetch_assoc</function>、<function>mysql_fetch_array</function>
+   和 <function>mysql_fetch_object</function> 所返回的最后一行的每个字段的长度储存到一个数组中，偏移量从 0 开始。
+  </para>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    &mysql.result.description;
+   </variablelist>
+  </para>
+ </refsect1>
+ 
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   An <type>array</type> of lengths on success&return.falseforfailure;.
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title><function>mysql_fetch_lengths</function> 示例</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$result = mysql_query("SELECT id,email FROM people WHERE id = '42'");
+if (!$result) {
+    echo 'Could not run query: ' . mysql_error();
+    exit;
+}
+$row     = mysql_fetch_assoc($result);
+$lengths = mysql_fetch_lengths($result);
+
+print_r($row);
+print_r($lengths);
+?>
+]]>
+    </programlisting>
+    &example.outputs.similar;
+    <screen>
+<![CDATA[
+Array
+(
+    [id] => 42
+    [email] => user@example.com
+)
+Array
+(
+    [0] => 2
+    [1] => 16
+)
+]]>
+    </screen>
+   </example>
+  </para>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>mysql_field_len</function></member>
+    <member><function>mysql_fetch_row</function></member>
+    <member><function>strlen</function></member>
+   </simplelist>
+  </para>
+ </refsect1>
+</refentry>
 
 <!-- Keep this comment at the end of the file
 Local variables:
