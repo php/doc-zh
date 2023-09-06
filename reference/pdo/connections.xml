@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: eae19eb5fe0f5bebcbce382ea7a505cedeb5a883 Maintainer: ichenshy Status: ready -->
+<!-- EN-Revision: d861a1bcea24f05e52e4938c1ecdf9d70326d7aa Maintainer: ichenshy Status: ready -->
 <!-- CREDITS: mowangjuanzi -->
 <chapter xml:id="pdo.connections" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <title>连接与连接管理</title>
@@ -31,24 +31,19 @@ $dbh = new PDO('mysql:host=localhost;dbname=test', $user, $pass);
 <?php
 try {
     $dbh = new PDO('mysql:host=localhost;dbname=test', $user, $pass);
-    foreach($dbh->query('SELECT * from FOO') as $row) {
-        print_r($row);
-    }
-    $dbh = null;
 } catch (PDOException $e) {
-    print "Error!: " . $e->getMessage() . "<br/>";
-    die();
+    // 对于示例，尝试在超时后重新连接
 }
-?>
 ]]>
    </programlisting>
   </example>
  </para>
  <warning>
   <para>
-  如果应用程序没有捕获 PDO 构造函数抛出的异常，zend
-  引擎采取的默认操作是终止脚本并显示回溯。此回溯可能泄漏完整的数据库连接详细信息，包括用户名和密码。因此有责任去显式（通过
-  <literal>catch</literal> 语句）或通过 <function>set_exception_handler</function> 隐式捕获异常。
+   就像其它任一 <link linkend="language.exceptions">exception</link> 一样，<classname>PDOException</classname>
+   可以通过 &catch; 语句手动捕获，也可以通过 <function>set_exception_handler</function> 自动捕获。否则，默认行为是将未捕获的异常转换为
+   <constant>E_FATAL_ERROR</constant>。fatal 错误可能会包含泄漏连接详情的 backtrace。因此，生产服务器上的 &php.ini;
+   选项 <link linkend="ini.display-errors"><literal>display_errors</literal></link> 应设置为 <literal>0</literal>。
   </para>
  </warning>
  <para>
