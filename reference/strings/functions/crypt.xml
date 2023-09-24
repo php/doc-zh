@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 2526581912be11d14da7006fba344ca525a8566a Maintainer: mowangjuanzi Status: ready -->
+<!-- EN-Revision: cc88cbd3303ca3342dcdcd643eae793e564730c7 Maintainer: mowangjuanzi Status: ready -->
+<!-- CREDITS: Luffy -->
 <refentry xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://docbook.org/ns/docbook" xml:id="function.crypt">
  <refnamediv>
   <refname>crypt</refname>
@@ -151,75 +152,16 @@
     <programlisting role="php">
 <![CDATA[
 <?php
-// 自动生成盐值；不推荐
-$hashed_password = crypt('mypassword');
+$user_input = 'rasmuslerdorf';
+$hashed_password = '$6$rounds=1000000$NJy4rIPjpOaU$0ACEYGg/aKCY3v8O8AfyiO7CTfZQ8/W231Qfh2tRLmfdvFD6XfHk12u6hMr9cYIA4hnpjLNSTRtUwYr9km9Ij/';
 
-/* 你应当使用 crypt() 得到的完整结果作为盐值进行密码校验，以此来避免使用不同散列算法导致的问题。（如上所述，基于标准 DES 算法的密码散列使用 2 字符盐值，但是基于 MD5 算法的散列使用 12 个字符盐值。）*/
+// 验证现有的 crypt() 哈希值，以便与非 PHP 软件兼容。
 if (hash_equals($hashed_password, crypt($user_input, $hashed_password))) {
    echo "Password verified!";
 }
 ?>
 ]]>
     </programlisting>
-   </example>
-  </para>
-  <para>
-   <example>
-    <title>利用 htpasswd 进行 <function>crypt</function> 加密</title>
-    <programlisting role="php">
-<![CDATA[
-<?php
-// 设置密码
-$password = 'mypassword';
-
-// 获取散列值，使用自动盐值；不推荐
-$hash = crypt($password);
-?>
-]]>
-    </programlisting>
-   </example>
-  </para>
-  <para>
-   <example>
-    <title>以不同散列类型使用 <function>crypt</function></title>
-    <programlisting role="php">
-<![CDATA[
-<?php
-/* These salts are examples only, and should not be used verbatim in your code.
-   You should generate a distinct, correctly-formatted salt for each password.
-*/
-echo 'Standard DES: ',
-    crypt('rasmuslerdorf', 'rl'),
-    "\n";
-echo 'Extended DES: ',
-    crypt('rasmuslerdorf', '_J9..rasm'),
-    "\n";
-echo 'MD5:          ',
-    crypt('rasmuslerdorf', '$1$rasmusle$'),
-    "\n";
-echo 'Blowfish:     ',
-    crypt('rasmuslerdorf', '$2a$07$usesomesillystringforsalt$'),
-    "\n";
-echo 'SHA-256:      ',
-    crypt('rasmuslerdorf', '$5$rounds=5000$usesomesillystringforsalt$'),
-    "\n";
-echo 'SHA-512:      ',
-    crypt('rasmuslerdorf', '$6$rounds=5000$usesomesillystringforsalt$'),
-    "\n";
-?>
-]]>
-    </programlisting>
-    &example.outputs.similar;
-    <screen>
-<![CDATA[
-Standard DES: rl.3StKT.4T8M
-Extended DES: _J9..rasmBYk8r9AiWNc
-MD5:          $1$rasmusle$rISCgZzpwk3UhDidwXvin0
-Blowfish:     $2y$07$usesomesillystringfore2uDLvp1Ii2e./U9C8sBjqp8I90dH6hi
-SHA-256:      $5$rounds=5000$usesomesillystri$KqJWpanXZHKq2BOB43TSaYhEWsQ1Lr5QNyPCDH/Tp.6
-SHA-512:      $6$rounds=5000$usesomesillystri$D4IrlXatmP7rx3P3InaxBeoomnAihCKRVQP22JZ6EY47Wc6BkroIuUUBOov1i.S5KPgErtP/EN5mcO.ChWQW21
-]]>
-    </screen>
    </example>
   </para>
  </refsect1>
@@ -239,7 +181,6 @@ SHA-512:      $6$rounds=5000$usesomesillystri$D4IrlXatmP7rx3P3InaxBeoomnAihCKRVQ
    <simplelist>
     <member><function>hash_equals</function></member>
     <member><function>password_hash</function></member>
-    <member><function>md5</function></member>
     <member>更多关于 crypt 函数的信息，请阅读 Unix man 页面</member>
    </simplelist>
   </para>
