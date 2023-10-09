@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 14767af0f05dffa6fdb9b49e1a1f4e9ca7022a60 Maintainer: mowangjuanzi Status: ready -->
+<!-- EN-Revision: e6376e04ed2526138e5b71e16168cf6bb269fa8a Maintainer: mowangjuanzi Status: ready -->
+<!-- CREDITS: Luffy -->
 <phpdoc:exceptionref xml:id="class.errorexception" xmlns:phpdoc="http://php.net/ns/phpdoc" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude">
  <title>ErrorException</title>
  <titleabbrev>ErrorException</titleabbrev>
@@ -82,14 +83,16 @@
      <programlisting role="php">
  <![CDATA[
 <?php
-function exception_error_handler($severity, $message, $file, $line) {
-    if (!(error_reporting() & $severity)) {
+function exception_error_handler(int $errno, string $errstr, string $errfile = null, int $errline) {
+    if (!(error_reporting() & $errno)) {
         // 这个错误代码未包含在 error_reporting 中
         return;
     }
-    throw new ErrorException($message, 0, $severity, $file, $line);
+    throw new \ErrorException($errstr, 0, $errno, $errfile, $errline);
 }
-set_error_handler("exception_error_handler");
+set_error_handler(exception_error_handler(...));
+// 在 PHP 8.1.0 引入 First-class 可调用语法之前，必须使用下面的调用来代替
+// set_error_handler(__NAMESPACE__ . "\\exception_error_handler");
 
 /* 触发异常 */
 strpos();
