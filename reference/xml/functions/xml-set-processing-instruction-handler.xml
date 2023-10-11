@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: f781803449007bb0e3a96c693e0eee067f7eb466 Maintainer: HonestQiao Status: ready -->
+<!-- EN-Revision: 5a14f904d231d294e2e5b4fb5d2fc4d2fd9eddee Maintainer: HonestQiao Status: ready -->
 <!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="function.xml-set-processing-instruction-handler" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
@@ -22,55 +22,47 @@
   </para>
   <para>
    处理指令有如下格式：
-   <informalexample>
-    <programlisting>&lt;?<replaceable>target</replaceable> 
-     <replaceable>data</replaceable>?&gt;
-    </programlisting>
-   </informalexample>
-   可以将 PHP 代码放置在类似的标识符中，但要注意一个限制：在 XML 处理指令（PI）中，PI 的终止符（<literal>?&gt;</literal>）不能被引号引用，因此该字符序列不应该在您用 PI 嵌入到 XML 文档中的 PHP 代码中出现。否则，剩下的 PHP 代码，包括“真正”的 PI 终止符将被当作字符数据处理。
+   <programlisting role="xml">
+<![CDATA[
+<?target
+data
+?>
+]]>
+   </programlisting>
   </para>
+  <caution>
+   <para>
+    PHP 代码通过 <literal>&lt;?php</literal> 处理指令分隔。因此可以在 XML 文档中使用 PHP
+    代码。但是 PI 结束标记（<literal>?&gt;</literal>）不能是数据的一部分。如果 PI
+    结束标记存在于嵌入式 PHP 代码的一部分，则 PHP 代码的其余部分以及“真实的”PI 结束标记将会视为字符数据。
+   </para>
+  </caution>
  </refsect1>
 
  <refsect1 role="parameters">
   &reftitle.parameters;
   <para>
    <variablelist>
-    <varlistentry>
-     <term><parameter>parser</parameter></term>
-     <listitem>
-      <para>
-       XML 解析器的引用，用于建立处理指令（PI）处理函数。
-      </para>
-     </listitem>
-    </varlistentry>
+    &xml.parser.param;
     <varlistentry>
      <term><parameter>handler</parameter></term>
      <listitem>
+      &xml.handler.description;
       <para>
-       参数 <parameter>handler</parameter> 为表示函数名称的字符串，函数必须在为 <parameter>parser</parameter> 指定的解析器调用 <function>xml_parse</function> 函数时已存在。
-      </para>
-      <para>
-       由 <parameter>handler</parameter> 参数命名的函数名必须接受三个参数：
+       处理程序的签名必须是：
        <methodsynopsis>
-        <methodname><replaceable>handler</replaceable></methodname>
+        <type>void</type><methodname><replaceable>handler</replaceable></methodname>
         <methodparam><type>XMLParser</type><parameter>parser</parameter></methodparam>
         <methodparam><type>string</type><parameter>target</parameter></methodparam>
         <methodparam><type>string</type><parameter>data</parameter></methodparam>
        </methodsynopsis>
        <variablelist>
-        <varlistentry>
-         <term><parameter>parser</parameter></term>
-         <listitem>
-          <simpara>
-           第一个参数 <replaceable>parser</replaceable> 为指向要调用处理程序的 XML 解析器的指针。
-          </simpara>
-         </listitem>
-        </varlistentry>
+        &xml.handler.parser.param;
         <varlistentry>
          <term><parameter>target</parameter></term>
          <listitem>
           <simpara>
-           第二个参数 <parameter>target</parameter> 为 PI 对象（PI target）。
+           处理指令目标。
           </simpara>
          </listitem>
         </varlistentry>
@@ -78,16 +70,12 @@
          <term><parameter>data</parameter></term>
          <listitem>
           <simpara>
-           第三个参数 <parameter>data</parameter> 包含了 PI 数据。
+           处理指令数据。
           </simpara>
          </listitem>
         </varlistentry>
        </variablelist>
       </para>
-      <para>
-       如果处理函数名被设置为空字符串或者 &false;，则该有问题的处理程序将被屏蔽。
-      </para>
-      &note.func-callback;
      </listitem>
     </varlistentry>
    </variablelist>
