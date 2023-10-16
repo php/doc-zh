@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 52dbbb3856a16174bfd0a96e6df8c52f236397eb Maintainer: daijie Status: ready -->
+<!-- EN-Revision: ab0006771069b6deaccdb44522a6312adaa91b35 Maintainer: daijie Status: ready -->
 <!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="function.curl-setopt" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
@@ -616,18 +616,19 @@
              <parameter>CURLAUTH_DIGEST</parameter>、
              <parameter>CURLAUTH_GSSNEGOTIATE</parameter>、
              <parameter>CURLAUTH_NTLM</parameter>、
-             <parameter>CURLAUTH_ANY</parameter>和
+             <constant>CURLAUTH_AWS_SIGV4</constant>、
+             <parameter>CURLAUTH_ANY</parameter> 和
              <parameter>CURLAUTH_ANYSAFE</parameter>。
             </para>
             <para>
-             可以使用 <literal>|</literal> 位域(OR)操作符结合多个值，cURL 会让服务器选择受支持的方法，并选择最好的那个。
+             可以使用 <literal>|</literal> 位域（OR）操作符结合多个值，cURL 会让服务器选择受支持的方法，并选择最好的那个。
             </para>
             <para>
-             <parameter>CURLAUTH_ANY</parameter>是 <literal>CURLAUTH_BASIC | CURLAUTH_DIGEST | CURLAUTH_GSSNEGOTIATE | CURLAUTH_NTLM</literal> 的别名。
+             <constant>CURLAUTH_ANY</constant> 设置所有的位。cURL 将自动选择它认为最安全的一个。
             </para>
-            
             <para>
-      <parameter>CURLAUTH_ANYSAFE</parameter> 是 <literal>CURLAUTH_DIGEST | CURLAUTH_GSSNEGOTIATE | CURLAUTH_NTLM</literal> 的别名。
+             <constant>CURLAUTH_ANYSAFE</constant> 设置了除 <literal>CURLAUTH_BASIC</literal> 以外所有的位。cURL
+             将自动选择它认为最安全的一个。
             </para>
            </entry>
            <entry valign="top">
@@ -654,6 +655,49 @@
            <entry valign="top"><constant>CURLOPT_LOW_SPEED_TIME</constant></entry>
            <entry valign="top">
             当传输速度小于<constant>CURLOPT_LOW_SPEED_LIMIT</constant>时(bytes/sec)，PHP会判断是否因太慢而取消传输。
+           </entry>
+           <entry valign="top">
+           </entry>
+          </row>
+          <row>
+           <entry valign="top"><constant>CURLOPT_MAIL_RCPT_ALLLOWFAILS</constant></entry>
+           <entry valign="top">
+            允许一些收件人的 RCPT TO 命令失败。
+           </entry>
+           <entry valign="top">
+            在向多个收件人发送数据时，如果至少有一个收件人导致 RCPT TO 命令返回错误，默认情况下 cURL 将中止 SMTP
+            对话。此选项告诉 cURL 忽略错误并继续使用剩余的有效收件人。如果所有收件人触发 RCPT TO 失败并且设置了此
+            flag，cURL 将中止 SMTP 对话并返回从最后一个 RCPT TO 命令收到的错误。
+           </entry>
+           <entry valign="top">
+           </entry>
+          </row>
+          <row>
+           <entry valign="top"><constant>CURLOPT_MAXAGE_CONN</constant></entry>
+           <entry valign="top">
+            重新使用已存在连接时允许的最大空闲时间。默认最大时间设置为 <literal>118</literal> 秒。
+           </entry>
+           <entry valign="top">
+           </entry>
+          </row>
+          <row>
+           <entry valign="top"><constant>CURLOPT_MAXFILESIZE_LARGE</constant></entry>
+           <entry valign="top">
+            The maximum file size in bytes allowed to download. If the file requested is found larger than this value,
+            the transfer will not start and <constant>CURLE_FILESIZE_EXCEEDED</constant> will be returned.
+            The file size is not always known prior to download, and for such files this option has no effect even if
+            the file transfer ends up being larger than this given limit.
+           </entry>
+           <entry valign="top">
+           </entry>
+          </row>
+          <row>
+           <entry valign="top"><constant>CURLOPT_MAXLIFETIME_CONN</constant></entry>
+           <entry valign="top">
+            The maximum time in seconds, since the creation of the connection, that is allowed for an existing
+            connection to have for it to be considered for reuse. If a connection is found in the cache that is older
+            than this value, it will instead be closed once any in-progress transfers are complete.
+            Default is 0 seconds, meaning the option is disabled and all connections are eligible for reuse.
            </entry>
            <entry valign="top">
            </entry>
@@ -719,6 +763,7 @@
              <parameter>CURLPROTO_DICT</parameter>、
              <parameter>CURLPROTO_FILE</parameter>、
              <parameter>CURLPROTO_TFTP</parameter>、
+             <constant>CURLPROTO_MQTT</constant>、
              <parameter>CURLPROTO_ALL</parameter>。
             </para>
            </entry>
@@ -814,6 +859,29 @@
              <constant>CURLSSLOPT_NO_REVOKE</constant>: disable certificate
              revocation checks for those SSL backends where such behavior is
              present.
+            </simpara>
+            <simpara>
+             <constant>CURLSSLOPT_AUTO_CLIENT_CERT</constant>: automatically
+             locate and use a client certificate for authentication, when
+             requested by the server. This option is only supported for
+             Schannel (the native Windows SSL library).
+            </simpara>
+            <simpara>
+             <constant>CURLSSLOPT_NATIVE_CA</constant>: use the operating system's
+             native CA store for certificate verification. Works only on Windows
+             when built to use OpenSSL. This option is experimental and behavior is subject to change.
+            </simpara>
+            <simpara>
+             <constant>CURLSSLOPT_NO_PARTIALCHAIN</constant>: do not accept "partial" certificate
+             chains, which cURL otherwise does by default. This option is only supported for OpenSSL
+             and will fail the certificate verification if the chain ends with
+             an intermediate certificate and not with a root certificate.
+            </simpara>
+            <simpara>
+             <constant>CURLSSLOPT_REVOKE_BEST_EFFORT</constant>: ignore certificate revocation checks
+             in case of missing or offline distribution points for those SSL backends where
+             such behavior is present. This option is only supported for Schannel (the native Windows SSL library).
+             If combined with <constant>CURLSSLOPT_NO_REVOKE</constant>, the latter takes precedence.
             </simpara>
            </entry>
            <entry valign="top">
@@ -970,6 +1038,28 @@
            </entry>
           </row>
           <row>
+           <entry valign="top"><constant>CURLOPT_UPKEEP_INTERVAL_MS</constant></entry>
+           <entry valign="top">
+            Some protocols have "connection upkeep" mechanisms. These mechanisms usually send some traffic
+            on existing connections in order to keep them alive. This option defines the connection upkeep interval.
+            Currently, the only protocol with a connection upkeep mechanism is HTTP/2. When the connection upkeep
+            interval is exceeded, an HTTP/2 PING frame is sent on the connection.
+            Default is <literal>60</literal> seconds.
+           </entry>
+           <entry valign="top">
+           </entry>
+          </row>
+          <row>
+           <entry valign="top"><constant>CURLOPT_UPLOAD_BUFFERSIZE</constant></entry>
+           <entry valign="top">
+            Preferred buffer size in bytes for the cURL upload buffer.
+            The upload buffer size by default is 64 kilobytes. The maximum buffer size allowed to be set is 2 megabytes.
+            The minimum buffer size allowed to be set is 16 kilobytes.
+           </entry>
+           <entry valign="top">
+           </entry>
+          </row>
+          <row>
            <entry valign="top"><constant>CURLOPT_MAX_RECV_SPEED_LARGE</constant></entry>
            <entry valign="top">
             如果下载速度超过了此速度(以每秒字节数来统计) ，即传输过程中累计的平均数，传输就会降速到这个参数的值。默认不限速。
@@ -1019,8 +1109,9 @@
            <entry valign="top"><constant>CURLOPT_FTP_FILEMETHOD</constant></entry>
            <entry valign="top">
             告诉 curl 使用哪种方式来获取 FTP(s) 服务器上的文件。可能的值有：
+            <constant>CURLFTPMETHOD_DEFAULT</constant>、
             <constant>CURLFTPMETHOD_MULTICWD</constant>、
-            <constant>CURLFTPMETHOD_NOCWD</constant> 和  
+            <constant>CURLFTPMETHOD_NOCWD</constant> 和
             <constant>CURLFTPMETHOD_SINGLECWD</constant>。
            </entry>
            <entry valign="top">
@@ -1044,12 +1135,61 @@
          </thead>
          <tbody>
           <row>
+           <entry valign="top"><constant>CURLOPT_ALTSVC</constant></entry>
+           <entry valign="top">
+            Pass the filename for cURL to use as the Alt-Svc cache file to read existing cache contents from and
+            possibly also write it back to a after a transfer, unless <constant>CURLALTSVC_READONLYFILE</constant>
+            is set via <constant>CURLOPT_ALTSVC_CTRL</constant>.
+           </entry>
+           <entry valign="top">
+           </entry>
+          </row>
+          <row>
+           <entry valign="top"><constant>CURLOPT_ALTSVC_CTRL</constant></entry>
+           <entry valign="top">
+            Populate the bitmask with the correct set of features to instruct cURL how to handle Alt-Svc for the
+            transfers using this handle. cURL only accepts Alt-Svc headers over HTTPS. It will also only complete
+            a request to an alternative origin if that origin is properly hosted over HTTPS.
+            Setting any bit will enable the alt-svc engine. The options are:
+            <constant>CURLALTSVC_H1</constant>,
+            <constant>CURLALTSVC_H2</constant>,
+            <constant>CURLALTSVC_H3</constant>, and
+            <constant>CURLALTSVC_READONLYFILE</constant>.
+           </entry>
+           <entry valign="top">
+           </entry>
+          </row>
+          <row>
+           <entry valign="top"><constant>CURLOPT_AWS_SIGV4</constant></entry>
+           <entry valign="top">
+            <para>
+             Provides AWS V4 signature authentication on HTTP(S) header.
+            </para>
+            <para>
+             This option overrides any other authentication types that have been set in
+             <constant>CURLOPT_HTTPAUTH</constant>. This method cannot be combined with other authentication types.
+            </para>
+           </entry>
+           <entry valign="top">
+           </entry>
+          </row>
+          <row>
            <entry valign="top"><constant>CURLOPT_CAINFO</constant></entry>
            <entry valign="top">
             一个保存着1个或多个用来让服务端验证的证书的文件名。这个参数仅仅在和<constant>CURLOPT_SSL_VERIFYPEER</constant>一起使用时才有意义。            .
            </entry>
            <entry valign="top">
             可能需要绝对路径。
+           </entry>
+          </row>
+          <row>
+           <entry valign="top"><constant>CURLOPT_CAINFO_BLOB</constant></entry>
+           <entry valign="top">
+            The name of a PEM file holding one or more certificates to verify the
+            peer with. This option overrides <constant>CURLOPT_CAINFO</constant>.
+           </entry>
+           <entry valign="top">
+            Available as of PHP 8.2.0 and cURL 7.77.0
            </entry>
           </row>
           <row>
@@ -1181,6 +1321,29 @@
            </entry>
           </row>
           <row>
+           <entry valign="top"><constant>CURLOPT_HSTS</constant></entry>
+           <entry valign="top">
+            <para>
+             HSTS (HTTP Strict Transport Security) cache file name.
+            </para>
+           </entry>
+           <entry valign="top">
+           </entry>
+          </row>
+          <row>
+           <entry valign="top"><constant>CURLOPT_HSTS_CTRL</constant></entry>
+           <entry valign="top">
+            <para>
+             Controls HSTS (HTTP Strict Transport Security) behavior. Populate the bitmask with the correct set of
+             features to instruct cURL how to handle HSTS for the transfers using this handle.
+             <constant>CURLHSTS_ENABLE</constant> enables the in-memory HSTS cache. If the HSTS cache file is defined,
+             set <constant>CURLHSTS_READONLYFILE</constant> to make the file read-only.
+            </para>
+           </entry>
+           <entry valign="top">
+           </entry>
+          </row>
+          <row>
            <entry valign="top"><constant>CURLOPT_INTERFACE</constant></entry>
            <entry valign="top">
             发送的网络接口（interface），可以是一个接口名、IP 地址或者是一个主机名。
@@ -1301,15 +1464,27 @@
           <row>
            <entry valign="top"><constant>CURLOPT_PROXY_CAINFO</constant></entry>
            <entry valign="top">
-            The path to proxy Certificate Authority (CA) bundle. Set the path as a 
-            <type>string</type> naming a file holding one or more certificates to 
+            The path to proxy Certificate Authority (CA) bundle. Set the path as a
+            <type>string</type> naming a file holding one or more certificates to
             verify the HTTPS proxy with.
             This option is for connecting to an HTTPS proxy, not an HTTPS server.
-            Defaults set to the system path where libcurl's cacert bundle is assumed 
+            Defaults set to the system path where libcurl's cacert bundle is assumed
             to be stored.
            </entry>
            <entry valign="top">
             自 PHP 7.3.0 和 libcurl &gt;= cURL 7.52.0 起可用。
+           </entry>
+          </row>
+          <row>
+           <entry valign="top"><constant>CURLOPT_PROXY_CAINFO_BLOB</constant></entry>
+           <entry valign="top">
+            The name of a PEM file holding one or more certificates to verify the HTTPS proxy with.
+            This option is for connecting to an HTTPS proxy, not an HTTPS server.
+            Defaults set to the system path where libcurl's cacert bundle is assumed
+            to be stored.
+           </entry>
+           <entry valign="top">
+            Available as of PHP 8.2.0 and libcurl &gt;= cURL 7.77.0.
            </entry>
           </row>
           <row>
@@ -1504,6 +1679,17 @@
           </row>
           
           <row>
+           <entry valign="top"><constant>CURLOPT_SASL_AUTHZID</constant></entry>
+           <entry valign="top">
+            The authorization identity (authzid) for the transfer. Only applicable to the PLAIN SASL
+            authentication mechanism where it is optional. When not specified, only the authentication identity
+            (authcid) as specified by the username will be sent to the server, along with the password.
+            The server will derive the authzid from the authcid when not provided, which it will then use internally.
+           </entry>
+           <entry valign="top">
+           </entry>
+          </row>
+          <row>
            <entry valign="top"><constant>CURLOPT_SERVICE_NAME</constant></entry>
            <entry valign="top">
             验证服务的名称
@@ -1520,6 +1706,15 @@
            </entry>
            <entry valign="top">
             cURL 7.17.1 中添加。
+           </entry>
+          </row>
+          <row>
+           <entry valign="top"><constant>CURLOPT_SSH_HOST_PUBLIC_KEY_SHA256</constant></entry>
+           <entry valign="top">
+            Base64-encoded SHA256 hash of the remote host's public key.
+            The transfer will fail if the given hash does not match the hash the remote host provides.
+           </entry>
+           <entry valign="top">
            </entry>
           </row>
           
@@ -1551,6 +1746,17 @@
            <entry valign="top"><constant>CURLOPT_SSL_CIPHER_LIST</constant></entry>
            <entry valign="top">
             一个SSL的加密算法列表。例如<literal>RC4-SHA</literal>和<literal>TLSv1</literal>都是可用的加密列表。
+           </entry>
+           <entry valign="top">
+           </entry>
+          </row>
+          <row>
+           <entry valign="top"><constant>CURLOPT_SSL_EC_CURVES</constant></entry>
+           <entry valign="top">
+            A colon delimited list of elliptic curve algorithms. For example,
+            <literal>X25519:P-521</literal> is a valid list of two elliptic curves.
+            This option defines the client's key exchange algorithms in the SSL handshake,
+            if the SSL backend cURL is built to use supports it.
            </entry>
            <entry valign="top">
            </entry>
