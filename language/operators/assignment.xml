@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- EN-Revision: 52407313885d27a4e891e08dd2e2481bcc39e244 Maintainer: mowangjuanzi Status: ready -->
+<sect1 xml:id="language.operators.assignment">
+ <title>赋值运算符</title>
+ <simpara>
+  基本的赋值运算符是“=”。一开始可能会以为它是“等于”，其实不是的。它实际上意味着把右边表达式的值赋给左边的运算数。
+ </simpara>
+ <para>
+  赋值运算表达式的值也就是所赋的值。也就是说，“<literal>$a = 3</literal>”的值是 3。这样就可以做一些小技巧：
+  <informalexample>
+   <programlisting role="php">
+<![CDATA[
+<?php
+
+$a = ($b = 4) + 5; // $a 现在成了 9，而 $b 成了 4。
+
+?>
+]]>
+   </programlisting>
+  </informalexample>
+ </para>
+
+ <para>
+  在基本赋值运算符之外，还有适合于所有<link
+  linkend="language.operators">二元算术</link>，数组集合和字符串运算符的“组合运算符”，这样可以在一个表达式中使用它的值并把表达式的结果赋给它，例如：
+  <informalexample>
+   <programlisting role="php">
+<![CDATA[
+<?php
+
+$a = 3;
+$a += 5; // 设置 $a 为 8 ，之前说过： $a = $a + 5;
+$b = "Hello ";
+$b .= "There!"; // 设置 $b 为 "Hello There!"，就像 $b = $b . "There!";
+
+?>
+]]>
+   </programlisting>
+  </informalexample>
+ </para>
+ <para>
+  注意赋值运算将原变量的值拷贝到新变量中（传值赋值），所以改变其中一个并不影响另一个。这也适合于在密集循环中拷贝一些值例如大数组。
+ </para>
+ <para>
+  在 PHP 中普通的传值赋值行为有个例外就是碰到对象 <type>object</type> 时，在
+  PHP 5 中是以引用赋值的，除非明确使用了 <link
+  linkend="language.oop5.cloning">clone</link> 关键字来拷贝。
+ </para>
+
+ <sect2 xml:id="language.operators.assignment.reference">
+  <title>引用赋值</title>
+  <para>
+   PHP 支持引用赋值，使用“<computeroutput>$var
+   = &amp;$othervar;</computeroutput>”语法。引用赋值意味着两个变量指向了同一个数据，没有拷贝任何东西。
+  </para>
+  <para>
+   <example>
+    <title>引用赋值</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$a = 3;
+$b = &$a; // $b 是 $a 的引用
+
+print "$a\n"; // 输出 3
+print "$b\n"; // 输出 3
+
+$a = 4; // 修改 $a
+
+print "$a\n"; // 输出 4
+print "$b\n"; // 也输出 4，因为 $b 是 $a 的引用，因此也被改变
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   <link linkend="language.oop5.basic.new">new</link>
+   运算符自动返回一个引用，因此对
+   <link linkend="language.oop5.basic.new">new</link> 的结果进行引用赋值是错误的。
+  </para>
+  <para>
+   <informalexample>
+       <programlisting role="php">
+<![CDATA[
+<?php
+class C {}
+
+$o = &new C;
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+Parse error: syntax error, unexpected 'new' (T_NEW) in …
+]]>
+    </screen>
+   </informalexample>
+  </para>
+  <para>
+   有关引用更多信息参见本手册中 <link
+   linkend="language.references">引用的解释</link> 一章。
+  </para>
+ </sect2>
+
+
+ <sect2 xml:id="language.operators.assignment.arithmetic">
+  <title>算术赋值运算符</title>
+  <informaltable>
+   <tgroup cols="3">
+    <thead>
+     <row>
+      <entry>例子</entry>
+      <entry>等同于</entry>
+      <entry>操作</entry>
+     </row>
+    </thead>
+    <tbody>
+     <row>
+      <entry>$a += $b</entry>
+      <entry>$a = $a + $b</entry>
+      <entry>加法</entry>
+     </row>
+     <row>
+      <entry>$a -= $b</entry>
+      <entry>$a = $a - $b</entry>
+      <entry>减法</entry>
+     </row>
+     <row>
+      <entry>$a *= $b</entry>
+      <entry>$a = $a * $b</entry>
+      <entry>乘法</entry>
+     </row>
+     <row>
+      <entry>$a /= $b</entry>
+      <entry>$a = $a / $b</entry>
+      <entry>除法</entry>
+     </row>
+     <row>
+      <entry>$a %= $b</entry>
+      <entry>$a = $a % $b</entry>
+      <entry>取模</entry>
+     </row>
+     <row>
+      <entry>$a **= $b</entry>
+      <entry>$a = $a ** $b</entry>
+      <entry>指数</entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </informaltable>
+ </sect2>
+
+ <sect2 xml:id="language.operators.assignment.bitwise">
+  <title>位赋值运算符</title>
+  <informaltable>
+   <tgroup cols="3">
+    <thead>
+     <row>
+      <entry>例子</entry>
+      <entry>等同于</entry>
+      <entry>操作</entry>
+     </row>
+    </thead>
+    <tbody>
+     <row>
+      <entry>$a &amp;= $b</entry>
+      <entry>$a = $a &amp; $b</entry>
+      <entry>按位与</entry>
+     </row>
+     <row>
+      <entry>$a |= $b</entry>
+      <entry>$a = $a | $b</entry>
+      <entry>按位或</entry>
+     </row>
+     <row>
+      <entry>$a ^= $b</entry>
+      <entry>$a = $a ^ $b</entry>
+      <entry>按位异或</entry>
+     </row>
+     <row>
+      <entry>$a &lt;&lt;= $b</entry>
+      <entry>$a = $a &lt;&lt; $b</entry>
+      <entry>左移</entry>
+     </row>
+     <row>
+      <entry>$a &gt;&gt;= $b</entry>
+      <entry>$a = $a &gt;&gt; $b</entry>
+      <entry>右移</entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </informaltable>
+ </sect2>
+
+ <sect2 xml:id="language.operators.assignment.other">
+  <title>其他赋值运算符</title>
+  <informaltable>
+   <tgroup cols="3">
+    <thead>
+     <row>
+      <entry>例子</entry>
+      <entry>等同于</entry>
+      <entry>操作</entry>
+     </row>
+    </thead>
+    <tbody>
+     <row>
+      <entry>$a .= $b</entry>
+      <entry>$a = $a . $b</entry>
+      <entry>字符串拼接</entry>
+     </row>
+     <row>
+      <entry>$a ??= $b</entry>
+      <entry>$a = $a ?? $b</entry>
+      <entry>NULL 合并</entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </informaltable>
+ </sect2>
+
+ <sect2 role="seealso" xml:id="language.operators.assignment.see-also">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><link linkend="language.operators.arithmetic">算术运算符</link></member>
+    <member><link linkend="language.operators.bitwise">位运算符</link></member>
+    <member><link linkend="language.operators.comparison.coalesce">NULL 合并运算符</link></member>
+   </simplelist>
+  </para>
+ </sect2>
+
+</sect1>

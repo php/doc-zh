@@ -1,0 +1,505 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- EN-Revision: 52407313885d27a4e891e08dd2e2481bcc39e244 Maintainer: mowangjuanzi Status: ready -->
+<sect1 xml:id="language.operators.comparison">
+ <title>比较运算符</title>
+ <simpara>
+  比较运算符，如同它们名称所暗示的，允许对两个值进行比较。还可以参考
+  <link linkend="types.comparisons">PHP 类型比较表</link>看不同类型相互比较的例子。
+ </simpara>
+ <table>
+  <title>比较运算符</title>
+  <tgroup cols="3">
+   <thead>
+    <row>
+     <entry>例子</entry>
+     <entry>名称</entry>
+     <entry>结果</entry>
+    </row>
+   </thead>
+   <tbody>
+    <row>
+     <entry>$a == $b</entry>
+     <entry>等于</entry>
+     <entry>&true;，如果类型转换后 <varname>$a</varname> 等于 <varname>$b</varname>。</entry>
+    </row>
+    <row>
+     <entry>$a === $b</entry>
+     <entry>全等</entry>
+     <entry>&true;，如果 <varname>$a</varname> 等于 <varname>$b</varname>，并且它们的类型也相同。</entry>
+    </row>
+    <row>
+     <entry>$a != $b</entry>
+     <entry>不等</entry>
+     <entry>&true;，如果类型转换后 <varname>$a</varname> 不等于 <varname>$b</varname>。</entry>
+    </row>
+    <row>
+     <entry>$a &lt;&gt; $b</entry>
+     <entry>不等</entry>
+     <entry>&true;，如果类型转换后 <varname>$a</varname> 不等于 <varname>$b</varname>。</entry>
+    </row>
+    <row>
+     <entry>$a !== $b</entry>
+     <entry>不全等</entry>
+     <entry>&true;，如果 <varname>$a</varname> 不等于 <varname>$b</varname>，或者它们的类型不同。</entry>
+    </row>
+    <row>
+     <entry>$a &lt; $b</entry>
+     <entry>小与</entry>
+     <entry>&true;，如果 <varname>$a</varname> 严格小于 <varname>$b</varname>。</entry>
+    </row>
+    <row>
+     <entry>$a &gt; $b</entry>
+     <entry>大于</entry>
+     <entry>&true;，如果 <varname>$a</varname> 严格大于 <varname>$b</varname>。</entry>
+    </row>
+    <row>
+     <entry>$a &lt;= $b</entry>
+     <entry>小于等于</entry>
+     <entry>&true;，如果 <varname>$a</varname> 小于或者等于 <varname>$b</varname>。</entry>
+    </row>
+    <row>
+     <entry>$a &gt;= $b</entry>
+     <entry>大于等于</entry>
+     <entry>&true;，如果 <varname>$a</varname> 大于或者等于 <varname>$b</varname>。</entry>
+    </row>
+    <row>
+     <entry>$a &lt;=&gt; $b</entry>
+     <entry>太空船运算符（组合比较符）</entry>
+     <entry>
+      当<varname>$a</varname>小于、等于、大于 <varname>$b</varname>时
+      分别返回一个小于、等于、大于0的 <type>int</type> 值。
+     </entry>
+    </row>
+   </tbody>
+  </tgroup>
+ </table>
+ <para>
+  当两个操作对象都是
+  <link linkend="language.types.numeric-strings">数字字符串</link>，
+  或一个是数字另一个是
+  <link linkend="language.types.numeric-strings">数字字符串</link>，
+  就会自动按照数值进行比较。
+  此规则也适用于
+  <link linkend="control-structures.switch">switch</link> 语句。
+  当比较时用的是 <literal>===</literal> 或 <literal>!==</literal>，
+  则不会进行类型转换——因为不仅要对比数值，还要对比类型。
+ </para>
+ <warning>
+ <para>
+ PHP 8.0.0 之前，如果 <type>string</type> 与数字或者数字字符串进行比较，
+ 则在比较前会将 <type>string</type> 转化为数字。
+ 在如下示例中会出现不可预料的结果：
+  <informalexample>
+   <programlisting role="php">
+<![CDATA[
+<?php
+var_dump(0 == "a");
+var_dump("1" == "01");
+var_dump("10" == "1e1");
+var_dump(100 == "1e2");
+
+switch ("a") {
+case 0:
+    echo "0";
+    break;
+case "a":
+    echo "a";
+    break;
+}
+?>
+]]>
+    </programlisting>
+    &example.outputs.7;
+    <screen>
+<![CDATA[
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+0
+]]>
+    </screen>
+    &example.outputs.8;
+    <screen>
+<![CDATA[
+bool(false)
+bool(true)
+bool(true)
+bool(true)
+a
+]]>
+    </screen>
+   </informalexample>
+  </para>
+ </warning>
+
+ <para>
+  <informalexample>
+   <programlisting role="php">
+<![CDATA[
+<?php
+// 整数
+echo 1 <=> 1; // 0
+echo 1 <=> 2; // -1
+echo 2 <=> 1; // 1
+
+// 浮点数
+echo 1.5 <=> 1.5; // 0
+echo 1.5 <=> 2.5; // -1
+echo 2.5 <=> 1.5; // 1
+
+// 字符串
+echo "a" <=> "a"; // 0
+echo "a" <=> "b"; // -1
+echo "b" <=> "a"; // 1
+
+echo "a" <=> "aa"; // -1
+echo "zz" <=> "aa"; // 1
+
+// 数组
+echo [] <=> []; // 0
+echo [1, 2, 3] <=> [1, 2, 3]; // 0
+echo [1, 2, 3] <=> []; // 1
+echo [1, 2, 3] <=> [1, 2, 1]; // 1
+echo [1, 2, 3] <=> [1, 2, 4]; // -1
+
+// 对象
+$a = (object) ["a" => "b"];
+$b = (object) ["a" => "b"];
+echo $a <=> $b; // 0
+
+$a = (object) ["a" => "b"];
+$b = (object) ["a" => "c"];
+echo $a <=> $b; // -1
+
+$a = (object) ["a" => "c"];
+$b = (object) ["a" => "b"];
+echo $a <=> $b; // 1
+
+// 不仅仅比较值，而且也会匹配键
+$a = (object) ["a" => "b"];
+$b = (object) ["b" => "b"];
+echo $a <=> $b; // 1
+
+?>
+]]>
+
+   </programlisting>
+  </informalexample>
+ </para>
+
+ <para>
+  对于多种类型，比较运算符根据下表比较（按顺序）。
+ </para>
+ <table xml:id="language.operators.comparison.types">
+  <title>比较多种类型</title>
+  <tgroup cols="3">
+   <thead>
+    <row>
+     <entry>运算数 1 类型</entry>
+     <entry>运算数 2 类型</entry>
+     <entry>结果</entry>
+    </row>
+   </thead>
+   <tbody>
+    <row>
+     <entry><type>null</type> 或 <type>string</type></entry>
+     <entry><type>string</type></entry>
+     <entry>将 &null; 转换为 ""，进行数字或词汇比较</entry>
+    </row>
+    <row>
+     <entry><type>bool</type> 或 <type>null</type></entry>
+     <entry>任何其它类型</entry>
+     <entry>转换为 <type>bool</type>，&false; &lt; &true;</entry>
+    </row>
+    <row>
+     <entry><type>object</type></entry>
+     <entry><type>object</type></entry>
+     <entry>
+      内置类可以定义自己的比较，不同类不能比较，相同的类查看<link
+      linkend="language.oop5.object-comparison">对象比较</link>
+     </entry>
+    </row>
+    <row>
+     <entry><type>string</type>、<type>resource</type>、<type>int</type>、<type>float</type></entry>
+     <entry><type>string</type>、<type>resource</type>、<type>int</type>、<type>float</type></entry>
+     <entry>将字符串和资源转换成数字，按普通数学比较</entry>
+    </row>
+    <row>
+     <entry><type>array</type></entry>
+     <entry><type>array</type></entry>
+     <entry>
+      成员越少的数组越小，如果运算数 1 中的键不存在于运算数
+      2 中则数组无法比较，否则挨个值比较（见下例）
+     </entry>
+    </row>
+    <row>
+     <entry><type>object</type></entry>
+     <entry>任何其它类型</entry>
+     <entry><type>object</type> 总是更大</entry>
+    </row>
+    <row>
+     <entry><type>array</type></entry>
+     <entry>任何其它类型</entry>
+     <entry><type>array</type> 总是更大</entry>
+    </row>
+   </tbody>
+  </tgroup>
+ </table>
+
+ <para>
+  <example>
+   <title>Boolean/null comparison</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+// Bool 和 null 总是作为 bool 比较
+var_dump(1 == TRUE);  // TRUE - same as (bool)1 == TRUE
+var_dump(0 == FALSE); // TRUE - same as (bool)0 == FALSE
+var_dump(100 < TRUE); // FALSE - same as (bool)100 < TRUE
+var_dump(-10 < FALSE);// FALSE - same as (bool)-10 < FALSE
+var_dump(min(-100, -10, NULL, 10, 100)); // NULL - (bool)NULL < (bool)-100 is FALSE < TRUE
+?>
+]]>
+   </programlisting>
+  </example>
+ </para>
+
+ <para>
+  <example>
+   <title>标准数组比较代码</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+// 数组是用标准比较运算符或者太空船运算符进行比较的
+function standard_array_compare($op1, $op2)
+{
+    if (count($op1) < count($op2)) {
+        return -1; // $op1 < $op2
+    } elseif (count($op1) > count($op2)) {
+        return 1; // $op1 > $op2
+    }
+    foreach ($op1 as $key => $val) {
+        if (!array_key_exists($key, $op2)) {
+            return 1;
+        } elseif ($val < $op2[$key]) {
+            return -1;
+        } elseif ($val > $op2[$key]) {
+            return 1;
+        }
+    }
+    return 0; // $op1 == $op2
+}
+?>
+]]>
+   </programlisting>
+  </example>
+ </para>
+
+ <warning>
+  <title>比较浮点数</title>
+
+  <para>
+   由于浮点数 <type>float</type> 的内部表达方式，不应比较两个浮点数<type>float</type>是否相等。
+  </para>
+
+  <para>
+   更多信息参见 <type>float</type>。
+  </para>
+ </warning>
+
+ <note>
+  <simpara>
+   请注意，在比较不同类型的值时，类型转换并不总是很明显，尤其是比较 &integer; 与 &boolean; 或者
+   &integer; 与 &string;。因此，在大多数情况下，通常建议使用 <literal>===</literal> 和
+   <literal>!==</literal> 进行比较而不是 <literal>==</literal> 和 <literal>!=</literal>。
+  </simpara>
+ </note>
+
+ <sect2 xml:id="language.operators.comparison.incomparable">
+  <title>不能比较的值</title>
+  <simpara>
+   虽然恒等比较（<literal>===</literal> 和
+   <literal>!==</literal>）可以应用于任意值，其它比较运算符应该仅用于可比较的值。不能比较的值的比较的结果是不确定的，不应依赖。
+  </simpara>
+ </sect2>
+
+ <sect2 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>strcasecmp</function></member>
+    <member><function>strcmp</function></member>
+    <member><link linkend="language.operators.array">数组运算符</link></member>
+    <member><link linkend="language.types">类型</link></member>
+   </simplelist>
+  </para>
+ </sect2>
+
+<sect2 xml:id="language.operators.comparison.ternary">
+  <title>三元运算符</title>
+  <para>
+   另一个条件运算符是“?:”（或三元）运算符 。
+   <example>
+    <title>赋默认值</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+// 三元运算符的例子
+$action = (empty($_POST['action'])) ? 'default' : $_POST['action'];
+
+// 以上等同于以下的  if/else 语句
+if (empty($_POST['action'])) {
+    $action = 'default';
+} else {
+    $action = $_POST['action'];
+}
+?>
+]]>
+    </programlisting>
+   </example>
+   表达式 <literal>(expr1) ? (expr2) : (expr3)</literal> 在
+   <replaceable>expr1</replaceable> 求值为 &true;
+   时的值为 <replaceable>expr2</replaceable>，在
+   <replaceable>expr1</replaceable> 求值为 &false; 时的值为
+   <replaceable>expr3</replaceable>。
+  </para>
+  <para>
+   可以省略三元运算符中间那部分。表达式
+   <literal>expr1 ?: expr3</literal> 等同于如果
+   <replaceable>expr1</replaceable> 求值为 &true; 时返回
+   <replaceable>expr1</replaceable> 的结果，否则返回
+   <replaceable>expr3</replaceable>。<replaceable>expr1</replaceable> 在这里仅执行一次。
+  </para>
+  <note>
+   <simpara>
+    注意三元运算符是个语句，因此其求值不是变量，而是语句的结果。如果想通过引用返回一个变量这点就很重要。在一个通过引用返回的函数中语句
+    <literal>return $var == 42 ? $a : $b;</literal> 将不起作用，以后的 PHP
+    版本会为此发出一条警告。
+   </simpara>
+  </note>
+  <note>
+   <para>
+    建议避免将三元运算符堆积在一起使用。和其他语言相比，
+    当在单个表达式中使用多个未加括号的三元运算符时会造成
+    PHP 运算结果不清晰。
+    甚至在 PHP 8.0.0 之前，三元运算符是从左到右执行的，
+    而大多数其他编程语言是从右到左的。
+    自 PHP 7.4.0 起，弃用依靠左联。
+    PHP 8.0.0 起，三元运算符是非关联的。
+    <example>
+     <title>不清晰的三元运算符行为</title>
+     <programlisting role="php">
+<![CDATA[
+<?php
+// 乍看起来下面的输出是 'true'
+echo (true ? 'true' : false ? 't' : 'f');
+
+// 然而，上面语句的实际输出是't'，因为在 PHP 8.0.0 之前三元运算符是左联的
+
+// 下面是与上面等价的语句，但更清晰
+echo ((true ? 'true' : 'false') ? 't' : 'f');
+
+// 这里可以看到第一个表达式的计算结果是 “true”，第二个表达式的计算结果为 (bool)true，
+// 因此返回第二个三元表达式的 true 分支。
+?>
+]]>
+     </programlisting>
+    </example>
+   </para>
+  </note>
+  <note>
+   <para>
+    然而，短三元运算符（<literal>?:</literal>）的链接是稳定且合理的。他将第一个参数进行求值，结果为非假值。注意，未定义的值将会引发警告。
+    <example>
+     <title>Short-ternary chaining</title>
+     <programlisting role="php">
+<![CDATA[
+<?php
+echo 0 ?: 1 ?: 2 ?: 3, PHP_EOL; //1
+echo 0 ?: 0 ?: 2 ?: 3, PHP_EOL; //2
+echo 0 ?: 0 ?: 0 ?: 3, PHP_EOL; //3
+?>
+]]>
+     </programlisting>
+    </example>
+   </para>
+  </note>
+ </sect2>
+
+ <sect2 xml:id="language.operators.comparison.coalesce">
+  <title>NULL 合并运算符</title>
+  <para>
+   另一个简略运算符是 "??" （NULL 合并）运算符。
+   <example>
+    <title>设置默认值</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+// NULL 合并运算符的例子
+$action = $_POST['action'] ?? 'default';
+
+// 以上例子等同于于以下 if/else 语句
+if (isset($_POST['action'])) {
+    $action = $_POST['action'];
+} else {
+    $action = 'default';
+}
+?>
+]]>
+    </programlisting>
+   </example>
+   当 <replaceable>expr1</replaceable> 为  &null;，表达式 <literal>(expr1) ?? (expr2)</literal> 等同于
+   <replaceable>expr2</replaceable>，否则为 <replaceable>expr1</replaceable>。
+  </para>
+  <para>
+   尤其要注意，当不存在左侧的值时，此运算符也和 <function>isset</function> 一样不会产生警告。
+   对于 array 键尤其有用。
+  </para>
+  <note>
+   <simpara>
+    请注意：NULL 合并运算符是一个表达式，产生的也是表达式结果，而不是变量。
+    返回引用变量时需要强调这一点。
+    因此，在返回引用的函数里就无法使用这样的语句：<literal>return $foo ?? $bar;</literal>，还会提示警告。
+   </simpara>
+  </note>
+  <note>
+   <para>
+    null 合并运算符的优先级较低。这意味着如果将它与其它运算符（比如字符串链接或者算术运算符）混合使用，可能需要括号。
+   </para>
+   <programlisting role="php">
+<![CDATA[
+<?php
+// $name 未定义，引发警告。
+print 'Mr. ' . $name ?? 'Anonymous';
+
+// 打印 "Mr. Anonymous"
+print 'Mr. ' . ($name ?? 'Anonymous');
+?>
+]]>
+   </programlisting>
+  </note>
+  <note>
+   <para>
+    请注意，NULL 合并运算符支持简单的嵌套：
+    <example>
+     <title>嵌套 NULL 合并运算符</title>
+     <programlisting role="php">
+<![CDATA[
+<?php
+
+$foo = null;
+$bar = null;
+$baz = 1;
+$qux = 2;
+
+echo $foo ?? $bar ?? $baz ?? $qux; // 输出 1
+
+?>
+]]>
+     </programlisting>
+    </example>
+   </para>
+  </note>
+ </sect2>
+</sect1>

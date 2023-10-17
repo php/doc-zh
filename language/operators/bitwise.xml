@@ -1,0 +1,640 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- EN-Revision: 52407313885d27a4e891e08dd2e2481bcc39e244 Maintainer: mowangjuanzi Status: ready -->
+<sect1 xml:id="language.operators.bitwise">
+ <title>位运算符</title>
+ <simpara>
+  位运算符允许对整型数中指定的位进行求值和操作。
+ </simpara>
+
+ <table>
+  <title>位运算符</title>
+  <tgroup cols="3">
+   <thead>
+    <row>
+     <entry>例子</entry>
+     <entry>名称</entry>
+     <entry>结果</entry>
+    </row>
+   </thead>
+   <tbody>
+    <row>
+     <entry><userinput>$a &amp; $b</userinput></entry>
+     <entry>And（按位与）</entry>
+     <entry>将把 <varname>$a</varname> 和 <varname>$b</varname> 中都为 1 的位设为 1。</entry>
+    </row>
+    <row>
+     <entry><userinput>$a | $b</userinput></entry>
+     <entry>Or（按位或）</entry>
+     <entry>将把 <varname>$a</varname> 和 <varname>$b</varname> 中任何一个为 1 的位设为 1。</entry>
+    </row>
+    <row>
+     <entry><userinput>$a ^ $b</userinput></entry>
+     <entry>Xor（按位异或）</entry>
+     <entry>将把 <varname>$a</varname> 和 <varname>$b</varname> 中一个为 1 另一个为 0 的位设为 1。</entry>
+    </row>
+    <row>
+     <entry><userinput>~ $a</userinput></entry>
+     <entry>Not（按位取反）</entry>
+     <entry>将 <varname>$a</varname> 中为 0 的位设为 1，反之亦然。</entry>
+    </row>
+    <row>
+     <entry><userinput>$a &lt;&lt; $b</userinput></entry>
+     <entry>Shift left（左移）</entry>
+     <entry>将 <varname>$a</varname> 中的位向左移动 <varname>$b</varname> 次（每一次移动都表示“乘以 2”）。</entry>
+    </row>
+    <row>
+     <entry><userinput>$a &gt;&gt; $b</userinput></entry>
+     <entry>Shift right（右移）</entry>
+     <entry>将 <varname>$a</varname> 中的位向右移动 <varname>$b</varname> 次（每一次移动都表示“除以 2”）。</entry>
+    </row>
+   </tbody>
+  </tgroup>
+ </table>
+ <para>
+  位移在 PHP 中是数学运算。向任何方向移出去的位都被丢弃。左移时右侧以零填充，符号位被移走意味着正负号不被保留。右移时左侧以符号位填充，意味着正负号被保留。
+ </para>
+ <para>
+  要用括号确保想要的<link linkend="language.operators.precedence">优先级</link>。例如
+  <literal>$a &amp; $b == true</literal> 先进行比较再进行按位与；而
+  <literal>($a &amp; $b) == true</literal> 则先进行按位与再进行比较。
+ </para>
+ <para>
+  如果 <literal>&amp;</literal>、 <literal>|</literal> 和
+  <literal>^</literal> 运算符的左右两个操作对象都是字符串，将对会组成字符串的字符 
+  ASCII 值执行操作，结果也是一个字符串。除此之外，两个操作对象都将 
+  <link linkend="language.types.integer.casting">转换为整数</link> ，结果也将会是整数。
+ </para>
+ <para>
+  如果 <literal>~</literal> 运算符的操作对象是字符串，则将对组成字符串的字符 ASCII 值进行操作，
+  结果将会是字符串，否则操作对象和结构都会是整数。
+ </para>
+ <para>
+  <literal>&lt;&lt;</literal> 和 <literal>&gt;&gt;</literal> 运算符的操作对象和结果始终都是整数。
+ </para>
+ <para>
+  <informalexample>
+   <para>
+    <literallayout>
+     PHP 的 ini 设定 error_reporting 使用了按位的值，
+     提供了关闭某个位的真实例子。要显示除了提示级别
+     之外的所有错误，php.ini 中是这样用的：
+     <userinput>E_ALL &amp; ~E_NOTICE</userinput>
+    </literallayout>
+   </para>
+   <para>
+    <literallayout>
+     具体运作方式是先取得 E_ALL 的值：
+     <computeroutput>00000000000000000111011111111111</computeroutput>
+     再取得 E_NOTICE 的值：
+     <computeroutput>00000000000000000000000000001000</computeroutput>
+     然后通过 <literal>~</literal> 将其取反：
+     <computeroutput>11111111111111111111111111110111</computeroutput>
+     最后再用按位与 AND（&amp;）得到两个值中都设定了（为 1）的位：
+     <computeroutput>00000000000000000111011111110111</computeroutput>
+    </literallayout>
+   </para>
+   <para>
+    <literallayout>
+     另外一个方法是用按位异或 XOR（<literal>^</literal>）来取得只在
+     其中一个值中设定了的位：
+     <userinput>E_ALL ^ E_NOTICE</userinput>
+    </literallayout>
+   </para>
+  </informalexample>
+ </para>
+ <para>
+  <informalexample>
+   <para>
+    <literallayout>
+     error_reporting 也可用来演示怎样置位。只显示错误和可恢复
+     错误的方法是：
+     <userinput>E_ERROR | E_RECOVERABLE_ERROR</userinput>
+    </literallayout>
+   </para>
+   <para>
+    <literallayout>
+     也就是将 E_ERROR
+     <computeroutput>00000000000000000000000000000001</computeroutput>
+     和 E_RECOVERABLE_ERROR
+     <computeroutput>00000000000000000001000000000000</computeroutput>
+     用按位或 OR（<literal>|</literal>）运算符来取得在任何一个值中被置位的结果：
+     <computeroutput>00000000000000000001000000000001</computeroutput>
+    </literallayout>
+   </para>
+  </informalexample>
+ </para>
+ <para>
+  <example>
+   <title>整数的 AND，OR 和 XOR 位运算符</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+/*
+ * 忽略顶部，
+ * 它只是为了使输出更加清晰而格式化。
+ */
+
+$format = '(%1$2d = %1$04b) = (%2$2d = %2$04b)'
+        . ' %3$s (%4$2d = %4$04b)' . "\n";
+
+echo <<<EOH
+ ---------     ---------  -- ---------
+ result        value      op test
+ ---------     ---------  -- ---------
+EOH;
+
+
+/*
+ * 这是示例。
+ */
+
+$values = array(0, 1, 2, 4, 8);
+$test = 1 + 4;
+
+echo "\n Bitwise AND \n";
+foreach ($values as $value) {
+    $result = $value & $test;
+    printf($format, $result, $value, '&', $test);
+}
+
+echo "\n Bitwise Inclusive OR \n";
+foreach ($values as $value) {
+    $result = $value | $test;
+    printf($format, $result, $value, '|', $test);
+}
+
+echo "\n Bitwise Exclusive OR (XOR) \n";
+foreach ($values as $value) {
+    $result = $value ^ $test;
+    printf($format, $result, $value, '^', $test);
+}
+?>
+]]>
+   </programlisting>
+   &example.outputs;
+   <screen>
+<![CDATA[
+ ---------     ---------  -- ---------
+ result        value      op test
+ ---------     ---------  -- ---------
+ Bitwise AND
+( 0 = 0000) = ( 0 = 0000) & ( 5 = 0101)
+( 1 = 0001) = ( 1 = 0001) & ( 5 = 0101)
+( 0 = 0000) = ( 2 = 0010) & ( 5 = 0101)
+( 4 = 0100) = ( 4 = 0100) & ( 5 = 0101)
+( 0 = 0000) = ( 8 = 1000) & ( 5 = 0101)
+
+ Bitwise Inclusive OR
+( 5 = 0101) = ( 0 = 0000) | ( 5 = 0101)
+( 5 = 0101) = ( 1 = 0001) | ( 5 = 0101)
+( 7 = 0111) = ( 2 = 0010) | ( 5 = 0101)
+( 5 = 0101) = ( 4 = 0100) | ( 5 = 0101)
+(13 = 1101) = ( 8 = 1000) | ( 5 = 0101)
+
+ Bitwise Exclusive OR (XOR)
+( 5 = 0101) = ( 0 = 0000) ^ ( 5 = 0101)
+( 4 = 0100) = ( 1 = 0001) ^ ( 5 = 0101)
+( 7 = 0111) = ( 2 = 0010) ^ ( 5 = 0101)
+( 1 = 0001) = ( 4 = 0100) ^ ( 5 = 0101)
+(13 = 1101) = ( 8 = 1000) ^ ( 5 = 0101)
+]]>
+   </screen>
+  </example>
+ </para>
+ <para>
+  <example>
+   <title>字符串的 XOR 运算符</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+echo 12 ^ 9; // 输出 '5'
+
+echo "12" ^ "9"; // 输出退格字符 (ascii 8)
+                 // ('1' (ascii 49)) ^ ('9' (ascii 57)) = #8
+
+echo "hallo" ^ "hello"; // 输出 ascii 值 #0 #4 #0 #0 #0
+                        // 'a' ^ 'e' = #4
+
+echo 2 ^ "3"; // 输出 1
+              // 2 ^ ((int)"3") == 1
+
+echo "2" ^ 3; // 输出 1
+              // ((int)"2") ^ 3 == 1
+?>
+]]>
+   </programlisting>
+  </example>
+ </para>
+ <para>
+  <example>
+   <title>整数的位移</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+/*
+ * 这是示例。
+ */
+
+echo "\n--- BIT SHIFT RIGHT ON POSITIVE INTEGERS ---\n";
+
+$val = 4;
+$places = 1;
+$res = $val >> $places;
+p($res, $val, '>>', $places, 'copy of sign bit shifted into left side');
+
+$val = 4;
+$places = 2;
+$res = $val >> $places;
+p($res, $val, '>>', $places);
+
+$val = 4;
+$places = 3;
+$res = $val >> $places;
+p($res, $val, '>>', $places, 'bits shift out right side');
+
+$val = 4;
+$places = 4;
+$res = $val >> $places;
+p($res, $val, '>>', $places, 'same result as above; can not shift beyond 0');
+
+
+echo "\n--- BIT SHIFT RIGHT ON NEGATIVE INTEGERS ---\n";
+
+$val = -4;
+$places = 1;
+$res = $val >> $places;
+p($res, $val, '>>', $places, 'copy of sign bit shifted into left side');
+
+$val = -4;
+$places = 2;
+$res = $val >> $places;
+p($res, $val, '>>', $places, 'bits shift out right side');
+
+$val = -4;
+$places = 3;
+$res = $val >> $places;
+p($res, $val, '>>', $places, 'same result as above; can not shift beyond -1');
+
+
+echo "\n--- BIT SHIFT LEFT ON POSITIVE INTEGERS ---\n";
+
+$val = 4;
+$places = 1;
+$res = $val << $places;
+p($res, $val, '<<', $places, 'zeros fill in right side');
+
+$val = 4;
+$places = (PHP_INT_SIZE * 8) - 4;
+$res = $val << $places;
+p($res, $val, '<<', $places);
+
+$val = 4;
+$places = (PHP_INT_SIZE * 8) - 3;
+$res = $val << $places;
+p($res, $val, '<<', $places, 'sign bits get shifted out');
+
+$val = 4;
+$places = (PHP_INT_SIZE * 8) - 2;
+$res = $val << $places;
+p($res, $val, '<<', $places, 'bits shift out left side');
+
+
+echo "\n--- BIT SHIFT LEFT ON NEGATIVE INTEGERS ---\n";
+
+$val = -4;
+$places = 1;
+$res = $val << $places;
+p($res, $val, '<<', $places, 'zeros fill in right side');
+
+$val = -4;
+$places = (PHP_INT_SIZE * 8) - 3;
+$res = $val << $places;
+p($res, $val, '<<', $places);
+
+$val = -4;
+$places = (PHP_INT_SIZE * 8) - 2;
+$res = $val << $places;
+p($res, $val, '<<', $places, 'bits shift out left side, including sign bit');
+
+
+/*
+ * 忽略顶部，
+ * 它只是为了使输出更加清晰而格式化。
+ */
+
+function p($res, $val, $op, $places, $note = '') {
+    $format = '%0' . (PHP_INT_SIZE * 8) . "b\n";
+
+    printf("Expression: %d = %d %s %d\n", $res, $val, $op, $places);
+
+    echo " Decimal:\n";
+    printf("  val=%d\n", $val);
+    printf("  res=%d\n", $res);
+
+    echo " Binary:\n";
+    printf('  val=' . $format, $val);
+    printf('  res=' . $format, $res);
+
+    if ($note) {
+        echo " NOTE: $note\n";
+    }
+
+    echo "\n";
+}
+?>
+]]>
+   </programlisting>
+   &example.outputs.32bit;
+   <screen>
+<![CDATA[
+
+--- BIT SHIFT RIGHT ON POSITIVE INTEGERS ---
+Expression: 2 = 4 >> 1
+ Decimal:
+  val=4
+  res=2
+ Binary:
+  val=00000000000000000000000000000100
+  res=00000000000000000000000000000010
+ NOTE: copy of sign bit shifted into left side
+
+Expression: 1 = 4 >> 2
+ Decimal:
+  val=4
+  res=1
+ Binary:
+  val=00000000000000000000000000000100
+  res=00000000000000000000000000000001
+
+Expression: 0 = 4 >> 3
+ Decimal:
+  val=4
+  res=0
+ Binary:
+  val=00000000000000000000000000000100
+  res=00000000000000000000000000000000
+ NOTE: bits shift out right side
+
+Expression: 0 = 4 >> 4
+ Decimal:
+  val=4
+  res=0
+ Binary:
+  val=00000000000000000000000000000100
+  res=00000000000000000000000000000000
+ NOTE: same result as above; can not shift beyond 0
+
+
+--- BIT SHIFT RIGHT ON NEGATIVE INTEGERS ---
+Expression: -2 = -4 >> 1
+ Decimal:
+  val=-4
+  res=-2
+ Binary:
+  val=11111111111111111111111111111100
+  res=11111111111111111111111111111110
+ NOTE: copy of sign bit shifted into left side
+
+Expression: -1 = -4 >> 2
+ Decimal:
+  val=-4
+  res=-1
+ Binary:
+  val=11111111111111111111111111111100
+  res=11111111111111111111111111111111
+ NOTE: bits shift out right side
+
+Expression: -1 = -4 >> 3
+ Decimal:
+  val=-4
+  res=-1
+ Binary:
+  val=11111111111111111111111111111100
+  res=11111111111111111111111111111111
+ NOTE: same result as above; can not shift beyond -1
+
+
+--- BIT SHIFT LEFT ON POSITIVE INTEGERS ---
+Expression: 8 = 4 << 1
+ Decimal:
+  val=4
+  res=8
+ Binary:
+  val=00000000000000000000000000000100
+  res=00000000000000000000000000001000
+ NOTE: zeros fill in right side
+
+Expression: 1073741824 = 4 << 28
+ Decimal:
+  val=4
+  res=1073741824
+ Binary:
+  val=00000000000000000000000000000100
+  res=01000000000000000000000000000000
+
+Expression: -2147483648 = 4 << 29
+ Decimal:
+  val=4
+  res=-2147483648
+ Binary:
+  val=00000000000000000000000000000100
+  res=10000000000000000000000000000000
+ NOTE: sign bits get shifted out
+
+Expression: 0 = 4 << 30
+ Decimal:
+  val=4
+  res=0
+ Binary:
+  val=00000000000000000000000000000100
+  res=00000000000000000000000000000000
+ NOTE: bits shift out left side
+
+
+--- BIT SHIFT LEFT ON NEGATIVE INTEGERS ---
+Expression: -8 = -4 << 1
+ Decimal:
+  val=-4
+  res=-8
+ Binary:
+  val=11111111111111111111111111111100
+  res=11111111111111111111111111111000
+ NOTE: zeros fill in right side
+
+Expression: -2147483648 = -4 << 29
+ Decimal:
+  val=-4
+  res=-2147483648
+ Binary:
+  val=11111111111111111111111111111100
+  res=10000000000000000000000000000000
+
+Expression: 0 = -4 << 30
+ Decimal:
+  val=-4
+  res=0
+ Binary:
+  val=11111111111111111111111111111100
+  res=00000000000000000000000000000000
+ NOTE: bits shift out left side, including sign bit
+]]>
+   </screen>
+   &example.outputs.64bit;
+   <screen>
+<![CDATA[
+
+--- BIT SHIFT RIGHT ON POSITIVE INTEGERS ---
+Expression: 2 = 4 >> 1
+ Decimal:
+  val=4
+  res=2
+ Binary:
+  val=0000000000000000000000000000000000000000000000000000000000000100
+  res=0000000000000000000000000000000000000000000000000000000000000010
+ NOTE: copy of sign bit shifted into left side
+
+Expression: 1 = 4 >> 2
+ Decimal:
+  val=4
+  res=1
+ Binary:
+  val=0000000000000000000000000000000000000000000000000000000000000100
+  res=0000000000000000000000000000000000000000000000000000000000000001
+
+Expression: 0 = 4 >> 3
+ Decimal:
+  val=4
+  res=0
+ Binary:
+  val=0000000000000000000000000000000000000000000000000000000000000100
+  res=0000000000000000000000000000000000000000000000000000000000000000
+ NOTE: bits shift out right side
+
+Expression: 0 = 4 >> 4
+ Decimal:
+  val=4
+  res=0
+ Binary:
+  val=0000000000000000000000000000000000000000000000000000000000000100
+  res=0000000000000000000000000000000000000000000000000000000000000000
+ NOTE: same result as above; can not shift beyond 0
+
+
+--- BIT SHIFT RIGHT ON NEGATIVE INTEGERS ---
+Expression: -2 = -4 >> 1
+ Decimal:
+  val=-4
+  res=-2
+ Binary:
+  val=1111111111111111111111111111111111111111111111111111111111111100
+  res=1111111111111111111111111111111111111111111111111111111111111110
+ NOTE: copy of sign bit shifted into left side
+
+Expression: -1 = -4 >> 2
+ Decimal:
+  val=-4
+  res=-1
+ Binary:
+  val=1111111111111111111111111111111111111111111111111111111111111100
+  res=1111111111111111111111111111111111111111111111111111111111111111
+ NOTE: bits shift out right side
+
+Expression: -1 = -4 >> 3
+ Decimal:
+  val=-4
+  res=-1
+ Binary:
+  val=1111111111111111111111111111111111111111111111111111111111111100
+  res=1111111111111111111111111111111111111111111111111111111111111111
+ NOTE: same result as above; can not shift beyond -1
+
+
+--- BIT SHIFT LEFT ON POSITIVE INTEGERS ---
+Expression: 8 = 4 << 1
+ Decimal:
+  val=4
+  res=8
+ Binary:
+  val=0000000000000000000000000000000000000000000000000000000000000100
+  res=0000000000000000000000000000000000000000000000000000000000001000
+ NOTE: zeros fill in right side
+
+Expression: 4611686018427387904 = 4 << 60
+ Decimal:
+  val=4
+  res=4611686018427387904
+ Binary:
+  val=0000000000000000000000000000000000000000000000000000000000000100
+  res=0100000000000000000000000000000000000000000000000000000000000000
+
+Expression: -9223372036854775808 = 4 << 61
+ Decimal:
+  val=4
+  res=-9223372036854775808
+ Binary:
+  val=0000000000000000000000000000000000000000000000000000000000000100
+  res=1000000000000000000000000000000000000000000000000000000000000000
+ NOTE: sign bits get shifted out
+
+Expression: 0 = 4 << 62
+ Decimal:
+  val=4
+  res=0
+ Binary:
+  val=0000000000000000000000000000000000000000000000000000000000000100
+  res=0000000000000000000000000000000000000000000000000000000000000000
+ NOTE: bits shift out left side
+
+
+--- BIT SHIFT LEFT ON NEGATIVE INTEGERS ---
+Expression: -8 = -4 << 1
+ Decimal:
+  val=-4
+  res=-8
+ Binary:
+  val=1111111111111111111111111111111111111111111111111111111111111100
+  res=1111111111111111111111111111111111111111111111111111111111111000
+ NOTE: zeros fill in right side
+
+Expression: -9223372036854775808 = -4 << 61
+ Decimal:
+  val=-4
+  res=-9223372036854775808
+ Binary:
+  val=1111111111111111111111111111111111111111111111111111111111111100
+  res=1000000000000000000000000000000000000000000000000000000000000000
+
+Expression: 0 = -4 << 62
+ Decimal:
+  val=-4
+  res=0
+ Binary:
+  val=1111111111111111111111111111111111111111111111111111111111111100
+  res=0000000000000000000000000000000000000000000000000000000000000000
+ NOTE: bits shift out left side, including sign bit
+]]>
+   </screen>
+  </example>
+ </para>
+ <warning>
+  <para>
+   使用 <link linkend="book.gmp">gmp</link> 扩展对超出 <literal>PHP_INT_MAX</literal> 的数值来进行位操作。
+  </para>
+ </warning>
+
+ <sect2 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <!-- <link linkend="language.oop5.basic.class.class">::class</link> -->
+    <member><function>pack</function></member>
+    <member><function>unpack</function></member>
+    <member><function>gmp_and</function></member>
+    <member><function>gmp_or</function></member>
+    <member><function>gmp_xor</function></member>
+    <member><function>gmp_testbit</function></member>
+    <member><function>gmp_clrbit</function></member>
+   </simplelist>
+  </para>
+ </sect2>
+</sect1>
