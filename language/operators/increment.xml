@@ -1,22 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- EN-Revision: 52407313885d27a4e891e08dd2e2481bcc39e244 Maintainer: mowangjuanzi Status: ready -->
+<!-- EN-Revision: 02302a754aa0b2ea9a783f792e2c2c6c54230829 Maintainer: mowangjuanzi Status: ready -->
 <sect1 xml:id="language.operators.increment">
  <title>递增／递减运算符</title>
  <para>
-  PHP 支持 C 风格的前／后递增与递减运算符。
+  PHP 支持前／后递增与递减运算符。这些一元运算符允许将值递增或递减 1。
  </para>
- <note>
-  <simpara>
-   递增／递减运算符不影响布尔值。递减
-   &null; 值也没有效果，但是递增 &null; 的结果是 <literal>1</literal>。
-  </simpara>
- </note>
  <table>
   <title>递增／递减运算符</title>
   <tgroup cols="3">
    <thead>
     <row>
-     <entry>例子</entry>
+     <entry>示例</entry>
      <entry>名称</entry>
      <entry>效果</entry>
     </row>
@@ -45,46 +39,91 @@
    </tbody>
   </tgroup>
  </table>
+
  <para>
   一个简单的示例脚本：
   <informalexample>
    <programlisting role="php">
 <![CDATA[
 <?php
-echo "<h3>Postincrement</h3>";
+echo 'Post-increment:', PHP_EOL;
 $a = 5;
-echo "Should be 5: " . $a++ . "<br />\n";
-echo "Should be 6: " . $a . "<br />\n";
+var_dump($a++);
+var_dump($a);
 
-echo "<h3>Preincrement</h3>";
+echo 'Pre-increment:', PHP_EOL;
 $a = 5;
-echo "Should be 6: " . ++$a . "<br />\n";
-echo "Should be 6: " . $a . "<br />\n";
+var_dump(++$a);
+var_dump($a);
 
-echo "<h3>Postdecrement</h3>";
+echo 'Post-decrement:', PHP_EOL;
 $a = 5;
-echo "Should be 5: " . $a-- . "<br />\n";
-echo "Should be 4: " . $a . "<br />\n";
+var_dump($a--);
+var_dump($a);
 
-echo "<h3>Predecrement</h3>";
+echo 'Pre-decrement:', PHP_EOL;
 $a = 5;
-echo "Should be 4: " . --$a . "<br />\n";
-echo "Should be 4: " . $a . "<br />\n";
+var_dump(--$a);
+var_dump($a);
 ?>
 ]]>
    </programlisting>
+   &example.outputs;
+   <screen>
+<![CDATA[
+Post-increment:
+int(5)
+int(6)
+Pre-increment:
+int(6)
+int(6)
+Post-decrement:
+int(5)
+int(4)
+Pre-decrement:
+int(4)
+int(4)
+]]>
+   </screen>
   </informalexample>
+
+  <warning>
+   <para>
+    递增和递减运算符对 <type>bool</type> 类型值没有影响。自 PHP 8.3.0 起，会发出
+    <constant>E_WARNING</constant>，因为将来会默认将该值转换为 <type>int</type>。
+   </para>
+   <para>
+    递减运算符对 <type>null</type> 类型的值没有影响。自 PHP 8.3.0 起，会发出
+    <constant>E_WARNING</constant>，因为将来会默认将该值转换为 <type>int</type>。
+   </para>
+   <para>
+    递减运算符对非<link linkend="language.types.numeric-strings">数字字符串</link>没有影响。自
+    PHP 8.3.0 起，会发出 <constant>E_WARNING</constant>，因为在将来会抛出 <classname>TypeError</classname>。
+   </para>
+  </warning>
+  <note>
+   <para>
+    支持重载加/减法的内部对象也可以进行递增或递减。其中一个这样的内部对象是 <classname>GMP</classname>。
+   </para>
+  </note>
  </para>
- <para>
-  在处理字符变量的算数运算时，PHP 沿袭了 Perl 的习惯，而非 C 的。例如，在
-  Perl 中 <literal>$a = 'Z'; $a++;</literal> 将把 <literal>$a</literal>
-  变成<literal>'AA'</literal>，而在 C 中，<literal>a = 'Z'; a++;</literal> 将把
-  <literal>a</literal> 变成 <literal>'['</literal>（<literal>'Z'</literal>
-  的 ASCII 值是 90，<literal>'['</literal> 的 ASCII 值是
-  91）。注意字符变量只能递增，不能递减，并且只支持纯 ASCII 字母数字（a-z、A-Z 和
-  0-9）。递增/递减其他字符变量则无效，原字符串没有变化。
+
+ <sect2 xml:id="language.operators.increment.string">
+  <title>PERL 字符串递增功能</title>
+  <warning>
+   <simpara>
+    自 PHP 8.3.0 起，此功能已软弃用。应该使用 <function>str_increment</function> 函数。
+   </simpara>
+  </warning>
+
+  <para>
+   在 PHP 中，可以递增非<link linkend="language.types.numeric-strings">数字字符串</link>。该字符串必须是字母数字
+   ASCII 字符串。当到达字母 <literal>Z</literal> 且递增到下个字母时，将进位到左侧值。例如，<code>$a = 'Z';
+   $a++;</code>将 <varname>$a</varname> 变为 <literal>'AA'</literal>。
+  </para>
+
   <example>
-   <title>涉及字符变量的算数运算</title>
+   <title>PERL 字符串递减功能</title>
    <programlisting role="php">
 <![CDATA[
 <?php
@@ -132,8 +171,35 @@ A14
 ]]>
    </screen>
   </example>
- </para>
- <para>
-  递增或递减布尔值没有效果。
- </para>
+
+  <warning>
+   <para>
+    如果数字字母字符串可以解释为<link linkend="language.types.numeric-strings">数字字符串</link>，则将转换为
+    <type>int</type> 或 <type>float</type>。这对于看起来像以指数形式写出的浮点数字符串来说尤其是一个问题。<function>str_increment</function>
+    函数不会受到这些默认类型转换的影响。
+   </para>
+   <example>
+    <title>数字字母字符串转换为浮点数</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$s = "5d9";
+var_dump(++$s);
+var_dump(++$s);
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+string(3) "5e0"
+float(6)
+]]>
+    </screen>
+    <para>
+     这是因为值 <literal>"5e0"</literal> 解释为 <type>float</type>，并在递增之前转换为 <literal>5.0</literal>。
+    </para>
+   </example>
+  </warning>
+ </sect2>
 </sect1>
