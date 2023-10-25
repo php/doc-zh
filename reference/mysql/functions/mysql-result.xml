@@ -1,61 +1,140 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
-  <refentry xml:id="function.mysql-result" xmlns="http://docbook.org/ns/docbook">
-   <refnamediv>
-    <refname>mysql_result</refname>
-    <refpurpose>取得结果数据</refpurpose>
-   </refnamediv>
-   <refsect1>
-    <title>说明</title>
-    <methodsynopsis>
-     <type>mixed</type><methodname>mysql_result</methodname>
-     <methodparam><type>resource</type><parameter>result</parameter></methodparam>
-     <methodparam><type>int</type><parameter>row</parameter></methodparam>
-     <methodparam choice="opt"><type>mixed</type><parameter>field</parameter></methodparam>
-    </methodsynopsis>
-    <para>
-     <function>mysql_result</function> 返回 MySQL
-     结果集中一个单元的内容。字段参数可以是字段的偏移量或者字段名，或者是字段表点字段名（tablename.fieldname）。如果给列起了别名（'select
-     foo as bar from...'），则用别名替代列名。
-    </para>
-    <para>
-     当作用于很大的结果集时，应该考虑使用能够取得整行的函数（在下边指出）。这些函数在一次函数调用中返回了多个单元的内容，比
-     <function>mysql_result</function>
-     快得多。此外注意在字段参数中指定数字偏移量比指定字段名或者
-     tablename.fieldname 要快得多。
-    </para>
-    <para>
-     调用 <function>mysql_result</function>
-     不能和其它处理结果集的函数混合调用。
-    </para>
-    <para>
-     <example>
-      <title><function>mysql_result</function> 例子</title>
-      <programlisting role="php">
+<!-- EN-Revision: e41806c30bf6975e452c0d4ce35ab0984c2fa68c Maintainer: dallas Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
+<refentry xml:id="function.mysql-result" xmlns="http://docbook.org/ns/docbook">
+ <refnamediv>
+  <refname>mysql_result</refname>
+  <refpurpose>取得结果数据</refpurpose>
+ </refnamediv>
+
+ <refsynopsisdiv>
+  <warning>
+   &mysql.alternative.note;
+   <simplelist role="alternatives">
+    <member>
+     <function>mysqli_data_seek</function> 与
+     <function>mysqli_field_seek</function> 和
+     <function>mysqli_fetch_field</function> 结合使用
+    </member>
+    <member><methodname>PDOStatement::fetchColumn</methodname></member>
+   </simplelist>
+  </warning>
+ </refsynopsisdiv>
+
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <type>string</type><methodname>mysql_result</methodname>
+   <methodparam><type>resource</type><parameter>result</parameter></methodparam>
+   <methodparam><type>int</type><parameter>row</parameter></methodparam>
+   <methodparam choice="opt"><type>mixed</type><parameter>field</parameter><initializer>0</initializer></methodparam>
+  </methodsynopsis>
+  <para>
+   Retrieves the contents of one cell from a MySQL result set.
+  </para>
+  <para>
+   When working on large result sets, you should consider using one
+   of the functions that fetch an entire row (specified below).  As
+   these functions return the contents of multiple cells in one
+   function call, they're MUCH quicker than
+   <function>mysql_result</function>.  Also, note that specifying a
+   numeric offset for the field argument is much quicker than
+   specifying a fieldname or tablename.fieldname argument.
+  </para>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    &mysql.result.description;
+    <varlistentry>
+     <term><parameter>row</parameter></term>
+     <listitem>
+      <para>
+       The row number from the result that's being retrieved. Row numbers 
+       start at <literal>0</literal>.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>field</parameter></term>
+     <listitem>
+      <para>
+       The name or offset of the field being retrieved.
+      </para>
+      <para>
+       It can be the field's offset, the field's name, or the field's table 
+       dot field name (tablename.fieldname). If the column name has been
+       aliased ('select foo as bar from...'), use the alias instead of the 
+       column name. If undefined, the first field is retrieved.
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   The contents of one cell from a MySQL result set on success, or 
+   &false; on failure.
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title><function>mysql_result</function> 示例</title>
+    <programlisting role="php">
 <![CDATA[
 <?php
-    $link = mysql_connect("localhost", "mysql_user", "mysql_password")
-            or die("Could not connect: " . mysql_error());
+$link = mysql_connect('localhost', 'mysql_user', 'mysql_password');
+if (!$link) {
+    die('Could not connect: ' . mysql_error());
+}
+if (!mysql_select_db('database_name')) {
+    die('Could not select database: ' . mysql_error());
+}
+$result = mysql_query('SELECT name FROM work.employee');
+if (!$result) {
+    die('Could not query:' . mysql_error());
+}
+echo mysql_result($result, 2); // outputs third employee's name
 
-    $result = mysql_query("SELECT name FROM work.employee")
-            or die("Could not query: . mysql_error());
-
-    echo mysql_result($result,2); // outputs third employee's name
-
-    mysql_close($link);
+mysql_close($link);
 ?>
 ]]>
-      </programlisting>
-     </example>
-    </para>
-    <para>
-     推荐使用高性能的替代函数：<function>mysql_fetch_row</function>，<function>mysql_fetch_array</function>，<function>mysql_fetch_assoc</function>
-     和 <function>mysql_fetch_object</function>。
-    </para>
-   </refsect1>
-  </refentry>
+    </programlisting>
+   </example>
+  </para>
+ </refsect1>
+
+ <refsect1 role="notes">
+  &reftitle.notes;
+  <note>
+   <para>
+    Calls to <function>mysql_result</function> should not be mixed
+    with calls to other functions that deal with the result set.
+   </para>
+  </note>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>mysql_fetch_row</function></member>
+    <member><function>mysql_fetch_array</function></member>
+    <member><function>mysql_fetch_assoc</function></member>
+    <member><function>mysql_fetch_object</function></member>
+   </simplelist>
+  </para>
+ </refsect1>
+</refentry>
 
 <!-- Keep this comment at the end of the file
 Local variables:
