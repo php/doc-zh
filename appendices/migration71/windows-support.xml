@@ -1,17 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 3cd337b4dc91c827399961b9b45524ae4f2b50c9 Maintainer: avenger Status: partial -->
-
+<!-- EN-Revision: 3cd337b4dc91c827399961b9b45524ae4f2b50c9 Maintainer: avenger Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <sect1 xml:id="migration71.windows-support" xmlns:xlink="http://www.w3.org/1999/xlink">
  <title>Windows 支持</title>
 
  <sect2 xml:id="migration71.windows-support.long-and-utf8-path">
-  <title>Support for long and UTF-8 path</title>
+  <title>支持长路径和 UTF-8 路径</title>
   <para>
-    If a web application is UTF-8 conform, no further action is required. For
-    applications depending on paths in non UTF-8 encodings for I/O, an explicit
-    INI directive has to be set. The encoding INI settings check relies on the
-    order in the core:
+    如果 Web 应用程序符合 UTF-8 编码，则不需要采取进一步的操作。对于依赖非 UTF-8 编码路径进行
+    I/O 的应用程序，必须设置明确的 INI 指令。编码 INI 设置的检查依赖于核心的顺序：
   </para>
   <itemizedlist>
    <listitem>
@@ -31,17 +29,17 @@
    </listitem>
   </itemizedlist>
   <para>
-    Several functions for codepage handling were introduced:
+    引入了几个用于处理代码页的函数：
   </para>
       <itemizedlist>
        <listitem>
         <simpara>
-         sapi_windows_cp_set() to set the default codepage
+         sapi_windows_cp_set() 用于设置默认的代码页
         </simpara>
        </listitem>
        <listitem>
         <simpara>
-         sapi_windows_cp_get() to retrieve the current codepage
+         sapi_windows_cp_get() 用于检索当前代码页
         </simpara>
        </listitem>
        <listitem>
@@ -51,64 +49,39 @@
        </listitem>
        <listitem>
         <simpara>
-         sapi_windows_cp_conv() to convert between codepages, using iconv() compatible signature
+         sapi_windows_cp_conv() 使用 iconv() 兼容签名在代码页之间进行转换
         </simpara>
        </listitem>
       </itemizedlist>
   <para>
-   These functions are thread safe.
+   这些函数是线程安全的。
   </para>
   <para>
-    The console output codepage is adjusted depending on the encoding used in
-    PHP. Depending on the concrete system OEM codepage, the visible output
-    might or might be not correct. For example, in the default cmd.exe and on
-    a system with the OEM codepage 437, outputs in codepages 1251, 1252, 1253
-    and some others can be shown correctly when using UTF-8. On the same system,
-    chars in codepage like 20932 probably won't be shown correctly. This refers
-    to the particular system rules for codepage, font compatibility and the
-    particular console program used. PHP automatically sets the console codepage
-    according to the encoding rules from php.ini. Using alternative consoles
-    instead of cmd.exe directly might bring better experience in some cases.
+    控制台输出代码页根据 PHP 中使用的编码进行调整。具体取决于系统的 OEM 代码页，可见输出可能正确，也可能不正确。例如，在默认
+    cmd.exe 和 OEM 代码页为 437 的系统上，使用 UTF-8 时可以正确显示代码页 1251、1252、1253
+    和其它一些代码页中的输出。在同一系统上，代码页中的字符（例如 20932）可能无法正确显示。这是指代码页、字体兼容性和所使用的特定控制台程序的特定系统规则。PHP
+    根据 php.ini 中的编码规则自动设置控制台代码页。在某些情况下，使用替代控制台而不是直接使用 cmd.exe 可能会带来更好的体验。
   </para>
   <para>
-    Nevertheless be aware, runtime codepage switch after the request start
-    might bring unexpected side effects on CLI. The preferable way is php.ini,
-    When PHP CLI is used in a console emulator, that doesn't support Unicode,
-    it might possibly be required, to avoid changing the console codepage. The
-    best way to achieve it is by setting the default or internal encoding to
-    correspond the ANSI codepage. Another method is to set the INI directives
-    output_encoding and input_encoding to the required codepage, in which case
-    however the difference between internal and I/O codepage is likely to cause
-    mojibake. In rare cases, if PHP happens to crash gracefully, the original
-    console codepage might be not restored. In this case, the chcp command
-    can be used, to restore it manually.
+    不过请注意，请求开始后切换运行时代码页可能会给 CLI 带来意想不到的副作用。更好的方法是 php.ini，当在不支持
+    Unicode 的控制台模拟器中使用 PHP CLI 时，可能需要这样做，以避免更改控制台代码页。实现此目的的最佳方式是将默认编码或内部编码设置为相应的
+    ANSI 代码页。另一种方法是将 INI 指令 output_encoding 和 input_encoding 设置为所需的代码页，但在这种情况下，内部代码页和 I/O
+    代码页之间的差异可能会导致乱码。在极少数情况下，如果 PHP 碰巧优雅崩溃，原始的控制台代码页可能无法恢复。在这种情况下，可以使用
+    chcp 命令，手动恢复。
   </para>
   <para>
-    Special awareness for the DBCS systems - the codepage switch on runtime
-    using <function>ini_set</function> is likely to cause display issues. The difference to the
-    non DBCS systems is, that the extended characters require two console cells
-    to be displayed. In certain case, only the mapping of the characters into
-    the glyph set of the font could happen, no actual font change. This is the
-    nature of DBCS systems, the most simple way to prevent display issues is
-    to avoid usage of <function>ini_set</function> for the codepage change.
+   对于 DBCS 系统需要特别注意——在运行时使用 <function>ini_set</function> 切换代码页可能会导致显示问题。与非 DBCS
+   系统的区别在于，扩展字符需要两个控制台单元格才能显示。在某些情况下，只有将字符映射到字体的字形集才能发生，而不会实际更改字体。这是
+   DBCS 系统的本质，预防显示问题的最简单方法是避免使用 <function>ini_set</function> 进行代码页更改。
   </para>
   <para>
-    As a result of UTF-8 support in the streams, PHP scripts are not limited
-    to ASCII or ANSI filenames anymore. This is supported out of the box on
-    CLI. For other SAPI, the documentation for the corresponding server
-    is useful.
+   由于 stream 支持 UTF-8，PHP 脚本不再局限于 ASCII 或 ANSI 文件名。CLI 上开箱即用的支持此功能。对于其它 SAPI，相应服务器的文档很有用。
   </para>
   <para>
-    Long paths support is transparent. Paths longer than 260 bytes get
-    automatically prefixed with <literal>\\?\</literal>. The max path length is limited to
-    2048 bytes. Be aware, that the path segment limit (basename length) still
-    persists.
+   长路径支持是公开的。超过 260 字节的路径会自动添加前缀 <literal>\\?\</literal>。最大路径长度限制为 2048 字节。路径片断限制（文件名长度）仍然存在。
   </para>
   <para>
-    For the best portability, it is strongely recommended to handle filenames,
-    I/O and other related topics UTF-8. Additionally, for the console applications,
-    the usage of a TrueType font is preferable and the usage of ini_set() for
-    the codepage change is discouraged.
+    为了获得最佳的可移植性，强烈推荐使用 UTF-8 处理文件名、I/O 和其它相关主题。此外，对于控制台应用程序，最好使用 TrueType 字体，并且不鼓励使用 ini_set() 来更改代码页。
   </para>
   <para>
   </para>
@@ -128,16 +101,15 @@
   <sect2 xml:id="migration71.windows-support.php-fcgi-children">
   <title>PHP_FCGI_CHILDREN</title>
   <para>
-  <varname>PHP_FCGI_CHILDREN</varname> is now respected. If this environment variable is 
-  defined, the first <filename>php-cgi.exe</filename> process will exec the specified number 
-  of children. These will share the same TCP socket.
+   <varname>PHP_FCGI_CHILDREN</varname> 现在收到重视。如果定义了此环境变量，第一个 <filename>php-cgi.exe</filename>
+   进程将执行指定数量的子进程。它们将共享相同的 TCP socket。
   </para>
  </sect2>
 
  <sect2 xml:id="migration71.windows-support.ftok">
   <title>ftok()</title>
   <para>
-   Added support for <function>ftok</function>
+   新增 <function>ftok</function> 支持
   </para>
  </sect2>
 
