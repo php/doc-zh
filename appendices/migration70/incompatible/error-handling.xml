@@ -1,28 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
 <!-- EN-Revision: 44b298ee5daf7c79a8e63c7e80ffe65232822838 Maintainer: yuanyuqiang Status: ready -->
-<!-- Reviewed: no -->
-
 <sect2 xml:id="migration70.incompatible.error-handling">
  <title>错误和异常处理相关的变更</title>
 
  <para>
-  在 PHP 7 中，很多致命错误以及可恢复的致命错误，都被转换为异常来处理了。
-  这些异常继承自 <classname>Error</classname> 类，此类实现了 
-  <classname>Throwable</classname> 接口
-  （所有异常都实现了这个基础接口）。
+  在 PHP 7 中，很多致命错误以及可恢复的致命错误，都被转换为异常来处理了。这些异常继承自
+  <classname>Error</classname> 类，此类实现了 
+  <classname>Throwable</classname> 接口（所有异常都实现了这个基础接口）。
  </para>
 
  <para>
-  这也意味着，当发生错误的时候，以前代码中的一些错误处理的代码将无法被触发。
-  因为在 PHP 7 版本中，已经使用抛出异常的错误处理机制了。
-  （如果代码中没有捕获 <classname>Error</classname> 异常，那么会引发致命错误）。
+  这也意味着，当发生错误的时候，以前代码中的一些错误处理的代码将无法被触发。因为在
+  PHP 7 版本中，已经使用抛出异常的错误处理机制了。（如果代码中没有捕获
+  <classname>Error</classname> 异常，那么会引发致命错误）。
  </para>
 
  <para>
-  PHP 7 中的错误处理的更完整的描述，请参见
-  <link linkend="language.errors.php7">PHP 7 错误处理</link>。
-  本迁移指导主要是列出对兼容性有影响的变更。
+  PHP 7 中的错误处理的更完整的描述，请参见 <link linkend="language.errors.php7">PHP 7
+  错误处理</link>。本迁移指导主要是列出对兼容性有影响的变更。
  </para>
 
  <sect3 xml:id="migration70.incompatible.error-handling.set-exception-handler">
@@ -35,7 +31,7 @@
   </para>
 
   <para>
-   想要异常处理器同时支持 PHP5 和 PHP7，应该删掉异常处理器里的类型声明。如果代码仅仅是升级到 PHP7，则可以把类型 <classname>Exception</classname>  替换成 <classname>Throwable</classname>。
+   想要异常处理器同时支持 PHP 5 和 7，应该删掉异常处理器里的类型声明。如果代码仅仅是升级到 PHP 7，则可以把类型 <classname>Exception</classname> 替换成 <classname>Throwable</classname>。
   </para>
 
   <informalexample>
@@ -58,13 +54,11 @@ function handler(Throwable $e) { ... }
  </sect3>
  
  <sect3 xml:id="migration70.incompatible.error-handling.constructors">
-  <title>当内部构造器失败的时候，总是抛出异常</title>
+  <title>当内部构造方法失败的时候，始终抛出异常</title>
 
   <para>
-   在之前版本中，如果内部类的构造器出错，会返回 &null; 
-   或者一个不可用的对象。
-   从 PHP 7 开始，如果内部类构造器发生错误，
-   那么会抛出异常。
+   在之前版本中，如果内部类的构造方法出错，会返回 &null; 
+   或者一个不可用的对象。从 PHP 7 开始，如果内部类构造方法发生错误，那么会抛出异常。
   </para>
  </sect3>
 
@@ -72,8 +66,8 @@ function handler(Throwable $e) { ... }
   <title>解析错误会抛出 <classname>ParseError</classname> 异常</title>
 
   <para>
-   解析错误会抛出 <classname>ParseError</classname> 异常。
-   对于 <function>eval</function> 函数，需要将其包含到一个
+   解析错误会抛出 <classname>ParseError</classname> 异常。对于 <function>eval</function>
+   函数，需要将其包含到一个
    &catch; 代码块中来处理解析错误。
   </para>
  </sect3>
@@ -82,8 +76,8 @@ function handler(Throwable $e) { ... }
   <title>E_STRICT 警告级别变更</title>
 
   <para>
-   原有的 <constant>E_STRICT</constant> 警告都被迁移到其他级别。
-   <constant>E_STRICT</constant> 常量会被保留，所以调用 
+   原有的 <constant>E_STRICT</constant> 警告都被迁移到其他级别。<constant>E_STRICT</constant>
+   常量会被保留，所以调用 
    <literal>error_reporting(E_ALL|E_STRICT)</literal> 不会引发错误。
   </para>
   <para>
