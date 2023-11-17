@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision$ -->
+<!-- EN-Revision: de195fca1537eb3c850cbab48a5001ca057e96b5 Maintainer: Luffy Status: ready -->
+<refentry xml:id="function.json-validate" xmlns="http://docbook.org/ns/docbook">
+ <refnamediv>
+  <refname>json_validate</refname>
+  <refpurpose>检查一个字符串是否包含有效的JSON</refpurpose>
+ </refnamediv>
+
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <type>bool</type><methodname>json_validate</methodname>
+   <methodparam><type>string</type><parameter>json</parameter></methodparam>
+   <methodparam><type>int</type><parameter>depth</parameter><initializer>512</initializer></methodparam>
+   <methodparam><type>int</type><parameter>flags</parameter><initializer>0</initializer></methodparam>
+  </methodsynopsis>
+  <para>
+   返回给定的 &string; 是否是语法上有效的 JSON。
+   如果 <function>json_validate</function> 返回 &true;，<function>json_decode</function> 在使用相同的 <parameter>depth</parameter>
+   和 <parameter>flags</parameter> 时，将成功解码给定的字符串。
+  </para>
+  <para>
+   如果 <function>json_validate</function> 返回 &false;，原因可以使用 <function>json_last_error</function>
+   和 <function>json_last_error_msg</function> 获取。
+  </para>
+  <para>
+   如果解码后的 JSON 内容未被使用，<function>json_validate</function> 相比于
+   <function>json_decode</function> 使用了较少的内存，因为它不需要构建包含有效载荷的数组或对象结构。
+  </para>
+  <caution>
+   <para>
+    在 <function>json_decode</function> 之前调用 <function>json_validate</function> 将不必要地解析字符串两次，
+    因为 <function>json_decode</function> 在解码过程中隐式地执行验证。
+   </para>
+   <para>
+    <function>json_validate</function> 只有在解码后的 JSON 内容不会立即使用，但需要知道字符串是否包含有效的 JSON 时才有用。
+   </para>
+  </caution>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>json</parameter></term>
+     <listitem>
+      <para>
+       需要验证的字符串。
+      </para>
+      <para>
+       该函数仅适用于 UTF-8 编码字符串。
+      </para>
+      &json.implementation.superset;
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>depth</parameter></term>
+     <listitem>
+      <para>
+       解码结构的最大嵌套深度。
+       该值必须大于 <literal>0</literal>、
+       且小于或等于 <literal>2147483647</literal>。
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><parameter>flags</parameter></term>
+     <listitem>
+      <para>
+       当前只接受 <constant>JSON_INVALID_UTF8_IGNORE</constant>。
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   如果给定字符串是语法有效的 JSON，则返回 &true;，否则返回 &false;。
+  </para>
+ </refsect1>
+
+ <refsect1 role="errors">
+  &reftitle.errors;
+  <para>
+   如果 <parameter>depth</parameter> 超出允许的范围，将抛出 <classname>ValueError</classname>。
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title><function>json_validate</function> 示例</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+var_dump(json_validate('{ "test": { "foo": "bar" } }'));
+var_dump(json_validate('{ "": "": "" } }'));
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+bool(true)
+bool(false)
+]]>
+    </screen>
+   </example>
+  </para>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>json_decode</function></member>
+    <member><function>json_last_error</function></member>
+    <member><function>json_last_error_msg</function></member>
+   </simplelist>
+  </para>
+ </refsect1>
+</refentry>
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
