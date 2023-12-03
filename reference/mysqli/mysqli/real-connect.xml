@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 2d77c9fe145f74663128006eb71662b0c44e8987 Maintainer: 谢毅斌 Status: ready -->
-<!-- CREDITS: mowangjuanzi -->
+<!-- EN-Revision: ae0dfad417adaba25669003c69024aa96b71dddf Maintainer: 谢毅斌 Status: ready -->
+<!-- CREDITS: mowangjuanzi, Luffy -->
 <refentry xml:id="mysqli.real-connect" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>mysqli::real_connect</refname>
@@ -43,8 +43,8 @@
   <itemizedlist>
    <listitem>
     <para>
-     <function>mysqli_real_connect</function> 需要一个有效的对象，这个对象由
-     <function>mysqli_init</function> 创建。
+     <function>mysqli_real_connect</function> 需要一个 <classname>mysqli</classname> 对象的实例。
+     这可以通过调用无参数的 <methodname>mysqli::__construct</methodname> 或 <function>mysqli_connect</function> 获得。
     </para>
    </listitem>
    <listitem>
@@ -226,9 +226,9 @@
 <![CDATA[
 <?php
 
-$mysqli = mysqli_init();
+$mysqli = new mysqli();
 if (!$mysqli) {
-    die('mysqli_init failed');
+    die('mysqli connection failed');
 }
 
 if (!$mysqli->options(MYSQLI_INIT_COMMAND, 'SET AUTOCOMMIT = 0')) {
@@ -257,7 +257,8 @@ $mysqli->close();
 
 class foo_mysqli extends mysqli {
     public function __construct($host, $user, $pass, $db) {
-        parent::init();
+        // 必须直接调用父构造函数，否则将产生 E_FATAL 错误
+        parent::__construct();
 
         if (!parent::options(MYSQLI_INIT_COMMAND, 'SET AUTOCOMMIT = 0')) {
             die('Setting MYSQLI_INIT_COMMAND failed');
@@ -287,9 +288,9 @@ $db->close();
 <![CDATA[
 <?php
 
-$link = mysqli_init();
+$link = mysqli_connect();
 if (!$link) {
-    die('mysqli_init failed');
+    die('mysqli_connect failed');
 }
 
 if (!mysqli_options($link, MYSQLI_INIT_COMMAND, 'SET AUTOCOMMIT = 0')) {
@@ -330,7 +331,6 @@ Success... MySQL host info: localhost via TCP/IP
   <para>
    <simplelist>
     <member><function>mysqli_connect</function></member>
-    <member><function>mysqli_init</function></member>
     <member><function>mysqli_options</function></member>
     <member><function>mysqli_ssl_set</function></member>
     <member><function>mysqli_close</function></member>
