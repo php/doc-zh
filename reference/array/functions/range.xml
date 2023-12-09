@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 9b89d5c26bba2f062bfbaba2e8c4c8cd89646770 Maintainer: daijie Status: ready -->
+<!-- EN-Revision: 62421b98a97fe576987878055e17cf755eb395af Maintainer: daijie Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="function.range" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>range</refname>
@@ -17,7 +18,15 @@
   <para>
    建立一个包含指定范围单元的数组。
   </para>
+  <para>
+   如果 <parameter>start</parameter> 和 <parameter>end</parameter> 都是 <type>string</type>，<parameter>step</parameter>
+   是 <type>int</type>，则生成的数组是字节序列，否则，生成的数组将是数字序列。
+  </para>
+  <para>
+   如果 <parameter>start</parameter> 小于或等于 <parameter>end</parameter>，则为递增序列，否则为递减序列。
+  </para>
  </refsect1>
+
  <refsect1 role="parameters">
   &reftitle.parameters;
   <para>
@@ -34,7 +43,7 @@
      <term><parameter>end</parameter></term>
      <listitem>
       <para>
-       序列结束于 <parameter>end</parameter> 的值。
+       序列的最后一个可能值。
       </para>
      </listitem>
     </varlistentry>
@@ -42,71 +51,190 @@
      <term><parameter>step</parameter></term>
      <listitem>
       <para>
-       如果设置了 <parameter>step</parameter>，会用作元素之间的增量（或减量）。<parameter>step</parameter> 
-       不能等于 0 或者超出范围。如果不设置 <parameter>step</parameter> 则默认为 1。
+       <parameter>step</parameter> 表示在序列之间产生序列时前进的数量。
+      </para>
+      <para>
+       对于递减序列，<parameter>step</parameter> 可能是负数。
+      </para>
+      <para>
+       如果 <parameter>step</parameter> 是没有小数部分的 <type>float</type>，则将解释为 <type>int</type>。
       </para>
      </listitem>
     </varlistentry>
    </variablelist>
   </para>
  </refsect1>
+
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   返回的数组中从
-     <parameter>start</parameter> 到 <parameter>end</parameter> （含 start 和 end）的单元。
+   返回  <type>array</type>，由元素组成的序列，其中第一个元素为 <parameter>start</parameter>，最后一个元素为
+   <parameter>end</parameter>，序列中每个元素之间的差值为 <parameter>step</parameter>。
+  </para>
+  <para>
+   返回的数组的最后一个元素是 <parameter>end</parameter> 或序列中的前一个元素，具体取决于 <parameter>step</parameter>。
+  </para>
+  <para>
+   如果 <parameter>start</parameter> 和 <parameter>end</parameter> 都是 <type>string</type>，并且
+   <parameter>step</parameter> 是 <type>int</type>，则生成的数组将是字节序列，通常是拉丁 <abbrev>ASCII</abbrev> 字符。
+  </para>
+  <para>
+   如果 <parameter>start</parameter>、<parameter>end</parameter> 或 <parameter>step</parameter> 是
+   <type>float</type>，则生成的数组将是 <type>float</type> 序列。
+  </para>
+  <para>
+   否则，生成的数组将是 <type>int</type> 序列。
   </para>
  </refsect1>
+
+ <refsect1 role="errors">
+  &reftitle.errors;
+  <itemizedlist>
+   <listitem>
+    <simpara>
+     如果 <parameter>step</parameter> 是 <literal>0</literal>，则抛出 <classname>ValueError</classname>。
+    </simpara>
+   </listitem>
+   <listitem>
+    <simpara>
+     如果 <parameter>start</parameter>、<parameter>end</parameter> 或 <parameter>step</parameter> 不是
+      <function>is_finite</function>，则抛出 <classname>ValueError</classname>。
+    </simpara>
+   </listitem>
+   <listitem>
+    <simpara>
+     如果 <parameter>step</parameter> 是负数，但生成的范围是递增的（例如 <code>$start &lt;=
+     $end</code>），则抛出 <classname>ValueError</classname>。
+    </simpara>
+   </listitem>
+   <listitem>
+    <simpara>
+     如果 <parameter>start</parameter> 或 <parameter>end</parameter> 是空字符串 <literal>''</literal>，则发出
+     <constant>E_WARNING</constant> 并将空字符串解释为 <literal>0</literal>。
+    </simpara>
+   </listitem>
+   <listitem>
+    <simpara>
+     如果 <parameter>start</parameter> 或 <parameter>end</parameter> 不是<link
+     linkend="language.types.numeric-strings">数字字符串</link>，并且多于一个字节，将发出 <constant>E_WARNING</constant>。
+    </simpara>
+   </listitem>
+   <listitem>
+    <simpara>
+     如果 <parameter>start</parameter> 或 <parameter>end</parameter> 是字符串，并且由于另一个边界值是数字而默默转换为
+     <type>int</type>，将发出 <constant>E_WARNING</constant>。
+    </simpara>
+   </listitem>
+   <listitem>
+    <simpara>
+     如果 <parameter>step</parameter> 是 <type>float</type>，并且 <parameter>start</parameter> 和 <parameter>end</parameter>
+     不是<link linkend="language.types.numeric-strings">数字字符串</link>，将发出 <constant>E_WARNING</constant>。
+    </simpara>
+   </listitem>
+  </itemizedlist>
+ </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <informaltable>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>&Version;</entry>
+      <entry>&Description;</entry>
+     </row>
+    </thead>
+    <tbody>
+     <row>
+      <entry>8.3.0</entry>
+      <entry>
+       如果 <parameter>start</parameter> 和 <parameter>end</parameter> 都是字符串，然后 <function>range</function>
+       现在将始终生成字节 <type>array</type>。之前如果其中一个边界值是数字字符串，然后另外一个边界值也会默默转换为 <type>int</type>。
+      </entry>
+     </row>
+     <row>
+      <entry>8.3.0</entry>
+      <entry>
+       如果 <parameter>start</parameter> 或 <parameter>end</parameter> 是字符串，并且由于另一个边界值是数字而默默转换为
+       <type>int</type>，现在将发出 <constant>E_WARNING</constant>。
+      </entry>
+     </row>
+     <row>
+      <entry>8.3.0</entry>
+      <entry>
+       如果 <parameter>start</parameter> 或 <parameter>end</parameter> 是多于一个字节的非数字字符串，现在将发出 <constant>E_WARNING</constant>。
+      </entry>
+     </row>
+     <row>
+      <entry>8.3.0</entry>
+      <entry>
+       如果 <parameter>start</parameter> 或 <parameter>end</parameter> 是空字符串，现在将发出 <constant>E_WARNING</constant>。
+      </entry>
+     </row>
+     <row>
+      <entry>8.3.0</entry>
+      <entry>
+       如果 <parameter>step</parameter> 是不带小数部分的 <type>float</type>，将解释为 <type>int</type>。
+      </entry>
+     </row>
+     <row>
+      <entry>8.3.0</entry>
+      <entry>
+       如果 <parameter>step</parameter> 是负数，当生成的范围是递增时，现在将抛出 <classname>ValueError</classname>。
+      </entry>
+     </row>
+     <row>
+      <entry>8.3.0</entry>
+      <entry>
+       如果 <parameter>step</parameter> 不是有限数值（finite），现在将抛出 <classname>ValueError</classname>。
+      </entry>
+     </row>
+     <row>
+      <entry>8.3.0</entry>
+      <entry>
+       如果 <parameter>start</parameter> 或 <parameter>end</parameter> 是 <type>array</type>、<type>object</type> 或
+       <type>resource</type>，现在将会抛出  <classname>TypeError</classname>。之前会默默地转换为 <type>int</type>。
+      </entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </informaltable>
+ </refsect1>
+
  <refsect1 role="examples">
   &reftitle.examples;
   <para>
    <example>
-    <title><function>range</function> 例子</title>
+    <title><function>range</function> 示例</title>
     <programlisting role="php">
 <![CDATA[
 <?php
-// array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)
-foreach (range(0, 12) as $number) {
-    echo $number;
-}
+echo implode(', ', range(0, 12)), PHP_EOL;
 
-echo "\n";
+echo implode(', ', range(0, 100, 10)), PHP_EOL;
 
-//  step 参数
-// array(0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100)
-foreach (range(0, 100, 10) as $number) {
-    echo $number;
-}
+echo implode(', ', range('a', 'i')), PHP_EOL;
 
-echo "\n";
+echo implode(', ', range('c', 'a')), PHP_EOL;
 
-// 字符序列的使用
-// array('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i');
-foreach (range('a', 'i') as $letter) {
-    echo $letter;
-}
-
-echo "\n";
-
-// array('c', 'b', 'a');
-foreach (range('c', 'a') as $letter) {
-    echo $letter;
-}
+echo implode(', ', range('A', 'z')), PHP_EOL;
 ?>
 ]]>
     </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12
+0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100
+a, b, c, d, e, f, g, h, i
+c, b, a
+A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z, [, \, ], ^, _, `, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z
+]]>
+    </screen>
    </example>
   </para>
  </refsect1>
- <refsect1 role="notes">
-  &reftitle.notes;
-  <note>
-   <para>
-    字符序列值仅限单个字符。
-    如果长度大于 1，仅仅使用第一个字符。
-   </para>
-  </note>
- </refsect1>
+
  <refsect1 role="seealso">
   &reftitle.seealso;
   <para>
@@ -117,6 +245,7 @@ foreach (range('c', 'a') as $letter) {
    </simplelist>
   </para>
  </refsect1>
+
 </refentry>
 <!-- Keep this comment at the end of the file
 Local variables:
