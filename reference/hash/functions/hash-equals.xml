@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 91e303f2d27cbca485137230fa7d2e50e75f19a6 Maintainer: yuanyuqiang Status: ready -->
+<!-- EN-Revision: 472a8ae5cc4e91fcf8365760ba07787f61087aae Maintainer: yuanyuqiang Status: ready -->
 <!-- CREDITS: Luffy, mowangjuanzi -->
 <refentry xml:id="function.hash-equals" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
@@ -16,12 +16,17 @@
    <methodparam><type>string</type><parameter>user_string</parameter></methodparam>
   </methodsynopsis>
   <para>
-   比较两个字符串，无论它们是否相等，本函数的时间消耗是恒定的。
+   检查两个字符串是否相等，而不会通过执行时泄露有关 <parameter>known_string</parameter> 内容的任何信息。
   </para>
   <para>
-   本函数可以用在需要防止时序攻击的字符串比较场景中，
-   例如，可以用在比较 <function>crypt</function> 密码散列值的场景。
+   此函数可用于缓解计时攻击。使用 <code>===</code> 进行常规比较所需的时间的长短取决于两个值是否不同以及可以找到第一个不同的位置，从而泄露有关
+   <parameter>known_string</parameter> 内容的秘密信息。
   </para>
+  <caution>
+   <para>
+    非常重要的一点是，用户提供的字符串必须是第二个参数。
+   </para>
+  </caution>
  </refsect1>
 
  <refsect1 role="parameters">
@@ -31,7 +36,7 @@
     <term><parameter>known_string</parameter></term>
     <listitem>
      <para>
-       已知长度的、要参与比较的 <type>string</type> 
+       必须保密的已知 &string;。
      </para>
     </listitem>
    </varlistentry>
@@ -39,7 +44,7 @@
     <term><parameter>user_string</parameter></term>
     <listitem>
      <para>
-      用户提供的字符串
+      与已知字符串进行比较的用户提供的 &string;。
      </para>
     </listitem>
    </varlistentry>
@@ -61,20 +66,24 @@
     <programlisting role="php">
 <![CDATA[
 <?php
-$expected  = crypt('12345', '$2a$07$usesomesillystringforsalt$');
-$correct   = crypt('12345', '$2a$07$usesomesillystringforsalt$');
-$incorrect = crypt('apple', '$2a$07$usesomesillystringforsalt$');
+$secretKey = '8uRhAeH89naXfFXKGOEj';
 
-var_dump(hash_equals($expected, $correct));
-var_dump(hash_equals($expected, $incorrect));
+// 值和签名是由用户提供的，例如在 URL 中，使用 $_GET 检索。
+$value = 'username=rasmuslerdorf';
+$signature = '8c35009d3b50caf7f5d2c1e031842e6b7823a1bb781d33c5237cd27b57b5f327';
+
+if (hash_equals(hash_hmac('sha256', $value, $secretKey), $signature)) {
+    echo "The value is correctly signed.", PHP_EOL;
+} else {
+    echo "The value was tampered with.", PHP_EOL;
+}
 ?>
 ]]>
     </programlisting>
     &example.outputs;
     <screen>
 <![CDATA[
-bool(true)
-bool(false)
+The value is correctly signed.
 ]]>
     </screen>
    </example>
@@ -90,13 +99,16 @@ bool(false)
     在时序攻击的场景下，已知字符串的长度可能会被泄露。
    </para>
   </note>
-  <note>
-   <para>
-    非常重要的一点是，用户提供的字符串必须是第二个参数。
-   </para>
-  </note>
  </refsect1>
 
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>hash_hmac</function></member>
+   </simplelist>
+  </para>
+ </refsect1>
 </refentry>
 
 <!-- Keep this comment at the end of the file

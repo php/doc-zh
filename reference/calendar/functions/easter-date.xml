@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 789af834328bf5d492ed174a4fedb226ccaf4b27 Maintainer: mowangjuanzi Status: ready -->
+<!-- EN-Revision: a0fcdcb58023bd4cb017fdba511df29b9f7a25f5 Maintainer: mowangjuanzi Status: ready -->
 <refentry xml:id="function.easter-date" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>easter_date</refname>
@@ -17,11 +17,6 @@
   <para>
    返回指定年份的复活节午夜时的 Unix 时间戳。
   </para>
-  <warning>
-   <para>
-    如果指定的年份超出 Unix 时间戳（即通常在 32 位系统上指定 1970 年以前或 2037 年以后）的范围，该函数将生成一个警告。
-   </para>
-  </warning>
   <para>
    复活节的日期是由尼西亚议会在公元 325 年确定的为每年春分月圆后的第一个星期日。春分一般是在 3 月 21 
    日，这就简化为只要计算满月的日期和紧挨的星期日的日期。这里所用的算法是在 532 年由 Dionysius Exiguus
@@ -39,8 +34,8 @@
      <term><parameter>year</parameter></term>
      <listitem>
       <para>
-       1970 年至 2037 年之间的数字类型的年份。如果省略或者为 
-       &null;，则根据本地时间默认为当前年份。
+       对于 32 位系统，年份必须是 1970 至 2037 之间的数字，对于 64 位系统，年份必须是 1970 到 2,000,000,000
+       之间的数字。如果省略或者为 &null;，则根据本地时间默认为当前年份。
       </para>
      </listitem>
     </varlistentry>  
@@ -64,6 +59,14 @@
   </para>
  </refsect1>
 
+ <refsect1 role="errors">
+  &reftitle.errors;
+  <para>
+   如果年份早于 1970，或者晚于 32 位系统的 2037 以及 64 位系统上的 2,000,000,000
+   时会抛出 <classname>ValueError</classname>。
+  </para>
+ </refsect1>
+
  <refsect1 role="changelog">
   &reftitle.changelog;
   <informaltable>
@@ -76,9 +79,22 @@
     </thead>
     <tbody>
      <row>
+      <entry>8.3.0</entry>
+      <entry>
+       在 64 位系统上，<parameter>year</parameter> 参数现在接受范围在 1970 到 2,000,000,000 的值。
+      </entry>
+     </row>
+     <row>
       <entry>8.0.0</entry>
       <entry>
        <parameter>year</parameter> 现在可为空（nullable）。
+      </entry>
+     </row>
+     <row>
+      <entry>8.0.0</entry>
+      <entry>
+       当 <parameter>year</parameter> 超出允许的范围现在抛出 <classname>ValueError</classname>。之前函数会返回
+       &false; 会触发 <constant>E_WARNING</constant>。
       </entry>
      </row>
     </tbody>
@@ -98,6 +114,24 @@
 echo date("M-d-Y", easter_date(1999));        // Apr-04-1999
 echo date("M-d-Y", easter_date(2000));        // Apr-23-2000
 echo date("M-d-Y", easter_date(2001));        // Apr-15-2001
+
+?>
+]]>
+    </programlisting>
+   </example>
+
+   <example>
+    <title>使用带 <classname>DateTime</classname> 的 <function>easter_date</function></title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+
+$timestamp = easter_date(2023);
+
+$datetime = new \DateTime();
+$datetime->setTimestamp($timestamp);
+
+echo $datetime->format('M-d-Y'); // Apr-09-2023
 
 ?>
 ]]>
