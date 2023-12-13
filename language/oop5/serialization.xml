@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: ba6a83ca3558574695be5ef0a0e008e4e5f78ddb Maintainer: daijie Status: ready -->
+<!-- EN-Revision: 1f407ffe61c42c203c99ff0bacc1ae82b3414621 Maintainer: daijie Status: ready -->
 <!-- CREDITS: Luffy -->
 <!-- TODO Rewrite to remove usage of "you" and talk about __serialize/_unserialize -->
  <sect1 xml:id="language.oop5.serialization" xmlns="http://docbook.org/ns/docbook">
@@ -11,39 +11,39 @@
    所有 PHP 里面的值都可以使用函数 <function>serialize</function> 来返回一个包含字节流的字符串来表示。<function>unserialize</function>
    函数能够重新把字符串变回 PHP 原来的值。序列化一个对象将会保存对象的所有变量，但是不会保存对象的方法，只会保存类的名字。
   </para>
-  
+
   <para>
    为了能够 <function>unserialize</function> 一个对象，这个对象的类必须已经定义过。如果序列化类 A 的一个对象，将会返回一个跟类 A 相关，而且包含了对象所有变量值的字符串。
    如果要想在另外一个文件中反序列化一个对象，这个对象的类必须在反序列化之前定义，可以通过包含一个定义该类的文件或使用函数 <function>spl_autoload_register</function> 来实现。
   </para>
-  
+
   <informalexample>
    <programlisting role="php">
 <![CDATA[
 <?php
-// classa.inc:
-  
+// A.php:
+
   class A {
       public $one = 1;
-    
+
       public function show_one() {
           echo $this->one;
       }
   }
-  
+
 // page1.php:
 
-  include("classa.inc");
-  
+  include "A.php";
+
   $a = new A;
   $s = serialize($a);
   // 把变量$s保存起来以便文件page2.php能够读到
   file_put_contents('store', $s);
 
 // page2.php:
-  
+
   // 要正确反序列化，必须包含下面一个文件
-  include("classa.inc");
+  include "A.php";
 
   $s = file_get_contents('store');
   $a = unserialize($s);
@@ -54,17 +54,17 @@
 ]]>
    </programlisting>
   </informalexample>
-  
+
   <para>
    在应用程序中序列化对象以便在之后使用，强烈推荐在整个应用程序都包含对象的类的定义。
    不然有可能出现在反序列化对象的时候，没有找到该对象的类的定义，从而把没有方法的类 <classname>__PHP_Incomplete_Class_Name</classname> 作为该对象的类，导致返回一个没有用的对象。
   </para>
-  
+
   <para>
-   所以在上面的例子中，通过在 <varname>$_SESSION</varname> 超全局数组中添加新的键，把变量 <varname>$a</varname> 放在会话里之后，需要在每个页面都包含文件 <literal>classa.inc</literal>，
+   所以在上面的例子中，通过在 <varname>$_SESSION</varname> 超全局数组中添加新的键，把变量 <varname>$a</varname> 放在会话里之后，需要在每个页面都包含文件 <literal>A.php</literal>，
    而不是只有文件 <filename>page1.php</filename> 和 <filename>page2.php</filename>。
   </para>
-  
+
   <para>
    除了以上建议，可以在对象上使用 
    <link linkend="object.sleep">__sleep()</link> 和
@@ -73,7 +73,6 @@
    <link linkend="object.sleep">__sleep()</link> 也能够让你仅序列化对象的某些属性。
   </para>
  </sect1>
- 
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
