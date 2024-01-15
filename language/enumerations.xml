@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- EN-Revision: 38ce6211e1da2f62833f8961511f3c980ea9093b Maintainer: daijie Status: ready -->
+<!-- EN-Revision: 0f53e8f37b7bf8513c93e5e2d67e7787f26ed693 Maintainer: daijie Status: ready -->
 <!-- CREDITS: Luffy, mowangjuanzi -->
 <chapter xml:id="language.enumerations" xmlns="http://docbook.org/ns/docbook">
  <title>枚举</title>
@@ -38,6 +38,7 @@
   <programlisting role="php">
 <![CDATA[
 <?php
+
 enum Suit
 {
     case Hearts;
@@ -60,14 +61,20 @@ enum Suit
   <programlisting role="php">
 <![CDATA[
 <?php
-function pick_a_card(Suit $suit) { ... }
+
+function pick_a_card(Suit $suit)
+{
+    /* ... */
+}
 
 $val = Suit::Diamonds;
 
 // OK
 pick_a_card($val);
+
 // OK
 pick_a_card(Suit::Clubs);
+
 // TypeError: pick_a_card(): Argument #1 ($suit) must be of type Suit, string given
 pick_a_card('Spades');
 ?>
@@ -92,6 +99,7 @@ pick_a_card('Spades');
   <programlisting role="php">
 <![CDATA[
 <?php
+
 $a = Suit::Spades;
 $b = Suit::Spades;
 
@@ -125,6 +133,7 @@ $a instanceof Suit;  // true
   <programlisting role="php">
 <![CDATA[
 <?php
+
 print Suit::Spades->name;
 // 输出 "Spades"
 ?>
@@ -155,6 +164,7 @@ print Suit::Spades->name;
   <programlisting role="php">
 <![CDATA[
 <?php
+
 enum Suit: string
 {
     case Hearts = 'H';
@@ -198,6 +208,7 @@ enum Suit: string
   <programlisting role="php">
 <![CDATA[
 <?php
+
 print Suit::Clubs->value;
 // 输出 "C"
 ?>
@@ -213,6 +224,7 @@ print Suit::Clubs->value;
   <programlisting role="php">
 <![CDATA[
 <?php
+
 $suit = Suit::Clubs;
 $ref = &$suit->value;
 // Error: Cannot acquire reference to property Suit::$value
@@ -250,6 +262,7 @@ $ref = &$suit->value;
   <programlisting role="php">
 <![CDATA[
 <?php
+
 $record = get_stuff_from_database($id);
 print $record['suit'];
 
@@ -280,6 +293,7 @@ print $suit->value;
   <programlisting role="php">
 <![CDATA[
 <?php
+
 interface Colorful
 {
     public function color(): string;
@@ -308,7 +322,10 @@ enum Suit implements Colorful
     }
 }
 
-function paint(Colorful $c) { ... }
+function paint(Colorful $c)
+{
+   /* ... */
+}
 
 paint(Suit::Clubs);  // 正常
 
@@ -330,6 +347,7 @@ print Suit::Diamonds->shape(); // 输出 "Rectangle"
   <programlisting role="php">
 <![CDATA[
 <?php
+
 interface Colorful
 {
     public function color(): string;
@@ -377,6 +395,7 @@ enum Suit: string implements Colorful
   <programlisting role="php">
 <![CDATA[
 <?php
+
 interface Colorful
 {
     public function color(): string;
@@ -432,6 +451,7 @@ final class Suit implements UnitEnum, Colorful
   <programlisting role="php">
 <![CDATA[
 <?php
+
 enum Size
 {
     case Small;
@@ -471,6 +491,7 @@ enum Size
   <programlisting role="php">
 <![CDATA[
 <?php
+
 enum Size
 {
     case Small;
@@ -496,6 +517,7 @@ enum Size
   <programlisting role="php">
 <![CDATA[
 <?php
+
 interface Colorful
 {
     public function color(): string;
@@ -548,30 +570,49 @@ enum Suit implements Colorful
   <programlisting role="php">
 <![CDATA[
 <?php
+
 // 这是完全合法的 Enum 定义
 enum Direction implements ArrayAccess
 {
     case Up;
     case Down;
 
-    public function offsetGet($val) { ... }
-    public function offsetExists($val) { ... }
-    public function offsetSet($val) { throw new Exception(); }
-    public function offsetUnset($val) { throw new Exception(); }
+    public function offsetExists($offset): bool
+    {
+        return false;
+    }
+
+    public function offsetGet($offset): mixed
+    {
+        return null;
+    }
+
+    public function offsetSet($offset, $value): void
+    {
+        throw new Exception();
+    }
+
+    public function offsetUnset($offset): void
+    {
+        throw new Exception();
+    }
 }
 
 class Foo
 {
     // 可以这样写。
-    const Bar = Direction::Down;
+    const DOWN = Direction::Down;
 
     // 由于它是不确定的，所以不能这么写。
-    const Bar = Direction::Up['short'];
+    const UP = Direction::Up['short'];
     // Fatal error: Cannot use [] on enums in constant expression
 }
 
 // 由于它不是一个常量表达式，所以是完全合法的
 $x = Direction::Up['short'];
+var_dump("\$x is " . var_export($x, true));
+
+$foo = new Foo();
 ?>
 ]]>
   </programlisting>
@@ -629,8 +670,10 @@ $x = Direction::Up['short'];
   <programlisting role="php">
 <![CDATA[
 <?php
+
 $clovers = new Suit();
 // Error: Cannot instantiate enum Suit
+
 $horseshoes = (new ReflectionClass(Suit::class))->newInstanceWithoutConstructor()
 // Error: Cannot instantiate enum Suit
 ?>
@@ -651,6 +694,7 @@ $horseshoes = (new ReflectionClass(Suit::class))->newInstanceWithoutConstructor(
   <programlisting role="php">
 <![CDATA[
 <?php
+
 Suit::cases();
 // 产生： [Suit::Hearts, Suit::Diamonds, Suit::Clubs, Suit::Spades]
 ?>
@@ -674,6 +718,7 @@ Suit::cases();
   <programlisting role="php">
 <![CDATA[
 <?php
+
 Suit::Hearts === unserialize(serialize(Suit::Hearts));
 
 print serialize(Suit::Hearts);
@@ -700,6 +745,7 @@ print serialize(Suit::Hearts);
   <programlisting role="php">
 <![CDATA[
 <?php
+
 enum Foo {
     case Bar;
 }
@@ -736,6 +782,7 @@ Baz Enum:int {
 
   <programlisting role="php">
 <![CDATA[
+
 <?php
 
 class A {}
@@ -761,13 +808,14 @@ function bar(B $b) {
   <programlisting role="php">
 <![CDATA[
 <?php
+
 enum ErrorCode {
     case SOMETHING_BROKE;
 }
 
 function quux(ErrorCode $errorCode)
 {
-    // When written, this code appears to cover all cases
+    // 编写时，此代码似乎涵盖了所有情况
     match ($errorCode) {
         ErrorCode::SOMETHING_BROKE => true,
     }
@@ -789,8 +837,9 @@ function quux(ErrorCode $errorCode)
   <programlisting role="php">
 <![CDATA[
 <?php
-// Thought experiment code where enums are not final.
-// Note, this won't actually work in PHP.
+
+// 当枚举不是 final 时考虑做的实验代码。
+// 注意在 PHP 中实际不起作用。
 enum MoreErrorCode extends ErrorCode {
     case PEBKAC;
 }
@@ -827,13 +876,17 @@ fot(MoreErrorCode::PEBKAC);
     <programlisting role="php">
 <![CDATA[
 <?php
+
 enum SortOrder
 {
     case Asc;
     case Desc;
 }
 
-function query($fields, $filter, SortOrder $order = SortOrder::Asc) { ... }
+function query($fields, $filter, SortOrder $order = SortOrder::Asc)
+{
+     /* ... */
+}
 ?>
 ]]>
     </programlisting>
@@ -854,6 +907,7 @@ function query($fields, $filter, SortOrder $order = SortOrder::Asc) { ... }
     <programlisting role="php">
 <![CDATA[
 <?php
+
 enum UserStatus: string
 {
     case Pending = 'P';
@@ -891,6 +945,7 @@ enum UserStatus: string
     <programlisting role="php">
 <![CDATA[
 <?php
+
 foreach (UserStatus::cases() as $case) {
     printf('<option value="%s">%s</option>\n', $case->value, $case->label());
 }
