@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 55f70d19870c396f3bf86b6c45826da3cb7e525f Maintainer: mowangjuanzi Status: ready -->
+<!-- EN-Revision: af7044e82ac0abe745ce3dfe2169e69a7e8e342f Maintainer: mowangjuanzi Status: ready -->
 <refentry xml:id="function.ob-get-status" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>ob_get_status</refname>
   <refpurpose>得到所有输出缓冲区的状态</refpurpose>
  </refnamediv>
- 
+
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
@@ -38,76 +38,125 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-    如果调用时没有 <parameter>full_status</parameter> 参数，或者
-    <parameter>full_status</parameter> = &false; 将返回一个包含下面元素的简单数组：
-   <informalexample>
+   如果省略了 <parameter>full_status</parameter> 或传递
+   &false;，则返回简单的数组，该数组保存有关活动输出级别的状态信息。
+  </para>
+  <para>
+   如果 <parameter>full_status</parameter> 为 &true;，则返回数组，其中每个元素都包含活动输出缓冲区级别。输出级别用作顶级数组的
+   key，每个数组元素本身又是另一个数组，包含活动输出级别的状态信息。
+  </para>
+  <para>
+   如果未打开输出缓冲，则返回空数组。
+  </para>
+  <para>
+   <segmentedlist>
+    <title><function>ob_get_status</function> 返回的数组元素</title>
+    <segtitle>Key</segtitle><segtitle>值</segtitle>
+    <seglistitem>
+     <seg>name</seg>
+     <seg>
+      活动输出处理程序的名称（有关详细信息，请参阅 <function>ob_list_handlers</function> 的返回值）
+     </seg>
+    </seglistitem>
+    <seglistitem>
+     <seg>type</seg>
+     <seg>
+      <literal>0</literal>（内部处理程序）或
+      <literal>1</literal>（用户提供的处理程序）
+     </seg>
+    </seglistitem>
+    <seglistitem>
+     <seg>flags</seg>
+     <seg>
+      <function>ob_start</function> 设置的 flag 掩码、输出处理程序的类型（见上文）和缓冲过程的状态（<link linkend="outcontrol.constants.flags-returned-by-handler">
+      <constant>PHP_OUTPUT_HANDLER_<replaceable>*</replaceable></constant></link> 常量）。如果处理程序成功处理缓冲并且没有返回 &false;，则将会设置
+      <constant>PHP_OUTPUT_HANDLER_STARTED</constant> 和 <constant>PHP_OUTPUT_HANDLER_PROCESSED</constant>。如果处理程序在处理缓冲时失败或返回 &false;，则将设置
+      <constant>PHP_OUTPUT_HANDLER_STARTED</constant> 和 <constant>PHP_OUTPUT_HANDLER_DISABLED</constant>。
+     </seg>
+    </seglistitem>
+    <seglistitem>
+     <seg>level</seg>
+     <seg>
+      输出嵌套级别（从 0 开始）。注意 <function>ob_get_level</function> 对于相同级别返回的值相差 1。<function>ob_get_status</function>
+      的第一级为 <literal>0</literal>，<function>ob_get_level</function> 的第一级为 <literal>1</literal>。
+     </seg>
+    </seglistitem>
+    <seglistitem>
+     <seg>chunk_size</seg>
+     <seg>
+      块大小（以字节为单位）。通过 <function>ob_start</function> 设置或启用 <link linkend="ini.output-buffering">output_buffering</link> 并将其值设置为正整数
+     </seg>
+    </seglistitem>
+    <seglistitem>
+     <seg>buffer_size</seg>
+     <seg>
+      输出缓冲区字节大小
+     </seg>
+    </seglistitem>
+    <seglistitem>
+     <seg>buffer_used</seg>
+     <seg>
+      输出缓冲区中数据的字节大小（与 <function>ob_get_length</function> 的整数返回值相同）
+     </seg>
+    </seglistitem>
+   </segmentedlist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title>当 <parameter>full_status</parameter> 是 &false; 的返回数组</title>
     <screen>
 <![CDATA[
 Array
 (
-    [level] => 2
-    [type] => 0
-    [status] => 0
     [name] => URL-Rewriter
-    [del] => 1
+    [type] => 0
+    [flags] => 112
+    [level] => 2
+    [chunk_size] => 0
+    [buffer_size] => 16384
+    [buffer_used] => 1024
 )
 ]]>
     </screen>
-   </informalexample>
-   <segmentedlist>
-    <title> <function>ob_get_status</function> 的简单结果</title>
-    <segtitle>Key</segtitle><segtitle>Value</segtitle>
-    <seglistitem><seg>level</seg><seg>输出嵌套级别</seg></seglistitem>
-    <seglistitem><seg>type</seg><seg><literal>0</literal>（内部处理程序）或者 <literal>1</literal>（用户提供的处理程序）</seg></seglistitem>
-    <seglistitem><seg>status</seg><seg><literal>PHP_OUTPUT_HANDLER_START</literal> (0), <literal>PHP_OUTPUT_HANDLER_CONT</literal> (1) or <literal>PHP_OUTPUT_HANDLER_END</literal> (2) 三个之一</seg></seglistitem>
-    <seglistitem><seg>name</seg><seg>起作用的输出处理程序的名字，或者是默认的输出处理程序的名字（如果没有设置的话）</seg></seglistitem>
-    <seglistitem><seg>del</seg><seg>由<function>ob_start</function>设置的删除标签（Erase-flag）</seg></seglistitem>
-   </segmentedlist>
+   </example>
   </para>
   <para>
-   如果调用时<parameter>full_status</parameter> = &true;，将返回一个数组，该数组的每个元素包含有效的输出缓冲区级别的状态信息。缓冲区的级别数用来当作数组的第一维数；每个元素自身是另一个数组，它持有该有效输出级别的状态信息。
-   <informalexample>
+   <example>
+    <title>当 <parameter>full_status</parameter> 是 &true; 的返回数组</title>
     <screen>
 <![CDATA[
 Array
 (
     [0] => Array
         (
-            [chunk_size] => 0
-            [size] => 40960
-            [block_size] => 10240
-            [type] => 1
-            [status] => 0
             [name] => default output handler
-            [del] => 1
+            [type] => 0
+            [flags] => 112
+            [level] => 1
+            [chunk_size] => 0
+            [buffer_size] => 16384
+            [buffer_used] => 2048
         )
 
     [1] => Array
         (
-            [chunk_size] => 0
-            [size] => 40960
-            [block_size] => 10240
-            [type] => 0
-            [buffer_size] => 0
-            [status] => 0
             [name] => URL-Rewriter
-            [del] => 1
+            [type] => 0
+            [flags] => 112
+            [level] => 2
+            [chunk_size] => 0
+            [buffer_size] => 16384
+            [buffer_used] => 1024
         )
 
 )
 ]]>
     </screen>
-   </informalexample>
-  </para>
-  <para>
-   完整的输出包含以下附加元素：
-   <segmentedlist>
-    <title>完整的<function>ob_get_status</function> 结果</title>
-    <segtitle>Key</segtitle><segtitle>Value</segtitle>
-    <seglistitem><seg>chunk_size</seg><seg>由 <function>ob_start</function>设置的Chunk size值</seg></seglistitem>
-    <seglistitem><seg>size</seg><seg>...</seg></seglistitem>
-    <seglistitem><seg>blocksize</seg><seg>...</seg></seglistitem>
-   </segmentedlist>
+   </example>
   </para>
  </refsect1>
 
@@ -117,6 +166,8 @@ Array
    <simplelist>
     <member><function>ob_get_level</function></member>
     <member><function>ob_list_handlers</function></member>
+    <member><function>ob_get_length</function></member>
+    <member><function>ob_start</function></member>
    </simplelist>
   </para>
  </refsect1>
