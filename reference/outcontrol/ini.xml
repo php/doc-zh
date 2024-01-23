@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 86e6094e86b84a51d00ab217ac50ce8dde33d82a Maintainer: HonestQiao Status: ready -->
+<!-- EN-Revision: c2c5f47c53f58b5a50b5cc3c30116cb2aecf2d3c Maintainer: HonestQiao Status: ready -->
 <!-- CREDITS: mowangjuanzi -->
 <section xml:id="outcontrol.configuration" xmlns="http://docbook.org/ns/docbook">
  &reftitle.runtime;
@@ -20,28 +20,29 @@
     <tbody>
     <row>
      <entry><link linkend="ini.output-buffering">output_buffering</link></entry>
-     <entry>"0"</entry>
+     <entry><literal>"0"</literal></entry>
      <entry>PHP_INI_PERDIR</entry>
      <entry></entry>
     </row>
     <row>
      <entry><link linkend="ini.output-handler">output_handler</link></entry>
-     <entry>NULL</entry>
+     <entry>&null;</entry>
      <entry>PHP_INI_PERDIR</entry>
      <entry></entry>
     </row>
     <row>
      <entry><link linkend="ini.implicit-flush">implicit_flush</link></entry>
-     <entry>"0"</entry>
+     <entry><literal>"0"</literal></entry>
      <entry>PHP_INI_ALL</entry>
      <entry></entry>
     </row>
     <row>
      <entry><link linkend="ini.url-rewriter.tags">url_rewriter.tags</link></entry>
-     <entry>"a=href,area=href,frame=src,form=,fieldset="</entry>
+     <entry><literal>"form="</literal></entry>
      <entry>PHP_INI_ALL</entry>
-     <entry>在 PHP 7.1.0 之前，用于设置 session 的 trans sid 重写。从 PHP 7.1.0 起，仅用于 
-     <function>output_add_rewrite_var</function>.</entry>
+     <entry>从 PHP 7.1.0 起，此 INI 设置仅影响 <function>output_add_rewrite_var</function>。在 PHP 7.1.0
+     之前，此 INI 设置启用透明会话 id 支持（请参阅 <link 
+     linkend="ini.session.trans-sid-tags">session.trans_sid_tags</link>）。</entry>
     </row>
     <row>
      <entry><link linkend="ini.url-rewriter.hosts">url_rewriter.hosts</link></entry>
@@ -54,9 +55,9 @@
   </table>
    &ini.php.constants;
  </para>
- 
+
  &ini.descriptions.title;
- 
+
  <para>
  <variablelist>
   <varlistentry xml:id="ini.output-buffering">
@@ -66,8 +67,8 @@
    </term>
    <listitem>
     <para>
-     该选项设置为“On”，可以在所有的脚本中启用输出缓冲。如果要限制输出缓冲区的最大值，可将该选项设定为指定的最大字节数（例如
-     output_buffering=4096）。该选项在 PHP-CLI 下总是关闭。
+     通过设置该选项为 <literal>"On"</literal>，来启用所有文件的输出缓冲。如果要限制缓冲区的大小，可以使用允许的最大字节数相对应的数字/数量来代替该指令的值
+     <literal>"On"</literal>。例如 <literal>output_buffering=4096</literal>。该选项在 PHP-CLI 下始终关闭。
     </para>
    </listitem>
   </varlistentry>
@@ -79,16 +80,15 @@
    </term>
    <listitem>
     <para>
-     脚本的所有输出重定向到一个函数。例如，设置 output_handler
-     为 <function>mb_output_handler</function>
-     时，字符的编码将被明确转换为指定的编码。设置任何输出处理函数，都将自动处理输出缓冲。
+     脚本的输出可以重定向到函数。例如设置 <literal>output_handler</literal> 为 <function>mb_output_handler</function>
+     时，字符编码将会明确转换为指定编码。设置任何输出处理程序都会自动打开输出缓冲。
     </para>
     <note>
      <para>
-      不能同时使用 <function>mb_output_handler</function> 和
-      <function>ob_iconv_handler</function>，也不能同时使用
-      <function>ob_gzhandler</function> 和
-      <link linkend="ini.zlib.output-compression">zlib.output_compression</link>。
+      <function>mb_output_handler</function> 和 <function>ob_iconv_handler</function> 不能一起使用，并且 <function>ob_gzhandler</function> 和
+      <link linkend="ini.zlib.output-compression">zlib.output_compression</link> 不能与以下函数一起使用
+      <function>mb_output_handler</function>、<function>ob_gzhandler</function>、<link linkend="ini.zlib.output-compression">zlib.output_compression</link>、“URL
+      重写器”处理程序（请参阅 <link linkend="ini.session.use-trans-sid">session.use_trans_sid</link> 和 <function>output_add_rewrite_var</function>)。
      </para>
     </note>
     <note>
@@ -107,10 +107,9 @@
    <listitem>
     <para>
      默认为 &false;。如将该选项改为 &true;，PHP
-     将使输出层在每段信息块输出后自动刷新。这等同于在每次调用
-     <function>print</function>、<function>echo</function>
-     以及 <literal>HTML</literal> 块之后，调用 PHP 中的
-     <function>flush</function> 函数。
+     将使输出层在每段信息块输出后自动刷新。这等同于在每次调用任何产出输出的函数（比如
+     <function>print</function>、<function>echo</function>）以及每个
+     HTML 块之后，调用 PHP 函数 <function>flush</function>。
     </para>
     <para>
      在 Web 环境中使用 PHP 时，打开这个选项会严重影响性能，通常只推荐在调试时使用。在
@@ -129,19 +128,22 @@
    </term>
    <listitem>
     <simpara>
-     <literal>url_rewriter.tags</literal> 指定哪些 HTML 标签由
-     <function>output_add_rewrite_var</function> 值重写。默认为
-     <literal>a=href,area=href,frame=src,input=src,form=</literal>
+     <literal>url_rewriter.tags</literal> 指定 HTML 标记和属性，其中 URL 由 <function>output_add_rewrite_var</function>
+     值重写。默认为 <literal>"form="</literal>。
     </simpara>
     <simpara>
-     <literal>form</literal> 是特殊标签。添加 <literal>&lt;input hidden="session_id" name="session_name"&gt;</literal>
-     为表单变量。
+     添加 <literal>"form="</literal> 或任何 <literal>form</literal> 属性将向 <literal>form</literal> 添加隐藏的 <literal>input</literal>
+     元素，并为传递给 <function>output_add_rewrite_var</function> 的每个名值对（name-value pair）添加名和值属性。
     </simpara>
+    <caution>
+     <simpara>
+      在 <literal>url_rewriter.tags</literal> 中多次添加相同的标签将仅在 URL 重写过程中使用第一次出现的标签。
+     </simpara>
+    </caution>
     <note>
      <simpara>
-      在 PHP 7.1.0 之前，使用 <link linkend="ini.url-rewriter.tags">url_rewriter.tags</link> 指定
-      <link linkend="ini.session.trans-sid-tags">session.trans_sid_tags</link>。自 PHP 7.1.0
-      起，<literal>fieldset</literal> 不再视为特殊标签。
+      PHP 7.1.0 之前，使用 <link linkend="ini.url-rewriter.tags">url_rewriter.tags</link> 指定
+      <link linkend="ini.session.trans-sid-tags">session.trans_sid_tags</link>。
      </simpara>
     </note>
    </listitem>
@@ -156,7 +158,8 @@
     <simpara>
      <literal>url_rewriter.hosts</literal> 可以指定重写那些主机包含
      <function>output_add_rewrite_var</function> 值。默认是
-     <literal>$_SERVER['HTTP_HOST']</literal>。通过“,”指定多个主机，且每个主机间不能带空格。比如：<literal>php.net,wiki.php.net,bugs.php.net</literal>
+     <literal>$_SERVER['HTTP_HOST']</literal>。通过不包含空格的逗号分隔列表指定多个主机。例如
+     <literal>"php.net,wiki.php.net,bugs.php.net"</literal>。
     </simpara>
    </listitem>
   </varlistentry>

@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 6ab6ea465889620fc2a8cdaf7b008cbaed83c523 Maintainer: micky Status: ready -->
+<!-- EN-Revision: 91ab4f5f898023b0eed0e642e1482ac11f749d20 Maintainer: micky Status: ready -->
 <!-- CREDITS: mowangjuanzi -->
 <refentry xmlns="http://docbook.org/ns/docbook" xml:id="function.flush">
  <refnamediv>
   <refname>flush</refname>
-  <refpurpose>刷新系统输出缓冲区</refpurpose>
+  <refpurpose>冲刷系统输出缓冲区</refpurpose>
  </refnamediv>
- 
+
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
@@ -15,28 +15,26 @@
    <void/>
   </methodsynopsis>
   <para>
-   刷新 PHP 的系统写入缓冲区，且不管 PHP 使用什么后端（CGI、Web 服务器等）。尝试推送当前输出到浏览器，但有一些警告。
+   冲刷 PHP 的系统写入缓冲区以及 PHP 使用的后端（CGI、Web 服务器）。在命令行环境中，<function>flush</function>
+   将仅尝试冲刷缓冲区的内容，而在 Web 上下文中，将冲刷 header 和缓冲区的内容。
   </para>
-  <para>
-   <function>flush</function> 无法覆盖 Web 服务器的缓冲方案，并且不会对任何浏览器中的客户端缓冲起作用。也不会对
-   PHP 的用户级别输出缓冲机制起作用。这意味着 <function>ob_flush</function> 应该在 <function>flush</function>
-   之前调用，以刷新缓冲区（如果正在使用）。
-  </para>
-  <para>
-   个别服务器，特别是 Win32，在结果传输到浏览器之前，仍然会缓冲脚本的输出，直到程序结束为止。
-  </para>
-  <para>
-   Apache 的服务器模块（比如 mod_gzip），可能自己进行输出缓冲，这将导致
-   <function>flush</function> 不会将数据立即发送到客户端浏览器。
-  </para>
-  <para>
-   甚至浏览器也会在显示之前进行输入缓冲。例如 Netscape
-   浏览器会在接受到行尾或开始标记之前缓冲文本，且在接收到 &lt;/table&gt; 标记之前，不会渲染出整个表格。
-  </para>
-  <para>
-   Microsoft Internet Explorer 的某些版本只有当接收到的 256
-   个字节的输出以后才开始显示页面，所以必须在刷新之前发送额外的空格来让这些浏览器显示页面。
-  </para>
+  <note>
+   <simpara>
+    <function>flush</function> 可能无法重写 Web 服务器的缓冲方案，并且它对浏览器中的任何客户端缓冲没有影响。
+   </simpara>
+  </note>
+  <note>
+   <simpara>
+    此函数对用户级输出处理程序（例如由 <function>ob_start</function> 或 <function>output_add_rewrite_var</function>
+    启动的处理程序）没有任何影响。
+   </simpara>
+  </note>
+  <warning>
+   <simpara>
+    <function>flush</function> 会干扰在 Web 上下文中设置和发送 header 的输出处理程序（例如
+    <function>ob_gzhandler</function>），因为它会在这些处理程序之前发送 header。
+   </simpara>
+  </warning>
  </refsect1>
 
  <refsect1 role="parameters">
@@ -61,7 +59,7 @@
     <member><function>ob_end_clean</function></member>
    </simplelist>
   </para>
- </refsect1> 
+ </refsect1>
 
 </refentry>
 
