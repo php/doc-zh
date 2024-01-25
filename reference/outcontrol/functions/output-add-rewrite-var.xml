@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: c6a8e42bdbbb814124b84d45d95cd793129aac6b Maintainer: mowangjuanzi Status: ready -->
+<!-- EN-Revision: b0d9505811e05bc11b58ef23167f3855c742edba Maintainer: mowangjuanzi Status: ready -->
 <refentry xmlns="http://docbook.org/ns/docbook" xml:id="function.output-add-rewrite-var">
  <refnamediv>
   <refname>output_add_rewrite_var</refname>
-  <refpurpose>添加URL重写器的值（Add URL rewriter values）</refpurpose>
+  <refpurpose>添加 URL 重写器的值</refpurpose>
  </refnamediv>
- 
+
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
@@ -15,21 +15,22 @@
    <methodparam><type>string</type><parameter>value</parameter></methodparam>
   </methodsynopsis>
   <para>
-   此函数给URL重写机制添加名/值对。
-   这种名值对将被添加到 URL（以 GET 参数的形式）和表单（以 input 隐藏域的形式），当透明 URL 重写用 
-   <link linkend="ini.session.use-trans-sid">session.use_trans_sid</link>
-   开启时同样可以添加到 session ID。
+   如果“URL-Rewriter”输出缓冲处理程序未激活，此函数将启动它，存储 <parameter>name</parameter> 和 <parameter>value</parameter>
+   参数，并在缓冲区刷新时根据有效的 ini 设置重写 <acronym>URL</acronym> 和表单。此函数后续的调用将存储所有附加的名/值对，直到处理程序关闭。
   </para>
   <para>
-   此函数的行为受 <link linkend="ini.url-rewriter.tags">url_rewriter.tags</link> 和
-   <link linkend="ini.url-rewriter.hosts">url_rewriter.hosts</link> &php.ini; 参数控制。
+   当冲刷输出缓冲区（调用 <function>ob_flush</function>、<function>ob_end_flush</function>、<function>ob_get_flush</function>
+   或在脚本结束时）时，<literal>'URL-Rewriter'</literal> 处理程序会将名/值对作为查询参数添加到 HTML 标签属性的 <acronym>URL</acronym>
+   中，并根据 <link linkend="ini.url-rewriter.tags">url_rewriter.tags</link> 和
+   <link linkend="ini.url-rewriter.hosts">url_rewriter.hosts</link> 配置指令的值向表单添加隐藏字段。
   </para>
   <para>
-   注意，每个请求最多可以成功调用此函数一次。
+   添加到 <literal>'URL-Rewriter'</literal> 处理程序的每个名/值对都会添加到 <acronym>URL</acronym> 或表单，即使这会导致重复的
+   <acronym>URL</acronym> 查询参数或具有相同名称属性的元素。
   </para>
   <note>
    <simpara>
-    如果还没有活跃的输出缓冲区，调用此函数将隐式地开启它。
+    一旦关闭了 <literal>'URL-Rewriter'</literal> 处理程序，就无法再次启动。
    </simpara>
   </note>
  </refsect1>
@@ -80,10 +81,11 @@
       <row>
        <entry>7.1.0</entry>
        <entry>
-        在 PHP 7.1.0 之前，使用 <function>output_add_rewrite_var</function> 设置重写变量使用相同的
-        Session 模块 trans sid 输出缓冲区。从 PHP 7.1.0 起，使用专用的输出缓冲区，<link linkend="ini.url-rewriter.tags">
-        url_rewriter.tags</link> 仅用于输出函数，新增 <link 
-        linkend="ini.url-rewriter.tags">url_rewriter.hosts</link>。
+        自 PHP 7.1.0 起，使用专用的输出缓冲区，<link linkend="ini.url-rewriter.tags">
+        url_rewriter.tags</link> 仅用于输出函数，并且 <link 
+        linkend="ini.url-rewriter.tags">url_rewriter.hosts</link> 可用。在 PHP 7.1.0
+        之前，由 <function>output_add_rewrite_var</function> 设置的重写变量共享具有透明
+        session id 支持的输出缓冲区（请参阅 <link linkend="ini.session.trans-sid-tags">session.trans_sid_tags</link>）。
        </entry>
       </row>
      </tbody>
@@ -96,17 +98,19 @@
   &reftitle.examples;
   <para>
    <example>
-    <title><function>output_add_rewrite_var</function> example</title>
+    <title><function>output_add_rewrite_var</function> 示例</title>
     <programlisting role="php">
 <![CDATA[
 <?php
+ini_set('url_rewriter.tags', 'a=href,form=');
+
 output_add_rewrite_var('var', 'value');
 
-// some links
+// 一些链接
 echo '<a href="file.php">link</a>
 <a href="http://example.com">link2</a>';
 
-// a form
+// 表单
 echo '<form action="script.php" method="post">
 <input type="text" name="var2" />
 </form>';
@@ -145,11 +149,9 @@ Array
     <member><function>ob_list_handlers</function></member>
     <member><link linkend="ini.url-rewriter.tags">url_rewriter.tags</link></member>
     <member><link linkend="ini.url-rewriter.hosts">url_rewriter.hosts</link></member>
-    <member><link linkend="ini.session.trans-sid-tags">session.trans_sid_tags</link></member>
-    <member><link linkend="ini.session.trans-sid-hosts">session.trans_sid_hosts</link></member>
    </simplelist>
   </para>
- </refsect1>  
+ </refsect1>
 
 </refentry>
 
