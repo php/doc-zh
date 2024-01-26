@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 86e6094e86b84a51d00ab217ac50ce8dde33d82a Maintainer: avenger Status: partial -->
+<!-- EN-Revision: 86e6094e86b84a51d00ab217ac50ce8dde33d82a Maintainer: avenger Status: ready -->
 <!-- CREDITS: mowangjuanzi -->
 <sect1 xml:id="migration73.incompatible" xmlns:xlink="http://www.w3.org/1999/xlink">
  <title>不向下兼容的变更</title>
@@ -57,28 +57,20 @@ while ($foo) {
   </sect3>
 
   <sect3 xml:id="migration73.incompatible.core.arrayaccess">
-   <title>Strict Interpretation of Integer String Keys on ArrayAccess</title>
+   <title>ArrayAccess 上整数 key 的严格解释</title>
 
    <para>
-    Array accesses of type <literal>$obj["123"]</literal>, where
-    <literal>$obj</literal> implements <classname>ArrayAccess</classname> and
-    <literal>"123"</literal> is an integer <type>string</type> literal will no
-    longer result in an implicit conversion to integer, i.e.,
-    <literal>$obj->offsetGet("123")</literal> will be called instead of
-    <literal>$obj->offsetGet(123)</literal>. This matches existing behavior for
-    non-literals. The behavior of arrays is not affected in any way, they
-    continue to implicitly convert integral string keys to integers.
+    类型 <literal>$obj["123"]</literal> 的数组访问，其中 <literal>$obj</literal> 实现了 <classname>ArrayAccess</classname> 以及 <literal>"123"</literal>
+    是整数 <type>string</type> 字面量且将不再默默转换为整数，即调用 <literal>$obj->offsetGet("123")</literal> 而不是
+    <literal>$obj->offsetGet(123)</literal>。这与非字面量的值的现有行为相匹配。数组的行为不会受到任何影响，它们仍然会将整数字符串 key 默默转换为整数。
    </para>
   </sect3>
 
   <sect3 xml:id="migration73.incompatible.core.static-properties">
-   <title>Static Properties no longer separated by Reference Assignment</title>
+   <title>静态属性将不再通过引用赋值分离</title>
 
    <para>
-    In PHP, static properties are shared between inheriting classes, unless the
-    static property is explicitly overridden in a child class. However, due to an
-    implementation artifact it was possible to separate the static properties by
-    assigning a reference. This loophole has been fixed.
+    在 PHP 中，静态属性是在继承类之间共享的，除非在子类中明确重写了静态属性。然而，由于实现上的原因，可以通过分配引用来分离静态属性。该漏洞已得到修复。
     <informalexample>
      <programlisting role="php">
 <![CDATA[
@@ -102,12 +94,10 @@ var_dump(Test::$x, Test2::$x);
   </sect3>
 
   <sect3 xml:id="migration73.incompatible.core.reference-unwrapping">
-   <title>References returned by Array and Property Accesses are immediately unwrapped</title>
+   <title>由访问数组和属性返回的引用会立即展开</title>
 
    <para>
-    References returned by array and property accesses are now unwrapped as part
-    of the access. This means that it is no longer possible to modify the
-    reference between the access and the use of the accessed value:
+    由访问数组和属性返回的引用现在作为访问的一部分展开（unwrapped）。这意味着在访问和使用访问的值之间，不会再修改引用：
     <informalexample>
      <programlisting role="php">
 <![CDATA[
@@ -115,23 +105,20 @@ var_dump(Test::$x, Test2::$x);
 $arr = [1];
 $ref =& $arr[0];
 var_dump($arr[0] + ($arr[0] = 2));
-// Previously: int(4), Now: int(3)
+// 之前：int(4)，现在：int(3)
 ?>
 ]]>
      </programlisting>
     </informalexample>
-    This makes the behavior of references and non-references consistent. Please
-    note that reading and writing a value inside a single expression remains
-    undefined behavior and may change again in the future.
+    这使得引用和非引用的行为保持一致。请注意，在单个表达式中读取和写入值仍然是未定义的行为，并且将来可能会再次发生变化。
    </para>
   </sect3>
 
   <sect3 xml:id="migration73.incompatible.core.traversable-unpacking">
-   <title>Argument Unpacking of Traversables with non-Integer Keys no longer supported</title>
+   <title>不再支持非整数 key 的可遍历对象的进行参数解包</title>
 
    <para>
-    Argument unpacking stopped working with <classname>Traversable</classname>s
-    with non-integer keys. The following code worked in PHP 5.6-7.2 by accident.
+    参数不会解包存在非整数 key 的 <classname>Traversable</classname>。以下代码在 PHP 5.6-7.2 中意外起作用。
     <informalexample>
      <programlisting role="php">
 <![CDATA[
@@ -195,9 +182,7 @@ foo(...gen());
   </para>
 
   <para>
-   <function>bcmul</function> and <function>bcpow</function> now return numbers
-   with the requested scale. Formerly, the returned numbers may have omitted
-   trailing decimal zeroes.
+   现在，<function>bcmul</function> 和 <function>bcpow</function> 返回带有指定小数位数的数字。以前，返回的数字可能省略了尾随的小数零。
   </para>
  </sect2>
 
