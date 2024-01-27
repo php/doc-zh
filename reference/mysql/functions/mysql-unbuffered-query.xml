@@ -1,47 +1,90 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: n/a Maintainer: dallas Status: ready -->
-  <refentry xml:id="function.mysql-unbuffered-query" xmlns="http://docbook.org/ns/docbook">
-   <refnamediv>
-    <refname>mysql_unbuffered_query</refname>
-    <refpurpose>
-     向 MySQL 发送一条 SQL 查询，并不获取和缓存结果的行
-    </refpurpose>
-   </refnamediv>
-   <refsect1>
-    <title>说明</title>
-     <methodsynopsis>
-      <type>resource</type><methodname>mysql_unbuffered_query</methodname>
-      <methodparam><type>string</type><parameter>query</parameter></methodparam>
-      <methodparam choice="opt"><type>resource</type><parameter>link_identifier</parameter></methodparam>
-     </methodsynopsis>
-    <para>
-     <function>mysql_unbuffered_query</function> 向
-     MySQL 发送一条 SQL 查询
-     <parameter>query</parameter>，但不像
-     <function>mysql_query</function>
-     那样自动获取并缓存结果集。一方面，这在处理很大的结果集时会节省可观的内存。另一方面，可以在获取第一行后立即对结果集进行操作，而不用等到整个
-     SQL 语句都执行完毕。当使用多个数据库连接时，必须指定可选参数
-     <parameter>link_identifier</parameter>。
-    </para>
-    <note>
-     <para>
-      <function>mysql_unbuffered_query</function>
-      的好处是有代价的：在
-      <function>mysql_unbuffered_query</function>
-      返回的结果集之上不能使用
-      <function>mysql_num_rows</function> 和 <function>mysql_data_seek</function>。此外在向
-      MySQL 发送一条新的 SQL
-      查询之前，必须提取掉所有未缓存的 SQL
-      查询所产生的结果行。
-     </para>
-    </note>
-    <para>
-     参见 <function>mysql_query</function>。
-    </para>
-   </refsect1>
-  </refentry>
+<!-- EN-Revision: e41806c30bf6975e452c0d4ce35ab0984c2fa68c Maintainer: dallas Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
+<refentry xml:id="function.mysql-unbuffered-query" xmlns="http://docbook.org/ns/docbook">
+ <refnamediv>
+  <refname>mysql_unbuffered_query</refname>
+  <refpurpose>向 MySQL 发送 SQL 查询，无需获取和缓冲结果行</refpurpose>
+ </refnamediv>
+
+ <refsynopsisdiv>
+  <warning>
+   &mysql.alternative.note;
+   <simplelist role="alternatives">
+    <member>参阅：<link linkend="mysqlinfo.concepts.buffering">缓冲和非缓冲查询</link></member>
+   </simplelist>
+  </warning>
+ </refsynopsisdiv>
+
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <type>resource</type><methodname>mysql_unbuffered_query</methodname>
+   <methodparam><type>string</type><parameter>query</parameter></methodparam>
+   <methodparam choice="opt"><type>resource</type><parameter>link_identifier</parameter><initializer>NULL</initializer></methodparam>
+  </methodsynopsis>
+  <para>
+   <function>mysql_unbuffered_query</function> 将 SQL <parameter>query</parameter> 发送到 MySQL，而不像 <function>mysql_query</function>
+   那样自动获取和缓冲结果行。对于生成大型结果集的 SQL 查询，这可以节省大量内存，并且可以在检索第一行后立即开始处理结果集，因为不必等到执行完整的 SQL
+   查询。要在打开多个数据库连接时使用 <function>mysql_unbuffered_query</function>，必须指定可选参数 <parameter>link_identifier</parameter>
+   来标识要使用哪个连接。
+  </para>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>query</parameter></term>
+     <listitem>
+      <para>
+       要执行的 SQL 查询。
+      </para>
+      <para>
+       查询中的数据应<link
+       linkend="function.mysql-real-escape-string">正确转义</link>。
+      </para>
+     </listitem>
+    </varlistentry>
+    &mysql.linkid.description;
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   对于 SELECT、SHOW、DESCRIBE 或 EXPLAIN 语句，<function>mysql_unbuffered_query</function> 在成功时返回
+   <type>resource</type>，错误时返回 &false;。
+  </para>
+  <para>
+   对于其他类型的 SQL 语句，UPDATE、DELETE、DROP 等，<function>mysql_unbuffered_query</function>
+   在成功时返回 &true;，在错误时返回 &false;。
+  </para>
+ </refsect1>
+
+ <refsect1 role="notes">
+  &reftitle.notes;
+  <note>
+   <para>
+    <function>mysql_unbuffered_query</function> 的好处是有代价的：在获取所有行之前，不能对 <function>mysql_unbuffered_query</function>
+    返回的结果集使用 <function>mysql_num_rows</function> 和 <function>mysql_data_seek</function>。还必须使用相同的
+    <parameter>link_identifier</parameter> 从无缓冲的 SQL 查询中获取所有结果行，然后才能将新的 SQL 查询发送到 MySQL。
+   </para>
+  </note>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>mysql_query</function></member>
+   </simplelist>
+  </para>
+ </refsect1>
+</refentry>
 
 <!-- Keep this comment at the end of the file
 Local variables:
