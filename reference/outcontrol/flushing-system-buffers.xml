@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- EN-Revision: 7610e990293c87168d026ad078d8272e643e2c23 Maintainer: mowangjuanzi Status: partial -->
+<!-- EN-Revision: 7610e990293c87168d026ad078d8272e643e2c23 Maintainer: mowangjuanzi Status: ready -->
 <chapter xml:id="outcontrol.flushing-system-buffers" xmlns="http://docbook.org/ns/docbook">
  <section>
   <title>冲刷系统缓冲区</title>
@@ -59,56 +59,36 @@
  <section>
   <title>限制</title>
   <para>
-   This functionality cannot flush user-level output buffers.
-   To use these together, user-level output buffers must be flushed
-   before flushing system buffers in order for PHP to produce any output.
+   此功能无法冲刷用户级输出缓冲区。要一起使用的话，必须在冲刷系统缓冲区之前冲刷用户级输出缓冲区，以便 PHP 生成任何输出。
   </para>
   <warning>
    <simpara>
-    Calling <function>flush</function> or implicit flushing being enabled
-    can interfere with output handlers of user-level output buffers
-    that set and send headers in a web context
-    (e.g. <function>ob_gzhandler</function>)
-    by sending headers before these handlers can do so.
+    调用 <function>flush</function> 或启用绝对刷新可能会干扰用户级输出缓冲区的输出处理程序，这些输出处理程序在 Web
+    上下文中设置和发送 header（例如 <function>ob_gzhandler</function>），因为在这些处理程序能够发送 header
+    之前，<function>flush</function> 或绝对刷新就已经发送了 header 信息。
    </simpara>
   </warning>
   <para>
-   Buffering implemented by the underlying software/hardware
-   cannot be overridden by PHP and should be taken into account
-   when working with PHP's buffer control functions.
-   Checking the web servers/browsers/consoles buffering settings
-   and working with these can alleviate possible issues.
-   Working in a web context, either the web server's buffering settings
-   or the script's buffering could be adjusted to work in tandem
-   whereas working around the buffering strategies of various browsers
-   can be achieved by adjusting buffering in the PHP script.
-   On consoles that implement line buffering,
-   newline characters could be inserted in the appropriate places
-   before flushing output.
+   PHP 不能完整覆盖由底层软件/硬件实现的缓冲，在使用 PHP 的缓冲控制函数时应考虑到这一点。检查 Web
+   服务器/浏览器/控制台缓冲设置并进行相应的处理可以缓解可能的问题。在 Web 环境中工作时，可以调整 Web
+   服务器的缓冲设置或脚本的缓冲以协同工作，而调整 PHP 脚本中的缓冲设置可以解决各种浏览器的缓冲策略。在实现行缓冲的控制台上，可以在刷新输出之前将换行符插入到适当的位置。
   </para>
  </section>
 
  <section>
-  <title><acronym>SAPI</acronym> Differences In Flushing</title>
+  <title><acronym>SAPI</acronym> 在冲刷方面的不同</title>
   <para>
-   Although flushing is implemented by each <acronym>SAPI</acronym>
-   in a slightly different way,
-   these implementations fall in one of two categories:
+   尽管每个 <acronym>SAPI</acronym> 实现冲刷的方式略有不同，但这些实现都属于以下两类中的一个：
    <itemizedlist>
     <listitem>
      <simpara>
-      <acronym>SAPI</acronym>s used in a web context will flush headers first
-      followed by the output.
-      <literal>Apache2Handler</literal>, <literal>CGI</literal>,
-      <literal>FastCGI</literal> and <literal>FPM</literal>
-      are such <acronym>SAPI</acronym>s
+      Web 上下文中使用的 <acronym>SAPI</acronym> 将首先冲刷 header，然后冲刷输出。<literal>Apache2Handler</literal>、<literal>CGI</literal>、<literal>FastCGI</literal>
+      和 <literal>FPM</literal> 都是此类 <acronym>SAPI</acronym>
      </simpara>
     </listitem>
     <listitem>
      <simpara>
-      other <acronym>SAPI</acronym>s
-      such as <literal>CLI</literal> and <literal>embed</literal>
-      will flush output only
+      其它 <acronym>SAPI</acronym>（比如 <literal>CLI</literal> 和 <literal>embed</literal>）仅冲刷输出
      </simpara>
     </listitem>
    </itemizedlist>
