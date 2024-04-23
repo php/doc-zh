@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 61374bbe228e8e9c55a24aba59a1e2bb2a871148 Maintainer: HonestQiao Status: ready -->
+<!-- EN-Revision: 8cb32bd2c0f0b8a95ebb84b211920fe10d4c2679 Maintainer: HonestQiao Status: ready -->
 <!-- CREDITS: HonestQiao, Haohappy, Luffy, mowangjuanzi -->
 <chapter xml:id="features.commandline" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <title>PHP 的命令行模式</title>
 
  <!--Introduction: {{{-->
- <section xml:id="features.commandline.introduction">
- <para>
-  &cli.sapi; 模块主要用作 PHP 的开发外壳应用。&cli.sapi; 和其它
-  <acronym>SAPI</acronym>
-  模块相比有很多的不同之处，我们将在本章中详细阐述。值得一提的是，尽管 &cli;
-  和 <literal>CGI</literal> 有很多共同的行为，但它们是不同的 <acronym>SAPI</acronym>。
+ <section xml:id="features.commandline.introduction" annotations="chunk:false">
+  <title>简介</title>
+  
+  <para>
+  &cli.sapi; 主要是使用 PHP 开发 shell 应用。&cli.sapi; 与本章中解释的其它 <acronym>SAPI</acronym>
+  存在相当多的差异。值得一提的是，尽管 &cli; 和 <literal>CGI</literal> 有很多共同的行为，但它们是不同的 <acronym>SAPI</acronym>。
  </para>
 
  <para>
@@ -430,6 +430,7 @@ $ php -c /custom/directory/custom-file.ini my_script.php
          </screen>
         </para>
         <para><example>
+         <title>使用 <literal>-d</literal> 设置 INI 配置的示例</title>
          <screen>
 <![CDATA[
 # 忽略值部分，将会设置配置指令为 "1"
@@ -1465,31 +1466,108 @@ php >
 
  <!--Built-in CLI Web Server: {{{-->
  <section xml:id="features.commandline.webserver">
-  <title>内置Web Server</title>
+  <title>内置 Web Server</title>
+
+  <warning>
+   <para>
+    该 Web 服务器目的是帮助应用程序开发。还可用于测试目的或在受控环境中运行的应用程序演示。但并不是一个功能齐全的 Web 服务器。不应该在公共网络上使用。
+   </para>
+  </warning>
 
   <para>
-   &cli.sapi; 提供了一个内置的Web服务器。
-  </para>
-<para>   
-   这个内置的Web服务器主要用于本地开发使用，不可用于线上产品环境。
+   &cli.sapi; 提供了内置的 Web 服务器。
   </para>
 
   <para>
-     URI请求会被发送到PHP所在的的工作目录（Working Directory）进行处理，除非你使用了-t参数来自定义不同的目录。
+   Web 服务器仅运行一个单线程进程，因此如果堵塞了请求，PHP 应用程序将停止运行。
   </para>
 
   <para>
-  
-   如果请求未指定执行哪个PHP文件，则默认执行目录内的index.php 或者 index.html。如果这两个文件都不存在，服务器会返回404错误。
+    URI 请求将从启动 PHP 的当前工作目录提供服务，除非使用 -t 选项指定文档根目录。如果 URI 请求未指定文件，则返回指定目录中的 index.php 或
+    index.html。如果两个文件都不存在，则将在父目录中继续查找 index.php 和 index.html，依此类推，直到找到一个文件或到达文档根目录。如果找到
+    index.php 或 index.html，则将其返回，并将 $_SERVER['PATH_INFO'] 设置为 URI 的尾部部分。否则将返回 404 响应代码。
   </para>
 
-  <para>  
-   
-   当你在命令行启动这个Web Server时，如果指定了一个PHP文件，则这个文件会作为一个“路由”脚本，意味着每次请求都会先执行这个脚本。如果这个脚本返回 &false; ，那么直接返回请求的文件（例如请求静态文件不作任何处理）。否则会把输出返回到浏览器。
+  <para>
+    如果在命令行上启动 Web 服务器时指定了 PHP 文件，则会将其视为“router”脚本。该脚本在每个 HTTP 请求开始时运行。如果此脚本返回
+    &false;，则按原样返回所请求的资源。否则脚本的输出将返回到浏览器。
   </para>
+
+  <para>
+   对于有扩展名的文件，将返回标准的 MIME 类型：
+   <simplelist type="inline">
+    <member><literal>.3gp</literal></member>
+    <member><literal>.apk</literal></member>
+    <member><literal>.avi</literal></member>
+    <member><literal>.bmp</literal></member>
+    <member><literal>.css</literal></member>
+    <member><literal>.csv</literal></member>
+    <member><literal>.doc</literal></member>
+    <member><literal>.docx</literal></member>
+    <member><literal>.flac</literal></member>
+    <member><literal>.gif</literal></member>
+    <member><literal>.gz</literal></member>
+    <member><literal>.gzip</literal></member>
+    <member><literal>.htm</literal></member>
+    <member><literal>.html</literal></member>
+    <member><literal>.ics</literal></member>
+    <member><literal>.jpe</literal></member>
+    <member><literal>.jpeg</literal></member>
+    <member><literal>.jpg</literal></member>
+    <member><literal>.js</literal></member>
+    <member><literal>.kml</literal></member>
+    <member><literal>.kmz</literal></member>
+    <member><literal>.m4a</literal></member>
+    <member><literal>.mov</literal></member>
+    <member><literal>.mp3</literal></member>
+    <member><literal>.mp4</literal></member>
+    <member><literal>.mpeg</literal></member>
+    <member><literal>.mpg</literal></member>
+    <member><literal>.odp</literal></member>
+    <member><literal>.ods</literal></member>
+    <member><literal>.odt</literal></member>
+    <member><literal>.oga</literal></member>
+    <member><literal>.ogg</literal></member>
+    <member><literal>.ogv</literal></member>
+    <member><literal>.pdf</literal></member>
+    <member><literal>.png</literal></member>
+    <member><literal>.pps</literal></member>
+    <member><literal>.pptx</literal></member>
+    <member><literal>.qt</literal></member>
+    <member><literal>.svg</literal></member>
+    <member><literal>.swf</literal></member>
+    <member><literal>.tar</literal></member>
+    <member><literal>.text</literal></member>
+    <member><literal>.tif</literal></member>
+    <member><literal>.txt</literal></member>
+    <member><literal>.wav</literal></member>
+    <member><literal>.webm</literal></member>
+    <member><literal>.wmv</literal></member>
+    <member><literal>.xls</literal></member>
+    <member><literal>.xlsx</literal></member>
+    <member><literal>.xml</literal></member>
+    <member><literal>.xsl</literal></member>
+    <member><literal>.xsd</literal></member>
+    <member><literal>.zip</literal></member>
+   </simplelist>
+   。
+  </para>
+
+  <simpara>
+   从 PHP 7.4.0 开始，内置 Web 服务器可以配置为派生多个工作线程，以便测试需要向内置 Web 服务器发出多个并发请求的代码。在启动服务器之前，将
+   <envar>PHP_CLI_SERVER_WORKERS</envar> 环境变量设置为所需的 worker 数量。
+  </simpara>
+  <note>
+   <simpara>此功能不支持 Windows。</simpara>
+  </note>
+  <warning>
+   <para>
+    此<emphasis>实验</emphasis>功能<emphasis>不</emphasis>适用于生产用途。通常，内置 Web 服务器<emphasis>不</emphasis>适合生产用途。
+   </para>
+  </warning>
 
   <example>
-   <title>启动Web服务器</title> 
+   <title>启动 Web 服务器</title> 
    <programlisting role="shell">
 <![CDATA[
 $ cd ~/public_html
@@ -1497,7 +1575,7 @@ $ php -S localhost:8000
 ]]>
    </programlisting>
    <para>
-     终端窗口会显示:
+     终端将显示:
    </para>
    <screen>
 <![CDATA[
@@ -1507,9 +1585,8 @@ Document root is /home/me/public_html
 Press Ctrl-C to quit
 ]]>
    </screen>
-   <para>   
-    
-    接着访问http://localhost:8000/和http://localhost:8000/myscript.html，窗口会显示：
+   <para>
+    在 URI 请求 http://localhost:8000/ 和 http://localhost:8000/myscript.html 之后，终端会显示类似以下的内容：
    </para>
    <screen>
 <![CDATA[
@@ -1524,10 +1601,13 @@ Press Ctrl-C to quit.
 [Thu Jul 21 10:48:52 2011] ::1:39149 GET /favicon.ico - Request read
 ]]>
    </screen>
+   <para>
+    请注意，在 PHP 7.4.0 之前，在 Windows 上无法访问符号链接的静态资源，除非 router 脚本可以处理这些资源。
+   </para>
   </example>
 
   <example>
-   <title>启动时指定根目录</title> 
+   <title>启动时指定文档根目录</title> 
    <programlisting role="shell">
 <![CDATA[
 $ cd ~/public_html
@@ -1535,7 +1615,7 @@ $ php -S localhost:8000 -t foo/
 ]]>
    </programlisting>
    <para>
-     终端窗口显示：
+     终端将显示：
    </para>
    <screen>
 <![CDATA[
@@ -1548,18 +1628,17 @@ Press Ctrl-C to quit
   </example>
 
   <example>
-   <title>使用路由（Router）脚本</title> 
+   <title>使用 router 脚本</title> 
 <para>
- 
- 请求图片直接显示图片，请求HTML则显示“Welcome to PHP”
+ 在此示例中，请求图像将显示图片，但对 HTML 文件的请求将显示“Welcome to PHP”：
 </para>
    <programlisting role="php">
 <![CDATA[
 <?php
 // router.php
-if (preg_match('/\.(?:png|jpg|jpeg|gif)$/', $_SERVER["REQUEST_URI"]))
-    return false;    // 直接返回请求的文件
-else { 
+if (preg_match('/\.(?:png|jpg|jpeg|gif)$/', $_SERVER["REQUEST_URI"])) {
+    return false;    // 原样提供所请求的资源
+} else { 
     echo "<p>Welcome to PHP</p>";
 }
 ?>]]>
@@ -1569,51 +1648,37 @@ else {
 $ php -S localhost:8000 router.php
 ]]>
    </programlisting>
-   <para>
-    
-    执行之后终端显示：
-   </para>
-   <screen>
-<![CDATA[
-PHP 5.4.0 Development Server started at Thu Jul 21 10:53:19 2011
-Listening on localhost:8000
-Document root is /home/me/public_html
-Press Ctrl-C to quit.
-[Thu Jul 21 10:53:45 2011] ::1:55801 GET /mylogo.jpg - Request read
-[Thu Jul 21 10:53:52 2011] ::1:55803 GET /abc.html - Request read
-[Thu Jul 21 10:53:52 2011] ::1:55804 GET /favicon.ico - Request read
-]]>
-   </screen>
   </example>
+
   <example>
-   <title>Checking for CLI Web Server Use</title>
-   <para>
-    To reuse a framework router script during development with the CLI web server and later also with a production web server:
-   </para>
+   <title>检查 CLI Web 服务器的使用</title> 
+<para>
+  要在使用 CLI Web 服务器开发期间以及稍后使用生产 Web 服务器重复使用的框架 router 脚本：
+</para>
    <programlisting role="php">
-    <![CDATA[
+<![CDATA[
 <?php
 // router.php
 if (php_sapi_name() == 'cli-server') {
-    /* route static assets and return false */
+    /* 发送静态资源并返回 false */
 }
-/* go on with normal index.php operations */
+/* 继续正常的 index.php 操作 */
 ?>]]>
    </programlisting>
    <programlisting role="shell">
-    <![CDATA[
+<![CDATA[
 $ php -S localhost:8000 router.php
 ]]>
    </programlisting>
   </example>
 
   <example>
-   <title>Handling Unsupported File Types</title>
-   <para>
-    If you need to serve a static resource whose MIME type is not handled by the CLI web server, use:
-   </para>
+   <title>处理不支持的文件类型</title> 
+<para>
+  如果需要提供不由 CLI Web 服务器处理的静态资源的 MIME 类型，请使用：
+</para>
    <programlisting role="php">
-    <![CDATA[
+<![CDATA[
 <?php
 // router.php
 $path = pathinfo($_SERVER["SCRIPT_FILENAME"]);
@@ -1627,25 +1692,25 @@ else {
 ?>]]>
    </programlisting>
    <programlisting role="shell">
-    <![CDATA[
+<![CDATA[
 $ php -S localhost:8000 router.php
 ]]>
    </programlisting>
   </example>
 
   <example>
-   <title>Accessing the CLI Web Server From Remote Machines</title>
+   <title>从远程计算机访问 CLI Web 服务器</title> 
    <para>
-    You can make the web server accessible on port 8000 to any interface with:
+    可以通过以下方式使 Web 服务器可通过端口 8000 接受任何链接：
    </para>
    <programlisting role="shell">
-    <![CDATA[
+<![CDATA[
 $ php -S 0.0.0.0:8000
 ]]>
    </programlisting>
    <warning>
     <para>
-     The built-in Web Server should not be used on a public network.
+      内置 Web 服务器不应该在公共网络上使用。
     </para>
    </warning>
   </example>
