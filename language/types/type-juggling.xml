@@ -48,11 +48,10 @@
  </simpara>
 
  <sect2>
-  <title>Numeric contexts</title>
+  <title>数字上下文</title>
 
   <simpara>
-   This is the context when using an
-   <link linkend="language.operators.arithmetic">arithmetical operator</link>.
+   使用<link linkend="language.operators.arithmetic">算术运算符</link>时的上下文。
   </simpara>
 
   <simpara>
@@ -63,14 +62,12 @@
  </sect2>
 
  <sect2>
-  <title>String contexts</title>
+  <title>字符串上下文</title>
 
   <simpara>
-   This is the context when using <function>echo</function>,
-   <function>print</function>,
-   <link linkend="language.types.string.parsing">string interpolation</link>,
-   or the string
-   <link linkend="language.operators.string">concatenation operator</link>.
+   使用 <function>echo</function>、<function>print</function>、<link
+   linkend="language.types.string.parsing">字符串插值</link>或者字符串<link
+   linkend="language.operators.string">连接运算符</link>时的上下文。
   </simpara>
 
   <simpara>
@@ -80,12 +77,11 @@
  </sect2>
 
  <sect2>
-  <title>Logical contexts</title>
+  <title>逻辑上下文</title>
 
   <simpara>
-   This is the context when using conditional statements, the
-   <link linkend="language.operators.comparison.ternary">ternary operator</link>,
-   or a <link linkend="language.operators.logical">logical operator</link>.
+   使用条件语句、<link linkend="language.operators.comparison.ternary">三元运算符</link>或<link
+   linkend="language.operators.logical">逻辑运算符</link>时的上下文。
   </simpara>
 
   <simpara>
@@ -94,11 +90,10 @@
  </sect2>
 
  <sect2>
-  <title>Integral and string contexts</title>
+  <title>整数和字符串上下文</title>
 
   <simpara>
-   This is the context when using
-   <link linkend="language.operators.bitwise">bitwise operators</link>.
+   使用<link linkend="language.operators.bitwise">位运算符</link>时的上下文。
   </simpara>
 
   <simpara>
@@ -109,11 +104,10 @@
  </sect2>
 
  <sect2>
-  <title>Comparative contexts</title>
+  <title>比较上下文</title>
 
   <simpara>
-   This is the context when using a
-   <link linkend="language.operators.comparison">comparison operator</link>.
+   使用<link linkend="language.operators.comparison">比较运算符</link>时的上下文。
   </simpara>
 
   <simpara>
@@ -123,11 +117,10 @@
  </sect2>
 
  <sect2 xml:id="language.types.type-juggling.function">
-  <title>Function contexts</title>
+  <title>函数上下文</title>
 
   <simpara>
-   This is the context when a value is passed to a typed parameter, property,
-   or returned from a function which declares a return type.
+   将值传递给已声明类型的参数、属性，或从声明了返回类型的函数返回值时的上下文。
   </simpara>
 
   <para>
@@ -175,10 +168,8 @@
   <sect3 xml:id="language.types.type-juggling.function.union">
    <title>使用联合类型的强制类型</title>
    <para>
-    When <literal>strict_types</literal> is not enabled, scalar type declarations
-    are subject to limited implicit type coercions.
-    如果值的精确类型不是联合的一部分，然后会按照以下优先顺序选择目标类型：
-
+    当未启用 <literal>strict_types</literal>
+    时，声明的标量类型会受到有限的隐式类型转换的影响。如果值的精确类型不是联合的一部分，然后会按照以下优先顺序选择目标类型：
     <orderedlist>
      <listitem>
       <simpara>
@@ -201,10 +192,7 @@
       </simpara>
      </listitem>
     </orderedlist>
-
-    If the type exists in the union and the value can be coerced to the
-    type under PHP's existing type-checking semantics, then the type is chosen.
-    Otherwise, the next type is tried.
+    如果类型存在于 union 类型中，并且值可以根据 PHP 现有的类型检查语义转换为此类型，则选择该类型。否则，尝试下一个类型
    </para>
 
    <caution>
@@ -217,38 +205,35 @@
 
    <note>
     <para>
-     Types that are not part of the above preference list are not eligible
-     targets for implicit coercion. In particular no implicit coercions to
-     the <type>null</type>, <type>false</type>, and <type>true</type>
-     types occur.
+     不属于上述优先级列表的类型不会进行隐式转换。特别是，不会出现对 <type>null</type>、<type>false</type> 和 <type>true</type> 类型的隐式转换。
     </para>
    </note>
 
    <example>
-    <title>Example of types being coerced into a type part of the union</title>
+    <title>类型转换为 union 类型中的一个的示例</title>
     <programlisting role="php">
 <![CDATA[
 <?php
 // int|string
-42    --> 42          // exact type
-"42"  --> "42"        // exact type
+42    --> 42          // 具体类型
+"42"  --> "42"        // 具体类型
 new ObjectWithToString --> "Result of __toString()"
-                      // object never compatible with int, fall back to string
-42.0  --> 42          // float compatible with int
-42.1  --> 42          // float compatible with int
-1e100 --> "1.0E+100"  // float too large for int type, fall back to string
-INF   --> "INF"       // float too large for int type, fall back to string
-true  --> 1           // bool compatible with int
-[]    --> TypeError   // array not compatible with int or string
+                      // 对象绝不会兼容 int，回退到 string
+42.0  --> 42          // int 兼容 float
+42.1  --> 42          // int 兼容 float
+1e100 --> "1.0E+100"  // float 对于 int 类型来说太大了，回退为 string
+INF   --> "INF"       // float 对于 int 类型来说太大了，回退为 string
+true  --> 1           // int 兼容 bool
+[]    --> TypeError   // int 或 string 不兼容 array
 
 // int|float|bool
-"45"    --> 45        // int numeric string
-"45.0"  --> 45.0      // float numeric string
+"45"    --> 45        // int 数字 string
+"45.0"  --> 45.0      // float 数字 string
 
-"45X"   --> true      // not numeric string, fall back to bool
-""      --> false     // not numeric string, fall back to bool
-"X"     --> true      // not numeric string, fall back to bool
-[]      --> TypeError // array not compatible with int, float or bool
+"45X"   --> true      // 不是 numeric string，回退为 bool
+""      --> false     // 不是 numeric string，回退为 bool
+"X"     --> true      // 不是 numeric string，回退为 bool
+[]      --> TypeError // int、float 或 bool 不兼容 array
 ?>
 ]]>
     </programlisting>
