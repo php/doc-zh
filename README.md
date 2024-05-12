@@ -35,6 +35,8 @@ PHP 文档的翻译工作完全是一项志愿行动，你不会从中得到任�
 - [待翻译文档列表](http://doc.php.net/revcheck.php?p=missfiles&lang=zh)
 - [旧的 readme.first](readme.first)
 
+## 参与方式
+
 ### 通过 GitHub 提交 PR
 
 你可以直接按照 GitHub 的工作流程：[GitHub Flow](https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests/github-flow)，fork 此仓库完成修改后再提交 Pull Request，你提交的 PR 会在通过翻译小组审核后，合并到官方文档中。
@@ -64,11 +66,11 @@ git clone git@github.com:php/doc-zh.git zh
 git clone git@github.com:php/doc-base.git
 ```
 
-#### 了解 DocBook 格式
+### 了解 DocBook 格式
 
 仓库里的 .xml 文件是文档的原始文件，我们所看到的 html 和官方在线的 php 文档，都是由这些 xml 文件生成的。XML 的格式为 [DocBook](http://www.docbook.org/)，这也是在 markdown 成为主流之前最流行的文档规范。
 
-#### 翻译流程
+### 翻译流程
 
 git 仓库中的每个文件都有一个版本号，它用来指明当前文件的版本号，我们使用版本号来检查一个文件是否与它的英文版本同步：找出翻译是否是最新的。这就是为什么您的翻译中的每个文件都需要一个 EN-Revision 注释，其语法如下。
 
@@ -97,7 +99,7 @@ git 仓库中的每个文件都有一个版本号，它用来指明当前文件�
 | Status      | 翻译完成后写 `ready`，翻译一部分的写 `partial`                   |
 | CREDITS     | 如果你对别人维护的文档做了重大更新或者完成了其中相当大的一部分翻译工作，请在这里添上你的昵称，多个人用逗号隔开 |
 
-#### 翻译新文件的流程
+### 翻译新文件的流程
 
 假设你想翻译 `in_array()` 函数的文档，但这个函数在中文文档中还不存在，切换到 `en` 目录，然后执行 `git log -n1 --pretty=format:%H -- reference/array/functions/in-array.xml` 获取 commit hash。
 
@@ -110,7 +112,7 @@ git 仓库中的每个文件都有一个版本号，它用来指明当前文件�
 
 规则很简单：如果你的版本号等于你所翻译的英文文件的版本号，那么你的翻译就是最新的。否则，就需要进行同步更新。
 
-#### 同步更新翻译的流程
+### 同步更新翻译的流程
 
 假设你想更新 `password_needs_rehash()` 的翻译。使用 [doc.php.net 工具](http://doc.php.net/revcheck.php?lang=zh)查看哪些文件需要更新以及需要更改哪些内容才能与英文版本同步：
 
@@ -155,7 +157,7 @@ index 984eb2dc5c..860758a4a4 100644
 
 现在翻译已经是最新的了，我们只需要等待官方文档每天同步更新，即可看到你的最新工作成果。
 
-### 翻译中需要注意的问题  
+## 翻译中需要注意的问题  
 
 1. 文件是 UNIX 的文件格式而不是 DOS 的，也就是文件中的换行标记只有换行符（\n），而没有回车符（\r）。并且在文件中不要使用 <TAB>（制表符\t）而要使用空格；
 1. 请注意翻译中的标点问题，使用中文标点符号；
@@ -165,7 +167,7 @@ index 984eb2dc5c..860758a4a4 100644
 1. 请参加翻译的人员加入 `doc-zh@lists.php.net` 邮件列表.具体方法是向 `doc-zh-subscribe@lists.php.net` 发一封空白电子邮件，然后回信确认。我们在这个邮件列表里面讨论和协调翻译工作。该邮件列表的内容可以通过如下地址访问 https://news-web.php.net/php.doc.zh
 1. 请参加翻译的人员，一定要在提交翻译完成的 XML 文件前运行 `php configure.php --with-lang=zh` 命令，检查文件是否有语法和拼写错误。
 
-#### 有关在翻译后的中文文件中的空格与换行的说明
+### 有关在翻译后的中文文件中的空格与换行的说明
 
 在原始的英文 XML 文件中不存在此问题，因为英文单词之间本来就有一个空格，而无论是 XML 文件还是编译后的 HTML 文件对待任何连续的空格，回车以及制表符都当成一个空格看待。但是在中文书写习惯中，汉字之间以及与中文标点符号之间都是没有空格的。因此英文文件中类似这样的段落：
 
