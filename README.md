@@ -94,7 +94,7 @@ git 仓库中的每个文件都有一个版本号，它用来指明当前文件�
 各项变量说明如下:
 | 变量         | 说明 |
 | ----------- | ------------------------------------------------------------ |
-| EN-Revision | 与当前中文文档相对应的英文文档的版本号（当前指的是 Commit ID，后续不再再次说明），非常重要！方便后续文档更新检测 |
+| EN-Revision | 与当前中文文档相对应的英文文档的版本号（当前指的是 commit hash，后续不再再次说明），非常重要！方便后续文档更新检测 |
 | Maintainer  | 此中文文档的维护者，一定要与 translation.xml 中的 nick 相同，区分大小写！ |
 | Status      | 翻译完成后写 `ready`，翻译一部分的写 `partial`                   |
 | CREDITS     | 如果你对别人维护的文档做了重大更新或者完成了其中相当大的一部分翻译工作，请在这里添上你的昵称，多个人用逗号隔开 |
@@ -116,7 +116,7 @@ git 仓库中的每个文件都有一个版本号，它用来指明当前文件�
 
 假设你想更新 `password_needs_rehash()` 的翻译。使用 [doc.php.net 工具](http://doc.php.net/revcheck.php?lang=zh)查看哪些文件需要更新以及需要更改哪些内容才能与英文版本同步：
 
-点击 [Outdated files](http://doc.php.net/revcheck.php?p=files&lang=zh) 链接，可以通过目录或用户名来过滤文件（用户名来自于上述头注释中的 Maintainer 变量）。我们假设该工具将 `password-needs-rehash.xml` 标记为过时的文件。点击文件名，你会看到 `diff` -- 两个版本的文件之间的变化列表：你的版本（在你的翻译中的 `EN-Revision` 中的当前 Commit ID）和英文源树中的最新版本。下面的例子应该是 `diff` 的样子。
+点击 [Outdated files](http://doc.php.net/revcheck.php?p=files&lang=zh) 链接，可以通过目录或用户名来过滤文件（用户名来自于上述头注释中的 Maintainer 变量）。我们假设该工具将 `password-needs-rehash.xml` 标记为过时的文件。点击文件名，你会看到 `diff` -- 两个版本的文件之间的变化列表：你的版本（在你的翻译中的 `EN-Revision` 中的当前 commit hash）和英文源树中的最新版本。下面的例子应该是 `diff` 的样子。
 
 ```diff
 diff --git a/reference/password/functions/password-needs-rehash.xml b/reference/password/functions/password-needs-rehash.xml
