@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 61374bbe228e8e9c55a24aba59a1e2bb2a871148 Maintainer: daijie Status: ready -->
+<!-- EN-Revision: 310963ad9ab1c2ca315361ff94314a21fa65f8b8 Maintainer: daijie Status: ready -->
 <!-- CREDITS: mowangjuanzi, Luffy -->
 <refentry xml:id="function.curl-setopt" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
@@ -570,27 +570,32 @@
           <row>
            <entry valign="top"><constant>CURLOPT_HEADEROPT</constant></entry>
            <entry valign="top">
-            How to deal with headers. One of the following constants:
+            <para>
+             如何处理 header。以下常量中的某个：
+             <variablelist>
+              <varlistentry>
+               <term>CURLHEADER_UNIFIED</term>
+               <listitem>
+                <simpara>
+                 <constant>CURLOPT_HTTPHEADER</constant> 中指定的 header 将用于对服务器和代理的请求。启用此选项后，<constant>CURLOPT_PROXYHEADER</constant> 将不起作用。
+                </simpara>
+               </listitem>
+              </varlistentry>
+              <varlistentry>
+               <term>CURLHEADER_SEPARATE</term>
+               <listitem>
+                <simpara>
+                 使 <constant>CURLOPT_HTTPHEADER</constant> header 仅发送到服务器而不发送到代理。代理 header 必须使用
+                 <constant>CURLOPT_PROXYHEADER</constant> 进行设置才能使用。注意，如果将非 CONNECT 请求发送到代理，libcurl
+                 将发送服务器 header 和代理 header。执行 CONNECT 时，libcurl 将仅将 <constant>CURLOPT_PROXYHEADER</constant>
+                 header 发送到代理，然后仅将 <constant>CURLOPT_HTTPHEADER</constant> header 发送到服务器。
+                </simpara>
+               </listitem>
+              </varlistentry>
+             </variablelist>
+            </para>
             <simpara>
-             <constant>CURLHEADER_UNIFIED</constant>: the headers specified in
-             <constant>CURLOPT_HTTPHEADER</constant> will be used in requests
-             both to servers and proxies. With this option enabled, 
-             <constant>CURLOPT_PROXYHEADER</constant> will not have any effect.
-            </simpara>
-            <simpara>
-             <constant>CURLHEADER_SEPARATE</constant>: makes
-             <constant>CURLOPT_HTTPHEADER</constant> headers only get sent to
-             a server and not to a proxy. Proxy headers must be set with
-             <constant>CURLOPT_PROXYHEADER</constant> to get used. Note that if
-             a non-CONNECT request is sent to a proxy, libcurl will send both
-             server headers and proxy headers. When doing CONNECT, libcurl will
-             send <constant>CURLOPT_PROXYHEADER</constant> headers only to the
-             proxy and then <constant>CURLOPT_HTTPHEADER</constant> headers
-             only to the server.
-            </simpara>
-            <simpara>
-             Defaults to <constant>CURLHEADER_SEPARATE</constant> as of cURL
-             7.42.1, and <constant>CURLHEADER_UNIFIED</constant> before.
+             从 cURL 7.42.1 起默认是 <constant>CURLHEADER_SEPARATE</constant>，之前默认是 <constant>CURLHEADER_UNIFIED</constant>。
             </simpara>
            </entry>
            <entry valign="top">
@@ -850,42 +855,73 @@
           <row>
            <entry valign="top"><constant>CURLOPT_SSL_OPTIONS</constant></entry>
            <entry valign="top">
-            Set SSL behavior options, which is a bitmask of any of the following constants:
-            <simpara>
-             <constant>CURLSSLOPT_ALLOW_BEAST</constant>: do not attempt to use
-             any workarounds for a security flaw in the SSL3 and TLS1.0 protocols.
-            </simpara>
-            <simpara>
-             <constant>CURLSSLOPT_NO_REVOKE</constant>: disable certificate
-             revocation checks for those SSL backends where such behavior is
-             present.
-            </simpara>
-            <simpara>
-             <constant>CURLSSLOPT_AUTO_CLIENT_CERT</constant>: automatically
-             locate and use a client certificate for authentication, when
-             requested by the server. This option is only supported for
-             Schannel (the native Windows SSL library).
-            </simpara>
-            <simpara>
-             <constant>CURLSSLOPT_NATIVE_CA</constant>: use the operating system's
-             native CA store for certificate verification. Works only on Windows
-             when built to use OpenSSL. This option is experimental and behavior is subject to change.
-            </simpara>
-            <simpara>
-             <constant>CURLSSLOPT_NO_PARTIALCHAIN</constant>: do not accept "partial" certificate
-             chains, which cURL otherwise does by default. This option is only supported for OpenSSL
-             and will fail the certificate verification if the chain ends with
-             an intermediate certificate and not with a root certificate.
-            </simpara>
-            <simpara>
-             <constant>CURLSSLOPT_REVOKE_BEST_EFFORT</constant>: ignore certificate revocation checks
-             in case of missing or offline distribution points for those SSL backends where
-             such behavior is present. This option is only supported for Schannel (the native Windows SSL library).
-             If combined with <constant>CURLSSLOPT_NO_REVOKE</constant>, the latter takes precedence.
-            </simpara>
+            <para>
+             设置 SSL 行为选项，它是以下常量的位掩码：
+             <variablelist>
+              <varlistentry>
+               <term>CURLSSLOPT_ALLOW_BEAST</term>
+               <listitem>
+                <simpara>
+                 请勿尝试使用任何变通方法来弥补 SSL3 和 TLS1.0 协议中的安全漏洞。
+                </simpara>
+               </listitem>
+              </varlistentry>
+              <varlistentry>
+               <term>CURLSSLOPT_NO_REVOKE</term>
+               <listitem>
+                <simpara>
+                 对存在此类行为的 SSL 后端禁用证书吊销检查。
+                </simpara>
+               </listitem>
+              </varlistentry>
+              <varlistentry>
+               <term>CURLSSLOPT_AUTO_CLIENT_CERT</term>
+               <listitem>
+                <simpara>
+                 当服务器请求时，自动查找并使用客户端证书进行身份验证。此选项仅支持 Schannel（本机 Windows SSL 库）。
+                </simpara>
+               </listitem>
+              </varlistentry>
+              <varlistentry>
+               <term>CURLSSLOPT_NATIVE_CA</term>
+               <listitem>
+                <simpara>
+                 使用操作系统的本地 CA 存储进行证书验证。仅在使用 OpenSSL 构建的 Windows 上有效。
+                </simpara>
+                <note>
+                 <simpara>
+                  此选项尚处于实验阶段，行为可能会发生变化。
+                 </simpara>
+                </note>
+               </listitem>
+              </varlistentry>
+              <varlistentry>
+               <term>CURLSSLOPT_NO_PARTIALCHAIN</term>
+               <listitem>
+                <simpara>
+                 不接受“partial”证书链，否则 cURL 默认会接受。此选项仅支持 OpenSSL，如果证书链以中间证书而不是根证书结尾，则证书验证将失败。
+                </simpara>
+               </listitem>
+              </varlistentry>
+              <varlistentry>
+               <term>CURLSSLOPT_REVOKE_BEST_EFFORT</term>
+               <listitem>
+                <simpara>
+                 如果存在此类行为的 SSL 后端缺少分发点或分发点（distribution point）处于离线状态，则忽略证书吊销检查。此选项仅支持
+                 Schannel（本机 Windows SSL 库）。
+                </simpara>
+                <note>
+                 <simpara>
+                  如果与 <constant>CURLSSLOPT_NO_REVOKE</constant> 结合使用，则后者优先。
+                 </simpara>
+                </note>
+               </listitem>
+              </varlistentry>
+             </variablelist>
+            </para>
            </entry>
            <entry valign="top">
-            Added in cURL 7.25.0. Available since PHP 7.0.7.
+            自 cURL 7.25.0 添加，并且自 PHP 7.0.7 起可用。
            </entry>
           </row>
           <row>
@@ -901,13 +937,41 @@
           <row>
            <entry valign="top"><constant>CURLOPT_SSLVERSION</constant></entry>
            <entry valign="top">
-            <constant>CURL_SSLVERSION_DEFAULT</constant> (0)、<constant>CURL_SSLVERSION_TLSv1</constant> (1)、<constant>CURL_SSLVERSION_SSLv2</constant> (2)、<constant>CURL_SSLVERSION_SSLv3</constant> (3)、<constant>CURL_SSLVERSION_TLSv1_0</constant> (4)、<constant>CURL_SSLVERSION_TLSv1_1</constant> (5) 、<constant>CURL_SSLVERSION_TLSv1_2</constant> (6) 或
-            <constant>CURL_SSLVERSION_TLSv1_3</constant> (7) 中的其中一个。
-            <note>
-             <para>
-              最好别设置这个值并让它使用默认值。鉴于 SSLv2 和 SSLv3 中的已知漏洞，将其设置为 2 或 3 非常危险。
-             </para>
-            </note>
+            <para>
+              <simplelist type="inline">
+                <member><constant>CURL_SSLVERSION_DEFAULT</constant></member>
+                <member><constant>CURL_SSLVERSION_TLSv1</constant></member>
+                <member><constant>CURL_SSLVERSION_SSLv2</constant></member>
+                <member><constant>CURL_SSLVERSION_SSLv3</constant></member>
+                <member><constant>CURL_SSLVERSION_TLSv1_0</constant></member>
+                <member><constant>CURL_SSLVERSION_TLSv1_1</constant></member>
+                <member><constant>CURL_SSLVERSION_TLSv1_2</constant></member>
+                <member><constant>CURL_SSLVERSION_TLSv1_3</constant></member>
+              </simplelist>
+              中的其中一个。
+            </para>
+            <simpara>
+             可以使用 <constant>CURL_SSLVERSION_MAX_<replaceable>*</replaceable></constant> 中的常量来设置最大 TLS 版本。 
+            </simpara>
+            <para>
+             还可以将 <constant>CURL_SSLVERSION_<replaceable>*</replaceable></constant> 中的某个常量与
+             <constant>CURL_SSLVERSION_MAX_<replaceable>*</replaceable></constant> 的某个进行按位或运算。
+
+             <simplelist type="inline">
+              <member><constant>CURL_SSLVERSION_MAX_DEFAULT</constant>（类库支持的最大版本）</member>
+              <member><constant>CURL_SSLVERSION_MAX_TLSv1_0</constant></member>
+              <member><constant>CURL_SSLVERSION_MAX_TLSv1_1</constant></member>
+              <member><constant>CURL_SSLVERSION_MAX_TLSv1_2</constant></member>
+              <member><constant>CURL_SSLVERSION_MAX_TLSv1_3</constant></member>
+             </simplelist>
+             。
+            </para>
+            <warning>
+             <simpara>
+              最好不要设置此选项并使用默认值。因为考虑到 SSLv2 和 SSLv3 中已知的漏洞，将其设置为
+              <constant>CURL_SSLVERSION_SSLv2</constant> 或 <constant>CURL_SSLVERSION_SSLv3</constant> 非常危险。
+             </simpara>
+            </warning>
            </entry>
            <entry valign="top">
            </entry>
@@ -915,16 +979,35 @@
           <row>
            <entry valign="top"><constant>CURLOPT_PROXY_SSL_OPTIONS</constant></entry>
            <entry valign="top">
-            设置代理 SSL 行为选项，它是以下任何常量的位掩码：
-            <simpara>
-             <constant>CURLSSLOPT_ALLOW_BEAST</constant>：不要尝试对 SSL3 和 TLS1.0 协议中的安全漏洞使用任何替代方法。
-            </simpara>
-            <simpara>
-             <constant>CURLSSLOPT_NO_REVOKE</constant>：对存在此类行为的 SSL 后端禁用证书吊销检查。（curl &gt;= 7.44.0）
-            </simpara>
-            <simpara>
-             <constant>CURLSSLOPT_NO_PARTIALCHAIN</constant>：不接受“部分”（partial）证书链，不然默认接受。（curl &gt;= 7.68.0）
-            </simpara>
+            <para>
+             设置代理 SSL 行为选项，它是以下常量的位掩码：
+             <variablelist>
+              <varlistentry>
+               <term>CURLSSLOPT_ALLOW_BEAST</term>
+               <listitem>
+                <simpara>
+                 不要尝试对 SSL3 和 TLS1.0 协议中的安全漏洞使用任何替代方法。
+                </simpara>
+               </listitem>
+              </varlistentry>
+              <varlistentry>
+               <term>CURLSSLOPT_NO_REVOKE</term>
+               <listitem>
+                <simpara>
+                 对存在此类行为的 SSL 后端禁用证书吊销检查。（curl &gt;= 7.44.0）
+                </simpara>
+               </listitem>
+              </varlistentry>
+              <varlistentry>
+               <term>CURLSSLOPT_NO_PARTIALCHAIN</term>
+               <listitem>
+                <simpara>
+                 不接受“部分”（partial）证书链，不然默认接受。（curl &gt;= 7.68.0）
+                </simpara>
+               </listitem>
+              </varlistentry>
+             </variablelist>
+            </para>
            </entry>
            <entry valign="top">
             自 PHP 7.3.0 和 libcurl &gt;= cURL 7.52.0 起可用。
@@ -944,13 +1027,28 @@
           <row>
            <entry valign="top"><constant>CURLOPT_PROXY_SSLVERSION</constant></entry>
            <entry valign="top">
-            <constant>CURL_SSLVERSION_DEFAULT</constant>、<constant>CURL_SSLVERSION_TLSv1</constant>、<constant>CURL_SSLVERSION_TLSv1_0</constant>、<constant>CURL_SSLVERSION_TLSv1_1</constant>、<constant>CURL_SSLVERSION_TLSv1_2</constant>、<constant>CURL_SSLVERSION_TLSv1_3</constant>、<constant>CURL_SSLVERSION_MAX_DEFAULT</constant>、<constant>CURL_SSLVERSION_MAX_TLSv1_0</constant>、<constant>CURL_SSLVERSION_MAX_TLSv1_1</constant>、<constant>CURL_SSLVERSION_MAX_TLSv1_2</constant>、<constant>CURL_SSLVERSION_MAX_TLSv1_3</constant>
-            或 <constant>CURL_SSLVERSION_SSLv3</constant> 其中之一。
-            <note>
-             <para>
-              最好的办法是不要设置它，使用默认的 <constant>CURL_SSLVERSION_DEFAULT</constant>，这将尝试找出远程 SSL 协议版本。
-             </para>
-            </note>
+            <para>
+             <simplelist type="inline">
+              <member><constant>CURL_SSLVERSION_DEFAULT</constant></member>
+              <member><constant>CURL_SSLVERSION_TLSv1</constant></member>
+              <member><constant>CURL_SSLVERSION_TLSv1_0</constant></member>
+              <member><constant>CURL_SSLVERSION_TLSv1_1</constant></member>
+              <member><constant>CURL_SSLVERSION_TLSv1_2</constant></member>
+              <member><constant>CURL_SSLVERSION_TLSv1_3</constant></member>
+              <member><constant>CURL_SSLVERSION_MAX_DEFAULT</constant></member>
+              <member><constant>CURL_SSLVERSION_MAX_TLSv1_0</constant></member>
+              <member><constant>CURL_SSLVERSION_MAX_TLSv1_1</constant></member>
+              <member><constant>CURL_SSLVERSION_MAX_TLSv1_2</constant></member>
+              <member><constant>CURL_SSLVERSION_MAX_TLSv1_3</constant></member>
+              <member><constant>CURL_SSLVERSION_SSLv3</constant></member>
+             </simplelist>
+             中的一个。
+            </para>
+            <warning>
+             <simpara>
+              最好不要设置此选项并使用默认的 <constant>CURL_SSLVERSION_DEFAULT</constant>，这将尝试找出远程 SSL 协议版本。
+             </simpara>
+            </warning>
            </entry>
            <entry valign="top">
             自 PHP 7.3.0 和 libcurl &gt;= cURL 7.52.0 起可用。
@@ -1219,7 +1317,15 @@
           <row>
            <entry valign="top"><constant>CURLOPT_COOKIEJAR</constant></entry>
            <entry valign="top">
-            连接结束后，比如，调用 curl_close 后，保存 cookie 信息的文件。
+            <simpara>
+             当调用句柄的析构函数时，用于保存所有内部 cookie 的文件的名称。
+            </simpara>
+            <warning>
+             <simpara>
+              从 PHP 8.0.0 开始，<function>curl_close</function> 为空操作（什么都不做），<emphasis>不会</emphasis>销毁句柄。如果需要在句柄自动销毁之前写入
+              cookie，请在句柄上调用 <function>unset</function>。
+             </simpara>
+            </warning>
            </entry>
            <entry valign="top">
            </entry>
@@ -1620,7 +1726,9 @@
           <row>
            <entry valign="top"><constant>CURLOPT_PROXY_TLSAUTH_TYPE</constant></entry>
            <entry valign="top">
-            The method of the TLS authentication used for the HTTPS connection. Supported method is "SRP".
+            <simpara>
+             用于 HTTPS 连接的 TLS 身份验证方法。支持的方法是 <literal>"SRP"</literal>。
+            </simpara>
             <note>
              <para>
               Secure Remote Password (SRP) authentication for TLS provides mutual authentication 
