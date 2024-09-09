@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: 6d29533483657c036e49edb5ea88c7103d126681 Maintainer: Altair Status: ready -->
+<!-- EN-Revision: d58ee8eaaa7f716c51f66f5f1058ab3c42376d98 Maintainer: Altair Status: ready -->
 <!-- CREDITS: dallas, Luffy -->
 <chapter xml:id="language.references" xmlns="http://docbook.org/ns/docbook">
  <title>引用的解释</title>
@@ -12,7 +11,8 @@
    在 PHP 中引用意味着用不同的名字访问同一个变量内容。这并不像 C
    的指针：例如你不能对他们做指针运算，他们并不是实际的内存地址……
    查看<xref linkend="language.references.arent" />了解更多信息。
-   替代的是，引用是符号表别名。注意在PHP 中，变量名和变量内容是不一样的，
+   替代的是，引用是<link linkend="features.gc.refcounting-basics">符号表</link>别名。
+   注意在PHP 中，变量名和变量内容是不一样的，
    因此同样的内容可以有不同的名字。最接近的比喻是
    Unix 的文件名和文件本身——变量名是目录条目，而变量内容则是文件本身。引用可以被看作是
    Unix 文件系统中的硬链接。
@@ -33,11 +33,13 @@
      PHP 的引用允许用两个变量来指向同一个内容。意思是，当这样做时：
      <informalexample>
       <programlisting role="php">
-  <![CDATA[
-  <?php
-  $a =& $b;
-  ?>
-  ]]>
+<![CDATA[
+<?php
+
+$a =& $b;
+
+?>
+]]>
       </programlisting>
      </informalexample>
      这意味着 <varname>$a</varname> 和 <varname>$b</varname> 指向了同一个变量。
@@ -57,7 +59,8 @@
       <programlisting role="php">
 <![CDATA[
 <?php
-function foo(&$var) { }
+
+function foo(&$var) {}
 
 foo($a); // 创建 $a 并赋值为 null
 
@@ -65,9 +68,10 @@ $b = array();
 foo($b['b']);
 var_dump(array_key_exists('b', $b)); // bool(true)
 
-$c = new stdClass;
+$c = new stdClass();
 foo($c->d);
 var_dump(property_exists($c, 'd')); // bool(true)
+
 ?>
 ]]>
       </programlisting>
@@ -80,7 +84,9 @@ var_dump(property_exists($c, 'd')); // bool(true)
     <programlisting role="php">
 <![CDATA[
 <?php
+
 $foo =& find_var($bar);
+
 ?>
 ]]>
     </programlisting>
@@ -103,12 +109,14 @@ $foo =& find_var($bar);
      <programlisting role="php">
 <![CDATA[
 <?php
+
 $var1 = "Example variable";
 $var2 = "";
 
 function global_references($use_globals)
 {
     global $var1, $var2;
+
     if (!$use_globals) {
         $var2 =& $var1; // 仅在函数内部可见
     } else {
@@ -118,8 +126,10 @@ function global_references($use_globals)
 
 global_references(false);
 echo "var2 is set to '$var2'\n"; // var2 is set to ''
+
 global_references(true);
 echo "var2 is set to '$var2'\n"; // var2 is set to 'Example variable'
+
 ?>
 ]]>
      </programlisting>
@@ -138,12 +148,16 @@ echo "var2 is set to '$var2'\n"; // var2 is set to 'Example variable'
      <programlisting role="php">
 <![CDATA[
 <?php
+
 $ref = 0;
 $row =& $ref;
+
 foreach (array(1, 2, 3) as $row) {
     // 做点什么
 }
+
 echo $ref; // 3 - 迭代数组的最后一个元素
+
 ?>
 ]]>
      </programlisting>
@@ -159,11 +173,16 @@ echo $ref; // 3 - 迭代数组的最后一个元素
         <programlisting role="php">
           <![CDATA[
 <?php
+
 $a = 1;
 $b = array(2, 3);
+
 $arr = array(&$a, &$b[0], &$b[1]);
-$arr[0]++; $arr[1]++; $arr[2]++;
+$arr[0]++;
+$arr[1]++;
+$arr[2]++;
 /* $a == 2, $b == array(3, 4); */
+
 ?>
 ]]>
         </programlisting>
@@ -178,19 +197,21 @@ $arr[0]++; $arr[1]++; $arr[2]++;
         <programlisting role="php">
           <![CDATA[
 <?php
+
 /* 标量变量赋值 */
 $a = 1;
 $b =& $a;
 $c = $b;
-$c = 7; //$c 不是引用；不会改变 $a 或者 $b
+$c = 7; // $c 不是引用；不会改变 $a 或者 $b
 
 /* 数组变量赋值 */
 $arr = array(1);
-$a =& $arr[0]; //$a 和 $arr[0] 设置了相同的引用
-$arr2 = $arr; //不是引用赋值！
+$a =& $arr[0]; // $a 和 $arr[0] 设置了相同的引用
+$arr2 = $arr; // 不是引用赋值！
 $arr2[0]++;
 /* $a == 2, $arr == array(2) */
 /* 尽量 $arr 不是引用，但是它的内容已经更改！ */
+
 ?>
 ]]>
         </programlisting>
@@ -207,6 +228,7 @@ $arr2[0]++;
     <programlisting role="php">
 <![CDATA[
 <?php
+
 function foo(&$var)
 {
     $var++;
@@ -214,6 +236,7 @@ function foo(&$var)
 
 $a=5;
 foo($a);
+
 ?>
 ]]>
     </programlisting>
@@ -239,11 +262,14 @@ foo($a);
     <programlisting role="php">
 <![CDATA[
 <?php
+
 function foo(&$var)
 {
     $var =& $GLOBALS["baz"];
 }
+
 foo($bar);
+
 ?>
 ]]>
     </programlisting>
@@ -255,7 +281,7 @@ foo($bar);
    <varname>$GLOBALS["baz"]</varname> 上面。不可能通过引用机制将 <varname>$bar</varname>
    在函数调用范围内绑定到别的变量上面，因为在函数 <varname>foo</varname> 中并没有变量
    <varname>$bar</varname>（它被表示为 <varname>$var</varname>，但是 <varname>$var</varname>
-   只有变量内容而没有调用符号表中的名字到值的绑定）。可以使用<link
+   只有变量内容而没有调用<link linkend="features.gc.refcounting-basics">符号表</link>中的名字到值的绑定）。可以使用<link
    linkend="language.references.return">引用返回</link>来引用被函数选择的变量。
   </simpara>
  </sect1>
@@ -268,14 +294,17 @@ foo($bar);
     <programlisting role="php">
 <![CDATA[
 <?php
+
 function foo(&$var)
 {
     $var++;
 }
 
 $a=5;
+
 foo($a);
 // 这里 $a 是 6
+
 ?>
 ]]>
     </programlisting>
@@ -297,16 +326,20 @@ foo($a);
      <programlisting role="php">
 <![CDATA[
 <?php
+
 function foo(&$var)
 {
     $var++;
 }
+
 function &bar()
 {
     $a = 5;
     return $a;
 }
+
 foo(bar());
+
 ?>
 ]]>
      </programlisting>
@@ -322,26 +355,28 @@ foo(bar());
      <programlisting role="php">
 <![CDATA[
 <?php
+
 function foo(&$var)
 {
     $var++;
 }
+
 function bar() // 注意缺少 &
 {
     $a = 5;
     return $a;
 }
+
 foo(bar()); // 导致 notice 信息
 
 foo($a = 5) // 表达式，不是变量
 foo(5) // 导致致命错误
 
-class Foobar
-{
-}
+class Foobar {}
 
 foo(new Foobar()) // 自 PHP 7.0.7 起生成通知
                   // 注意：只有变量应该通过引用传递
+
 ?>
 ]]>
      </programlisting>
@@ -360,18 +395,21 @@ foo(new Foobar()) // 自 PHP 7.0.7 起生成通知
      <programlisting role="php">
 <![CDATA[
 <?php
-class foo {
+class Foo
+{
     public $value = 42;
 
-    public function &getValue() {
+    public function &getValue()
+    {
         return $this->value;
     }
 }
 
-$obj = new foo;
-$myValue = &$obj->getValue(); // $myValue 是对 $obj->value 的引用，即 42。
+$obj = new Foo();
+$myValue = &$obj->getValue(); // $myValue 是对 $obj->value 的引用，即 42
 $obj->value = 2;
-echo $myValue;                // 打印 $obj->value 的新值，即 2。
+echo $myValue;                // 打印 $obj->value 的新值，即 2
+
 ?> 
 ]]>
      </programlisting>
@@ -400,12 +438,15 @@ echo $myValue;                // 打印 $obj->value 的新值，即 2。
        <programlisting role="php">
          <![CDATA[
 <?php
-function &collector() {
-  static $collection = array();
-  return $collection;
+function &collector()
+{
+    static $collection = array();
+    return $collection;
 }
+
 $collection = &collector();
 $collection[] = 'foo';
+
 ?>
 ]]>
        </programlisting>
@@ -415,11 +456,14 @@ $collection[] = 'foo';
        <programlisting role="php">
          <![CDATA[
 <?php
-function &collector() {
-  static $collection = array();
-  return $collection;
+function &collector()
+{
+    static $collection = array();
+    return $collection;
 }
+
 array_push(collector(), 'foo');
+
 ?>
 ]]>
        </programlisting>
@@ -441,9 +485,11 @@ array_push(collector(), 'foo');
     <programlisting role="php">
 <![CDATA[
 <?php
+
 $a = 1;
 $b =& $a;
 unset($a);
+
 ?>
 ]]>
     </programlisting>
@@ -472,7 +518,9 @@ unset($a);
      <programlisting role="php">
 <![CDATA[
 <?php
+
 $var =& $GLOBALS["var"];
+
 ?>
 ]]>
      </programlisting>
