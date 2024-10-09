@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: bae0435ddd1fbda2fe0089f682265ee3014dacea Maintainer: daijie Status: ready -->
-<!-- CREDITS: mowangjuanzi, Luffy -->
+<!-- EN-Revision: 288ea761f5a8e7c685fe7f6fce2d7de0a87b31bd Maintainer: Luffy Status: ready -->
 <article xml:id="reference.pcre.pattern.modifiers" xmlns="http://docbook.org/ns/docbook">
  <title>模式修饰符</title>
  <titleabbrev>正则表达式模式中可用的模式修饰符</titleabbrev>
   <para>
-  下面列出了当前可用的 PCRE 修饰符。括号中提到的名字是 PCRE 内部这些修饰符的名称。
-  模式修饰符中的空格，换行符会被忽略，其他字符会导致错误。
+   目前可用的 PCRE 修饰符如下所示。括号中的名称是这些修饰符的内部 PCRE 名称。
+   修饰符中的空格和换行符会被忽略，其他字符会引发错误。
   </para>
   <para>
    <blockquote>
@@ -16,7 +15,7 @@
       <term><emphasis>i</emphasis> (<literal>PCRE_CASELESS</literal>)</term>
       <listitem>
        <simpara>
-       如果设置了这个修饰符，模式中的字母会进行大小写不敏感匹配。
+        如果设置了这个修饰符，模式中的字母会匹配大小写字母。
        </simpara>
       </listitem>
      </varlistentry>
@@ -24,14 +23,15 @@
       <term><emphasis>m</emphasis> (<literal>PCRE_MULTILINE</literal>)</term>
       <listitem>
        <simpara>
-       默认情况下，PCRE 认为目标字符串是由单行字符组成的(然而实际上它可能会包含多行)，
-   "行首"元字符 (^) 仅匹配字符串的开始位置， 而"行末"元字符 ($) 仅匹配字符串末尾，
-   或者最后的换行符(除非设置了 <emphasis>D</emphasis> 修饰符)。这个行为和 perl 相同。
+        默认情况下，PCRE 将主题字符串视为由单个 "行" 字符组成的字符串（即使实际上包含多个换行符）。
+        "行首" 元字符 (^) 仅在字符串的开头匹配，而 "行尾" 元字符 ($) 仅在字符串的结尾或终止换行符之前匹配
+        （除非设置了 <emphasis>D</emphasis> 修饰符）。
+        这与 Perl 相同。
        </simpara>
        <simpara>
-       当这个修饰符设置之后，“行首”和“行末”就会匹配目标字符串中任意换行符之前或之后，另外，
-       还分别匹配目标字符串的最开始和最末尾位置。这等同于 perl 的 /m 修饰符。如果目标字符串
-       中没有 "\n" 字符，或者模式中没有出现 ^ 或 $，设置这个修饰符不产生任何影响。
+        当设置了这个修饰符时，"行首" 和 "行尾" 元字符会在主题字符串中的每个换行符之后或之前立即匹配。
+        这等效于 Perl 的 /m 修饰符。如果主题字符串中没有 "\n" 字符，或者模式中没有 "^" 或 "$" 的出现，
+        设置这个修饰符不会产生任何效果。
        </simpara>
       </listitem>
      </varlistentry>
@@ -39,9 +39,9 @@
       <term><emphasis>s</emphasis> (<literal>PCRE_DOTALL</literal>)</term>
       <listitem>
        <simpara>
-       如果设置了这个修饰符，模式中的点号元字符匹配所有字符，包含换行符。如果没有这个
-       修饰符，点号不匹配换行符。这个修饰符等同于 perl 中的/s修饰符。 一个取反字符类比如
-       [^a] 总是匹配换行符，而不依赖于这个修饰符的设置。
+        如果设置了这个修饰符，模式中的点元字符将匹配所有字符，包括换行符。如果没有设置这个修饰符，
+        换行符会被排除在外。这个修饰符等效于 Perl 的 /s 修饰符。负类（如 [^a]）总是匹配换行符，
+        与这个修饰符的设置无关。
        </simpara>
       </listitem>
      </varlistentry>
@@ -49,12 +49,10 @@
       <term><emphasis>x</emphasis> (<literal>PCRE_EXTENDED</literal>)</term>
       <listitem>
        <simpara>
-       如果设置了这个修饰符，模式中的没有经过转义的或不在字符类中的空白数据字符总会被忽略， 
-       并且位于一个未转义的字符类外部的#字符和下一个换行符之间的字符也被忽略。
-        这个修饰符
-       等同于 perl 中的 /x 修饰符，使被编译模式中可以包含注释。 注意：这仅用于数据字符。 空白字符
-       还是不能在模式的特殊字符序列中出现，比如序列 (?( 引入了一个条件子组(译注: 这种语法定义的
-       特殊字符序列中如果出现空白字符会导致编译错误。 比如(?(就会导致错误)。
+        如果设置了这个修饰符，模式中的空白数据字符会被完全忽略，除非被转义或在字符类内部，
+        并且在一个未转义的 "#" 和下一个换行符之间的字符也会被忽略。这等效于 Perl 的 /x 修饰符，
+        并且使得在复杂模式中包含评论成为可能。然而，这仅适用于数据字符。空白字符永远不会出现在模式中的特殊字符序列中，
+        例如在引入条件子模式的序列 (?( 中。
        </simpara>
       </listitem>
      </varlistentry>
@@ -62,9 +60,8 @@
       <term><emphasis>A</emphasis> (<literal>PCRE_ANCHORED</literal>)</term>
       <listitem>
        <simpara>
-       如果设置了这个修饰符，模式被强制为"锚定"模式，也就是说约束匹配使其仅从
-       目标字符串的开始位置搜索。这个效果同样可以使用适当的模式构造出来，并且
-       这也是 perl 种实现这种模式的唯一途径。
+        如果设置了这个修饰符，模式会被强制为 "锚定"，也就是说，它只能匹配主题字符串的开头。
+        这个效果也可以通过模式本身中的适当构造来实现，这是在 Perl 中唯一的方法。
        </simpara>
       </listitem>
      </varlistentry>
@@ -72,9 +69,9 @@
       <term><emphasis>D</emphasis> (<literal>PCRE_DOLLAR_ENDONLY</literal>)</term>
       <listitem>
        <simpara>
-       如果这个修饰符被设置，模式中的元字符美元符号仅仅匹配目标字符串的末尾。如果这个修饰符
-       没有设置，当字符串以一个换行符结尾时， 美元符号还会匹配该换行符(但不会匹配之前的任何换行符)。
-   如果设置了修饰符<emphasis>m</emphasis>，这个修饰符被忽略. 在 perl 中没有与此修饰符等同的修饰符。
+        如果设置了这个修饰符，模式中的美元元字符只能匹配主题字符串的结尾。
+        如果没有设置这个修饰符，美元元字符也会在主题字符串的最后一个字符之前立即匹配，但不会在其他换行符之前匹配。
+        如果设置了 <emphasis>m</emphasis> 修饰符，这个修饰符会被忽略。在 Perl 中没有这个修饰符的等效项。
        </simpara>
       </listitem>
      </varlistentry>
@@ -82,9 +79,10 @@
       <term><emphasis>S</emphasis></term>
       <listitem>
        <simpara>
-       当一个模式需要多次使用的时候，为了得到匹配速度的提升，值得花费一些时间
-       对其进行一些额外的分析。如果设置了这个修饰符，这个额外的分析就会执行。当前， 
-       这种对一个模式的分析仅仅适用于非锚定模式的匹配(即没有单独的固定开始字符)。
+        当一个模式将被多次使用时，值得花费更多时间来分析它，以加快匹配所需的时间。
+        如果设置了这个修饰符，那么会执行额外的分析。
+        目前，对于不具有单个固定起始字符的非锚定模式，研究模式是有用的。
+        从 PHP 7.3.0 开始，这个修饰符没有效果。
        </simpara>
       </listitem>
      </varlistentry>
@@ -92,16 +90,14 @@
       <term><emphasis>U</emphasis> (<literal>PCRE_UNGREEDY</literal>)</term>
       <listitem>
        <simpara>
-       这个修饰符逆转了量词的"贪婪"模式。 使量词默认为非贪婪的，通过量词后紧跟<literal>?</literal>
-       的方式可以使其成为贪婪的。这和 perl 是不兼容的。 它同样可以使用
-       <link linkend="regexp.reference.internal-options">模式内修饰符设置</link>
-       <literal>(?U)</literal>进行设置， 或者在量词后以问号标记其非贪婪(比如<literal>.*?</literal>)。
+        这个修饰符反转了量词的 "贪婪性"，使其默认情况下不贪婪，但如果后面跟着 <literal>?</literal>，则变为贪婪。
+        它与 Perl 不兼容。也可以通过模式内的 <literal>(?U)</literal><link linkend="regexp.reference.internal-options">修饰符设置</link>
+        或在量词后面加上问号（例如 <literal>.*?</literal>）来设置。
        </simpara>
        <note>
         <para>
-        在非贪婪模式，通常不能匹配超过
-        <link linkend="ini.pcre.backtrack-limit">pcre.backtrack_limit</link>
-        的字符。
+         在不贪婪模式下，通常不可能匹配超过 <link linkend="ini.pcre.backtrack-limit">pcre.backtrack_limit</link>
+         个字符。
         </para>
        </note>
       </listitem>
@@ -110,10 +106,9 @@
       <term><emphasis>X</emphasis> (<literal>PCRE_EXTRA</literal>)</term>
       <listitem>
        <simpara>
-       这个修饰符打开了 PCRE 与 perl 不兼容的附件功能。模式中的任意反斜线后就 ingen 一个
-       没有特殊含义的字符都会导致一个错误，以此保留这些字符以保证向后兼容性。
-        默认情况下，在 perl 中，反斜线紧跟一个没有特殊含义的字符被认为是该字符的原文。
-       当前没有其他特性由这个修饰符控制。
+        这个修饰符打开了 PCRE 的额外功能，这些功能与 Perl 不兼容。模式中的任何反斜杠后跟一个没有特殊含义的字母的组合都会引发错误，
+        从而为将来的扩展保留这些组合。默认情况下，与 Perl 一样，反斜杠后跟一个没有特殊含义的字母会被视为字面量。
+        目前没有其他受这个修饰符控制的功能。
        </simpara>
       </listitem>
      </varlistentry>
@@ -121,9 +116,9 @@
       <term><emphasis>J</emphasis> (<literal>PCRE_INFO_JCHANGED</literal>)</term>
       <listitem>
        <simpara>
-       内部选项设置(?J)修改本地的<literal>PCRE_DUPNAMES</literal>选项。允许子组重名，
-       (译注：只能通过内部选项设置，外部的 /J 设置会产生错误。)
-       自 PHP 7.2.0 起，也能支持 <literal>J</literal> 修饰符。
+        这个内部修饰符 (?J) 改变了本地 <literal>PCRE_DUPNAMES</literal> 选项。
+        允许子模式名称重复。
+        从 PHP 7.2.0 开始，<literal>J</literal> 也作为修饰符支持。
        </simpara>
       </listitem>
      </varlistentry>
@@ -131,10 +126,9 @@
       <term><emphasis>u</emphasis> (<literal>PCRE_UTF8</literal>)</term>
       <listitem>
        <simpara>
-       此修正符打开一个与 Perl 不兼容的附加功能。 模式和目标字符串都被认为是 UTF-8 的。
-        无效的目标字符串会导致 preg_* 函数什么都匹配不到；
-        无效的模式字符串会导致 E_WARNING 级别的错误。
-        5 字节和 6 字节的 UTF-8 字符序列以无效字符序列对待。
+        这个修饰符打开了 PCRE 的额外功能，这些功能与 Perl 不兼容。模式和主题字符串被视为 UTF-8。
+        无效的主题字符串会导致 preg_* 函数匹配不到任何内容；无效的模式会触发一个 E_WARNING 级别的错误。
+        五个和六个字节的 UTF-8 序列被视为无效。
        </simpara>
       </listitem>
      </varlistentry>
@@ -142,9 +136,10 @@
       <term><emphasis>n</emphasis> (<literal>PCRE_NO_AUTO_CAPTURE</literal>)</term>
       <listitem>
        <simpara>
-        使用此修饰符不会捕获简单的 (xyz) 组。只有像 <code>(?&lt;name&gt;xyz)</code>
-        这样的命名组才会捕获。这仅影响要捕获的组，仍然可以使用编号的子模式引用，并且匹配数组仍将包含编号的结果。
-        从 PHP 8.2.0 起可用。
+        这个修饰符使简单的 <literal>(xyz)</literal> 组不捕获。
+        只有像 <literal>(?&lt;name&gt;xyz)</literal> 这样的命名组才会捕获。
+        这只影响哪些组是捕获的，仍然可以使用编号的子模式引用，匹配数组仍然包含编号的结果。
+        从 PHP 8.2.0 开始可用。
        </simpara>
       </listitem>
      </varlistentry>
