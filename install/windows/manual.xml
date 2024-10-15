@@ -1,78 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 8e732e84a1425cf0ab3a5b0da8fe113c7a6da85e Maintainer: avenger Status: ready -->
-<!-- CREDITS: Luffy -->
-<!-- Reviewed: no -->
+<!-- EN-Revision: 2dbf3d9064d4cb07f0a2f7d06641c877a2e5ed24 Maintainer: avenger Status: ready -->
+<!-- CREDITS: Luffy, mowangjuanzi -->
 <sect1 xml:id="install.windows.manual" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
- <title>在 Windows 上手动安装 PHP</title>
- <sect2>
-  <title>选择 Web 服务器</title>
-  <sect3>
-   <title>IIS</title>
-     <para>
-      IIS 是 Windows 内置的服务。在
-      Windows 服务器版本上，请使用服务器管理（Server Manager）来添加 IIS 规则。同时需要设置 CGI 角色规则。在
-      Windows 桌面版本上，需要使用控制面板中的 "添加/删除程序" 功能来添加 IIS。请参阅微软的官方文档的  <link xlink:href="https://docs.microsoft.com/en-us/previous-versions/ms181052(v=vs.80)">详细说明</link>。
+ <title>手动安装预编译的二进制文件</title>
 
-      对于桌面 web app 开发者，你也可以选择 IIS/Express 或 PHP Desktop。
-      <example>
-       <title>命令行下配置 IIS 和 PHP</title>
-       <programlisting>
-<![CDATA[
+ <simplesect xml:id="install.windows.requirements" annotations="chunk:false">
+  <title>安装要求</title>
+  <simpara>
+   PHP 仅适用于 32 位 x86 或 64 位 x64 系统，目前无法在 Windows RT 或 Windows on ARM 上运行。从
+   8.3.0 版本开始，PHP 需要 Windows 8 或 Windows Server 2012。7.2.0 之后的版本需要 Windows 2008
+   R2 或 Windows 7。7.2.0 之前的版本支持 Windows 2008 和 Vista。
+  </simpara>
 
-@echo off
+  <simpara>
+   PHP 需要 Visual C 运行时 (CRT)。许多其他应用程序也需要它，因此很可能已经安装了该运行时，但如果没有，Visual
+   Studio 2022 的 Microsoft Visual C++ 可再发行程序包（Microsoft Visual C++ Redistributable for
+   Visual Studio 2022）适用于所有 PHP 版本，可从 <link
+   xlink:href="&url.microsoft.visualc.redistr;">Microsoft 下载</link>。
+  </simpara>
 
-REM download .ZIP file of PHP build from http://windows.php.net/downloads/
+  <simpara>
+   必须下载 x86 CRT 才能与 PHP x86 版本一起使用，而 x64 CRT 则适用于 PHP x64 版本。如果已安装
+   CRT，安装程序将显示一条消息，表明已安装且不会进行任何更改。CRT 安装程序支持 <option>/quiet</option>
+   和 <option>/norestart</option> 命令行开关，因此可以编写安装脚本。
+  </simpara>
+ </simplesect>
 
-REM path to directory you decompressed PHP .ZIP file into (no trailing \)
-set phppath=c:\php
+ <simplesect>
+  <title>哪里可以下载 PHP 二进制文件</title>
+  <simpara>
+   Windows 版本可从 <link xlink:href="&url.php.win.downloads;">PHP Windows
+   网站</link>下载。所有版本都经过优化 (<abbrev>PGO</abbrev>)，QA 和 GA 版本都经过全面测试。
+  </simpara>
+ </simplesect>
 
-
-REM Clear current PHP handlers
-%windir%\system32\inetsrv\appcmd clear config /section:system.webServer/fastCGI
-REM The following command will generate an error message if PHP is not installed. This can be ignored.
-%windir%\system32\inetsrv\appcmd set config /section:system.webServer/handlers /-[name='PHP_via_FastCGI']
-
-REM Set up the PHP handler
-%windir%\system32\inetsrv\appcmd set config /section:system.webServer/fastCGI /+[fullPath='%phppath%\php-cgi.exe']
-%windir%\system32\inetsrv\appcmd set config /section:system.webServer/handlers /+[name='PHP_via_FastCGI',path='*.php',verb='*',modules='FastCgiModule',scriptProcessor='%phppath%\php-cgi.exe',resourceType='Unspecified']
-%windir%\system32\inetsrv\appcmd set config /section:system.webServer/handlers /accessPolicy:Read,Script
-
-REM Configure FastCGI Variables
-%windir%\system32\inetsrv\appcmd set config -section:system.webServer/fastCgi /[fullPath='%phppath%\php-cgi.exe'].instanceMaxRequests:10000
-%windir%\system32\inetsrv\appcmd.exe set config -section:system.webServer/fastCgi /+"[fullPath='%phppath%\php-cgi.exe'].environmentVariables.[name='PHP_FCGI_MAX_REQUESTS',value='10000']"
-%windir%\system32\inetsrv\appcmd.exe set config -section:system.webServer/fastCgi /+"[fullPath='%phppath%\php-cgi.exe'].environmentVariables.[name='PHPRC',value='%phppath%\php.ini']"
-]]>
-       </programlisting>
-      </example>
-     </para>
-    </sect3>
-    <sect3>
-     <title>Apache</title>
-     <para>
-      有几个用于 Windows 的 Apache 版本。
-      推荐 ApacheLounge 编译的 Apache，但是其他选项（比如 XAMPP、 WampServer、 BitNami）提供了自动安装工具。
-      PHP 可以在带有 mod_php 或者 mod_fastcgi 的 Apache 上使用。
-      mod_php 需要使用相同版本的 Visual C 和 相同的 CPU （x86 或 x64） 编译的 Apache TS 版本。
-     </para>
-    </sect3>
-  </sect2>
-
- <sect2>
-  <title>选择编译版本</title>
+ <simplesect xml:id="install.windows.pecl" annotations="chunk:false">
+  <title>预编译的 PECL 扩展</title>
   <para>
-   从 Windows 专用站点下载适合产品环境使用的 PHP 预编译版本：
-   <link xlink:href="http://windows.php.net/download/">http://windows.php.net/download/</link>。
-   所有的编译都经过优化（<abbrev>PGO</abbrev>），并且 QA 和 GA版本都经过彻底测试。
+   可以从 <link xlink:href="&url.pecl.windows.releases;">PHP Windows 网站的 PECL
+   下载章节</link>获取为 Windows 预先编译的 PECL 扩展。
   </para>
   <para>
-   PHP 编译版本有四种类型：
+   对于使用其他系统（如 Unix）的特定功能或依赖于在 Windows 上无效的扩展，二进制文件不可用。
+  </para>
+ </simplesect>
+
+
+ <simplesect>
+  <title>编译类型</title>
+  <para>
+   PHP 编译有四种类型：
    <itemizedlist spacing="compact">
     <listitem>
-     <para>Thread-Safe(TS) - 线程安全，用于单进程 web 服务器，例如带有 mod_php 的 Apache</para>
+     <para>Thread-Safe (TS) - 线程安全，用于单进程 web 服务器，例如带有 mod_php 的 Apache</para>
     </listitem>
     <listitem>
-     <para>Non-Thread-Safe(NTS) - 非线程安全，用于 IIS 和其他 FastCGI web 服务器（使用带有 mod_fastcgi 的 Apache），并且推荐命令行脚本也用此版本</para>
+     <para>Non-Thread-Safe (NTS) - 非线程安全，用于 IIS 和其他 FastCGI web 服务器（使用带有 mod_fastcgi 的 Apache），并且推荐命令行脚本也用此版本</para>
     </listitem>
     <listitem>
      <para>x86 - 用于 32 位系统。</para>
@@ -82,7 +66,7 @@ REM Configure FastCGI Variables
     </listitem>
    </itemizedlist>
   </para>
- </sect2>
+ </simplesect>
 </sect1>
 <!-- Keep this comment at the end of the file
 Local variables:
