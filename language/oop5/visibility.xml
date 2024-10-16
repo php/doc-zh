@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: f5e5b54129045a7d02c5285a88cea0abff8ffb6f Maintainer: lm92 Status: ready -->
+<!-- EN-Revision: 7d7b378abd302430b8ce7cedb4b78c7033f5e88c Maintainer: lm92 Status: ready -->
 <!-- CREDITS: Luffy, mowangjuanzi -->
  <sect1 xml:id="language.oop5.visibility" xmlns="http://docbook.org/ns/docbook">
   <title>访问控制（可见性）</title>
@@ -16,7 +16,6 @@
    <para>
     类属性可以定义为public， private 或者 protected。在没有任何访问控制关键字的情况下，属性声明为 public。
    </para>
-   <para>
     <example>
      <title>属性声明</title>
      <programlisting role="php">
@@ -73,7 +72,118 @@ $obj2->printHello(); // 输出 Public2、Protected2 和 Undefined
 ]]>
      </programlisting>
     </example>
-   </para>
+   <sect3 xml:id="language.oop5.visibility-members-aviz">
+   <title>不对称属性可见性</title>
+   <simpara>
+    从 PHP 8.4 开始，属性也可以设置不对称的可见性，读取（<literal>get</literal>）
+    和写入（<literal>set</literal>）可以有不同的范围。
+    具体来说，可以单独指定<literal>set</literal>可见性，只要它不比默认可见性更宽。
+   </simpara>
+   <example>
+    <title>不对称属性可见性</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+class Book
+{
+    public function __construct(
+        public private(set) string $title,
+        public protected(set) string $author,
+        protected private(set) int $pubYear,
+    ) {}
+}
+
+class SpecialBook extends Book
+{
+    public function update(string $author, int $year): void
+    {
+        $this->author = $author; // OK
+        $this->pubYear = $year; // Fatal Error
+    }
+}
+
+$b = new Book('How to PHP', 'Peter H. Peterson', 2024);
+
+echo $b->title; // Works
+echo $b->author; // Works
+echo $b->pubYear; // Fatal Error
+
+$b->title = 'How not to PHP'; // Fatal Error
+$b->author = 'Pedro H. Peterson'; // Fatal Error
+$b->pubYear = 2023; // Fatal Error
+?>
+]]>
+     </programlisting>
+   </example>
+   <para>关于不对称可见性有一些注意事项：</para>
+    <itemizedlist>
+     <listitem>
+      <simpara>
+       只有声明了类型的属性才能有单独的<literal>set</literal>可见性。
+      </simpara>
+     </listitem>
+     <listitem>
+      <simpara>
+       <literal>set</literal> 可见性必须和 <literal>get</literal> 可见性相同或更严格。
+       也就是说，<code>public protected(set)</code> 和 <code>protected protected(set)</code>
+       是允许的，但是 <code>protected public(set)</code> 会导致语法错误。
+      </simpara>
+     </listitem>
+     <listitem>
+      <simpara>
+       如果一个属性是 <literal>public</literal>，那么主要可见性可能被省略。
+       也就是说，<code>public private(set)</code> 和 <code>private(set)</code>
+       会有相同的结果。
+      </simpara>
+     </listitem>
+     <listitem>
+      <simpara>
+       一个属性的 <literal>private(set)</literal> 可见性会自动变为 <literal>final</literal>，
+       并且不能在子类中重新声明。
+      </simpara>
+     </listitem>
+     <listitem>
+      <simpara>
+       读取属性的引用遵循 <literal>set</literal> 可见性，而不是 <literal>get</literal>。
+       这是因为引用可能用于修改属性值。
+      </simpara>
+     </listitem>
+     <listitem>
+      <simpara>
+       同样，试图写入数组属性会涉及到内部的 <literal>get</literal> 和 <literal>set</literal> 操作，
+       因此会遵循 <literal>set</literal> 可见性，因为这总是更严格的。
+      </simpara>
+     </listitem>
+    </itemizedlist>
+    <simpara>
+     当一个类继承另一个类时，子类可以重新定义任何不是 <literal>final</literal> 的属性。
+     这样做时，可以扩大主要可见性或 <literal>set</literal> 可见性，只要新的可见性和父类相同或更宽。
+     但是要注意，如果一个 <literal>private</literal> 属性被重写，它实际上并没有改变父类的属性，
+     而是创建了一个具有不同内部名称的新属性。
+    </simpara>
+    <example>
+     <title>不对称属性继承</title>
+     <programlisting role="php">
+<![CDATA[
+<?php
+class Book
+{
+    protected string $title;
+    public protected(set) string $author;
+    protected private(set) int $pubYear;
+}
+
+class SpecialBook extends Book
+{
+    public protected(set) $title; // OK, as reading is wider and writing the same.
+    public string $author; // OK, as reading is the same and writing is wider.
+    public protected(set) int $pubYear; // Fatal Error. private(set) properties are final.
+}
+?>
+]]>
+     </programlisting>
+    </example>
+   </sect3>
   </sect2>
 
   <sect2 xml:id="language.oop5.visiblity-methods">
@@ -81,8 +191,7 @@ $obj2->printHello(); // 输出 Public2、Protected2 和 Undefined
    <para>
     类中的方法可以被定义为 public、private 或 protected。如果没有设置这些关键字，则该方法默认为 public。
    </para>
-   <para>
-    <example>
+   <example>
      <title>方法声明</title>
      <programlisting role="php">
 <![CDATA[
@@ -170,9 +279,8 @@ $myFoo->test(); // Bar::testPrivate
                 // Foo::testPublic
 ?>
 ]]>
-     </programlisting>
-    </example>
-   </para>
+    </programlisting>
+   </example>
   </sect2>
 
   <sect2 xml:id="language.oop5.visiblity-constants">
@@ -180,32 +288,31 @@ $myFoo->test(); // Bar::testPrivate
    <para>
     PHP 7.1.0 开始，类的常量可以定义为 public、private 或 protected。如果没有设置这些关键字，则该常量默认为 public。
    </para>
-   <para>
-    <example>
-     <title>PHP 7.1.0 中的常量声明</title>
-     <programlisting role="php">
+   <example>
+    <title>PHP 7.1.0 中的常量声明</title>
+    <programlisting role="php">
 <![CDATA[
 <?php
 /**
- * Define MyClass
- */
+* Define MyClass
+*/
 class MyClass
 {
-    // 公有常量
-    public const MY_PUBLIC = 'public';
+   // 公有常量
+   public const MY_PUBLIC = 'public';
 
-    // 受保护的常量
-    protected const MY_PROTECTED = 'protected';
+   // 受保护的常量
+   protected const MY_PROTECTED = 'protected';
 
-    // 私有常量
-    private const MY_PRIVATE = 'private';
+   // 私有常量
+   private const MY_PRIVATE = 'private';
 
-    public function foo()
-    {
-        echo self::MY_PUBLIC;
-        echo self::MY_PROTECTED;
-        echo self::MY_PRIVATE;
-    }
+   public function foo()
+   {
+       echo self::MY_PUBLIC;
+       echo self::MY_PROTECTED;
+       echo self::MY_PRIVATE;
+   }
 }
 
 $myclass = new MyClass();
@@ -216,17 +323,17 @@ $myclass->foo(); // 将会输出：Public Protected Private
 
 
 /**
- * Define MyClass2
- */
+* Define MyClass2
+*/
 class MyClass2 extends MyClass
 {
-    // This is public
-    function foo2()
-    {
-        echo self::MY_PUBLIC;
-        echo self::MY_PROTECTED;
-        echo self::MY_PRIVATE; // 这行会产生一个致命错误
-    }
+   // This is public
+   function foo2()
+   {
+       echo self::MY_PUBLIC;
+       echo self::MY_PROTECTED;
+       echo self::MY_PRIVATE; // 这行会产生一个致命错误
+   }
 }
 
 $myclass2 = new MyClass2;
@@ -234,9 +341,8 @@ echo MyClass2::MY_PUBLIC; // 这行可以正常执行
 $myclass2->foo2(); // 将会输出：Public Protected，MY_PRIVATE 是私有常量，无法输出
 ?>
 ]]>
-     </programlisting>
-    </example>
-   </para>
+    </programlisting>
+  </example>
   </sect2>
 
   <sect2 xml:id="language.oop5.visibility-other-objects">
