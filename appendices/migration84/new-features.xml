@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- EN-Revision: 5fbf0f0cbce2dda6a379d8bda33d5b1869702e47 Maintainer: mowangjuanzi Status: partial -->
+<!-- EN-Revision: 8a9f4bd9d54a809d66f32d35ec60eb2b7353f76e Maintainer: mowangjuanzi Status: partial -->
 <sect1 xml:id="migration84.new-features">
  <title>新功能</title>
 
@@ -9,20 +9,48 @@
 
   <!-- RFC: https://wiki.php.net/rfc/property-hooks -->
   <sect3 xml:id="migration84.new-features.core.property-hooks">
-   <title>属性钩子</title>
+   <title>属性挂钩</title>
 
    <simpara>
-    TODO
+    对象属性现在可以其 <literal>get</literal> 和 <literal>set</literal>
+    操作中关联相关的附加逻辑。根据用法，这可能会也可能不会使属性变为虚拟属性，即该属性根本没有实际的存储值。
    </simpara>
 
    <informalexample>
     <programlisting role="php">
 <![CDATA[
 <?php
-/*
-examples
-*/
+class Person
+{
+    // “虚拟”属性，可能无法明确设置。
+    public string $fullName {
+        get => $this->firstName . ' ' . $this->lastName;
+    }
 
+    // 所有的写入操作都会经过这个挂钩，结果就是写入的内容。
+    // 读取访问正常。
+    public string $firstName {
+        set => ucfirst(strtolower($value));
+    }
+
+    // 所有的写入操作都会经过这个挂钩，它必须写入支持值本身。
+    // 读取访问正常。
+    public string $lastName {
+        set {
+            if (strlen($value) < 2) {
+                throw new \InvalidArgumentException('Too short');
+            }
+            $this->lastName = $value;
+        }
+    }
+}
+
+$p = new Person();
+
+$p->firstName = 'peter';
+print $p->firstName; // 打印“Peter”
+$p->lastName = 'Peterson';
+print $p->fullName; // 打印“Peter Peterson”
 ]]>
     </programlisting>
    </informalexample>
@@ -42,6 +70,8 @@ examples
 <?php
 class Example
 {
+    // 第一个可见性修饰符控制 get 可见性，第二个修饰符控制 set 可见性。
+    // The get-visibility must not be narrower than set-visibility.
     public protected(set) string $name;
 
     public function __construct(string $name)
@@ -56,11 +86,35 @@ class Example
 
   <!-- RFC: https://wiki.php.net/rfc/lazy-objects -->
   <sect3 xml:id="migration84.new-features.core.lazy-objects">
-   <title>Lazy Objects</title>
-
+   <title>惰性对象</title>
    <simpara>
-    TODO
+    现在可以创建对象，将初始化延迟到访问时。库和框架可以利用这些惰性对象来延迟获取初始化所需的数据或依赖项。
    </simpara>
+   <informalexample>
+    <programlisting role="php">
+<![CDATA[
+<?php
+class Example
+{
+    public function __construct(private int $data)
+    {
+    }
+
+    // ...
+}
+
+$initializer = static function (Example $ghost): void {
+    // 获取数据或者依赖项
+    $data = ...;
+    // 初始化
+    $ghost->__construct($data);
+};
+
+$reflector = new ReflectionClass(Example::class);
+$object = $reflector->newLazyGhost($initializer);
+]]>
+    </programlisting>
+   </informalexample>
   </sect3>
 
   <!-- RFC: https://wiki.php.net/rfc/deprecated_attribute -->
@@ -68,7 +122,13 @@ class Example
    <title><code>#[\Deprecated]</code> 注解</title>
 
    <simpara>
-    TODO
+    新的 <classname>Deprecated</classname> 属性可用于将函数、方法和类常量标记为已弃用。此弃用属性的行为与 PHP
+    本身提供的现有弃用机制的行为一致。唯一的例外是发出的错误代码是 <constant>E_USER_DEPRECATED</constant>，而不是
+    <constant>E_DEPRECATED</constant>。
+   </simpara>
+
+   <simpara>
+    PHP 本身提供的现有弃用已更新为使用该属性，通过包含简短的解释来改进发出的错误消息。
    </simpara>
   </sect3>
 
@@ -190,9 +250,16 @@ class Example
  <sect2 xml:id="migration84.new-features.dom">
   <title>DOM</title>
 
+  <!-- RFC: https://wiki.php.net/rfc/domdocument_html5_parser -->
+  <!-- RFC: https://wiki.php.net/rfc/opt_in_dom_spec_compliance -->
+  <simpara>
+   添加了 <package>Dom</package> 命名空间，其中包含与现有 DOM 类对应的新类（例如，<classname>Dom\Node</classname> 是新的
+   <classname>DOMNode</classname>）。这些类与 HTML 5 兼容，并且符合 WHATWG 规范；解决了 DOM 扩展中长期存在的错误。旧的 DOM
+   类仍然可用，以实现向后兼容。
+  </simpara>
+
   <para>
-   Added the <methodname>DOMNode::compareDocumentPosition</methodname>
-   with its associated constants:
+   新增 <methodname>DOMNode::compareDocumentPosition</methodname> 及其相关常量：
    <simplelist>
     <member><constant>DOMNode::DOCUMENT_POSITION_DISCONNECTED</constant></member>
     <member><constant>DOMNode::DOCUMENT_POSITION_PRECEDING</constant></member>
@@ -205,23 +272,11 @@ class Example
 
   <!-- RFC: https://wiki.php.net/rfc/improve_callbacks_dom_and_xsl -->
   <simpara>
-   It is now possible to pass any callable to
-   <methodname>DOMXPath::registerPhpFunctions</methodname>.
-   <!-- TODO Mention DOMXPath::registerPHPFunctionNS ? -->
-  </simpara>
- </sect2>
+   现在可以将任何 callable 传递给
+   <methodname>DOMXPath::registerPhpFunctions</methodname>。
 
- <!-- TODO: Should this be moved to "other changes" in the SAPI section? - Girgias -->
- <sect2 xml:id="migration84.new-features.fpm">
-  <title>FPM</title>
-
-  <simpara>
-   Flushing headers without a body will now succeed.
-   <!-- See GH-12785. -->
-  </simpara>
-
-  <simpara>
-   状态页面新增字段用于展示内存峰值。
+   此外，现在使用 <methodname>DOMXPath::registerPhpFunctionNs</methodname> 可以注册使用原生函数调用语法，而不是使用
+   <code>php:function('name')</code>。
   </simpara>
  </sect2>
 
@@ -391,8 +446,8 @@ class Example
   </simpara>
  </sect2>
 
- <sect2 xml:id="migration84.new-features.reflection">
-  <title>Reflection</title>
+ <sect2 xml:id="migration84.new-features.readline">
+  <title>Readline</title>
 
   <simpara>
    <classname>ReflectionAttribute</classname> now contains a
@@ -407,9 +462,7 @@ class Example
 
   <!-- RFC: https://wiki.php.net/rfc/lazy-objects -->
   <para>
-   Multiple new methods and constants which are related to the lazy objects
-   feature have been added:
-
+   添加了与惰性对象功能相关的多个新方法和常量：
    <simplelist>
     <member>
      <methodname>ReflectionClass::newLazyGhost</methodname>
@@ -436,10 +489,10 @@ class Example
      <methodname>ReflectionClass::getLazyInitializer</methodname>
     </member>
     <member>
-     <methodname>ReflectionClass::skipLazyInitialization</methodname>
+     <methodname>ReflectionProperty::skipLazyInitialization</methodname>
     </member>
     <member>
-     <methodname>ReflectionClass::setRawValueWithoutLazyInitialization</methodname>
+     <methodname>ReflectionProperty::setRawValueWithoutLazyInitialization</methodname>
     </member>
     <member>
      <constant>ReflectionClass::SKIP_INITIALIZATION_ON_SERIALIZE</constant>
