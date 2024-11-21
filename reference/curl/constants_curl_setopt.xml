@@ -1,6 +1,6 @@
-<!-- EN-Revision: 5af46249c57c3cdee132f275899b0b7750e0cba4 Maintainer: mowangjuanzi Status: partial -->
+<!-- EN-Revision: 9bbcd47e469474bbee6ab59061d49bbb9266692e Maintainer: mowangjuanzi Status: partial -->
  <variablelist role="constant_list">
-  <title><function>curl-setopt</function></title>
+  <title><function>curl_setopt</function></title>
   <varlistentry xml:id="constant.curlopt-abstract-unix-socket">
    <term>
     <constant>CURLOPT_ABSTRACT_UNIX_SOCKET</constant>
@@ -10,7 +10,7 @@
     <para>
      允许使用抽象 Unix 域套接字而不是与主机建立 TCP 连接，并将路径设置为指定 <type>string</type>。此选项与
      <constant>CURLOPT_UNIX_SOCKET_PATH</constant> 具有相同的语义。这两个选项共享相同的存储，因此每个句柄只能设置其中一个。自
-     PHP 7.3.0 和 cURL 7.53.0 起可用
+     PHP 7.3.0 和 cURL 7.53.0 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -62,7 +62,7 @@
    </term>
    <listitem>
     <para>
-     Pass the filename for cURL to use as the Alt-Svc cache file to read existing cache contents from and
+     Pass a <type>string</type> with the filename for cURL to use as the Alt-Svc cache file to read existing cache contents from and
      possibly also write it back to a after a transfer, unless <constant>CURLALTSVC_READONLYFILE</constant>
      is set via <constant>CURLOPT_ALTSVC_CTRL</constant>.
      Available as of PHP 8.2.0 and cURL 7.64.1.
@@ -79,11 +79,10 @@
      Populate the bitmask with the correct set of features to instruct cURL how to handle Alt-Svc for the
      transfers using this handle. cURL only accepts Alt-Svc headers over HTTPS. It will also only complete
      a request to an alternative origin if that origin is properly hosted over HTTPS.
-     Setting any bit will enable the alt-svc engine. The options are:
-     <constant>CURLALTSVC_H1</constant>,
-     <constant>CURLALTSVC_H2</constant>,
-     <constant>CURLALTSVC_H3</constant>, and
-     <constant>CURLALTSVC_READONLYFILE</constant>.
+     Setting any bit will enable the alt-svc engine.
+     Set to any of the
+     <constant>CURLALTSVC_<replaceable>*</replaceable></constant> constants.
+     Defaults to Alt-Svc handling being disabled.
      Available as of PHP 8.2.0 and cURL 7.64.1.
     </para>
    </listitem>
@@ -109,8 +108,8 @@
    </term>
    <listitem>
     <para>
-     &true; to automatically set the <literal>Referer:</literal> field in
-     requests where it follows a <literal>Location:</literal> redirect.
+     &true; 时将根据 <literal>Location:</literal> 重定向时，自动设置 header 中的 <literal>Referer:</literal>
+     信息。默认是 <literal>0</literal>。自 cURL 7.1.0 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -121,10 +120,10 @@
    </term>
    <listitem>
     <para>
-     Provides AWS V4 signature authentication on HTTP(S) header.
+     Provides AWS V4 signature authentication on HTTP(S) header as a <type>string</type>.
      This option overrides any other authentication types that have been set in
      <constant>CURLOPT_HTTPAUTH</constant>. This method cannot be combined with other authentication types.
-     Available as of PHP 8.2.0 and cURL 7.75.0
+     Available as of PHP 8.2.0 and cURL 7.75.0.
     </para>
    </listitem>
   </varlistentry>
@@ -135,7 +134,8 @@
    </term>
    <listitem>
     <para>
-
+     This constant is no longer used as of PHP 5.5.0.
+     Deprecated as of PHP 8.4.0.
     </para>
    </listitem>
   </varlistentry>
@@ -146,9 +146,8 @@
    </term>
    <listitem>
     <para>
-     The size of the buffer to use for each read. There is no guarantee
-     this request will be fulfilled, however.
-     Available as of cURL 7.10.
+     每次读取要使用的缓冲区大小。但不能保证此请求一定会得到满足。此选项接受任何可以转换为有效 <type>int</type>
+     的值。默认为 <constant>CURL_MAX_WRITE_SIZE</constant>（当前为 16kB）。自 cURL 7.10 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -159,9 +158,9 @@
    </term>
    <listitem>
     <para>
-     The name of a file holding one or more certificates to verify the
-     peer with. This only makes sense when used in combination with
-     <constant>CURLOPT_SSL_VERIFYPEER</constant>. Might require an absolute path.
+     包含一个或多个证书的文件名称的<type>string</type>，用于验证对等方。这仅在与
+     <constant>CURLOPT_SSL_VERIFYPEER</constant> 结合使用时才有意义。可能需要绝对路径。自
+     cURL 7.4.2 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -172,9 +171,9 @@
    </term>
    <listitem>
     <para>
-     The name of a PEM file holding one or more certificates to verify the
+     A <type>string</type> with the name of a PEM file holding one or more certificates to verify the
      peer with. This option overrides <constant>CURLOPT_CAINFO</constant>.
-     Available as of PHP 8.2.0 and cURL 7.77.0
+     Available as of PHP 8.2.0 and cURL 7.77.0.
     </para>
    </listitem>
   </varlistentry>
@@ -185,8 +184,9 @@
    </term>
    <listitem>
     <para>
-     A directory that holds multiple CA certificates. Use this option
-     alongside <constant>CURLOPT_SSL_VERIFYPEER</constant>.
+     A <type>string</type> with a directory that holds multiple CA certificates.
+     Use this option alongside <constant>CURLOPT_SSL_VERIFYPEER</constant>.
+     Available as of cURL 7.9.8.
     </para>
    </listitem>
   </varlistentry>
@@ -197,6 +197,10 @@
    </term>
    <listitem>
     <para>
+     Sets the maximum time in seconds any in memory cached CA certificate store
+     may be kept and reused for new connections.
+     This option accepts any value that can be cast to a valid <type>int</type>.
+     Defaults to <literal>86400</literal> (24 hours).
      Available as of PHP 8.3.0 and cURL 7.87.0
     </para>
    </listitem>
@@ -208,9 +212,8 @@
    </term>
    <listitem>
     <para>
-     &true; to output SSL certification information to <constant>STDERR</constant>
-     on secure transfers. Added in cURL 7.19.1.
-     Requires <constant>CURLOPT_VERBOSE</constant> to be on to have an effect.
+     &true; 将在安全传输时输出 SSL 证书信息到 <constant>STDERR</constant>。需要开启
+     <constant>CURLOPT_VERBOSE</constant> 才有效。默认为 &false;。自 cURL 7.19.1 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -221,8 +224,8 @@
    </term>
    <listitem>
     <para>
-     The number of seconds to wait while trying to connect. Use 0 to
-     wait indefinitely.
+     在尝试连接时等待的秒数。设置为 0，则无限等待。此选项接受任何可以转换为有效 <type>int</type>
+     的值。默认 <literal>300</literal>。自 cURL 7.7.0 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -233,12 +236,10 @@
    </term>
    <listitem>
     <para>
-     The number of milliseconds to wait while trying to connect. Use 0 to
-     wait indefinitely.
-     <!-- http://curl.haxx.se/libcurl/c/curl_easy_setopt.html -->
-     If libcurl is built to use the standard system name resolver, that
-     portion of the connect will still use full-second resolution for
-     timeouts with a minimum timeout allowed of one second. Available as of cURL 7.16.2.
+     尝试连接等待的时间，以毫秒为单位。设置为 <literal>0</literal>，则无限等待。如果 cURL
+     编译时使用系统标准的名称解析器（standard system name
+     resolver），那部分的连接仍旧使用以秒计的超时解决方案，最小超时时间还是一秒钟。此选项接受任何可以转换为有效 <type>int</type>
+     的值。默认 <literal>300000</literal>。自 cURL 7.16.2 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -249,10 +250,8 @@
    </term>
    <listitem>
     <para>
-     &true; tells the library to perform all the required proxy authentication
-     and connection setup, but no data transfer. This option is implemented for
-     HTTP, SMTP and POP3.
-     Available as of cURL 7.15.2.
+     &true; 将让库执行所有需要的代理、验证、连接过程，但不传输数据。此选项用于
+     HTTP、SMTP 和 POP3。默认是 &false;。自 cURL 7.15.2 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -263,10 +262,9 @@
    </term>
    <listitem>
     <para>
-     Connect to a specific host and port instead of the URL's host and port.
-     Accepts an array of strings with the format
-     <literal>HOST:PORT:CONNECT-TO-HOST:CONNECT-TO-PORT</literal>.
-     Available as of PHP 7.0.7 and cURL 7.49.0
+     连接到指定主机和端口，从而替换 URL 中的主机和端口。接受 <type>string</type> 格式的
+     <type>array</type>：<literal>HOST:PORT:CONNECT-TO-HOST:CONNECT-TO-PORT</literal>。自
+     PHP 7.0.7 和 cURL 7.49.0 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -277,10 +275,8 @@
    </term>
    <listitem>
     <para>
-     The contents of the <literal>"Cookie: "</literal> header to be
-     used in the HTTP request.
-     Note that multiple cookies are separated with a semicolon followed
-     by a space (e.g., "<literal>fruit=apple; colour=red</literal>")
+     包含 HTTP 请求中使用的 <literal>Cookie: </literal> header 内容的 <type>string</type>。请注意，多个 Cookie
+     之间用分号分隔，后跟一个空格（例如，<literal>fruit=apple; colour=red</literal>）。自 cURL 7.1.0 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -291,11 +287,8 @@
    </term>
    <listitem>
     <para>
-     The name of the file containing the cookie data. The cookie file can
-     be in Netscape format, or just plain HTTP-style headers dumped into
-     a file.
-     If the name is an empty string, no cookies are loaded, but cookie
-     handling is still enabled.
+     包含 cookie 数据的文件的名称 <type>string</type>。cookie 文件可以是 Netscape 格式，也可以只是转储到文件中的纯
+     HTTP 样式标头。如果名称为空 <type>string</type>，则不会加载任何 cookie，但仍启用 cookie 处理。自 cURL 7.1.0 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -306,14 +299,11 @@
    </term>
    <listitem>
     <para>
-     The name of a file to save all internal cookies to when the
-     handle's destructor is called.
+     <type>string</type>，包含调用句柄的析构函数时用于保存所有内部 cookie 的文件的名称。自 cURL 7.9.0 起可用。
      <warning>
       <simpara>
-       As of PHP 8.0.0, <function>curl_close</function> is a no-op
-       and does <emphasis>not</emphasis> destroy the handle.
-       If cookies need to be written prior to the handle being automatically
-       destroyed, call <function>unset</function> on the handle.
+       自 PHP 8.0.0 起，<function>curl_close</function> 为空操作（什么都不做），<emphasis>不会</emphasis>销毁句柄。如果需要在句柄自动销毁之前写入
+       cookie，在句柄上调用 <function>unset</function>。
       </simpara>
      </warning>
     </para>
@@ -326,13 +316,27 @@
    </term>
    <listitem>
     <para>
-     A cookie string (i.e. a single line in Netscape/Mozilla format, or a regular
-     HTTP-style Set-Cookie header) adds that single cookie to the internal cookie store.
-     <literal>"ALL"</literal> erases all cookies held in memory.
-     <literal>"SESS"</literal> erases all session cookies held in memory.
-     <literal>"FLUSH"</literal> writes all known cookies to the file specified by <constant>CURLOPT_COOKIEJAR</constant>.
-     <literal>"RELOAD"</literal> loads all cookies from the files specified by <constant>CURLOPT_COOKIEFILE</constant>.
-     Available as of cURL 7.14.1
+     cookie <type>string</type>（即 Netscape/Mozilla 的单行格式，或常规 HTTP 样式的 Set-Cookie header）将单个
+     cookie 添加到内部 cookie 存储中。
+     <simplelist type="inline">
+      <member>
+       <literal>ALL</literal>
+       擦除内存中保存的所有 cookie
+      </member>
+      <member>
+       <literal>SESS</literal>
+       擦除内存中保存的所有会话 cookie
+      </member>
+      <member>
+       <literal>FLUSH</literal>
+       将所有已知的 cookie 写入到 <constant>CURLOPT_COOKIEJAR</constant> 指定的文件
+      </member>
+      <member>
+       <literal>RELOAD</literal>
+       从 <constant>CURLOPT_COOKIEFILE</constant> 指定的文件中加载所有 cookie
+      </member>
+     </simplelist>.
+     自 cURL 7.14.1 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -343,12 +347,9 @@
    </term>
    <listitem>
     <para>
-     &true; to mark this as a new cookie "session". It will force libcurl
-     to ignore all cookies it is about to load that are "session cookies"
-     from the previous session. By default, libcurl always stores and
-     loads all cookies, independent if they are session cookies or not.
-     Session cookies are cookies without expiry date and they are meant
-     to be alive and existing for this "session" only.
+     设为 &true; 时将开启新的 cookie“会话”。将强制 cURL 忽略之前会话时存的其他 cookie。cURL
+     在默认情况下无论是否为会话，都会储存、加载所有 cookie。会话 cookie
+     是指没有过期时间，只存活在会话之中。自 cURL 7.9.7 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -359,8 +360,7 @@
    </term>
    <listitem>
     <para>
-     &true; to convert Unix newlines to CRLF newlines
-     on transfers.
+     &true; 表示将 Unix 换行符转换成 CRLF 换行符。自 cURL 7.1.0 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -385,7 +385,7 @@
      Also note that <constant>CURLOPT_CRLFILE</constant> implies
      <constant>CURLSSLOPT_NO_PARTIALCHAIN</constant>
      as of cURL 7.71.0 due to an OpenSSL bug.
-     Available as of cURL 7.19.0
+     Available as of cURL 7.19.0.
     </para>
    </listitem>
   </varlistentry>
@@ -396,19 +396,13 @@
    </term>
    <listitem>
     <para>
-     A custom request method to use instead of
-     <literal>"GET"</literal> or <literal>"HEAD"</literal> when doing
-     a HTTP request. This is useful for doing
-     <literal>"DELETE"</literal> or other, more obscure HTTP requests.
-     Valid values are things like <literal>"GET"</literal>,
-     <literal>"POST"</literal>, <literal>"CONNECT"</literal> and so on;
-     i.e. Do not enter a whole HTTP request line here. For instance,
-     entering <literal>"GET /index.html HTTP/1.0\r\n\r\n"</literal>
-     would be incorrect.
+     HTTP 请求时，使用自定义的请求方法来代替 <literal>GET</literal> 或 <literal>HEAD</literal>。对
+     <literal>DELETE</literal> 或者其他更隐蔽的 HTTP 请求有用。有效值如 <literal>GET</literal>、<literal>POST</literal>，<literal>CONNECT</literal>
+     等等；也就是说，不要在这里输入整行 HTTP 请求。例如输入 <literal>GET /index.html HTTP/1.0\r\n\r\n</literal>
+     是不正确的。此选项接受 <type>string</type> 或 &null;。自 cURL 7.1.0 起可用。
      <note>
       <para>
-       Don't do this without making sure the server supports the custom
-       request method first.
+       在没有首先确保服务器支持自定义请求方法的情况下，不要执行此操作。
       </para>
      </note>
     </para>
@@ -421,8 +415,7 @@
    </term>
    <listitem>
     <para>
-     The default protocol to use if the URL is missing a scheme name.
-     Available as of PHP 7.0.7 and cURL 7.45.0
+     URL 缺少协议的时候，使用 <type>string</type> 格式的默认协议。自 PHP 7.0.7 和 cURL 7.45.0 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -453,8 +446,9 @@
    </term>
    <listitem>
     <para>
-     &true; to not allow URLs that include a username. Usernames are allowed by default (0).
-     Available as of PHP 7.3.0 and cURL 7.61.0
+     &true; to not allow URLs that include a username.
+     Usernames are allowed by default.
+     Available as of PHP 7.3.0 and cURL 7.61.0.
     </para>
    </listitem>
   </varlistentry>
@@ -465,8 +459,8 @@
    </term>
    <listitem>
     <para>
-     The number of seconds to keep DNS entries in memory. This
-     option is set to 120 (2 minutes) by default.
+     设置在内存中缓存 DNS 的时间，默认为 <literal>120</literal> 秒（2 分钟）。此选项接受任何可以转换为有效
+     <type>int</type> 的值。自 cURL 7.9.3 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -479,6 +473,7 @@
     <para>
      Set the name of the network interface that the DNS resolver should bind to.
      This must be an interface name (not an address).
+     This option accepts a <type>string</type> or &null;.
      Available as of PHP 7.0.7 and cURL 7.33.0
     </para>
    </listitem>
@@ -490,9 +485,10 @@
    </term>
    <listitem>
     <para>
-     Set the local IPv4 address that the resolver should bind to. The argument
-     should contain a single numerical IPv4 address as a string.
-     Available as of PHP 7.0.7 and cURL 7.33.0
+     Set the local IPv4 address that the resolver should bind to.
+     The argument should contain a single numerical IPv4 address.
+     This option accepts a <type>string</type> or &null;.
+     Available as of PHP 7.0.7 and cURL 7.33.0.
     </para>
    </listitem>
   </varlistentry>
@@ -503,9 +499,10 @@
    </term>
    <listitem>
     <para>
-     Set the local IPv6 address that the resolver should bind to. The argument
-     should contain a single numerical IPv6 address as a string.
-     Available as of PHP 7.0.7 and cURL 7.33.0
+     Set the local IPv6 address that the resolver should bind to.
+     The argument should contain a single numerical IPv6 address.
+     This option accepts a <type>string</type> or &null;.
+     Available as of PHP 7.0.7 and cURL 7.33.0.
     </para>
    </listitem>
   </varlistentry>
@@ -519,7 +516,7 @@
      Pass a <type>string</type> with a comma-separated list of DNS servers to be used
      instead of the system default
      (e.g.: <literal>192.168.1.100,192.168.1.101:8080</literal>).
-     Available as of cURL 7.24.0
+     Available as of cURL 7.24.0.
     </para>
    </listitem>
   </varlistentry>
@@ -533,7 +530,7 @@
      &true; to shuffle the order of all returned addresses so that they will be used
      in a random order, when a name is resolved and more than one IP address is returned.
      This may cause IPv4 to be used before IPv6 or vice versa.
-     Available as of PHP 7.3.0 and cURL 7.60.0
+     Available as of PHP 7.3.0 and cURL 7.60.0.
     </para>
    </listitem>
   </varlistentry>
@@ -544,9 +541,9 @@
    </term>
    <listitem>
     <para>
-     &true; to use a global DNS cache. This option is not thread-safe.
-     It is conditionally enabled by default if PHP is built for non-threaded use
-     (CLI, FCGI, Apache2-Prefork, etc.).
+     &true; 表示使用全局 DNS 缓存。此选项非线程安全。如果 PHP 是为非线程使用（CLI、FCGI、Apache2-Prefork
+     等）构建的，则默认情况下会有条件性的启用此选项。自 cURL 7.9.3 起可用，自 cURL 7.11.1 起弃用。自
+     PHP 8.4 起，此选项不再有效。
     </para>
    </listitem>
   </varlistentry>
@@ -557,7 +554,7 @@
    </term>
    <listitem>
     <para>
-     Verify the DNS-over-HTTPS server's SSL certificate name fields against the host name.
+     Set to <literal>2</literal> to verify the DNS-over-HTTPS server's SSL certificate name fields against the host name.
      Available as of PHP 8.2.0 and cURL 7.76.0.
     </para>
    </listitem>
@@ -569,7 +566,8 @@
    </term>
    <listitem>
     <para>
-     Verify the authenticity of the DNS-over-HTTPS server's SSL certificate.
+     Set to <literal>1</literal> to enable and <literal>0</literal> to disable
+     verification of the authenticity of the DNS-over-HTTPS server's SSL certificate.
      Available as of PHP 8.2.0 and cURL 7.76.0.
     </para>
    </listitem>
@@ -581,7 +579,8 @@
    </term>
    <listitem>
     <para>
-     Tell cURL to verify the status of the DNS-over-HTTPS server certificate
+     Set to <literal>1</literal> to enable and <literal>0</literal> to disable
+     the verification of the status of the DNS-over-HTTPS server certificate
      using the "Certificate Status Request" TLS extension (OCSP stapling).
      Available as of PHP 8.2.0 and cURL 7.76.0.
     </para>
@@ -595,6 +594,7 @@
    <listitem>
     <para>
      Provides the DNS-over-HTTPS URL.
+     This option accepts a <type>string</type> or &null;.
      Available as of PHP 8.1.0 and cURL 7.62.0.
     </para>
    </listitem>
@@ -608,6 +608,7 @@
     <para>
      Like <constant>CURLOPT_RANDOM_FILE</constant>, except a filename
      to an Entropy Gathering Daemon socket.
+     Available as of cURL 7.7.0 and deprecated as of cURL 7.84.0.
     </para>
    </listitem>
   </varlistentry>
@@ -618,12 +619,16 @@
    </term>
    <listitem>
     <para>
-     The contents of the <literal>"Accept-Encoding: "</literal> header.
-     This enables decoding of the response. Supported encodings are
-     <literal>"identity"</literal>, <literal>"deflate"</literal>, and
-     <literal>"gzip"</literal>. If an empty string, <literal>""</literal>,
-     is set, a header containing all supported encoding types is sent.
-     Available as of cURL 7.10.
+     The contents of the <literal>Accept-Encoding: </literal> header as a <type>string</type>.
+     This enables decoding of the response. Supported encodings are:
+     <simplelist type="inline">
+      <member><literal>identity</literal></member>
+      <member><literal>deflate</literal></member>
+      <member><literal>gzip</literal></member>
+     </simplelist>.
+     If an empty <type>string</type> is set,
+     a header containing all supported encoding types is sent.
+     Available as of cURL 7.10 and deprecated as of cURL 7.21.6.
     </para>
    </listitem>
   </varlistentry>
@@ -634,9 +639,8 @@
    </term>
    <listitem>
     <para>
-     The timeout for <literal>Expect: 100-continue</literal> responses in milliseconds.
-     Defaults to 1000 milliseconds.
-     Available as of PHP 7.0.7 and cURL 7.36.0
+     <literal>Expect: 100-continue</literal> 响应的超时时间，以毫秒为单位。默认为 <literal>1000</literal>
+     毫秒。此选项接受任何可以转换为有效 <type>int</type> 的值。自 PHP 7.0.7 和 cURL 7.36.0 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -647,9 +651,8 @@
    </term>
    <listitem>
     <para>
-     &true; to fail verbosely if the HTTP code returned
-     is greater than or equal to 400. The default behavior is to return
-     the page normally, ignoring the code.
+     当 HTTP 状态码大于等于 <literal>400</literal>，&true; 将显示错误详情。默认情况下将返回页面，忽略
+     HTTP 代码。自 cURL 7.1.0 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -660,8 +663,10 @@
    </term>
    <listitem>
     <para>
-     The file that the transfer should be written to. The default
-     is <constant>STDOUT</constant> (the browser window).
+     Accepts a file handle <type>resource</type>
+     to the file that the transfer should be written to.
+     The default is <constant>STDOUT</constant> (the browser window).
+     Available as of cURL 7.1.0 and deprecated as of cURL 7.9.7.
     </para>
    </listitem>
   </varlistentry>
@@ -672,10 +677,8 @@
    </term>
    <listitem>
     <para>
-     &true; to attempt to retrieve the modification
-     date of the remote document. This value can be retrieved using
-     the <constant>CURLINFO_FILETIME</constant> option with
-     <function>curl_getinfo</function>.
+     设置为 &true; 时，会尝试获取远程文档中的修改时间信息。此值可通过 <function>curl_getinfo</function>
+     函数的 <parameter>CURLINFO_FILETIME</parameter> 选项获取。自 cURL 7.5.0 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -735,12 +738,9 @@
    </term>
    <listitem>
     <para>
-     &true; to follow any
-     <literal>"Location: "</literal> header that the server sends as
-     part of the HTTP header.
-     See also <constant>CURLOPT_MAXREDIRS</constant>.
-     This constant is not available when <link xmlns="http://docbook.org/ns/docbook" linkend="ini.open-basedir">open_basedir</link>
-     is enabled.
+     设置为 &true; 时将会根据服务器返回 HTTP header 中的 <literal>Location: </literal> 重定向。参
+      <constant>CURLOPT_MAXREDIRS</constant>。当 <link xmlns="http://docbook.org/ns/docbook"
+      linkend="ini.open-basedir">open_basedir</link> 启用时，此常量无效。自 cURL 7.1.0 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -751,8 +751,7 @@
    </term>
    <listitem>
     <para>
-     &true; to force the connection to explicitly
-     close when it has finished processing, and not be pooled for reuse.
+     设置为 &true; 后，在完成交互以后强制断开连接，不能在连接池中重用。自 cURL 7.7.0 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -763,8 +762,7 @@
    </term>
    <listitem>
     <para>
-     &true; to force the use of a new connection
-     instead of a cached one.
+     设置为 &true; 强制获取新连接，而不是缓存中的连接。自 cURL 7.7.0 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -775,8 +773,7 @@
    </term>
    <listitem>
     <para>
-     &true; to append to the remote file instead of
-     overwriting it.
+     设置为 &true; 时为追加写入文件，而不是覆盖。自 cURL 7.1.0 起可用并于 cURL 7.16.4 起弃用。
     </para>
    </listitem>
   </varlistentry>
@@ -787,8 +784,8 @@
    </term>
    <listitem>
     <para>
-     An alias of
-     <constant>CURLOPT_TRANSFERTEXT</constant>. Use that instead.
+     <constant>CURLOPT_TRANSFERTEXT</constant> 的别名。请改用 <constant>CURLOPT_TRANSFERTEXT</constant>。自
+     cURL 7.1 起可用，自 cURL 7.11.1 起弃用，最后在 cURL 7.15.5 中可用。自 PHP 7.3.0 起移除。
     </para>
    </listitem>
   </varlistentry>
@@ -799,8 +796,7 @@
    </term>
    <listitem>
     <para>
-     &true; to only list the names of an FTP
-     directory.
+     设置为 &true; 时只列出 FTP 目录的名称。自 cURL 7.1.0 起可用并于 cURL 7.16.4 起弃用。
     </para>
    </listitem>
   </varlistentry>
@@ -811,12 +807,13 @@
    </term>
    <listitem>
     <para>
-     The value which will be used to get the IP address to use
-     for the FTP "PORT" instruction. The "PORT" instruction tells
+     A <type>string</type> which will be used to get the IP address to use for the FTP <literal>PORT</literal> instruction. The <literal>PORT</literal> instruction tells
      the remote server to connect to our specified IP address.  The
-     string may be a plain IP address, a hostname, a network
-     interface name (under Unix), or just a plain '-' to use the
-     systems default IP address.
+     <type>string</type> may be a plain IP address, a hostname,
+     a network interface name (under Unix),
+     or just a plain <literal>-</literal> to use the system's default IP address.
+     This option accepts a <type>string</type> or &null;.
+     Available as of cURL 7.1.0.
     </para>
    </listitem>
   </varlistentry>
@@ -827,11 +824,8 @@
    </term>
    <listitem>
     <para>
-     The FTP authentication method (when is activated):
-     <constant>CURLFTPAUTH_SSL</constant> (try SSL first),
-     <constant>CURLFTPAUTH_TLS</constant> (try TLS first), or
-     <constant>CURLFTPAUTH_DEFAULT</constant> (let cURL decide).
-     Available as of cURL 7.12.2.
+     将 FTP over SSL 身份验证方法（如果已启用）设置为任何 <constant>CURLFTPAUTH_<replaceable>*</replaceable></constant>
+     常量。默认 <constant>CURLFTPAUTH_DEFAULT</constant>。自 cURL 7.12.2 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -871,8 +865,7 @@
    </term>
    <listitem>
     <para>
-     &true; to create missing directories when an FTP operation
-     encounters a path that currently doesn't exist.
+     设置为 &true; 时在 FTP 操作遇到当前不存在的路径时会创建缺失的目录。自 cURL 7.10.7 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -883,11 +876,9 @@
    </term>
    <listitem>
     <para>
-     Tell curl which method to use to reach a file on a FTP(S) server. Possible values are
-     <constant>CURLFTPMETHOD_DEFAULT</constant>,
-     <constant>CURLFTPMETHOD_MULTICWD</constant>,
-     <constant>CURLFTPMETHOD_NOCWD</constant>, and
-     <constant>CURLFTPMETHOD_SINGLECWD</constant>.
+     Tell cURL which method to use to reach a file on a FTP(S) server. Possible values are
+     any of the <constant>CURLFTPMETHOD_<replaceable>*</replaceable></constant> constants.
+     Defaults to <constant>CURLFTPMETHOD_MULTICWD</constant>.
      Available as of cURL 7.15.1.
     </para>
    </listitem>
@@ -902,6 +893,8 @@
      A timeout in seconds cURL will wait for a response from an FTP server.
      This option overrides <constant>CURLOPT_TIMEOUT</constant>.
      This option accepts any value that can be cast to a valid <type>int</type>.
+     This option name is replaced with <constant>CURLOPT_SERVER_RESPONSE_TIMEOUT</constant>,
+     available as of PHP 8.4.0.
      Available as of cURL 7.10.8 and deprecated as of cURL 7.85.0.
     </para>
    </listitem>
@@ -931,7 +924,7 @@
    </term>
    <listitem>
     <para>
-
+     Available as of cURL 7.11.0 and deprecated as of cURL 7.16.4.
     </para>
    </listitem>
   </varlistentry>
@@ -958,9 +951,9 @@
    </term>
    <listitem>
     <para>
-     &true; to use EPRT (and LPRT) when doing active
-     FTP downloads. Use &false; to disable EPRT and LPRT and use PORT
-     only.
+     设置为 &true; 时，当 FTP 下载时，使用 <literal>EPRT</literal> (和 <literal>LPRT</literal>)命令。设置为 &false;
+     时禁用 <literal>EPRT</literal> 和 <literal>LPRT</literal>，仅仅使用 <literal>PORT</literal> 命令。自
+     cURL 7.10.5 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -971,9 +964,8 @@
    </term>
    <listitem>
     <para>
-     &true; to first try an EPSV command for FTP
-     transfers before reverting back to PASV. Set to &false;
-     to disable EPSV.
+     设置为 &true; 时，在 FTP 传输过程中，回到 <literal>PASV</literal> 模式前，先尝试 <literal>EPSV</literal> 命令。设置为
+     &false; 时禁用 <literal>EPSV</literal>。自 cURL 7.9.2 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -1016,10 +1008,11 @@
    </term>
    <listitem>
     <para>
-     Head start for ipv6 for the happy eyeballs algorithm. Happy eyeballs attempts
+     Head start for IPv6 for the happy eyeballs algorithm. Happy eyeballs attempts
      to connect to both IPv4 and IPv6 addresses for dual-stack hosts,
      preferring IPv6 first for timeout milliseconds.
-     Defaults to CURL_HET_DEFAULT, which is currently 200 milliseconds.
+     Defaults to <constant>CURL_HET_DEFAULT</constant>, which is currently 200 milliseconds.
+     This option accepts any value that can be cast to a valid <type>int</type>.
      Available as of PHP 7.3.0 and cURL 7.59.0
     </para>
    </listitem>
@@ -1031,9 +1024,9 @@
    </term>
    <listitem>
     <para>
-     &true; to send an HAProxy PROXY protocol v1 header at the start of the connection.
+     &true; to send an HAProxy <literal>PROXY</literal> protocol v1 header at the start of the connection.
      The default action is not to send this header.
-     Available as of PHP 7.3.0 and cURL 7.60.0
+     Available as of PHP 7.3.0 and cURL 7.60.0.
     </para>
    </listitem>
   </varlistentry>
@@ -1044,7 +1037,8 @@
    </term>
    <listitem>
     <para>
-     &true; to include the header in the output.
+     设置为 &true; 以将 header 包含在发送到 <constant>CURLOPT_WRITEFUNCTION</constant>
+     定义的回调的输出中。自 cURL 7.1.0 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -1055,11 +1049,32 @@
    </term>
    <listitem>
     <para>
-     A callback accepting two parameters.
-     The first is the cURL resource, the second is a
-     string with the header data to be written. The header data must
-     be written by this callback. Return the number of
-     bytes written.
+     A <type>callable</type> with the following signature:
+     <methodsynopsis>
+      <type>int</type><methodname><replaceable>callback</replaceable></methodname>
+      <methodparam><type>resource</type><parameter>curlHandle</parameter></methodparam>
+      <methodparam><type>string</type><parameter>headerData</parameter></methodparam>
+     </methodsynopsis>
+     <variablelist role="function_parameters">
+      <varlistentry>
+       <term><parameter>curlHandle</parameter></term>
+       <listitem>
+        <simpara>
+         The cURL handle.
+        </simpara>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term><parameter>headerData</parameter></term>
+       <listitem>
+        <simpara>
+         The header data which must be written by the callback.
+        </simpara>
+       </listitem>
+      </varlistentry>
+     </variablelist>
+     The callback should return the number of bytes written.
+     Available as of cURL 7.7.2.
     </para>
    </listitem>
   </varlistentry>
@@ -1070,10 +1085,9 @@
    </term>
    <listitem>
     <para>
-     Possible values are <constant>CURLHEADER_UNIFIED</constant> or <constant>CURLHEADER_SEPARATE</constant>.
-     Defaults to <constant>CURLHEADER_SEPARATE</constant> as of cURL
-     7.42.1, and <constant>CURLHEADER_UNIFIED</constant> before.
-     Available as of PHP 7.0.7 and cURL 7.37.0
+     将 HTTP header 同时发送到代理和主机或单独发送。可能的值是 <constant>CURLHEADER_<replaceable>*</replaceable></constant>
+     常量。自 cURL 7.42.1 起默认 <constant>CURLHEADER_SEPARATE</constant>，在此之前默认为
+     <constant>CURLHEADER_UNIFIED</constant>。自 PHP 7.0.7 和 cURL 7.37.0 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -1084,8 +1098,10 @@
    </term>
    <listitem>
     <para>
-     HSTS (HTTP Strict Transport Security) cache file name.
-     Available as of PHP 8.2.0 and cURL 7.74.0
+     <type>string</type> with HSTS (HTTP Strict Transport Security) cache file name
+     or &null; to allow HSTS without reading from or writing to any file
+     and clear the list of files to read HSTS data from.
+     Available as of PHP 8.2.0 and cURL 7.74.0.
     </para>
    </listitem>
   </varlistentry>
@@ -1096,11 +1112,9 @@
    </term>
    <listitem>
     <para>
-     Controls HSTS (HTTP Strict Transport Security) behavior. Populate the bitmask with the correct set of
-     features to instruct cURL how to handle HSTS for the transfers using this handle.
-     <constant>CURLHSTS_ENABLE</constant> enables the in-memory HSTS cache. If the HSTS cache file is defined,
-     set <constant>CURLHSTS_READONLYFILE</constant> to make the file read-only.
-     Available as of PHP 8.2.0 and cURL 7.74.0
+     Accepts a bitmask of HSTS (HTTP Strict Transport Security) features
+     defined by the <constant>CURLHSTS_<replaceable>*</replaceable></constant> constants.
+     Available as of PHP 8.2.0 and cURL 7.74.0.
     </para>
    </listitem>
   </varlistentry>
@@ -1111,9 +1125,8 @@
    </term>
    <listitem>
     <para>
-     Whether to allow HTTP/0.9 responses. Defaults to &false; as of libcurl 7.66.0;
-     formerly it defaulted to &true;.
-     Available as of PHP 7.3.15 and 7.4.3, respectively, and cURL 7.64.0
+     是否允许 HTTP/0.9 响应。从 cURL 7.66.0 起默认为 &false;；以前默认为 &true;。分别自
+     PHP 7.3.15 和 7.4.3 以及 cURL 7.64.0 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -1124,8 +1137,7 @@
    </term>
    <listitem>
     <para>
-     An array of HTTP 200 responses that will be treated as valid
-     responses and not as errors.
+     An <type>array</type> of HTTP <literal>200</literal> responses that will be treated as valid responses and not as errors.
      Available as of cURL 7.10.3.
     </para>
    </listitem>
@@ -1137,21 +1149,18 @@
    </term>
    <listitem>
     <para>
-     The HTTP authentication method(s) to use. The options are:
-     <constant>CURLAUTH_BASIC</constant>,
-     <constant>CURLAUTH_DIGEST</constant>,
-     <constant>CURLAUTH_GSSNEGOTIATE</constant>,
-     <constant>CURLAUTH_NTLM</constant>,
-     <constant>CURLAUTH_AWS_SIGV4</constant>,
-     <constant>CURLAUTH_ANY</constant>, and
-     <constant>CURLAUTH_ANYSAFE</constant>.
-     The bitwise <literal>|</literal> (or) operator can be used to combine
-     more than one method. If this is done, cURL will poll the server to see
-     what methods it supports and pick the best one.
-     <constant>CURLAUTH_ANY</constant> sets all bits. cURL will automatically select
-     the one it finds most secure.
-     <constant>CURLAUTH_ANYSAFE</constant> sets all bits except <constant>CURLAUTH_BASIC</constant>.
-     cURL will automatically select the one it finds most secure.
+     使用的 HTTP 验证方法。选项有：
+     <simplelist type="inline">
+      <member><constant>CURLAUTH_BASIC</constant></member>
+      <member><constant>CURLAUTH_DIGEST</constant></member>
+      <member><constant>CURLAUTH_GSSNEGOTIATE</constant></member>
+      <member><constant>CURLAUTH_NTLM</constant></member>
+      <member><constant>CURLAUTH_AWS_SIGV4</constant></member>
+      <member><constant>CURLAUTH_ANY</constant></member>
+      <member><constant>CURLAUTH_ANYSAFE</constant></member>
+     </simplelist>。如果使用多种方法，cURL 将轮询服务器以查看它支持哪些方法并选择最佳方法。<constant>CURLAUTH_ANY</constant>
+     设置所有的位。cURL 将自动选择它认为最安全的一个。<constant>CURLAUTH_ANYSAFE</constant> 设置了除
+     <constant>CURLAUTH_BASIC</constant> 以外所有的位。cURL 将自动选择它认为最安全的一个。自 cURL 7.10.6 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -1162,9 +1171,8 @@
    </term>
    <listitem>
     <para>
-     &true; to reset the HTTP request method to GET.
-     Since GET is the default, this is only necessary if the request
-     method has been changed.
+     设置为 &true; 时会设置 HTTP 方法为 <literal>GET</literal>，由于默认是
+     <literal>GET</literal>，所以只有修改请求方法时才需要这个选项。自 cURL 7.8.1 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -1175,10 +1183,11 @@
    </term>
    <listitem>
     <para>
-     An array of HTTP header fields to set, in the format
+     An <type>array</type> of HTTP header fields to set, in the format
      <code>
       array('Content-type: text/plain', 'Content-length: 100')
      </code>
+     Available as of cURL 7.1.0.
     </para>
    </listitem>
   </varlistentry>
@@ -1189,7 +1198,7 @@
    </term>
    <listitem>
     <para>
-     &true; to tunnel through a given HTTP proxy.
+     &true; 会通过指定 HTTP 代理来传输。自 cURL 7.3.0 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -1200,8 +1209,7 @@
    </term>
    <listitem>
     <para>
-     &false; to get the raw HTTP response body.
-     Available as of cURL 7.16.2.
+     &false; 时获取原始 HTTP 响应主体。自 cURL 7.16.2 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -1228,14 +1236,8 @@
    </term>
    <listitem>
     <para>
-     <constant>CURL_HTTP_VERSION_NONE</constant> (default, lets CURL
-     decide which version to use),
-     <constant>CURL_HTTP_VERSION_1_0</constant> (forces HTTP/1.0),
-     <constant>CURL_HTTP_VERSION_1_1</constant> (forces HTTP/1.1),
-     <constant>CURL_HTTP_VERSION_2_0</constant> (attempts HTTP 2),
-     <constant>CURL_HTTP_VERSION_2</constant> (alias of <constant>CURL_HTTP_VERSION_2_0</constant>),
-     <constant>CURL_HTTP_VERSION_2TLS</constant> (attempts HTTP 2 over TLS (HTTPS) only) or
-     <constant>CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE</constant> (issues non-TLS HTTP requests using HTTP/2 without HTTP/1.1 Upgrade).
+     设置为 <constant>CURL_HTTP_VERSION_<replaceable>*</replaceable></constant> 常量中的一个，以便
+     cURL 使用指定的 HTTP 版本。自 cURL 7.9.1 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -1261,7 +1263,10 @@
    </term>
    <listitem>
     <para>
-     The file that the transfer should be read from when uploading.
+     Accepts a file handle <type>resource</type>
+     to the file that the transfer should be read from when uploading.
+     Available as of cURL 7.1.0 and deprecated as of cURL 7.9.7.
+     Use <constant>CURLOPT_READDATA</constant> instead.
     </para>
    </listitem>
   </varlistentry>
@@ -1272,10 +1277,9 @@
    </term>
    <listitem>
     <para>
-     The expected size, in bytes, of the file when uploading a file to
-     a remote site. Note that using this option will not stop libcurl
-     from sending more data, as exactly what is sent depends on
-     <constant>CURLOPT_READFUNCTION</constant>.
+     希望传给远程站点的文件字节大小。注意无法用这个选项阻止 cURL 发送更多的数据，确切发送什么取决于
+     <constant>CURLOPT_READFUNCTION</constant>。此选项接受任何可以转换为有效 <type>int</type>
+     的值。自 cURL 7.1.0 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -1286,8 +1290,9 @@
    </term>
    <listitem>
     <para>
-     The name of the outgoing network interface to use. This can be an
-     interface name, an IP address or a host name.
+     Set to a <type>string</type> with the name of the outgoing network interface to use.
+     This can be an interface name, an IP address or a host name.
+     Available as of cURL 7.1.0.
     </para>
    </listitem>
   </varlistentry>
@@ -1298,14 +1303,9 @@
    </term>
    <listitem>
     <para>
-     Allows an application to select what kind of IP addresses to use when
-     resolving host names. This is only interesting when using host names that
-     resolve addresses using more than one version of IP, possible values are
-     <constant>CURL_IPRESOLVE_WHATEVER</constant>,
-     <constant>CURL_IPRESOLVE_V4</constant>,
-     <constant>CURL_IPRESOLVE_V6</constant>, by default
-     <constant>CURL_IPRESOLVE_WHATEVER</constant>.
-     Available as of cURL 7.10.8.
+     允许应用程序选择在解析主机名时使用哪种 IP 地址。这仅在使用解析使用多个 IP 版本的地址的主机名时才有意义。设置为
+     <constant>CURL_IPRESOLVE_<replaceable>*</replaceable></constant> 常量中的一个。默认为
+     <constant>CURL_IPRESOLVE_WHATEVER</constant>。自 cURL 7.10.8 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -1334,7 +1334,9 @@
    </term>
    <listitem>
     <para>
-     Issuer SSL certificate from memory blob.
+     Pass a <type>string</type> with binary data of a CA SSL certificate in PEM format.
+     If set, an additional check against the peer certificate is performed
+     to verify the issuer is the one associated with the certificate provided by the option.
      Available as of PHP 8.1.0 and cURL 7.71.0.
     </para>
    </listitem>
@@ -1346,11 +1348,9 @@
    </term>
    <listitem>
     <para>
-     &true; to keep sending the request body if the HTTP code returned is
-     equal to or larger than 300. The default action would be to stop sending
-     and close the stream or connection. Suitable for manual NTLM authentication.
-     Most applications do not need this option.
-     Available as of PHP 7.3.0 and cURL 7.51.0
+     设置为 &true; 时，如果返回的 HTTP 代码等于或大于
+     <literal>300</literal>，则继续发送请求主体。默认操作是停止发送并关闭流或连接。适用于手动 NTLM
+     身份验证。大多数应用程序不需要此选项。自 PHP 7.3.0 和 cURL 7.51.0 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -1361,9 +1361,10 @@
    </term>
    <listitem>
     <para>
-     The password required to use the <constant>CURLOPT_SSLKEY</constant>
+     Set to a <type>string</type> with the password required to use the <constant>CURLOPT_SSLKEY</constant>
      or <constant>CURLOPT_SSH_PRIVATE_KEYFILE</constant> private key.
-     Available as of cURL 7.16.1.
+     Setting this option to &null; disables using a password for these options.
+     Available as of cURL 7.17.0.
     </para>
    </listitem>
   </varlistentry>
@@ -1374,16 +1375,19 @@
    </term>
    <listitem>
     <para>
-     The KRB4 (Kerberos 4) security level. Any of the following values
+     The KRB4 (Kerberos 4) security level. Any of the following <type>string</type> values
      (in order from least to most powerful) are valid:
-     <literal>"clear"</literal>,
-     <literal>"safe"</literal>,
-     <literal>"confidential"</literal>,
-     <literal>"private".</literal>.
-     If the string does not match one of these,
-     <literal>"private"</literal> is used. Setting this option to &null;
+     <simplelist type="inline">
+      <member><literal>clear</literal></member>
+      <member><literal>safe</literal></member>
+      <member><literal>confidential</literal></member>
+      <member><literal>private</literal></member>
+     </simplelist>.
+     If the <type>string</type> does not match one of these,
+     <literal>private</literal> is used. Setting this option to &null;
      will disable KRB4 security. Currently KRB4 security only works
      with FTP transactions.
+     Available as of cURL 7.3.0 and deprecated as of cURL 7.17.0.
     </para>
    </listitem>
   </varlistentry>
@@ -1401,8 +1405,7 @@
       <member><literal>safe</literal></member>
       <member><literal>confidential</literal></member>
       <member><literal>private</literal></member>
-     </simplelist>
-     .
+     </simplelist>.
      If the <type>string</type> is set but does not match one of these,
      <literal>private</literal> is used.
      Setting this option to &null; will disable kerberos support for FTP.
@@ -1448,10 +1451,9 @@
    <listitem>
     <para>
      Can be used to set protocol specific login options, such as the
-     preferred authentication mechanism via "AUTH=NTLM" or "AUTH=*",
-     and should be used in conjunction with the
+     preferred authentication mechanism via <literal>AUTH=NTLM</literal> or <literal>AUTH=*</literal>, and should be used in conjunction with the
      <constant>CURLOPT_USERNAME</constant> option.
-     Available as of PHP 7.0.7 and cURL 7.34.0
+     Available as of PHP 7.0.7 and cURL 7.34.0.
     </para>
    </listitem>
   </varlistentry>
@@ -1462,9 +1464,9 @@
    </term>
    <listitem>
     <para>
-     The transfer speed, in bytes per second, that the transfer should be
-     below during the count of <constant>CURLOPT_LOW_SPEED_TIME</constant>
-     seconds before PHP considers the transfer too slow and aborts.
+     传输速度，每秒字节数，根据 <constant>CURLOPT_LOW_SPEED_TIME</constant>
+     秒数统计是否因太慢而取消传输。此选项接受任何可以转换为有效 <type>int</type>
+     的值。自 cURL 7.1.0 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -1475,9 +1477,9 @@
    </term>
    <listitem>
     <para>
-     The number of seconds the transfer speed should be below
-     <constant>CURLOPT_LOW_SPEED_LIMIT</constant> before PHP considers
-     the transfer too slow and aborts.
+     当传输速度小于 <constant>CURLOPT_LOW_SPEED_LIMIT</constant> 时(bytes/sec)，PHP
+     会判断是否因太慢而取消传输。此选项接受任何可以转换为有效 <type>int</type>
+     的值。自 cURL 7.1.0 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -1540,7 +1542,11 @@
    </term>
    <listitem>
     <para>
-     Available as of PHP 8.2.0 and cURL 7.69.0
+     设置为 <literal>1</literal> 以允许 <literal>RCPT TO</literal> 命令对某些收件人失败，这会使 cURL
+     忽略个别收件人的错误并继续处理其余已接受的收件人。如果所有收件人触发失败并且设置了此 flag，cURL 将中止
+     SMTP 对话并返回从最后一个 <literal>RCPT TO</literal> 命令收到的错误。自 cURL 8.2.0 起由
+     <constant>CURLOPT_MAIL_RCPT_ALLOWFAILS</constant> 取代。自 PHP 8.2.0 和 cURL 7.69.0
+     起可用。自 cURL 8.2.0 起弃用。
     </para>
    </listitem>
   </varlistentry>
@@ -1551,9 +1557,8 @@
    </term>
    <listitem>
     <para>
-     The maximum idle time allowed for an existing connection to be considered for reuse.
-     Default maximum age is set to <literal>118</literal> seconds.
-     Available as of PHP 8.2.0 and cURL 7.65.0
+     重新使用已存在连接时允许的最大空闲时间。默认最大时间设置为 <literal>118</literal>
+     秒。此选项接受任何可以转换为有效 <type>int</type> 的值。自 PHP 8.2.0 和 cURL 7.65.0 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -1564,9 +1569,8 @@
    </term>
    <listitem>
     <para>
-     The maximum amount of persistent connections that are allowed.
-     When the limit is reached, the oldest one in the cache is closed
-     to prevent increasing the number of open connections.
+     允许的最大持久连接数。当达到限制时，将会关闭缓存中最早的连接，以防止增加已打开的连接数。此选项接受任何可以转换为有效
+     <type>int</type> 的值。自 cURL 7.7.0 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -1607,7 +1611,8 @@
      the transfer will not start and <constant>CURLE_FILESIZE_EXCEEDED</constant> will be returned.
      The file size is not always known prior to download, and for such files this option has no effect even if
      the file transfer ends up being larger than this given limit.
-     Available as of PHP 8.2.0 and cURL 7.11.0
+     This option accepts any value that can be cast to a valid <type>int</type>.
+     Available as of PHP 8.2.0 and cURL 7.11.0.
     </para>
    </listitem>
   </varlistentry>
@@ -1621,8 +1626,9 @@
      The maximum time in seconds, since the creation of the connection, that is allowed for an existing
      connection to have for it to be considered for reuse. If a connection is found in the cache that is older
      than this value, it will instead be closed once any in-progress transfers are complete.
-     Default is 0 seconds, meaning the option is disabled and all connections are eligible for reuse.
-     Available as of PHP 8.2.0 and cURL 7.80.0
+     Default is <literal>0</literal> seconds, meaning the option is disabled and all connections are eligible for reuse.
+     This option accepts any value that can be cast to a valid <type>int</type>.
+     Available as of PHP 8.2.0 and cURL 7.80.0.
     </para>
    </listitem>
   </varlistentry>
@@ -1633,11 +1639,8 @@
    </term>
    <listitem>
     <para>
-     The maximum amount of HTTP redirections to follow. Use this option
-     alongside <constant>CURLOPT_FOLLOWLOCATION</constant>.
-     Default value of <literal>20</literal> is set to prevent infinite redirects.
-     Setting to <literal>-1</literal> allows inifinite redirects, and <literal>0</literal>
-     refuses all redirects.
+     指定最多的 HTTP 重定向次数，这个选项是和 <constant>CURLOPT_FOLLOWLOCATION</constant> 一起使用的。默认值 <literal>20</literal>
+     是为了防止无限重定向。设置为 <literal>-1</literal> 允许无限重定向，<literal>0</literal> 拒绝所有重定向。自 cURL 7.5.0 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -1648,11 +1651,9 @@
    </term>
    <listitem>
     <para>
-     If a download exceeds this speed (counted in bytes per second) on
-     cumulative average during the transfer, the transfer will pause to
-     keep the average rate less than or equal to the parameter value.
-     Defaults to unlimited speed.
-     Available as of cURL 7.15.5
+     如果下载速度超过了此速度（以每秒字节数来统计），即传输过程中累计的平均数，传输就会降速到这个参数的值。默认不限速。
+     This option accepts any value that can be cast to a valid <type>int</type>.
+     Available as of cURL 7.15.5.
     </para>
    </listitem>
   </varlistentry>
@@ -1663,11 +1664,9 @@
    </term>
    <listitem>
     <para>
-     If an upload exceeds this speed (counted in bytes per second) on
-     cumulative average during the transfer, the transfer will pause to
-     keep the average rate less than or equal to the parameter value.
-     Defaults to unlimited speed.
-     Available as of cURL 7.15.5
+     如果上传的速度超过了此速度（以每秒字节数来统计），即传输过程中累计的平均数，传输就会降速到这个参数的值。默认不限速。
+     This option accepts any value that can be cast to a valid <type>int</type>.
+     Available as of cURL 7.15.5.
     </para>
    </listitem>
   </varlistentry>
@@ -1678,7 +1677,10 @@
    </term>
    <listitem>
     <para>
-     Available as of PHP 8.3.0 and cURL 7.81.0
+     Set to a bitmask of <constant>CURLMIMEOPT_<replaceable>*</replaceable></constant>
+     constants. Currently there is only one available option:
+     <constant>CURLMIMEOPT_FORMESCAPE</constant>.
+     Available as of PHP 8.3.0 and cURL 7.81.0.
     </para>
    </listitem>
   </varlistentry>
@@ -1689,9 +1691,8 @@
    </term>
    <listitem>
     <para>
-     &true; to be completely silent with regards to
-     the cURL functions.
-     Removed as of cURL 7.15.5; use <constant xmlns="http://docbook.org/ns/docbook">CURLOPT_RETURNTRANSFER</constant> instead.
+     设置 &true; 时将完全静默，无论是何 cURL 函数。使用 <constant>CURLOPT_RETURNTRANSFER</constant>
+     代替。自 cURL 7.1.0 起可用，自 cURL 7.8.0 起弃用，最后在 cURL 7.15.5 中可用。自 PHP 7.3.0 起移除。
     </para>
    </listitem>
   </varlistentry>
@@ -1702,9 +1703,8 @@
    </term>
    <listitem>
     <para>
-     &true; to scan the <filename>~/.netrc</filename>
-     file to find a username and password for the remote site that
-     a connection is being established with.
+     设置为 &true; 时，在连接建立时，访问 <filename>~/.netrc</filename>
+     文件获取用户名和密码来连接远程站点。自 cURL 7.1.0 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -1762,9 +1762,8 @@
    </term>
    <listitem>
     <para>
-     &true; to exclude the body from the output.
-     Request method is then set to HEAD. Changing this to &false; does
-     not change it to GET.
+     设置为 &true; 可从输出中排除正文。对于 HTTP(S)，cURL 会发出 HEAD 请求。对于大多数其他协议，cURL
+     根本不会要求正文数据。将其更改为 &false; 将导致正文数据包含在输出中。自 cURL 7.1.0 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -1775,13 +1774,13 @@
    </term>
    <listitem>
     <para>
-     &true; to disable the progress meter for cURL transfers.
+     设置为 &true; 时关闭 cURL 的传输进度。
      <note>
       <para>
-       PHP automatically sets this option to &true;, this should only be
-       changed for debugging purposes.
+       PHP 自动设置此选项为 &true;，只有用于调试才需要改变设置。
       </para>
      </note>
+     自 cURL 7.1.0 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -1813,10 +1812,8 @@
    </term>
    <listitem>
     <para>
-     &true; to ignore any cURL function that causes a
-     signal to be sent to the PHP process. This is turned on by default
-     in multi-threaded SAPIs so timeout options can still be used.
-     Available as of cURL 7.10.
+     &true; 时忽略所有的 cURL 函数传递给 PHP 进程的信号。在 SAPI
+     多线程传输时默认启用此选项，所以超时选项仍能使用。自 cURL 7.10 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -1827,10 +1824,42 @@
    </term>
    <listitem>
     <para>
-     A callback accepting three parameters.
-     The first is the cURL resource, the second is a
-     string containing a password prompt, and the third is the maximum
-     password length. Return the string containing the password.
+     A <type>callable</type> with the following signature:
+     <methodsynopsis>
+      <type>string</type><methodname><replaceable>callback</replaceable></methodname>
+      <methodparam><type>resource</type><parameter>curlHandle</parameter></methodparam>
+      <methodparam><type>string</type><parameter>passwordPrompt</parameter></methodparam>
+      <methodparam><type>int</type><parameter>maximumPasswordLength</parameter></methodparam>
+     </methodsynopsis>
+     <variablelist role="function_parameters">
+      <varlistentry>
+       <term><parameter>curlHandle</parameter></term>
+       <listitem>
+        <simpara>
+         The cURL handle.
+        </simpara>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term><parameter>passwordPrompt</parameter></term>
+       <listitem>
+        <simpara>
+         A password prompt.
+        </simpara>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term><parameter>maximumPasswordLength</parameter></term>
+       <listitem>
+        <simpara>
+         The maximum length of the password.
+        </simpara>
+       </listitem>
+      </varlistentry>
+     </variablelist>
+     The callback should return a <type>string</type> containing the password.
+     Available as of cURL 7.4.2, deprecated as of cURL 7.11.1
+     and last available in cURL 7.15.5.
      Removed as of PHP 7.3.0.
     </para>
    </listitem>
@@ -1842,7 +1871,7 @@
    </term>
    <listitem>
     <para>
-     The password to use in authentication.
+     Set to a <type>string</type> with the password to use in authentication.
      Available as of cURL 7.19.1.
     </para>
    </listitem>
@@ -1854,8 +1883,11 @@
    </term>
    <listitem>
     <para>
-     &true; to not handle dot dot sequences.
-     Available as of PHP 7.0.7 and cURL 7.42.0
+     Set to &true; for cURL not alter URL paths before passing them on to the server.
+     Defaults to &false;, which squashes sequences of <literal>/../</literal>
+     or <literal>/./</literal> that may exist in the URL's path part
+     which is supposed to be removed according to RFC 3986 section 5.2.4.
+     Available as of PHP 7.0.7 and cURL 7.42.0.
     </para>
    </listitem>
   </varlistentry>
@@ -1866,12 +1898,12 @@
    </term>
    <listitem>
     <para>
-     Set the pinned public key.
-      The string can be the file name of your pinned public key. The file
-      format expected is "PEM" or "DER". The string can also be any
-      number of base64 encoded sha256 hashes preceded by "sha256//" and
-      separated by ";".
-     Available as of PHP 7.0.7 and cURL 7.39.0
+     Set a <type>string</type> with the pinned public key.
+     The <type>string</type> can be the file name of the pinned public key
+     in a PEM or DER file format. The <type>string</type> can also be any
+     number of base64 encoded sha256 hashes preceded by <literal>sha256//</literal> and
+     separated by <literal>;</literal>.
+     Available as of PHP 7.0.7 and cURL 7.39.0.
     </para>
    </listitem>
   </varlistentry>
@@ -1882,8 +1914,10 @@
    </term>
    <listitem>
     <para>
-     &true; to wait for pipelining/multiplexing.
-     Available as of PHP 7.0.7 and cURL 7.43.0
+     Set to &true; to wait for an existing connection to confirm
+     whether it can do multiplexing and use it if it can
+     before creating and using a new connection.
+     Available as of PHP 7.0.7 and cURL 7.43.0.
     </para>
    </listitem>
   </varlistentry>
@@ -1894,7 +1928,9 @@
    </term>
    <listitem>
     <para>
-     An alternative port number to connect to.
+     An <type>int</type> with an alternative port number to connect to
+     instead of the one specified in the URL or the default port for the used protocol.
+     Available as of cURL 7.1.0.
     </para>
    </listitem>
   </varlistentry>
@@ -1905,9 +1941,8 @@
    </term>
    <listitem>
     <para>
-     &true; to do a regular HTTP POST. This POST is the
-     normal <literal>application/x-www-form-urlencoded</literal> kind,
-     most commonly used by HTML forms.
+     设置为 &true; 用于执行 HTTP <literal>POST</literal> 请求。此请求使用
+     <literal>application/x-www-form-urlencoded</literal> header。默认为 &false;。自 cURL 7.1.0 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -1918,15 +1953,16 @@
    </term>
    <listitem>
     <para>
-     The full data to post in a HTTP "POST" operation.
+     The full data to post in a HTTP <literal>POST</literal> operation.
      This parameter can either be
-     passed as a urlencoded string like '<literal>para1=val1&amp;para2=val2&amp;...</literal>'
-     or as an array with the field name as key and field data as value.
-     If <parameter>value</parameter> is an array, the
+     passed as a urlencoded <type>string</type> like '<literal>para1=val1&amp;para2=val2&amp;...</literal>'
+     or as an <type>array</type> with the field name as key and field data as value.
+     If <parameter>value</parameter> is an <type>array</type>, the
      <literal>Content-Type</literal> header will be set to
      <literal>multipart/form-data</literal>.
      Files can be sent using <classname>CURLFile</classname> or <classname>CURLStringFile</classname>,
-     in which case <parameter>value</parameter> must be an array.
+     in which case <parameter>value</parameter> must be an <type>array</type>.
+     Available as of cURL 7.1.0.
     </para>
    </listitem>
   </varlistentry>
@@ -1937,8 +1973,9 @@
    </term>
    <listitem>
     <para>
-     An array of FTP commands to execute on the server after the FTP
-     request has been performed.
+     An <type>array</type> of FTP command <type>string</type>s
+     to execute on the server after the FTP request has been performed.
+     Available as of cURL 7.1.0.
     </para>
    </listitem>
   </varlistentry>
@@ -1949,11 +1986,9 @@
    </term>
    <listitem>
     <para>
-     A bitmask of 1 (301 Moved Permanently), 2 (302 Found)
-     and 4 (303 See Other) if the HTTP POST method should be maintained
-     when <constant>CURLOPT_FOLLOWLOCATION</constant> is set and a
-     specific type of redirect occurs.
-     Available as of cURL 7.19.1.
+     位掩码，<constant>CURL_REDIR_POST_301</constant>、<constant>CURL_REDIR_POST_302</constant>
+     和 <constant>CURL_REDIR_POST_303</constant>。当设置 <constant>CURLOPT_FOLLOWLOCATION</constant>
+     并发生了特定类型的重定向时，是否需要再次 HTTP <literal>POST</literal> 到重定向网址。自 cURL 7.19.1 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -1965,18 +2000,18 @@
    <listitem>
     <para>
      Set a <type>string</type> holding the host name or dotted numerical
-     IP address to be used as the preproxy that curl connects to before
+     IP address to be used as the preproxy that cURL connects to before
      it connects to the HTTP(S) proxy specified in the
      <constant>CURLOPT_PROXY</constant> option for the upcoming request.
      The preproxy can only be a SOCKS proxy and it should be prefixed with
      <literal>[scheme]://</literal> to specify which kind of socks is used.
      A numerical IPv6 address must be written within [brackets].
-     Setting the preproxy to an empty string explicitly disables the use of a preproxy.
-     To specify port number in this string, append <literal>:[port]</literal>
+     Setting the preproxy to an empty <type>string</type> explicitly disables the use of a preproxy.
+     To specify port number in this <type>string</type>, append <literal>:[port]</literal>
      to the end of the host name. The proxy's port number may optionally be
      specified with the separate option <constant>CURLOPT_PROXYPORT</constant>.
      Defaults to using port 1080 for proxies if a port is not specified.
-     Available as of PHP 7.3.0 and cURL 7.52.0
+     Available as of PHP 7.3.0 and cURL 7.52.0.
     </para>
    </listitem>
   </varlistentry>
@@ -2019,21 +2054,67 @@
    </term>
    <listitem>
     <para>
-     A callback accepting five parameters.
-     The first is the cURL resource, the second is the total number of
-     bytes expected to be downloaded in this transfer, the third is
-     the number of bytes downloaded so far, the fourth is the total
-     number of bytes expected to be uploaded in this transfer, and the
-     fifth is the number of bytes uploaded so far.
+     A <type>callable</type> with the following signature:
+     <methodsynopsis>
+      <type>int</type><methodname><replaceable>callback</replaceable></methodname>
+      <methodparam><type>resource</type><parameter>curlHandle</parameter></methodparam>
+      <methodparam><type>int</type><parameter>bytesToDownload</parameter></methodparam>
+      <methodparam><type>int</type><parameter>bytesDownloaded</parameter></methodparam>
+      <methodparam><type>int</type><parameter>bytesToUpload</parameter></methodparam>
+      <methodparam><type>int</type><parameter>bytesUploaded</parameter></methodparam>
+     </methodsynopsis>
+     <variablelist role="function_parameters">
+      <varlistentry>
+       <term><parameter>curlHandle</parameter></term>
+       <listitem>
+        <simpara>
+         The cURL handle.
+        </simpara>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term><parameter>bytesToDownload</parameter></term>
+       <listitem>
+        <simpara>
+         The total number of bytes expected to be downloaded in this transfer.
+        </simpara>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term><parameter>bytesDownloaded</parameter></term>
+       <listitem>
+        <simpara>
+         The number of bytes downloaded so far.
+        </simpara>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term><parameter>bytesToUpload</parameter></term>
+       <listitem>
+        <simpara>
+         The total number of bytes expected to be uploaded in this transfer.
+        </simpara>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term><parameter>bytesUploaded</parameter></term>
+       <listitem>
+        <simpara>
+         The number of bytes uploaded so far.
+        </simpara>
+       </listitem>
+      </varlistentry>
+     </variablelist>
+     The callback should return an <type>int</type> with a non-zero value to abort the transfer
+     and set a <constant>CURLE_ABORTED_BY_CALLBACK</constant> error.
      <note>
       <para>
        The callback is only called when the <constant>CURLOPT_NOPROGRESS</constant>
        option is set to &false;.
       </para>
      </note>
-     Return a non-zero value to abort the transfer. In which case, the
-     transfer will set a <constant>CURLE_ABORTED_BY_CALLBACK</constant>
-     error.
+     Available as of cURL 7.1.0 and deprecated as of cURL 7.32.0.
+     Use <constant>CURLOPT_XFERINFOFUNCTION</constant> instead.
     </para>
    </listitem>
   </varlistentry>
@@ -2044,28 +2125,11 @@
    </term>
    <listitem>
     <para>
-     Bitmask of <constant>CURLPROTO_*</constant> values. If used, this bitmask
-     limits what protocols libcurl may use in the transfer. This allows you to have
-     a libcurl built to support a wide range of protocols but still limit specific
-     transfers to only be allowed to use a subset of them. By default libcurl will
-     accept all protocols it supports.
+     Bitmask of <constant>CURLPROTO_<replaceable>*</replaceable></constant> values.
+     If used, this bitmask limits what protocols cURL may use in the transfer.
+     Defaults to <constant>CURLPROTO_ALL</constant>, ie. cURL will accept all protocols it supports.
      See also <constant>CURLOPT_REDIR_PROTOCOLS</constant>.
-     Valid protocol options are:
-     <constant>CURLPROTO_HTTP</constant>,
-     <constant>CURLPROTO_HTTPS</constant>,
-     <constant>CURLPROTO_FTP</constant>,
-     <constant>CURLPROTO_FTPS</constant>,
-     <constant>CURLPROTO_SCP</constant>,
-     <constant>CURLPROTO_SFTP</constant>,
-     <constant>CURLPROTO_TELNET</constant>,
-     <constant>CURLPROTO_LDAP</constant>,
-     <constant>CURLPROTO_LDAPS</constant>,
-     <constant>CURLPROTO_DICT</constant>,
-     <constant>CURLPROTO_FILE</constant>,
-     <constant>CURLPROTO_TFTP</constant>,
-     <constant>CURLPROTO_MQTT</constant>,
-     <constant>CURLPROTO_ALL</constant>
-     Available as of cURL 7.19.4.
+     Available as of cURL 7.19.4 and deprecated as of cURL 7.85.0.
     </para>
    </listitem>
   </varlistentry>
@@ -2076,7 +2140,46 @@
    </term>
    <listitem>
     <para>
-     Available as of PHP 8.3.0 and cURL 7.85.0
+     Set to a <type>string</type> with a comma separated list
+     of case insensitive protocol names (URL schemes) to allow in the transfer.
+     Set to <literal>ALL</literal> to enable all protocols.
+     By default, cURL accepts all protocols it was built with support for.
+     Available protocols are:
+     <simplelist type="inline">
+      <member><literal>DICT</literal></member>
+      <member><literal>FILE</literal></member>
+      <member><literal>FTP</literal></member>
+      <member><literal>FTPS</literal></member>
+      <member><literal>GOPHER</literal></member>
+      <member><literal>GOPHERS</literal></member>
+      <member><literal>HTTP</literal></member>
+      <member><literal>HTTPS</literal></member>
+      <member><literal>IMAP</literal></member>
+      <member><literal>IMAPS</literal></member>
+      <member><literal>LDAP</literal></member>
+      <member><literal>LDAPS</literal></member>
+      <member><literal>MQTT</literal></member>
+      <member><literal>POP3</literal></member>
+      <member><literal>POP3S</literal></member>
+      <member><literal>RTMP</literal></member>
+      <member><literal>RTMPE</literal></member>
+      <member><literal>RTMPS</literal></member>
+      <member><literal>RTMPT</literal></member>
+      <member><literal>RTMPTE</literal></member>
+      <member><literal>RTMPTS</literal></member>
+      <member><literal>RTSP</literal></member>
+      <member><literal>SCP</literal></member>
+      <member><literal>SFTP</literal></member>
+      <member><literal>SMB</literal></member>
+      <member><literal>SMBS</literal></member>
+      <member><literal>SMTP</literal></member>
+      <member><literal>SMTPS</literal></member>
+      <member><literal>TELNET</literal></member>
+      <member><literal>TFTP</literal></member>
+      <member><literal>WS</literal></member>
+      <member><literal>WSS</literal></member>
+     </simplelist>.
+     Available as of PHP 8.3.0 and cURL 7.85.0.
     </para>
    </listitem>
   </varlistentry>
@@ -2087,7 +2190,10 @@
    </term>
    <listitem>
     <para>
-     The HTTP proxy to tunnel requests through.
+     A <type>string</type> with the HTTP proxy to tunnel requests through.
+     This should be the hostname, the dotted numerical IP address
+     or a numerical IPv6 address written within [brackets].
+     Available as of cURL 7.1.0.
     </para>
    </listitem>
   </varlistentry>
@@ -2098,11 +2204,12 @@
    </term>
    <listitem>
     <para>
-     The HTTP authentication method(s) to use for the proxy connection.
-     Use the same bitmasks as described in
-     <constant>CURLOPT_HTTPAUTH</constant>. For proxy authentication,
-     only <constant>CURLAUTH_BASIC</constant> and
+     A bitmask of the HTTP authentication method(s)
+     (<constant>CURLAUTH_<replaceable>*</replaceable></constant> constants)
+     to use for the proxy connection.
+     For proxy authentication, only <constant>CURLAUTH_BASIC</constant> and
      <constant>CURLAUTH_NTLM</constant> are currently supported.
+     Defaults to <constant>CURLAUTH_BASIC</constant>.
      Available as of cURL 7.10.7.
     </para>
    </listitem>
@@ -2114,8 +2221,8 @@
    </term>
    <listitem>
     <para>
-     An array of custom HTTP headers to pass to proxies.
-     Available as of PHP 7.0.7 and cURL 7.37.0
+     An <type>array</type> of custom HTTP header <type>string</type>s to pass to proxies.
+     Available as of PHP 7.0.7 and cURL 7.37.0.
     </para>
    </listitem>
   </varlistentry>
@@ -2138,8 +2245,11 @@
    </term>
    <listitem>
     <para>
-     The port number of the proxy to connect to. This port number can
-     also be set in <constant>CURLOPT_PROXY</constant>.
+     An <type>int</type> with the port number of the proxy to connect to.
+     This port number can also be set in <constant>CURLOPT_PROXY</constant>.
+     Setting this to zero makes cURL use the default proxy port number
+     or the port number specified in the proxy URL <type>string</type>.
+     Available as of cURL 7.1.0.
     </para>
    </listitem>
   </varlistentry>
@@ -2150,11 +2260,9 @@
    </term>
    <listitem>
     <para>
-     Either <constant>CURLPROXY_HTTP</constant> (default),
-     <constant>CURLPROXY_SOCKS4</constant>,
-     <constant>CURLPROXY_SOCKS5</constant>,
-     <constant>CURLPROXY_SOCKS4A</constant> or
-     <constant>CURLPROXY_SOCKS5_HOSTNAME</constant>.
+     Sets the type of the proxy to one of the
+     <constant>CURLPROXY_<replaceable>*</replaceable></constant> constants.
+     Defaults to <constant>CURLPROXY_HTTP</constant>.
      Available as of cURL 7.10.
     </para>
    </listitem>
@@ -2178,9 +2286,10 @@
    </term>
    <listitem>
     <para>
-     A username and password formatted as
-     <literal>"[username]:[password]"</literal> to use for the
+     A <type>string</type> with a username and password formatted as
+     <literal>[username]:[password]</literal> to use for the
      connection to the proxy.
+     Available as of cURL 7.1.0.
     </para>
    </listitem>
   </varlistentry>
@@ -2195,9 +2304,9 @@
      <type>string</type> naming a file holding one or more certificates to
      verify the HTTPS proxy with.
      This option is for connecting to an HTTPS proxy, not an HTTPS server.
-     Defaults set to the system path where libcurl's cacert bundle is assumed
+     Defaults set to the system path where cURL's cacert bundle is assumed
      to be stored.
-     Available as of PHP 7.3.0 and cURL 7.52.0
+     Available as of PHP 7.3.0 and cURL 7.52.0.
     </para>
    </listitem>
   </varlistentry>
@@ -2208,11 +2317,11 @@
    </term>
    <listitem>
     <para>
-     The name of a PEM file holding one or more certificates to verify the HTTPS proxy with.
+     A <type>string</type> with the name of a PEM file holding one or more certificates to verify the HTTPS proxy with.
      This option is for connecting to an HTTPS proxy, not an HTTPS server.
-     Defaults set to the system path where libcurl's cacert bundle is assumed
+     Defaults set to the system path where cURL's cacert bundle is assumed
      to be stored.
-     Available as of PHP 8.2.0 and cURL 7.77.0
+     Available as of PHP 8.2.0 and cURL 7.77.0.
     </para>
    </listitem>
   </varlistentry>
@@ -2223,8 +2332,9 @@
    </term>
    <listitem>
     <para>
-     The directory holding multiple CA certificates to verify the HTTPS proxy with.
-     Available as of PHP 7.3.0 and cURL 7.52.0
+     A <type>string</type> with the directory holding multiple CA certificates
+     to verify the HTTPS proxy with.
+     Available as of PHP 7.3.0 and cURL 7.52.0.
     </para>
    </listitem>
   </varlistentry>
@@ -2235,10 +2345,11 @@
    </term>
    <listitem>
     <para>
-     Set the file name with the concatenation of CRL (Certificate Revocation List)
+     Set to a <type>string</type> with the file name
+     with the concatenation of CRL (Certificate Revocation List)
      in PEM format to use in the certificate validation that occurs during
      the SSL exchange.
-     Available as of PHP 7.3.0 and cURL 7.52.0
+     Available as of PHP 7.3.0 and cURL 7.52.0.
     </para>
    </listitem>
   </varlistentry>
@@ -2249,7 +2360,7 @@
    </term>
    <listitem>
     <para>
-     Proxy issuer SSL certificate filename.
+     Proxy issuer SSL certificate filename <type>string</type>.
      Available as of PHP 8.1.0 and cURL 7.71.0.
     </para>
    </listitem>
@@ -2261,7 +2372,7 @@
    </term>
    <listitem>
     <para>
-     Proxy issuer SSL certificate from memory blob.
+     A <type>string</type> with the proxy issuer SSL certificate.
      Available as of PHP 8.1.0 and cURL 7.71.0.
     </para>
    </listitem>
@@ -2273,11 +2384,12 @@
    </term>
    <listitem>
     <para>
-     Set the string be used as the password required to use the
-     <constant>CURLOPT_PROXY_SSLKEY</constant> private key. You never needed a
-     passphrase to load a certificate but you need one to load your private key.
+     Set the <type>string</type> be used as the password required to use the
+     <constant>CURLOPT_PROXY_SSLKEY</constant> private key.
+     A passphrase is not needed to load a certificate
+     but one is needed to load a private key.
      This option is for connecting to an HTTPS proxy, not an HTTPS server.
-     Available as of PHP 7.3.0 and cURL 7.52.0
+     Available as of PHP 7.3.0 and cURL 7.52.0.
     </para>
    </listitem>
   </varlistentry>
@@ -2288,11 +2400,13 @@
    </term>
    <listitem>
     <para>
-     Set the pinned public key for HTTPS proxy. The string can be the file name
-     of your pinned public key. The file format expected is "PEM" or "DER".
-     The string can also be any number of base64 encoded sha256 hashes preceded by
-     "sha256//" and separated by ";".
-     Available as of PHP 7.3.0 and cURL 7.52.0
+     Set the pinned public key for HTTPS proxy.
+     The <type>string</type> can be the file name of the pinned public key
+     which is expected to be in a <literal>PEM</literal>
+     or <literal>DER</literal> file format.
+     The <type>string</type> can also be any number of base64 encoded sha256 hashes
+     preceded by <literal>sha256//</literal> and separated by <literal>;</literal>.
+     Available as of PHP 7.3.0 and cURL 7.52.0.
     </para>
    </listitem>
   </varlistentry>
@@ -2303,7 +2417,7 @@
    </term>
    <listitem>
     <para>
-     The proxy authentication service name.
+     A <type>string</type> with the proxy authentication service name.
      Available as of PHP 7.0.7, cURL 7.43.0 (for HTTP proxies) and cURL 7.49.0 (for SOCKS5 proxies).
     </para>
    </listitem>
@@ -2315,14 +2429,15 @@
    </term>
    <listitem>
     <para>
-     The file name of your client certificate used to connect to the HTTPS proxy.
-     The default format is "P12" on Secure Transport and "PEM" on other engines,
+     A <type>string</type> with the file name of the client certificate used to connect to the HTTPS proxy.
+     The default format is <literal>P12</literal> on Secure Transport and <literal>PEM</literal> on other engines,
      and can be changed with <constant>CURLOPT_PROXY_SSLCERTTYPE</constant>.
      With NSS or Secure Transport, this can also be the nickname of the certificate
-     you wish to authenticate with as it is named in the security database.
-     If you want to use a file from the current directory, please precede it with
-     "./" prefix, in order to avoid confusion with a nickname.
-     Available as of PHP 7.3.0 and cURL 7.52.0
+     used for authentication as it is named in the security database.
+     If a file from the current directory is to be used,
+     it must be prefixed with <literal>./</literal>
+     in order to avoid confusion with a nickname.
+     Available as of PHP 7.3.0 and cURL 7.52.0.
     </para>
    </listitem>
   </varlistentry>
@@ -2333,12 +2448,12 @@
    </term>
    <listitem>
     <para>
-     The format of your client certificate used when connecting to an HTTPS proxy.
-     Supported formats are "PEM" and "DER", except with Secure Transport.
+     A <type>string</type> with the format of the client certificate used when connecting to an HTTPS proxy.
+     Supported formats are <literal>PEM</literal> and <literal>DER</literal>, except with Secure Transport.
      OpenSSL (versions 0.9.3 and later) and Secure Transport
-     (on iOS 5 or later, or OS X 10.7 or later) also support "P12" for
-     PKCS#12-encoded files. Defaults to "PEM".
-     Available as of PHP 7.3.0 and cURL 7.52.0
+     (on iOS 5 or later, or OS X 10.7 or later) also support <literal>P12</literal> for
+     PKCS#12-encoded files. Defaults to <literal>PEM</literal>.
+     Available as of PHP 7.3.0 and cURL 7.52.0.
     </para>
    </listitem>
   </varlistentry>
@@ -2349,7 +2464,7 @@
    </term>
    <listitem>
     <para>
-     SSL proxy client certificate from memory blob.
+     A <type>string</type> with the SSL proxy client certificate.
      Available as of PHP 8.1.0 and cURL 7.71.0.
     </para>
    </listitem>
@@ -2361,11 +2476,13 @@
    </term>
    <listitem>
     <para>
-     The file name of your private key used for connecting to the HTTPS proxy.
-     The default format is "PEM" and can be changed with
+     A <type>string</type> with the file name of the private key
+     used for connecting to the HTTPS proxy.
+     The default format is <literal>PEM</literal> and can be changed with
      <constant>CURLOPT_PROXY_SSLKEYTYPE</constant>.
-     (iOS and Mac OS X only) This option is ignored if curl was built against Secure Transport. Available if built TLS enabled.
-     Available as of PHP 7.3.0 and cURL 7.52.0
+     (iOS and Mac OS X only) This option is ignored if cURL was built against
+     Secure Transport. Available if built with TLS enabled.
+     Available as of PHP 7.3.0 and cURL 7.52.0.
     </para>
    </listitem>
   </varlistentry>
@@ -2376,8 +2493,14 @@
    </term>
    <listitem>
     <para>
-     The format of your private key. Supported formats are "PEM", "DER" and "ENG".
-     Available as of PHP 7.3.0 and cURL 7.52.0
+     A <type>string</type> with the format of the private key.
+     Supported formats are:
+     <simplelist type="inline">
+      <member><literal>PEM</literal></member>
+      <member><literal>DER</literal></member>
+      <member><literal>ENG</literal></member>
+     </simplelist>.
+     Available as of PHP 7.3.0 and cURL 7.52.0.
     </para>
    </listitem>
   </varlistentry>
@@ -2388,7 +2511,7 @@
    </term>
    <listitem>
     <para>
-     Private key for proxy cert from memory blob.
+     A <type>string</type> with the private key for connecting to the HTTPS proxy.
      Available as of PHP 8.1.0 and cURL 7.71.0.
     </para>
    </listitem>
@@ -2400,30 +2523,16 @@
    </term>
    <listitem>
     <para>
-     One of
-     <simplelist type="inline">
-      <member><constant>CURL_SSLVERSION_DEFAULT</constant></member>
-      <member><constant>CURL_SSLVERSION_TLSv1</constant></member>
-      <member><constant>CURL_SSLVERSION_TLSv1_0</constant></member>
-      <member><constant>CURL_SSLVERSION_TLSv1_1</constant></member>
-      <member><constant>CURL_SSLVERSION_TLSv1_2</constant></member>
-      <member><constant>CURL_SSLVERSION_TLSv1_3</constant></member>
-      <member><constant>CURL_SSLVERSION_MAX_DEFAULT</constant></member>
-      <member><constant>CURL_SSLVERSION_MAX_TLSv1_0</constant></member>
-      <member><constant>CURL_SSLVERSION_MAX_TLSv1_1</constant></member>
-      <member><constant>CURL_SSLVERSION_MAX_TLSv1_2</constant></member>
-      <member><constant>CURL_SSLVERSION_MAX_TLSv1_3</constant></member>
-      <member><constant>CURL_SSLVERSION_SSLv3</constant></member>
-     </simplelist>
-     .
+     Set the preferred HTTPS proxy TLS version to one of the
+     <constant>CURL_SSLVERSION_<replaceable>*</replaceable></constant>
+     constants.
+     Defaults to <constant>CURL_SSLVERSION_DEFAULT</constant>.
      <warning>
       <simpara>
-       It is better to not set this option and leave the default
-       <constant>CURL_SSLVERSION_DEFAULT</constant>
-       which will attempt to figure out the remote SSL protocol version.
+       最好不要设置此选项并使用默认的 <constant>CURL_SSLVERSION_DEFAULT</constant>，这将尝试找出远程 SSL 协议版本。
       </simpara>
      </warning>
-     Available as of PHP 7.3.0 and cURL 7.52.0
+     Available as of PHP 7.3.0 and cURL 7.52.0.
     </para>
    </listitem>
   </varlistentry>
@@ -2434,11 +2543,12 @@
    </term>
    <listitem>
     <para>
-     The list of ciphers to use for the connection to the HTTPS proxy.
-     The list must be syntactically correct, it consists of one or more cipher
-     strings separated by colons. Commas or spaces are also acceptable separators
-     but colons are normally used, !, - and + can be used as operators.
-     Available as of PHP 7.3.0 and cURL 7.52.0
+     A <type>string</type> with a colon-separated list of ciphers
+     to use for the connection to the HTTPS proxy.
+     When used with OpenSSL commas and spaces are also acceptable as separators,
+     and <literal>!</literal>, <literal>-</literal> and <literal>+</literal>
+     can be used as operators.
+     Available as of PHP 7.3.0 and cURL 7.52.0.
     </para>
    </listitem>
   </varlistentry>
@@ -2449,13 +2559,9 @@
    </term>
    <listitem>
     <para>
-     Set proxy SSL behavior options, which is a bitmask of the following constants:
-     <simplelist type="inline">
-      <member><constant>CURLSSLOPT_ALLOW_BEAST</constant></member>
-      <member><constant>CURLSSLOPT_NO_REVOKE</constant></member>
-      <member><constant>CURLSSLOPT_NO_PARTIALCHAIN</constant></member>
-     </simplelist>
-     Available as of PHP 7.3.0 and cURL 7.52.0
+     Set proxy SSL behavior options, which is a bitmask of the
+     <constant>CURLSSLOPT_<replaceable>*</replaceable></constant> constants.
+     Available as of PHP 7.3.0 and cURL 7.52.0.
     </para>
    </listitem>
   </varlistentry>
@@ -2466,14 +2572,12 @@
    </term>
    <listitem>
     <para>
-     Set to <literal>2</literal> to verify in the HTTPS proxy's certificate name fields against the proxy name.
-     When set to <literal>0</literal> the connection succeeds regardless of the names used in the certificate.
-     Use that ability with caution!
-     <literal>1</literal> treated as a debug option in curl 7.28.0 and earlier.
-     From curl 7.28.1 to 7.65.3 <constant>CURLE_BAD_FUNCTION_ARGUMENT</constant> is returned.
-     From curl 7.66.0 onwards <literal>1</literal> and <literal>2</literal> is treated as the same value.
-     In production environments the value of this option should be kept at <literal>2</literal> (default value).
-     Available as of PHP 7.3.0 and cURL 7.52.0
+     设置为 <literal>2</literal> 以根据代理名称验证 HTTPS 代理的证书名称字段。设置为 <literal>0</literal>
+     时，无论证书中使用的名称如何，连接都会成功。谨慎使用该能力！在 cURL 7.28.0 及更早版本中将其设置为
+     <literal>1</literal> 作为调试选项。在 cURL 7.28.1 到 7.65.3 中设置为 <literal>1</literal>，则返回
+     <constant>CURLE_BAD_FUNCTION_ARGUMENT</constant>。自 cURL 7.66.0 起，视 <literal>1</literal> 和
+     <literal>2</literal> 为相同的值。默认为 <literal>2</literal>。在生产环境中，此选项的值应保持为
+     <literal>2</literal>。从 PHP 7.3.0 和 cURL 7.52.0 开始可用。
     </para>
    </listitem>
   </varlistentry>
@@ -2484,13 +2588,9 @@
    </term>
    <listitem>
     <para>
-     &false; to stop cURL from verifying the peer's certificate.
-     Alternate certificates to verify against can be
-     specified with the <constant>CURLOPT_CAINFO</constant> option
-     or a certificate directory can be specified with the
-     <constant>CURLOPT_CAPATH</constant> option.
-     When set to false, the peer certificate verification succeeds regardless. &true; by default.
-     Available as of PHP 7.3.0 and cURL 7.52.0
+     &false; 时阻止 CURL 验证对等证书（peer's certificate）。可以使用 <constant>CURLOPT_CAINFO</constant>
+     选项指定要验证的备用证书，或者使用 <constant>CURLOPT_CAPATH</constant> 选项指定证书目录。设置为 &false;
+     时，无论如何验证对等证书都会成功。默认为 &true;。自 PHP 7.3.0 和 cURL 7.52.0 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -2501,13 +2601,11 @@
    </term>
    <listitem>
     <para>
-     The list of cipher suites to use for the TLS 1.3 connection to a proxy.
-     The list must be syntactically correct, it consists of one or more
-     cipher suite strings separated by colons. This option is currently used
-     only when curl is built to use OpenSSL 1.1.1 or later.
-     If you are using a different SSL backend you can try setting
-     TLS 1.3 cipher suites by using the <constant>CURLOPT_PROXY_SSL_CIPHER_LIST</constant> option. Available when built with OpenSSL &gt;= 1.1.1.
-     Available as of PHP 7.3.0 and cURL 7.61.0
+     A <type>string</type> with a colon-separated list of ciphers to use for the connection to the TLS 1.3 connection to a proxy.
+     This option is currently used only when cURL is built to use OpenSSL 1.1.1 or later.
+     When using a different SSL backend the TLS 1.3 cipher suites can be set
+     with the <constant>CURLOPT_PROXY_SSL_CIPHER_LIST</constant> option.
+     Available as of PHP 7.3.0 and cURL 7.61.0.
     </para>
    </listitem>
   </varlistentry>
@@ -2518,10 +2616,10 @@
    </term>
    <listitem>
     <para>
-     The password to use for the TLS authentication method specified with the
+     A <type>string</type> with the password to use for the TLS authentication method specified with the
      <constant>CURLOPT_PROXY_TLSAUTH_TYPE</constant> option. Requires that the
      <constant>CURLOPT_PROXY_TLSAUTH_USERNAME</constant> option to also be set.
-     Available as of PHP 7.3.0 and cURL 7.52.0
+     Available as of PHP 7.3.0 and cURL 7.52.0.
     </para>
    </listitem>
   </varlistentry>
@@ -2533,16 +2631,16 @@
    <listitem>
     <para>
      The method of the TLS authentication used for the HTTPS connection.
-     Supported method is <literal>"SRP"</literal>.
+     Supported method is <literal>SRP</literal>.
      <note>
       <para>
        Secure Remote Password (SRP) authentication for TLS provides mutual authentication
-       if both sides have a shared secret. To use TLS-SRP, you must also set the
+       if both sides have a shared secret. To use TLS-SRP, the
        <constant>CURLOPT_PROXY_TLSAUTH_USERNAME</constant> and
-       <constant>CURLOPT_PROXY_TLSAUTH_PASSWORD</constant> options.
+       <constant>CURLOPT_PROXY_TLSAUTH_PASSWORD</constant> options must also be set.
       </para>
      </note>
-     Available as of PHP 7.3.0 and cURL 7.52.0
+     Available as of PHP 7.3.0 and cURL 7.52.0.
     </para>
    </listitem>
   </varlistentry>
@@ -2556,7 +2654,7 @@
      The username to use for the HTTPS proxy TLS authentication method specified with the
      <constant>CURLOPT_PROXY_TLSAUTH_TYPE</constant> option. Requires that the
      <constant>CURLOPT_PROXY_TLSAUTH_PASSWORD</constant> option to also be set.
-     Available as of PHP 7.3.0 and cURL 7.52.0
+     Available as of PHP 7.3.0 and cURL 7.52.0.
     </para>
    </listitem>
   </varlistentry>
@@ -2585,9 +2683,9 @@
    </term>
    <listitem>
     <para>
-     &true; to HTTP PUT a file. The file to PUT must
-     be set with <constant>CURLOPT_INFILE</constant> and
-     <constant>CURLOPT_INFILESIZE</constant>.
+     &true; 时允许 HTTP 发送文件。要被 PUT 的文件必须在 <constant>CURLOPT_READDATA</constant>
+     和<constant>CURLOPT_INFILESIZE</constant> 中设置。自 cURL 7.1.0 起可用并于 cURL 7.12.1
+     弃用。
     </para>
    </listitem>
   </varlistentry>
@@ -2598,7 +2696,11 @@
    </term>
    <listitem>
     <para>
-     Available as of PHP 8.3.0 and cURL 7.87.0
+     Set to &true; for cURL to skip cleanup of resources
+     when recovering from a timeout.
+     This allows for a swift termination of the cURL process
+     at the expense of a possible leak of associated resources.
+     Available as of PHP 8.3.0 and cURL 7.87.0.
     </para>
    </listitem>
   </varlistentry>
@@ -2609,8 +2711,8 @@
    </term>
    <listitem>
     <para>
-     An array of FTP commands to execute on the server prior to the FTP
-     request.
+     An <type>array</type> of FTP command <type>string</type>s to execute on the server prior to the FTP request.
+     Available as of cURL 7.1.0.
     </para>
    </listitem>
   </varlistentry>
@@ -2621,7 +2723,8 @@
    </term>
    <listitem>
     <para>
-     A filename to be used to seed the random number generator for SSL.
+     A <type>string</type> with a filename to be used to seed the random number generator for SSL.
+     Available as of cURL 7.7.0 and deprecated as of cURL 7.84.0.
     </para>
    </listitem>
   </varlistentry>
@@ -2632,10 +2735,11 @@
    </term>
    <listitem>
     <para>
-     Range(s) of data to retrieve in the format
-     <literal>"X-Y"</literal> where X or Y are optional. HTTP transfers
+     A <type>string</type> with the range(s) of data to retrieve in the format <literal>X-Y</literal> where X or Y are optional. HTTP transfers
      also support several intervals, separated with commas in the format
-     <literal>"X-Y,N-M"</literal>.
+     <literal>X-Y,N-M</literal>.
+     Set to &null; to disable requesting a byte range.
+     Available as of cURL 7.1.0.
     </para>
    </listitem>
   </varlistentry>
@@ -2659,14 +2763,45 @@
    </term>
    <listitem>
     <para>
-     A callback accepting three parameters.
-     The first is the cURL resource, the second is a
-     stream resource provided to cURL through the option
-     <constant>CURLOPT_INFILE</constant>, and the third is the maximum
-     amount of data to be read. The callback must return a string
+     A <type>callable</type> with the following signature:
+     <methodsynopsis>
+      <type>string</type><methodname><replaceable>callback</replaceable></methodname>
+      <methodparam><type>resource</type><parameter>curlHandle</parameter></methodparam>
+      <methodparam><type>resource</type><parameter>streamResource</parameter></methodparam>
+      <methodparam><type>int</type><parameter>maxAmountOfDataToRead</parameter></methodparam>
+     </methodsynopsis>
+     <variablelist role="function_parameters">
+      <varlistentry>
+       <term><parameter>curlHandle</parameter></term>
+       <listitem>
+        <simpara>
+         The cURL handle.
+        </simpara>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term><parameter>streamResource</parameter></term>
+       <listitem>
+        <simpara>
+         Stream <type>resource</type> provided to cURL through the option
+     <constant>CURLOPT_READDATA</constant>.
+        </simpara>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term><parameter>maxAmountOfDataToRead</parameter></term>
+       <listitem>
+        <simpara>
+         The maximum amount of data to be read.
+        </simpara>
+       </listitem>
+      </varlistentry>
+     </variablelist>
+     The callback should return a <type>string</type>
      with a length equal or smaller than the amount of data requested,
-     typically by reading it from the passed stream resource. It should
-     return an empty string to signal <literal>EOF</literal>.
+     typically by reading it from the passed stream <type>resource</type>. It should
+     return an empty <type>string</type> to signal <literal>EOF</literal>.
+     Available as of cURL 7.1.0.
     </para>
    </listitem>
   </varlistentry>
@@ -2677,15 +2812,16 @@
    </term>
    <listitem>
     <para>
-     Bitmask of <constant>CURLPROTO_*</constant> values. If used, this bitmask
-     limits what protocols libcurl may use in a transfer that it follows to in
+     Bitmask of <constant>CURLPROTO_<replaceable>*</replaceable></constant> values
+     which limit what protocols cURL may use in a transfer that it follows to in
      a redirect when <constant>CURLOPT_FOLLOWLOCATION</constant> is enabled.
-     This allows you to limit specific transfers to only be allowed to use a subset
-     of protocols in redirections. By default libcurl will allow all protocols
-     except for FILE and SCP. This is a difference compared to pre-7.19.4 versions
-     which unconditionally would follow to all protocols supported.
+     This allows limiting specific transfers to only be allowed to use a subset
+     of protocols in redirections.
+     As of cURL 7.19.4, by default cURL will allow all protocols
+     except for <literal>FILE</literal> and <literal>SCP</literal>.
+     Prior to cURL 7.19.4, cURL would unconditionally follow to all supported protocols.
      See also <constant>CURLOPT_PROTOCOLS</constant> for protocol constant values.
-     Available as of cURL 7.19.4.
+     Available as of cURL 7.19.4 and deprecated as of cURL 7.85.0.
     </para>
    </listitem>
   </varlistentry>
@@ -2696,6 +2832,53 @@
    </term>
    <listitem>
     <para>
+     Set to a <type>string</type> with a comma separated list
+     of case insensitive protocol names (URL schemes)
+     to allow to follow to in a redirect when
+     <constant>CURLOPT_FOLLOWLOCATION</constant> is enabled.
+     Set to <literal>ALL</literal> to enable all protocols.
+     As of cURL 7.65.2 it defaults to <literal>FTP</literal>,
+     <literal>FTPS</literal>, <literal>HTTP</literal> and <literal>HTTPS</literal>.
+     From cURL 7.40.0 to 7.65.1, this defaults to all protocols except
+     <literal>FILE</literal>, <literal>SCP</literal>, <literal>SMB</literal> and
+     <literal>SMBS</literal>.
+     Prior to cURL 7.40.0, this defaults to all protocols except
+     <literal>FILE</literal> and <literal>SCP</literal>.
+     Available protocols are:
+     <simplelist type="inline">
+      <member><literal>DICT</literal></member>
+      <member><literal>FILE</literal></member>
+      <member><literal>FTP</literal></member>
+      <member><literal>FTPS</literal></member>
+      <member><literal>GOPHER</literal></member>
+      <member><literal>GOPHERS</literal></member>
+      <member><literal>HTTP</literal></member>
+      <member><literal>HTTPS</literal></member>
+      <member><literal>IMAP</literal></member>
+      <member><literal>IMAPS</literal></member>
+      <member><literal>LDAP</literal></member>
+      <member><literal>LDAPS</literal></member>
+      <member><literal>MQTT</literal></member>
+      <member><literal>POP3</literal></member>
+      <member><literal>POP3S</literal></member>
+      <member><literal>RTMP</literal></member>
+      <member><literal>RTMPE</literal></member>
+      <member><literal>RTMPS</literal></member>
+      <member><literal>RTMPT</literal></member>
+      <member><literal>RTMPTE</literal></member>
+      <member><literal>RTMPTS</literal></member>
+      <member><literal>RTSP</literal></member>
+      <member><literal>SCP</literal></member>
+      <member><literal>SFTP</literal></member>
+      <member><literal>SMB</literal></member>
+      <member><literal>SMBS</literal></member>
+      <member><literal>SMTP</literal></member>
+      <member><literal>SMTPS</literal></member>
+      <member><literal>TELNET</literal></member>
+      <member><literal>TFTP</literal></member>
+      <member><literal>WS</literal></member>
+      <member><literal>WSS</literal></member>
+     </simplelist>.
      Available as of PHP 8.3.0 and cURL 7.85.0.
     </para>
    </listitem>
@@ -2707,8 +2890,9 @@
    </term>
    <listitem>
     <para>
-     The contents of the <literal>"Referer: "</literal> header to be used
-     in a HTTP request.
+     A <type>string</type> with the contents of the <literal>Referer: </literal>
+     header to be used in a HTTP request.
+     Available as of cURL 7.1.0.
     </para>
    </listitem>
   </varlistentry>
@@ -2719,6 +2903,8 @@
    </term>
    <listitem>
     <para>
+     A <type>string</type> to use in the upcoming request
+     instead of the path as extracted from the URL.
      Available as of PHP 7.3.0 and cURL 7.55.0.
     </para>
    </listitem>
@@ -2730,11 +2916,13 @@
    </term>
    <listitem>
     <para>
-     Provide a custom address for a specific host and port pair. An array
-     of hostname, port, and IP address strings, each element separated by
-     a colon. In the format:
+     Provide an <type>array</type> of colon-separated <type>string</type>s
+     with custom addresses for specific host and port pairs in the following format:
      <code>
-      array("example.com:80:127.0.0.1")
+      array(
+        "example.com:80:127.0.0.1",
+        "example2.com:443:127.0.0.2",
+      )
      </code>
      Available as of cURL 7.21.3.
     </para>
@@ -2747,7 +2935,8 @@
    </term>
    <listitem>
     <para>
-     The offset, in bytes, to resume a transfer from.
+     恢复传输时，传递字节为单位的偏移量（以字节为单位）。此选项接受任何可以转换为有效 <type>int</type>
+     的值。自 cURL 7.1.0 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -2758,9 +2947,7 @@
    </term>
    <listitem>
     <para>
-     &true; to return the transfer as a string of the
-     return value of <function>curl_exec</function> instead of outputting
-     it directly.
+     &true; 将 <function>curl_exec</function> 获取的信息以 <type>string</type> 返回，而不是直接输出。
     </para>
    </listitem>
   </varlistentry>
@@ -2863,11 +3050,8 @@
    </term>
    <listitem>
     <para>
-     Always &true;, what disables support for the <literal>@</literal> prefix for
-     uploading files in <constant>CURLOPT_POSTFIELDS</constant>, which
-     means that values starting with <literal>@</literal> can be safely
-     passed as fields. <classname>CURLFile</classname> may be used for
-     uploads instead.
+     始终为 &true;，在 <constant>CURLOPT_POSTFIELDS</constant> 中禁用了对上传文件的 <literal>@</literal>
+     前缀的支持，这意味着以 <literal>@</literal> 开头的值可以作为字段安全地传递。上传可使用 <classname>CURLFile</classname> 替代。
     </para>
    </listitem>
   </varlistentry>
@@ -2878,11 +3062,11 @@
    </term>
    <listitem>
     <para>
-     The authorization identity (authzid) for the transfer. Only applicable to the PLAIN SASL
+     The authorization identity (authzid) <type>string</type> for the transfer. Only applicable to the PLAIN SASL
      authentication mechanism where it is optional. When not specified, only the authentication identity
      (authcid) as specified by the username will be sent to the server, along with the password.
      The server will derive the authzid from the authcid when not provided, which it will then use internally.
-     Available as of PHP 8.2.0 and cURL 7.66.0
+     Available as of PHP 8.2.0 and cURL 7.66.0.
     </para>
    </listitem>
   </varlistentry>
@@ -2893,8 +3077,7 @@
    </term>
    <listitem>
     <para>
-     &true; to enable sending the initial response in the first packet.
-     Available as of PHP 7.0.7 and cURL 7.31.0
+     &true; 时开启，收到首包（first packet）后发送初始的响应（initial response）。自 PHP 7.0.7 和 cURL 7.31.0 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -2905,8 +3088,8 @@
    </term>
    <listitem>
     <para>
-     The authentication service name.
-     Available as of PHP 7.0.7 and cURL 7.43.0
+     A <type>string</type> with the authentication service name.
+     Available as of PHP 7.0.7 and cURL 7.43.0.
     </para>
    </listitem>
   </varlistentry>
@@ -2917,8 +3100,7 @@
    </term>
    <listitem>
     <para>
-     A result of <function>curl_share_init</function>. Makes the cURL
-     handle to use the data from the shared handle.
+     <function>curl_share_init</function> 的结果。使 cURL 可以使用共享句柄中的数据。自 cURL 7.10 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -2929,19 +3111,14 @@
    </term>
    <listitem>
     <para>
-     The SOCKS5 authentication method(s) to use. The options are:
-     <constant>CURLAUTH_BASIC</constant>,
-     <constant>CURLAUTH_GSSAPI</constant>,
-     <constant>CURLAUTH_NONE</constant>.
-     The bitwise <literal>|</literal> (or) operator can be used to combine
-     more than one method. If this is done, cURL will poll the server to see
-     what methods it supports and pick the best one.
-     <constant>CURLAUTH_BASIC</constant> allows username/password authentication.
-     <constant>CURLAUTH_GSSAPI</constant> allows GSS-API authentication.
-     <constant>CURLAUTH_NONE</constant> allows no authentication.
-     Defaults to <literal>CURLAUTH_BASIC|CURLAUTH_GSSAPI</literal>.
-     Set the actual username and password with the <constant>CURLOPT_PROXYUSERPWD</constant> option.
-     Available as of PHP 7.3.0 and cURL 7.55.0
+     用于 SOCKS5 验证方法。选项是：
+     <simplelist type="inline">
+      <member><constant>CURLAUTH_BASIC</constant></member>
+      <member><constant>CURLAUTH_GSSAPI</constant></member>
+      <member><constant>CURLAUTH_NONE</constant></member>
+     </simplelist>。当设置了多种方法时，cURL 将轮询服务器以查看其支持哪些方法并选择最佳方法。默认为
+     <literal>CURLAUTH_BASIC|CURLAUTH_GSSAPI</literal>。使用 <constant>CURLOPT_PROXYUSERPWD</constant>
+     选项设置真实的用户名和密码。自 PHP 7.3.0 和 cURL 7.55.0 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -2980,12 +3157,16 @@
    </term>
    <listitem>
     <para>
-     A bitmask consisting of one or more of
-     <constant>CURLSSH_AUTH_PUBLICKEY</constant>,
-     <constant>CURLSSH_AUTH_PASSWORD</constant>,
-     <constant>CURLSSH_AUTH_HOST</constant>,
-     <constant>CURLSSH_AUTH_KEYBOARD</constant>. Set to
-     <constant>CURLSSH_AUTH_ANY</constant> to let libcurl pick one.
+     A bitmask consisting of one or more of the following constants:
+     <simplelist type="inline">
+      <member><constant>CURLSSH_AUTH_PUBLICKEY</constant></member>
+      <member><constant>CURLSSH_AUTH_PASSWORD</constant></member>
+      <member><constant>CURLSSH_AUTH_HOST</constant></member>
+      <member><constant>CURLSSH_AUTH_KEYBOARD</constant></member>
+      <member><constant>CURLSSH_AUTH_AGENT</constant></member>
+      <member><constant>CURLSSH_AUTH_ANY</constant></member>
+     </simplelist>.
+     Defaults to <constant>CURLSSH_AUTH_ANY</constant>.
      Available as of cURL 7.16.1.
     </para>
    </listitem>
@@ -2997,9 +3178,10 @@
    </term>
    <listitem>
     <para>
-     &true; to enable built-in SSH compression. This is a request, not an order;
-     the server may or may not do it.
-     Available as of PHP 7.3.0 and cURL 7.56.0
+     &true; to enable, &false; to disable built-in SSH compression.
+     Note that the server can disregard this request.
+     Defaults to &false;.
+     Available as of PHP 7.3.0 and cURL 7.56.0.
     </para>
    </listitem>
   </varlistentry>
@@ -3010,7 +3192,51 @@
    </term>
    <listitem>
     <para>
-     Available as of PHP 8.3.0 and cURL 7.84.0
+     A <type>callable</type> that will be called when SSH host key verification is needed.
+     The callback must have the following signature:
+     <methodsynopsis>
+      <type>int</type><methodname><replaceable>callback</replaceable></methodname>
+      <methodparam><type>resource</type><parameter>curlHandle</parameter></methodparam>
+      <methodparam><type>int</type><parameter>keyType</parameter></methodparam>
+      <methodparam><type>string</type><parameter>key</parameter></methodparam>
+      <methodparam><type>int</type><parameter>keyLength</parameter></methodparam>
+     </methodsynopsis>
+     <variablelist role="function_parameters">
+      <varlistentry>
+       <term><parameter>curlHandle</parameter></term>
+       <listitem>
+        <simpara>
+         The cURL handle.
+        </simpara>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term><parameter>keyType</parameter></term>
+       <listitem>
+        <simpara>
+         One of the <constant>CURLKHTYPE_<replaceable>*</replaceable></constant> key types.
+        </simpara>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term><parameter>key</parameter></term>
+       <listitem>
+        <simpara>
+         The key to check.
+        </simpara>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term><parameter>keyLength</parameter></term>
+       <listitem>
+        <simpara>
+         The length of the key in bytes.
+        </simpara>
+       </listitem>
+      </varlistentry>
+     </variablelist>
+     This callback overrides <constant>CURLOPT_SSH_KNOWNHOSTS</constant>.
+     Available as of PHP 8.3.0 and cURL 7.84.0.
     </para>
    </listitem>
   </varlistentry>
@@ -3021,8 +3247,8 @@
    </term>
    <listitem>
     <para>
-     A string containing 32 hexadecimal digits. The string should be the
-     MD5 checksum of the remote host's public key, and libcurl will reject
+     A <type>string</type> containing 32 hexadecimal digits which should contain the
+     MD5 checksum of the remote host's public key, and cURL will reject
      the connection to the host unless the md5sums match.
      This option is only for SCP and SFTP transfers.
      Available as of cURL 7.17.1.
@@ -3036,9 +3262,10 @@
    </term>
    <listitem>
     <para>
-     Base64-encoded SHA256 hash of the remote host's public key.
+     A <type>string</type> with the base64-encoded SHA256 hash
+     of the remote host's public key.
      The transfer will fail if the given hash does not match the hash the remote host provides.
-     Available as of PHP 8.2.0 and cURL 7.80.0
+     Available as of PHP 8.2.0 and cURL 7.80.0.
     </para>
    </listitem>
   </varlistentry>
@@ -3062,9 +3289,9 @@
    </term>
    <listitem>
     <para>
-     The file name for your private key. If not used, libcurl defaults to
-     $HOME/.ssh/id_dsa if the HOME environment variable is set,
-     and just "id_dsa" in the current directory if HOME is not set.
+     The file name for a private key. If not used, cURL defaults to
+     <filename>$HOME/.ssh/id_dsa</filename> if the HOME environment variable is set,
+     and just <literal>id_dsa</literal> in the current directory if HOME is not set.
      If the file is password-protected, set the password with
      <constant>CURLOPT_KEYPASSWD</constant>.
      Available as of cURL 7.16.1.
@@ -3078,9 +3305,9 @@
    </term>
    <listitem>
     <para>
-     The file name for your public key. If not used, libcurl defaults to
-     $HOME/.ssh/id_dsa.pub if the HOME environment variable is set,
-     and just "id_dsa.pub" in the current directory if HOME is not set.
+     The file name for a public key. If not used, cURL defaults to
+     <filename>$HOME/.ssh/id_dsa.pub</filename> if the HOME environment variable is set,
+     and just <literal>id_dsa.pub</literal> in the current directory if HOME is not set.
      Available as of cURL 7.16.1.
     </para>
    </listitem>
@@ -3093,6 +3320,7 @@
    <listitem>
     <para>
      The name of a file containing a PEM formatted certificate.
+     Available as of cURL 7.1.0.
     </para>
    </listitem>
   </varlistentry>
@@ -3105,6 +3333,7 @@
     <para>
      The password required to use the
      <constant>CURLOPT_SSLCERT</constant> certificate.
+     Available as of cURL 7.1.0 and deprecated as of cURL 7.17.0.
     </para>
    </listitem>
   </varlistentry>
@@ -3115,11 +3344,15 @@
    </term>
    <listitem>
     <para>
-     The format of the certificate. Supported formats are
-     <literal>"PEM"</literal> (default), <literal>"DER"</literal>,
-     and <literal>"ENG"</literal>.
-     As of OpenSSL 0.9.3, <literal>"P12"</literal> (for PKCS#12-encoded files)
-     is also supported.
+     A <type>string</type> with the format of the certificate. Supported formats are:
+     <simplelist type="inline">
+      <member><literal>PEM</literal></member>
+      <member><literal>DER</literal></member>
+      <member><literal>ENG</literal></member>
+      <member><literal>P12</literal></member>
+     </simplelist>.
+     <literal>P12</literal> (for PKCS#12-encoded files) is available as of OpenSSL 0.9.3.
+     Defaults to <literal>PEM</literal>.
      Available as of cURL 7.9.3.
     </para>
    </listitem>
@@ -3131,7 +3364,7 @@
    </term>
    <listitem>
     <para>
-     SSL client certificate from memory blob.
+     A <type>string</type> with the SSL client certificate.
      Available as of PHP 8.1.0 and cURL 7.71.0.
     </para>
    </listitem>
@@ -3143,8 +3376,9 @@
    </term>
    <listitem>
     <para>
-     The identifier for the crypto engine of the private SSL key
+     The <type>string</type> identifier for the crypto engine of the private SSL key
      specified in <constant>CURLOPT_SSLKEY</constant>.
+     Available as of cURL 7.9.3.
     </para>
    </listitem>
   </varlistentry>
@@ -3155,8 +3389,9 @@
    </term>
    <listitem>
     <para>
-     The identifier for the crypto engine used for asymmetric crypto
+     The <type>string</type> identifier for the crypto engine used for asymmetric crypto
      operations.
+     Available as of cURL 7.9.3.
     </para>
    </listitem>
   </varlistentry>
@@ -3168,6 +3403,7 @@
    <listitem>
     <para>
      The name of a file containing a private SSL key.
+     Available as of cURL 7.9.3.
     </para>
    </listitem>
   </varlistentry>
@@ -3186,6 +3422,7 @@
        the PHP script it is contained within safe.
       </para>
      </note>
+     Available as of cURL 7.9.3 and deprecated as of cURL 7.17.0.
     </para>
    </listitem>
   </varlistentry>
@@ -3197,9 +3434,14 @@
    <listitem>
     <para>
      The key type of the private SSL key specified in
-     <constant>CURLOPT_SSLKEY</constant>. Supported key types are
-     <literal>"PEM"</literal> (default), <literal>"DER"</literal>,
-     and <literal>"ENG"</literal>.
+     <constant>CURLOPT_SSLKEY</constant>. Supported key types are:
+     <simplelist type="inline">
+      <member><literal>PEM</literal></member>
+      <member><literal>DER</literal></member>
+      <member><literal>ENG</literal></member>
+     </simplelist>.
+     Defaults to <literal>PEM</literal>.
+     Available as of cURL 7.9.3.
     </para>
    </listitem>
   </varlistentry>
@@ -3210,7 +3452,7 @@
    </term>
    <listitem>
     <para>
-     Private key for client cert from memory blob.
+     A <type>string</type> private key for client cert.
      Available as of PHP 8.1.0 and cURL 7.71.0.
     </para>
    </listitem>
@@ -3223,44 +3465,15 @@
    <listitem>
     <para>
      One of
-     <simplelist type="inline">
-      <member><constant>CURL_SSLVERSION_DEFAULT</constant></member>
-      <member><constant>CURL_SSLVERSION_TLSv1</constant></member>
-      <member><constant>CURL_SSLVERSION_SSLv2</constant></member>
-      <member><constant>CURL_SSLVERSION_SSLv3</constant></member>
-      <member><constant>CURL_SSLVERSION_TLSv1_0</constant></member>
-      <member><constant>CURL_SSLVERSION_TLSv1_1</constant></member>
-      <member><constant>CURL_SSLVERSION_TLSv1_2</constant></member>
-      <member><constant>CURL_SSLVERSION_TLSv1_3</constant></member>
-     </simplelist>
-     .
-     The maximum TLS version can be set by using one of the
-     <constant>CURL_SSLVERSION_MAX_<replaceable>*</replaceable></constant>
-     constants.
-     It is also possible to bitwise OR one of the
-     <constant>CURL_SSLVERSION_<replaceable>*</replaceable></constant>
-     constants with one of the
-     <constant>CURL_SSLVERSION_MAX_<replaceable>*</replaceable></constant>.
-
-     <simplelist type="inline">
-      <member><constant>CURL_SSLVERSION_MAX_DEFAULT</constant> (the maximum version supported by the library)</member>
-      <member><constant>CURL_SSLVERSION_MAX_TLSv1_0</constant></member>
-      <member><constant>CURL_SSLVERSION_MAX_TLSv1_1</constant></member>
-      <member><constant>CURL_SSLVERSION_MAX_TLSv1_2</constant></member>
-      <member><constant>CURL_SSLVERSION_MAX_TLSv1_3</constant></member>
-     </simplelist>
-     .
+     the <constant>CURL_SSLVERSION_<replaceable>*</replaceable></constant> constants.
      <warning>
       <simpara>
-       It is better to not set this option and leave the defaults.
-       As setting this to
-       <constant>CURL_SSLVERSION_SSLv2</constant>
-       or
-       <constant>CURL_SSLVERSION_SSLv3</constant>
-       is very dangerous, given the known
-       vulnerabilities in SSLv2 and SSLv3.
+       最好不要设置此选项并使用默认值。因为考虑到 SSLv2 和 SSLv3 中已知的漏洞，将其设置为
+       <constant>CURL_SSLVERSION_SSLv2</constant> 或 <constant>CURL_SSLVERSION_SSLv3</constant> 非常危险。
       </simpara>
      </warning>
+     Defaults to <constant>CURL_SSLVERSION_DEFAULT</constant>.
+     Available as of cURL 7.1.0.
     </para>
    </listitem>
   </varlistentry>
@@ -3271,9 +3484,9 @@
    </term>
    <listitem>
     <para>
-     A list of ciphers to use for SSL. For example,
-     <literal>RC4-SHA</literal> and <literal>TLSv1</literal> are valid
-     cipher lists.
+     A colon-separated <type>string</type> of ciphers to use
+     for the TLS 1.2 (1.1, 1.0) connection.
+     Available as of cURL 7.9.
     </para>
    </listitem>
   </varlistentry>
@@ -3288,7 +3501,7 @@
      <literal>X25519:P-521</literal> is a valid list of two elliptic curves.
      This option defines the client's key exchange algorithms in the SSL handshake,
      if the SSL backend cURL is built to use supports it.
-     Available as of PHP 8.2.0 and cURL 7.73.0
+     Available as of PHP 8.2.0 and cURL 7.73.0.
     </para>
    </listitem>
   </varlistentry>
@@ -3299,10 +3512,8 @@
    </term>
    <listitem>
     <para>
-     &false; to disable ALPN in the SSL handshake (if the SSL backend
-     libcurl is built to use supports it), which can be used to
-     negotiate http2.
-     Available as of PHP 7.0.7 and cURL 7.36.0
+     &false; 时禁用 SSL 握手中的 ALPN（如果 SSL 后端的
+     cURL 内建支持）用于协商到 http2。自 PHP 7.0.7 和 cURL 7.36.0 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -3313,10 +3524,8 @@
    </term>
    <listitem>
     <para>
-     &false; to disable NPN in the SSL handshake (if the SSL backend
-     libcurl is built to use supports it), which can be used to
-     negotiate http2.
-     Available as of PHP 7.0.7 and cURL 7.36.0
+     &false; 时禁用 SSL 握手中的 NPN（如果 SSL 后端的 libcurl 内建支持），用于协商到
+     http2。自 PHP 7.0.7 和 cURL 7.36.0 起可用，并且自 cURL 7.86.0 起弃用。
     </para>
    </listitem>
   </varlistentry>
@@ -3327,8 +3536,8 @@
    </term>
    <listitem>
     <para>
-     &true; to enable TLS false start.
-     Available as of PHP 7.0.7 and cURL 7.42.0
+     &true; 表示启用，&false; 表示禁用 TLS 错误启动，这是 TLS 客户端在验证服务器 <literal>Finished</literal>
+     消息之前开始发送应用程序数据的模式。自 PHP 7.0.7 和 cURL 7.42.0 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -3339,16 +3548,10 @@
    </term>
    <listitem>
     <para>
-     Set SSL behavior options, which is a bitmask of the following constants:
-     <simplelist type="inline">
-      <member><constant>CURLSSLOPT_ALLOW_BEAST</constant></member>
-      <member><constant>CURLSSLOPT_NO_REVOKE</constant></member>
-      <member><constant>CURLSSLOPT_AUTO_CLIENT_CERT</constant></member>
-      <member><constant>CURLSSLOPT_NATIVE_CA</constant></member>
-      <member><constant>CURLSSLOPT_NO_PARTIALCHAIN</constant></member>
-      <member><constant>CURLSSLOPT_REVOKE_BEST_EFFORT</constant></member>
-     </simplelist>
-     Available as of PHP 7.0.7. and cURL 7.25.0
+     Set SSL behavior options, which is a bitmask of the
+     <constant>CURLSSLOPT_<replaceable>*</replaceable></constant> constants.
+     Defaults to none of the bits being set.
+     Available as of PHP 7.0.7. and cURL 7.25.0.
     </para>
    </listitem>
   </varlistentry>
@@ -3373,12 +3576,9 @@
    </term>
    <listitem>
     <para>
-     <literal>2</literal> to verify that a Common Name field or a Subject Alternate Name
-     field in the SSL peer certificate matches the provided hostname.
-     <literal>0</literal> to not check the names.
-     <literal>1</literal> should not be used.
-     In production environments the value of this option
-     should be kept at <literal>2</literal> (default value). Support for value <literal>1</literal> removed in cURL 7.28.1.
+     <literal>2</literal> 时验证 SSL 对等证书中的公用名称字段或主题备用名称（Subject Alternate Name，简称
+     SNA）字段是否与提供的主机名匹配。<literal>0</literal> 时不检查名称。不应使用 <literal>1</literal>。在生产环境中，此选项的值应保持为
+     <literal>2</literal>（默认值）。自 cURL 7.8.1 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -3389,12 +3589,9 @@
    </term>
    <listitem>
     <para>
-     &false; to stop cURL from verifying the peer's
-     certificate. Alternate certificates to verify against can be
-     specified with the <constant>CURLOPT_CAINFO</constant> option
-     or a certificate directory can be specified with the
-     <constant>CURLOPT_CAPATH</constant> option. &true; by default as of cURL 7.10. Default bundle installed as of
-     cURL 7.10.
+     &false; 时禁止 cURL 验证对等证书（peer's certificate）。要验证的交换证书可以在 <constant>CURLOPT_CAINFO</constant>
+     选项中设置，或在 <constant>CURLOPT_CAPATH</constant> 中设置证书目录。自 cURL 7.10 起默认为 &true;。自 cURL 7.10
+     起安装默认的 CA 证书包。自 cURL 7.4.2 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -3405,8 +3602,7 @@
    </term>
    <listitem>
     <para>
-     &true; to verify the certificate's status.
-     Available as of PHP 7.0.7 and cURL 7.41.0
+     &true; 时启用或者 &false; 时禁用验证证书状态。自 PHP 7.0.7 和 cURL 7.41.0 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -3417,8 +3613,10 @@
    </term>
    <listitem>
     <para>
-     An alternative location to output errors to instead of
+     Accepts a file handle <type>resource</type> pointing to
+     an alternative location to output errors to instead of
      <constant>STDERR</constant>.
+     Available as of cURL 7.1.0.
     </para>
    </listitem>
   </varlistentry>
@@ -3429,8 +3627,7 @@
    </term>
    <listitem>
     <para>
-     Set the numerical stream weight (a number between 1 and 256).
-     Available as of PHP 7.0.7 and cURL 7.46.0
+     设置 stream weight 数值（<literal>1</literal> 和 <literal>256</literal> 之间的数字）。自 PHP 7.0.7 和 cURL 7.46.0 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -3444,7 +3641,8 @@
      &true; to suppress proxy CONNECT response headers from the user callback functions
      <constant>CURLOPT_HEADERFUNCTION</constant> and <constant>CURLOPT_WRITEFUNCTION</constant>,
      when <constant>CURLOPT_HTTPPROXYTUNNEL</constant> is used and a CONNECT request is made.
-     Available as of PHP 7.3.0 and cURL 7.54.0
+     Defaults to &false;.
+     Available as of PHP 7.3.0 and cURL 7.54.0.
     </para>
    </listitem>
   </varlistentry>
@@ -3455,8 +3653,7 @@
    </term>
    <listitem>
     <para>
-     &true; to enable TCP Fast Open.
-     Available as of PHP 7.0.7 and cURL 7.49.0
+     &true; 时启用或者 &false; 时禁用 TCP Fast Open。自 PHP 7.0.7 和 cURL 7.49.0 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -3467,11 +3664,12 @@
    </term>
    <listitem>
     <para>
-     If set to <literal>1</literal>, TCP keepalive probes will be sent. The delay and
-     frequency of these probes can be controlled by the <constant>CURLOPT_TCP_KEEPIDLE</constant>
-     and <constant>CURLOPT_TCP_KEEPINTVL</constant> options, provided the operating system
-     supports them. If set to <literal>0</literal> (default) keepalive probes are disabled.
-     Available as of cURL 7.25.0
+     如果设置为 <literal>1</literal>，将发送 TCP keepalive 探针。这些探针的延迟和频率可以通过 <constant>CURLOPT_TCP_KEEPIDLE</constant>
+     和 <constant>CURLOPT_TCP_KEEPINTVL</constant> 选项来控制，前提是操作系统支持它们。如果设置为 <literal>0</literal>（默认值），将禁用
+     keepalive 探针。
+     The maximum number of probes can be set with the <constant>CURLOPT_TCP_KEEPCNT</constant>
+     option.
+     Available as of cURL 7.25.0.
     </para>
    </listitem>
   </varlistentry>
@@ -3482,11 +3680,8 @@
    </term>
    <listitem>
     <para>
-     Sets the delay, in seconds, that the operating system will wait while the connection is
-     idle before sending keepalive probes, if <constant>CURLOPT_TCP_KEEPALIVE</constant> is
-     enabled. Not all operating systems support this option.
-     The default is <literal>60</literal>.
-     Available as of cURL 7.25.0
+     设置延迟秒数，如果启用了 <constant>CURLOPT_TCP_KEEPALIVE</constant>，操作系统将在连接空闲时等待，然后再发送
+     keepalive 探针。并非所有操作系统都支持此选项。默认值为 <literal>60</literal>。自 cURL 7.25.0 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -3497,11 +3692,21 @@
    </term>
    <listitem>
     <para>
-     Sets the interval, in seconds, that the operating system will wait between sending
-     keepalive probes, if <constant>CURLOPT_TCP_KEEPALIVE</constant> is enabled.
-     Not all operating systems support this option.
-     The default is <literal>60</literal>.
-     Available as of cURL 7.25.0
+     设置间隔（以秒为单位），如果启用了 <constant>CURLOPT_TCP_KEEPALIVE</constant>，操作系统将在发送
+     keepalive 探针之间等待。并非所有操作系统都支持此选项。默认值为 <literal>60</literal>。自 cURL 7.25.0 起可用。
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry xml:id="constant.curlopt-tcp-keepcnt">
+   <term>
+    <constant>CURLOPT_TCP_KEEPCNT</constant>
+    (<type>int</type>)
+   </term>
+   <listitem>
+    <para>
+     Sets the maximum number of TCP keep-alive probes.
+     The default is <literal>9</literal>.
+     Available as of PHP 8.4.0 and cURL 8.9.0.
     </para>
    </listitem>
   </varlistentry>
@@ -3512,9 +3717,7 @@
    </term>
    <listitem>
     <para>
-     &true; to disable TCP's Nagle algorithm, which tries to minimize
-     the number of small packets on the network.
-     Available as of cURL 7.11.2.
+     &true; 时禁用 TCP 的 Nagle 算法，就是减少网络上的小数据包数量。默认是 &true;。自 cURL 7.11.2 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -3529,7 +3732,7 @@
      The variables should be in the format <literal>&gt;option=value&lt;</literal>.
      cURL supports the options <literal>TTYPE</literal>,
      <literal>XDISPLOC</literal> and <literal>NEW_ENV</literal>.
-     Available as of cURL 7.7.
+     Available as of cURL 7.7.0.
     </para>
    </listitem>
   </varlistentry>
@@ -3558,8 +3761,7 @@
    </term>
    <listitem>
     <para>
-     &true; to not send TFTP options requests.
-     Available as of PHP 7.0.7 and cURL 7.48.0
+     &true; 时不发送 TFTP 的 options 请求。默认为 &false;。自 PHP 7.0.7 和 cURL 7.48.0 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -3570,17 +3772,12 @@
    </term>
    <listitem>
     <para>
-     How <constant>CURLOPT_TIMEVALUE</constant> is treated.
-     Use <constant>CURL_TIMECOND_IFMODSINCE</constant> to return the
-     page only if it has been modified since the time specified in
-     <constant>CURLOPT_TIMEVALUE</constant>. If it hasn't been modified,
-     a <literal>"304 Not Modified"</literal> header will be returned
-     assuming <constant>CURLOPT_HEADER</constant> is &true;.
-     Use <constant>CURL_TIMECOND_IFUNMODSINCE</constant> for the reverse
-     effect. Use <constant>CURL_TIMECOND_NONE</constant> to ignore
-     <constant>CURLOPT_TIMEVALUE</constant> and always return the page.
-     <constant>CURL_TIMECOND_NONE</constant> is the default. Before cURL 7.46.0 the default was
-     <constant>CURL_TIMECOND_IFMODSINCE</constant>.
+     设置如何对待 <constant>CURLOPT_TIMEVALUE</constant>。使用 <parameter>CURL_TIMECOND_IFMODSINCE</parameter>，仅在页面
+     <constant>CURLOPT_TIMEVALUE</constant> 之后修改，才返回页面。没有修改则返回 <literal>304 Not Modified</literal>
+     header，假设设置了 <constant>CURLOPT_HEADER</constant> 为 &true;。<parameter>CURL_TIMECOND_IFUNMODSINCE</parameter>
+     则起相反的效果。使用 <constant>CURL_TIMECOND_NONE</constant> 忽略 <constant>CURLOPT_TIMEVALUE</constant> 并始终返回页面。默认为
+     <parameter>CURL_TIMECOND_IFMODSINCE</parameter>。在 cURL 7.46.0 之前，默认值为 <constant>CURL_TIMECOND_IFMODSINCE</constant>。自
+     cURL 7.1.0 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -3591,7 +3788,9 @@
    </term>
    <listitem>
     <para>
-     The maximum number of seconds to allow cURL functions to execute.
+     允许 cURL 函数执行的最长秒数。
+     Defaults to <literal>0</literal>, meaning that functions never time out during transfer.
+     Available as of cURL 7.1.0.
     </para>
    </listitem>
   </varlistentry>
@@ -3602,12 +3801,9 @@
    </term>
    <listitem>
     <para>
-     The maximum number of milliseconds to allow cURL functions to
-     execute.
-     <!-- http://curl.haxx.se/libcurl/c/curl_easy_setopt.html -->
-     If libcurl is built to use the standard system name resolver, that
-     portion of the connect will still use full-second resolution for
-     timeouts with a minimum timeout allowed of one second.
+     允许 cURL 允许执行的最长毫秒数。如果 cURL 编译时使用系统标准的名称解析器（ standard system name
+     resolver），那部分的连接仍旧使用以秒计的超时解决方案，最小超时时间还是一秒钟。
+     Defaults to <literal>0</literal>, meaning that functions never time out during transfer.
      Available as of cURL 7.16.2.
     </para>
    </listitem>
@@ -3619,8 +3815,8 @@
    </term>
    <listitem>
     <para>
-     The time in seconds since January 1st, 1970. The time will be used
-     by <constant>CURLOPT_TIMECONDITION</constant>.
+     秒数，从 1970 年 1 月 1 日开始。这个时间将由 <constant>CURLOPT_TIMECONDITION</constant> 使用。默认
+     <literal>0</literal>。自 cURL 7.1.0 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -3636,7 +3832,7 @@
      The difference between this option and <constant>CURLOPT_TIMEVALUE</constant>
      is the type of the argument. On systems where 'long' is only 32 bit wide,
      this option has to be used to set dates beyond the year 2038.
-     Available as of PHP 7.3.0 and cURL 7.59.0
+     Available as of PHP 7.3.0 and cURL 7.59.0.
     </para>
    </listitem>
   </varlistentry>
@@ -3647,12 +3843,12 @@
    </term>
    <listitem>
     <para>
-     The list of cipher suites to use for the TLS 1.3 connection. The list must be
-     syntactically correct, it consists of one or more cipher suite strings separated by colons.
-     This option is currently used only when curl is built to use OpenSSL 1.1.1 or later.
-     If you are using a different SSL backend you can try setting
-     TLS 1.3 cipher suites by using the <constant>CURLOPT_SSL_CIPHER_LIST</constant> option. Available when built with OpenSSL &gt;= 1.1.1.
-     Available as of PHP 7.3.0 and cURL 7.61.0
+     A <type>string</type> with a colon-separated list of ciphers
+     to use for the connection to the TLS 1.3 connection.
+     This option is currently used only when cURL is built to use OpenSSL 1.1.1 or later.
+     When using a different SSL backend the TLS 1.3 cipher suites can be set
+     with the <constant>CURLOPT_SSL_CIPHER_LIST</constant> option.
+     Available as of PHP 7.3.0 and cURL 7.61.0.
     </para>
    </listitem>
   </varlistentry>
@@ -3725,10 +3921,8 @@
    </term>
    <listitem>
     <para>
-     &true; to use ASCII mode for FTP transfers.
-     For LDAP, it retrieves data in plain text instead of HTML. On
-     Windows systems, it will not set <constant>STDOUT</constant> to binary
-     mode.
+     &true; 时 FTP 传输使用 ASCII 模式。对于 LDAP，会检索纯文本信息而非 HTML。在 Windows 系统上，系统不会把
+     <constant>STDOUT</constant> 设置成二进制模式。默认是 &false;。自 cURL 7.1.1 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -3741,7 +3935,9 @@
     <para>
      Enables the use of Unix domain sockets as connection endpoint and
      sets the path to the given <type>string</type>.
-     Available as of PHP 7.0.7 and cURL 7.40.0
+     Set to &null; to disable.
+     Defaults to &null;.
+     Available as of PHP 7.0.7 and cURL 7.40.0.
     </para>
    </listitem>
   </varlistentry>
@@ -3752,10 +3948,8 @@
    </term>
    <listitem>
     <para>
-     &true; to keep sending the username and password
-     when following locations (using
-     <constant>CURLOPT_FOLLOWLOCATION</constant>), even when the
-     hostname has changed.
+     &true; 时在使用 <constant>CURLOPT_FOLLOWLOCATION</constant> 重定向 header 中的多个 location
+     时继续发送用户名和密码信息，哪怕主机名已改变。默认为 &false;。自 cURL 7.10.4 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -3770,8 +3964,9 @@
      on existing connections in order to keep them alive. This option defines the connection upkeep interval.
      Currently, the only protocol with a connection upkeep mechanism is HTTP/2. When the connection upkeep
      interval is exceeded, an HTTP/2 PING frame is sent on the connection.
-     Default is <literal>60</literal> seconds.
-     Available as of PHP 8.2.0 and cURL 7.62.0
+     Defaults to <constant>CURL_UPKEEP_INTERVAL_DEFAULT</constant>
+     which is currently <literal>60</literal> seconds.
+     Available as of PHP 8.2.0 and cURL 7.62.0.
     </para>
    </listitem>
   </varlistentry>
@@ -3782,7 +3977,7 @@
    </term>
    <listitem>
     <para>
-     &true; to prepare for an upload.
+     &true; 时准备执行上传。默认 &false;。自 cURL 7.1.0 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -3796,7 +3991,7 @@
      Preferred buffer size in bytes for the cURL upload buffer.
      The upload buffer size by default is 64 kilobytes. The maximum buffer size allowed to be set is 2 megabytes.
      The minimum buffer size allowed to be set is 16 kilobytes.
-     Available as of PHP 8.2.0 and cURL 7.62.0
+     Available as of PHP 8.2.0 and cURL 7.62.0.
     </para>
    </listitem>
   </varlistentry>
@@ -3809,6 +4004,7 @@
     <para>
      The URL to fetch. This can also be set when initializing a
      session with <function>curl_init</function>.
+     Available as of cURL 7.1.0.
     </para>
    </listitem>
   </varlistentry>
@@ -3823,11 +4019,8 @@
      when using FTP, SMTP, POP3, IMAP, etc.
      These are all protocols that start out plain text
      and get "upgraded" to SSL using the STARTTLS command.
-     Set to one of the following:
-     <constant>CURLUSESSL_NONE</constant>,
-     <constant>CURLUSESSL_TRY</constant>,
-     <constant>CURLUSESSL_CONTROL</constant> or
-     <constant>CURLUSESSL_ALL</constant>.
+     Set to one of the
+     <constant>CURLUSESSL_<replaceable>*</replaceable></constant> constants.
      Available as of cURL 7.17.0.
     </para>
    </listitem>
@@ -3839,8 +4032,9 @@
    </term>
    <listitem>
     <para>
-     The contents of the <literal>"User-Agent: "</literal> header to be
+     The contents of the <literal>User-Agent: </literal> header to be
      used in a HTTP request.
+     Available as of cURL 7.1.0.
     </para>
    </listitem>
   </varlistentry>
@@ -3852,7 +4046,7 @@
    <listitem>
     <para>
      The user name to use in authentication.
-     Available as of cURL 7.19.1
+     Available as of cURL 7.19.1.
     </para>
    </listitem>
   </varlistentry>
@@ -3864,8 +4058,9 @@
    <listitem>
     <para>
      A username and password formatted as
-     <literal>"[username]:[password]"</literal> to use for the
+     <literal>[username]:[password]</literal> to use for the
      connection.
+     Available as cURL 7.1.0.
     </para>
    </listitem>
   </varlistentry>
@@ -3876,9 +4071,8 @@
    </term>
    <listitem>
     <para>
-     &true; to output verbose information. Writes
-     output to <constant>STDERR</constant>, or the file specified using
-     <constant>CURLOPT_STDERR</constant>.
+     &true; 时输出所有的信息，写入到 <constant>STDERR</constant>，或在 <constant>CURLOPT_STDERR</constant>
+     中指定的文件。默认 &false;。自 cURL 7.1.0 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -3906,11 +4100,34 @@
    </term>
    <listitem>
     <para>
-     A callback accepting two parameters.
-     The first is the cURL resource, and the second is a
-     string with the data to be written. The data must be saved by
-     this callback. It must return the exact number of bytes written
+     A <type>callable</type> with the following signature:
+     <methodsynopsis>
+      <type>int</type><methodname><replaceable>callback</replaceable></methodname>
+      <methodparam><type>resource</type><parameter>curlHandle</parameter></methodparam>
+      <methodparam><type>string</type><parameter>data</parameter></methodparam>
+     </methodsynopsis>
+     <variablelist role="function_parameters">
+      <varlistentry>
+       <term><parameter>curlHandle</parameter></term>
+       <listitem>
+        <simpara>
+         The cURL handle.
+        </simpara>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term><parameter>data</parameter></term>
+       <listitem>
+        <simpara>
+         The data to be written.
+        </simpara>
+       </listitem>
+      </varlistentry>
+     </variablelist>
+     The data must be saved by the callback
+     and the callback must return the exact number of bytes written
      or the transfer will be aborted with an error.
+     Available as of cURL 7.1.0.
     </para>
    </listitem>
   </varlistentry>
@@ -3921,7 +4138,7 @@
    </term>
    <listitem>
     <para>
-     The file that the header part of the transfer is written to.
+     接受文件句柄 <type>resource</type>，将传输的 header 部分写入该文件。自 cURL 7.1.0 起可用。
     </para>
    </listitem>
   </varlistentry>
@@ -3932,7 +4149,10 @@
    </term>
    <listitem>
     <para>
-     Available as of PHP 8.3.0 and cURL 7.86.0
+     Accepts a bitmask setting WebSocket behavior options.
+     The only available option is <constant>CURLWS_RAW_MODE</constant>.
+     Defaults to <literal>0</literal>.
+     Available as of PHP 8.3.0 and cURL 7.86.0.
     </para>
    </listitem>
   </varlistentry>
@@ -3943,10 +4163,76 @@
    </term>
    <listitem>
     <para>
-     A callback accepting two parameters.
-     Has a similar purpose as <constant>CURLOPT_PROGRESSFUNCTION</constant> but is more modern
-     and the preferred option from cURL.
+     A <type>callable</type> with the following signature:
+     <methodsynopsis>
+      <type>int</type><methodname><replaceable>callback</replaceable></methodname>
+      <methodparam><type>resource</type><parameter>curlHandle</parameter></methodparam>
+      <methodparam><type>int</type><parameter>bytesToDownload</parameter></methodparam>
+      <methodparam><type>int</type><parameter>bytesDownloaded</parameter></methodparam>
+      <methodparam><type>int</type><parameter>bytesToUpload</parameter></methodparam>
+      <methodparam><type>int</type><parameter>bytesUploaded</parameter></methodparam>
+     </methodsynopsis>
+     <variablelist role="function_parameters">
+      <varlistentry>
+       <term><parameter>curlHandle</parameter></term>
+       <listitem>
+        <simpara>
+         The cURL handle.
+        </simpara>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term><parameter>bytesToDownload</parameter></term>
+       <listitem>
+        <simpara>
+         The total number of bytes expected to be downloaded in this transfer.
+        </simpara>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term><parameter>bytesDownloaded</parameter></term>
+       <listitem>
+        <simpara>
+         The number of bytes downloaded so far.
+        </simpara>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term><parameter>bytesToUpload</parameter></term>
+       <listitem>
+        <simpara>
+         The total number of bytes expected to be uploaded in this transfer.
+        </simpara>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term><parameter>bytesUploaded</parameter></term>
+       <listitem>
+        <simpara>
+         The number of bytes uploaded so far.
+        </simpara>
+       </listitem>
+      </varlistentry>
+     </variablelist>
+     Return <literal>1</literal> to abort the transfer
+     and set a <constant>CURLE_ABORTED_BY_CALLBACK</constant> error.
      Available as of PHP 8.2.0 and cURL 7.32.0.
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry xml:id="constant.curlopt-server-response-timeout">
+   <term>
+    <constant>CURLOPT_SERVER_RESPONSE_TIMEOUT</constant>
+    (<type>int</type>)
+   </term>
+   <listitem>
+    <para>
+     A timeout in seconds cURL will wait for a response from an
+     <acronym>FTP</acronym>, <acronym>SFTP</acronym>, <acronym>IMAP</acronym>,
+     <acronym>SCP</acronym>, <acronym>SMTP</acronym>, or a <acronym>POP3</acronym> server.
+     This option replaces the existing <constant>CURLOPT_FTP_RESPONSE_TIMEOUT</constant>
+     option which is deprecated in cURL 7.85.0.
+     Available as of PHP 8.4.0.
     </para>
    </listitem>
   </varlistentry>
@@ -3958,7 +4244,210 @@
    <listitem>
     <para>
      Specifies the OAuth 2.0 access token.
-     Available as of PHP 7.0.7 and cURL 7.33.0
+     Set to &null; to disable.
+     Defaults to &null;.
+     Available as of PHP 7.0.7 and cURL 7.33.0.
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry xml:id="constant.curlopt-prereqfunction">
+   <term>
+    <constant>CURLOPT_PREREQFUNCTION</constant>
+    (<type>int</type>)
+   </term>
+   <listitem>
+    <para>
+     A <type>callable</type> with the following signature that gets called after the
+     connection is established, but before the request payload (for example, the
+     GET/POST/DELETE request of an HTTP connection) is sent, and can be used to abort
+     or allow the connection depending on the source and destination IP address and
+     port numbers:
+     <methodsynopsis>
+      <type>int</type><methodname><replaceable>callback</replaceable></methodname>
+      <methodparam><type>CurlHandle</type><parameter>curlHandle</parameter></methodparam>
+      <methodparam><type>string</type><parameter>destination_ip</parameter></methodparam>
+      <methodparam><type>string</type><parameter>local_ip</parameter></methodparam>
+      <methodparam><type>int</type><parameter>destination_port</parameter></methodparam>
+      <methodparam><type>int</type><parameter>local_port</parameter></methodparam>
+     </methodsynopsis>
+     <variablelist role="function_parameters">
+      <varlistentry>
+       <term><parameter>curlHandle</parameter></term>
+       <listitem>
+        <simpara>
+         The cURL handle.
+        </simpara>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term><parameter>destination_ip</parameter></term>
+       <listitem>
+        <simpara>
+         The primary IP of the remote server established with this connection.
+         For <acronym>FTP</acronym>, this is the IP for the control connection.
+         IPv6 addresses are represented without surrounding brackets.
+        </simpara>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term><parameter>local_ip</parameter></term>
+       <listitem>
+        <simpara>
+         The originating IP for this connection.
+         IPv6 addresses are represented without surrounding brackets.
+        </simpara>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term><parameter>destination_port</parameter></term>
+       <listitem>
+        <simpara>
+         The primary port number on the remote server established with this connection.
+         For <acronym>FTP</acronym>, this is the port for the control connection.
+         This can be a <acronym>TCP</acronym> or a <acronym>UDP</acronym> port number depending on the protocol.
+        </simpara>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term><parameter>local_port</parameter></term>
+       <listitem>
+        <simpara>
+         The originating port number for this connection.
+         This can be a <acronym>TCP</acronym> or a <acronym>UDP</acronym> port number depending on the protocol.
+        </simpara>
+       </listitem>
+      </varlistentry>
+     </variablelist>
+     Return <constant>CURL_PREREQFUNC_OK</constant> to allow the request, or
+     <constant>CURL_PREREQFUNC_ABORT</constant> to abort the transfer.
+     Available as of PHP 8.4.0 and cURL 7.80.0.
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry xml:id="constant.curlopt-debugfunction">
+   <term>
+    <constant>CURLOPT_DEBUGFUNCTION</constant>
+    (<type>int</type>)
+   </term>
+   <listitem>
+    <para>
+     Available as of PHP 8.4.0.
+     This option requires <constant>CURLOPT_VERBOSE</constant> option enabled.
+     A <type>callable</type> to replace the standard cURL verbose output.
+     This callback gets called during various stages of the request with verbose debug information.
+     The callback should match the following signature:
+     <methodsynopsis>
+      <type>void</type><methodname><replaceable>callback</replaceable></methodname>
+      <methodparam><type>CurlHandle</type><parameter>curlHandle</parameter></methodparam>
+      <methodparam><type>int</type><parameter>type</parameter></methodparam>
+      <methodparam><type>string</type><parameter>data</parameter></methodparam>
+     </methodsynopsis>
+     <variablelist role="function_parameters">
+      <varlistentry>
+       <term><parameter>curlHandle</parameter></term>
+       <listitem>
+        <simpara>
+         The cURL handle.
+        </simpara>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term><parameter>type</parameter></term>
+       <listitem>
+        <simpara>
+         One of the following constants indicating the type of the <parameter>data</parameter> value:
+        </simpara>
+        <variablelist xml:id="constant.curl-debugfunction.constants" role="constant_list">
+         <varlistentry xml:id="constant.curlinfo-text">
+          <term>
+           <constant>CURLINFO_TEXT</constant>
+           (<type>int</type>)
+          </term>
+          <listitem>
+           <simpara>
+            Informational text.
+           </simpara>
+          </listitem>
+         </varlistentry>
+         <varlistentry xml:id="constant.curlinfo-header-in">
+          <term>
+           <constant>CURLINFO_HEADER_IN</constant>
+           (<type>int</type>)
+          </term>
+          <listitem>
+           <simpara>
+            Header (or header-like) data received from the peer.
+           </simpara>
+          </listitem>
+         </varlistentry>
+         <varlistentry xml:id="constant.curlinfo-header-out-debug">
+          <term>
+           <constant linkend="constant.curlinfo-header-out-debug">CURLINFO_HEADER_OUT</constant>
+           (<type>int</type>)
+          </term>
+          <listitem>
+           <simpara>
+            header（或者类 header） 数据发送给对等方。
+           </simpara>
+          </listitem>
+         </varlistentry>
+         <varlistentry xml:id="constant.curlinfo-data-in">
+          <term>
+           <constant>CURLINFO_DATA_IN</constant>
+           (<type>int</type>)
+          </term>
+          <listitem>
+           <simpara>
+            Unprocessed protocol data received from the peer.
+            Even if the data is encoded or compressed, it is not provided decoded nor decompressed to this callback.
+           </simpara>
+          </listitem>
+         </varlistentry>
+         <varlistentry xml:id="constant.curlinfo-data-out">
+          <term>
+           <constant>CURLINFO_DATA_OUT</constant>
+           (<type>int</type>)
+          </term>
+          <listitem>
+           <simpara>
+            Protocol data sent to the peer.
+           </simpara>
+          </listitem>
+         </varlistentry>
+         <varlistentry xml:id="constant.curlinfo-ssl-data-in">
+          <term>
+           <constant>CURLINFO_SSL_DATA_IN</constant>
+           (<type>int</type>)
+          </term>
+          <listitem>
+           <simpara>
+            <acronym>SSL</acronym>/<acronym>TLS</acronym> (binary) data received from the peer.
+           </simpara>
+          </listitem>
+         </varlistentry>
+         <varlistentry xml:id="constant.curlinfo-ssl-data-out">
+          <term>
+           <constant>CURLINFO_SSL_DATA_OUT</constant>
+           (<type>int</type>)
+          </term>
+          <listitem>
+           <simpara>
+            <acronym>SSL</acronym>/<acronym>TLS</acronym> (binary) data sent to the peer.
+           </simpara>
+          </listitem>
+         </varlistentry>
+        </variablelist>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term><parameter>data</parameter></term>
+       <listitem>
+        <simpara>
+         Verbose debug data of the type indicate by the <parameter>type</parameter> parameter.
+        </simpara>
+       </listitem>
+      </varlistentry>
+     </variablelist>
     </para>
    </listitem>
   </varlistentry>
