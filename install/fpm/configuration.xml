@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 78cfb58c46cab7bd81921faeacd1c6830d807dbd Maintainer: HonestQiao Status: ready -->
+<!-- EN-Revision: fe2ce5304bfe7eaadba78bebb877dcd197df4c41 Maintainer: HonestQiao Status: ready -->
 <!-- CREDITS: mowangjuanzi -->
 <sect1 xml:id="install.fpm.configuration" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <title>配置</title>
@@ -390,8 +390,7 @@
     <listitem>
      <para>
       设置启动时创建的子进程数目。仅在 <literal>pm</literal> 设置为
-      <literal>dynamic</literal> 时使用。默认值：min_spare_servers + (max_spare_servers -
-      min_spare_servers) / 2。
+      <literal>dynamic</literal> 时使用。默认值：(min_spare_servers + max_spare_servers) / 2。
      </para> 
     </listitem>
    </varlistentry>
@@ -743,47 +742,66 @@
           <tbody>
            <row>
             <entry>
+             <literal>%%</literal>
+            </entry>
+            <entry><literal>%</literal> 字符</entry>
+           </row>
+           <row>
+            <entry>
              <literal>%C</literal>
             </entry>
-            <entry>%CPU</entry>
+            <entry>
+             请求使用的 %CPU。可以接受以下格式：<literal>%{user}C</literal> 仅表示用户
+             CPU，<literal>%{system}C</literal> 仅表示系统 CPU，<literal>%{total}C</literal>
+             表示用户 + 系统 CPU（默认）
+            </entry>
            </row>
            <row>
             <entry>
              <literal>%d</literal>
             </entry>
             <entry>
-             持续时间。接受以下精度格式：<literal>%{seconds}d</literal>（默认）<literal>%{milliseconds}d</literal>、<literal>%{microseconds}d</literal>。
+             处理请求所花费的时间。可以接受以下格式以提高精度：<literal>%{seconds}d</literal>（默认）<literal>%{milliseconds}d</literal>、<literal>%{microseconds}d</literal>
             </entry>
            </row>
            <row>
             <entry>
-             <literal>%e</literal>
+             <literal>%{<replaceable>name</replaceable>}e</literal>
             </entry>
-            <entry>fastcgi 环境变量</entry>
+            <entry>
+             环境变量（与 <varname>$_ENV</varname> 或 <varname>$_SERVER</varname>
+             相同）。必须在花括号内指定变量名称，以指定环境 env 的名称。例如，服务器详细信息（如 <literal>%{REQUEST_METHOD}e</literal>
+             或 <literal>%{SERVER_PROTOCOL}e</literal>）、HTTP header（如 <literal>%{HTTP_HOST}e</literal> 或
+             <literal>%{HTTP_USER_AGENT}e</literal>）
+            </entry>
            </row>
            <row>
             <entry>
              <literal>%f</literal>
             </entry>
-            <entry>脚本文件</entry>
+            <entry>脚本文件名</entry>
            </row>
            <row>
             <entry>
              <literal>%l</literal>
             </entry>
-            <entry>内容长度</entry>
+            <entry>
+             请求的 <literal>Content-Length</literal>（仅适用于 HTTP POST 请求）
+            </entry>
            </row>
            <row>
             <entry>
              <literal>%m</literal>
             </entry>
-            <entry>请求方法</entry>
+            <entry>请求 HTTP 方法</entry>
            </row>
            <row>
             <entry>
              <literal>%M</literal>
             </entry>
-            <entry>内存</entry>
+            <entry>
+             PHP 分配的内存峰值。可以接受以下格式：<literal>%{bytes}M</literal>（默认）、<literal>%{kilobytes}M</literal>、<literal>%{kilo}M</literal>、<literal>%{megabytes}M</literal>、<literal>%{mega}M</literal>
+            </entry>
            </row>
            <row>
             <entry>
@@ -793,15 +811,24 @@
            </row>
            <row>
             <entry>
-             <literal>%o</literal>
+             <literal>%{<replaceable>name</replaceable>}o</literal>
             </entry>
-            <entry>header 输出</entry>
+            <entry>
+             输出 header。必须在花括号内指定 header 名称。例如
+             <literal>%{Content-Type}o</literal>、<literal>%{X-Powered-By}o</literal>、<literal>%{Transfer-Encoding}o</literal>
+            </entry>
            </row>
            <row>
             <entry>
              <literal>%p</literal>
             </entry>
-            <entry>PID</entry>
+            <entry>为请求提供服务的子进程的 PID</entry>
+           </row>
+           <row>
+            <entry>
+             <literal>%P</literal>
+            </entry>
+            <entry>为请求提供服务的子进程的父进程 PID</entry>
            </row>
            <row>
             <entry>
@@ -813,13 +840,17 @@
             <entry>
              <literal>%Q</literal>
             </entry>
-            <entry>%q 和 %r 之间的连接字符</entry>
+            <entry>
+             如果查询字符串存在，则为 <literal>'?'</literal> 字符，或 <literal>%q</literal> 和 <literal>%r</literal> 之间的连接字符
+            </entry>
            </row>
            <row>
             <entry>
              <literal>%r</literal>
             </entry>
-            <entry>请求 URI</entry>
+            <entry>
+             不带查询字符串的请求 URI，参阅 <literal>%q</literal> 和 <literal>%Q</literal>
+            </entry>
            </row>
            <row>
             <entry>
@@ -831,25 +862,35 @@
             <entry>
              <literal>%s</literal>
             </entry>
-            <entry>状态码</entry>
-           </row>
-           <row>
-            <entry>
-             <literal>%T</literal>
-            </entry>
-            <entry>时间</entry>
+            <entry>状态（响应码）</entry>
            </row>
            <row>
             <entry>
              <literal>%t</literal>
             </entry>
-            <entry>时间</entry>
+            <entry>
+             收到请求的服务器时间。可以接受 <literal>strftime(3)</literal> 格式
+             <literal>%d/%b/%Y:%H:%M:%S %z</literal>（默认）。<literal>strftime(3)</literal> 格式必须封装在
+             <literal>%{&lt;strftime_format&gt;}t</literal> 标签中，例如，对于 ISO8601 格式的时间字符串，使用
+             <literal>%{%Y-%m-%dT%H:%M:%S%z}t</literal>
+            </entry>
+           </row>
+           <row>
+            <entry>
+             <literal>%T</literal>
+            </entry>
+            <entry>
+             写入日志的时间（请求完成时）。可以接受 <literal>strftime(3)</literal> 格式
+             <literal>%d/%b/%Y:%H:%M:%S %z</literal>（默认）。<literal>strftime(3)</literal> 格式必须封装在
+             <literal>%{&lt;strftime_format&gt;}t</literal> 标签中，例如，对于 ISO8601 格式的时间字符串，使用
+             <literal>%{%Y-%m-%dT%H:%M:%S%z}t</literal>
+            </entry>
            </row>
            <row>
             <entry>
              <literal>%u</literal>
             </entry>
-            <entry>远程用户</entry>
+            <entry>基本访问认证用户（如果在 <literal>Authorization</literal> header 中指定）</entry>
            </row>
           </tbody>
          </tgroup>
@@ -858,13 +899,12 @@
       </listitem>
      </varlistentry>
     </variablelist>
-  
-  <para>
-   还可以在为一个运行池传递附加的环境变量，或者更新 PHP
-   的配置值。可以在进程池配置文件中如下面的配置参数来做到：
-   <example>
-    <title>给运行池传递环境变量和设置 PHP 的配置值</title>
-    <programlisting role="ini">
+    <para>
+     还可以在为一个运行池传递附加的环境变量，或者更新 PHP
+     的配置值。可以在进程池配置文件中如下面的配置参数来做到：
+     <example>
+      <title>给运行池传递环境变量和设置 PHP 的配置值</title>
+      <programlisting role="ini">
 <![CDATA[
 env[HOSTNAME] = $HOSTNAME
 env[PATH] = /usr/local/bin:/usr/bin:/bin
@@ -877,7 +917,7 @@ php_flag[display_errors] = off
 php_admin_value[error_log] = /var/log/fpm-php.www.log
 php_admin_flag[log_errors] = on
 php_admin_value[memory_limit] = 32M
-       ]]>
+]]>
       </programlisting>
      </example>
      PHP配置值通过 <literal>php_value</literal> 或者

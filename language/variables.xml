@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 5700871f9d037a59d137be318f89deb7e146bbf6 Maintainer: HonestQiao Status: ready -->
+<!-- EN-Revision: d6baeae3fa6e100b6b4b4ecd59fda030aa32f694 Maintainer: HonestQiao Status: ready -->
 <!-- CREDITS: dallas, Gregory, verdana, mowangjuanzi, Luffy -->
  <chapter xml:id="language.variables" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
   <title>变量</title>
@@ -13,31 +13,29 @@
    </simpara>
 
    <para>
-    变量名与 PHP
-    中其它的标签一样遵循相同的规则。一个有效的变量名由字母或者下划线开头，后面跟上任意数量的字母，数字，或者下划线。
-    按照正常的正则表达式，它将被表述为：'<code>^[a-zA-Z_\x80-\xff][a-zA-Z0-9_\x80-\xff]*$</code>'。
+    有效的变量名由字母（<literal>A-Z</literal>、<literal>a-z</literal> 或 128 到 255
+    之间的字节）或者下划线开头，后面跟上任意数量的字母，数字，或者下划线。
+    按照正常的正则表达式，它将被表述为：<code>^[a-zA-Z_\x80-\xff][a-zA-Z0-9_\x80-\xff]*$</code>。
    </para>
 
    <note>
     <simpara>
-     在此所说的字母是 a-z，A-Z，以及 ASCII 字符从 128 到 255（<literal>0x80-0xff</literal>）。
+     PHP 不支持 Unicode 变量名，但是，某些字符编码（例如 UTF-8）会以这样的方式对字符进行编码，即多字节字符的所有字节都在允许的范围内，从而使其成为有效的变量名。
     </simpara>
    </note>
+
    <note>
     <simpara>
-     <literal>$this</literal> 是一个特殊的变量，它不能被赋值。
-     PHP 7.1.0 之前，间接赋值（例如通过使用<link linkend="language.variables.variable">可变变量</link>）是可能的。
+     <literal>$this</literal> 是一个特殊的变量，它不能被赋值。PHP 7.1.0
+     之前，间接赋值（例如通过使用<link linkend="language.variables.variable">可变变量</link>）是可能的。
     </simpara>
    </note>
    
    &tip.userlandnaming;
    
-   <para>
-    有关变量的函数信息见<link linkend="ref.var">变量函数</link>。
-   </para>
-   <para>
-    <informalexample>
-     <programlisting role="php">
+   <example>
+    <title>有效和无效变量名</title>
+    <programlisting role="php">
 <![CDATA[
 <?php
 $var = 'Bob';
@@ -49,12 +47,35 @@ $_4site = 'not yet';    // 合法变量名；以下划线开头
 $i站点is = 'mansikka';  // 合法变量名；可以用中文
 ?>
 ]]>
-     </programlisting>
-    </informalexample>
-   </para>
+    </programlisting>
+   </example>
+
+   <simpara>
+    PHP 接受任意字节序列作为变量名。不遵循上述命名规则的变量名只能在运行时动态访问。有关如何访问变量的信息，请参阅<link
+    linkend="language.variables.variable">可变变量</link>。
+   </simpara>
+
+   <example>
+    <title>访问模糊的变量名</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+${'invalid-name'} = 'bar';
+$name = 'invalid-name';
+echo ${'invalid-name'}, " ", $$name;
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+bar bar
+]]>
+    </screen>
+   </example>
 
    <para>
-    变量默认总是传值赋值。那也就是说，当将一个表达式的值赋予一个变量时，整个原始表达式的值被赋值到目标变量。这意味着，例如，当一个变量的值赋予另外一个变量时，改变其中一个变量的值，将不会影响到另外一个变量。有关这种类型的赋值操作，请参阅<link linkend="language.expressions">表达式</link>一章。
+    变量默认始终传值赋值。那也就是说，当表达式的值赋值给变量时，整个原始表达式的值被赋值到目标变量。这意味着，例如，当一个变量的值赋予另外一个变量时，改变其中一个变量的值，将不会影响到另外一个变量。有关这种类型的赋值操作，请参阅<link linkend="language.expressions">表达式</link>一章。
    </para>
    <para>
     PHP 也提供了另外一种方式给变量赋值：<link linkend="language.references">引用赋值</link>。这意味着新的变量简单的引用（换言之，“成为其别名” 或者 “指向”）了原始变量。改动新的变量将影响到原始变量，反之亦然。
@@ -78,7 +99,7 @@ echo $foo;                 // $foo 的值也被修改
    </para>
 
    <para>
-    有一点重要事项必须指出，那就是只有有名字的变量才可以引用赋值。
+    有一点重要事项必须指出，那就是只有变量才可以引用赋值。
     <informalexample>
      <programlisting role="php">
 <![CDATA[
@@ -92,16 +113,16 @@ function test()
    return 25;
 }
 
-$bar = &test();    // 非法
+$bar = &test();    // 无效，因为 test() 没有通过引用返回变量。
 ?>
 ]]>
      </programlisting>
     </informalexample>
    </para>
    <para>
-    虽然在 PHP 中并不需要初始化变量，但对变量进行初始化是个好习惯。未初始化的变量具有其类型的默认值 - 布尔类型的变量默认值是
-    &false;，整形和浮点型变量默认值是零，字符串型变量（例如用于 <function>echo</function> 
-    中）默认值是空字符串以及数组变量的默认值是空数组。
+    在 PHP 中声明变量不是必需的，但这是一种非常好的做法。访问未定义的变量将导致 <constant>E_WARNING</constant>（在
+    PHP 8.0.0 之前，为 <constant>E_NOTICE</constant>）。未定义的变量的默认值为 &null;。<function>isset</function>
+    语言结构可用于检测变量是否已初始化。
    </para>
    <para>
     <example>
@@ -109,60 +130,59 @@ $bar = &test();    // 非法
      <programlisting role="php">
 <![CDATA[
 <?php
-// 未设置和未引用（不使用上下文）的变量；输出 NULL
+// 未设置和未引用（不使用上下文）的变量。
 var_dump($unset_var);
-
-// Boolean 用法；输出 'false' (See ternary operators for more on this syntax)
-echo $unset_bool ? "true\n" : "false\n";
-
-// String 用法；输出 'string(3) "abc"'
-$unset_str .= 'abc';
-var_dump($unset_str);
-
-// Integer 用法；输出 'int(25)'
-$unset_int += 25; // 0 + 25 => 25
-var_dump($unset_int);
-
-// Float 用法；输出 'float(1.25)'
-$unset_float += 1.25;
-var_dump($unset_float);
-
-// Array 用法；输出 array(1) {  [3]=>  string(3) "def" }
-$unset_arr[3] = "def"; // array() + array(3 => "def") => array(3 => "def")
-var_dump($unset_arr);
-
-// Object 用法：创建新 stdClass 对象 (see http://www.php.net/manual/en/reserved.classes.php)
-// Outputs: object(stdClass)#1 (1) {  ["foo"]=>  string(3) "bar" }
-$unset_obj->foo = 'bar';
-var_dump($unset_obj);
 ?>
 ]]>
      </programlisting>
+     &example.outputs;
+     <screen>
+<![CDATA[
+Warning: Undefined variable $unset_var in ...
+NULL
+]]>
+     </screen>
     </example>
    </para>
-   <para>
-    依赖未初始化变量的默认值在某些情况下会有问题，例如把一个文件包含到另一个之中时碰上相同的变量名。
-    使用未初始化的变量会发出
-    <constant>E_WARNING</constant> （在 PHP 8.0.0 之前是 <constant>E_NOTICE</constant>）
-    错误，但是在向一个未初始化的数组附加单元时不会。<function>isset</function> 语言结构可以用来检测一个变量是否已被初始化。
-   </para>
+
+   <simpara>
+    PHP 允许从未定义的变量自动生成数组（自动创建新数组）。
+    将元素追加到未定义的变量将创建一个新数组，并且不会生成警告。
+   </simpara>
+   <example>
+    <title>未定义变量自动生成数组</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$unset_array[] = 'value'; // 不会生成警告。
+?>
+]]>
+    </programlisting>
+   </example>
+
+   <warning>
+    <simpara>
+     当将一个文件包含在另一个使用相同变量名的文件中时，依赖未初始化变量的默认值是有问题的。
+    </simpara>
+   </warning>
+
+   <simpara>
+    可以使用 <function>unset</function> 语言结构来销毁变量。
+   </simpara>
+
+   <simpara>
+    有关变量相关函数的信息，请参阅<link linkend="ref.var">变量函数参考</link>。
+   </simpara>
   </sect1>
 
   <sect1 xml:id="language.variables.predefined">
    <title>预定义变量</title>
-
+   
    <para>
-    PHP 提供了大量的预定义变量。由于许多变量依赖于运行的服务器的版本和设置，及其它因素，所以并没有详细的说明文档。一些预定义变量在
-    PHP 以<link linkend="features.commandline">命令行</link>形式运行时并不生效。
-    详细参阅<link
-    linkend="reserved.variables">预定义变量</link>一章。
-   </para>
-
-   <para>
-    PHP 提供了一套附加的预定数组，这些数组变量包含了来自 web
-    服务器（如果可用），运行环境，和用户输入的数据。这些数组非常特别，它们在全局范围内自动生效，例如，在任何范围内自动生效。因此通常被称为自动全局变量（autoglobals）或者超全局变量（superglobals）。（PHP
-    中没有用户自定义超全局变量的机制。）
-    详情参阅<link linkend="language.variables.superglobals">超全局变量列表</link>。
+    PHP 提供了许多 <link linkend="reserved.variables">预定义变量</link>。PHP
+    提供了一套附加的预定数组，这些数组变量包含了来自 web
+    服务器（如果可用），运行环境，和用户输入的数据。这些数组在每个作用域内自动可用。因此通常被称为自动全局变量（autoglobals）或者超全局变量（superglobals）。（PHP
+    中没有用户自定义超全局变量的机制。）详情参阅<link linkend="language.variables.superglobals">超全局变量列表</link>。
    </para>
 
    <note>
@@ -181,63 +201,60 @@ var_dump($unset_obj);
 
 
   <sect1 xml:id="language.variables.scope">
-   <title>变量范围</title>
+   <title>变量作用域</title>
 
    <simpara>
-    变量的范围即它定义的上下文背景（也就是它的生效范围）。大部分的
-    PHP 变量只有一个单独的范围。这个单独的范围跨度同样包含了
-    <function>include</function> 和 <function>require</function>
-    引入的文件。例如：
+    变量的作用域是定义该变量的上下文。PHP 有函数作用域和全局作用域。在函数之外定义的任何变量都仅限于全局作用域。当包含文件时，该文件中的代码继承了包含语句所在行的变量作用域。
    </simpara>
-   <informalexample>
+   <example>
+    <title>全局变量作用域示例</title>
     <programlisting role="php">
 <![CDATA[
 <?php
 $a = 1;
-include 'b.inc';
+include 'b.inc'; // 变量 $a 将在 b.inc 内可用
 ?>
 ]]>
     </programlisting>
-   </informalexample>
+   </example>
+
    <simpara>
-    这里变量 <varname>$a</varname> 将会在包含文件
-    <filename>b.inc</filename> 中生效。但是，在用户自定义函数中，一个局部函数范围将被引入。任何用于函数内部的变量按缺省情况将被限制在局部函数范围内。例如：
+    在命名函数或<link linkend="functions.anonymous">匿名</link>函数内创建的任何变量都仅限于函数主体的作用域。然而，<link
+    linkend="functions.arrow">箭头函数</link>会绑定父级作用域中的变量，使其在函数体内可用。如果在函数内部
+    include 文件，那么包含文件中的变量将如同在调用函数内部定义一样可用。
    </simpara>
 
-   <informalexample>
-    <programlisting role="php">
+   <example>
+    <title>局部变量作用域的示例</title>
+    <programlisting role="php"> 
 <![CDATA[
 <?php
-$a = 1; /* global scope */
+$a = 1; // 全局作用域
 
-function Test()
-{
-    echo $a; /* reference to local scope variable */
+function test()
+{ 
+    echo $a; // $a 变量 $a 未定义，因为它引用了 $a 的局部版本
 }
-
-Test();
 ?>
 ]]>
     </programlisting>
-   </informalexample>
+   </example>
 
    <simpara>
-    这个脚本会生成未定义变量 <constant>E_WARNING</constant>（PHP 8.0.0 之前是 <constant>E_NOTICE</constant>）诊断提示。然而，如果 <link
-    linkend="ini.display-errors">display_errors</link> INI 设置为隐藏这类诊断提示，然后在任何情况下都不会有输出。这是因为
-    echo 语句引用了一个局部版本的变量 <varname>$a</varname>，而且在这个范围内，它并没有被赋值。你可能注意到
-    PHP 的全局变量和 C 语言有一点点不同，在 C
-    语言中，全局变量在函数中自动生效，除非被局部变量覆盖。这可能引起一些问题，有些人可能不小心就改变了一个全局变量。PHP
+    下面的示例会生成未定义变量 <constant>E_WARNING</constant>（PHP 8.0.0 之前是 <constant>E_NOTICE</constant>）诊断提示。这是因为
+    echo 语句引用了局部版本的变量 <varname>$a</varname>，而且在这个作用域内，它并没有被赋值。注意这与
+    C 语言有一点点不同，因为 C 中的全局变量会自动提供给函数，除非被局部定义特别覆盖。这可能引起一些问题，有些人可能不小心就改变了一个全局变量。PHP
     中全局变量在函数中使用时必须声明为 global。
    </simpara>
 
    <sect2 xml:id="language.variables.scope.global">
-    <title>global 关键字</title>
+    <title><literal>global</literal> 关键字</title>
     <simpara>
-     首先，一个使用 <literal>global</literal> 的例子：
+     <literal>global</literal> 关键字用于将变量从全局作用域绑定到局部作用域。该关键字可以与变量列表或单个变量一起使用。将创建引用同名全局变量的局部变量。如果全局变量不存在，则将在全局作用域内创建该变量并赋值为 &null;。
     </simpara>
     <para>
      <example>
-      <title>使用 global</title>
+      <title>使用 <literal>global</literal></title>
       <programlisting role="php">
 <![CDATA[
 <?php
@@ -256,24 +273,29 @@ echo $b;
 ?>
 ]]>
       </programlisting>
+      &example.outputs;
+      <screen>
+<![CDATA[
+3
+]]>
+      </screen>
      </example>
     </para>
 
-    <simpara>
-     以上脚本的输出将是“3”。在函数中声明了全局变量
-     <varname>$a</varname> 和 <varname>$b</varname>
-     之后，对任一变量的所有引用都会指向其全局版本。对于一个函数能够声明的全局变量的最大个数，PHP 没有限制。
-    </simpara>
+   <simpara>
+    在函数中声明了全局变量
+    <varname>$a</varname> 和 <varname>$b</varname>
+    之后，对任一变量的所有引用都会指向其全局版本。对于一个函数能够声明的全局变量的最大个数，PHP 没有限制。
+   </simpara>
 
-    <simpara>
-     在全局范围内访问变量的第二个办法，是用特殊的 PHP 自定义
-     <varname>$GLOBALS</varname> 数组。前面的例子可以写成：
-    </simpara>
-
-    <para>
-     <example>
-      <title>使用 <varname>$GLOBALS</varname> 替代 global</title>
-      <programlisting role="php">
+   <simpara>
+    在全局作用域内访问变量的第二个办法，是用特殊的 PHP 自定义
+    <varname>$GLOBALS</varname> 数组。前面的例子可以写成：
+   </simpara>
+   <para>
+    <example>
+     <title>使用 <varname>$GLOBALS</varname> 替代 global</title>
+     <programlisting role="php">
 <![CDATA[
 <?php
 $a = 1;
@@ -288,21 +310,21 @@ Sum();
 echo $b;
 ?>
 ]]>
-      </programlisting>
-     </example>
-    </para>
+     </programlisting>
+    </example>
+   </para>
 
-    <simpara>
-     <varname>$GLOBALS</varname>
-     是一个关联数组，每一个变量为一个元素，键名对应变量名，值对应变量的内容。<varname>$GLOBALS</varname>
-     之所以在全局范围内存在，是因为 $GLOBALS 是一个<link
-     linkend="language.variables.superglobals">超全局变量</link>。以下范例显示了超全局变量的用处：
-    </simpara>
+   <simpara>
+    <varname>$GLOBALS</varname>
+    是一个关联数组，每一个变量为一个元素，键名对应变量名，值对应变量的内容。<varname>$GLOBALS</varname>
+    之所以在全局作用域内存在，是因为 $GLOBALS 是一个<link
+    linkend="language.variables.superglobals">超全局变量</link>。以下范例显示了超全局变量的用处：
+   </simpara>
 
-    <para>
-     <example>
-      <title>演示超全局变量和作用域的例子</title>
-      <programlisting role="php">
+   <para>
+    <example>
+     <title>演示超全局变量和作用域的例子</title>
+     <programlisting role="php">
 <![CDATA[
 <?php
 function test_superglobal()
@@ -311,23 +333,27 @@ function test_superglobal()
 }
 ?>
 ]]>
-      </programlisting>
-     </example>
-    </para>
-   </sect2>
-
-   <sect2 xml:id="language.variables.scope.static">
-    <title>使用静态变量</title>
-
+     </programlisting>
+    </example>
+   </para>
+   <note>
     <simpara>
-     变量范围的另一个重要特性是<emphasis>静态变量</emphasis>（static
-     variable）。静态变量仅在局部函数域中存在，但当程序执行离开此作用域时，其值并不丢失。看看下面的例子：
+     在函数外部使用 <literal>global</literal> 关键字不是错误。如果文件是从函数内部 include 的，则可以使用它。
     </simpara>
+   </note>
+  </sect2>
 
-    <para>
-     <example>
-      <title>演示需要静态变量的例子</title>
-      <programlisting role="php">
+  <sect2 xml:id="language.variables.scope.static">
+   <title>使用 <literal>static</literal> 变量</title>
+
+   <simpara>
+    变量作用域的另一个重要特性是 <emphasis>static</emphasis> 变量。静态变量仅在局部函数作用域中存在，但当程序执行离开此作用域时，其值并不丢失。看看下面的例子：
+   </simpara>
+
+   <para>
+    <example>
+     <title>演示需要静态变量的例子</title>
+     <programlisting role="php">
 <![CDATA[
 <?php
 function Test()
@@ -338,23 +364,21 @@ function Test()
 }
 ?>
 ]]>
-      </programlisting>
-     </example>
-    </para>
-
-    <simpara>
-     本函数没什么用处，因为每次调用时都会将
-     <varname>$a</varname> 的值设为 <literal>0</literal> 并输出
-     <literal>0</literal>。将变量加一的 <varname>$a</varname>++
-     没有作用，因为一旦退出本函数则变量
-     <varname>$a</varname> 就不存在了。要写一个不会丢失本次计数值的计数函数，要将变量
-     <varname>$a</varname> 定义为静态的：
-    </simpara>
-
-    <para>
-     <example>
-      <title>使用静态变量的例子</title>
-      <programlisting role="php">
+     </programlisting>
+    </example>
+   </para>
+   <simpara>
+    本函数没什么用处，因为每次调用时都会将
+    <varname>$a</varname> 的值设为 <literal>0</literal> 并输出
+    <literal>0</literal>。将变量加一的 <varname>$a</varname>++
+    没有作用，因为一旦退出本函数则变量
+    <varname>$a</varname> 就不存在了。要写一个不会丢失本次计数值的计数函数，要将变量
+    <varname>$a</varname> 定义为静态的：
+   </simpara>
+   <para>
+    <example>
+     <title>使用静态变量的例子</title>
+     <programlisting role="php">
 <![CDATA[
 <?php
 function test()
@@ -365,24 +389,23 @@ function test()
 }
 ?>
 ]]>
-      </programlisting>
-     </example>
-    </para>
+     </programlisting>
+    </example>
+   </para>
 
-    <simpara>
-     现在，变量 <varname>$a</varname> 仅在第一次调用 test() 函数时被初始化，之后每次调用 test() 函数都会输出
-     <varname>$a</varname> 的值并加一。
-    </simpara>
+   <simpara>
+    现在，变量 <varname>$a</varname> 仅在第一次调用 test() 函数时被初始化，之后每次调用 test() 函数都会输出
+    <varname>$a</varname> 的值并加一。
+   </simpara>
 
-    <simpara>
-     静态变量也提供了一种处理递归函数的方法。递归函数是一种调用自己的函数。写递归函数时要小心，因为可能会无穷递归下去。必须确保有充分的方法来中止递归。以下这个简单的函数递归计数到
-     10，使用静态变量 <varname>$count</varname> 来判断何时停止：
-    </simpara>
-
-    <para>
-     <example>
-      <title>静态变量与递归函数</title>
-      <programlisting role="php">
+   <simpara>
+    静态变量也提供了一种处理递归函数的方法。以下这个简单的函数递归计数到
+    10，使用静态变量 <varname>$count</varname> 来判断何时停止：
+   </simpara>
+   <para>
+    <example>
+     <title>静态变量与递归函数</title>
+     <programlisting role="php">
 <![CDATA[
 <?php
 function test()
@@ -398,33 +421,32 @@ function test()
 }
 ?>
 ]]>
-      </programlisting>
-     </example>
-    </para>
+     </programlisting>
+    </example>
+   </para>
 
-    <para>
-        常量表达式的结果可以赋值给静态变量，但是动态表达式（比如函数调用）会导致解析错误。
-     </para>
-
-     <para>
-      <example>
-       <title>声明静态变量</title>
-       <programlisting role="php">
+   <para>
+    在 PHP 8.3.0 之前，静态变量只能使用常量表达式进行初始化。自 PHP 8.3.0 起，还允许使用动态表达式（例如函数调用）：
+   </para>
+   <para>
+    <example>
+     <title>声明静态变量</title>
+     <programlisting role="php">
 <![CDATA[
 <?php
 function foo(){
     static $int = 0;          // 正确
     static $int = 1+2;        // 正确
-    static $int = sqrt(121);  // 错误（因为它是函数）
+    static $int = sqrt(121);  // 自 PHP 8.3.0 起正确
 
     $int++;
     echo $int;
 }
 ?>
 ]]>
-       </programlisting>
-      </example>
-    </para>
+     </programlisting>
+    </example>
+   </para>
      
    <para>
     从 PHP 8.1.0
@@ -452,21 +474,15 @@ var_dump(Bar::counter()); // int(4)，PHP 8.1.0 之前 int(2)
 ]]>
     </programlisting>
    </example>
-
-   <note>
-    <para>
-     静态声明在编译时解析。
-    </para>
-   </note>
   </sect2>
 
    <sect2 xml:id="language.variables.scope.references">
-    <title>全局和静态变量的引用</title>
+    <title><literal>global</literal> 和 <literal>static</literal> 变量的引用</title>
     <simpara>
      对于变量的
      <link linkend="language.variables.scope.static">static</link> 和
      <link linkend="language.variables.scope.global">global</link>
-     定义是以<link linkend="language.references">引用</link>的方式实现的。例如，在一个函数域内部用
+     定义是以<link linkend="language.references">引用</link>的方式实现的。例如，在一个函数作用域内部用
      <literal>global</literal>
      语句导入的一个真正的全局变量实际上是建立了一个到全局变量的引用。这有可能导致预料之外的行为，如以下例子所演示的：
     </simpara>
@@ -577,8 +593,8 @@ Static object: object(stdClass)#3 (1) {
     </screen>
 
     <simpara>
-     上例演示了当把一个引用赋值给一个静态变量时，第二次调用
-     <literal>&amp;get_instance_ref()</literal> 函数时其值并没有被<emphasis>记住</emphasis>。
+     此示例说明，当把引用赋值给静态变量时，第二次调用
+     <literal>&amp;get_instance_ref()</literal> 函数时不会<emphasis>记住</emphasis>该引用。
     </simpara>
    </sect2>
   </sect1>
@@ -649,21 +665,16 @@ echo "$a $hello";
    </simpara>
 
    <simpara>
-    要将可变变量用于数组，必须解决一个模棱两可的问题。这就是当写下
-    <varname>$$a[1]</varname>
-    时，解析器需要知道是想要
-    <varname>$a[1]</varname>
-    作为一个变量呢，还是想要
-    <varname>$$a</varname>
-    作为一个变量并取出该变量中索引为 [1]
-    的值。解决此问题的语法是，对第一种情况用
+    要将可变变量用于数组，必须解决模棱两可的问题。也就是说，如果解析器看到 <varname>$$a[1]</varname>，那么解析器需要知道是将
+    <varname>$a[1]</varname> 作为变量，还是将 <varname>$$a</varname> 作为个变量并取出该变量中索引为
+    <literal>[1]</literal> 的值。解决此问题的语法是，对第一种情况用
     <varname>${$a[1]}</varname>，对第二种情况用
     <varname>${$a}[1]</varname>。
    </simpara>
 
    <simpara>
-    类的属性也可以通过可变属性名来访问。可变属性名将在该调用所处的范围内被解析。例如，对于
-    <varname>$foo->$bar</varname> 表达式，则会在本地范围来解析 <varname>$bar</varname>
+    类的属性也可以通过可变属性名来访问。可变属性名将在该调用所处的作用域内被解析。例如，对于
+    <varname>$foo->$bar</varname> 表达式，则会在局部作用域来解析 <varname>$bar</varname>
     并且其值将被用于 <varname>$foo</varname> 的属性名。对于 <varname>$bar</varname>
     是数组单元时也是一样。
    </simpara>
@@ -749,20 +760,19 @@ I am r.
 
     <para>
      只有两种方法可以访问 HTML
-     表单中的数据。
-     以下列出了当前有效的方法：
+     表单中的数据。以下列出了当前有效的方法：
     </para>
 
     <para>
      <example>
-      <title>从一个简单的 POST HTML 表单访问数据</title>
+      <title>从简单的 POST HTML 表单访问数据</title>
       <programlisting role="php">
-        <![CDATA[
-        <?php
-        echo $_POST['username'];
-        echo $_REQUEST['username'];
-        ?>
-        ]]>
+<![CDATA[
+<?php
+echo $_POST['username'];
+echo $_REQUEST['username'];
+?>
+]]>
       </programlisting>
      </example>
     </para>
@@ -786,8 +796,9 @@ I am r.
     </note>
 
     <simpara>
-     PHP 也懂得表单变量上下文中的数组（参见<link
-     linkend="faq.html">相关常见问题</link>）。例如可以将相关的变量编成组，或者用此特性从多选输入框中取得值。例如，将一个表单 POST 给自己并在提交时显示数据：
+     PHP 也理解表单变量上下文中的数组（参见<link
+     linkend="faq.html">相关常见问题</link>）。例如可以将相关的变量编成组，或者用此功能从多选输入框中取得值。例如，将表单
+     POST 给自己并在提交时显示数据：
     </simpara>
 
     <para>
@@ -796,44 +807,36 @@ I am r.
       <programlisting role="php">
 <![CDATA[
 <?php
-if (isset($_POST['action']) && $_POST['action'] == 'submitted') {
+if ($_POST) {
     echo '<pre>';
-
-    print_r($_POST);
-    echo '<a href="'. $_SERVER['PHP_SELF'] .'">Please try again</a>';
-
+    echo htmlspecialchars(print_r($_POST, true));
     echo '</pre>';
-} else {
+}
 ?>
-<form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post">
-    Name:  <input type="text" name="personal[name]"><br />
-    Email: <input type="text" name="personal[email]"><br />
-    Beer: <br>
+<form action="" method="post">
+    Name:  <input type="text" name="personal[name]" /><br />
+    Email: <input type="text" name="personal[email]" /><br />
+    Beer: <br />
     <select multiple name="beer[]">
         <option value="warthog">Warthog</option>
         <option value="guinness">Guinness</option>
-        <option value="stuttgarter">Stuttgarter Schwabenbr</option>
+        <option value="stuttgarter">Stuttgarter Schwabenbräu</option>
     </select><br />
-    <input type="hidden" name="action" value="submitted" />
-    <input type="submit" name="submit" value="submit me!" />
+    <input type="submit" value="submit me!" />
 </form>
-<?php
-}
-?>
 ]]>
       </programlisting>
      </example>
     </para>
 
     <note>
-        <simpara>
-         If an external variable name begins with a valid array syntax, trailing characters
-         are silently ignored. For example, <literal>&lt;input name="foo[bar]baz"&gt;</literal>
-         becomes <literal>$_REQUEST['foo']['bar']</literal>.
-        </simpara>
-     </note>
+     <simpara>
+      如果外部变量名以有效的数组语法开头，则将会忽略尾随字符。例如，<literal>&lt;input name="foo[bar]baz"&gt;</literal>
+      变为 <literal>$_REQUEST['foo']['bar']</literal>。
+     </simpara>
+    </note>
 
-     <sect3 xml:id="language.variables.external.form.submit">
+    <sect3 xml:id="language.variables.external.form.submit">
      <title>IMAGE SUBMIT 变量名</title>
 
      <simpara>
@@ -859,7 +862,7 @@ if (isset($_POST['action']) && $_POST['action'] == 'submitted') {
    </sect2>
 
    <sect2 xml:id="language.variables.external.cookies">
-    <title>HTTP Cookies</title>
+    <title>HTTP Cookie</title>
 
     <simpara>
      PHP 透明地支持 <link
@@ -878,14 +881,14 @@ if (isset($_POST['action']) && $_POST['action'] == 'submitted') {
     </simpara>
 
     <note>
-        <simpara>
-         As of PHP 7.2.34, 7.3.23 and 7.4.11, respectively, the <emphasis>names</emphasis>
-         of incoming cookies are no longer url-decoded for security reasons.
-        </simpara>
+     <simpara>
+      自 PHP 7.2.34、7.3.23 和 7.4.11 起，出于安全原因，传入 cookie 的
+      <emphasis>name</emphasis> 不再进行 url 解码。
+     </simpara>
     </note>
 
     <simpara>
-     如果要将多个值赋给一个 cookie 变量，必须将其赋成数组。例如：
+     如果要将多个值赋给单个 cookie 变量，可以将其赋成数组。例如：
     </simpara>
 
     <informalexample>
@@ -900,16 +903,13 @@ if (isset($_POST['action']) && $_POST['action'] == 'submitted') {
     </informalexample>
 
     <simpara>
-     这将会建立两个单独的 cookie，尽管 MyCookie
-     在脚本中是一个单一的数组。如果想在仅仅一个 cookie
-     中设定多个值，考虑先在值上使用
-     <function>serialize</function> 或
-     <function>explode</function>。
+     尽管 <varname>MyCookie</varname> 在脚本中是单个数组，这将会建立两个单独的 cookie。如果只需为一个 cookie
+     设定多个值，考虑先在值上使用 <function>serialize</function> 或 <function>explode</function>。
     </simpara>
 
     <simpara>
-     注意在浏览器中一个 cookie 会替换掉上一个同名的
-     cookie，除非路径或者域不同。因此对于购物车程序可以保留一个计数器并一起传递，例如：
+     注意，除非路径或者域不同，cookie 将替换浏览器中先前的同名
+     cookie。因此对于购物车程序，可以保留一个计数器并一起传递，即
     </simpara>
 
     <example>
@@ -966,12 +966,9 @@ $varname.ext;  /* 非法变量名 */
      linkend="language.types">类型</link>一章。
     </para>
     <para>
-     HTTP being a text protocol, most, if not all, content that comes in
-     <link linkend="language.variables.superglobals">Superglobal arrays</link>, 
-     like <varname>$_POST</varname> and <varname>$_GET</varname> will remain
-     as strings. PHP will not try to convert values to a specific type.
-     In the example below, <varname>$_GET["var1"]</varname> will contain the
-     string "null" and <varname>$_GET["var2"]</varname>, the string "123".
+     HTTP 是一种文本协议，大多数（可能不是全部）<link linkend="language.variables.superglobals">超全局数组</link>中的内容（如
+     <varname>$_POST</varname> 和 <varname>$_GET</varname>）将保留为字符串。PHP 不会尝试将值转换为特定类型。在下面的示例中，<varname>$_GET["var1"]</varname>
+     将包含字符串“null”，而 <varname>$_GET["var2"]</varname> 将包含字符串“123”。
      <programlisting>
 <![CDATA[
 /index.php?var1=null&var2=123
@@ -996,8 +993,7 @@ $varname.ext;  /* 非法变量名 */
         <row>
          <entry>7.2.34, 7.3.23, 7.4.11</entry>
          <entry>
-            The <emphasis>names</emphasis> of incoming cookies are no longer url-decoded
-            for security reasons.
+            出于安全原因，传入 cookie 的 <emphasis>name</emphasis> 不再进行 URL 解码。
          </entry>
         </row>
        </tbody>
