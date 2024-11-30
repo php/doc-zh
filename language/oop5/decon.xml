@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 9f351a14a749721a74df1dc6ac9533cf796a652e Maintainer: lm92 Status: ready -->
+<!-- EN-Revision: 376d3f9c2ef7fcd64d8b8503d552013acefb8b5b Maintainer: lm92 Status: ready -->
 <!-- CREDITS: mowangjuanzi, Luffy -->
 <sect1 xml:id="language.oop5.decon" xmlns="http://docbook.org/ns/docbook">
  <title>构造函数和析构函数</title>
@@ -317,7 +317,18 @@ $obj = new MyDestructableClass();
    析构函数即使在使用 <function>exit</function>
    终止脚本运行时也会被调用。在析构函数中调用
    <function>exit</function> 将会中止其余关闭操作的运行。
-  </para>
+   </para>
+   <para>
+    如果析构方法为其对象创建了新的引用，则当引用计数再次达到零或在关闭序列期间将不会再次调用该函数。
+   </para>
+   <para>
+    自 PHP 8.4.0 起，当在 <link linkend="language.fibers">Fiber</link> 执行期间发生<link
+    linkend="features.gc.collecting-cycles">垃圾回收</link>时，计划回收的对象析构方法将在单独的
+    Fiber（称为 <literal>gc_destructor_fiber</literal>）中执行。如果挂起此 Fiber，则会创建新的
+    Fiber 来执行任何剩余的析构方法。垃圾回收器将不会引用之前的
+    <literal>gc_destructor_fiber</literal>，并且如果其他地方没有引用它，则可能会被回收。已挂起的析构方法在对象中在析构方法返回或
+    Fiber 本身被回收之前不会被回收。
+   </para>
   <note>
    <para>
     析构函数在脚本关闭时调用，此时所有的 HTTP

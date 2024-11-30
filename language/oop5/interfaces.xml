@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 3d522c890d98c563bb283cf89ec5da5f535cfb8f Maintainer: jhdxr Status: ready -->
+<!-- EN-Revision: 0c2a0d736df56dd0f3a1b88bd6ce7c975c38285a Maintainer: jhdxr Status: ready -->
 <!-- CREDITS: mowangjuanzi -->
 <sect1 xml:id="language.oop5.interfaces" xmlns="http://docbook.org/ns/docbook"
 xmlns:xlink="http://www.w3.org/1999/xlink">
  <title>对象接口</title>
  <para>
-  使用接口（interface），可以指定某个类必须实现哪些方法，但不需要定义这些方法的具体内容。
+  使用接口（interface），可以指定某个类必须实现哪些方法和属性，但不需要定义这些方法或属性的具体内容。
   由于接口（interface）和类（class）、trait 共享了命名空间，所以它们不能重名。
  </para>
  <para>
@@ -41,7 +41,6 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
    此外，也不能强制确保构造器遵守继承规则，将导致不可预料的行为结果。
   </para>
  </note>
-
 
  <sect2 xml:id="language.oop5.interfaces.implements">
   <title>实现（<literal>implements</literal>）</title>
@@ -79,7 +78,80 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
    不能被子类或子接口所覆盖。
   </para>
  </sect2>
+  <sect2 xml:id="language.oop5.interfaces.properties">
+   <title>属性</title>
+   <simpara>
+    自 PHP 8.4.0 起，接口也可以声明属性。如果声明了属性，则必须指定属性是可读、可写还是可读可写。接口声明仅适用于 public 读写访问。
+   </simpara>
+   <simpara>
+    类可以通过多种方式满足接口属性。可以定义 public 属性。可以定义仅实现相应挂钩的 public <link
+    linkend="language.oop5.property-hooks.virtual">虚拟属性</link>。或者属性读取可以由 <literal>readonly</literal>
+    属性满足。但是可 set 的接口属性可能不是 <literal>readonly</literal>。
+   </simpara>
+   <example>
+    <title>接口属性示例</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+interface I
+{
+    // 实现的类必须具有 public get 的属性，
+    // 但是否可以 public set 则不受限制。
+    public string $readable { get; }
 
+    // 实现的类必须具有 public set 的属性，
+    // 但是不是 public get 则不受限制。
+    public string $writeable { set; }
+
+    // 实现的类必须具有 public get 和 public set 的属性。
+    public string $both { get; set; }
+}
+
+// 此类将所有三个属性实现为传统的非挂钩属性。这是完全有效的。
+class C1 implements I
+{
+    public string $readable;
+
+    public string $writeable;
+
+    public string $both;
+}
+
+// 此类仅使用请求的挂钩即可实现所有三个属性。这也是完全有效的。
+class C2 implements I
+{
+    private string $written = '';
+    private string $all = '';
+
+    // 仅使用 get 挂钩来创建虚拟属性。
+    // 这满足了“public get”要求。
+    // 它不可写，但这不是接口所要求的。
+    public string $readable { get => strtoupper($this->writeable); }
+
+    // 该接口仅要求属性可 set，
+    // 但包含 get 操作也是完全有效的。
+    // 此示例创建了虚拟属性，这很好。
+    public string $writeable {
+        get => $this->written;
+        set {
+            $this->written = $value;
+        }
+    }
+
+    // 此属性要求读取和写入均可，
+    // 因此需要实现两者，或者允许它具有默认行为。
+    public string $both {
+        get => $this->all;
+        set {
+            $this->all = strtoupper($value);
+        }
+    }
+}
+?>
+]]>
+    </programlisting>
+   </example>
+  </sect2>
  <sect2 xml:id="language.oop5.interfaces.examples">
   &reftitle.examples;
   <example xml:id="language.oop5.interfaces.examples.ex1">

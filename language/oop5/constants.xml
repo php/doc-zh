@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: fc174e8d6162091550edde46159917ee7e5a2e73 Maintainer: Haohappy Status: ready -->
-<!-- CREDITS: Luffy -->
+<!-- EN-Revision: 7ddc30e0d2087d75b8f50da40668f4e422c6a4c5 Maintainer: Haohappy Status: ready -->
+<!-- CREDITS: Luffy, mowangjuanzi -->
  <sect1 xml:id="language.oop5.constants" xmlns="http://docbook.org/ns/docbook">
   <title>类常量</title>
   <para>
@@ -112,6 +112,57 @@ Fatal error: Uncaught Error: Cannot access private const Foo::BAZ in …
  <note>
   <para>
    自 PHP 7.1.0 起，类常量允许使用可见性修饰符。
+  </para>
+ </note>
+ <example>
+  <title>自 PHP 8.3.0 起，类常量可见性不一致检查</title>
+  <programlisting role="php">
+<![CDATA[
+<?php
+
+interface MyInterface
+{
+    public const VALUE = 42;
+}
+
+class MyClass implements MyInterface
+{
+    protected const VALUE = 42;
+}
+?>
+]]>
+  </programlisting>
+  &example.outputs.83;
+  <screen>
+<![CDATA[
+Fatal error: Access level to MyClass::VALUE must be public (as in interface MyInterface) …
+]]>
+  </screen>
+ </example>
+ <note>
+  <simpara>
+   自 PHP 8.3.0 起，可见性差异检查要更加严格。在此版本之前，类常量的可见性可能与实现的接口中常量的可见性不同。
+  </simpara>
+ </note>
+ <example>
+  <title>自 PHP 8.3.0 起获取类常量语法</title>
+  <programlisting role="php">
+<![CDATA[
+<?php
+class Foo {
+    public const BAR = 'bar';
+    private const BAZ = 'baz';
+}
+
+$name = 'BAR';
+echo Foo::{$name}, PHP_EOL; // bar
+?>
+]]>
+  </programlisting>
+ </example>
+ <note>
+  <para>
+   自 PHP 8.3.0 起，可以使用变量动态获取类常量。
   </para>
  </note>
 </sect1>
