@@ -11,17 +11,8 @@
  </simpara>
 
  <simpara>
-  Two lazy object strategies are supported: Ghost Objects and Virtual
-  Proxies, hereafter referred to as &quot;lazy ghosts&quot; and
-  &quot;lazy proxies&quot;.
-  In both strategies, the lazy object is attached to an initializer or factory
-  that is called automatically when its state is observed or modified for
-  the first time.  From an abstraction point of view, lazy ghost objects are
-  indistinguishable from non-lazy ones: they can be used without knowing they
-  are lazy, allowing them to be passed to and used by code that is unaware of
-  laziness. Lazy proxies are similarly transparent, but care must be taken when
-  their identity is used, as the proxy and its real instance have different
-  identities.
+  支持两种延迟对象策略：幽灵对象（Ghost Object）和虚拟代理（Virtual Proxies），以下称为&quot;延迟幽灵&quot;和&quot;延迟代理&quot;。
+  在这两种策略中，延迟对象都附加到初始化程序或工厂，当第一次观察或修改其状态时会自动调用。从抽象的角度来看，延迟幽灵对象与非延迟幽灵对象没有区别：都可以在不知道自己是延迟的情况下使用，从而允许将其传递给不知道延迟的代码并由其使用。延迟代理同样是透明的，但在使用它们的标识（identity）时必须小心，因为代理和其真实实例具有不同的标识。
  </simpara>
 
  <sect2 xml:id="language.oop5.lazy-objects.creation">
@@ -37,7 +28,7 @@
   </simpara>
 
   <example>
-   <title>Creating a Lazy Ghost</title>
+   <title>创建延迟幽灵</title>
    <programlisting role="php">
 <![CDATA[
 <?php
@@ -51,14 +42,14 @@ class Example
 
 $reflector = new ReflectionClass(Example::class);
 $lazyObject = $reflector->newLazyGhost(function (Example $object) {
-    // Initialize object in-place
+    // 在这里初始化对象
     $object->__construct(1);
 });
 
 var_dump($lazyObject);
 var_dump(get_class($lazyObject));
 
-// Triggers initialization
+// 触发初始化
 var_dump($lazyObject->prop);
 ?>
 ]]>
@@ -78,7 +69,7 @@ int(1)
   </example>
 
   <example>
-   <title>Creating a Lazy Proxy</title>
+   <title>创建延迟代理</title>
    <programlisting role="php">
 <![CDATA[
 <?php
@@ -92,7 +83,7 @@ class Example
 
 $reflector = new ReflectionClass(Example::class);
 $lazyObject = $reflector->newLazyProxy(function (Example $object) {
-    // Create and return the real instance
+    // 创建并返回真实实例
     return new Example(1);
 });
 
@@ -119,14 +110,12 @@ int(1)
   </example>
 
   <simpara>
-   Any access to properties of a lazy object triggers its initialization
-   (including via <classname>ReflectionProperty</classname>).
-   However, certain properties might be known in advance and should not trigger
-   initialization when accessed:
+   对延迟对象属性的任何访问都会触发其初始化（包括通过 <classname>ReflectionProperty</classname>
+   访问）。但是，某些属性可能是预先知道的，并且在访问时不应触发初始化：
   </simpara>
 
   <example>
-   <title>Initializing Properties Eagerly</title>
+   <title>立即初始化属性</title>
    <programlisting role="php">
 <![CDATA[
 <?php
@@ -162,9 +151,8 @@ var_dump($post->id);
   </example>
 
   <simpara>
-   The <methodname>ReflectionProperty::skipLazyInitialization</methodname> and
-   <methodname>ReflectionProperty::setRawValueWithoutLazyInitialization</methodname>
-   methods offer ways to bypass lazy-initialization when accessing a property.
+   <methodname>ReflectionProperty::skipLazyInitialization</methodname> 和 <methodname>ReflectionProperty::setRawValueWithoutLazyInitialization</methodname>
+   方法提供了在访问属性时绕过延迟初始化的方法。
   </simpara>
  </sect2>
 
@@ -329,7 +317,7 @@ var_dump($post->id);
   </simpara>
 
   <sect3>
-   <title>Ghost Objects</title>
+   <title>幽灵对象</title>
    <simplelist>
     <member>
      The object is marked as non-lazy.
@@ -358,7 +346,7 @@ var_dump($post->id);
   </sect3>
 
   <sect3>
-   <title>Proxy Objects</title>
+   <title>代理对象</title>
    <simplelist>
     <member>
      The object is marked as non-lazy.
@@ -405,7 +393,7 @@ var_dump($post->id);
   </sect3>
 
   <sect3>
-   <title>Common Behavior</title>
+   <title>通用行为</title>
 
    <simpara>
     The scope and <varname>$this</varname> context of the initializer or factory

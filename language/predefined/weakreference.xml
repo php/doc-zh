@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 14767af0f05dffa6fdb9b49e1a1f4e9ca7022a60 Maintainer: daijie Status: ready -->
+<!-- EN-Revision: cd391e65a613a729f9bbded2b1249e2d7143400c Maintainer: daijie Status: ready -->
 <!-- CREDITS: mowangjuanzi -->
 <reference xml:id="class.weakreference" role="class" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude">
 
@@ -13,7 +13,10 @@
   <section xml:id="weakreference.intro">
    &reftitle.intro;
    <para>
-    弱引用可以指向一个对象，并且不阻止对象的销毁。可以实现具有对象结构的缓存。
+    弱引用允许保留对对象的引用，而不会阻止销毁对象。对于实现类似缓存的结构很有用。如果原始对象已销毁，则调用
+    <methodname>WeakReference::get</methodname> 方法时将返回 &null;。当原始对象的 <link
+    linkend="features.gc.refcounting-basics">refcount</link> 降至零时，会销毁原始对象；创建弱引用不会增加被引用对象的
+    <literal>refcount</literal>。
    </para>
    <para>
     <classname>弱引用类</classname>不能序列化。
@@ -51,11 +54,16 @@
      <programlisting role="php">
 <![CDATA[
 <?php
-$obj = new stdClass;
+
+$obj = new stdClass();
 $weakref = WeakReference::create($obj);
+
 var_dump($weakref->get());
+
 unset($obj);
+
 var_dump($weakref->get());
+
 ?>
 ]]>
      </programlisting>
