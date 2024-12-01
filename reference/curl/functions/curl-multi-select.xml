@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: b7f8c11e56ff1c57a2993e2ed7e5c5ace18637fd Maintainer: mowangjuanzi Status: ready -->
+<!-- EN-Revision: f414967c2c80702de6401191034d9837a2801dc1 Maintainer: mowangjuanzi Status: ready -->
 <refentry xml:id="function.curl-multi-select" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>curl_multi_select</refname>
-  <refpurpose>在任意 curl_multi 连接上等待活动</refpurpose>
+  <refpurpose>等待，直到任何 cURL 多句柄连接可以进行读取或写入</refpurpose>
  </refnamediv>
- 
+
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
@@ -15,7 +15,8 @@
    <methodparam choice="opt"><type>float</type><parameter>timeout</parameter><initializer>1.0</initializer></methodparam>
   </methodsynopsis>
   <para>
-    阻塞到任意 curl_multi连接上有活动。
+    堵塞脚本执行，直到附加到 cURL 多句柄的 cURL 句柄能够在下次调用
+    <function>curl_multi_exec</function> 时取得进展或者直到超时（以先到者为准）。
   </para>
 
  </refsect1>
@@ -29,20 +30,29 @@
      <term><parameter>timeout</parameter></term>
      <listitem>
       <para>
-       以秒为单位，等待响应的时间。
+       以秒为单位，等待活跃 cURL 多句柄连接的响应时间。
       </para>
      </listitem>
     </varlistentry>
    </variablelist>
   </para>
  </refsect1>
- 
+
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   成功时返回描述符集合中描述符的数量。如果没有任何活动的描述符，则为
-   0。失败时，此函数将在 select 失败时返回 -1（来自底层 select 系统调用）。
+   成功时返回描述符集合中活跃描述符的数量。如果没有任何活动的描述符，则为
+   <literal>0</literal>。失败时，此函数将在 <literal>select()</literal>
+   失败时返回 <literal>-1</literal>（来自底层 select 系统调用）。
   </para>
+ </refsect1>
+
+ <refsect1 role="errors">
+  &reftitle.errors;
+  <simpara>
+   如果 <parameter>timeout</parameter> 小于 <literal>0</literal>
+   或者大于 <constant>PHP_INT_MAX</constant>，则抛出 <exceptionname>ValueError</exceptionname>。
+  </simpara>
  </refsect1>
 
  <refsect1 role="changelog">
@@ -56,6 +66,13 @@
      </row>
     </thead>
     <tbody>
+     <row>
+      <entry>8.4.0</entry>
+      <entry>
+       如果 <parameter>timeout</parameter> 小于 <literal>0</literal>
+       或者大于 <constant>PHP_INT_MAX</constant>，现在抛出 <exceptionname>ValueError</exceptionname>。
+      </entry>
+     </row>
      &curl.changelog.multi-handle-param;
     </tbody>
    </tgroup>
