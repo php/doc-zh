@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 210d382b5b139444fe2e16a5a3211076a65ff2ba Maintainer: daijie Status: ready -->
+<!-- EN-Revision: 72b70d7c3c3b2b87423641906da2db407c32c3c3 Maintainer: daijie Status: ready -->
 <!-- CREDITS: mowangjuanzi, Luffy -->
 <refentry xml:id="function.trigger-error" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
@@ -41,6 +41,12 @@
       <para>
        该 error 所特定的错误类型。仅 <constant>E_USER_<replaceable>*</replaceable></constant> 系列常量对其有效，默认是 <constant>E_USER_NOTICE</constant>。
       </para>
+      <warning>
+       <simpara>
+        现已弃用传递 <constant>E_USER_ERROR</constant> 作为 <parameter>error_level</parameter>。抛出
+        <exceptionname>Exception</exceptionname> 或调用 <function>exit</function>。
+       </simpara>
+      </warning>
      </listitem>
     </varlistentry>
    </variablelist>
@@ -74,6 +80,19 @@
     </thead>
     <tbody>
      <row>
+      <entry>8.4.0</entry>
+      <entry>
+       现已弃用传递 <constant>E_USER_ERROR</constant> 作为 <parameter>error_level</parameter>。抛出
+       <exceptionname>Exception</exceptionname> 或调用 <function>exit</function>。
+      </entry>
+     </row>
+     <row>
+      <entry>8.4.0</entry>
+      <entry>
+       此函数现在返回类型是 <type>true</type> 而不是 <type>bool</type>。
+      </entry>
+     </row>
+     <row>
       <entry>8.0.0</entry>
       <entry>
        如果指定 <parameter>error_level</parameter> 无效，此函数现在将抛出 <classname>ValueError</classname>。之前返回 &false;。
@@ -95,9 +114,11 @@
     <programlisting role="php">
 <![CDATA[
 <?php
-if ($divisor == 0) {
-    trigger_error("Cannot divide by zero", E_USER_ERROR);
+$password = $_POST['password'] ?? '';
+if ($password === '') {
+  trigger_error("Using an empty password is unsafe", E_USER_WARNING);
 }
+$hash = password_hash($password, PASSWORD_DEFAULT);
 ?>
 ]]>
     </programlisting>
@@ -124,6 +145,7 @@ if ($divisor == 0) {
     <member><function>set_error_handler</function></member>
     <member><function>restore_error_handler</function></member>
     <member><link linkend="errorfunc.constants">错误级别常量</link></member>
+    <member><classname>Deprecated</classname> 注解</member>
    </simplelist>
   </para>
  </refsect1>
