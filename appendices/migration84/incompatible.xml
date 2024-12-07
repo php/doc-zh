@@ -1,0 +1,792 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- EN-Revision: b1b039696eedcc82e9c1144eeecbfc0a8a1b3859 Maintainer: mowangjuanzi Status: partial -->
+<sect1 xml:id="migration84.incompatible" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <title>不向后兼容的变更</title>
+
+ <simpara>
+  尽管本节没有明确说明，但每个新<link linkend="migration84.new-functions">函数</link>、<link
+  linkend="migration84.new-classes">类、interface、枚举</link>或<link
+  linkend="migration84.constants">常量</link>都可能导致抛出重复声明
+  <exceptionname>Error</exceptionname>。
+ </simpara>
+
+ <sect2 xml:id="migration84.incompatible.core">
+  <title>PHP 核心</title>
+
+  <!-- RFC: https://wiki.php.net/rfc/exit-as-function -->
+  <sect3 xml:id="migration84.incompatible.core.exit">
+   <title><function>exit</function> 行为变更</title>
+
+   <simpara>
+    <function>exit</function>（和 <function>die</function>）语言结构现在的行为更像函数。这意味着现在可以传递
+    <type>callable</type>，受 <literal>strict_types</literal> 声明语句的影响，并且现在执行往常的类型强制，而不是将任何非整数值转换为字符串。
+   </simpara>
+
+   <simpara>
+    因此，将无效类型传递给 <function>exit</function> 和 <function>die</function> 现在会导致抛出 <exceptionname>TypeError</exceptionname>。
+   </simpara>
+  </sect3>
+
+  <sect3 xml:id="migration84.incompatible.core.recursion-comparison">
+   <title>比较过程中的递归</title>
+
+   <simpara>
+    比较期间遇到递归现在会导致 <exceptionname>Error</exceptionname> 异常，而不是 <constant>E_ERROR</constant> 致命错误。
+   </simpara>
+  </sect3>
+
+  <sect3 xml:id="migration84.incompatible.core.readonly-indirect-modification">
+   <title>间接修改 readonly 属性</title>
+
+   <!-- TODO Link to clone magic method, and explain this better as UPGRADING is... -->
+   <simpara>
+    不再允许在 <code>__clone()</code> 里间接修改 readonly 属性，例如 <code>$ref = &amp;$this->readonly</code>。这在 readonly
+    初始化中已禁止，并且是“克隆期间 readlony 重新初始化”实现中的一个疏忽。
+   </simpara>
+  </sect3>
+
+  <sect3 xml:id="migration84.incompatible.core.constant-type-change">
+   <title>常量的类型变更</title>
+
+   <simpara>
+    <constant>PHP_DEBUG</constant> 和 <constant>PHP_ZTS</constant> 常量现在为 <type>bool</type> 类型。以前为 <type>int</type> 类型。
+   </simpara>
+  </sect3>
+
+  <sect3 xml:id="migration84.incompatible.core.tempnam-length">
+   <title>Temporary 文件名长度</title>
+
+   <simpara>
+    上传文件和 <function>tempnam</function> 函数创建的文件名现在为 13 个字节。总长度仍取决于平台。
+   </simpara>
+  </sect3>
+
+  <!-- RFC: https://wiki.php.net/rfc/deprecations_php_8_4#remove_e_strict_error_level_and_deprecate_e_strict_constant -->
+  <sect3 xml:id="migration84.incompatible.core.e-strict">
+   <title>移除 <constant>E_STRICT</constant> 错误级别</title>
+
+   <simpara>
+    已移除 <constant>E_STRICT</constant> 错误级别，因为其在 PHP 引擎中不再使用。已弃用 <constant>E_STRICT</constant> 常量。
+   </simpara>
+  </sect3>
+ </sect2>
+
+ <sect2 xml:id="migration84.incompatible.typed-constants">
+  <title>扩展类常量现已类型化</title>
+
+  <para>
+   以下扩展类常量现在在其常量上声明类型：
+   <simplelist>
+    <member><link linkend="book.datetime">Date</link></member>
+    <member><link linkend="book.intl">Intl</link></member>
+    <member><link linkend="book.pdo">PDO</link></member>
+    <member><link linkend="book.reflection">Reflection</link></member>
+    <member><link linkend="book.spl">SPL</link></member>
+    <member><link linkend="book.sqlite3">Sqlite</link></member>
+    <member><link linkend="book.xmlreader">XMLReader</link></member>
+   </simplelist>
+  </para>
+ </sect2>
+
+ <!-- TODO: Check resource names -->
+ <sect2 xml:id="migration84.incompatible.resource2object">
+  <title>迁移资源到对象</title>
+
+  <simpara>
+   多个 &resource; 已迁移到 &object;。除非另有说明，否则 <function>is_resource</function>
+   的返回值检查应替换为 &false; 检查。
+  </simpara>
+
+  <sect3 xml:id="migration84.incompatible.resource2object.dba">
+   <title>DBA</title>
+
+   <simpara>
+    <link linkend="book.dba">DBA</link> 函数现在接受并返回
+    <classname>Dba\Connection</classname> 对象，而不是
+    <literal>dba_connection</literal> &resource;。
+   </simpara>
+  </sect3>
+
+  <sect3 xml:id="migration84.incompatible.resource2object.odbc">
+   <title>ODBC</title>
+
+   <simpara>
+    <link linkend="book.uodbc">ODBC</link> 函数现在接受并返回
+    <classname>Odbc\Result</classname> 对象，而不是
+    <literal>odbc_result</literal> &resource;。
+   </simpara>
+
+   <simpara>
+    <link linkend="book.uodbc">ODBC</link> 函数现在接受并返回
+    <classname>Odbc\Connection</classname> 对象，而不是
+    <literal>odbc_connection</literal> &resource;。
+   </simpara>
+  </sect3>
+
+  <sect3 xml:id="migration84.incompatible.resource2object.soap">
+   <title>SOAP</title>
+
+   <simpara>
+    <property>SoapClient::$httpurl</property> 属性现在是
+    <classname>Soap\Url</classname> 对象，而不是
+    <literal>soap_url</literal> &resource;。
+    检查使用 <function>is_resource</function>（即
+    <code>is_resource($client->httpurl)</code>）应该替换为检查
+    是否为 &null;（即 <code>$client->httpurl !== null</code>）。
+   </simpara>
+   <simpara>
+    <property>SoapClient::$sdl</property> 属性现在是
+    <classname>Soap\Sdl</classname> 对象，而不是
+    <literal>soap_sdl</literal> &resource;。
+    检查使用 <function>is_resource</function>（即
+    <code>is_resource($client->sdl)</code>）应该替换为检查
+    是否为 &null;（即 <code>$client->sdl !== null</code>）。
+   </simpara>
+  </sect3>
+ </sect2>
+
+ <sect2 xml:id="migration84.incompatible.new-warnings-exceptions">
+  <title>新的警告和异常</title>
+
+  <simpara>
+   添加了因编程错误（即将无效值提供给参数）而触发新的警告和异常。
+  </simpara>
+
+  <sect3 xml:id="migration84.incompatible.new-warnings-exceptions.curl">
+   <title>Curl</title>
+
+   <simpara>
+    如果 <parameter>timeout</parameter> 参数小于 <literal>0</literal> 或大于
+    <constant>PHP_INT_MAX</constant>，<function>curl_multi_select</function>
+    现在会抛出 <exceptionname>ValueError</exceptionname>。
+   </simpara>
+  </sect3>
+
+  <sect3 xml:id="migration84.incompatible.new-warnings-exceptions.gd">
+   <title>Gd</title>
+
+   <para>
+    当传入无效的 <parameter>quality</parameter>
+    时，<simplelist type="inline">
+     <member><function>imagejpeg</function></member>
+     <member><function>imagewebp</function></member>
+     <member><function>imagepng</function></member>
+     <member><function>imageavif</function></member>
+    </simplelist>
+    现在抛出 <exceptionname>ValueError</exceptionname>。
+   </para>
+
+   <simpara>
+    当传递无效的 <parameter>speed</parameter> 参数值时，<function>imageavif</function>
+    现在将抛出 <exceptionname>ValueError</exceptionname>。
+   </simpara>
+
+   <simpara>
+    如果 <parameter>width</parameter> 或 <parameter>height</parameter>
+    参数溢出，<function>imagescale</function> 现在将抛出 <exceptionname>ValueError</exceptionname>。
+   </simpara>
+
+   <simpara>
+    当传入无效的 <parameter>mode</parameter> 参数时，<function>imagescale</function>
+    现在将抛出 <exceptionname>ValueError</exceptionname>。
+   </simpara>
+
+   <simpara>
+    如果 <parameter>sub</parameter> 或 <parameter>plus</parameter>
+    参数溢出，<function>imagefilter</function> 现在使用 <constant>IMG_FILTER_SCATTER</constant>
+    过滤器将抛出 <exceptionname>ValueError</exceptionname>。
+   </simpara>
+  </sect3>
+
+  <sect3 xml:id="migration84.incompatible.new-warnings-exceptions.gettext">
+   <title>Gettext</title>
+
+   <para>
+    如果 <parameter>domain</parameter> 是空字符串，<simplelist type="inline">
+     <member><function>bind_textdomain_codeset</function></member>
+     <member><function>textdomain</function></member>
+     <member><function>d<replaceable>*</replaceable>gettext</function></member>
+    </simplelist> 现在 抛出 <exceptionname>ValueError</exceptionname>。
+   </para>
+  </sect3>
+
+  <sect3 xml:id="migration84.incompatible.new-warnings-exceptions.intl">
+   <title>Intl</title>
+
+   <para>
+    <function>resourcebundle_get</function>、<methodname>ResourceBundle::get</methodname>
+    和在 <classname>ResourceBundle</classname> 对象上访问偏移量现在会抛出：
+    <simplelist>
+     <member>
+      无效偏移类型的 <exceptionname>TypeError</exceptionname>
+     </member>
+     <member>
+      空 &string; 的 <exceptionname>ValueError</exceptionname>
+     </member>
+     <member>
+      如果整数索引不符合有符号的 32 位整数，则 <exceptionname>ValueError</exceptionname>
+     </member>
+    </simplelist>
+   </para>
+
+   <simpara>
+    如果 <parameter>locale</parameter> 无效，则
+    <methodname>IntlDateFormatter::__construct</methodname> 抛出
+    <exceptionname>ValueError</exceptionname>。
+   </simpara>
+
+   <simpara>
+    如果 <parameter>locale</parameter> 无效，则
+    <methodname>NumberFormatter::__construct</methodname> 抛出
+    <exceptionname>ValueError</exceptionname>。
+   </simpara>
+  </sect3>
+
+  <sect3 xml:id="migration84.incompatible.new-warnings-exceptions.mbstring">
+   <title>MBString</title>
+
+   <simpara>
+    <function>mb_encode_numericentity</function> 和
+    <function>mb_decode_numericentity</function> 现在检测
+    <parameter>map</parameter> 是否仅由 &integer;
+    构成，如果不是，则抛出 <exceptionname>ValueError</exceptionname>。
+   </simpara>
+
+   <simpara>
+    如果 <parameter>type</parameter> 无效，<function>mb_http_input</function>
+    现在始终抛出 <exceptionname>ValueError</exceptionname>。
+   </simpara>
+
+   <simpara>
+    <function>mb_http_output</function> 现在检测
+    <parameter>encoding</parameter> 是不是不包含 null 字节，如果包含，会抛出
+    <exceptionname>ValueError</exceptionname>。
+   </simpara>
+  </sect3>
+
+  <sect3 xml:id="migration84.incompatible.new-warnings-exceptions.odbc">
+   <title>ODBC</title>
+
+   <simpara>
+    当 <parameter>row</parameter> 小于或等于 <literal>0</literal>
+    时，<function>odbc_fetch_row</function> 返回 &false;。在这种情况下会发出 warning。
+   </simpara>
+  </sect3>
+
+  <sect3 xml:id="migration84.incompatible.new-warnings-exceptions.pcntl">
+   <title>PCNTL</title>
+
+   <para>
+    <function>pcntl_sigprocmask</function>、<function>pcntl_sigwaitinfo</function> 和
+    <function>pcntl_sigtimedwait</function> 函数现在会抛出：
+    <simplelist>
+     <member>
+      如果 <parameter>signals</parameter> 数组为空，则抛出 <exceptionname>ValueError</exceptionname>（如果
+      <parameter>mode</parameter> <constant>SIG_SETMASK</constant> 则
+      <function>pcntl_sigprocmask</function> 除外）
+     </member>
+     <member>
+      如果 <parameter>signals</parameter> 数组的值不是 &integer;，则抛出 <exceptionname>TypeError</exceptionname>
+     </member>
+     <member>
+      如果 <parameter>signals</parameter> 数组不是有效的信号编号，则抛出 <exceptionname>ValueError</exceptionname>
+     </member>
+    </simplelist>
+   </para>
+
+   <simpara>
+    如果 <parameter>mode</parameter> 不是 <constant>SIG_BLOCK</constant>、<constant>SIG_UNBLOCK</constant>
+    或 <constant>SIG_SETMASK</constant> 中的一个，<function>pcntl_sigprocmask</function>
+    现在将抛出 <exceptionname>ValueError</exceptionname>。
+   </simpara>
+
+   <para>
+    <function>pcntl_sigtimedwait</function> 函数现在将抛出：
+    <simplelist>
+     <member>
+      如果 <parameter>seconds</parameter> 小于 <literal>0</literal> 则抛出 <exceptionname>ValueError</exceptionname>
+     </member>
+     <member>
+      如果 <parameter>nanoseconds</parameter> 小于 <literal>0</literal> 或者大于
+      <literal>1e9</literal>，则抛出 <exceptionname>ValueError</exceptionname>
+     </member>
+     <member>
+      如果 <parameter>seconds</parameter> 和 <parameter>nanoseconds</parameter>
+      是 <literal>0</literal>，则抛出 <exceptionname>ValueError</exceptionname>
+     </member>
+    </simplelist>
+   </para>
+  </sect3>
+
+  <sect3 xml:id="migration84.incompatible.new-warnings-exceptions.simplexml">
+   <title>SimpleXML</title>
+
+   <simpara>
+    使用非 XML 对象调用 <function>simplexml_import_dom</function> 将抛出
+    <exceptionname>TypeError</exceptionname> 而不是 <exceptionname>ValueError</exceptionname>
+   </simpara>
+  </sect3>
+
+  <sect3 xml:id="migration84.incompatible.new-warnings-exceptions.standard">
+   <title>标准</title>
+
+   <simpara>
+    <function>round</function> 函数现在会验证 <parameter>mode</parameter>
+    的值，如果无效，则抛出 <exceptionname>ValueError</exceptionname>。之前无效模式会解释为 <constant>PHP_ROUND_HALF_UP</constant>。
+   </simpara>
+
+   <simpara>
+    当 <parameter>separator</parameter> 和 <parameter>enclosure</parameter> 参数值的长度不为一个字节，或者
+    <parameter>escape</parameter> 参数值不为一个字节或者空字符串，<function>str_getcsv</function> 现在将抛出
+    <exceptionname>ValueError</exceptionname>。该行为已与 <function>fputcsv</function> 和
+    <function>fgetcsv</function> 行为相同。
+   </simpara>
+
+   <simpara>
+    如果 <parameter>mode</parameter> 无效，<function>php_uname</function>
+    函数现在会抛出 <exceptionname>ValueError</exceptionname>。
+   </simpara>
+
+   <simpara>
+    <function>unserialize</function> 的 <literal>"allowed_classes"</literal>
+    选项如果不是类名 <type>array</type>，现在会抛出 <exceptionname>TypeError</exceptionname>
+    和 <exceptionname>ValueError</exceptionname>。
+   </simpara>
+  </sect3>
+
+  <sect3 xml:id="migration84.incompatible.new-warnings-exceptions.xmlreader">
+   <title>XMLReader</title>
+
+   <simpara>
+    Passing an invalid character encoding to
+    <methodname>XMLReader::open</methodname> or
+    <methodname>XMLReader::XML</methodname> now throws a
+    <exceptionname>ValueError</exceptionname>.
+   </simpara>
+
+   <simpara>
+    Passing a &string; containing null bytes previously emitted a
+    warning and now throws a <exceptionname>ValueError</exceptionname>.
+   </simpara>
+  </sect3>
+
+  <sect3 xml:id="migration84.incompatible.new-warnings-exceptions.xmlwriter">
+   <title>XMLWriter</title>
+
+   <simpara>
+    Passing a &string; containing null bytes previously emitted a
+    warning and now throws a <exceptionname>ValueError</exceptionname>.
+   </simpara>
+  </sect3>
+
+  <sect3 xml:id="migration84.incompatible.new-warnings-exceptions.xsl">
+   <title>XSL</title>
+
+   <simpara>
+    <methodname>XSLTProcessor::setParameter</methodname> will now throw a
+    <exceptionname>ValueError</exceptionname> when its arguments contain null
+    bytes. This never actually worked correctly in the first place,
+    which is why it throws an exception now.
+   </simpara>
+
+   <simpara>
+    Calling <methodname>XSLTProcessor::importStyleSheet</methodname> with a
+    non-XML object now throws a <exceptionname>TypeError</exceptionname>
+    instead of a <exceptionname>ValueError</exceptionname>.
+   </simpara>
+
+   <!-- RFC: https://wiki.php.net/rfc/improve_callbacks_dom_and_xsl -->
+   <simpara>
+    Failure to call a PHP function callback during evaluation now throws
+    instead of emitting a warning.
+   </simpara>
+  </sect3>
+ </sect2>
+
+ <sect2 xml:id="migration84.incompatible.dom">
+  <title>DOM</title>
+
+  <simpara>
+   Some DOM methods previously returned &false; or a
+   <exceptionname>DOMException</exceptionname> with code
+   <constant>DOM_PHP_ERR</constant> if a new node could not be allocated.
+   They now consistently throw a <exceptionname>DOMException</exceptionname>
+   with code <constant>DOM_INVALID_STATE_ERR</constant>.
+   This situation is extremely unlikely and the probability of being affected
+   is low.
+   As a result <methodname>DOMImplementation::createDocument</methodname>
+   now has a tentative return type of <classname>DOMDocument</classname>
+   <!-- TODO: Use a proper union type for linkage -->
+   instead of <code>DOMDocument|false</code>.
+  </simpara>
+
+  <simpara>
+   Previously, <classname>DOMXPath</classname> objects could be cloned,
+   but resulted in an unusable object.
+   This is no longer possible, and cloning a <classname>DOMXPath</classname>
+   object now throws an <exceptionname>Error</exceptionname>.
+  </simpara>
+
+  <!-- RFC: https://wiki.php.net/rfc/deprecations_php_8_4#remove_domimplementationgetfeature_feature_version -->
+  <simpara>
+   The <methodname>DOMImplementation::getFeature</methodname> method has been removed.
+  </simpara>
+ </sect2>
+
+ <sect2 xml:id="migration84.incompatible.gmp">
+  <title>GMP</title>
+
+  <!-- RFC: https://wiki.php.net/rfc/gmp-final -->
+  <simpara>
+   The <classname>GMP</classname> class is now final and cannot be extended
+   anymore.
+  </simpara>
+ </sect2>
+
+ <sect2 xml:id="migration84.incompatible.mbstring">
+  <title>MBString</title>
+
+  <simpara>
+   On invalid strings (those with encoding errors),
+   <function>mb_substr</function> now interprets character indices in the same
+   manner as most other mbstring functions.
+   This means that character indices returned by <function>mb_strpos</function>
+   can be passed to <function>mb_substr</function>.
+  </simpara>
+
+  <simpara>
+   For SJIS-Mac (MacJapanese) strings, character indices passed to
+   <function>mb_substr</function> now refer to the indices of the Unicode
+   codepoints which are produced when the string is converted to Unicode.
+   This is significant because around 40 SJIS-Mac characters convert to a
+   sequence of multiple Unicode codepoints.
+  </simpara>
+ </sect2>
+
+ <sect2 xml:id="migration84.incompatible.mysqli">
+  <title>MySQLi</title>
+
+  <simpara>
+   The unused and undocumented constant
+   <constant>MYSQLI_SET_CHARSET_DIR</constant> has been removed.
+  </simpara>
+
+  <simpara>
+   The <constant>MYSQLI_STMT_ATTR_PREFETCH_ROWS</constant> constant has been
+   removed. The feature is unavailable with mysqlnd.
+  </simpara>
+
+  <simpara>
+   The <constant>MYSQLI_CURSOR_TYPE_FOR_UPDATE</constant> and
+   <constant>MYSQLI_CURSOR_TYPE_SCROLLABLE</constant> constants have been
+   removed. This functionality was never implemented,
+   neither with mysqlnd nor with libmysql.
+  </simpara>
+
+  <simpara>
+   The unused <constant>MYSQLI_TYPE_INTERVAL</constant> constant, which is
+   currently a stub and an alias for <constant>MYSQLI_TYPE_ENUM</constant>,
+   has been removed.
+   <!-- There are no
+  plans to add such data type to MySQL yet, so it's unclear what its value
+  would finally be. -->
+  </simpara>
+ </sect2>
+
+ <sect2 xml:id="migration84.incompatible.mysqlnd">
+  <title>MySQLnd</title>
+
+  <simpara>
+   The error code reported for MySQL server wait timeouts has been changed from
+   <literal>2006</literal> to <literal>4031</literal> for MySQL server
+   versions 8.0.24 and above.
+  </simpara>
+ </sect2>
+
+ <sect2 xml:id="migration84.incompatible.opcache">
+  <title>Opcache</title>
+
+  <simpara>
+   The maximum value of the
+   <link linkend="ini.opcache.interned-strings-buffer">opcache.interned_strings_buffer</link>
+   setting on 64bit architectures is now <literal>32767</literal>.
+   Previously it was <literal>4095</literal>.
+  </simpara>
+
+  <sect3>
+   <title>JIT</title>
+
+   <simpara>
+    The default configuration values for the JIT changed from
+    <link linkend="ini.opcache.jit"><literal>opcache.jit=tracing</literal></link>
+    and <link linkend="ini.opcache.jit-buffer-size"><literal>opcache.jit_buffer_size=0</literal></link>
+    to <link linkend="ini.opcache.jit"><literal>opcache.jit=disable</literal></link>
+    and <link linkend="ini.opcache.jit-buffer-size"><literal>opcache.jit_buffer_size=64M</literal></link>, respectively.
+   </simpara>
+
+   <simpara>
+    This does not affect the default observable behavior,
+    as the JIT is still disabled by default.
+    However, it is now disabled through the
+    <link linkend="ini.opcache.jit">opcache.jit</link> setting,
+    rather than
+    <link linkend="ini.opcache.jit-buffer-size">opcache.jit_buffer_size</link>.
+    This may affect users who previously enabled JIT through
+    <link linkend="ini.opcache.jit-buffer-size">opcache.jit_buffer_size</link>
+    exclusively, without also specifying a JIT mode using
+    <link linkend="ini.opcache.jit">opcache.jit</link>.
+    To enable JIT compilation, set the
+    <link linkend="ini.opcache.jit">opcache.jit</link> config value accordingly.
+   </simpara>
+
+   <simpara>
+    If <acronym>JIT</acronym> compilation is enabled, <acronym>PHP</acronym> will now exit with a fatal error on
+    startup if the initialization of the <acronym>JIT</acronym> compiler failed for any reason.
+   </simpara>
+  </sect3>
+ </sect2>
+
+ <sect2 xml:id="migration84.incompatible.pcntl">
+  <title>PCNTL</title>
+
+  <simpara>
+   The <function>pcntl_sigprocmask</function>,
+   <function>pcntl_sigwaitinfo</function>, and
+   <function>pcntl_sigtimedwait</function> functions now always
+   return &false; on failure.
+   In some case previously it could return the value <literal>-1</literal>.
+  </simpara>
+ </sect2>
+
+ <sect2 xml:id="migration84.incompatible.pcre">
+  <title>PCRE</title>
+
+  <simpara>
+   The bundled pcre2lib has been updated to version 10.44.
+   As a consequence, this means <literal>{,3}</literal> is now recognized
+   as a quantifier instead of as text.
+   Furthermore, the meaning of some character classes in UCP mode has changed.
+   Consult the <link xlink:href="https://github.com/PCRE2Project/pcre2/blob/master/NEWS">PCRE2 Changelog</link>
+   for a full changelog.
+  </simpara>
+ </sect2>
+
+ <sect2 xml:id="migration84.incompatible.pdo-dblib">
+  <title>PDO_DBLIB</title>
+
+  <simpara>
+   The <constant>Pdo\Dblib::ATTR_STRINGIFY_UNIQUEIDENTIFIER</constant> and
+   <constant>Pdo\Dblib::ATTR_DATETIME_CONVERT</constant> attributes now act as
+   boolean attributes instead of integer attributes.
+   Thus setting the attribute via <methodname>PDO::setAttribute</methodname>
+   and retrieving it via <methodname>PDO::getAttribute</methodname> expects
+   and or return a <type>bool</type>.
+  </simpara>
+ </sect2>
+
+ <sect2 xml:id="migration84.incompatible.pdo-firebird">
+  <title>PDO_FIREBIRD</title>
+
+  <simpara>
+   The <constant>PDO::ATTR_AUTOCOMMIT</constant> attribute now act as
+   boolean attributes instead of integer attributes.
+   Thus setting the attribute via <methodname>PDO::setAttribute</methodname>
+   and retrieving it via <methodname>PDO::getAttribute</methodname> expects
+   and or return a <type>bool</type>.
+  </simpara>
+
+  <simpara>
+   The extension now exposes some Firebird C++ APIs,
+   therefore building this extension now requires a C++ compiler.
+   Moreover, the extension must now be compiled against fbclient 3.0 or higher.
+  </simpara>
+ </sect2>
+
+ <sect2 xml:id="migration84.incompatible.pdo-mysql">
+  <title>PDO_MYSQL</title>
+
+  <simpara>
+   The <constant>PDO::ATTR_AUTOCOMMIT</constant>,
+   <constant>PDO::ATTR_EMULATE_PREPARES</constant>, and
+   <constant>PDO::MYSQL_ATTR_DIRECT_QUERY</constant> attributes now act as
+   boolean attributes instead of integer attributes.
+   Thus setting the attribute via <methodname>PDO::setAttribute</methodname>
+   and retrieving it via <methodname>PDO::getAttribute</methodname> expects
+   and or return a <type>bool</type>.
+  </simpara>
+ </sect2>
+
+ <sect2 xml:id="migration84.incompatible.pdo-pgsql">
+  <title>PDO_PGSQL</title>
+
+  <simpara>
+   The DSN's credentials, when set, are given priority over their PDO
+   constructor counterparts, being closer to the documentation states.
+  </simpara>
+ </sect2>
+
+ <sect2 xml:id="migration84.incompatible.simplexml">
+  <title>SimpleXML</title>
+
+  <simpara>
+   <classname>SimpleXMLElement</classname> is not only a representation of an
+   XML element, but it is also a <classname>RecursiveIterator</classname>.
+   Prior to PHP 8.4.0, some of its methods (e.g.
+   <methodname>SimpleXMLElement::asXML</methodname> or
+   <methodname>SimpleXMLElement::getName</methodname>) and casting such
+   instances to &string; would implicitly reset the iterator.
+  </simpara>
+  <para>
+   This could cause unexpected infinite loops as the iterator was rewound.
+   For example:
+   <informalexample>
+    <programlisting role="php">
+<![CDATA[
+<?php
+
+$xmlString = "<root><a><b>1</b><b>2</b><b>3</b></a></root>";
+$xml = simplexml_load_string($xmlString);
+
+$nodes = $xml->a->b;
+foreach ($nodes as $nodeData) {
+    echo "nodeData: " . $nodeData . "\n";
+
+    $xml = $nodes->asXml();
+}
+
+]]>
+    </programlisting>
+    <simpara>
+     would result in an infinite loop.
+    </simpara>
+    <screen>
+<![CDATA[
+nodeData: 1
+nodeData: 2
+nodeData: 2
+nodeData: 2
+nodeData: 2
+nodeData: 2
+nodeData: 2
+// ...
+]]>
+    </screen>
+    <simpara>
+     However, this behavior has now been corrected, and a
+     <classname>SimpleXMLElement</classname> will no longer implicitly reset
+     the iterator data, unless explicitly rewound.
+     Meaning the previous example would now result in:
+    </simpara>
+    <screen>
+<![CDATA[
+nodeData: 1
+nodeData: 2
+nodeData: 3
+]]>
+    </screen>
+   </informalexample>
+  </para>
+  <!-- This is no longer the case as a consequence of the bugfixes for GH-12192,GH-12208, #55098. -->
+ </sect2>
+
+ <sect2 xml:id="migration84.incompatible.soap">
+  <title>SOAP</title>
+
+  <simpara>
+   <property>SoapClient::$typemap</property> is now an <type>array</type>
+   rather than a <type>resource</type>.
+   Checks using <function>is_resource</function> (i.e.
+   <code>is_resource($client->typemap)</code>) should be
+   replaced with checks for &null; (i.e. <code>$client->typemap !== null</code>).
+  </simpara>
+
+  <simpara>
+   The SOAP extension gained an optional dependency on the
+   <link linkend="book.session">session</link> extension.
+   If PHP is built without the session extension and with the
+   <option>--enable-rtld-now</option> configure flag enabled,
+   startup errors will now occur if the <link linkend="book.soap">SOAP</link>
+   extension is also used.
+   To solve this either don't use rtld-now or load the session extension.
+  </simpara>
+ </sect2>
+
+ <sect2 xml:id="migration84.incompatible.standard">
+  <title>Standard</title>
+
+  <simpara>
+   When using <function>strcspn</function> with
+   <parameter>characters</parameter> being the empty string,
+   the length of the string is now returned instead of incorrectly stopping
+   at the first null byte.
+   <!-- See GH-12592 -->
+  </simpara>
+
+  <simpara>
+   <function>http_build_query</function> now correctly handles backed enums.
+  </simpara>
+
+  <!-- RFC: https://wiki.php.net/rfc/dedicated_stream_bucket -->
+  <simpara>
+   <function>stream_bucket_make_writeable</function> and
+   <function>stream_bucket_new</function> will now return a
+   <classname>StreamBucket</classname> instance instead of an instance of
+   <classname>stdClass</classname>.
+  </simpara>
+ </sect2>
+
+ <sect2 xml:id="migration84.incompatible.tidy">
+  <title>Tidy</title>
+
+  <simpara>
+   Failures in the constructor now throw exceptions rather than emitting
+   warnings and having a broken object.
+  </simpara>
+ </sect2>
+
+ <sect2 xml:id="migration84.incompatible.xml">
+  <title>XML</title>
+
+  <simpara>
+   The <function>xml_set_<replaceable>*</replaceable>_handler</function>
+   functions now declare and check for an effective
+   signature of <type class="union"><type>callable</type><type>string</type><type>null</type></type> for the
+   <parameter>handler</parameter> parameters.
+   Moreover, values of type <type>string</type> that correspond to method names,
+   of object set with <function>xml_set_object</function> are now checked to
+   see if the method exists on the class of the previously passed object.
+   This means that <function>xml_set_object</function> must now always be
+   called prior to setting method names as <type>callable</type>s.
+   Passing an empty string to disable the handler is still allowed,
+   but deprecated.
+  </simpara>
+
+  <simpara>
+   However, as <function>xml_set_object</function> and passing
+   non-<type>callable</type> strings is deprecated.
+   It is recommended to change such instances with a <type>callable</type>
+   referring to the method directly.
+  </simpara>
+ </sect2>
+
+</sect1>
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
