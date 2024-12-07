@@ -4,97 +4,78 @@
  <title>不向后兼容的变更</title>
 
  <simpara>
-  Although not explicitly stated in this section,
-  every new <link linkend="migration84.new-functions">function</link>,
-  <link linkend="migration84.new-classes">class, interface, enum</link>,
-  or <link linkend="migration84.constants">constant</link>
-  may cause a redeclaration <exceptionname>Error</exceptionname> to be thrown.
+  尽管本节没有明确说明，但每个新<link linkend="migration84.new-functions">函数</link>、<link
+  linkend="migration84.new-classes">类、interface、枚举</link>或<link
+  linkend="migration84.constants">常量</link>都可能导致抛出重复声明
+  <exceptionname>Error</exceptionname>。
  </simpara>
 
  <sect2 xml:id="migration84.incompatible.core">
-  <title>PHP Core</title>
+  <title>PHP 核心</title>
 
   <!-- RFC: https://wiki.php.net/rfc/exit-as-function -->
   <sect3 xml:id="migration84.incompatible.core.exit">
-   <title><function>exit</function> behavioral change</title>
+   <title><function>exit</function> 行为变更</title>
 
    <simpara>
-    The <function>exit</function> (and <function>die</function>) language
-    constructs now behave more like a function.
-    This means that they can now be passed like <type>callable</type>s,
-    <!-- TODO: Link to declare documentation/type juggling documentation -->
-    are affected by the <literal>strict_types</literal> declare statement,
-    and now perform the usual type coercions instead of casting any non-integer
-    value to a string.
+    <function>exit</function>（和 <function>die</function>）语言结构现在的行为更像函数。这意味着现在可以传递
+    <type>callable</type>，受 <literal>strict_types</literal> 声明语句的影响，并且现在执行往常的类型强制，而不是将任何非整数值转换为字符串。
    </simpara>
 
    <simpara>
-    As such, passing invalid types to <function>exit</function> and
-    <function>die</function> now consistently result in a
-    <exceptionname>TypeError</exceptionname> being thrown.
+    因此，将无效类型传递给 <function>exit</function> 和 <function>die</function> 现在会导致抛出 <exceptionname>TypeError</exceptionname>。
    </simpara>
   </sect3>
 
   <sect3 xml:id="migration84.incompatible.core.recursion-comparison">
-   <title>Recursion during comparison</title>
+   <title>比较过程中的递归</title>
 
    <simpara>
-    Encountering recursion during comparison now results in an
-    <exceptionname>Error</exceptionname> exception instead of a
-    <constant>E_ERROR</constant> fatal error.
+    比较期间遇到递归现在会导致 <exceptionname>Error</exceptionname> 异常，而不是 <constant>E_ERROR</constant> 致命错误。
    </simpara>
   </sect3>
 
   <sect3 xml:id="migration84.incompatible.core.readonly-indirect-modification">
-   <title>Indirect Modification of readonly Properties</title>
+   <title>间接修改 readonly 属性</title>
 
    <!-- TODO Link to clone magic method, and explain this better as UPGRADING is... -->
    <simpara>
-    Indirect modification of readonly properties within <code>__clone()</code>
-    is no longer allowed, e.g. <code>$ref = &amp;$this->readonly</code>.
-    This was already forbidden for readonly initialization, and was an
-    oversight in the "readonly reinitialization during cloning" implementation.
+    不再允许在 <code>__clone()</code> 里间接修改 readonly 属性，例如 <code>$ref = &amp;$this->readonly</code>。这在 readonly
+    初始化中已禁止，并且是“克隆期间 readlony 重新初始化”实现中的一个疏忽。
    </simpara>
   </sect3>
 
   <sect3 xml:id="migration84.incompatible.core.constant-type-change">
-   <title>Type Change of Constants</title>
+   <title>常量的类型变更</title>
 
    <simpara>
-    The <constant>PHP_DEBUG</constant> and <constant>PHP_ZTS</constant>
-    constants are now of type <type>bool</type>.
-    Previously they were of type <type>int</type>.
+    <constant>PHP_DEBUG</constant> 和 <constant>PHP_ZTS</constant> 常量现在为 <type>bool</type> 类型。以前为 <type>int</type> 类型。
    </simpara>
   </sect3>
 
   <sect3 xml:id="migration84.incompatible.core.tempnam-length">
-   <title>Temporary Filename Length</title>
+   <title>Temporary 文件名长度</title>
 
    <simpara>
-    The name of uploaded files and files created by the
-    <function>tempnam</function> function are now 13 bytes longer.
-    The total length is still platform-dependent.
+    上传文件和 <function>tempnam</function> 函数创建的文件名现在为 13 个字节。总长度仍取决于平台。
    </simpara>
   </sect3>
 
   <!-- RFC: https://wiki.php.net/rfc/deprecations_php_8_4#remove_e_strict_error_level_and_deprecate_e_strict_constant -->
   <sect3 xml:id="migration84.incompatible.core.e-strict">
-   <title>Removal of <constant>E_STRICT</constant> error level</title>
+   <title>移除 <constant>E_STRICT</constant> 错误级别</title>
 
    <simpara>
-    The <constant>E_STRICT</constant> error level has been removed,
-    as it was no longer in use within the PHP engine.
-    The <constant>E_STRICT</constant> constant has been deprecated.
+    已移除 <constant>E_STRICT</constant> 错误级别，因为其在 PHP 引擎中不再使用。已弃用 <constant>E_STRICT</constant> 常量。
    </simpara>
   </sect3>
  </sect2>
 
  <sect2 xml:id="migration84.incompatible.typed-constants">
-  <title>Extension Class Constants which are now Typed</title>
+  <title>扩展类常量现已类型化</title>
 
   <para>
-   The following extension class constants now declare a type on their
-   constants:
+   以下扩展类常量现在在其常量上声明类型：
    <simplelist>
     <member><link linkend="book.datetime">Date</link></member>
     <member><link linkend="book.intl">Intl</link></member>
@@ -109,21 +90,20 @@
 
  <!-- TODO: Check resource names -->
  <sect2 xml:id="migration84.incompatible.resource2object">
-  <title>Resource to Object Migration</title>
+  <title>迁移资源到对象</title>
 
   <simpara>
-   Several &resource;s have been migrated to &object;s.
-   Return value checks using <function>is_resource</function> should be
-   replaced with checks for &false;, unless specified otherwise.
+   多个 &resource; 已迁移到 &object;。除非另有说明，否则 <function>is_resource</function>
+   的返回值检查应替换为 &false; 检查。
   </simpara>
 
   <sect3 xml:id="migration84.incompatible.resource2object.dba">
    <title>DBA</title>
 
    <simpara>
-    The <link linkend="book.dba">DBA</link> functions now accept and return
-    <classname>Dba\Connection</classname> objects instead of
-    <literal>dba_connection</literal> &resource;s.
+    <link linkend="book.dba">DBA</link> 函数现在接受并返回
+    <classname>Dba\Connection</classname> 对象，而不是
+    <literal>dba_connection</literal> &resource;。
    </simpara>
   </sect3>
 
@@ -131,15 +111,15 @@
    <title>ODBC</title>
 
    <simpara>
-    The <link linkend="book.uodbc">ODBC</link> functions now accept and return
-    <classname>Odbc\Result</classname> objects instead of
-    <literal>odbc_result</literal> &resource;s.
+    <link linkend="book.uodbc">ODBC</link> 函数现在接受并返回
+    <classname>Odbc\Result</classname> 对象，而不是
+    <literal>odbc_result</literal> &resource;。
    </simpara>
 
    <simpara>
-    The <link linkend="book.uodbc">ODBC</link> functions now accept and return
-    <classname>Odbc\Connection</classname> objects instead of
-    <literal>odbc_connection</literal> &resource;s.
+    <link linkend="book.uodbc">ODBC</link> 函数现在接受并返回
+    <classname>Odbc\Connection</classname> 对象，而不是
+    <literal>odbc_connection</literal> &resource;。
    </simpara>
   </sect3>
 
@@ -147,20 +127,20 @@
    <title>SOAP</title>
 
    <simpara>
-    The <property>SoapClient::$httpurl</property> property is now a
-    <classname>Soap\Url</classname> object rather than a
-    <literal>soap_url</literal> &resource;.
-    Checks using <function>is_resource</function> (i.e.
-    <code>is_resource($client->httpurl)</code>) should be  replaced with checks
-    for &null; (i.e. <code>$client->httpurl !== null</code>).
+    <property>SoapClient::$httpurl</property> 属性现在是
+    <classname>Soap\Url</classname> 对象，而不是
+    <literal>soap_url</literal> &resource;。
+    检查使用 <function>is_resource</function>（即
+    <code>is_resource($client->httpurl)</code>）应该替换为检查
+    是否为 &null;（即 <code>$client->httpurl !== null</code>）。
    </simpara>
    <simpara>
-    The <property>SoapClient::$sdl</property> property is now a
-    <classname>Soap\Sdl</classname> object rather than a
-    <literal>soap_sdl</literal> &resource;.
-    Checks using <function>is_resource</function> (i.e.
-    <code>is_resource($client->sdl)</code>) should be  replaced with checks
-    for &null; (i.e. <code>$client->sdl !== null</code>).
+    <property>SoapClient::$sdl</property> 属性现在是
+    <classname>Soap\Sdl</classname> 对象，而不是
+    <literal>soap_sdl</literal> &resource;。
+    检查使用 <function>is_resource</function>（即
+    <code>is_resource($client->sdl)</code>）应该替换为检查
+    是否为 &null;（即 <code>$client->sdl !== null</code>）。
    </simpara>
   </sect3>
  </sect2>
@@ -169,18 +149,16 @@
   <title>New warnings and exceptions</title>
 
   <simpara>
-   New warnings and exceptions have been added which are triggered on
-   programming errors, i.e. invalid values provided as arguments.
+   添加了因编程错误（即将无效值提供给参数）而触发新的警告和异常。
   </simpara>
 
   <sect3 xml:id="migration84.incompatible.new-warnings-exceptions.curl">
    <title>Curl</title>
 
    <simpara>
-    <function>curl_multi_select</function> now throws a
-    <exceptionname>ValueError</exceptionname> if the
-    <parameter>timeout</parameter> parameter is less than
-    <literal>0</literal> or greater than <constant>PHP_INT_MAX</constant>.
+    如果 <parameter>timeout</parameter> 参数小于 <literal>0</literal> 或大于
+    <constant>PHP_INT_MAX</constant>，<function>curl_multi_select</function>
+    现在会抛出 <exceptionname>ValueError</exceptionname>。
    </simpara>
   </sect3>
 
@@ -188,41 +166,35 @@
    <title>Gd</title>
 
    <para>
-    <simplelist type="inline">
+    当传入无效的 <parameter>quality</parameter>
+    时，<simplelist type="inline">
      <member><function>imagejpeg</function></member>
      <member><function>imagewebp</function></member>
      <member><function>imagepng</function></member>
      <member><function>imageavif</function></member>
     </simplelist>
-    now throw a <exceptionname>ValueError</exceptionname> when an invalid
-    <parameter>quality</parameter> is passed.
+    现在抛出 <exceptionname>ValueError</exceptionname>。
    </para>
 
    <simpara>
-    <function>imageavif</function> will now throw a
-    <exceptionname>ValueError</exceptionname> if an invalid
-    <parameter>speed</parameter> parameter value is passed.
+    当传递无效的 <parameter>speed</parameter> 参数值时，<function>imageavif</function>
+    现在将抛出 <exceptionname>ValueError</exceptionname>。
    </simpara>
 
    <simpara>
-    <function>imagescale</function> will now throw a
-    <exceptionname>ValueError</exceptionname> if the
-    <parameter>width</parameter> or <parameter>height</parameter>
-    parameters underflows/overflows.
+    如果 <parameter>width</parameter> 或 <parameter>height</parameter>
+    参数溢出，<function>imagescale</function> 现在将抛出 <exceptionname>ValueError</exceptionname>。
    </simpara>
 
    <simpara>
-    <function>imagescale</function> will now throw a
-    <exceptionname>ValueError</exceptionname> if an invalid
-    <parameter>mode</parameter> parameter value is passed.
+    当传入无效的 <parameter>mode</parameter> 参数时，<function>imagescale</function>
+    现在将抛出 <exceptionname>ValueError</exceptionname>。
    </simpara>
 
    <simpara>
-    <function>imagefilter</function> will now throw a
-    <exceptionname>ValueError</exceptionname> with the
-    <constant>IMG_FILTER_SCATTER</constant> filter
-    if the <parameter>sub</parameter> or <parameter>plus</parameter>
-    parameters underflows/overflows.
+    如果 <parameter>sub</parameter> 或 <parameter>plus</parameter>
+    参数溢出，<function>imagefilter</function> 现在使用 <constant>IMG_FILTER_SCATTER</constant>
+    过滤器将抛出 <exceptionname>ValueError</exceptionname>。
    </simpara>
   </sect3>
 
@@ -230,13 +202,11 @@
    <title>Gettext</title>
 
    <para>
-    <simplelist type="inline">
+    如果 <parameter>domain</parameter> 是空字符串，<simplelist type="inline">
      <member><function>bind_textdomain_codeset</function></member>
      <member><function>textdomain</function></member>
      <member><function>d<replaceable>*</replaceable>gettext</function></member>
-    </simplelist>
-    now throw a <exceptionname>ValueError</exceptionname> if
-    <parameter>domain</parameter> is the empty string.
+    </simplelist> 现在 抛出 <exceptionname>ValueError</exceptionname>。
    </para>
   </sect3>
 
