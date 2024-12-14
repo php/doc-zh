@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: fdd2aca71cfb2af77e365633a57e79e22bc1786e Maintainer: HonestQiao Status: ready -->
+<!-- EN-Revision: 5fb1bb4a70dc9cf2538d9a78f423579b805137b4 Maintainer: HonestQiao Status: ready -->
 <!-- CREDITS: Luffy, mowangjuanzi -->
 <refentry xml:id="function.glob" xmlns="http://docbook.org/ns/docbook" xmlns:xi="http://www.w3.org/2001/XInclude">
  <refnamediv>
@@ -20,6 +20,10 @@
    <parameter>pattern</parameter> 匹配的文件路径，类似于一般 shells
    所用的规则一样。
   </para>
+  <simpara>
+   Unix 系统和 macOS 上的行为由系统级 glob() 实现来决定。在 Windows 上，使用符合
+   POSIX 1003.2 定义的 glob() 实现，它包含一个扩展来处理 <literal>[!...]</literal> 约定以否定范围。
+  </simpara>
  </refsect1>
 
  <refsect1 role="parameters">
@@ -77,13 +81,9 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   返回包含有匹配文件和目录的数组，没有匹配文件时返回空数组，出错返回 &false;。
+   返回包含有匹配文件和目录的数组，没有匹配文件时返回空数组，出错返回
+   &false;。除非使用了 <literal>GLOB_NOSORT</literal>，否则名称将按字母顺序排序。
   </para>
-  <note>
-   <para>
-    在个别操作系统上，无法区分是否为空匹配或错误。
-   </para>
-  </note>
  </refsect1>
 
  <refsect1 role="examples">
@@ -107,6 +107,30 @@ foreach (glob("*.txt") as $filename) {
 funclist.txt size 44686
 funcsummary.txt size 267625
 quickref.txt size 137820
+]]>
+    </screen>
+   </example>
+   <example>
+    <title>
+     更复杂模式的示例
+    </title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+foreach (glob("path/*/*.{txt,md}", \GLOB_BRACE) as $filename) {
+    echo "$filename\n";
+}
+?>
+]]>
+    </programlisting>
+    &example.outputs.similar;
+    <screen>
+<![CDATA[
+path/docs/mailinglist-rules.md
+path/docs/README.md
+path/docs/release-process.md
+path/pear/install-pear.txt
+path/Zend/README.md
 ]]>
     </screen>
    </example>
