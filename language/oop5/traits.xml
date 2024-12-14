@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: c1c803cf6a83feb30a444c90787c88cd1946e3f6 Maintainer: daijie Status: ready -->
+<!-- EN-Revision: b5f0c19bec9f70f1cbdc1480b3f3c92c608489d1 Maintainer: daijie Status: ready -->
 <!-- CREDITS: mowangjuanzi, Luffy -->
  <sect1 xml:id="language.oop5.traits" xmlns="http://docbook.org/ns/docbook">
   <title>Trait</title>
@@ -22,23 +22,43 @@
     <programlisting role="php">
 <![CDATA[
 <?php
-trait ezcReflectionReturnInfo {
-    function getReturnType() { /*1*/ }
-    function getReturnDescription() { /*2*/ }
+
+trait TraitA {
+    public function sayHello() {
+        echo 'Hello';
+    }
 }
 
-class ezcReflectionMethod extends ReflectionMethod {
-    use ezcReflectionReturnInfo;
-    /* ... */
+trait TraitB {
+    public function sayWorld() {
+        echo 'World';
+    }
 }
 
-class ezcReflectionFunction extends ReflectionFunction {
-    use ezcReflectionReturnInfo;
-    /* ... */
+class MyHelloWorld
+{
+    use TraitA, TraitB; // A class can use multiple traits
+
+    public function sayHelloWorld() {
+        $this->sayHello();
+        echo ' ';
+        $this->sayWorld();
+        echo "!\n";
+    }
 }
+
+$myHelloWorld = new MyHelloWorld();
+$myHelloWorld->sayHelloWorld();
+
 ?>
 ]]>
     </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+Hello World!
+]]>
+    </screen>
    </example>
   
   <sect2 xml:id="language.oop5.traits.precedence">
@@ -362,70 +382,121 @@ class MyHelloWorld {
     <programlisting role="php">
 <![CDATA[
 <?php
-trait Counter {
-    public function inc() {
+
+trait Counter
+{
+    public function inc()
+    {
         static $c = 0;
         $c = $c + 1;
         echo "$c\n";
     }
 }
 
-class C1 {
+class C1
+{
     use Counter;
 }
 
-class C2 {
+class C2
+{
     use Counter;
 }
 
-$o = new C1(); $o->inc(); // echo 1
-$p = new C2(); $p->inc(); // echo 1
+$o = new C1();
+$o->inc();
+$p = new C2();
+$p->inc();
+
 ?>
 ]]>
     </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+1
+1
+]]>
+    </screen>
    </example>
    <example xml:id="language.oop5.traits.static.ex2">
     <title>静态方法</title>
     <programlisting role="php">
 <![CDATA[
 <?php
-trait StaticExample {
-    public static function doSomething() {
+
+trait StaticExample
+{
+    public static function doSomething()
+    {
         return 'Doing something';
     }
 }
 
-class Example {
+class Example
+{
     use StaticExample;
 }
 
-Example::doSomething();
+echo Example::doSomething();
+
 ?>
 ]]>
     </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+Doing something
+]]>
+    </screen>
    </example>
    <example xml:id="language.oop5.traits.static.ex3">
     <title>静态属性</title>
     <caution>
      <simpara>
-      在 PHP 8.3.0 之前，静态属性在使用该 trait 的所有类之间共享。自 PHP 8.3.0 起，每个使用该 trait 的类都有自己的静态属性副本。
+      PHP 8.3.0 之前，trait 中定义的静态属性会在使用该 trait 的同一继承层次结构中的所有类之间共享。自
+      PHP 8.3.0 起，如果子类使用具有静态属性的 trait，将视为与父类中定义的 trait 不同。
      </simpara>
     </caution>
     <programlisting role="php">
      <![CDATA[
 <?php
-trait StaticExample {
-    public static $static = 'foo';
+
+trait T
+{
+    public static $counter = 1;
 }
 
-class Example {
-    use StaticExample;
+class A
+{
+    use T;
+
+    public static function incrementCounter()
+    {
+        static::$counter++;
+    }
 }
 
-echo Example::$static;
+class B extends A
+{
+    use T;
+}
+
+A::incrementCounter();
+
+echo A::$counter, "\n";
+echo B::$counter, "\n";
+
 ?>
 ]]>
     </programlisting>
+    &example.outputs.83;
+    <screen>
+<![CDATA[
+2
+1
+]]>
+    </screen>
    </example>
   </sect2>
   
@@ -439,16 +510,20 @@ echo Example::$static;
     <programlisting role="php">
 <![CDATA[
 <?php
-trait PropertiesTrait {
+
+trait PropertiesTrait
+{
     public $x = 1;
 }
 
-class PropertiesExample {
+class PropertiesExample
+{
     use PropertiesTrait;
 }
 
-$example = new PropertiesExample;
+$example = new PropertiesExample();
 $example->x;
+
 ?>
 ]]>
     </programlisting>
@@ -502,10 +577,16 @@ class ConstantsExample {
 }
 
 $example = new ConstantsExample;
-echo $example::FLAG_MUTABLE; // 1
+echo $example::FLAG_MUTABLE;
 ?>
 ]]>
    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+1
+]]>
+    </screen>
   </example>
   <para>
    如果 trait 定义了常量，然后类不能定义相同名称的常量，除非两者兼容（相同的可见性、初始化值和
@@ -534,29 +615,45 @@ class ConstantsExample {
  <sect2 xml:id="language.oop5.traits.final-methods">
   <title>final 方法</title>
   <simpara>
-   自 PHP 8.3.0 起，<link linkend="language.oop5.final">final</link> 修饰符可以应用于来自 trait 的方法。
+   自 PHP 8.3.0 起，<link linkend="language.oop5.final">final</link> 修饰符可以应用于使用
+   <literal>as</literal> 操作符从 trait 导入的方法。这可用于防止子类覆盖该方法。但是，使用该 trait
+   的类仍然可以覆盖该方法。
   </simpara>
   <example xml:id="language.oop5.traits.final-methods.example">
    <title>将来自 trait 的方法定义为 <literal>final</literal></title>
    <programlisting role="php">
     <![CDATA[
 <?php
-trait ConstantsTrait {
-    public function method() {
+
+trait CommonTrait
+{
+    public function method()
+    {
         echo 'Hello';
     }
 }
 
-class ConstantsExample {
-    use ConstantsTrait;
-
-    final public function method() {
-        echo 'Hello World';
+class FinalExampleA
+{
+    use CommonTrait {
+        CommonTrait::method as final; // 'final' 防止子类覆盖方法
     }
 }
+
+class FinalExampleB extends FinalExampleA
+{
+    public function method() {}
+}
+
 ?>
 ]]>
    </programlisting>
+    &example.outputs.similar;
+    <screen>
+<![CDATA[
+Fatal error: Cannot override final method FinalExampleA::method() in ...
+]]>
+    </screen>
   </example>
  </sect2>
 
