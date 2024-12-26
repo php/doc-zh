@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: de9c65c91ff1710d8b2d2ec955caea0162679305 Maintainer: mowangjuanzi Status: ready -->
+<!-- EN-Revision: 53054bf8decc8648cf2e90a493692a161e2371af Maintainer: mowangjuanzi Status: ready -->
 <!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="function.filter-var-array" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>filter_var_array</refname>
   <refpurpose>获取多个变量并且过滤它们</refpurpose>
  </refnamediv>
+
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
@@ -15,50 +16,52 @@
    <methodparam choice="opt"><type class="union"><type>array</type><type>int</type></type><parameter>options</parameter><initializer><constant>FILTER_DEFAULT</constant></initializer></methodparam>
    <methodparam choice="opt"><type>bool</type><parameter>add_empty</parameter><initializer>&true;</initializer></methodparam>
   </methodsynopsis>
-  <para>
-   不需要重复调用 <function>filter_var</function> 就能获取多个变量。
-  </para>
+  <simpara>
+   使用 <constant>FILTER_VALIDATE_<replaceable>*</replaceable></constant> 验证过滤器、<constant>FILTER_SANITIZE_<replaceable>*</replaceable></constant>
+   清理过滤器或自定义过滤器来过滤关联 &array; 的值。
+  </simpara>
  </refsect1>
+
  <refsect1 role="parameters">
   &reftitle.parameters;
-  <para>
-   <variablelist>
-    <varlistentry>
-     <term><parameter>array</parameter></term>
-     <listitem>
-      <para>
-       数组，键为字符串，值为待过滤的数据。
-      </para>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
-     <term><parameter>options</parameter></term>
-     <listitem>
-      <para>
-       一个定义参数的数组。一个有效的键必须是一个包含变量名的<type>string</type>，一个有效的值要么是一个<link
-       linkend="filter.filters">filter type</link>，或者是一个<type>array</type>
-       指明了过滤器、标示和选项。如果值是一个数组，那么它的有效的键可以是 <literal>filter</literal>，
-       用于指明 <link linkend="filter.filters">filter type</link>，<literal>flags</literal> 
-       用于指明任何想要用于过滤器的标示，或者 <literal>options</literal> 用于指明任何想要用于过滤器的选项。
-       参考下面的例子来更好的理解这段说明。
-      </para>
-      <para>
-       这个参数也可以是一个<link
-       linkend="filter.constants">filter constant</link>的整数。那么数组中的所有值都会被这个过滤器所过滤。
-      </para>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
-     <term><parameter>add_empty</parameter></term>
-     <listitem>
-      <para>
-       在返回值中添加 &null; 作为不存在的键。
-      </para>
-     </listitem>
-    </varlistentry>
-   </variablelist>
-  </para>
+  <variablelist>
+   <varlistentry>
+    <term><parameter>array</parameter></term>
+    <listitem>
+     <simpara>
+      关联 &array;，包含要过滤的数据。
+     </simpara>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><parameter>options</parameter></term>
+    <listitem>
+     <simpara>
+      要么是选项的关联 <type>array</type>，要么是应用于每个条目的过滤器，可以是使用 <constant>FILTER_VALIDATE_<replaceable>*</replaceable></constant>
+      常量的验证过滤器，也可以是使用 <constant>FILTER_SANITIZE_<replaceable>*</replaceable></constant> 常量的清理过滤器。
+     </simpara>
+     <simpara>
+      选项数组是关联数组，其中 key 对应于数据 <parameter>array</parameter> 中的键，而关联的值要么是应用于该条目的过滤器，要么是描述如何以及应用哪个过滤器到该条目的关联数组。
+     </simpara>
+     <simpara>
+      描述如何应用过滤器的关联数组必须包含 <literal>'filter'</literal>
+      key，其关联的值是要应用的过滤器，<constant>FILTER_VALIDATE_<replaceable>*</replaceable></constant>、<constant>FILTER_SANITIZE_<replaceable>*</replaceable></constant>、<constant>FILTER_UNSAFE_RAW</constant>
+      或 <constant>FILTER_CALLBACK</constant> 常量之一。还可以选择性地包含 <literal>'flags'</literal> key，用于指定适用于过滤器的
+      flag，以及 <literal>'options'</literal> key，用于指定适用于过滤器的任何选项。
+     </simpara>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><parameter>add_empty</parameter></term>
+    <listitem>
+     <para>
+      为缺失的 key 添加 &null; 到返回值中。
+     </para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
  </refsect1>
+
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
@@ -76,37 +79,40 @@
 <![CDATA[
 <?php
 
-$data = array(
-    'product_id'    => 'libgd<script>',
-    'component'     => '10',
-    'versions'      => '2.0.33',
-    'testscalar'    => array('2', '23', '10', '12'),
-    'testarray'     => '2',
-);
+$data = [
+    'product_id' => 'libgd<script>',
+    'component'  => '10',
+    'versions'   => '2.0.33',
+    'testscalar' => ['2', '23', '10', '12'],
+    'testarray'  => '2',
+];
 
-$args = array(
+$filters = [
     'product_id'   => FILTER_SANITIZE_ENCODED,
-    'component'    => array('filter'    => FILTER_VALIDATE_INT,
-                            'flags'     => FILTER_FORCE_ARRAY, 
-                            'options'   => array('min_range' => 1, 'max_range' => 10)
-                           ),
-    'versions'     => FILTER_SANITIZE_ENCODED,
+    'component'    => [
+        'filter'   => FILTER_VALIDATE_INT,
+        'flags'    => FILTER_FORCE_ARRAY,
+        'options'  => [
+            'min_range' => 1,
+            'max_range' => 10,
+        ],
+    ],
+    'versions'     => [
+        'filter' => FILTER_SANITIZE_ENCODED
+    ],
+    'testscalar'   => [
+        'filter' => FILTER_VALIDATE_INT,
+        'flags'  => FILTER_REQUIRE_SCALAR,
+    ],
+    'testarray'    => [
+        'filter' => FILTER_VALIDATE_INT,
+        'flags'  => FILTER_FORCE_ARRAY,
+    ],
     'doesnotexist' => FILTER_VALIDATE_INT,
-    'testscalar'   => array(
-                            'filter' => FILTER_VALIDATE_INT,
-                            'flags'  => FILTER_REQUIRE_SCALAR,
-                           ),
-    'testarray'    => array(
-                            'filter' => FILTER_VALIDATE_INT,
-                            'flags'  => FILTER_FORCE_ARRAY,
-                           )
+];
 
-);
+var_dump(filter_var_array($data, $filters));
 
-$myinputs = filter_var_array($data, $args);
-
-var_dump($myinputs);
-echo "\n";
 ?>
 ]]>
     </programlisting>
@@ -123,8 +129,6 @@ array(6) {
   }
   ["versions"]=>
   string(6) "2.0.33"
-  ["doesnotexist"]=>
-  NULL
   ["testscalar"]=>
   bool(false)
   ["testarray"]=>
@@ -132,6 +136,8 @@ array(6) {
     [0]=>
     int(2)
   }
+  ["doesnotexist"]=>
+  NULL
 }
 ]]>
     </screen>
@@ -141,14 +147,19 @@ array(6) {
 
  <refsect1 role="seealso">
   &reftitle.seealso;
-  <para>
-   <simplelist>
-    <member><function>filter_input_array</function></member>
-    <member><function>filter_var</function></member>
-    <member><function>filter_input</function></member>
-    <member><xref linkend="filter.filters"/></member>
-   </simplelist>
-  </para>
+  <simplelist>
+   <member><function>filter_input_array</function></member>
+   <member><function>filter_var</function></member>
+   <member><function>filter_input</function></member>
+   <member>
+    验证过滤器
+    <constant>FILTER_VALIDATE_<replaceable>*</replaceable></constant>
+   </member>
+   <member>
+    清理过滤器
+    <constant>FILTER_SANITIZE_<replaceable>*</replaceable></constant>
+   </member>
+  </simplelist>
  </refsect1>
 
 </refentry>
