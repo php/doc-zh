@@ -1,17 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- EN-Revision: 2a8768782512db2b95e5da2f032dd0347806d203 Maintainer: mowangjuanzi Status: partial -->
+<!-- EN-Revision: 2a8768782512db2b95e5da2f032dd0347806d203 Maintainer: mowangjuanzi Status: ready -->
 <!-- CREDITS: Luffy -->
 <chapter xml:id="outcontrol.user-level-output-buffers" xmlns="http://docbook.org/ns/docbook" xmlns:xi="http://www.w3.org/2001/XInclude">
- <title>用户级别输出缓冲区</title>
+ <title>用户级输出缓冲区</title>
  <para>
-  用户级输出缓冲区可以从 PHP 代码中实现启动、操作和终止。每个都包含输出缓冲区和关联的输出处理函数。
+  用户级输出缓冲区可以从 PHP 代码中启动、操作和终止。
+  每个缓冲区都包括一个输出缓冲区和一个关联的输出处理程序函数。
  </para>
 
  <section xml:id="outcontrol.what-output-is-buffered">
-  <title>缓冲什么输出？</title>
+  <title>什么输出会被缓冲？</title>
   <para>
-   PHP 的用户级输出缓冲区在启动后缓冲所有输出，直到它们关闭或脚本结束。PHP 用户级输出缓冲区中上下文中的输出是 PHP
-   将显示或发送回浏览器的所有内容。实际上，输出是非零长度数据，即：
+   PHP 的用户级输出缓冲区在启动后缓冲所有输出，直到关闭或脚本结束。
+   在 PHP 的用户级输出缓冲区的上下文中，输出是指 PHP 将显示或发送回浏览器的所有内容。
+   在实际应用中，输出为非零长度的数据，即：
    <itemizedlist>
     <xi:include xpointer="xmlns(db=http://docbook.org/ns/docbook) xpointer(id('outputcontrol.what-is-output')/*)"><xi:fallback/></xi:include>
    </itemizedlist>
@@ -57,29 +59,19 @@
    如果在启动新的缓冲区时已经存在一个活跃的输出缓冲区，那么新的缓冲区将会嵌套在先前活跃的缓冲区内。无论是否嵌套，内部缓冲区的行为都将保持一致，外部缓冲区不会再次缓冲内部的缓冲输出。只有当内部缓冲区冲刷的输出才会被外部缓冲区缓冲。
   </para>
   <para>
-   Most <literal>ob_<replaceable>*</replaceable></literal> functions only work
-   with the active output buffer (the last one started)
-   therefore only the active buffer can be flushed, cleaned and turned off.
-   The functions that work with other buffers are
-   <function>ob_list_handlers</function>
-   which returns the list of all output handlers in use
-   and <function>ob_get_status</function>
-   which can return information on the active buffer only
-   or on all buffers in use.
+   大多数 <literal>ob_*</literal> 函数只能与活跃的输出缓冲区（最后一个启动的）一起使用，
+   因此只能冲刷、清空和关闭活跃的缓冲区。可以使用的函数有
+   <function>ob_list_handlers</function>，它返回所有正在使用的输出处理程序的列表，
+   以及 <function>ob_get_status</function>，它可以返回活跃缓冲区的信息或所有正在使用的缓冲区的信息。
   </para>
   <para>
-   Calling <function>ob_get_level</function>
-   or <function>ob_get_status</function> will return
-   the nesting level of the active output buffer.
+   调用 <function>ob_get_level</function> 或 <function>ob_get_status</function> 将返回活跃输出缓冲区的嵌套级别。
   </para>
   <caution>
    <simpara>
-    The value for identical levels between <function>ob_get_level</function>
-    and <function>ob_get_status</function> is off by one.
-    For <function>ob_get_level</function>
-    the first level is <literal>1</literal>,
-    whereas for <function>ob_get_status</function>
-    the first level is <literal>0</literal>.
+    <function>ob_get_level</function> 和 <function>ob_get_status</function> 之间相同级别的值相差一。
+    对于 <function>ob_get_level</function>，第一个级别是 <literal>1</literal>，
+    而对于 <function>ob_get_status</function>，第一个级别是 <literal>0</literal>。
    </simpara>
   </caution>
  </section>
@@ -87,96 +79,82 @@
  <section xml:id="outcontrol.buffer-size">
   <title>缓冲区大小</title>
   <para>
-   Buffer sizes are expressed by integers
-   and represent the number of bytes the buffer can store without flushing.
-   When the size of output in the buffer exceeds the size of the buffer,
-   the contents of the buffer are sent to the output handler,
-   its return value is flushed and the buffer is cleared.
+   缓冲区大小由整数表示，表示缓冲区可以存储的字节数，而不会刷新。
+   当缓冲区中的输出大小超过缓冲区的大小时，缓冲区的内容将被发送到输出处理程序，其返回值将被刷新，缓冲区将被清除。
   </para>
   <para>
-   With the exception of <literal>"URL-Rewriter"</literal>,
-   the size of output buffers can be set when the buffer is started.
-   If set to <literal>0</literal>,
-   the output buffer is only limited by the memory available to PHP.
-   If set to <literal>1</literal>,
-   the buffer is flushed after every block of code producing
-   any non-zero length output.
+   除了 <literal>"URL-Rewriter"</literal> 之外，输出缓冲区的大小可以在启动缓冲区时设置。
+   如果设置为 <literal>0</literal>，则输出缓冲区仅受 PHP 可用内存的限制。
+   如果设置为 <literal>1</literal>，则在生成任何非零长度输出的代码块后，缓冲区将被刷新。
   </para>
   <para>
-   The size of output buffers can be retrieved by calling
-   <function>ob_get_status</function>.
+   输出缓冲区的大小可通过调用 <function>ob_get_status</function> 来获取。
   </para>
   <para>
-   Output buffers started with <function>ob_start</function>
-   will have their buffer sizes set to the integer value passed to
-   the function's second <parameter>chunk_size</parameter> parameter.
-   If omitted, it is set to <literal>0</literal>.
+   使用 <function>ob_start</function> 启动的输出缓冲区将其缓冲区大小设置为传递给函数的第二个
+   <parameter>chunk_size</parameter> 参数的整数值。
+   如果省略，则设置为 <literal>0</literal>。
   </para>
   <para>
-   The output buffer started with
-   <link linkend="ini.output-buffering">output_buffering</link>
-   set to <literal>"On"</literal> will have its buffer size set to 0.
-   If set to an integer than buffer size will correspond to that number.
+   以 <literal>"On"</literal> 设置 <link linkend="ini.output-buffering">output_buffering</link>
+   启动的输出缓冲区将其缓冲区大小设置为 <literal>0</literal>。
+   如果设置为整数，则缓冲区大小将与该数字对应。
   </para>
   <para>
-   <literal>"URL-Rewriter"</literal>'s buffer size is set to <literal>0</literal>,
-   therefore it is only limited by the memory available to PHP.
+   <literal>"URL-Rewriter"</literal> 的缓冲区大小设置为 <literal>0</literal>，
+   因此仅受 PHP 可用内存的限制。
   </para>
   <para>
-   The size of <literal>zlib</literal>'s output buffer is controlled by the
+   <literal>zlib</literal> 的输出缓冲区大小由
    <link linkend="ini.zlib.output-compression">zlib.output_compression</link>
-   &php.ini; setting.
-   If set to <literal>"On"</literal> the buffer size will be
-   <literal>"16K"</literal>/<literal>16384</literal>.
-   If set to an integer then buffer size will correspond to that number in bytes.
+   &php.ini; 设置控制。
+   如果设置为 <literal>"On"</literal>，缓冲区大小将为
+   <literal>"16K"</literal>/<literal>16384</literal>。
+   如果设置为整数，则缓冲区大小将与该数字（字节）对应。
   </para>
  </section>
 
  <section xml:id="outcontrol.operations-on-buffers">
   <title>缓冲区中允许的操作</title>
   <para>
-   The operations allowed on buffers can be controlled
-   by passing one of the
-   <link linkend="outcontrol.constants.buffer-control-flags">buffer control flags</link>
-   to <function>ob_start</function>'s third
-   <parameter>flags</parameter> parameter.
-   If omitted, all operations are allowed by default.
-   If <literal>0</literal> is used instead,
-   the buffer cannot be flushed, cleaned or removed
-   but it's contents can still be retrieved.
+   可以通过将
+   <link linkend="outcontrol.constants.buffer-control-flags">缓冲区控制标志</link>
+   之一传递给 <function>ob_start</function> 的第三个
+   <parameter>flags</parameter> 参数来控制缓冲区上允许的操作。
+   如果省略，则默认情况下允许所有操作。
+   如果使用 <literal>0</literal>，则缓冲区不能被刷新、清空或移除，但仍然可以检索其内容。
   </para>
   <para>
-   <constant>PHP_OUTPUT_HANDLER_CLEANABLE</constant> allows
-   <function>ob_clean</function> to clean the contents of the buffer.
+   <constant>PHP_OUTPUT_HANDLER_CLEANABLE</constant> 允许
+   <function>ob_clean</function> 清空缓冲区的内容。
   </para>
   <warning>
    <simpara>
-    The absence of the <constant>PHP_OUTPUT_HANDLER_CLEANABLE</constant> flag
-    will not prevent <function>ob_end_clean</function>
-    or <function>ob_get_clean</function> from clearing the contents of the buffer.
+    缺少 <constant>PHP_OUTPUT_HANDLER_CLEANABLE</constant> 标志
+    不会阻止 <function>ob_end_clean</function>
+    或 <function>ob_get_clean</function> 清空缓冲区的内容。
    </simpara>
   </warning>
   <para>
-   <constant>PHP_OUTPUT_HANDLER_FLUSHABLE</constant> allows
-   <function>ob_flush</function> to flush the contents of the buffer.
+   <constant>PHP_OUTPUT_HANDLER_FLUSHABLE</constant> 允许
+   <function>ob_flush</function> 刷新缓冲区的内容。
   </para>
   <warning>
    <simpara>
-    The absence of the <constant>PHP_OUTPUT_HANDLER_FLUSHABLE</constant> flag
-    will not prevent <function>ob_end_flush</function>
-    or <function>ob_get_flush</function> from flushing the contents of the buffer.
+    缺少 <constant>PHP_OUTPUT_HANDLER_FLUSHABLE</constant> 标志
+    不会阻止 <function>ob_end_flush</function>
+    或 <function>ob_get_flush</function> 刷新缓冲区的内容。
    </simpara>
   </warning>
   <para>
-   <constant>PHP_OUTPUT_HANDLER_REMOVABLE</constant> allows
-   <function>ob_end_clean</function>, <function>ob_end_flush</function>,
-   <function>ob_get_clean</function> or <function>ob_get_flush</function>
-   to turn off the buffer.
+   <constant>PHP_OUTPUT_HANDLER_REMOVABLE</constant> 允许
+   <function>ob_end_clean</function>、<function>ob_end_flush</function>、
+   <function>ob_get_clean</function> 或 <function>ob_get_flush</function>
+   关闭缓冲区。
   </para>
   <para>
-   <constant>PHP_OUTPUT_HANDLER_STDFLAGS</constant>,
-   the combination of the three flags will allow each of the three operations
-   to be performed on the buffer.
+   <constant>PHP_OUTPUT_HANDLER_STDFLAGS</constant>
+   这三个标志的组合将允许对缓冲区执行这三个操作。
   </para>
  </section>
 
@@ -195,38 +173,32 @@
   </caution>
   <caution>
    <simpara>
-    Flushing buffers will flush the return value of the output handler
-    which can differ from the contents of the buffer.
-    For example, using <function>ob_gzhandler</function> will compress
-    the output and flush the compressed output.
+    冲刷缓冲区将冲刷输出处理程序的返回值，这可能与缓冲区的内容不同。
+    例如，使用 <function>ob_gzhandler</function> 将压缩输出并冲刷压缩后的输出。
    </simpara>
   </caution>
   <para>
-   The contents of the active buffer can be retrieved by calling
-   <function>ob_get_contents</function>, <function>ob_get_clean</function>
-   or <function>ob_get_flush</function>.
+   可以通过调用 <function>ob_get_contents</function>、<function>ob_get_clean</function>
+   或 <function>ob_get_flush</function> 来检索活动缓冲区的内容。
   </para>
   <para>
-   If only the length of the buffer's contents are needed,
-   <function>ob_get_length</function> or <function>ob_get_status</function>
-   will return the length of the contents in bytes.
+   如果只需要缓冲区内容的长度，<function>ob_get_length</function> 或
+   <function>ob_get_status</function> 将返回内容的字节长度。
   </para>
   <caution>
    <simpara>
-    Calling <function>ob_get_clean</function>
-    or <function>ob_get_flush</function> will turn off the active buffer
-    after returning the its contents.
+    调用 <function>ob_get_clean</function>
+    或 <function>ob_get_flush</function> 将在返回其内容后关闭活跃的缓冲区。
    </simpara>
   </caution>
   <para>
-   The contents of the active buffer can be cleaned by calling
-   <function>ob_clean</function>, <function>ob_end_clean</function>
-   or <function>ob_get_clean</function>.
+   可以通过调用 <function>ob_clean</function>、<function>ob_end_clean</function>
+   或 <function>ob_get_clean</function> 来清理活动缓冲区的内容。
   </para>
   <caution>
    <simpara>
-    Calling <function>ob_end_clean</function>
-    or <function>ob_get_clean</function> will turn off the active buffer.
+    调用 <function>ob_end_clean</function>
+    或 <function>ob_get_clean</function> 将关闭活跃的缓冲区。
    </simpara>
   </caution>
  </section>
@@ -234,30 +206,23 @@
  <section>
   <title>关闭缓冲区</title>
   <para>
-   Output buffers can be turned off by calling
-   <function>ob_end_clean</function>, <function>ob_end_flush</function>,
-   <function>ob_get_flush</function> or <function>ob_get_clean</function>.
+   可以通过调用 <function>ob_end_clean</function>、<function>ob_end_flush</function>、
+   <function>ob_get_flush</function> 或 <function>ob_get_clean</function> 来关闭输出缓冲区。
   </para>
   <warning>
    <simpara>
-    Output buffers started without the
-    <constant>PHP_OUTPUT_HANDLER_REMOVABLE</constant> flag
-    cannot be turned off and may generate an <constant>E_NOTICE</constant>.
+    没有使用 <constant>PHP_OUTPUT_HANDLER_REMOVABLE</constant> 标志启动的输出缓冲区不能关闭，可能会生成一个
+    <constant>E_NOTICE</constant>。
    </simpara>
   </warning>
   <para>
-   Every output buffer that has not been closed by the end of the script
-   or when <function>exit</function> is called will be flushed
-   and turned off by PHP's shutdown process.
-   The buffers will be flushed and turned off in reverse order
-   of their starting up.
-   The last buffered started will be first,
-   the first buffer started will be last to be flushed and turned off.
+   脚本结束时或调用 <function>exit</function> 时，所有未关闭的输出缓冲区都将被冲刷并关闭。
+   缓冲区将按照它们启动的相反顺序被冲刷并关闭。
+   最后启动的缓冲区将首先被冲刷，最先启动的缓冲区将最后被冲刷并关闭。
   </para>
   <caution>
    <simpara>
-    If flushing of the buffer's contents is not desired,
-    a custom output handler should be used to prevent flushing during shutdown.
+    如果不希望冲刷缓冲区的内容，应该使用自定义的输出处理程序来防止在关闭期间冲刷缓冲区的内容。
    </simpara>
   </caution>
  </section>
@@ -265,42 +230,37 @@
  <section xml:id="outcontrol.output-handlers">
   <title>输出处理程序</title>
   <para>
-   Output handlers are <type>callable</type>s associated with output buffers
-   that are invoked by calling <function>ob_clean</function>,
-   <function>ob_flush</function>, <function>ob_end_flush</function>,
-   <function>ob_get_flush</function>, <function>ob_end_clean</function>,
-   <function>ob_get_clean</function> or during PHP's shutdown process.
+   输出处理程序是与输出缓冲区关联的 <type>callable</type>，通过调用
+   <function>ob_clean</function>、<function>ob_flush</function>、<function>ob_end_flush</function>、
+   <function>ob_get_flush</function>、<function>ob_end_clean</function>、<function>ob_get_clean</function>
+   或 PHP 的关闭过程来调用。
   </para>
   <note>
    <simpara>
-    The shutdown process will flush the return value of the handler.
+    关闭过程将冲刷处理程序的返回值。
    </simpara>
   </note>
   <para>
-   If omitted or &null; when starting the output buffer
-   the internal <literal>"default output handler"</literal> will be used
-   which returns the unmodified contents of the buffer when invoked.
-   Output handlers can be used to return a modified version
-   of the buffer's contents and/or have side-effects (e.g. send headers).
+   如果省略或在启动输出缓冲区时传递 &null;，则将使用内部的
+   <literal>"default output handler"</literal>，当调用时返回缓冲区的未修改内容。
+   输出处理程序可用于返回缓冲区内容的修改版本和/或具有副作用（例如发送头部）。
   </para>
   <para>
-   PHP comes with two internal output handlers:
-   <literal>"default output handler"</literal>
-   and <literal>"URL-Rewriter"</literal> (which is integrated into
-   its own output buffer and only up to two instances of it can be started).
+   PHP 自带两个内部输出处理程序：
+   <literal>"default output handler"</literal> 和 <literal>"URL-Rewriter"</literal>
+   （它集成到自己的输出缓冲区中，最多只能启动两个实例）。
   </para>
   <para>
-   The bundled extensions include four additional output handlers:
-   <function>mb_output_handler</function>, <function>ob_gzhandler</function>,
-   <function>ob_iconv_handler</function>, <function>ob_tidyhandler</function>.
+   捆绑的扩展包括四个额外的输出处理程序：
+   <function>mb_output_handler</function>、<function>ob_gzhandler</function>、
+   <function>ob_iconv_handler</function>、<function>ob_tidyhandler</function>。
   </para>
  </section>
 
  <section xml:id="outcontrol.working-with-output-handlers">
   <title>使用输出处理程序</title>
   <para>
-   When invoked, output handlers are passed the contents of the buffer
-   and a bitmask indicating the status of output buffering.
+   调用输出处理程序时，将缓冲区的内容和一个位掩码传递给输出处理程序。
   </para>
   <para>
    <methodsynopsis>
@@ -322,7 +282,7 @@
      <term><parameter>buffer</parameter></term>
      <listitem>
       <simpara>
-       Contents of the output buffer.
+       输出缓冲区的内容。
       </simpara>
      </listitem>
     </varlistentry>
@@ -330,11 +290,10 @@
      <term><parameter>phase</parameter></term>
      <listitem>
       <simpara>
-       Bitmask of
        <link linkend="constant.php-output-handler-start">
         <constant>PHP_OUTPUT_HANDLER_<replaceable>*</replaceable></constant>
-        constants
-       </link>.
+        常量
+       </link> 的位掩码。
       </simpara>
      </listitem>
     </varlistentry>
@@ -342,31 +301,26 @@
   </para>
   <warning>
    <simpara>
-    Calling any of the following functions from within an output handler
-    will result in a fatal error:
-    <function>ob_clean</function>, <function>ob_end_clean</function>,
-    <function>ob_end_flush</function>, <function>ob_flush</function>,
-    <function>ob_get_clean</function>, <function>ob_get_flush</function>,
-    <function>ob_start</function>.
+    从输出处理程序中调用以下任何函数都会导致致命错误：
+    <function>ob_clean</function>、<function>ob_end_clean</function>、
+    <function>ob_end_flush</function>、<function>ob_flush</function>、
+    <function>ob_get_clean</function>、<function>ob_get_flush</function>、
+    <function>ob_start</function>。
    </simpara>
   </warning>
   <note>
    <simpara>
-    If the <constant>PHP_OUTPUT_HANDLER_DISABLED</constant> of a handler is set,
-    the handler will not be invoked by calling
-    <function>ob_end_clean</function>, <function>ob_end_flush</function>,
-    <function>ob_get_clean</function>, <function>ob_get_flush</function>,
-    <function>ob_clean</function>,
-    <function>ob_flush</function>
-    or during PHP's shutdown process.
-    Prior to PHP 8.4.0, this flag had no effect when calling <function>ob_clean</function>
-    or <function>ob_flush</function>.
+    如果设置了处理程序的 <constant>PHP_OUTPUT_HANDLER_DISABLED</constant>，
+    那么调用 <function>ob_end_clean</function>、<function>ob_end_flush</function>、
+    <function>ob_get_clean</function>、<function>ob_get_flush</function>、
+    <function>ob_clean</function>、<function>ob_flush</function>
+    或 PHP 的关闭过程将不会调用处理程序。
+    在 PHP 8.4.0 之前，调用 <function>ob_clean</function> 或 <function>ob_flush</function> 时，此标志不起作用。
    </simpara>
   </note>
   <note>
    <simpara>
-    The working directory of the script can change inside the shutdown function
-    under some web servers, e.g. Apache or the built-in web server.
+    脚本的工作目录可能会在某些 Web 服务器（例如 Apache 或内置 Web 服务器）的关闭函数中发生变化。
    </simpara>
   </note>
  </section>
@@ -374,55 +328,45 @@
  <section xml:id="outcontrol.flags-passed-to-output-handlers">
   <title>传递给输出处理程序的 flag</title>
   <para>
-   The bitmask passed to the second <parameter>phase</parameter> parameter
-   of the output handler provides information on the invocation of the handler.
+   传递给输出处理程序的第二个 <parameter>phase</parameter> 参数的位掩码提供了关于处理程序调用的信息。
   </para>
   <note>
    <simpara>
-    The bitmask can include more than one flag
-    and the bitwise <literal>&amp;</literal> operator should be used
-    to check whether a flag is set.
+    位掩码可以包含多个标志，应使用按位 <literal>&amp;</literal> 运算符来检查是否设置了标志。
    </simpara>
   </note>
   <warning>
    <simpara>
-    The value of <constant>PHP_OUTPUT_HANDLER_WRITE</constant> and its alias
-    <constant>PHP_OUTPUT_HANDLER_CONT</constant> is <literal>0</literal>
-    therefore whether it is set can only be determined
-    by using an
-    <link linkend="language.operators.comparison">equality operator</link>
-    (<literal>==</literal> or <literal>===</literal>).
+    <constant>PHP_OUTPUT_HANDLER_WRITE</constant> 和其别名
+    <constant>PHP_OUTPUT_HANDLER_CONT</constant> 的值为 <literal>0</literal>，
+    因此只能通过使用
+    <link linkend="language.operators.comparison">等号运算符</link>
+    （<literal>==</literal> 或 <literal>===</literal>）来确定是否设置了它。
    </simpara>
   </warning>
   <para>
-   The following flags are set in a specific phase of the handler's lifecycle:
-   <constant>PHP_OUTPUT_HANDLER_START</constant> is set
-   when a handler is invoked for the first time.
-   <constant>PHP_OUTPUT_HANDLER_FINAL</constant>
-   or its alias <constant>PHP_OUTPUT_HANDLER_END</constant>
-   is set when a handler is invoked for the last time,
-   i.e. it is being turned off. This flag is also set
-   when buffers are being turned off by PHP's shutdown process.
+   下面的标志在处理程序的生命周期的特定阶段设置：
+   <constant>PHP_OUTPUT_HANDLER_START</constant> 在第一次调用处理程序时设置。
+   <constant>PHP_OUTPUT_HANDLER_FINAL</constant> 或其别名
+   <constant>PHP_OUTPUT_HANDLER_END</constant> 在最后一次调用处理程序时设置，
+   即关闭处理程序。此标志也在 PHP 的关闭过程中关闭缓冲区时设置。
   </para>
   <para>
-   The following flags are set by a specific invocation of the handler:
-   <constant>PHP_OUTPUT_HANDLER_FLUSH</constant> is set
-   when the handler is invoked by calling <function>ob_flush</function>.
-   <constant>PHP_OUTPUT_HANDLER_WRITE</constant>
-   or its alias <constant>PHP_OUTPUT_HANDLER_CONT</constant>
-   is set when the size of its contents equals or exceeds the size of the buffer
-   and the handler is invoked while the buffer is being automatically flushed.
-   <constant>PHP_OUTPUT_HANDLER_FLUSH</constant> is set
-   when the handler is invoked by calling <function>ob_clean</function>,
-   <function>ob_end_clean</function> or <function>ob_get_clean</function>.
-   When <function>ob_end_clean</function> or <function>ob_get_clean</function>
-   is called, <constant>PHP_OUTPUT_HANDLER_FINAL</constant> is set as well.
+   下面的标志由特定调用处理程序设置：
+   <constant>PHP_OUTPUT_HANDLER_FLUSH</constant> 在调用 <function>ob_flush</function> 时设置。
+   <constant>PHP_OUTPUT_HANDLER_WRITE</constant> 或其别名
+   <constant>PHP_OUTPUT_HANDLER_CONT</constant> 在其内容的大小等于或超过缓冲区的大小时设置，
+   并且在缓冲区自动刷新时调用处理程序。
+   <constant>PHP_OUTPUT_HANDLER_FLUSH</constant> 在调用 <function>ob_clean</function>、
+   <function>ob_end_clean</function> 或 <function>ob_get_clean</function> 时设置。
+   当调用 <function>ob_end_clean</function> 或 <function>ob_get_clean</function> 时，
+   <constant>PHP_OUTPUT_HANDLER_FINAL</constant> 也会设置。
   </para>
   <note>
    <simpara>
-    When <function>ob_end_flush</function> or <function>ob_get_flush</function>
-    is called, <constant>PHP_OUTPUT_HANDLER_FINAL</constant> is set
-    but <constant>PHP_OUTPUT_HANDLER_FLUSH</constant> is not.
+    当调用 <function>ob_end_flush</function> 或 <function>ob_get_flush</function> 时，
+    设置 <constant>PHP_OUTPUT_HANDLER_FINAL</constant> 但未设置
+    <constant>PHP_OUTPUT_HANDLER_FLUSH</constant>。
    </simpara>
   </note>
  </section>
@@ -430,23 +374,21 @@
  <section xml:id="outcontrol.output-handler-return-values">
   <title>输出处理程序的返回值</title>
   <para>
-   The return value of the output handler is internally coerced into a string
-   following standard PHP type semantics, with two exceptions:
-   <type>array</type>s and <type>bool</type>eans.
+   输出处理程序的返回值在内部转换为字符串，遵循标准 PHP 类型语义，
+   但有两个例外：<type>array</type>s 和 <type>bool</type>eans。
   </para>
   <para>
-   Arrays are converted into the string <literal>"Array"</literal>
-   but the <literal>Array to string conversion</literal> warning
-   is not triggered.
+   <type>Array</type>s 被转换为字符串 <literal>"Array"</literal>，
+   但不会触发 <literal>Array to string conversion</literal> 警告。
   </para>
   <para>
-   If the handler returns &false; the contents of the buffer are returned.
-   If the handler returns &true; an empty string is returned.
+   如果处理程序返回 &false; 则返回缓冲区的内容。
+   如果处理程序返回 &true; 则返回一个空字符串。
   </para>
   <note>
    <simpara>
-    If a handler returns &false; or throws an exception
-    its <constant>PHP_OUTPUT_HANDLER_DISABLED</constant> status flag is set.
+    如果处理程序返回 &false; 或抛出异常，则设置其
+    <constant>PHP_OUTPUT_HANDLER_DISABLED</constant> 状态标志。
    </simpara>
   </note>
  </section>
@@ -454,26 +396,21 @@
  <section>
   <title>输出处理程序中抛出异常</title>
   <para>
-   If an uncaught exception is thrown in an output handler
-   the program terminates and the handler is invoked
-   by the shutdown process after which
-   the <literal>"Uncaught Exception"</literal> error message is flushed.
+   如果在输出处理程序中抛出未捕获的异常，则程序将终止，并在关闭过程中调用处理程序后刷新
+   <literal>"Uncaught Exception"</literal> 错误消息。
   </para>
   <para>
-   If the uncaught exception is thrown in a handler
-   invoked by <function>ob_flush</function>,
-   <function>ob_end_flush</function> or <function>ob_get_flush</function>,
-   the contents of the buffer are flushed before the error message.
+   如果未捕获的异常是在由 <function>ob_flush</function>、<function>ob_end_flush</function>
+   或 <function>ob_get_flush</function> 调用的处理程序中引发的，
+   则在错误消息之前刷新缓冲区的内容。
   </para>
   <para>
-   If an uncaught exception is thrown in an output handler during shutdown,
-   the handler is terminated and neither the contents of the buffer
-   nor the error message is flushed.
+   如果在关闭过程中的输出处理程序中引发未捕获的异常，则程序终止，而不刷新缓冲区或错误消息。
   </para>
   <note>
    <simpara>
-    If a handler throws an exception
-    its <constant>PHP_OUTPUT_HANDLER_DISABLED</constant> status flag is set.
+    如果处理程序抛出异常，则设置其
+    <constant>PHP_OUTPUT_HANDLER_DISABLED</constant> 状态标志。
    </simpara>
   </note>
  </section>
@@ -481,63 +418,50 @@
  <section>
   <title>输出处理程序中引发错误</title>
   <para>
-   If a non-fatal error is raised in an output handler
-   the program continues execution.
+   如果在输出处理程序中引发非致命错误，则程序继续执行。
   </para>
   <para>
-   If the non-fatal error is raised in a handler invoked by
-   <function>ob_flush</function>, <function>ob_end_flush</function>
-   or <function>ob_get_flush</function>,
-   the buffer flushes certain data depending on the return value of the handler.
-   If the handler returns &false; the buffer and the error message are flushed.
-   If the returns anything else the handler return value is flushed
-   but not the error message.
+   如果非致命错误是在由 <function>ob_flush</function>、<function>ob_end_flush</function>
+   或 <function>ob_get_flush</function> 调用的处理程序中引发的，
+   则根据处理程序的返回值刷新特定的数据。
+   如果处理程序返回 &false; 则刷新缓冲区和错误消息。
+   如果返回其他任何值，则刷新处理程序的返回值，但不刷新错误消息。
   </para>
   <note>
    <simpara>
-    If a handler returns &false;
-    its <constant>PHP_OUTPUT_HANDLER_DISABLED</constant> status flag is set.
+    如果处理程序返回 &false;，则设置其
+    <constant>PHP_OUTPUT_HANDLER_DISABLED</constant> 状态标志。
    </simpara>
   </note>
   <para>
-   If a fatal error is raised in an output handler
-   the program terminates and the handler is invoked
-   by the shutdown process after which the error message is flushed.
+   如果输出处理程序中出现致命错误，则程序终止，并在关闭过程中调用处理程序后刷新错误消息。
   </para>
   <para>
-   If the fatal error is raised in a handler
-   invoked by <function>ob_flush</function>,
-   <function>ob_end_flush</function> or <function>ob_get_flush</function>,
-   the contents of the buffers are flushed before the error message.
+   如果致命错误是在由 <function>ob_flush</function>、<function>ob_end_flush</function>
+   或 <function>ob_get_flush</function> 调用的处理程序中引发的，
+   则在错误消息之前刷新缓冲区的内容。
   </para>
   <para>
-   If a fatal error is raised in an output handler during shutdown
-   the program terminates without flushing the buffer or the error message.
+   如果在关闭过程中的输出处理程序中引发致命错误，则程序终止，而不刷新缓冲区或错误消息。
   </para>
  </section>
 
  <section>
   <title>输出处理程序中输出</title>
   <para>
-   In specific circumstances, output produced in the handler is flushed
-   along with the contents of the buffer.
-   This output is not appended to the buffer and is not part of the string
-   returned by <function>ob_get_flush</function>.
+   在特定情况下，处理程序中生成的输出与缓冲区的内容一起刷新。
+   此输出不会附加到缓冲区，也不是由 <function>ob_get_flush</function> 返回的字符串的一部分。
   </para>
   <para>
-   During flush operations (calling <function>ob_flush</function>,
-   <function>ob_end_flush</function>, <function>ob_get_flush</function>
-   and during shutdown)
-   if the return value of a handler is &false;
-   the contents of the buffer are flushed followed by the output.
-   If the handler is not invoked during shutdown
-   the handler throwing an exception or <function>exit</function> being called
-   results in the same behavior.
+   在冲刷操作（调用 <function>ob_flush</function>、<function>ob_end_flush</function>、
+   <function>ob_get_flush</function> 和关闭过程中）期间，
+   如果处理程序的返回值为 &false;，则缓冲区的内容将被刷新，然后输出。
+   如果处理程序在关闭过程中被调用，则抛出异常或调用 <function>exit</function> 会导致相同的行为。
   </para>
   <note>
    <simpara>
-    If a handler returns &false;
-    its <constant>PHP_OUTPUT_HANDLER_DISABLED</constant> status flag is set.
+    如果处理程序返回 &false;，则设置其
+    <constant>PHP_OUTPUT_HANDLER_DISABLED</constant> 状态标志。
    </simpara>
   </note>
  </section>
@@ -545,31 +469,25 @@
  <section>
   <title>输出处理程序状态 flag</title>
   <para>
-   The
-   <link linkend="outcontrol.constants.flags-returned-by-handler">
-    handler status flags
-   </link> of the buffer's <literal>flags</literal> bitmask
-   are set every time to the output handler is invoked
-   and are part of the <literal>flags</literal> returned by
-   <function>ob_get_status</function>.
-   If the handler successfully executes and does not return &false;,
-   <constant>PHP_OUTPUT_HANDLER_STARTED</constant> and
-   <constant>PHP_OUTPUT_HANDLER_PROCESSED</constant> is set.
-   If the handler returns &false; or throws an exception while executing,
-   <constant>PHP_OUTPUT_HANDLER_STARTED</constant> and
-   <constant>PHP_OUTPUT_HANDLER_DISABLED</constant> is set.
+   每次调用输出处理程序时，缓冲区的 <literal>flags</literal> 位掩码的
+   <link linkend="outcontrol.constants.flags-returned-by-handler">处理程序状态标志</link>
+   都会被设置，并且是由 <function>ob_get_status</function> 返回的
+   <literal>flags</literal> 的一部分。
+   如果处理程序成功执行且未返回 &false;，则设置
+   <constant>PHP_OUTPUT_HANDLER_STARTED</constant> 和
+   <constant>PHP_OUTPUT_HANDLER_PROCESSED</constant>。
+   如果处理程序在执行时返回 &false; 或引发异常，则设置
+   <constant>PHP_OUTPUT_HANDLER_STARTED</constant> 和
+   <constant>PHP_OUTPUT_HANDLER_DISABLED</constant>。
   </para>
   <note>
    <simpara>
-    If the <constant>PHP_OUTPUT_HANDLER_DISABLED</constant> of a handler is set,
-    the handler will not be invoked by calling
-    <function>ob_end_clean</function>, <function>ob_end_flush</function>,
-    <function>ob_get_clean</function>, <function>ob_get_flush</function>,
-    <function>ob_clean</function>,
-    <function>ob_flush</function>
-    or during PHP's shutdown process.
-    Prior to PHP 8.4.0, this flag had no effect when calling <function>ob_clean</function>
-    or <function>ob_flush</function>.
+    如果处理程序设置了 <constant>PHP_OUTPUT_HANDLER_DISABLED</constant> 标志，
+    则不会调用 <function>ob_end_clean</function>、<function>ob_end_flush</function>、
+    <function>ob_get_clean</function>、<function>ob_get_flush</function>、
+    <function>ob_clean</function>、<function>ob_flush</function>
+    或 PHP 的关闭过程。
+    在 PHP 8.4.0 之前，调用 <function>ob_clean</function> 或 <function>ob_flush</function> 时，此标志不起作用。
    </simpara>
   </note>
  </section>
