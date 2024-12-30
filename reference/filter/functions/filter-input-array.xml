@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: de9c65c91ff1710d8b2d2ec955caea0162679305 Maintainer: mowangjuanzi Status: ready -->
+<!-- EN-Revision: 53054bf8decc8648cf2e90a493692a161e2371af Maintainer: mowangjuanzi Status: ready -->
 <!-- CREDITS: mowangjuanzi -->
-<refentry xml:id="function.filter-input-array" xmlns="http://docbook.org/ns/docbook">
+<refentry xml:id="function.filter-input-array" xmlns="http://docbook.org/ns/docbook" xmlns:xi="http://www.w3.org/2001/XInclude">
  <refnamediv>
   <refname>filter_input_array</refname>
   <refpurpose>获取一系列外部变量，并且可以通过过滤器处理它们</refpurpose>
  </refnamediv>
+
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
@@ -19,139 +20,49 @@
    这个函数当需要获取很多变量却不想重复调用<function>filter_input</function>时很有用。
   </para>
  </refsect1>
+
  <refsect1 role="parameters">
   &reftitle.parameters;
-  <para>
-   <variablelist>
-    <varlistentry>
-     <term><parameter>type</parameter></term>
-     <listitem>
-      <para>
-       <constant>INPUT_GET</constant>, <constant>INPUT_POST</constant>,
-       <constant>INPUT_COOKIE</constant>, <constant>INPUT_SERVER</constant>, or
-       <constant>INPUT_ENV</constant>之一。
-      </para>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
-     <term><parameter>options</parameter></term>
-     <listitem>
-      <para>
-       一个定义参数的数组。一个有效的键必须是一个包含变量名的<type>string</type>，一个有效的值要么是一个<link
-       linkend="filter.filters">filter type</link>，或者是一个<type>array</type>
-       指明了过滤器、标示和选项。如果值是一个数组，那么它的有效的键可以是 <literal>filter</literal>，
-       用于指明 <link linkend="filter.filters">filter type</link>，<literal>flags</literal> 
-       用于指明任何想要用于过滤器的标示，或者 <literal>options</literal> 用于指明任何想要用于过滤器的选项。
-       参考下面的例子来更好的理解这段说明。
-      </para>
-      <para>
-       这个参数也可以是一个<link
-       linkend="filter.constants">filter constant</link>的整数。那么数组中的所有变量都会被这个过滤器所过滤。
-      </para>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
-     <term><parameter>add_empty</parameter></term>
-     <listitem>
-      <para>
-       在返回值中添加 &null; 作为不存在的键。
-      </para>
-     </listitem>
-    </varlistentry>
-   </variablelist>
-  </para>
+  <variablelist>
+   <varlistentry>
+    <term><parameter>type</parameter></term>
+    <listitem>
+     <simpara>
+      <constant>INPUT_<replaceable>*</replaceable></constant> 常量之一。
+     </simpara>
+     <warning>
+      <simpara>
+       在用户对超全局变量进行任何修改之前，正在过滤的超全局变量内容是 <acronym>SAPI</acronym>
+       提供的“原始”内容。要过滤修改后的超全局变量，请使用 <function>filter_var_array</function>。
+      </simpara>
+     </warning>
+    </listitem>
+   </varlistentry>
+   <xi:include xpointer="xmlns(db=http://docbook.org/ns/docbook) xpointer(id('function.filter-var-array')/db:refsect1[@role='parameters']//db:varlistentry[db:term[db:parameter[text()='options']]]/.)">
+    <xi:fallback/>
+   </xi:include>
+   <xi:include xpointer="xmlns(db=http://docbook.org/ns/docbook) xpointer(id('function.filter-var-array')/db:refsect1[@role='parameters']//db:varlistentry[db:term[db:parameter[text()='add_empty']]]/.)">
+    <xi:fallback/>
+   </xi:include>
+  </variablelist>
  </refsect1>
+
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
-  <para>
-   成功时包含请求变量值的数组。如果通过 <parameter>type</parameter> 指定的输入数组没有值可以填充，当没有指定 
-   <constant>FILTER_NULL_ON_FAILURE</constant> flag 时函数返回 &null;，否则为 &false;。其它失败返回 &false;。
-  </para>
-  <para>
-   如果过滤失败，数组值将为 &false;，如果变量未设置，返回 &null;。如果使用 <constant>FILTER_NULL_ON_FAILURE</constant>
-   flag，变量未设置将返回 &false;，过滤失败将返回 &null;。如果 <parameter>add_empty</parameter> 参数为
-   &false;，不会为复位的变量添加数组元素。
-  </para>
- </refsect1>
-
- <refsect1 role="examples">
-  &reftitle.examples;
-  <para>
-   <example>
-    <title><function>filter_input_array</function> 示例</title>
-    <programlisting role="php">
-<![CDATA[
-<?php
-
-/* data actually came from POST
-$_POST = array(
-    'product_id' => 'libgd<script>',
-    'component'  => array('10'),
-    'version'    => '2.0.33',
-    'testarray'  => array('2', '23', '10', '12'),
-    'testscalar' => '2',
-);
-*/
-
-$args = array(
-    'product_id'   => FILTER_SANITIZE_ENCODED,
-    'component'    => array('filter'    => FILTER_VALIDATE_INT,
-                            'flags'     => FILTER_REQUIRE_ARRAY, 
-                            'options'   => array('min_range' => 1, 'max_range' => 10)
-                           ),
-    'version'      => FILTER_SANITIZE_ENCODED,
-    'doesnotexist' => FILTER_VALIDATE_INT,
-    'testscalar'   => array(
-                            'filter' => FILTER_VALIDATE_INT,
-                            'flags'  => FILTER_REQUIRE_SCALAR,
-                           ),
-    'testarray'    => array(
-                            'filter' => FILTER_VALIDATE_INT,
-                            'flags'  => FILTER_REQUIRE_ARRAY,
-                           )
-
-);
-
-$myinputs = filter_input_array(INPUT_POST, $args);
-
-var_dump($myinputs);
-echo "\n";
-?>
-]]>
-    </programlisting>
-    &example.outputs;
-    <screen>
-<![CDATA[
-array(6) {
-  ["product_id"]=>
-  string(17) "libgd%3Cscript%3E"
-  ["component"]=>
-  array(1) {
-    [0]=>
-    int(10)
-  }
-  ["version"]=>
-  string(6) "2.0.33"
-  ["doesnotexist"]=>
-  NULL
-  ["testscalar"]=>
-  int(2)
-  ["testarray"]=>
-  array(4) {
-    [0]=>
-    int(2)
-    [1]=>
-    int(23)
-    [2]=>
-    int(10)
-    [3]=>
-    int(12)
-  }
-}
-]]>
-    </screen>
-   </example>
-  </para>
+  <simpara>
+   成功时，返回 &array;，包含所请求变量的值。
+  </simpara>
+  <simpara>
+   失败时返回 &false;。有一个失败的例外情况，就是 <parameter>type</parameter> 指定的输入数组没有填充，并且使用了
+   <constant>FILTER_NULL_ON_FAILURE</constant> flag 时，返回 &null;。
+  </simpara>
+  <simpara>
+   如果 <parameter>add_empty</parameter> 为 &true;，则输入数组中缺失的条目会填充到返回数组中，并且缺失的条目将设置为
+   &null;。
+  </simpara>
+  <simpara>
+   如果过滤失败，则返回 &array; 中的条目将为 &false;，当使用了 <constant>FILTER_NULL_ON_FAILURE</constant> flag 时为 &null;。
+  </simpara>
  </refsect1>
 
  <refsect1 role="notes">
@@ -165,13 +76,19 @@ array(6) {
 
  <refsect1 role="seealso">
   &reftitle.seealso;
-  <para>
-   <simplelist>
-    <member><function>filter_input</function></member>
-    <member><function>filter_var_array</function></member>
-    <member><xref linkend="filter.filters"/></member>
-   </simplelist>
-  </para>
+  <simplelist>
+   <member><function>filter_input</function></member>
+   <member><function>filter_var</function></member>
+   <member><function>filter_var_array</function></member>
+   <member>
+    验证过滤器
+    <constant>FILTER_VALIDATE_<replaceable>*</replaceable></constant>
+   </member>
+   <member>
+    清理过滤器
+    <constant>FILTER_SANITIZE_<replaceable>*</replaceable></constant>
+   </member>
+  </simplelist>
  </refsect1>
 
 </refentry>
