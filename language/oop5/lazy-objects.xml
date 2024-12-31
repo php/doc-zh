@@ -135,15 +135,14 @@ $post = $reflector->newLazyGhost(function ($post) {
     $post->__construct($data['id'], $data['title'], $data['content']);
 });
 
-// Without this line, the following call to ReflectionProperty::setValue() would
-// trigger initialization.
+// 如果没有这行，下面调用 ReflectionProperty::setValue() 时将触发初始化
 $reflector->getProperty('id')->skipLazyInitialization($post);
 $reflector->getProperty('id')->setValue($post, 123);
 
-// Alternatively, one can use this directly:
+// 或者直接使用它：
 $reflector->getProperty('id')->setRawValueWithoutLazyInitialization($post, 123);
 
-// The id property can be accessed without triggering initialization
+// 无需触发初始化即可访问 id 属性
 var_dump($post->id);
 ?>
 ]]>
@@ -160,21 +159,11 @@ var_dump($post->id);
   <title>关于延迟对象策略</title>
 
   <simpara>
-   <emphasis>Lazy ghosts</emphasis> are objects that initialize in-place and,
-   once initialized, are indistinguishable from an object that was never lazy.
-   This strategy is suitable when we control both the instantiation and
-   initialization of the object, making it unsuitable if either of these is
-   managed by another party.
+   <emphasis>延迟幽灵</emphasis>，就地初始化的对象，并且一旦初始化，就跟从未延迟化的对象没有区别。当需要控制对象的实例化和初始化时，此策略是合适的，如果是其中任何一个由另一方管理，则不适合。
   </simpara>
 
   <simpara>
-   <emphasis>Lazy proxies</emphasis>, once initialized, act as proxies to
-   a real instance: any operation on an initialized lazy proxy is forwarded
-   to the real instance. The creation of the real instance can be delegated
-   to another party, making this strategy useful in cases where lazy ghosts
-   are unsuitable. Although lazy proxies are nearly as transparent as lazy
-   ghosts, caution is needed when their identity is used, as the proxy and
-   its real instance have distinct identities.
+   <emphasis>延迟代理</emphasis>一旦初始化，便充当真实实例的代理：对已初始化延迟代理的任何操作都将转发给真实实例。真实实例的创建可以委托给另一方，这使得此策略在延迟幽灵不适合的情况下非常有用。尽管延迟代理几乎与延迟幽灵一样透明，但在使用其身份时需要谨慎，因为代理和真实实例具有不同的身份。
   </simpara>
  </sect2>
 
@@ -182,36 +171,29 @@ var_dump($post->id);
   <title>延迟对象的生命周期</title>
 
   <simpara>
-   Objects can be made lazy at instantiation time using
-   <methodname>ReflectionClass::newLazyGhost</methodname> or
-   <methodname>ReflectionClass::newLazyProxy</methodname>, or after
-   instantiation by using
-   <methodname>ReflectionClass::resetAsLazyGhost</methodname> or
-   <methodname>ReflectionClass::resetAsLazyProxy</methodname>. Following this, a
-   lazy object can become initialized through one of the following operations:
+   对象可以使用 <methodname>ReflectionClass::newLazyGhost</methodname> 或
+   <methodname>ReflectionClass::newLazyProxy</methodname> 在实例化时设置为延迟，或者使用
+   <methodname>ReflectionClass::resetAsLazyGhost</methodname> 或
+   <methodname>ReflectionClass::resetAsLazyProxy</methodname> 在实例化后设置为延迟。之后可以通过下列操作之一初始化延迟对象：
   </simpara>
 
   <simplelist>
    <member>
-    Interacting with the object in a way that triggers automatic initialization. See
-    <link linkend="language.oop5.lazy-objects.initialization-triggers">Initialization
-    triggers</link>.
+    以触发自动初始化的方式与对象进行交互。参阅<link linkend="language.oop5.lazy-objects.initialization-triggers">初始化触发器</link>。
    </member>
    <member>
-    Marking all its properties as non-lazy using
-    <methodname>ReflectionProperty::skipLazyInitialization</methodname> or
-    <methodname>ReflectionProperty::setRawValueWithoutLazyInitialization</methodname>.
+    使用 <methodname>ReflectionProperty::skipLazyInitialization</methodname> 或
+    <methodname>ReflectionProperty::setRawValueWithoutLazyInitialization</methodname>
+    将其所有属性标注为非延迟。
    </member>
    <member>
-    Calling explicitly <methodname>ReflectionClass::initializeLazyObject</methodname>
-    or <methodname>ReflectionClass::markLazyObjectAsInitialized</methodname>.
+    明确调用 <methodname>ReflectionClass::initializeLazyObject</methodname>
+    或 <methodname>ReflectionClass::markLazyObjectAsInitialized</methodname>。
    </member>
   </simplelist>
 
   <simpara>
-   As lazy objects become initialized when all their properties are marked
-   non-lazy, the above methods will not mark an object as lazy if no properties
-   could be marked as lazy.
+   由于延迟对象在所有属性均标记为非惰性时才会初始化，因此如果没有属性可以标记为延迟，则上述方法不会将对象标记为延迟。
   </simpara>
  </sect2>
 
