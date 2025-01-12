@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: f80105b4fc1196bd8d5fecb98d686b580b1ff65d Maintainer: HonestQiao Status: ready -->
+<!-- EN-Revision: 42bb18bcfef4f715008d00bbdc7ea5203f8ec30a Maintainer: HonestQiao Status: ready -->
 <!-- CREDITS: mowangjuanzi, Luffy -->
 <refentry xml:id="function.unserialize" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
@@ -51,11 +51,13 @@
       </para>
       <para>
        <note>
-        <title><link linkend="ini.unserialize-callback-func">unserialize_callback_func</link> 指令</title>
-        <para>
+        <title>
          <link linkend="ini.unserialize-callback-func">unserialize_callback_func</link>
-         指令中指定的回调函数在反序列化未定义的类时会调用。如果没有指定回调函数，对象将被实例化为
-         <classname>__PHP_Incomplete_Class</classname>。
+          指令
+        </title>
+        <para>
+         在反序列化未定义类时会调用 <link linkend="ini.unserialize-callback-func">unserialize_callback_func</link>
+         指令中指定的回调。如果没有指定回调，将对象实例化为 <classname>__PHP_Incomplete_Class</classname>。
         </para>
        </note>
       </para>
@@ -80,7 +82,7 @@
         <tbody>
          <row>
           <entry><literal>allowed_classes</literal></entry>
-          <entry><type>mixed</type></entry>
+          <entry><type>array|bool</type></entry>
           <entry>
            <simpara>
             应该接受的类名数组，&false; 表示不接受任何类，或者 &true; 表示接受所有类。如果定义此选项且
@@ -124,9 +126,14 @@
 
  <refsect1 role="errors">
   &reftitle.errors;
-  <para>
+  <simpara>
    对象可能会在反序列化处理程序中抛出 <classname>Throwable</classname>。
-  </para>
+  </simpara>
+  <simpara>
+   自 PHP 8.4.0 起，如果 <parameter>options</parameter> 的 <literal>allowed_classes</literal>
+   元素不是类名 <type>array</type>，则 <function>unserialize</function> 会抛出 <exceptionname>TypeError</exceptionname>
+   和 <exceptionname>ValueError</exceptionname>。
+  </simpara>
  </refsect1>
 
  <refsect1 role="changelog">
@@ -141,6 +148,20 @@
       </row>
      </thead>
      <tbody>
+      <row>
+       <entry>8.4.0</entry>
+       <entry>
+        如果 <parameter>options</parameter> 的 <literal>allowed_classes</literal>
+        元素不是类名 <type>array</type>，现在会抛出 <exceptionname>TypeError</exceptionname>
+        和 <exceptionname>ValueError</exceptionname>。
+       </entry>
+      </row>
+      <row>
+       <entry>8.3.0</entry>
+       <entry>
+        当输入字符串有未使用的数据时，现在会发出 <constant>E_WARNING</constant>。
+       </entry>
+      </row>
       <row>
        <entry>8.3.0</entry>
        <entry>
@@ -178,7 +199,7 @@
   &reftitle.examples;
   <para>
    <example>
-    <title><function>unserialize</function> 例子</title>
+    <title><function>unserialize</function> 示例</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -206,7 +227,7 @@ if (!odbc_execute($stmt, $sqldata) || !odbc_fetch_into($stmt, $tmp)) {
   </para>
   <para>
    <example>
-    <title>unserialize_callback_func 例子</title>
+    <title>unserialize_callback_func 示例</title>
     <programlisting role="php">
 <![CDATA[
 <?php

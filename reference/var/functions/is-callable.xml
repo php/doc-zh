@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 83a17a7324c2597bd6385148abf19f76127229f5 Maintainer: HonestQiao Status: ready -->
+<!-- EN-Revision: 32c55286c8739fd20de9c8624473b2f3268de68e Maintainer: HonestQiao Status: ready -->
 <!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="function.is-callable" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>is_callable</refname>
   <refpurpose>
-   验证值是否可以在当前范围内作为函数调用。
+   验证值是否可以在当前范围内作为函数调用
   </refpurpose>
  </refnamediv>
 
@@ -19,7 +19,8 @@
    <methodparam choice="opt"><type>string</type><parameter role="reference">callable_name</parameter><initializer>&null;</initializer></methodparam>
   </methodsynopsis>
   <para>
-   验证值是 <type>callable</type>。
+   验证 <parameter>value</parameter> 是 <type>callable</type>，或者其可以使用
+   <function>call_user_func</function> 函数调用。
   </para>
  </refsect1>
 
@@ -31,7 +32,7 @@
      <term><parameter>value</parameter></term>
      <listitem>
       <para>
-       要验证的值
+       要验证的值。
       </para>
      </listitem>
     </varlistentry>
@@ -40,8 +41,9 @@
      <listitem>
       <para>
        如果设置为 &true;，则函数仅验证 <parameter>value</parameter>
-       可能是函数或方法。它仅拒绝不是字符串的简单变量，或者不能用作回调的有效结构的数组。只有
-       2 个条目有效，一个是对象或者字符串，其次是字符串。
+       是函数还是方法。它将拒绝任何不是<link linkend="object.invoke">可调用</link>对象、<classname>Closure</classname>、&string;
+       或者不能用作回调的无效结构的数组的值。有效的可调用数组只有
+       2 个条目，第一个是对象或者字符串，第二个是字符串。
       </para>
      </listitem>
     </varlistentry>
@@ -49,8 +51,8 @@
      <term><parameter>callable_name</parameter></term>
      <listitem>
       <para>
-       接受“可调用的名称”。下面的例子是“someClass::someMethod”。注意，尽管 
-       someClass::SomeMethod() 暗示是可调用的静态方法，但事实并非如此。
+       接受 “callable 名称”，例如 <literal>"SomeClass::someMethod"</literal>。注意，尽管 
+       <literal>SomeClass::someMethod()</literal> 暗示是可调用静态方法，但事实并非如此。
       </para>
      </listitem>
     </varlistentry>
@@ -69,54 +71,66 @@
   &reftitle.examples;
   <para>
    <example>
-    <title><function>is_callable</function> 例子</title>
+    <title>检查字符串是否可以作为函数调用</title>
     <programlisting role="php">
 <![CDATA[
 <?php
-//  如何检测变量以查看是否可以作为函数调用。
 
-//
-//  包含函数的简单变量
-//
-
-function someFunction() 
-{
-}
+function someFunction() {}
 
 $functionVariable = 'someFunction';
 
-var_dump(is_callable($functionVariable, false, $callable_name));  // bool(true)
+var_dump(is_callable($functionVariable, false, $callable_name));
 
-echo $callable_name, "\n";  // someFunction
-
-//
-//  包含方法的数组
-//
-
-class someClass {
-
-  function someMethod() 
-  {
-  }
-
-}
-
-$anObject = new someClass();
-
-$methodVariable = array($anObject, 'someMethod');
-
-var_dump(is_callable($methodVariable, true, $callable_name));  //  bool(true)
-
-echo $callable_name, "\n";  //  someClass::someMethod
+var_dump($callable_name);
 
 ?>
 ]]>
     </programlisting>
-   </example>   
+    &example.outputs;
+    <screen>
+<![CDATA[
+bool(true)
+string(12) "someFunction"
+]]>
+    </screen>
+   </example>
    <example>
-    <title><function>is_callable</function> 和构造函数</title>
+    <title>检查数组是否可以作为函数调用</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+
+class SomeClass
+{
+    public function someMethod() {}
+}
+
+$anObject = new SomeClass();
+
+$methodVariable = [$anObject, 'someMethod'];
+
+var_dump(is_callable($methodVariable, true, $callable_name));
+
+var_dump($callable_name);
+
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+bool(true)
+string(21) "SomeClass::someMethod"
+]]>
+    </screen>
+   </example>
+   <example>
+    <title><function>is_callable</function> 和构造方法</title>
     <simpara>
-     <function>is_callable</function> 报告构造函数不可调用。
+     尽管构造方法是创建对象时调用的方法，但它们不是静态方法，<function>is_callable</function>
+     将对它们返回 &false;。无法使用 <function>is_callable</function> 检查类是否可以从当前作用域实例化。
+
     </simpara>
     <programlisting role="php">
 <![CDATA[
@@ -125,13 +139,19 @@ echo $callable_name, "\n";  //  someClass::someMethod
 class Foo
 {
     public function __construct() {}
+
     public function foo() {}
 }
 
 var_dump(
-    is_callable(array('Foo', '__construct')),
-    is_callable(array('Foo', 'foo'))
+    is_callable(['Foo', '__construct']),
+    is_callable(['Foo', 'foo'])
 );
+
+$foo = new Foo();
+var_dump(is_callable([$foo, '__construct']));
+
+?>
 ]]>
     </programlisting>
     &example.outputs;
@@ -139,6 +159,7 @@ var_dump(
 <![CDATA[
 bool(false)
 bool(false)
+bool(true)
 ]]>
     </screen>
    </example>
@@ -168,6 +189,7 @@ bool(false)
   &reftitle.seealso;
   <para>
    <simplelist>
+    <member><function>call_user_func</function></member>
     <member><function>function_exists</function></member>
     <member><function>method_exists</function></member>
    </simplelist>
