@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 422bb032237525aaf50e6a43f33362a2c610a1d7 Maintainer: daijie Status: ready -->
+<!-- EN-Revision: 89990d6588947665d4e9c029ee83696f1a9d3d11 Maintainer: daijie Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="function.strcspn" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>strcspn</refname>
@@ -92,9 +93,7 @@
   </para>
   <note>
    <para>
-    When a <parameter>offset</parameter> parameter is set, the returned length
-    is counted starting from this position, not from the beginning of
-    <parameter>string</parameter>.
+    当设置了 <parameter>offset</parameter> 参数时，返回的长度是从该位置开始计算，而不是从 <parameter>string</parameter> 的开头计算。
    </para>
   </note>
  </refsect1>
@@ -110,6 +109,15 @@
      </row>
     </thead>
     <tbody>
+     <row>
+      <entry>8.4.0</entry>
+      <entry>
+       <simpara>
+        在 PHP 8.4.0 之前，当 <parameter>characters</parameter> 为空字符串时，搜索会错误地停止在
+        <parameter>string</parameter> 的第一个 null 字节处。
+       </simpara>
+      </entry>
+     </row>
      <row>
       <entry>8.0.0</entry>
       <entry>
@@ -128,29 +136,26 @@
    <programlisting role="php">
 <![CDATA[
 <?php
-$a = strcspn('abcd',  'apple');
-$b = strcspn('abcd',  'banana');
-$c = strcspn('hello', 'l');
-$d = strcspn('hello', 'world');
-$e = strcspn('abcdhelloabcd', 'abcd', -9);
-$f = strcspn('abcdhelloabcd', 'abcd', -9, -5);
+$a = strcspn('banana', 'a');
+$b = strcspn('banana', 'abcd');
+$c = strcspn('banana', 'z');
+$d = strcspn('abcdhelloabcd', 'a', -9);
+$e = strcspn('abcdhelloabcd', 'a', -9, -5);
 
 var_dump($a);
 var_dump($b);
 var_dump($c);
 var_dump($d);
 var_dump($e);
-var_dump($f);
 ?>
 ]]>
    </programlisting>
    &example.outputs;
    <screen>
 <![CDATA[
+int(1)
 int(0)
-int(0)
-int(2)
-int(2)
+int(6)
 int(5)
 int(4)
 ]]>

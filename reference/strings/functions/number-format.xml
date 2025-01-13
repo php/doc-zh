@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: de35b538453a7817a0cc839cddda0be46eed8764 Maintainer: daijie Status: ready -->
+<!-- EN-Revision: ae148826a6830492a51e47f21e1ad4f80373f2a6 Maintainer: daijie Status: ready -->
 <!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="function.number-format" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
@@ -38,7 +38,9 @@
      <term><parameter>decimals</parameter></term>
      <listitem>
       <para>
-       设置小数位数。如果为 <literal>0</literal>，则从返回值中忽略 <parameter>decimal_separator</parameter>。
+       设置小数位数。如果为 <literal>0</literal>，则从返回值中忽略 <parameter>decimal_separator</parameter>。自
+       PHP 8.3.0 起，当值为负数时，<parameter>num</parameter> 将四舍五入为小数点前的有效数字
+       <parameter>decimals</parameter>。在 PHP 8.3.0 之前，负值将被忽略并与 <literal>0</literal> 一样处理。
       </para>
      </listitem>
     </varlistentry>
@@ -81,6 +83,12 @@
       </row>
      </thead>
      <tbody>
+      <row>
+       <entry>8.3.0</entry>
+       <entry>
+        新增对 <parameter>decimals</parameter> 负值的处理。
+       </entry>
+      </row>
       <row>
        <entry>8.0.0</entry>
        <entry>
@@ -133,6 +141,30 @@ $english_format_number = number_format($number, 2, '.', '');
     </programlisting>
    </example>
   </para>
+  <example>
+   <title><parameter>decimals</parameter> 为负值</title>
+   <simpara>
+    自 PHP 8.3.0 起，使用 <parameter>decimals</parameter> 的负值来对小数点前的有效数字的位数进行四舍五入。
+   </simpara>
+   <programlisting role="php">
+<![CDATA[
+<?php
+$number = "1234.5678";
+var_dump(number_format($number, -1));
+var_dump(number_format($number, -2));
+var_dump(number_format($number, -3));
+?>
+]]>
+   </programlisting>
+   &example.outputs;
+   <screen>
+<![CDATA[
+string(5) "1,230"
+string(5) "1,200"
+string(5) "1,000"
+]]>
+   </screen>
+  </example>
  </refsect1>
  
  <refsect1 role="seealso">
