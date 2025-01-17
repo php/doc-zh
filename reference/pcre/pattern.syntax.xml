@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 587830d5d261802148a160a59059dd8d76385fd2 Maintainer: daijie Status: ready -->
+<!-- EN-Revision: 0e4868392a619db8f148cb4c56cd57e92f6a3d2d Maintainer: daijie Status: ready -->
 <!-- CREDITS: mowangjuanzi -->
 <!-- splitted from ./en/functions/pcre.xml, last change in rev 1.2 -->
 <chapter xml:id="reference.pcre.pattern.syntax" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -10,10 +10,8 @@
  <section xml:id="regexp.introduction">
   <title>简介</title>
   <para>
-  下面描述的是 PCRE 支持的正则表达式语法和语义。正则表达式在 perl 的文档
-  和另外一些书籍中也有讨论, 其中一些会有丰富的示例。O'Reilly(ISBN 1-56592-257-3)
-   出版的 Jeffrey Friedl 的《精通正则表达式》一书非常详细的讨论了这些内容。
-  这里的描述仅作为一个参考手册。
+  本节描述的是 PCRE 支持的正则表达式语法和语义。正则表达式在 perl 的文档和另外一些书籍中也有讨论, 其中一些会有丰富的示例。O'Reilly（ISBN
+  1-56592-257-3）出版的 Jeffrey Friedl 的《精通正则表达式》一书非常详细的讨论了这些内容。这里的描述仅作为一个参考手册。
   </para>
   <para>
   正则表达式是一个从左到右匹配目标字符串的模式。大多数字符自身就代表一个匹配
@@ -1392,15 +1390,22 @@
    <literal>\d{8}</literal>
 
   则只能匹配 8 个数字。
-  左花括号出现在不允许使用量词的位置或者与量词语法不匹配时，
-  被认为是一个普通字符，对它自身进行原文匹配。 比如，{,6}就不是一个量词，
-  会按照原文匹配四个字符 ”{,6}”。
+
+  </para>
+  <simpara>
+   PHP 8.4.0 之前，如果左花括号出现在不允许使用量词的位置，或者与量词语法不匹配时，则将其视为普通字符。例如
+   <literal>{,6}</literal> 不是量词，而是四个字符的文字字符串。
+   
+   自 PHP 8.4.0 起，PCRE 扩展捆绑 PCRE2 10.44 版本，允许使用诸如 <literal>\d{,8}</literal>
+   之类的模式，并且将其解释为 <literal>\d{0,8}</literal>。
+   
+   此外，自 PHP 8.4.0 起，量词周围允许使用空格字符，例如 <literal>\d{0 , 8}</literal> 和 <literal>\d{ 0 , 8 }</literal>。
+  </simpara>
+  <para>
+  允许使用量词 {0}，会导致表达式的行为就像前一项和量词不存在一样。
   </para>
   <para>
-  量词 {0} 是被授权的，它会导致的行为是认为前面的项和量词不存在。
-  </para>
-  <para>
-  为了方便(以及历史的兼容性)，最常用的三个量词都有单字符缩写。
+   为了方便(和历史兼容性)，三个最常用的量词都有单字符缩写。
    <table>
     <title>单字符量词</title>
     <tgroup cols="2">
@@ -1848,7 +1853,7 @@
   <informalexample>
    <programlisting>
 <![CDATA[
-( \( )?    [^()]+    (?(1) \) )
+( \( )? [^()]+ (?(1) \) )
 ]]>
    </programlisting>
   </informalexample>
@@ -1875,7 +1880,7 @@
    <programlisting>
 <![CDATA[
 (?(?=[^a-z]*[a-z])
-\d{2}-[a-z]{3}-\d{2}  |  \d{2}-\d{2}-\d{2} )
+\d{2}-[a-z]{3}-\d{2} | \d{2}-\d{2}-\d{2} )
 ]]>
    </programlisting>
   </informalexample>
