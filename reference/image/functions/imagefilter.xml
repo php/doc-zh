@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: ccd3e68e1e8a89a099a32207dd31ed26b70f43cd Maintainer: HonestQiao Status: ready -->
+<!-- EN-Revision: 9960a09a5705102bf4dd0ce63e03d9ec716d0015 Maintainer: HonestQiao Status: ready -->
 <!-- CREDITS: mowangjuanzi, Luffy -->
 <refentry xml:id="function.imagefilter" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
@@ -38,9 +38,9 @@
         </listitem>
         <listitem>
          <simpara>
-          <constant>IMG_FILTER_GRAYSCALE</constant>：将图像转换为灰度，
-          通过使用与 REC.601 亮度 (Y') 计算相同的系数来更改红色、绿色和蓝色分量的加权和。
-          保留 alpha 分量。对于调色板图像，由于调色板限制，结果可能有所不同。
+          <constant>IMG_FILTER_GRAYSCALE</constant>：将图像转换为灰度，通过使用与 REC.601
+          亮度 (Y') 计算相同的系数来更改红色、绿色和蓝色分量的加权和。保留 alpha
+          分量。对于调色板图像，由于调色板限制，结果可能有所不同。
          </simpara>
         </listitem>
         <listitem>
@@ -221,8 +221,7 @@
  <refsect1 role="errors">
   &reftitle.errors;
   <simpara>
-   抛出 <classname>ValueError</classname> 异常，
-   如果 <parameter>sub</parameter> 或 <parameter>plus</parameter>
+   抛出 <classname>ValueError</classname> 异常，如果 <parameter>sub</parameter> 或 <parameter>plus</parameter>
    会导致 <constant>IMG_FILTER_SCATTER</constant> <parameter>filter</parameter> 的溢出/下溢。
   </simpara>
  </refsect1>
@@ -242,8 +241,7 @@
       <row>
        <entry>8.4.0</entry>
        <entry>
-        现在抛出 <classname>ValueError</classname> 异常，
-        如果 <parameter>sub</parameter> 或 <parameter>plus</parameter>
+        现在抛出 <classname>ValueError</classname> 异常，如果 <parameter>sub</parameter> 或 <parameter>plus</parameter>
         会导致 <constant>IMG_FILTER_SCATTER</constant> <parameter>filter</parameter> 的溢出/下溢。
        </entry>
       </row>
@@ -279,8 +277,6 @@ else
 {
     echo 'Conversion to grayscale failed.';
 }
-
-imagedestroy($im);
 ?>
 ]]>
     </programlisting>
@@ -299,7 +295,6 @@ if($im && imagefilter($im, IMG_FILTER_BRIGHTNESS, 20))
     echo 'Image brightness changed.';
 
     imagepng($im, 'sean.png');
-    imagedestroy($im);
 }
 else
 {
@@ -318,13 +313,12 @@ else
 <?php
 $im = imagecreatefrompng('philip.png');
 
-/* R, G, B, so 0, 255, 0 is green */
+/* R、G、B, 所以 0, 255, 0 是绿色 */
 if($im && imagefilter($im, IMG_FILTER_COLORIZE, 0, 255, 0))
 {
     echo 'Image successfully shaded green.';
 
     imagepng($im, 'philip.png');
-    imagedestroy($im);
 }
 else
 {
@@ -341,8 +335,8 @@ else
     <programlisting role="php">
 <![CDATA[
 <?php
-// Define our negate function so its portable for 
-// php versions without imagefilter()
+// 定义否定函数，以便可以移植到没有
+// imagefilter() 的 php 版本
 function negate($im)
 {
     if(function_exists('imagefilter'))
@@ -372,7 +366,6 @@ if($im && negate($im))
     echo 'Image successfully converted to negative colors.';
 
     imagejpeg($im, 'kalle.jpg', 100);
-    imagedestroy($im);
 }
 else
 {
@@ -389,30 +382,25 @@ else
     <programlisting role="php">
 <![CDATA[
 <?php
-// Load the PHP logo, we need to create two instances 
-// to show the differences
+// 加载 PHP log，需要创建两个实例
+// 来显示差异
 $logo1 = imagecreatefrompng('./php.png');
 $logo2 = imagecreatefrompng('./php.png');
 
-// Create the image instance we want to show the 
-// differences on
+// 创建想要显示差异的图像实例
 $output = imagecreatetruecolor(imagesx($logo1) * 2, imagesy($logo1));
 
-// Apply pixelation to each instance, with a block 
-// size of 3
+// 对每个实例应用像素化，块大小为 3
 imagefilter($logo1, IMG_FILTER_PIXELATE, 3);
 imagefilter($logo2, IMG_FILTER_PIXELATE, 3, true);
 
-// Merge the differences onto the output image
+// 合并差异到输出图像上
 imagecopy($output, $logo1, 0, 0, 0, 0, imagesx($logo1) - 1, imagesy($logo1) - 1);
 imagecopy($output, $logo2, imagesx($logo2), 0, 0, 0, imagesx($logo2) - 1, imagesy($logo2) - 1);
-imagedestroy($logo1);
-imagedestroy($logo2);
 
-// Output the differences
+// 输出差异
 header('Content-Type: image/png');
 imagepng($output);
-imagedestroy($output);
 ?>
 ]]>
     </programlisting>
@@ -431,22 +419,21 @@ imagedestroy($output);
     <programlisting role="php">
 <![CDATA[
 <?php
-// Load the image
+// 加载图像
 $logo = imagecreatefrompng('./php.png');
 
-// Apply a very soft scatter effect to the image
+// 对图像应用非常柔和的散射效果
 imagefilter($logo, IMG_FILTER_SCATTER, 3, 5);
 
-// Output the image with the scatter effect
+// 输出带有散射效果的图像
 header('Content-Type: image/png');
 imagepng($logo);
-imagedestroy($logo);
 ?>
 ]]>
     </programlisting>
     &example.outputs.similar;
     <mediaobject>
-     <alt>Output of example : imagefilter() scatter</alt>
+     <alt>输出示例：imagefilter() 散射</alt>
      <imageobject>
       <imagedata fileref="en/reference/image/figures/scatter.png"/>
      </imageobject>
