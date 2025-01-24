@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 5bc68add3da3cd18c40f851e944b15095d3a26aa Maintainer: duanxiaoqiang Status: ready -->
+<!-- EN-Revision: f0d11929d41082d71dcf8338a18e04412c656fa0 Maintainer: duanxiaoqiang Status: ready -->
 <!-- CREDITS: mowangjuanzi, Luffy -->
 <refentry xml:id="function.openssl-csr-new" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
@@ -11,9 +11,9 @@
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <type class="union"><type>OpenSSLCertificateSigningRequest</type><type>false</type></type><methodname>openssl_csr_new</methodname>
+   <type class="union"><type>OpenSSLCertificateSigningRequest</type><type>bool</type></type><methodname>openssl_csr_new</methodname>
    <methodparam><type>array</type><parameter>distinguished_names</parameter></methodparam>
-   <methodparam><modifier role="attribute">#[\SensitiveParameter]</modifier><type>OpenSSLAsymmetricKey</type><parameter role="reference">private_key</parameter></methodparam>
+   <methodparam><modifier role="attribute">#[\SensitiveParameter]</modifier><type class="union"><type>OpenSSLAsymmetricKey</type><type>null</type></type><parameter role="reference">private_key</parameter></methodparam>
    <methodparam choice="opt"><type class="union"><type>array</type><type>null</type></type><parameter>options</parameter><initializer>&null;</initializer></methodparam>
    <methodparam choice="opt"><type class="union"><type>array</type><type>null</type></type><parameter>extra_attributes</parameter><initializer>&null;</initializer></methodparam>
   </methodsynopsis>
@@ -31,7 +31,8 @@
      <term><parameter>distinguished_names</parameter></term>
      <listitem>
       <para>
-       在证书中使用的专有名称或主题字段。
+       在证书中要包含的专有名称或主题字段。<parameter>distinguished_names</parameter> 是关联数组，其中 key 表示
+       专有名称的属性名称，value 可以是字符串（对于单个值）或数组（如果需要设置多个值）。
       </para>
      </listitem>
     </varlistentry>
@@ -39,7 +40,9 @@
      <term><parameter>private_key</parameter></term>
      <listitem>
       <para>
-       <parameter>private_key</parameter> 应该被设置为由 <function>openssl_pkey_new</function> 函数预先生成(或者以其他方式从 openssl_pkey 函数集中获得)的私钥。该密钥的相应公共部分将用于签署 <acronym>CSR</acronym>。
+       <parameter>private_key</parameter> 应设置为由 <function>openssl_pkey_new</function> 预先生成的私钥（或从其他 openssl_pkey
+       系列函数获取），或 &null; 变量。如果值为 &null; 变量，则根据提供的 <parameter>options</parameter>
+       生成新的私钥并将其分配给提供的变量。密钥的相应公共部分将用于签署 <acronym>CSR</acronym>。
       </para>
      </listitem>
     </varlistentry>
@@ -47,8 +50,10 @@
      <term><parameter>options</parameter></term>
      <listitem>
       <para>
-       默认通过系统里的 <literal>openssl.conf</literal> 配置来初始化请求；可以通过设置 <parameter>options</parameter> 的 <literal>config_section_section</literal> 项来指定配置文件部分。
-       还可以通过将 config 键的值设置为想要使用的文件路径来指定另一个 openssl 配置文件。如果在 <parameter>options</parameter> 中存在下列键，它们的行为就像在 <literal>openssl.conf</literal> 中一样。如下表所示：
+       默认系统 <literal>openssl.conf</literal> 中的信息用于初始化请求；可以通过在 <parameter>options</parameter> 中设置
+       <literal>config_section_section</literal> key 来指定配置文件部分。还可以通过将 key <literal>config</literal>
+       的值设置为要使用的文件路径，来指定备用 OpenSSL 配置文件。如果选项中存在以下 key，它们的行为就像在
+       <literal>openssl.conf</literal> 中一样，如下表所示。
        <table>
         <title>配置覆盖</title>
         <tgroup cols="3">
@@ -137,8 +142,8 @@
      <term><parameter>extra_attributes</parameter></term>
      <listitem>
       <para>
-       <parameter>extra_attributes</parameter> 用于为 <acronym>CSR</acronym> 指定额外的配置选项。<parameter>distinguished_names</parameter> 和
-       <parameter>extra_attributes</parameter> 都是关联数组它们的键被转换成 OID，并应用到请求的相关部分。
+       <parameter>extra_attributes</parameter> 用于指定 <acronym>CSR</acronym> 的附加属性。是关联数组，其中
+       key 转换为 OID 并应用为 <acronym>CSR</acronym> 属性。
       </para>
      </listitem>
     </varlistentry>
@@ -149,7 +154,7 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   成功，返回 <acronym>CSR</acronym>&return.falseforfailure;。
+   成功时返回 <acronym>CSR</acronym>，如果 <acronym>CSR</acronym> 创建成功但签名失败则返回 &true;&return.falseforfailure;。
   </para>
  </refsect1>
 
@@ -164,6 +169,18 @@
      </row>
     </thead>
     <tbody>
+     <row>
+      <entry>8.4.0</entry>
+      <entry>
+       <parameter>distinguished_names</parameter> 关联数组现在支持 value 为数组，允许为单个属性指定多个值。
+      </entry>
+     </row>
+     <row>
+      <entry>8.4.0</entry>
+      <entry>
+       <parameter>extra_attributes</parameter> 参数现在可以正确设置 CSR 属性，而不是像以前错误地修改主题的专用名称。
+      </entry>
+     </row>
      <row>
       <entry>8.0.0</entry>
       <entry>

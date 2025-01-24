@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 2e08eac2b22e4cfa97635d5d38b0984b5016a2f3 Maintainer: duanxiaoqiang Status: ready -->
-<!-- CREDITS: Luffy -->
+<!-- EN-Revision: 3b06ef4bb06db8cf2cd8ea8470287f7f43ef9e71 Maintainer: duanxiaoqiang Status: ready -->
+<!-- CREDITS: Luffy, mowangjuanzi -->
 <refentry xml:id="function.openssl-pkey-new" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>openssl_pkey_new</refname>
-  <refpurpose>生成一个新的私钥</refpurpose>
+  <refpurpose>生成新的私钥</refpurpose>
  </refnamediv>
 
  <refsect1 role="description">
@@ -28,9 +28,338 @@
      <term><parameter>options</parameter></term>
      <listitem>
       <para>
-       你可以使用 <parameter>options</parameter> 参数微调密钥的生成（比如指定位数）。查看
-       <function>openssl_csr_new</function> 获取更多关于
-       <parameter>options</parameter> 的信息。
+       可以使用 <parameter>options</parameter> 参数微调密钥生成（例如指定位的数量或参数）。这些选项可以是用于密钥生成的特定于算法的参数，也可以是
+       <acronym>CSR</acronym> 生成中使用的通用选项（如果未指定）。有关在 <acronym>CSR</acronym> 中使用 <parameter>options</parameter>
+       的更多信息，参阅 <function>openssl_csr_new</function>。在这些选项中，只有
+       <literal>private_key_bits</literal>、<literal>private_key_type</literal>、<literal>curve_name</literal> 和 <literal>config</literal>
+       用于密钥生成。如果关联数组包含某个特定 key，则使用特定算法选项。
+       <itemizedlist>
+        <listitem>
+         <simpara>
+          <literal>"rsa"</literal> key 用于设置 RSA 参数。
+         </simpara>
+         <informaltable>
+          <tgroup cols="2">
+           <thead>
+            <row>
+             <entry>选项</entry>
+             <entry>类型</entry>
+             <entry>格式</entry>
+             <entry>是否必需</entry>
+             <entry>说明</entry>
+            </row>
+           </thead>
+           <tbody>
+            <row>
+             <entry><literal>"n"</literal></entry>
+             <entry><type>string</type></entry>
+             <entry>binary number</entry>
+             <entry>yes</entry>
+             <entry>modulus</entry>
+            </row>
+            <row>
+             <entry><literal>"e"</literal></entry>
+             <entry><type>string</type></entry>
+             <entry>binary number</entry>
+             <entry>no</entry>
+             <entry>public exponent</entry>
+            </row>
+            <row>
+             <entry><literal>"d"</literal></entry>
+             <entry><type>string</type></entry>
+             <entry>binary number</entry>
+             <entry>yes</entry>
+             <entry>private exponent</entry>
+            </row>
+            <row>
+             <entry><literal>"p"</literal></entry>
+             <entry><type>string</type></entry>
+             <entry>binary number</entry>
+             <entry>no</entry>
+             <entry>prime 1</entry>
+            </row>
+            <row>
+             <entry><literal>"q"</literal></entry>
+             <entry><type>string</type></entry>
+             <entry>binary number</entry>
+             <entry>no</entry>
+             <entry>prime 2</entry>
+            </row>
+            <row>
+             <entry><literal>"dmp1"</literal></entry>
+             <entry><type>string</type></entry>
+             <entry>binary number</entry>
+             <entry>no</entry>
+             <entry>exponent1, d mod (p-1)</entry>
+            </row>
+            <row>
+             <entry><literal>"dmq1"</literal></entry>
+             <entry><type>string</type></entry>
+             <entry>binary number</entry>
+             <entry>no</entry>
+             <entry>exponent2, d mod (q-1)</entry>
+            </row>
+            <row>
+             <entry><literal>"iqmp"</literal></entry>
+             <entry><type>string</type></entry>
+             <entry>binary number</entry>
+             <entry>no</entry>
+             <entry>coefficient, (inverse of q) mod p</entry>
+            </row>
+           </tbody>
+          </tgroup>
+         </informaltable>
+        </listitem>
+        <listitem>
+         <simpara>
+          <literal>"dsa"</literal> key 用于设置 DSA 参数。
+         </simpara>
+         <informaltable>
+          <tgroup cols="2">
+           <thead>
+            <row>
+             <entry>选项</entry>
+             <entry>类型</entry>
+             <entry>格式</entry>
+             <entry>是否必需</entry>
+             <entry>说明</entry>
+            </row>
+           </thead>
+           <tbody>
+            <row>
+             <entry><literal>"p"</literal></entry>
+             <entry><type>string</type></entry>
+             <entry>binary number</entry>
+             <entry>no</entry>
+             <entry>prime number (public)</entry>
+            </row>
+            <row>
+             <entry><literal>"q"</literal></entry>
+             <entry><type>string</type></entry>
+             <entry>binary number</entry>
+             <entry>no</entry>
+             <entry>160-bit subprime, q | p-1 (public)</entry>
+            </row>
+            <row>
+             <entry><literal>"g"</literal></entry>
+             <entry><type>string</type></entry>
+             <entry>binary number</entry>
+             <entry>no</entry>
+             <entry>generator of subgroup (public)</entry>
+            </row>
+            <row>
+             <entry><literal>"priv_key"</literal></entry>
+             <entry><type>string</type></entry>
+             <entry>PEM key</entry>
+             <entry>no</entry>
+             <entry>private key x</entry>
+            </row>
+            <row>
+             <entry><literal>"pub_key"</literal></entry>
+             <entry><type>string</type></entry>
+             <entry>PEM key</entry>
+             <entry>no</entry>
+             <entry>public key y = g^x</entry>
+            </row>
+           </tbody>
+          </tgroup>
+         </informaltable>
+        </listitem>
+        <listitem>
+         <simpara>
+          <literal>"dh"</literal> key 用于 DH（迪菲-赫尔曼密钥交换）参数。
+         </simpara>
+         <informaltable>
+          <tgroup cols="2">
+           <thead>
+            <row>
+             <entry>选项</entry>
+             <entry>&Type;</entry>
+             <entry>格式</entry>
+             <entry>是否必需</entry>
+             <entry>&Description;</entry>
+            </row>
+           </thead>
+           <tbody>
+            <row>
+             <entry><literal>"p"</literal></entry>
+             <entry><type>string</type></entry>
+             <entry>binary number</entry>
+             <entry>no</entry>
+             <entry>prime number (shared)</entry>
+            </row>
+            <row>
+             <entry><literal>"g"</literal></entry>
+             <entry><type>string</type></entry>
+             <entry>binary number</entry>
+             <entry>no</entry>
+             <entry>generator of Z_p (shared)</entry>
+            </row>
+            <row>
+             <entry><literal>"priv_key"</literal></entry>
+             <entry><type>string</type></entry>
+             <entry>PEM key</entry>
+             <entry>no</entry>
+             <entry>private DH value x</entry>
+            </row>
+            <row>
+             <entry><literal>"pub_key"</literal></entry>
+             <entry><type>string</type></entry>
+             <entry>PEM key</entry>
+             <entry>no</entry>
+             <entry>public DH value g^x</entry>
+            </row>
+           </tbody>
+          </tgroup>
+         </informaltable>
+        </listitem>
+        <listitem>
+         <simpara>
+          <literal>"ec"</literal> key，用于椭圆曲线参数
+         </simpara>
+         <informaltable>
+          <tgroup cols="2">
+           <thead>
+            <row>
+             <entry>选项</entry>
+             <entry>&Type;</entry>
+             <entry>格式</entry>
+             <entry>是否必需</entry>
+             <entry>&Description;</entry>
+            </row>
+           </thead>
+           <tbody>
+            <row>
+             <entry><literal>"curve_name"</literal></entry>
+             <entry><type>string</type></entry>
+             <entry>name</entry>
+             <entry>no</entry>
+             <entry>name of curve, see <function>openssl_get_curve_names</function></entry>
+            </row>
+            <row>
+             <entry><literal>"p"</literal></entry>
+             <entry><type>string</type></entry>
+             <entry>binary number</entry>
+             <entry>no</entry>
+             <entry>prime of the field for curve over Fp</entry>
+            </row>
+            <row>
+             <entry><literal>"a"</literal></entry>
+             <entry><type>string</type></entry>
+             <entry>binary number</entry>
+             <entry>no</entry>
+             <entry>coofecient a of the curve for Fp: y^2 mod p = x^3 + ax + b mod p</entry>
+            </row>
+            <row>
+             <entry><literal>"b"</literal></entry>
+             <entry><type>string</type></entry>
+             <entry>binary number</entry>
+             <entry>no</entry>
+             <entry>coofecient b of the curve for Fp: y^2 mod p = x^3 + ax + b mod p</entry>
+            </row>
+            <row>
+             <entry><literal>"seed"</literal></entry>
+             <entry><type>string</type></entry>
+             <entry>binary number</entry>
+             <entry>no</entry>
+             <entry>用于生成系数 b 的可选随机数种子</entry>
+            </row>
+            <row>
+             <entry><literal>"generator"</literal></entry>
+             <entry><type>string</type></entry>
+             <entry>binary encoded point</entry>
+             <entry>no</entry>
+             <entry>曲线生成点</entry>
+            </row>
+            <row>
+             <entry><literal>"g_x"</literal></entry>
+             <entry><type>string</type></entry>
+             <entry>binary number</entry>
+             <entry>no</entry>
+             <entry>曲线生成点 x 坐标</entry>
+            </row>
+            <row>
+             <entry><literal>"g_y"</literal></entry>
+             <entry><type>string</type></entry>
+             <entry>binary number</entry>
+             <entry>no</entry>
+             <entry>曲线生成点 y 坐标</entry>
+            </row>
+            <row>
+             <entry><literal>"cofactor"</literal></entry>
+             <entry><type>string</type></entry>
+             <entry>binary number</entry>
+             <entry>no</entry>
+             <entry>curve cofactor</entry>
+            </row>
+            <row>
+             <entry><literal>"order"</literal></entry>
+             <entry><type>string</type></entry>
+             <entry>binary number</entry>
+             <entry>no</entry>
+             <entry>curve order</entry>
+            </row>
+            <row>
+             <entry><literal>"x"</literal></entry>
+             <entry><type>string</type></entry>
+             <entry>binary number</entry>
+             <entry>no</entry>
+             <entry>x coordinate (public)</entry>
+            </row>
+            <row>
+             <entry><literal>"y"</literal></entry>
+             <entry><type>string</type></entry>
+             <entry>binary number</entry>
+             <entry>no</entry>
+             <entry>y coordinate (public)</entry>
+            </row>
+            <row>
+             <entry><literal>"d"</literal></entry>
+             <entry><type>string</type></entry>
+             <entry>binary number</entry>
+             <entry>no</entry>
+             <entry>private key</entry>
+            </row>
+           </tbody>
+          </tgroup>
+         </informaltable>
+        </listitem>
+        <listitem>
+         <simpara>
+          <literal>"x25519"</literal>、<literal>"x448"</literal>、<literal>"ed25519"</literal>、<literal>"ed448"</literal>
+          key 用于 Curve25519 和 Curve448 参数。
+         </simpara>
+         <informaltable>
+          <tgroup cols="2">
+           <thead>
+            <row>
+             <entry>选项</entry>
+             <entry>&Type;</entry>
+             <entry>格式</entry>
+             <entry>是否必需</entry>
+             <entry>&Description;</entry>
+            </row>
+           </thead>
+           <tbody>
+             <row>
+             <entry><literal>"priv_key"</literal></entry>
+             <entry><type>string</type></entry>
+             <entry>PEM key</entry>
+             <entry>no</entry>
+             <entry>私钥</entry>
+            </row>
+            <row>
+             <entry><literal>"pub_key"</literal></entry>
+             <entry><type>string</type></entry>
+             <entry>PEM key</entry>
+             <entry>no</entry>
+             <entry>公钥</entry>
+            </row>
+           </tbody>
+          </tgroup>
+         </informaltable>
+        </listitem>
+       </itemizedlist>
       </para>
      </listitem>
     </varlistentry>
@@ -57,6 +386,19 @@
     </thead>
     <tbody>
      <row>
+      <entry>8.4.0</entry>
+      <entry>
+       引入 <literal>x25519</literal>、<literal>ed25519</literal>、<literal>x448</literal> 和 <literal>ed448</literal>
+       字段，增加了对基于 Curve25519 和 Curve448 的密钥支持。
+      </entry>
+     </row>
+     <row>
+      <entry>8.3.0</entry>
+      <entry>
+       新增使用自定义 EC 参数生成 EC 秘钥的支持。特别是引入了 EC 选项：<literal>p</literal>、<literal>a</literal>、<literal>b</literal>、<literal>seed</literal>、<literal>generator</literal>、<literal>g_x</literal>、<literal>g_y</literal>、<literal>cofactor</literal> 和 <literal>order</literal>。
+      </entry>
+     </row>
+     <row>
       <entry>8.0.0</entry>
       <entry>
        成功时此函数会返回 <classname>OpenSSLAsymmetricKey</classname> 的实例；在之前版本中，则会返回类似为
@@ -77,7 +419,7 @@
  <refsect1 role="examples">
   &reftitle.examples;
   <example xml:id="function.openssl-pkey-new.example.public-key">
-   <title>Obtain the public key from a private key</title>
+   <title>从私钥获取公钥</title>
    <programlisting role="php">
 <![CDATA[
 <?php

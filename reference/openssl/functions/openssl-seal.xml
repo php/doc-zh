@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 5bc68add3da3cd18c40f851e944b15095d3a26aa Maintainer: duanxiaoqiang Status: ready -->
+<!-- EN-Revision: 110ac43250fdb3531fe26d4d29292e33df7855e8 Maintainer: duanxiaoqiang Status: ready -->
 <!-- CREDITS: mowangjuanzi, Luffy -->
 <refentry xml:id="function.openssl-seal" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
@@ -20,9 +20,10 @@
    <methodparam choice="opt"><type>string</type><parameter role="reference">iv</parameter><initializer>&null;</initializer></methodparam>
   </methodsynopsis>
   <para>
-   <function>openssl_seal</function> 使用随机生成的密钥和给定的 <parameter>cipher_algo</parameter> 方法密封（加密）<parameter>data</parameter>
-   数据。密钥用与 <parameter>public_key</parameter> 中的标识符相关联的每个公共密钥加密，并且每个加密密钥在 <parameter>encrypted_keys</parameter>
-   中返回。这意味着一个人可以将密封的数据发送给多个接收者（如果一个人已经获得了他们的公钥）。每个接收方都必须同时接收加密的数据和用接收方的公钥加密的信封密钥。
+   <function>openssl_seal</function> 使用指定 <parameter>cipher_algo</parameter> 和随机生成的密钥密封（加密）<parameter>data</parameter>。使用
+   <parameter>public_key</parameter> 数组中的每个公钥对秘钥加密，并在 <parameter>encrypted_keys</parameter> 返回每个加密的 envelope 密钥。
+   这允许将密封的数据发送给多个接收方（前提是公钥可用）。每个接收方都必须同时接收加密的数据和用接收方的公钥加密的 envelope 密钥。生成 IV（初始化向量），并在
+   <parameter>iv</parameter> 中返回其值。
   </para>
  </refsect1>
 
@@ -69,7 +70,7 @@
        加密算法。
        <caution>
         <simpara>
-         默认值（<literal>'RC4'</literal>）认为不安全。强烈建议明确指定安全密码方法。
+         默认值在 PHP 8.0 之前为（<literal>'RC4'</literal>），这不安全。强烈建议明确指定安全密码方法。
         </simpara>
        </caution>
       </para>
@@ -79,8 +80,13 @@
      <term><parameter>iv</parameter></term>
      <listitem>
       <para>
-       初始化向量。
+       用于解密 <parameter>data</parameter> 的初始化向量。如果密码方法需要 IV，则需要它。可以通过调用 <function>openssl_cipher_iv_length</function> 时传入 <parameter>cipher_algo</parameter> 来找到它。
       </para>
+      <caution>
+       <simpara>
+        IV 无法明确设置。其中设置的任何值都将被随机生成的值覆盖。
+       </simpara>
+      </caution>
      </listitem>
     </varlistentry>
    </variablelist>
@@ -138,26 +144,19 @@
     <programlisting role="php">
 <![CDATA[
 <?php
-// $data is assumed to contain the data to be sealed
+// 假设 $data 包含要密封的数据
+$data = "test";
 
-// fetch public keys for our recipients, and ready them
-$fp = fopen("/src/openssl-0.9.6/demos/maurice/cert.pem", "r");
-$cert = fread($fp, 8192);
-fclose($fp);
-$pk1 = openssl_get_publickey($cert);
-// Repeat for second recipient
-$fp = fopen("/src/openssl-0.9.6/demos/sign/cert.pem", "r");
-$cert = fread($fp, 8192);
-fclose($fp);
-$pk2 = openssl_get_publickey($cert);
+// 获取公钥
+$pk1 = openssl_get_publickey("file://cert1.pem");
+$pk2 = openssl_get_publickey("file://cert2.pem");
 
-// seal message, only owners of $pk1 and $pk2 can decrypt $sealed with keys
-// $ekeys[0] and $ekeys[1] respectively.
-openssl_seal($data, $sealed, $ekeys, array($pk1, $pk2));
-
-// free the keys from memory
-openssl_free_key($pk1);
-openssl_free_key($pk2);
+// 密封消息，只有 $pk1 和 $pk2 的所有者才能分别使用密钥
+// $ekeys[0] 和 $ekeys[1] 解密 $sealed。
+if (openssl_seal($data, $sealed, $ekeys, array($pk1, $pk2), 'AES256', $iv) > 0) {
+    // 可能存储 $sealed 和 $iv 值并稍后在 openssl_open 中使用
+    echo "success\n";
+}
 ?>
 ]]>
     </programlisting>
