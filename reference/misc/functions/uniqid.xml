@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 52c495140bdb84f45f186bfb1cccf09788b0121e Maintainer: daijie Status: ready -->
+<!-- EN-Revision: b65b98da1039e01b4a8f51f94560822ec9a113d9 Maintainer: daijie Status: ready -->
 <!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="function.uniqid" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>uniqid</refname>
-  <refpurpose>生成一个唯一ID</refpurpose>
+  <refpurpose>生成基于时间的标识符</refpurpose>
  </refnamediv>
  
  <refsect1 role="description">
@@ -16,14 +16,13 @@
    <methodparam choice="opt"><type>bool</type><parameter>more_entropy</parameter><initializer>&false;</initializer></methodparam>
   </methodsynopsis>
   <para>
-   获取一个带前缀、基于当前时间微秒数的唯一ID。
+   获取基于当前时间的标识符，精度为微秒，以指定 <parameter>prefix</parameter> 作为前缀，并可选择附加随机生成的值。
   </para>
   &caution.cryptographically-insecure;
   <warning>
     <para>
-     此函数不保证返回值的唯一性。由于绝大多数系统使用 NTP
-     或者类似服务调整系统的时间，所以系统时间经常发生变化。此外，进程/线程可能不会返回唯一的 
-     ID。用 <parameter>more_entropy</parameter> 来增加唯一性的概率。
+     该函数不保证返回值的唯一性，因为该值基于当前时间（以微秒为单位）或当前时间加上少量随机数据（如果
+     <parameter>more_entropy</parameter> 为 &true;）。
     </para>
   </warning>
  </refsect1>
@@ -36,7 +35,7 @@
      <term><parameter>prefix</parameter></term>
      <listitem>
       <para>
-       有用的参数。例如：如果在多台主机上可能在同一微秒生成唯一ID。
+       有用的参数。例如同一微秒时在多台主机上同时生成标识符。（如果系统时钟向后移动，例如通过 NTP 调整，即使在单个主机上也会发生这种情况。）
       </para>
       <para>
        <parameter>prefix</parameter>为空，则返回的字符串长度为
@@ -61,11 +60,11 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-   返回字符串形式的唯一ID。
+   返回字符串形式的，基于时间戳的标识符。
   </para>
   <warning>
    <para>
-    此函数努力创建唯一识别符，但它不保证返回值得唯一性。
+    该函数不保证返回值的唯一性。
    </para>
   </warning>
  </refsect1>
@@ -74,14 +73,14 @@
   &reftitle.examples;
   <para>
    <example>
-    <title><function>uniqid</function> 例子</title>
+    <title><function>uniqid</function> 示例</title>
     <programlisting role="php">
 <![CDATA[
 <?php
 /* 一个 uniqid，像：4b3403665fea6 */
 printf("uniqid(): %s\r\n", uniqid());
 
-/* 也可以为uniqid 添加前缀，以下两种方式相同：
+/* 也可以为 uniqid 添加前缀，以下两种方式相同：
  *
  * $uniqid = $prefix . uniqid();
  * $uniqid = uniqid($prefix);

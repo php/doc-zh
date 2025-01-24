@@ -1,68 +1,123 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 86e6094e86b84a51d00ab217ac50ce8dde33d82a Maintainer: daijie Status: ready -->
+<!-- EN-Revision: 2aaaf1967f2510471b694daf8e41a419fc98b751 Maintainer: daijie Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="function.exit" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>exit</refname>
-  <refpurpose>输出一个消息并且退出当前脚本</refpurpose>
+  <refpurpose>使用状态 code 或消息终止当前脚本</refpurpose>
  </refnamediv>
- 
+
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <type>void</type><methodname>exit</methodname>
-   <methodparam choice="opt"><type>string</type><parameter>status</parameter></methodparam>
+   <type>never</type><methodname>exit</methodname>
+   <methodparam choice="opt"><type class="union"><type>string</type><type>int</type></type><parameter>status</parameter><initializer>0</initializer></methodparam>
   </methodsynopsis>
-  <methodsynopsis>
-   <type>void</type><methodname>exit</methodname>
-   <methodparam><type>int</type><parameter>status</parameter></methodparam>
-  </methodsynopsis>
-  <para>
-   中止脚本的执行。
-   尽管调用了 <function>exit</function>，
-   <link linkend="function.register-shutdown-function">Shutdown函数</link>
-   以及 <link linkend="language.oop5.decon.destructor">object destructors</link> 总是会被执行。
-  </para>
-  <para>
-   <literal>exit</literal> 是个语法结构，如果没有 <parameter>status</parameter> 参数要传入，可以省略圆括号。
-  </para>
+  <simpara>
+   中止脚本的执行。即使调用了 <function>exit</function>，<link linkend="function.register-shutdown-function">Shutdown
+   函数</link> 以及 <link linkend="language.oop5.decon.destructor">对象析构方法</link> 始终会执行。但 &finally; 块永远不会执行。
+  </simpara>
+  <simpara>
+   退出 code <literal>0</literal> 表示程序已成功完成任务。其它任何值都表示执行过程中发生了某种错误。
+  </simpara>
+  <simpara>
+   <function>exit</function> 是特殊函数，因为在解析器中有个专用记号，因此可以像语句一样使用（即没有括号），以使用默认状态 code 终止脚本。
+  </simpara>
+  <caution>
+   <simpara>
+    无法禁用或创建命名空间函数来屏蔽全局 <function>exit</function> 函数。
+   </simpara>
+  </caution>
  </refsect1>
 
  <refsect1 role="parameters">
   &reftitle.parameters;
-  <para>
-   <variablelist>
-    <varlistentry>
-     <term><parameter>status</parameter></term>
-     <listitem>
-      <para>
-       如果 <parameter>status</parameter> 是一个字符串，在退出之前该函数会打印
-       <parameter>status</parameter> 。
-      </para>
-      <para>
-       如果 <parameter>status</parameter> 是一个 <type>int</type>，该值会作为退出状态码，并且不会被打印输出。
-       退出状态码应该在范围0至254，不应使用被PHP保留的退出状态码255。 
-       状态码0用于成功中止程序。
-      </para>
-     </listitem>
-    </varlistentry>
-   </variablelist>
-  </para>
+  <variablelist>
+   <varlistentry>
+    <term><parameter>status</parameter></term>
+    <listitem>
+     <simpara>
+      如果 <parameter>status</parameter> 是字符串，此函数将在退出前打印
+      <parameter>status</parameter>。PHP 返回的退出 code 为 <literal>0</literal>。
+     </simpara>
+     <para>
+      如果 <parameter>status</parameter> 是 <type>int</type>，PHP
+      返回的退出 code 将为 <parameter>status</parameter>。
+      <note>
+       <simpara>
+        退出 code 的范围应在 <literal>0</literal> 到 <literal>254</literal> 内，退出 code <literal>255</literal> 由 PHP 保留，不应使用。
+       </simpara>
+      </note>
+     </para>
+     <warning>
+      <simpara>
+       PHP 8.4.0 之前，<function>exit</function> 不遵循 PHP 的标准<link linkend="language.types.type-juggling.function">类型处理语义</link>，也不遵守
+       <link linkend="language.types.declarations.strict"><literal>strict_types</literal></link> 声明。
+      </simpara>
+      <simpara>
+       任何非 <type>int</type> 类型的值（包括 <type>resource</type> 和 <type>array</type> 值）均会转换为 <type>string</type>。自
+       PHP 8.4.0 起，遵循通用的类型处理语义，并在无效值上抛出 <exceptionname>TypeError</exceptionname>。
+      </simpara>
+     </warning>
+    </listitem>
+   </varlistentry>
+  </variablelist>
  </refsect1>
 
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
-  <para>
-   &return.void;
-  </para>
+  <simpara>
+   由于这会终止 PHP 脚本，因此没有返回任何值。
+  </simpara>
+ </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <informaltable>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>&Version;</entry>
+      <entry>&Description;</entry>
+     </row>
+    </thead>
+    <tbody>
+     <row>
+      <entry>8.4.0</entry>
+      <entry>
+       <function>exit</function> 现在是真正的函数，因此遵循通用的<link linkend="language.types.type-juggling.function">类型处理语义</link>，受
+       <link linkend="language.types.declarations.strict"><literal>strict_types</literal></link>
+       声明的影响，可以用命名参数调用，并且是<link linkend="functions.variable-functions">变量函数</link>。
+      </entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </informaltable>
  </refsect1>
 
  <refsect1 role="examples">
   &reftitle.examples;
-  <para>
-   <example>
-    <title><function>exit</function> 例子</title>
-    <programlisting role="php">
+  <example>
+   <title>基础 <function>exit</function> 示例</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+
+// 正常退出程序
+exit();
+exit(0);
+
+// 带着错误 code 的退出
+exit(1);
+
+?>
+]]>
+   </programlisting>
+  </example>
+  <example>
+   <title><function>exit</function> 的 <type>string</type> 示例</title>
+   <programlisting role="php">
 <![CDATA[
 <?php
 
@@ -72,34 +127,11 @@ $file = fopen($filename, 'r')
 
 ?>
 ]]>
-    </programlisting>
-   </example>
-  </para>
-  <para>
-   <example>
-    <title><function>exit</function> 状态码例子</title>
-    <programlisting role="php">
-<![CDATA[
-<?php
-
-//exit program normally
-exit;
-exit();
-exit(0);
-
-//exit with an error code
-exit(1);
-exit(0376); //octal
-
-?>
-]]>
-    </programlisting>
-   </example>
-  </para>
-  <para>
-   <example>
-    <title>无论如何，Shutdown函数与析构函数都会被执行</title>
-    <programlisting role="php">
+   </programlisting>
+  </example>
+  <example>
+   <title>Shutdown 函数和析构方法无论如何都会运行</title>
+   <programlisting role="php">
 <![CDATA[
 <?php
 class Foo
@@ -122,41 +154,51 @@ exit();
 echo 'This will not be output.';
 ?>
 ]]>
-    </programlisting>
-    &example.outputs;
-    <screen>
- <![CDATA[
- Shutdown: shutdown()
- Destruct: Foo::__destruct()
- ]]>
-    </screen>
-   </example>
-  </para>
+   </programlisting>
+   &example.outputs;
+   <screen>
+<![CDATA[
+Shutdown: shutdown()
+Destruct: Foo::__destruct()
+]]>
+   </screen>
+  </example>
+  <example>
+   <title><function>exit</function> 作为语句</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+
+// 程序正常退出，退出 code 为 0
+exit;
+
+?>
+]]>
+   </programlisting>
+  </example>
  </refsect1>
 
  <refsect1 role="notes">
   &reftitle.notes;
-  
-  &note.language-construct;
-
-  <note>
-   <para>
-    该语法结构等同于 <function>die</function>。
-   </para>
-  </note>
+  <warning>
+   <simpara>
+    PHP 8.4.0 之前，<function>exit</function> 是语言结构而不是函数，因此无法使用<link
+    linkend="functions.variable-functions">变量函数</link>或<link
+    linkend="functions.named-arguments">命名参数</link>调用。
+   </simpara>
+  </warning>
  </refsect1>
 
  <refsect1 role="seealso">
   &reftitle.seealso;
-  <para>
-   <simplelist>
-    <member><function>register_shutdown_function</function></member>
-   </simplelist>
-  </para>
+  <simplelist>
+   <member><function>register_shutdown_function</function></member>
+   <member><link linkend="function.register-shutdown-function">Shutdown 函数</link></member>
+   <member><link linkend="language.oop5.decon.destructor">对象析构方法</link></member>
+  </simplelist>
  </refsect1>
 
 </refentry>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
