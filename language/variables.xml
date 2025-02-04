@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: df1e7145848499f193d0e106a86c27a9b94d130e Maintainer: HonestQiao Status: ready -->
+<!-- EN-Revision: 7d804723a85d3a8039ba3d0d2c8c414e85f5ede1 Maintainer: HonestQiao Status: ready -->
 <!-- CREDITS: dallas, Gregory, verdana, mowangjuanzi, Luffy -->
  <chapter xml:id="language.variables" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
   <title>变量</title>
@@ -448,6 +448,33 @@ function foo(){
     </example>
    </para>
      
+   <simpara>
+    匿名函数内的静态变量仅在该特定函数实例中存在。如果每次调用时都重新创建匿名函数，则静态变量将重新初始化。
+   </simpara>
+   <example>
+    <title>匿名函数内的静态变量</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+function exampleFunction($input) {
+    $result = (static function () use ($input) {
+        static $counter = 0;
+        $counter++;
+        return "Input: $input, Counter: $counter\n";
+    });
+
+    return $result();
+}
+
+// 调用 exampleFunction 将重新创建匿名函数，因此静态
+// 变量不会保留其值。
+echo exampleFunction('A'); // 输出：Input: A, Counter: 1
+echo exampleFunction('B'); // 输出：Input: B, Counter: 1
+?>
+]]>
+    </programlisting>
+   </example>
+
    <para>
     从 PHP 8.1.0
     开始，当继承（不是覆盖）使用有静态变量的方法时，继承的方法将会跟父级方法共享静态变量。这意味着方法中的静态变量现在跟静态属性有相同的行为。
