@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 4a07033f7ac5ab121357051cc94ec48b9f6f58fc Maintainer: HonestQiao Status: ready -->
+<!-- EN-Revision: e6e9c116083c3d1aeb3d1fc2e45f51fbcb0d5182 Maintainer: HonestQiao Status: ready -->
 <!-- CREDITS: mowangjuanzi, Luffy -->
 <refentry xml:id="function.empty" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
@@ -14,8 +14,8 @@
    <methodparam><type>mixed</type><parameter>var</parameter></methodparam>
   </methodsynopsis>
   <para>
-   判断变量是否为空。如果变量不存在或其值等于 &false;，则认为变量为空。
-   <function>empty</function> 不会在变量不存在时产生警告。
+   判断变量是否为空。如果变量不存在或其值等于 &false;，则认为变量为空。<function>empty</function>
+   不会在变量不存在时产生警告。
   </para>
  </refsect1>
  <refsect1 role="parameters">
@@ -29,8 +29,8 @@
        待检查的变量
       </para>
       <para>
-       不会在变量不存在时产生警告。
-       这意味着 <function>empty</function> 本质上等同于 <command>!isset($var) || $var == false</command>。
+       变量不存在时不会产生警告。这意味着 <function>empty</function> 本质上等同于 <command>!isset($var) ||
+       $var == false</command>。这也适用于嵌套结构，例如多维数组或链式属性。
       </para>
      </listitem>
     </varlistentry>
@@ -49,7 +49,7 @@
   <para>
    <example>
     <title>
-     一个简单的 <function>empty</function> 与 <function>isset</function> 的比较。
+     简单的 <function>empty</function> 与 <function>isset</function> 的比较。
     </title>  
     <programlisting role="php">
 <![CDATA[
@@ -79,7 +79,6 @@ $expected_array_got_string = 'somestring';
 var_dump(empty($expected_array_got_string['some_key']));
 var_dump(empty($expected_array_got_string[0]));
 var_dump(empty($expected_array_got_string['0']));
-var_dump(empty($expected_array_got_string[0.5]));
 var_dump(empty($expected_array_got_string['0.5']));
 var_dump(empty($expected_array_got_string['0 Mostel']));
 ?>
@@ -91,9 +90,40 @@ var_dump(empty($expected_array_got_string['0 Mostel']));
 bool(true)
 bool(false)
 bool(false)
+bool(true)
+bool(true)
+]]>
+   </screen>
+  </example>
+  <example>
+   <title>多维数组上使用 <function>empty</function></title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+$multidimensional = [
+    'some' => [
+        'deep' => [
+            'nested' => 'value'
+        ]
+    ]
+];
+
+if (!empty($multidimensional['some']['some']['nested'])) {
+    $someVariable = $multidimensional['some']['deep']['nested'];
+}
+
+var_dump(empty($multidimensional['some-undefined-key']));
+var_dump(empty($multidimensional['some']['deep']['unknown']));
+var_dump(empty($multidimensional['some']['deep']['nested']));
+?>
+]]>
+   </programlisting>
+   &example.outputs;
+   <screen>
+<![CDATA[
+bool(true)
+bool(true)
 bool(false)
-bool(true)
-bool(true)
 ]]>
    </screen>
   </example>
