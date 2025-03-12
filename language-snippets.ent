@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: ffd2ef754b37526c0b96e94859d57ce06acfbf41 Maintainer: Gregory Status: ready -->
+<!-- EN-Revision: cb573d7f33644962dcf32003e5898cf4d67be6ac Maintainer: Gregory Status: ready -->
 <!-- CREDITS: dallas, mowangjuanzi, Luffy -->
 <!-- 请保持此文件与英文文件中相应的每个 ENTITY 行号一一对应以便于对照，修改与更新！ -->
 
@@ -232,6 +232,9 @@ linkend="book.outcontrol">输出控制函数</link>来捕获当前函数的输�
 PHP 版本中发生变化而不另行通知。使用本扩展应自行承担风险。</simpara></warning>'>
 
 
+
+<!ENTITY deprecated.function '此函数已废弃。'>
+<!ENTITY removed.function '此函数已移除。'>
 
 <!ENTITY warn.deprecated.feature-5-3-0 '<warning xmlns="http://docbook.org/ns/docbook"><simpara>自 PHP 5.3.0
 起，已经<emphasis>废弃</emphasis>此特性。强烈建议不要应用此特性。</simpara></warning>'>
@@ -1456,11 +1459,11 @@ linkend="memcached.expiration" xmlns="http://docbook.org/ns/docbook">到期时�
 
 <!-- RNP -->
 
-<!ENTITY rnp.parameter.ffi-description 'The FFI object returned by rnp_ffi_create.'>
+<!ENTITY rnp.parameter.ffi-description 'The FFI object returned by <function xmlns="http://docbook.org/ns/docbook">rnp_ffi_create</function>.'>
 
 <!ENTITY rnp.parameter.key-format 'The key format of the data (GPG, KBX, G10).'>
 
-<!ENTITY rnp.parameter.loadsave-flags 'See RNP_LOAD_SAVE_* flags description.'>
+<!ENTITY rnp.parameter.loadsave-flags 'See <constant xmlns="http://docbook.org/ns/docbook">RNP_LOAD_SAVE_<replaceable>*</replaceable></constant> flags description.'>
 
 <!-- socket entities -->
 
@@ -1743,6 +1746,28 @@ It is strongly recommended to avoid timezone abbreviations.
   of the <link linkend="libxml.constants">libxml option constants</link>.
 </para>'>
 
+<!ENTITY dom.parameter.compliant.options '&dom.parameter.options;
+ <simpara xmlns="http://docbook.org/ns/docbook">
+  It is also possible to pass <constant>Dom\HTML_NO_DEFAULT_NS</constant>
+  to disable the use of the HTML namespace and the template element.
+  This should only be used if the implications are properly understood.
+</simpara>'>
+
+<!ENTITY dom.parameter.compliant.encoding '<simpara xmlns="http://docbook.org/ns/docbook">
+ The encoding that the document was created in.
+ If not provided, it will attempt to determine the encoding that is most likely used.
+</simpara>'>
+
+<!ENTITY dom.parser.compliant.note.whitespace '<refsect1 role="notes" xmlns="http://docbook.org/ns/docbook">
+ &reftitle.notes;
+ <note>
+  <simpara>
+   Whitespace in the <literal>html</literal> and <literal>head</literal> tags
+   is not considered significant and may lose formatting.
+  </simpara>
+ </note>
+</refsect1>'>
+
 <!ENTITY dom.parameters.register_node_ns '<varlistentry xmlns="http://docbook.org/ns/docbook">
  <term><parameter>registerNodeNS</parameter></term>
  <listitem>
@@ -1753,6 +1778,14 @@ It is strongly recommended to avoid timezone abbreviations.
   </para>
  </listitem>
 </varlistentry>'>
+
+<!ENTITY dom.parameters.serialize.options '<simpara xmlns="http://docbook.org/ns/docbook">
+ Additional Options.
+ The <constant>LIBXML_NOEMPTYTAG</constant>
+ and <constant>LIBXML_NOXMLDECL</constant> options are supported.
+ Prior to PHP 8.3.0, only the <constant>LIBXML_NOEMPTYTAG</constant>
+ option is supported.
+</simpara>'>
 
 <!ENTITY dom.errors.hierarchy.parent '<varlistentry xmlns="http://docbook.org/ns/docbook">
  <term><constant>DOM_HIERARCHY_REQUEST_ERR</constant></term>
@@ -1785,6 +1818,27 @@ It is strongly recommended to avoid timezone abbreviations.
   </para>
  </listitem>
 </varlistentry>'>
+
+<!ENTITY dom.errors.compliant.wrong_document '<listitem xmlns="http://docbook.org/ns/docbook">
+ <simpara>
+  Throws a <exceptionname>Dom\DOMException</exceptionname> with code
+  <constant>Dom\WRONG_DOCUMENT_ERR</constant> if <parameter>node</parameter>
+  is from another document.
+ </simpara>
+</listitem>'>
+
+<!ENTITY dom.errors.compliant.common '<listitem xmlns="http://docbook.org/ns/docbook">
+ <simpara>
+  Throws a <exceptionname>ValueError</exceptionname> if
+  <parameter>options</parameter> contains an invalid option.
+ </simpara>
+</listitem>
+<listitem>
+ <simpara>
+  Throws a <exceptionname>ValueError</exceptionname> if
+  <parameter>overrideEncoding</parameter> is an unknown encoding.
+ </simpara>
+</listitem>'>
 
 <!ENTITY dom.changelog.previous_hierarchy_exception 'Previously this threw a
  <classname xmlns="http://docbook.org/ns/docbook">DOMException</classname> with code
@@ -1880,6 +1934,33 @@ It is strongly recommended to avoid timezone abbreviations.
   <entry>
    此函数现在返回 <classname>Odbc\Connection</classname> 实例；之前返回
    <type>resource</type>。
+  </entry>
+ </row>'>
+
+<!ENTITY odbc.changelog.credential-params '<row xmlns="http://docbook.org/ns/docbook">
+  <entry>8.4.0</entry>
+  <entry>
+   <parameter>user</parameter> and <parameter>password</parameter> are now nullable,
+   they are now also optional and default to &null;.
+  </entry>
+ </row>
+ <row xmlns="http://docbook.org/ns/docbook">
+  <entry>8.4.0</entry>
+  <entry>
+   Previously, using an empty string for <parameter>password</parameter> would not include
+   <literal>pwd</literal> in the generated connection string for <parameter>dsn</parameter>.
+   It is now generated to include a <literal>pwd</literal> which has an empty string as its value.
+   To restore the previous behaviour <parameter>password</parameter> can now be set to &null;.
+  </entry>
+ </row>
+ <row xmlns="http://docbook.org/ns/docbook">
+  <entry>8.4.0</entry>
+  <entry>
+   Previously, if <parameter>dsn</parameter> contained <literal>uid</literal> or <literal>pwd</literal>
+   both <parameter>user</parameter> and <parameter>password</parameter> parameters were ignored.
+   Now <parameter>user</parameter> is only ignored if <parameter>dsn</parameter> contains
+   <literal>uid</literal>, and <parameter>password</parameter>  is only ignored if
+   <parameter>dsn</parameter> contains <literal>pwd</literal>.
   </entry>
  </row>'>
 
@@ -2213,19 +2294,6 @@ while <constant>PGSQL_BOTH</constant> will return both numerical and associative
 <!ENTITY safemode '<link xmlns="http://docbook.org/ns/docbook" linkend="ini.safe-mode">安全模式</link>'>
 
 <!ENTITY sqlsafemode '<link xmlns="http://docbook.org/ns/docbook" linkend="ini.sql.safe-mode">SQL 安全模式</link>'>
-
-<!-- BCMath Notes -->
-<!ENTITY bc.scale.description '<varlistentry xmlns="http://docbook.org/ns/docbook">
- <term><parameter>scale</parameter></term>
- <listitem>
-  <simpara>
-   此参数用于设置结果中的小数位数。如果为 &null;，则使用 <function>bcscale</function>
-   设置的默认小数位数，或者回退到 <link linkend="ini.bcmath.scale"><literal>bcmath.scale</literal></link>
-   INI 指令的值。
-  </simpara>
- </listitem>
-</varlistentry>'>
-
 
 <!-- CTYPE Notes -->
 <!ENTITY note.ctype.parameter.integer '<note xmlns="http://docbook.org/ns/docbook"><para>
@@ -3169,6 +3237,11 @@ local: {
        <entry>endpoint</entry>
        <entry>string</entry>
        <entry>Optional. Host with optional port.</entry>
+      </row>
+      <row>
+       <entry>delegated</entry>
+       <entry>bool</entry>
+       <entry>Optional. If true, this key should be decrypted by the KMIP server.</entry>
       </row>
      </tbody>
     </tgroup>
