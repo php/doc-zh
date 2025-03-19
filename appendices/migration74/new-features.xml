@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 8d1a5d2d15df15cc5cbc7f96cdc083b8fe49366e Maintainer: avenger Status: ready -->
-<!-- CREDITS: mowangjuanzi -->
+<!-- EN-Revision: e150cc645a17588282e5e6b5e43e600a2f345549 Maintainer: avenger Status: ready -->
+<!-- CREDITS: mowangjuanzi, Luffy -->
 <sect1 xml:id="migration74.new-features" xmlns:xlink="http://www.w3.org/1999/xlink">
  <title>新特性</title>
 
@@ -73,6 +73,33 @@ class ChildProducer extends Producer {
      </programlisting>
     </informalexample>
     只有在使用自动加载的情况下，才会有完整的差异支持。在一个文件内，只有非循环类型引用是可能的，因为在引用之前，所有的类都需要可用。
+    <informalexample>
+     <programlisting role="php">
+<![CDATA[
+<?php
+
+/**
+ * These classes satisfy the LSP requirements, because C is a subtype of A.
+ * However, at the time class B is declared, class C is not yet available
+ */
+class A
+{
+    public function method(): A {}
+}
+
+class B extends A
+{
+    // Fatal error: Could not check compatibility between B::method():C and
+    // A::method(): A, because class С is not available
+    public function method(): С {}
+}
+
+class C extends B {}
+
+?>
+]]>
+     </programlisting>
+    </informalexample>
    </para>
   </sect3>
 
@@ -133,7 +160,7 @@ $fruits = ['banana', 'orange', ...$parts, 'watermelon'];
     </informalexample>
    </para>
   </sect3>
- 
+
   <sect3 xml:id="migration74.new-features.core.weakreference">
    <title>弱引用</title>
 
@@ -156,7 +183,7 @@ $fruits = ['banana', 'orange', ...$parts, 'watermelon'];
 
  <sect2 xml:id="migration74.new-features.curl">
   <title>CURL</title>
-  
+
   <para>
    如果扩展是使用 libcurl &gt;= 7.56.0 构建的，<classname>CURLFile</classname>
    现在除了支持普通文件名之外还支持流封装协议。
@@ -165,7 +192,7 @@ $fruits = ['banana', 'orange', ...$parts, 'watermelon'];
 
  <sect2 xml:id="migration74.new-features.filter">
   <title>Filter</title>
-  
+
   <para>
    <constant>FILTER_VALIDATE_FLOAT</constant> 过滤器现在支持 <literal>min_range</literal>
    和 <literal>max_range</literal> 选项，其含义跟 <constant>FILTER_VALIDATE_INT</constant> 相同。
@@ -293,10 +320,14 @@ $fruits = ['banana', 'orange', ...$parts, 'watermelon'];
 <![CDATA[
 <?php
 // 返回数组，包含对象所有必要的状态。
-public function __serialize(): array;
+public function __serialize(): array
+{
+}
 
 // 从指定的数据数组中回复对象状态。
-public function __unserialize(array $data): void;
+public function __unserialize(array $data): void
+{
+}
 ?>
 ]]>
      </programlisting>

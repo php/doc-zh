@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: ada1d79de35239334b68d0120b011530e31244ff Maintainer: daijie Status: ready -->
+<!-- EN-Revision: b1116af46680f7baf89c46610430a3b63ce9a1f0 Maintainer: daijie Status: ready -->
 <!-- CREDITS: mowangjuanzi, Luffy -->
 <section xml:id="info.configuration" xmlns="http://docbook.org/ns/docbook">
  &reftitle.runtime;
@@ -98,6 +98,24 @@
      <entry><constant>INI_ALL</constant></entry>
      <entry></entry>
     </row>
+     <row>
+      <entry><link linkend="ini.zend.max-allowed-stack-size">zend.max_allowed_stack_size</link></entry>
+      <entry>"0"</entry>
+      <entry><constant>INI_SYSTEM</constant></entry>
+      <entry>自 PHP 8.3.0 起可用。</entry>
+     </row>
+     <row>
+      <entry><link linkend="ini.zend.reserved-stack-size">zend.reserved_stack_size</link></entry>
+      <entry>"0"</entry>
+      <entry><constant>INI_SYSTEM</constant></entry>
+      <entry>自 PHP 8.3.0 起可用。</entry>
+     </row>
+     <row>
+      <entry><link linkend="ini.fiber.stack-size">fiber.stack_size</link></entry>
+      <entry></entry>
+      <entry><constant>INI_ALL</constant></entry>
+      <entry>自 PHP 8.1.0 起可用。</entry>
+     </row>
     </tbody>
    </tgroup>
   </table>
@@ -279,6 +297,98 @@
     </listitem>
    </varlistentry>
 
+   <varlistentry xml:id="ini.zend.max-allowed-stack-size">
+    <term>
+     <parameter>zend.max_allowed_stack_size</parameter>
+     <type>int</type>
+    </term>
+    <listitem>
+     <para>
+      程序允许消耗的操作系统原生堆栈空间的最大值。
+      尝试消耗超过操作系统允许的堆栈空间通常会导致硬崩溃，没有易于获得的调试信息。
+      为了使调试更容易，引擎在发生之前（当程序使用超过
+      <link linkend="ini.zend.max-allowed-stack-size">zend.max_allowed_stack_size</link>-<link linkend="ini.zend.reserved-stack-size">zend.reserved_stack_size</link>
+      字节的堆栈时）抛出一个
+      <classname>Error</classname>。
+     </para>
+     <para>
+      用户定义代码中的递归不会消耗原生堆栈空间。
+      但是，内部函数和魔术方法会。
+      涉及这些函数的非常深的递归可能会导致程序耗尽所有可用的原生堆栈空间。
+     </para>
+     <para>
+      可能的值为：
+      <simplelist>
+       <member>
+        <literal>0</literal>：
+        自动检测操作系统允许程序消耗的最大原生堆栈空间。
+        这是默认值。
+        当无法检测时，使用已知的系统默认值。
+       </member>
+       <member>
+        <literal>-1</literal>：
+        禁用引擎中的堆栈大小检查。
+       </member>
+       <member>
+        正整数：固定大小，以字节为单位。
+        设置此值过高会导致与禁用堆栈大小检查相同的效果。
+       </member>
+      </simplelist>
+     </para>
+     <para>
+      由于 <link linkend="language.fibers">Fiber</link> 的堆栈大小由
+      <link linkend="ini.fiber.stack-size">fiber.stack_size</link> 决定，
+      在执行 Fiber 时检查堆栈使用情况时，使用此参数的值而不是
+      <link linkend="ini.zend.max-allowed-stack-size">zend.max_allowed_stack_size</link>。
+     </para>
+     <note>
+      <para>
+       这与堆栈 <emphasis>缓冲区</emphasis> 溢出无关，也不是安全功能。
+      </para>
+     </note>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry xml:id="ini.zend.reserved-stack-size">
+    <term>
+     <parameter>zend.reserved_stack_size</parameter>
+     <type>int</type>
+    </term>
+    <listitem>
+     <para>
+      保留的堆栈大小，以字节为单位。
+      在检查堆栈大小时，从
+      <link linkend="ini.zend.max-allowed-stack-size">max allowed stack size</link>
+      减去此值作为缓冲区。
+     </para>
+     <para>
+      可能的值为：
+      <simplelist>
+       <member>
+        <literal>0</literal>：自动检测合理大小。
+       </member>
+       <member>
+        正整数：固定大小，以字节为单位。
+       </member>
+      </simplelist>
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry xml:id="ini.fiber.stack-size">
+    <term>
+     <parameter>fiber.stack_size</parameter>
+     <type>int</type>
+    </term>
+    <listitem>
+     <para>
+      为每个 <link linkend="language.fibers">Fiber</link> 分配的本地堆栈大小，以字节为单位。
+     </para>
+     <para>
+      默认值是系统指针大小小于 8 字节的系统上的 1MiB，否则为 2MiB。
+     </para>
+    </listitem>
+   </varlistentry>
   </variablelist>
  </para>
 </section>
