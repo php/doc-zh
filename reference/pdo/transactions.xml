@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: eae19eb5fe0f5bebcbce382ea7a505cedeb5a883 Maintainer: ichenshy Status: ready -->
+<!-- EN-Revision: 969a4a70626497a200e4f2ffd883a29cbb228b33 Maintainer: ichenshy Status: ready -->
 <!-- CREDITS: mowangjuanzi -->
 <chapter xml:id="pdo.transactions" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <title>事务与自动提交</title>
@@ -22,9 +22,37 @@
    PDO 仅在驱动层检查是否具有事务处理能力。如果某些运行时条件意味着事务不可用，且数据库服务接受请求去启动一个事务，<methodname>PDO::beginTransaction</methodname> 将仍然返回 &true; 而且没有错误。
   </para>
   <para>
-   试着在 MySQL 数据库的  MyISAM 数据表中使用事务就是一个很好的例子。
+   试着在 MySQL 数据库的 MyISAM 数据表中使用事务就是一个很好的例子。
   </para>
  </warning>
+ <warning>
+  <para>
+   <emphasis>DDL 语句的隐式提交：</emphasis>
+   某些数据库在事务中执行诸如 <literal>DROP TABLE</literal> 或 <literal>CREATE TABLE</literal>
+   等数据库定义语言（DDL）语句时，会自动发出隐式提交。这意味着在同一事务中之前所做的任何更改都将<emphasis>自动提交</emphasis>，且无法回滚。
+  </para>
+  <para>
+   <literal>MySQL</literal> 和 <literal>Oracle</literal> 就是表现出这种行为的示例数据库。
+  </para>
+ </warning>
+ <para>
+  <example>
+   <title>隐式提交示例</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+$pdo->beginTransaction();
+$pdo->exec("INSERT INTO users (name) VALUES ('Rasmus')");
+$pdo->exec("CREATE TABLE test (id INT PRIMARY KEY)"); // 这里发生了隐式提交
+$pdo->rollBack(); // 这不会撤销 MySQL 或 Oracle 中的 INSERT/CREATE 操作
+?>
+]]>
+   </programlisting>
+  </example>
+ </para>
+ <para>
+  <emphasis>最佳实践：</emphasis>若使用强制此行为的数据库，则避免在事务内执行 DDL 语句。必要时，将 DDL 操作与事务逻辑分离。
+ </para>
  <para>
   当脚本结束或连接即将被关闭时，如果尚有一个未完成的事务，那么 PDO 将自动回滚该事务。这种安全措施有助于在脚本意外终止时避免出现不一致的情况——如果没有显式地提交事务，那么假设是某个地方出错了，所以执行回滚来保证数据安全。
  </para>
