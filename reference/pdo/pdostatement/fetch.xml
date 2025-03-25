@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: daf4cc624df3c21d472149725feb377b1beedb04 Maintainer: ichenshy Status: ready -->
+<!-- EN-Revision: a8863b0123dc5348c91e67198b995222878a7e65 Maintainer: ichenshy Status: ready -->
 <!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="pdostatement.fetch" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
@@ -43,9 +43,10 @@
          <literal>PDO::FETCH_BOUND</literal>：返回 &true; ，并分配结果集中的列值给 <methodname>PDOStatement::bindColumn</methodname> 方法绑定的 PHP 变量。
         </para></listitem>
         <listitem><para>
-         <literal>PDO::FETCH_CLASS</literal>：返回一个请求类的新实例，映射结果集中的列名到类中对应的属性名，然后调用构造函数，除非指定
-         <literal>PDO::FETCH_PROPS_LATE</literal>。如果 <parameter>mode</parameter> 包含 PDO::FETCH_CLASSTYPE（例如：<literal>PDO::FETCH_CLASS |
-         PDO::FETCH_CLASSTYPE</literal>），则类名由第一列的值决定
+         <literal>PDO::FETCH_CLASS</literal>：返回请求类的新实例，通过将结果集的列映射到类的属性以实现对象初始化。此过程发生于构造方法调用之前，允许填充属性，无论其可见性如何，也不管是否被标记为
+         <literal>readonly</literal>。若类中不存在对应属性且存在魔术方法 <link linkend="object.set">__set()</link>，则调用该方法；否则创建动态 public 属性。但如果同时指定了
+         <constant>PDO::FETCH_PROPS_LATE</constant> flag，则将在填充属性<emphasis>前</emphasis>调用构造函数。若 <parameter>mode</parameter> 包含
+         <constant>PDO::FETCH_CLASSTYPE</constant>（例如 <literal>PDO::FETCH_CLASS | PDO::FETCH_CLASSTYPE</literal> ），类名由第一列的值确定。
         </para></listitem>
         <listitem><para>
          <literal>PDO::FETCH_INTO</literal>：更新一个被请求类已存在的实例，映射结果集中的列到类中命名的属性
@@ -225,8 +226,8 @@ Reading backwards:
 
    <example><title>构造顺序</title>
     <simpara>
-     当通过 <literal>PDO::FETCH_CLASS</literal> 获取对象时，首先分配对象属性，然后调用类的构造方法。如果还指定了
-     <literal>PDO::FETCH_PROPS_LATE</literal>，则此顺序相反，即首先调用构造方法，然后分配属性。
+     当通过 <constant>PDO::FETCH_CLASS</constant> 获取对象时，首先分配对象属性，然后调用类的构造方法。然而，当指定了
+     <constant>PDO::FETCH_PROPS_LATE</constant> 时，则此顺序相反，即首先调用构造方法，然后分配属性。
     </simpara>
     <programlisting role="php">
 <![CDATA[
