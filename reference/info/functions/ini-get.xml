@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: c8a8981a9df9a1564a4b9a79e84583d41a7b6ac5 Maintainer: daijie Status: ready -->
+<!-- EN-Revision: 4c016ab334b90a98258b98e04752af7dc74954cd Maintainer: daijie Status: ready -->
 <!-- CREDITS: mowangjuanzi, Luffy -->
 <refentry xml:id="function.ini-get" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
@@ -55,38 +55,15 @@
 我们的 php.ini 包含了以下的设置：
 
 display_errors = On
-register_globals = Off
+opcache.enable_cli = Off
 post_max_size = 8M
 */
 
 echo 'display_errors = ' . ini_get('display_errors') . "\n";
-echo 'register_globals = ' . (int) ini_get('register_globals') . "\n";
+echo 'opcache.enable_cli = ' . (int) ini_get('opcache.enable_cli') . "\n";
 echo 'post_max_size = ' . ini_get('post_max_size') . "\n";
 echo 'post_max_size + 1 = ' . (rtrim(ini_get('post_max_size'), 'KMG') + 1) . "\n";
-echo 'post_max_size in bytes = ' . return_bytes(ini_get('post_max_size'));
-
-function return_bytes($val)
-{
-    $val = trim($val);
-    $num = (int) rtrim($val, 'KMG');
-    $last = strtolower($val[strlen($val) - 1]);
-
-    switch ($last) {
-        // 可以使用修饰符 'G'
-        case 'g':
-            $num = $num * 1024 * 1024 * 1024;
-            break;
-        case 'm':
-            $num = $num * 1024 * 1024;
-            break;
-        case 'k':
-            $num *= 1024;
-            break;
-    }
-
-    return $num;
-}
-
+echo 'post_max_size in bytes = ' . ini_parse_quantity(ini_get('post_max_size'));
 ?>
 ]]>
     </programlisting>
@@ -95,7 +72,7 @@ function return_bytes($val)
 <![CDATA[
 
 display_errors = 1
-register_globals = 0
+opcache.enable_cli = 0
 post_max_size = 8M
 post_max_size+1 = 9
 post_max_size in bytes = 8388608
@@ -120,8 +97,8 @@ post_max_size in bytes = 8388608
    <para>
     许多内存尺寸的 ini 值，类似 <link linkend="ini.upload-max-filesize">upload_max_filesize</link> 是以简写表示法储存在 &php.ini; 文件里。
     <function>ini_get</function> 会返回 &php.ini; 文件中储存的确切字符串，而<emphasis>不是</emphasis>它的等量 <type>int</type>。
-    尝试对这些值使用常规算术运算函数将不会得到预期的结果。
-    以上示例显示了转换简写表示法为字节的一种方式，和 PHP 源码所做的比较像。
+    尝试对这些值进行正常的算术运算将不会得到预期的结果。
+    <function>ini_parse_quantity</function> 函数可以用来将简写表示法转换为字节。
    </para>
   </note>
   <note>
@@ -139,6 +116,7 @@ post_max_size in bytes = 8388608
    <simplelist>
     <member><function>get_cfg_var</function></member>
     <member><function>ini_get_all</function></member>
+    <member><function>ini_parse_quantity</function></member>
     <member><function>ini_restore</function></member>
     <member><function>ini_set</function></member>
    </simplelist>
