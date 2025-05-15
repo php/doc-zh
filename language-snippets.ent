@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: f0d52500c7f8bda83761b18d6c03965741753abd Maintainer: Gregory Status: ready -->
+<!-- EN-Revision: 4639881688d3faaf0073ad71fe0a4b730aea15a0 Maintainer: Gregory Status: ready -->
 <!-- CREDITS: dallas, mowangjuanzi, Luffy -->
 <!-- 请保持此文件与英文文件中相应的每个 ENTITY 行号一一对应以便于对照，修改与更新！ -->
 
@@ -2970,17 +2970,75 @@ xmlns="http://docbook.org/ns/docbook"><simpara xmlns="http://docbook.org/ns/docb
 <!ENTITY trader.arg.slow.limit 'Lower limit use in the adaptive algorithm. Valid range from 0.01 to 0.99.'>
 
 <!-- mongodb -->
+<!ENTITY mongodb.changelog.class-removed '
+       <row xmlns="http://docbook.org/ns/docbook">
+        <entry>PECL mongodb 2.0.0</entry>
+        <entry>
+         此类已被移除。
+        </entry>
+       </row>
+'>
+
+<!ENTITY mongodb.changelog.function-removed '
+       <row xmlns="http://docbook.org/ns/docbook">
+        <entry>PECL mongodb 2.0.0</entry>
+        <entry>
+         此函数已被移除。
+        </entry>
+       </row>
+'>
+
+<!ENTITY mongodb.changelog.method-removed '
+       <row xmlns="http://docbook.org/ns/docbook">
+        <entry>PECL mongodb 2.0.0</entry>
+        <entry>
+         此方法已被移除。
+        </entry>
+       </row>
+'>
+
+<!ENTITY mongodb.changelog.serializable-interface-removed '
+       <row xmlns="http://docbook.org/ns/docbook">
+        <entry>PECL mongodb 2.0.0</entry>
+        <entry>
+         <para>
+          此类不再实现 <interfacename>Serializable</interfacename> 接口。
+         </para>
+        </entry>
+       </row>
+'>
+
 <!ENTITY mongodb.changelog.tentative-return-types '
        <row xmlns="http://docbook.org/ns/docbook">
         <entry>PECL mongodb 1.15.0</entry>
         <entry>
-         Return types for methods are declared as tentative on PHP 8.0 and newer,
-         triggering deprecation notices in code that implements this interface
-         without declaring the appropriate return types. The <code>#[ReturnTypeWillChange]</code>
-         attribute can be added to silence the deprecation notice.
+         在 PHP 8.0 及更高版本中，方法的返回类型被声明为暂定（tentative），
+         这会导致在实现该接口但未声明相应返回类型的代码中触发弃用提示。
+         可以添加 <code>#[ReturnTypeWillChange]</code> 属性来消除该弃用提示。
         </entry>
        </row>
 '>
+
+<!ENTITY mongodb.changelog.tentative-return-types-enforced '
+       <row xmlns="http://docbook.org/ns/docbook">
+        <entry>PECL mongodb 2.0.0</entry>
+        <entry>
+         之前声明为暂定的返回类型现在已被强制执行。
+        </entry>
+       </row>
+'>
+
+<!ENTITY mongodb.changelog.throw-unacknowledged-write '
+       <row xmlns="http://docbook.org/ns/docbook">
+        <entry>PECL mongodb 2.0.0</entry>
+        <entry>
+         <para>
+          当针对未确认写入调用此方法时，现在会抛出异常，而不是返回 &null;。
+         </para>
+        </entry>
+       </row>
+'>
+
 
 <!ENTITY mongodb.option.collation '
          <row xmlns="http://docbook.org/ns/docbook">
@@ -3594,6 +3652,7 @@ local: {
 <!ENTITY mongodb.throws.authentication '<member xmlns="http://docbook.org/ns/docbook">Throws <classname>MongoDB\Driver\Exception\AuthenticationException</classname> if authentication is needed and fails.</member>'>
 <!ENTITY mongodb.throws.connection '<member xmlns="http://docbook.org/ns/docbook">Throws <classname>MongoDB\Driver\Exception\ConnectionException</classname> if connection to the server fails (for reasons other than authentication).</member>'>
 <!ENTITY mongodb.throws.bson.unexpected '<member xmlns="http://docbook.org/ns/docbook">Throws <classname>MongoDB\Driver\Exception\UnexpectedValueException</classname> if the input did not contain exactly one BSON document. Possible reasons include, but are not limited to, invalid BSON, extra data (after reading one BSON document), or an unexpected <link xlink:href="&url.mongodb.libbson;" xmlns:xlink="http://www.w3.org/1999/xlink">libbson</link> error.</member>'>
+<!ENTITY mongodb.throws.unacknowledged '<member xmlns="http://docbook.org/ns/docbook">Throws <classname>MongoDB\Driver\Exception\LogicException</classname> if the write was not acknowledged.</member>'>
 
 <!-- Not used in EN anymore -->
 <!ENTITY mongodb.note.queryable-encryption-preview ''>
@@ -3948,51 +4007,56 @@ local: {
    </para>
   </formalpara>
 
-  <para>
-   <table>
-    <title>标志</title>
-    <tgroup cols="2">
-     <thead>
-      <row>
-       <entry>标志</entry>
-       <entry>&Description;</entry>
-      </row>
-     </thead>
-     <tbody>
-      <row>
-       <entry><literal>-</literal></entry>
-       <entry>
-        在指定字段宽度时左对齐，默认右对齐
-       </entry>
-      </row>
-      <row>
-       <entry><literal>+</literal></entry>
-       <entry>
-        正数的加号 <literal>+</literal>前缀，默认负数的前缀是负号。
-       </entry>
-      </row>
-      <row>
-       <entry><literal> </literal>(space)</entry>
-       <entry>
-        空格填充结果。这是默认设置。
-       </entry>
-      </row>
-      <row>
-       <entry><literal>0</literal></entry>
-       <entry>
-        仅用 0 进行左侧数字填充。使用 <literal>s</literal> 标志符可以右侧填充。
-       </entry>
-      </row>
-      <row>
-       <entry><literal>&apos;</literal>(char)</entry>
-       <entry>
-        用字符（char）填充结果。
-       </entry>
-      </row>
-     </tbody>
-    </tgroup>
-   </table>
-  </para>
+  <formalpara>
+   <title>标志</title>
+   <para>
+    <informaltable>
+     <tgroup cols="2">
+      <thead>
+       <row>
+        <entry>标志</entry>
+        <entry>&Description;</entry>
+       </row>
+      </thead>
+      <tbody>
+       <row>
+        <entry><literal>-</literal></entry>
+        <entry>
+         在给定字段宽度内左对齐；右对齐是默认值
+        </entry>
+       </row>
+       <row>
+        <entry><literal>+</literal></entry>
+        <entry>
+         在给定字段宽度内为正数添加加号前缀
+         <literal>+</literal>；默认情况下，只有负数才会添加负号前缀。
+        </entry>
+       </row>
+       <row>
+        <entry><literal> </literal>(space)</entry>
+        <entry>
+         用空格填充结果。
+         这是默认值。
+        </entry>
+       </row>
+       <row>
+        <entry><literal>0</literal></entry>
+        <entry>
+         仅对数字进行左侧零填充。
+         对于 <literal>s</literal> 说明符，也可以右侧用零填充。
+        </entry>
+       </row>
+       <row>
+        <entry><literal>&apos;</literal>(char)</entry>
+        <entry>
+         用字符（char）填充结果。
+        </entry>
+       </row>
+      </tbody>
+     </tgroup>
+    </informaltable>
+   </para>
+  </formalpara>
 
   <formalpara>
    <title>Width</title>
