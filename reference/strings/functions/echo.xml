@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 2a5223230bf6177c225003ca30c63f48ef266cc0 Maintainer: daijie Status: ready -->
+<!-- EN-Revision: 45042fef652f1b4e904e809fcbfcf31f6c60670b Maintainer: daijie Status: ready -->
 <!-- CREDITS: mowangjuanzi -->
 <refentry xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://docbook.org/ns/docbook" xml:id="function.echo">
  <refnamediv>
@@ -101,15 +101,26 @@ echo implode(" and ", $fruits); // lemon and orange and banana
 // 即使使用 declare(strict_types=1)，非字符串表达式也会强制转换字符串
 echo 6 * 7; // 42
 
-// 因为 echo 的表现跟表达式不同，所以下面的代码无效。
-($some_var) ? echo 'true' : echo 'false';
-
 // 但是，下面的示例又正常：
 ($some_var) ? print 'true' : print 'false'; // print 也是语言结构，
                                             // 但它是有效的表达式，返回 1，
                                             // 所以可以在此上下文中使用。
 
 echo $some_var ? 'true': 'false'; // 首先运行表达式然后传递它到 echo
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+  <para>
+   <example>
+    <title><literal>echo</literal> 不是表达式</title>
+    <programlisting role="php" annotations="non-interactive">
+<![CDATA[
+<?php
+
+// 因为 echo 的行为与表达式不同，所以下面的代码无效。
+($some_var) ? echo 'true' : echo 'false';
 ?>
 ]]>
     </programlisting>
@@ -128,32 +139,44 @@ echo $some_var ? 'true': 'false'; // 首先运行表达式然后传递它到 ech
     后的单个参数并不会引发语法错误，而且还会产生看起来像普通函数调用的语法。但是，这可能会产生误导，因为括号实际上是输出表达式的一部分，而不是
     <literal>echo</literal> 语法本身的一部分。
 
-    <informalexample>
+    <example>
+     <title>使用括号</title>
      <programlisting role="php">
      <![CDATA[
 <?php
-echo "hello";
+echo "hello", PHP_EOL;
 // 输出“hello”
 
-echo("hello");
+echo("hello"), PHP_EOL;
 // 也会输出“hello”，因为 ("hello") 是有效表达式
 
-echo(1 + 2) * 3;
+echo(1 + 2) * 3, PHP_EOL;
 // 输出“9”；首先对括号内的 1+2 求值，然后 echo 语句将 
 // 整个表达式 3*3 视为一个参数
 
-echo "hello", " world";
+echo "hello", " world", PHP_EOL;
 // 输出“hello world”
 
-echo("hello"), (" world");
+echo("hello"), (" world"), PHP_EOL;
 // 输出“hello world”；括号是每个表达式的一部分
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
 
-echo("hello", " world");
+  <para>
+    <example>
+     <title>无效表达式</title>
+     <programlisting role="php" annotations="non-interactive">
+     <![CDATA[
+<?php
+echo("hello", " world"), PHP_EOL;
 // 抛出解析错误，因为 ("hello", " world") 不是有效的表达式
 ?>
 ]]>
     </programlisting>
-   </informalexample>
+   </example>
   </para>
   </note>
 
