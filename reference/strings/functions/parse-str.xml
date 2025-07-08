@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 5d7f95f58f99eb121d25348370ee6146c0442b0c Maintainer: daijie Status: ready -->
-<!-- CREDITS: Luffy -->
+<!-- EN-Revision: da15b6674ac1900c7d065bd746a04b53d7e963bf Maintainer: daijie Status: ready -->
+<!-- CREDITS: Luffy, mowangjuanzi -->
 <refentry xml:id="function.parse-str" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>parse_str</refname>
-  <refpurpose>将字符串解析成多个变量</refpurpose>
+  <refpurpose>解析 URL 查询字符串</refpurpose>
  </refnamediv>
  
  <refsect1 role="description">
@@ -16,7 +16,8 @@
    <methodparam><type>array</type><parameter role="reference">result</parameter></methodparam>
   </methodsynopsis>
   <para>
-   如果 <parameter>string</parameter> 是 URL 传递入的查询字符串（query string），则将它解析为变量并设置到当前作用域（如果提供了 <parameter>result</parameter> 则会设置到该数组里 ）。
+   如果 <parameter>string</parameter> 是通过 URL 传入的查询字符串，则将其解析，并将 key 设置到指定 <parameter>result</parameter>
+   数组中。如果未提供 <parameter>result</parameter> 数组，则会将值设置为当前作用域中的变量。
   </para>
  </refsect1>
 
@@ -36,8 +37,8 @@
      <term><parameter>result</parameter></term>
      <listitem>
       <para>
-       如果设置了第二个变量 <parameter>result</parameter>，
-       变量将会以数组元素的形式存入到这个数组，作为替代。
+       以引用方式传递的变量，该变量将设置为数组，包含从 <parameter>string</parameter> 中提取的 key-value
+       对。如果未传入 <parameter>result</parameter> 参数，则每个 key 都会在局部作用域中设置为单独的变量。
       </para>
 
       <warning>
@@ -103,31 +104,23 @@ $str = "first=value&arr[]=foo+bar&arr[]=baz";
 
 // 推荐用法
 parse_str($str, $output);
-echo $output['first'];  // value
-echo $output['arr'][0]; // foo bar
-echo $output['arr'][1]; // baz
-
-// 不建议这么用
-parse_str($str);
-echo $first;  // value
-echo $arr[0]; // foo bar
-echo $arr[1]; // baz
+echo $output['first'], PHP_EOL;  // value
+echo $output['arr'][0], PHP_EOL; // foo bar
+echo $output['arr'][1], PHP_EOL; // baz
 ?>
 ]]>
     </programlisting>
    </example>
   </para>
   <para>
-   由于 PHP 的变量名不能带「点」和「空格」，所以它们会被转化成下划线。
-   用本函数带 <parameter>result</parameter> 参数，也会应用同样规则到数组的键名。
+   在创建数组 key 或局部变量时，参数名中的「空格」和「点」均会转换为下划线。这是因为 PHP
+   变量名不允许包含空格或点号，即使按推荐方式使用 <parameter>result</parameter>
+   参数传递数组，此规则依然适用。
    <example>
     <title><function>parse_str</function> 名称改写</title>
     <programlisting role="php">
 <![CDATA[
 <?php
-parse_str("My Value=Something");
-echo $My_Value; // Something
-
 parse_str("My Value=Something", $output);
 echo $output['My_Value']; // Something
 ?>
@@ -142,7 +135,7 @@ echo $output['My_Value']; // Something
 
   <note>
    <para>
-    <function>parse_str()</function> 是受 <link linkend="ini.max-input-vars">max_input_vars</link>
+    <function>parse_str</function> 是受 <link linkend="ini.max-input-vars">max_input_vars</link>
     指令影响的。超过这个限制会触发一个 <constant>E_WARNING</constant>，
     超过限制的变量不会被添加到结果数组中。
     默认值是 1000；根据需要调整 <link linkend="ini.max-input-vars">max_input_vars</link>。
@@ -151,16 +144,14 @@ echo $output['My_Value']; // Something
 
   <note>
    <para>
-    所有创建的变量(或者在设置第二个参数的情况下，返回数组里的值)，
-    都已经 <function>urldecode</function> 了。
+    填充到 <parameter>result</parameter> 数组中的所有值（如果未设置第二个参数，则为创建变量）均已按照与
+    <function>urldecode</function> 相同的规则进行了 URL 解码。
    </para>
   </note>
   <note>
    <para>
-    要获取当前的 <literal>QUERY_STRING</literal>，可以使用
-    <varname>$_SERVER['QUERY_STRING']</varname> 变量。
-    所以你可能想要阅读
-    <link linkend="language.variables.external">来自 PHP 之外的变量</link>这个章节。
+    要获取当前请求的查询字符串，可以使用 <varname>$_SERVER['QUERY_STRING']</varname> 变量。此外建议阅读<link
+    linkend="language.variables.external">来自 PHP 之外的变量</link>的相关章节。
    </para>
   </note>
  </refsect1>
