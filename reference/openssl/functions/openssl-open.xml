@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 5bc68add3da3cd18c40f851e944b15095d3a26aa Maintainer: duanxiaoqiang Status: ready -->
+<!-- EN-Revision: 730fd5c3dd1523bb9330762084ce016d4e58e946 Maintainer: duanxiaoqiang Status: ready -->
 <!-- CREDITS: mowangjuanzi, Luffy -->
 <refentry xml:id="function.openssl-open" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
@@ -20,9 +20,9 @@
    <methodparam choice="opt"><type class="union"><type>string</type><type>null</type></type><parameter>iv</parameter><initializer>&null;</initializer></methodparam>
   </methodsynopsis>
   <para>
-   <function>openssl_open</function> 使用与密钥标识符 <parameter>private_key</parameter> 和信封密钥
-   <parameter>encrypted_key</parameter> 相关联的私钥打开（解密）<parameter>data</parameter> 数据, 使用解密后的数据填充
-   <parameter>output</parameter>。当数据被密封时，就生成了信封密钥且只能由一个特定的私钥使用。更多信息参见<function>openssl_seal</function>。
+   <function>openssl_open</function> 使用通过 <parameter>private_key</parameter> 从 <parameter>encrypted_key</parameter> 解密得到的信封密钥来打开/解密
+   <parameter>data</parameter>。解密过程采用 <parameter>cipher_algo</parameter> 和 <parameter>iv</parameter>。仅当加密方法需要时，才需提供
+   iv。该函数将解密后的数据填充至 <parameter>output</parameter>。信封密钥通常在使用与私钥对应的公钥密封数据时生成。更多信息请参阅 <function>openssl_seal</function>。
   </para>
  </refsect1>
 
@@ -34,6 +34,7 @@
      <term><parameter>data</parameter></term>
      <listitem>
       <para>
+       密封数据。
       </para>
      </listitem>
     </varlistentry>
@@ -49,6 +50,7 @@
      <term><parameter>encrypted_key</parameter></term>
      <listitem>
       <para>
+       可使用 <parameter>private_key</parameter> 解密的对称加密密钥。
       </para>
      </listitem>
     </varlistentry>
@@ -56,6 +58,7 @@
      <term><parameter>private_key</parameter></term>
      <listitem>
       <para>
+       用于解密 <parameter>encrypted_key</parameter> 的私钥。
       </para>
      </listitem>
     </varlistentry>
@@ -63,10 +66,10 @@
      <term><parameter>cipher_algo</parameter></term>
      <listitem>
       <para>
-       加解密算法。
+       用于解密 <parameter>data</parameter> 的密码算法。
        <caution>
         <simpara>
-         默认值（<literal>'RC4'</literal>）认为不安全。强烈建议明确指定安全密码方法。
+         PHP 8.0 之前版本的默认值为（<literal>'RC4'</literal>），该算法存在安全隐患。强烈建议明确指定安全密码方法。
         </simpara>
        </caution>
       </para>
@@ -76,7 +79,8 @@
      <term><parameter>iv</parameter></term>
      <listitem>
       <para>
-       初始化向量。
+       用于解密 <parameter>data</parameter> 的初始化向量。当密码算法需要 IV 时，必须提供该参数。可通过调用
+       <function>openssl_cipher_iv_length</function> 并传入 <parameter>cipher_algo</parameter> 来确认是否需要 IV。
       </para>
      </listitem>
     </varlistentry>
@@ -129,24 +133,19 @@
     <programlisting role="php">
 <![CDATA[
 <?php
-// $sealed and $env_key are assumed to contain the sealed data
-// and our envelope key, both given to us by the sealer.
 
-// fetch private key from file and ready it
-$fp = fopen("/src/openssl-0.9.6/demos/sign/key.pem", "r");
-$priv_key = fread($fp, 8192);
-fclose($fp);
-$pkeyid = openssl_get_privatekey($priv_key);
+// $sealed、$env_key 和 $iv 分别假设包含密封数据、信封密钥和初始化向量，这些参数均由数据密封方提供。
 
-// decrypt the data and store it in $open
-if (openssl_open($sealed, $open, $env_key, $pkeyid)) {
-    echo "here is the opened data: ", $open;
+// 从 private_key.pem 文件中获取私钥
+$pkey = openssl_get_privatekey("file://private_key.pem");
+
+// 解密数据并存储到 $open
+if (openssl_open($sealed, $open, $env_key, $pkey, 'AES256', $iv)) {
+    echo "Here is the opened data: ", $open;
 } else {
-    echo "failed to open data";
+    echo "Failed to open data";
 }
 
-// free the private key from memory
-openssl_free_key($pkeyid);
 ?>
 ]]>
     </programlisting>
