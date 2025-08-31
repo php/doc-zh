@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 65f1e1978c89ba3ba24d8eff0907dedfac5fd5bb Maintainer: mowangjuanzi Status: ready -->
+<!-- EN-Revision: b6c220c748034c8db2d007ef42b74b212ac2f1cd Maintainer: mowangjuanzi Status: ready -->
 <appendix xml:id="memcached.constants" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  &reftitle.constants;
  &extension.constants;
@@ -10,23 +10,80 @@
    <term><constant>Memcached::OPT_COMPRESSION</constant></term>
    <listitem>
     <para>
-    开启或关闭压缩功能。当开启的时候，item 的值超过某个阈值（当前是 100 bytes）时，会首先对值进行压缩然后存储，并
-    在获取该值时进行解压缩然后返回，使得压缩对应用层透明。
+    开启或关闭负载压缩。开启后，item 值的长度超过特定阈值（当前是 2000 字节）时，会对值压缩并存储，在检索时会以透明方式解压缩。可以使用
+    <link linkend="ini.memcached.compression-threshold">memcached.compression_threshold</link> INI 配置来设置阈值。
     </para>
-    <para>类型：&boolean;，默认：&true;。</para>
+    <para>类型：<type>bool</type>，默认：&true;。</para>
+   </listitem>
+  </varlistentry>
+
+  <varlistentry xml:id="memcached.constants.opt-compression-type">
+   <term><constant>Memcached::OPT_COMPRESSION_TYPE</constant></term>
+   <listitem>
+    <simpara>
+     如果启用了压缩，则指定要使用的压缩算法。有效的算法包括
+     <constant>Memcached::COMPRESSION_FASTLZ</constant>、<constant>Memcached::COMPRESSION_ZLIB</constant> 和
+     <constant>Memcached::COMPRESSION_ZSTD</constant>。
+    </simpara>
+    <para>类型：<type>int</type>，默认：<constant>Memcached::COMPRESSION_FASTLZ</constant>。</para>
+   </listitem>
+  </varlistentry>
+
+  <varlistentry xml:id="memcached.constants.compression-fastlz">
+   <term><constant>Memcached::COMPRESSION_FASTLZ</constant></term>
+   <listitem>
+    <simpara>
+     FASTLZ 压缩算法。
+    </simpara>
+   </listitem>
+  </varlistentry>
+
+  <varlistentry xml:id="memcached.constants.compression-zlib">
+   <term><constant>Memcached::COMPRESSION_ZLIB</constant></term>
+   <listitem>
+    <simpara>ZLIB 压缩算法。</simpara>
+   </listitem>
+  </varlistentry>
+
+  <varlistentry xml:id="memcached.constants.compression-zstd">
+   <term><constant>Memcached::COMPRESSION_ZSTD</constant></term>
+   <listitem>
+    <simpara>
+     ZSTD 压缩算法。
+    </simpara>
+    <simpara>
+     自 Memcached 3.3.0 起可用。
+    </simpara>
+   </listitem>
+  </varlistentry>
+
+  <varlistentry xml:id="memcached.constants.opt-compression-level">
+   <term><constant>Memcached::OPT_COMPRESSION_LEVEL</constant></term>
+   <listitem>
+    <simpara>
+     如果启用了压缩，则指定要使用的压缩级别。
+    </simpara>
+    <simplelist>
+     <member><constant>Memcached::COMPRESSION_FASTLZ</constant> 不支持压缩级别。</member>
+     <member><constant>Memcached::COMPRESSION_ZSTD</constant>：最低级别为 <literal>-22</literal>，最高级别为 <literal>22</literal>。</member>
+     <member><constant>Memcached::COMPRESSION_ZLIB</constant>：最低级别为 <literal>0</literal>，最高级别为 <literal>9</literal>。</member>
+    </simplelist>
+    <para>类型：<type>int</type>，默认：<literal>3</literal>。</para>
    </listitem>
   </varlistentry>
 
   <varlistentry xml:id="memcached.constants.opt-serializer">
    <term><constant>Memcached::OPT_SERIALIZER</constant></term>
    <listitem>
+    <simpara>
+     指定对于非标量值进行序列化的序列化工具。可用的值有
+     <constant>Memcached::SERIALIZER_PHP</constant>、<constant>Memcached::SERIALIZER_IGBINARY</constant>、<constant>Memcached::SERIALIZER_JSON</constant>、<constant>Memcached::SERIALIZER_JSON_ARRAY</constant>
+     和 <constant>Memcached::SERIALIZER_MSGPACK</constant>。
+    </simpara>
     <para>
-     指定对于非标量值进行序列化的序列化工具。可用的值有 <constant>Memcached::SERIALIZER_PHP</constant>
-     和 <constant>Memcached::SERIALIZER_IGBINARY</constant>。后者仅在 memcached 配置时开启
-     <literal>--enable-memcached-igbinary</literal> 选项并且
-     <literal>igbinary</literal> 扩展被加载时才有效。
+     类型：<type>int</type>，默认：优先 <constant>Memcached::SERIALIZER_IGBINARY</constant>（如果有效），其次
+     <constant>Memcached::SERIALIZER_MSGPACK</constant>（如果有效），最后 <constant>Memcached::SERIALIZER_PHP</constant>。
     </para>
-    <para>类型：&integer;，默认：<constant>Memcached::SERIALIZER_PHP</constant>。</para>
    </listitem>
   </varlistentry>
 
@@ -40,38 +97,64 @@
   <varlistentry xml:id="memcached.constants.serializer-igbinary">
    <term><constant>Memcached::SERIALIZER_IGBINARY</constant></term>
    <listitem>
-    <para><link xlink:href="&url.igbinary;">igbinary</link> 序列化工具。它将 php 的数据结构
-    存储为紧密的二进制形式，在时间和空间上都有所改进。
-    </para>
+    <simpara>
+     <link linkend="book.igbinary">igbinary</link> 序列化工具。它将 php 的数据结构
+     存储为紧密的二进制形式，而非文本表示，从而节省时间和空间。
+    </simpara>
+    <simpara>
+     仅当 memcached 配置了 <option>--enable-memcached-igbinary</option> 选项并加载了
+     <link linkend="intro.igbinary">igbinary</link> 扩展时，才支持此序列化器。
+    </simpara>
    </listitem>
   </varlistentry>
 
   <varlistentry xml:id="memcached.constants.serializer-json">
    <term><constant>Memcached::SERIALIZER_JSON</constant></term>
    <listitem>
-    <para>JSON序列化。</para>
+    <para>JSON 序列化器。此序列化器将 JSON 反序列化为对象。</para>
+   </listitem>
+  </varlistentry>
+
+  <varlistentry xml:id="memcached.constants.serializer-json-array">
+   <term><constant>Memcached::SERIALIZER_JSON_ARRAY</constant></term>
+   <listitem>
+    <simpara>
+     JSON 数组序列化器。此序列化器将 JSON 反序列化为关联数组
+    </simpara>
+   </listitem>
+  </varlistentry>
+
+  <varlistentry xml:id="memcached.constants.serializer-msgpack">
+   <term><constant>Memcached::SERIALIZER_MSGPACK</constant></term>
+   <listitem>
+    <simpara>
+     <link xlink:href="&url.pecl.package;msgpack">MessagePack</link> 序列化器。
+    </simpara>
+    <simpara>
+     仅当 memcached 配置了 <option>--enable-memcached-msgpack</option> 选项并加载了 <literal>msgpack</literal> 扩展时，才支持此序列化器。
+    </simpara>
    </listitem>
   </varlistentry>
 
   <varlistentry xml:id="memcached.constants.opt-prefix-key">
    <term><constant>Memcached::OPT_PREFIX_KEY</constant></term>
    <listitem>
-    <para>
-    可以用于为 key 创建“域”。这个值将会被作为每个 key 的前缀，它不能长于 <literal>128</literal> 个字符，
-    并且将会缩短最大可允许的 key 的长度。这个前缀仅仅用于被存储的元素的 key，而不会用于服务器 key。
-    </para>
-    <para>类型：&string;，默认：<literal>""</literal>。</para>
+    <simpara>
+     可以用于为 key 创建“域”。这个值将会被作为每个 key 的前缀，它不能长于 <literal>128</literal> 个字符，
+     并且将会缩短最大可允许的 key 的长度。这个前缀仅仅用于被存储的元素的 key，而不会用于服务器 key。
+    </simpara>
+    <para>类型：<type>string</type>，默认：<literal>""</literal>。</para>
    </listitem>
   </varlistentry>
 
   <varlistentry xml:id="memcached.constants.opt-hash">
    <term><constant>Memcached::OPT_HASH</constant></term>
    <listitem>
-    <para>
-    指定存储元素 key 使用的 hash 算法。可用的值是 <constant>Memcached::HASH_*</constant> 系列的常量。
-    每种 hash 算法都有它的优势和劣势，在你不了解或不确定哪种算法对你更有利时，请使用默认值。
-    </para>
-    <para>类型：&integer;，默认：<constant>Memcached::HASH_DEFAULT</constant></para>
+    <simpara>
+     指定存储元素 key 使用的散列算法。可用的值通过 <constant>Memcached::HASH_<replaceable>*</replaceable></constant>
+     常量提供。每种散列算法均有其优缺点。若无特定需求或不了解差异，建议使用默认值。
+    </simpara>
+    <para>类型：<type>int</type>，默认：<constant>Memcached::HASH_DEFAULT</constant></para>
    </listitem>
   </varlistentry>
 
@@ -141,11 +224,11 @@
   <varlistentry xml:id="memcached.constants.opt-distribution">
    <term><constant>Memcached::OPT_DISTRIBUTION</constant></term>
    <listitem>
-    <para>
-    指定元素 key 分布到各个服务器的方法。当前支持的方法有余数分步法合一致性 hash 算法两种。一致性 hash 算法提供
-    了更好的分配策略并且在添加服务器到集群时可以最小化缓存丢失。
-    </para>
-    <para>类型：&integer;，默认:：<constant>Memcached::DISTRIBUTION_MODULA</constant>。</para>
+    <simpara>
+     指定元素 key 分布到各个服务器的方法。当前支持的方法有余数分步法合一致性 hash 算法两种。一致性 hash 算法提供
+     了更好的分配策略并且在添加服务器到集群时可以最小化缓存丢失。
+    </simpara>
+    <para>类型：<type>int</type>，默认:：<constant>Memcached::DISTRIBUTION_MODULA</constant>。</para>
    </listitem>
   </varlistentry>
 
@@ -163,6 +246,15 @@
    </listitem>
   </varlistentry>
 
+  <varlistentry xml:id="memcached.constants.distribution-virtual-bucket">
+   <term><constant>Memcached::DISTRIBUTION_VIRTUAL_BUCKET</constant></term>
+   <listitem>
+    <simpara>
+     虚拟桶（bucket）散列 key 分布算法（也称为 vbucket）。
+    </simpara>
+   </listitem>
+  </varlistentry>
+
   <varlistentry xml:id="memcached.constants.opt-libketama-compatible">
    <term><constant>Memcached::OPT_LIBKETAMA_COMPATIBLE</constant></term>
    <listitem>
@@ -173,52 +265,73 @@
     </para>
     <note>
      <para>
-      如果你要使用一致性 hash 算法强烈建议开启此选项，并且这个选项可能在未来的发布版中被设置为默认开启。
+      如果要使用一致性 hash 算法强烈建议开启此选项，并且这个选项可能在未来的发布版中被设置为默认开启。
      </para>
     </note>
-    <para>类型：<literal>boolean</literal>，默认：&false;。</para>
+    <para>类型：<type>bool</type>，默认：&false;。</para>
+   </listitem>
+  </varlistentry>
+
+  <varlistentry xml:id="memcached.constants.opt-libketama-hash">
+   <term><constant>Memcached::OPT_LIBKETAMA_HASH</constant></term>
+   <listitem>
+    <simpara>
+     指定用于主机映射的散列算法。
+    </simpara>
+    <para>类型：<type>int</type>。</para>
+   </listitem>
+  </varlistentry>
+
+  <varlistentry xml:id="memcached.constants.opt-tcp-keepalive">
+   <term><constant>Memcached::OPT_TCP_KEEPALIVE</constant></term>
+   <listitem>
+    <simpara>
+     启用 TCP 保活（keep alive）。
+    </simpara>
+    <para>类型：<type>bool</type>，默认:：&false;。</para>
    </listitem>
   </varlistentry>
 
   <varlistentry xml:id="memcached.constants.opt-buffer-writes">
    <term><constant>Memcached::OPT_BUFFER_WRITES</constant></term>
    <listitem>
-    <para>
+    <simpara>
      开启或关闭 I/O 缓存。开启 I/O 缓存会导致存储命令不实际发送而是存储到缓冲区中。任意的检索数据操作都会导致
      缓存中的数据被发送到远程服务端。退出连接或关闭连接也会导致缓存数据被发送到远程服务端。
-    </para>
-    <para>类型：<literal>boolean</literal>，默认：&false;。</para>
+    </simpara>
+    <para>类型：<type>bool</type>，默认：&false;。</para>
    </listitem>
   </varlistentry>
 
   <varlistentry xml:id="memcached.constants.opt-binary-protocol">
    <term><constant>Memcached::OPT_BINARY_PROTOCOL</constant></term>
    <listitem>
-    <para>
+    <simpara>
      开启使用二进制协议。请注意这个选项不能在一个打开的连接上进行切换。
-    </para>
-    <para>类型：<literal>boolean</literal>，默认：&false;。</para>
+    </simpara>
+    <para>类型：<type>bool</type>，默认：&false;。</para>
    </listitem>
   </varlistentry>
 
   <varlistentry xml:id="memcached.constants.opt-no-block">
    <term><constant>Memcached::OPT_NO_BLOCK</constant></term>
    <listitem>
-    <para>
+    <simpara>
      开启或关闭异步 I/O。这将使得存储函数传输速度最大化。
-    </para>
-    <para>类型：<literal>boolean</literal>，默认：&false;。</para>
+    </simpara>
+    <para>类型：<type>bool</type>，默认：&false;。</para>
    </listitem>
   </varlistentry>
 
   <varlistentry xml:id="memcached.constants.opt-noreply">
    <term><constant>Memcached::OPT_NOREPLY</constant></term>
    <listitem>
-    <para>
-     启用或禁用忽略存储命令的结果（set、add、replace、append、prepend、delete、increment、decrement
-     等）。存储命令将会直接发送而无需花费时间等待回复（没有回复）。Memcached::get() 等检索命令不受此设置的影响。
-    </para>
-    <para>类型：&boolean;，默认：&false;。</para>
+    <simpara>
+     启用或禁用忽略存储命令（set、add、replace、append、prepend、delete、increment、decrement
+     等）的结果。存储命令将直接发送而无需等待响应（也不会返回响应）。检索命令（如
+     <methodname>Memcached::get</methodname>）不受此设置影响。
+    </simpara>
+    <para>类型：<type>bool</type>，默认：&false;。</para>
    </listitem>
   </varlistentry>
 
@@ -226,115 +339,222 @@
    <term><constant>Memcached::OPT_TCP_NODELAY</constant></term>
    <listitem>
     <para>
-     开启或关闭已连接 socket 的无延迟特性（在某些幻境可能会带来速度上的提升）。
+     启用或禁用连接套接字的无延迟特性（在某些环境中可能提升速度）。
     </para>
-    <para>类型：<literal>boolean</literal>，默认：&false;。</para>
+    <para>类型：<type>bool</type>，默认：&false;。</para>
    </listitem>
   </varlistentry>
 
   <varlistentry xml:id="memcached.constants.opt-socket-send-size">
    <term><constant>Memcached::OPT_SOCKET_SEND_SIZE</constant></term>
    <listitem>
-    <para>socket 发送缓冲的最大值。</para>
-    <para>类型：&integer;，默认：根据不同的平台/内核配置不同</para>
+    <simpara>socket 发送缓冲的最大值。</simpara>
+    <para>类型：<type>int</type>，默认：根据不同的平台/内核配置不同</para>
    </listitem>
   </varlistentry>
 
   <varlistentry xml:id="memcached.constants.opt-socket-recv-size">
    <term><constant>Memcached::OPT_SOCKET_RECV_SIZE</constant></term>
    <listitem>
-    <para>socket 接收缓冲的最大值。</para>
-    <para>类型：&integer;，默认：根据不同的平台/内核配置不同</para>
+    <simpara>socket 接收缓冲的最大值。</simpara>
+    <para>类型：<type>int</type>，默认：根据不同的平台/内核配置不同</para>
    </listitem>
   </varlistentry>
 
   <varlistentry xml:id="memcached.constants.opt-connect-timeout">
    <term><constant>Memcached::OPT_CONNECT_TIMEOUT</constant></term>
    <listitem>
-    <para>在非阻塞模式下这里设置的值就是 socket 连接的超时时间，单位是毫秒。</para>
-    <para>类型：&integer;，默认：<literal>1000</literal>。</para>
+    <simpara>在非阻塞模式下，设置套接字连接期间的超时值，单位是毫秒。</simpara>
+    <para>类型：<type>int</type>，默认：<literal>1000</literal>。</para>
    </listitem>
   </varlistentry>
 
   <varlistentry xml:id="memcached.constants.opt-retry-timeout">
    <term><constant>Memcached::OPT_RETRY_TIMEOUT</constant></term>
    <listitem>
-    <para>
+    <simpara>
     等待失败的连接重试的时间，单位秒。
-    </para>
-    <para>类型：&integer;，默认：<literal>0</literal>。</para>
+    </simpara>
+    <para>类型：<type>int</type>，默认：<literal>2</literal>。</para>
+   </listitem>
+  </varlistentry>
+
+  <varlistentry xml:id="memcached.constants.opt-dead-timeout">
+   <term><constant>Memcached::OPT_DEAD_TIMEOUT</constant></term>
+   <listitem>
+    <simpara>
+     等待重试失效服务器的时间，单位为秒。<literal>0</literal> 表示不重试。
+    </simpara>
+    <para>类型：<type>int</type>，默认：<literal>0</literal>。</para>
    </listitem>
   </varlistentry>
 
   <varlistentry xml:id="memcached.constants.opt-send-timeout">
    <term><constant>Memcached::OPT_SEND_TIMEOUT</constant></term>
    <listitem>
-    <para>socket 发送超时时间，单位微秒。在这种情况下您不能使用非阻塞 I/O，这将使得您仍然有数据会发送超时。</para>
-    <para>类型：&integer;，默认：<literal>0</literal>。</para>
+    <simpara>socket 发送超时时间，单位微秒。在这种情况下您不能使用非阻塞 I/O，这将使得您仍然有数据会发送超时。</simpara>
+    <para>类型：<type>int</type>，默认：<literal>0</literal>。</para>
    </listitem>
   </varlistentry>
 
   <varlistentry xml:id="memcached.constants.opt-recv-timeout">
    <term><constant>Memcached::OPT_RECV_TIMEOUT</constant></term>
    <listitem>
-    <para>socket 读取超时时间，单位微秒。在这种情况下您不能使用非阻塞 I/O，这将使得您仍然有数据会读取超时。</para>
-    <para>类型：&integer;，默认：<literal>0</literal>。</para>
+    <simpara>socket 读取超时时间，单位微秒。在这种情况下您不能使用非阻塞 I/O，这将使得您仍然有数据会读取超时。</simpara>
+    <para>类型：<type>int</type>，默认：<literal>0</literal>。</para>
    </listitem>
   </varlistentry>
 
   <varlistentry xml:id="memcached.constants.opt-poll-timeout">
    <term><constant>Memcached::OPT_POLL_TIMEOUT</constant></term>
    <listitem>
-    <para>poll 连接超时时间，单位毫秒。</para>
-    <para>类型：&integer;，默认：<literal>1000</literal>。</para>
+    <simpara>poll 连接超时时间，单位毫秒。</simpara>
+    <para>类型：<type>int</type>，默认：<literal>1000</literal>。</para>
    </listitem>
   </varlistentry>
 
   <varlistentry xml:id="memcached.constants.opt-cache-lookups">
    <term><constant>Memcached::OPT_CACHE_LOOKUPS</constant></term>
    <listitem>
-    <para>开启或禁用 DNS 查找缓存。</para>
-    <para>类型：<literal>boolean</literal>，默认：&false;。</para>
+    <simpara>开启或禁用 DNS 查找缓存。</simpara>
+    <para>类型：<type>bool</type>，默认：&false;。</para>
    </listitem>
   </varlistentry>
 
   <varlistentry xml:id="memcached.constants.opt-server-failure-limit">
    <term><constant>Memcached::OPT_SERVER_FAILURE_LIMIT</constant></term>
    <listitem>
-    <para>指定一个服务器连接的失败重试次数限制。在达到此数量的失败重连后此服务器将被从服务器池中移除。</para>
-    <para>类型：&integer;，默认：<literal>0</literal>。</para>
+    <simpara>指定一个服务器连接的失败重试次数限制。在达到此数量的失败重连后此服务器将被从服务器池中移除。</simpara>
+    <para>类型：<type>int</type>，默认：<literal>5</literal>。</para>
+   </listitem>
+  </varlistentry>
+
+  <varlistentry xml:id="memcached.constants.opt-server-timeout-limit">
+   <term><constant>Memcached::OPT_SERVER_TIMEOUT_LIMIT</constant></term>
+   <listitem>
+    <simpara>
+     指定服务器连接尝试的超时限制。当连续连接超时次数达到此值后，将移除此服务器。
+    </simpara>
+    <para>类型：<type>int</type>，默认：<literal>0</literal>。</para>
+   </listitem>
+  </varlistentry>
+
+  <varlistentry xml:id="memcached.constants.opt-auto-eject-hosts">
+   <term><constant>Memcached::OPT_AUTO_EJECT_HOSTS</constant></term>
+   <listitem>
+    <para>
+     从列表中移除已禁用的服务器。需与 <constant>Memcached::OPT_SERVER_FAILURE_LIMIT</constant>
+     和 <constant>Memcached::OPT_SERVER_TIMEOUT_LIMIT</constant> 配合使用。
+    </para>
+    <note>
+     <para>
+      <constant>Memcached::OPT_REMOVE_FAILED_SERVERS</constant> 已取代此选项。
+     </para>
+    </note>
+    <para>类型：<type>bool</type>，默认：&false;。</para>
+   </listitem>
+  </varlistentry>
+
+  <varlistentry xml:id="memcached.constants.opt-verify-key">
+   <term><constant>Memcached::OPT_VERIFY_KEY</constant></term>
+   <listitem>
+    <simpara>
+     启用 memcached 对 key 的验证。
+    </simpara>
+    <para>类型：<type>bool</type>，默认：&false;。</para>
+   </listitem>
+  </varlistentry>
+
+  <varlistentry xml:id="memcached.constants.opt-use-udp">
+   <term><constant>Memcached::OPT_USE_UDP</constant></term>
+   <listitem>
+    <simpara>
+     使用 UDP 而非 TCP。
+    </simpara>
+    <para>类型：<type>bool</type>，默认：&false;。</para>
+   </listitem>
+  </varlistentry>
+
+  <varlistentry xml:id="memcached.constants.opt-number-of-replicas">
+   <term><constant>Memcached::OPT_NUMBER_OF_REPLICAS</constant></term>
+   <listitem>
+    <simpara>
+     在不同服务器上存储每个元素的指定数量的副本。
+    </simpara>
+    <para>类型：<type>int</type>，默认：<literal>0</literal>。</para>
+   </listitem>
+  </varlistentry>
+
+  <varlistentry xml:id="memcached.constants.opt-randomize-replica-reads">
+   <term><constant>Memcached::OPT_RANDOMIZE_REPLICA_READS</constant></term>
+   <listitem>
+    <simpara>
+     对副本读取服务器进行随机化。
+    </simpara>
+    <para>类型：<type>bool</type>，默认：&false;。</para>
+   </listitem>
+  </varlistentry>
+
+  <varlistentry xml:id="memcached.constants.opt-remove-failed-servers">
+   <term><constant>Memcached::OPT_REMOVE_FAILED_SERVERS</constant></term>
+   <listitem>
+    <simpara>
+     从列表中移除已禁用的服务器。需与 <constant>Memcached::OPT_SERVER_FAILURE_LIMIT</constant>
+     和 <constant>Memcached::OPT_SERVER_TIMEOUT_LIMIT</constant> 配合使用。
+    </simpara>
+    <para>类型：<type>bool</type>，默认：&false;。</para>
    </listitem>
   </varlistentry>
 
   <varlistentry xml:id="memcached.constants.have-igbinary">
    <term><constant>Memcached::HAVE_IGBINARY</constant></term>
    <listitem>
-    <para>指示是否支持 igbinary 的序列化。</para>
-    <para>类型：<literal>boolean</literal>。</para>
+    <simpara>指示是否支持 igbinary 的序列化。</simpara>
+    <para>类型：<type>bool</type>。</para>
    </listitem>
   </varlistentry>
 
   <varlistentry xml:id="memcached.constants.have-json">
    <term><constant>Memcached::HAVE_JSON</constant></term>
    <listitem>
-    <para>指示是否支持 json 的序列化。</para>
-    <para>类型：<literal>boolean</literal>。</para>
+    <simpara>指示是否支持 json 的序列化。</simpara>
+    <para>类型：<type>bool</type>。</para>
    </listitem>
   </varlistentry>
 
   <varlistentry xml:id="memcached.constants.have-msgpack">
    <term><constant>Memcached::HAVE_MSGPACK</constant></term>
    <listitem>
-    <para>表示 msgpack 序列化支持是否有效。</para>
-    <para>类型：&boolean;。</para>
+    <simpara>表示 MessagePack 序列化支持是否有效。</simpara>
+    <para>类型：<type>bool</type>。</para>
     <para>自 Memcached 3.0.0 起可用。</para>
+   </listitem>
+  </varlistentry>
+
+  <varlistentry xml:id="memcached.constants.have-zstd">
+   <term><constant>Memcached::HAVE_ZSTD</constant></term>
+   <listitem>
+    <simpara>表示是否支持 ZSTD 压缩。</simpara>
+    <para>类型：<type>bool</type>。</para>
+    <para>自 Memcached 3.3.0 起可用。</para>
+   </listitem>
+  </varlistentry>
+
+  <varlistentry xml:id="memcached.constants.have-encoding">
+   <term><constant>Memcached::HAVE_ENCODING</constant></term>
+   <listitem>
+    <simpara>
+     表示是否支持使用 <methodname>Memcached::setEncodingKey</methodname> 进行数据加密。
+    </simpara>
+    <para>类型：<type>bool</type>。</para>
+    <para>自 Memcached 3.1.0 起可用。</para>
    </listitem>
   </varlistentry>
 
   <varlistentry xml:id="memcached.constants.have-session">
    <term><constant>Memcached::HAVE_SESSION</constant></term>
    <listitem>
-    <para>类型：&boolean;.</para>
+    <para>类型：<type>bool</type>。</para>
     <para>自 Memcached 3.0.0 起可用。</para>
    </listitem>
   </varlistentry>
@@ -342,7 +562,7 @@
   <varlistentry xml:id="memcached.constants.have-sasl">
    <term><constant>Memcached::HAVE_SASL</constant></term>
    <listitem>
-    <para>类型：&boolean;。</para>
+    <para>类型：<type>bool</type>。</para>
     <para>自 Memcached 3.0.0 起可用。</para>
    </listitem>
   </varlistentry>
@@ -351,8 +571,8 @@
    <term><constant>Memcached::GET_EXTENDED</constant></term>
    <listitem>
     <para>
-     <function>Memcached::get</function>、<function>Memcached::getMulti</function> 和
-     <function>Memcached::getMultiByKey</function> 的 flag，确保返回 CAS 令牌值。
+     <methodname>Memcached::get</methodname>、<methodname>Memcached::getMulti</methodname> 和
+     <methodname>Memcached::getMultiByKey</methodname> 的 flag，确保返回 CAS 令牌值。
     </para>
     <para>自 Memcached 3.0.0 起可用。</para>
    </listitem>
@@ -362,9 +582,9 @@
    <term><constant>Memcached::GET_PRESERVE_ORDER</constant></term>
    <listitem>
     <para>
-     一个用于 <function>Memcached::getMulti</function> 和
-     <function>Memcached::getMultiByKey</function> 的标记用以确保返回的 key 和请求的 key 顺序保持一致。
-     不存在的 key 将会得到一个 NULL 值。</para>
+     用于 <methodname>Memcached::getMulti</methodname> 和 <methodname>Memcached::getMultiByKey</methodname>
+     的 flag 用以确保返回的 key 和请求的 key 顺序保持一致。不存在的 key 将会得到默认值 &null;。
+     </para>
    </listitem>
   </varlistentry>
 
@@ -434,14 +654,18 @@
   <varlistentry xml:id="memcached.constants.res-notstored">
    <term><constant>Memcached::RES_NOTSTORED</constant></term>
    <listitem>
-    <para>元素没有被存储，但并不是因为一个错误。这通常表明 add（元素已存在）或 replace（元素不存在）方式存储数据失败或者元素已经在一个删除序列中（延时删除）。</para>
+    <para>
+     元素未存储，但并非由于错误。这通常表明“add”（元素已存在）或“replace”（元素不存在）命令的条件不满足或者该元素位于删除序列中（延时删除）。
+    </para>
    </listitem>
   </varlistentry>
 
   <varlistentry xml:id="memcached.constants.res-notfound">
    <term><constant>Memcached::RES_NOTFOUND</constant></term>
    <listitem>
-    <para>元素未找到（通过 get 或 cas 操作时）。</para>
+    <para>
+     元素未找到（通过“get”或“cas”操作时）。
+    </para>
    </listitem>
   </varlistentry>
 
@@ -498,6 +722,76 @@
    <term><constant>Memcached::RES_BAD_KEY_PROVIDED</constant></term>
    <listitem>
     <para>提供了无效的 key。</para>
+   </listitem>
+  </varlistentry>
+
+  <varlistentry xml:id="memcached.constants.res-stored">
+   <term><constant>Memcached::RES_STORED</constant></term>
+   <listitem>
+    <simpara>元素已存储。</simpara>
+   </listitem>
+  </varlistentry>
+
+  <varlistentry xml:id="memcached.constants.res-deleted">
+   <term><constant>Memcached::RES_DELETED</constant></term>
+   <listitem>
+    <simpara>元素已删除。</simpara>
+   </listitem>
+  </varlistentry>
+
+  <varlistentry xml:id="memcached.constants.res-stat">
+   <term><constant>Memcached::RES_STAT</constant></term>
+   <listitem>
+    <simpara>统计数据。</simpara>
+   </listitem>
+  </varlistentry>
+
+  <varlistentry xml:id="memcached.constants.res-item">
+   <term><constant>Memcached::RES_ITEM</constant></term>
+   <listitem>
+    <simpara>元素。</simpara>
+   </listitem>
+  </varlistentry>
+
+  <varlistentry xml:id="memcached.constants.res-not-supported">
+   <term><constant>Memcached::RES_NOT_SUPPORTED</constant></term>
+   <listitem>
+    <simpara>不支持。</simpara>
+   </listitem>
+  </varlistentry>
+
+  <varlistentry xml:id="memcached.constants.res-fetch-notfinished">
+   <term><constant>Memcached::RES_FETCH_NOTFINISHED</constant></term>
+   <listitem>
+    <simpara>获取尚未完成。</simpara>
+   </listitem>
+  </varlistentry>
+
+  <varlistentry xml:id="memcached.constants.res-server-marked-dead">
+   <term><constant>Memcached::RES_SERVER_MARKED_DEAD</constant></term>
+   <listitem>
+    <simpara>服务器标记为失效</simpara>
+   </listitem>
+  </varlistentry>
+
+  <varlistentry xml:id="memcached.constants.res-unknown-stat-key">
+   <term><constant>Memcached::RES_UNKNOWN_STAT_KEY</constant></term>
+   <listitem>
+    <simpara>未知统计 key。</simpara>
+   </listitem>
+  </varlistentry>
+
+  <varlistentry xml:id="memcached.constants.res-invalid-host-protocol">
+   <term><constant>Memcached::RES_INVALID_HOST_PROTOCOL</constant></term>
+   <listitem>
+    <simpara>主机协议无效。</simpara>
+   </listitem>
+  </varlistentry>
+
+  <varlistentry xml:id="memcached.constants.res-memory-allocation-failure">
+   <term><constant>Memcached::RES_MEMORY_ALLOCATION_FAILURE</constant></term>
+   <listitem>
+    <simpara>内存分配失败。</simpara>
    </listitem>
   </varlistentry>
 

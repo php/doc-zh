@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 2c17cef6e71c3d85011319cde128cc4edf89a053 Maintainer: daijie Status: ready -->
+<!-- EN-Revision: 34f90a65914c900173f9a42331acc45bc53d8eee Maintainer: daijie Status: ready -->
 <!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="function.mb-detect-encoding" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
@@ -25,6 +25,16 @@
   <para>
    此函数适用于多字节编码，但并非所有字节顺序都构成有效字符串。如果输入字符串包含这样的顺序，则将会拒绝该编码，并检查下一个编码。
   </para>
+
+  <warning>
+   <title>结果不准确</title>
+   <para>
+    此函数的名称具有误导性，它执行的是“猜测”而不是“检测”。
+   </para>
+   <para>
+    猜测结果远非准确，因此无法使用此函数准确检测正确的字符编码。
+   </para>
+  </warning>
  </refsect1>
 
  <refsect1 role="parameters">
@@ -107,14 +117,17 @@
     <programlisting role="php">
 <![CDATA[
 <?php
-// 使用当前的 detect_order 来检测字符编码
-echo mb_detect_encoding($str);
 
-// "auto" 将根据 mbstring.language 来扩展
-echo mb_detect_encoding($str, "auto");
+$str = "\x95\xB6\x8E\x9A\x83\x52\x81\x5B\x83\x68";
+
+// 使用当前的 detect_order 来检测字符编码
+var_dump(mb_detect_encoding($str));
+
+// “auto”将根据 mbstring.language 来扩展
+var_dump(mb_detect_encoding($str, "auto"));
 
 // 通过以逗号分隔的列表指定“encodings”参数
-echo mb_detect_encoding($str, "JIS, eucjp-win, sjis-win");
+var_dump(mb_detect_encoding($str, "JIS, eucjp-win, sjis-win"));
 
 // 使用数组指定“encodings”参数
 $encodings = [
@@ -122,10 +135,19 @@ $encodings = [
   "JIS",
   "EUC-JP"
 ];
-echo mb_detect_encoding($str, $encodings);
+var_dump(mb_detect_encoding($str, $encodings));
 ?>
 ]]>
     </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+string(5) "ASCII"
+string(5) "ASCII"
+string(8) "SJIS-win"
+string(5) "ASCII"
+]]>
+    </screen>
    </example>
   </para>
   <para>
