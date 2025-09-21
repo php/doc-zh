@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: d43f29f6a628996d1b7c3be487dcff39450146bf Maintainer: HonestQiao Status: partial -->
+<!-- EN-Revision: d43f29f6a628996d1b7c3be487dcff39450146bf Maintainer: HonestQiao Status: ready -->
 <!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="function.mail" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
@@ -19,7 +19,7 @@
    <methodparam choice="opt"><type>string</type><parameter>additional_params</parameter><initializer>""</initializer></methodparam>
   </methodsynopsis>
   <para>
-   发送一封电子邮件。
+   发送邮件。
   </para>
  </refsect1>
 
@@ -118,32 +118,21 @@ $text = str_replace("\n.", "\n..", $text);
      <term><parameter>additional_params</parameter>（可选）</term>
      <listitem>
       <para>
-       The <parameter>additional_params</parameter> parameter
-       can be used to pass additional flags as command line options to the
-       program configured to be used when sending mail, as defined by the
-       <literal>sendmail_path</literal> configuration setting. For example,
-       this can be used to set the envelope sender address when using
-       sendmail with the <literal>-f</literal> sendmail option.
+       发送邮件时，<parameter>additional_params</parameter> 参数可用于将额外的 flag 作为命令行选项传递给通过
+       <literal>sendmail_path</literal> 配置项指定的邮件发送程序。例如，当使用 sendmail 并配合
+       <literal>-f</literal> 选项时，可通过此参数设置邮件发件人地址。
       </para>
       <para>
-       This parameter is escaped by <function>escapeshellcmd</function> internally
-       to prevent command execution. <function>escapeshellcmd</function> prevents
-       command execution, but allows to add additional parameters. For security reasons,
-       it is recommended for the user to sanitize this parameter to avoid adding unwanted
-       parameters to the shell command.
+       该参数在内部会经过 <function>escapeshellcmd</function> 转义，以防止命令注入执行。<function>escapeshellcmd</function>
+       虽可阻止命令执行，但仍允许添加额外的参数。出于安全考虑，建议用户自行对该参数进行过滤和清理，避免向 shell 命令中注入非预期的参数。
       </para>
       <para>
-       Since <function>escapeshellcmd</function> is applied automatically, some characters
-       that are allowed as email addresses by internet RFCs cannot be used. 
-       <function>mail</function> can not allow such characters, so in programs where the use of
-       such characters is required, alternative means of sending emails (such as using a framework
-       or a library) is recommended. 
+       由于会自动应用 <function>escapeshellcmd</function>，某些符合互联网 RFC 标准、允许在电子邮件地址中使用的字符将无法通过此方式使用。<function>mail</function>
+       无法支持这些字符，因此，若程序中必须使用此类字符，建议改用其他发送邮件的方式（例如使用框架或第三方库）。
       </para>
       <para>
-       The user that the webserver runs as should be added as a trusted user to the
-       sendmail configuration to prevent a 'X-Warning' header from being added
-       to the message when the envelope sender (-f) is set using this method.
-       For sendmail users, this file is <filename>/etc/mail/trusted-users</filename>.
+       应将运行 Web 服务器的用户添加到 sendmail 配置的受信任用户列表中，以避免通过此方法设置信封发件人（-f）时，邮件自动带上
+       “X-Warning” 头部。对于使用 sendmail 的用户，该文件路径为 <filename>/etc/mail/trusted-users</filename>。
       </para>
      </listitem>
     </varlistentry>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: fccc7eb7010120c17732c57f93df1f321245376c Maintainer: HonestQiao Status: ready -->
+<!-- EN-Revision: 912705841956ea969e25d8d1cc99f8d105d1ce78 Maintainer: HonestQiao Status: ready -->
 <!-- CREDITS: mowangjuanzi, Luffy -->
 <section xml:id="mail.configuration" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  &reftitle.runtime;
@@ -18,11 +18,17 @@
      </row>
    </thead>
    <tbody>
-     <row>
+    <row>
      <entry><link linkend="ini.mail.add-x-header">mail.add_x_header</link></entry>
      <entry>"0"</entry>
      <entry><constant>INI_PERDIR</constant></entry>
      <entry></entry>
+    </row>
+    <row>
+     <entry><link linkend="ini.mail.mixed_lf_and_crlf">mail.mixed_lf_and_crlf</link></entry>
+     <entry>"0"</entry>
+     <entry><constant>INI_SYSTEM</constant>|<constant>INI_PERDIR</constant></entry>
+     <entry>PHP 8.2.4 新增</entry>
     </row>
     <row>
      <entry><link linkend="ini.mail.log">mail.log</link></entry>
@@ -33,7 +39,7 @@
     <row>
      <entry><link linkend="ini.mail.force_extra_parameters">mail.force_extra_parameters</link></entry>
      <entry>NULL</entry>
-     <entry><constant>INI_SYSTEM</constant>|<constant>INI_PERDIR</constant></entry>
+     <entry><constant>INI_SYSTEM</constant></entry>
      <entry></entry>
     </row>
     <row>
@@ -56,7 +62,7 @@
     </row>
     <row>
      <entry><link linkend="ini.sendmail-path">sendmail_path</link></entry>
-     <entry>NULL</entry>
+     <entry>"/usr/sbin/sendmail -t -i"</entry>
      <entry><constant>INI_SYSTEM</constant></entry>
      <entry></entry>
     </row>
@@ -97,6 +103,20 @@
    </listitem>
   </varlistentry>
 
+  <varlistentry xml:id="ini.mail.mixed_lf_and_crlf">
+   <term>
+    <parameter>mail.mixed_lf_and_crlf</parameter>
+    <type>bool</type>
+   </term>
+   <listitem>
+    <para>
+     允许将邮件 header 和邮件正文的行分隔符还原为 LF（换行符），以模拟 PHP 7
+     的非标准行为。此选项作为兼容性措施提供，用于适配某些不符合标准的邮件传输代理（MTA），这些 MTA
+     无法正确处理邮件 header 和正文内容中作为行分隔符的 CRLF（回车符 + 换行符）。
+    </para>
+   </listitem>
+  </varlistentry>
+
   <varlistentry xml:id="ini.mail.force_extra_parameters">
    <term>
     <parameter>mail.force_extra_parameters</parameter>
@@ -107,6 +127,10 @@
      强制添加指定参数作为额外参数传递给 sendmail 二进制文件。这些参数将始终代替
      <function>mail</function> 第五个参数的值。
     </para>
+    <simpara>
+     除了 <constant>INI_SYSTEM</constant> 的默认行为外，该值也可通过在
+     <filename>httpd.conf</filename> 中使用 <literal>php_value</literal> 进行设置（但不建议这样做）。
+    </simpara>
    </listitem>
   </varlistentry>
 
