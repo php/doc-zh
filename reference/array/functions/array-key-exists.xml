@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 89fe795cc8bcf1b5ff9eb894bff51f006db66a65 Maintainer: daijie Status: ready -->
+<!-- EN-Revision: 73048c75fbe328342b74f0ffb0a0c85c477f5cde Maintainer: daijie Status: ready -->
 <!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="function.array-key-exists" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
@@ -74,8 +74,20 @@
       <entry>8.0.0</entry>
       <entry>
        <parameter>key</parameter> 参数现在接受
-       <parameter>bool</parameter>、<parameter>float</parameter>、<parameter>int</parameter>、<parameter>null</parameter>、<parameter>resource</parameter>
-       和 <parameter>string</parameter> 作为参数。
+       <type>bool</type>、<type>float</type>、<type>int</type>、<type>null</type>、<type>resource</type>
+       和 <type>string</type> 作为参数。
+      </entry>
+     </row>
+     <row>
+      <entry>8.0.0</entry>
+      <entry>
+       不再支持将 <type>object</type> 传递给 <parameter>array</parameter> 参数。
+      </entry>
+     </row>
+     <row>
+      <entry>7.4.0</entry>
+      <entry>
+       已弃用将 <type>object</type> 传递给 <parameter>array</parameter> 参数。建议使用 <function>property_exists</function>。
       </entry>
      </row>
     </tbody>
@@ -91,50 +103,43 @@
     <programlisting role="php">
 <![CDATA[
 <?php
-$search_array = array('first' => 1, 'second' => 4);
-if (array_key_exists('first', $search_array)) {
-    echo "The 'first' element is in the array";
-}
+$searchArray = ['first' => 1, 'second' => 4];
+var_dump(array_key_exists('first', $searchArray));
 ?>
 ]]>
     </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+bool(true)
+]]>
+    </screen>
    </example>
   </para>
   <example>
    <title><function>array_key_exists</function> 与 <function>isset</function> 的对比</title>
    <para>
-    <function>isset</function> 对于数组中为 &null;
-    的值不会返回 &true;，而
+    <function>isset</function> 对于数组中为 &null; 的值不会返回 &true;，而
     <function>array_key_exists</function> 会。
    </para>
    <programlisting role="php">
 <![CDATA[
 <?php
-$search_array = array('first' => null, 'second' => 4);
+$searchArray = ['first' => null, 'second' => 4];
 
-// 返回 false
-isset($search_array['first']);
-
-// 返回 true
-array_key_exists('first', $search_array);
+var_dump(isset($searchArray['first']));
+var_dump(array_key_exists('first', $searchArray));
 ?>
 ]]>
    </programlisting>
+   &example.outputs;
+   <screen>
+<![CDATA[
+bool(false)
+bool(true)
+]]>
+   </screen>
   </example>
- </refsect1>
-
- <refsect1 role="notes">
-  &reftitle.notes;
-  <note>
-    <para>
-     由于为了兼容以前版本，如果 <type>object</type> 当做 <parameter>array</parameter> 传入 
-     <function>array_key_exists</function>，同时 <parameter>key</parameter> 是对象的属性，也会返回 &true;。
-     此行为在 PHP 7.4.0 弃用且在 PHP 8.0.0 移除。
-    </para>
-    <para>
-     要检查对象是否有某个属性，应该使用 <function>property_exists</function>。
-    </para>
-  </note>
  </refsect1>
 
  <refsect1 role="seealso">
