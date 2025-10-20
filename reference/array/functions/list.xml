@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 75a5125c8b8bbe3006415bdcff531735c5701bd5 Maintainer: daijie Status: ready -->
+<!-- EN-Revision: eaec4ab10a65c4515ee2fb899d06e89bae3754b0 Maintainer: daijie Status: ready -->
 <!-- CREDITS: mowangjuanzi -->
-  <refentry xml:id="function.list" xmlns="http://docbook.org/ns/docbook">
-   <refnamediv>
-    <refname>list</refname>
-    <refpurpose>把数组中的值赋给一组变量 </refpurpose>
-   </refnamediv>
+<refentry xml:id="function.list" xmlns="http://docbook.org/ns/docbook">
+ <refnamediv>
+  <refname>list</refname>
+  <refpurpose>把数组中的值赋给一组变量 </refpurpose>
+ </refnamediv>
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
@@ -14,11 +14,12 @@
    <methodparam><type>mixed</type><parameter>var</parameter></methodparam>
    <methodparam rep="repeat" choice="opt"><type>mixed</type><parameter>vars</parameter></methodparam>
   </methodsynopsis>
-    <para>
-     像 <function>array</function> 一样，这不是真正的函数，而是语言结构。
-     <function>list</function> 可以在单次操作内为一组变量赋值。字符串不能解包且
-     <function>list</function> 表达式不能完全为空。
-    </para>
+  <para>
+   像 <function>array</function> 一样，这不是真正的函数，而是语言结构。
+   <function>list</function> 可以在单次操作内为一组变量赋值。仅数组和实现了
+   <link linkend="class.arrayaccess">ArrayAccess</link>
+   的对象可以解包。<function>list</function> 表达式不能为空。
+  </para>
   <note>
    <para>
     在 PHP 7.1.0 之前的版本，<function>list</function> 仅能用于数字索引的数组，并假定数字索引从 0 开始。
@@ -28,6 +29,15 @@
    自 PHP 7.1.0 起，<function>list</function> 还可以包含指定的 key，从而允许使用非整数或非连续 key
    解构数组。有关数组解构的更多详细信息，请参阅<link linkend="language.types.array.syntax.destructuring">数组解构部分</link>。
   </para>
+  <note>
+   <para>
+    尝试访问未定义的数组 key 与访问其他未定义变量相同：将发出 <constant>E_WARNING</constant>
+    级别的错误消息（在 PHP 8.0.0 之前为 <constant>E_NOTICE</constant> 级别），并且结果为 &null;。
+   </para>
+   <para>
+    尝试解包标量会将所有变量赋值为 &null;。尝试解包未实现 ArrayAccess 的对象会导致严重错误。
+   </para>
+  </note>
  </refsect1>
  <refsect1 role="parameters">
   &reftitle.parameters;
@@ -94,7 +104,7 @@
   &reftitle.examples;
   <para>
    <example>
-    <title><function>list</function> 例子</title>
+    <title><function>list</function> 示例</title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -123,8 +133,8 @@ var_dump($bar); // NULL
   </para>
   <para>
    <example>
-    <title><function>list</function> 用法的一个例子</title>
-    <programlisting role="php">
+    <title>使用 <function>list</function> 的示例</title>
+    <programlisting role="php" annotations="non-interactive">
 <![CDATA[
 <?php
 $result = $pdo->query("SELECT id, name FROM employees");
@@ -138,7 +148,7 @@ while (list($id, $name) = $result->fetch(PDO::FETCH_NUM)) {
   </para>
   <para>
    <example>
-    <title>使用嵌套的  <function>list</function></title>
+    <title>使用嵌套的 <function>list</function></title>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -150,6 +160,7 @@ var_dump($a, $b, $c);
 ?>
 ]]>
     </programlisting>
+    &example.outputs;
     <screen>
 <![CDATA[
 int(1)
@@ -160,11 +171,11 @@ int(3)
    </example>
   </para>
   <para>
+   <function>list</function> 使用 array 索引的顺序和它何时定义无关。
+  </para>
+  <para>
    <example>
     <title><function>list</function> 和索引顺序定义</title>
-    <simpara>
-     <function>list</function> 使用 array 索引的顺序和它何时定义无关。
-    </simpara>
     <programlisting role="php">
 <![CDATA[
 <?php
