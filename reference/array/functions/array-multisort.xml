@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 6a6f43d1c490a57b452656db285de6d136055ed2 Maintainer: HonestQiao Status: ready -->
+<!-- EN-Revision: 2e60c5134e7a847c99f81eb3f7ecee1f5efeeace Maintainer: HonestQiao Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="function.array-multisort" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
   <refname>array_multisort</refname>
@@ -228,18 +229,6 @@ volume | edition
      的数组中。这通常是通过循环从数据库取得的结果，例如
      <function>mysql_fetch_assoc</function>。
     </para>
-    <programlisting role="php">
-<![CDATA[
-<?php
-$data[] = array('volume' => 67, 'edition' => 2);
-$data[] = array('volume' => 86, 'edition' => 1);
-$data[] = array('volume' => 85, 'edition' => 6);
-$data[] = array('volume' => 98, 'edition' => 2);
-$data[] = array('volume' => 86, 'edition' => 6);
-$data[] = array('volume' => 67, 'edition' => 7);
-?>
-]]>
-    </programlisting>
     <para>
      本例中将把 <varname>volume</varname> 降序排列，把
      <varname>edition</varname> 升序排列。
@@ -251,6 +240,14 @@ $data[] = array('volume' => 67, 'edition' => 7);
     <programlisting role="php">
 <![CDATA[
 <?php
+// 通过循环调用 mysqli_fetch_assoc 生成的数据：
+$data[] = array('volume' => 67, 'edition' => 2);
+$data[] = array('volume' => 86, 'edition' => 1);
+$data[] = array('volume' => 85, 'edition' => 6);
+$data[] = array('volume' => 98, 'edition' => 2);
+$data[] = array('volume' => 86, 'edition' => 6);
+$data[] = array('volume' => 67, 'edition' => 7);
+
 // 取得列的列表
 foreach ($data as $key => $row) {
     $volume[$key]  = $row['volume'];
@@ -264,6 +261,13 @@ $edition = array_column($data, 'edition');
 // 将数据根据 volume 降序排列，根据 edition 升序排列
 // 把 $data 作为最后一个参数，以通用键排序
 array_multisort($volume, SORT_DESC, $edition, SORT_ASC, $data);
+
+// 遍历数据并输出每列的排序值
+echo 'volume | edition', PHP_EOL;
+echo '-------+--------', PHP_EOL;
+for ($i = 0; $i < count($data); $i++) {
+     printf("%6d | %7d\n", $volume[$i], $edition[$i]);
+}
 ?>
 ]]>
     </programlisting>
