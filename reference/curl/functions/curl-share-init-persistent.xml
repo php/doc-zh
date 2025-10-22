@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- EN-Revision: 9e08f606a38fb7c0de98b42375636692d43d7040 Maintainer: mowangjuanzi Status: ready -->
+<refentry xml:id="function.curl-share-init-persistent" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <refnamediv>
+  <refname>curl_share_init_persistent</refname>
+  <refpurpose>初始化 <emphasis role="bold">持久</emphasis> cURL 共享句柄</refpurpose>
+ </refnamediv>
+
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <type>CurlSharePersistentHandle</type><methodname>curl_share_init_persistent</methodname>
+   <methodparam><type>array</type><parameter>share_options</parameter></methodparam>
+  </methodsynopsis>
+  <simpara>
+   使用指定的共享选项初始化<emphasis role="bold">持久</emphasis> cURL 共享句柄。与 <function>curl_share_init</function>
+   不同，此函数创建的句柄不会在 PHP 请求结束时销毁。如果找到具有相同 <parameter>share_options</parameter>
+   的持久共享句柄，则会重用该句柄。
+  </simpara>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+
+  <variablelist>
+   <varlistentry>
+    <term><parameter>share_options</parameter></term>
+    <listitem>
+     <simpara>
+      非空的 <constant>CURL_LOCK_DATA_<replaceable>*</replaceable></constant> 常量数组。
+     </simpara>
+     <note>
+      <simpara>
+       不允许使用 <constant>CURL_LOCK_DATA_COOKIE</constant>，如果指定，此函数将抛出 <exceptionname>ValueError</exceptionname>。在
+       PHP 请求之间共享 cookies 可能导致用户之间的敏感 cookies 意外混淆。
+      </simpara>
+     </note>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <simpara>
+   返回 <classname>CurlSharePersistentHandle</classname>。
+  </simpara>
+ </refsect1>
+
+ <refsect1 role="errors">
+  &reftitle.errors;
+  <itemizedlist>
+   <listitem>
+    <simpara>
+     如果 <parameter>share_options</parameter> 为空，此函数抛出 <exceptionname>ValueError</exceptionname>。
+    </simpara>
+   </listitem>
+   <listitem>
+    <simpara>
+     如果 <parameter>share_options</parameter> 包含与 <constant>CURL_LOCK_DATA_<replaceable>*</replaceable></constant>
+     不匹配的值，此函数将抛出 <classname>ValueError</classname>。
+    </simpara>
+   </listitem>
+   <listitem>
+    <simpara>
+     如果 <parameter>share_options</parameter> 包含 <constant>CURL_LOCK_DATA_COOKIE</constant>，此函数将抛出
+     <exceptionname>ValueError</exceptionname>。
+    </simpara>
+   </listitem>
+   <listitem>
+    <simpara>
+     如果 <parameter>share_options</parameter> 包含非整数值，此函数将抛出 <exceptionname>TypeError</exceptionname>。
+    </simpara>
+   </listitem>
+  </itemizedlist>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <example xml:id="function.curl-share-init-persistent.example.basic">
+   <title><function>curl_share_init_persistent</function> 示例</title>
+   <simpara>
+    此示例将创建持久 cURL 共享句柄，并演示它们之间共享连接的功能。如果在长生命周期的 PHP SAPI
+    中执行，<literal>$sh</literal> 将在 SAPI 请求之间保持存在。
+   </simpara>
+
+   <programlisting role="php">
+    <![CDATA[
+<?php
+
+// 创建或获取持久 cURL 共享句柄，设置为共享 DNS 查找和连接
+$sh = curl_share_init_persistent([CURL_LOCK_DATA_DNS, CURL_LOCK_DATA_CONNECT]);
+
+// 初始化第一个 cURL 句柄并为其分配共享句柄
+$ch1 = curl_init("http://example.com/");
+curl_setopt($ch1, CURLOPT_SHARE, $sh);
+
+// 执行第一个 cURL 句柄。此操作可能会重用来自先前 SAPI 请求的连接
+curl_exec($ch1);
+
+// 初始化第二个 cURL 句柄并为其分配共享句柄
+$ch2 = curl_init("http://example.com/");
+curl_setopt($ch2, CURLOPT_SHARE, $sh);
+
+// 执行第二个 cURL 句柄。此操作将重用来自 $ch1 的连接
+curl_exec($ch2);
+
+?>
+
+    ]]>
+   </programlisting>
+  </example>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <simplelist>
+   <member><function>curl_setopt</function></member>
+   <member><function>curl_share_init</function></member>
+  </simplelist>
+ </refsect1>
+
+</refentry>
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
