@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: e587d0655e426f97b3fcb431453da5030e743b23 Maintainer: HonestQiao Status: ready -->
+<!-- EN-Revision: 094816bd170e26abf0e057dae1cfb498dd6aad88 Maintainer: HonestQiao Status: ready -->
 <!-- CREDITS: Geogory, dallas, jwj, mowangjuanzi, Luffy -->
 <sect1 xml:id="language.types.array">
  <title>Array 数组</title>
@@ -701,6 +701,11 @@ echo $b, PHP_EOL;    // 打印 1
       级别的错误消息（PHP 8.0.0 之前是 <constant>E_NOTICE</constant> 级别），结果将是 &null;。
     </para>
    </note>
+   <note>
+    <para>
+     解构标量值会分配 &null; 到所有变量。
+    </para>
+   </note>
   </sect3>
 
  </sect2><!-- end syntax -->
@@ -861,12 +866,12 @@ $arr = array('fruit' => 'apple', 'veggie' => 'carrot');
 echo $arr['fruit'], PHP_EOL;  // apple
 echo $arr['veggie'], PHP_EOL; // carrot
 
-// Incorrect. This works but also throws a PHP Error because
+// Incorrect. This does not work and throws a PHP Error because
 // of an undefined constant named fruit
 //
 // Error: Undefined constant "fruit"
 try {
-    echo $arr[fruit];    // apple
+    echo $arr[fruit];
 } catch (Error $e) {
     echo get_class($e), ': ', $e->getMessage(), PHP_EOL;
 }
@@ -880,7 +885,7 @@ echo $arr['fruit'], PHP_EOL;  // apple
 echo $arr[fruit], PHP_EOL;    // carrot
 
 // The following is okay, as it's inside a string. Constants are not looked for
-// within strings, so no E_NOTICE occurs here
+// within strings, so no error occurs here
 echo "Hello $arr[fruit]", PHP_EOL;      // Hello apple
 
 // With one exception: braces surrounding arrays within strings allows constants
@@ -907,14 +912,6 @@ print "Hello $_GET['foo']";
 ]]>
     </programlisting>
    </informalexample>
-
-   <para>
-    当打开 <link linkend="ini.error-reporting">error_reporting</link> 来显示
-    <constant>E_NOTICE</constant> 级别的错误（将其设为
-    <constant>E_ALL</constant>）时将看到这些错误。默认情况下
-    <link linkend="ini.error-reporting">error_reporting</link>
-    被关闭不显示这些。
-   </para>
 
    <para>
     和在 <link linkend="language.types.array.syntax">语法</link>
@@ -1106,7 +1103,7 @@ array(3) {
   <para>
    在 array 定义时，用 <code>...</code> 前缀的一个 array 可以被展开到当前位置。
    只有实现了 <interfacename>Traversable</interfacename> 的数组和对象才能被展开。
-   PHP 7.4.0 开始可以使用 <code>...</code> 解包 array。
+   PHP 7.4.0 开始可以使用 <code>...</code> 解包 array。这也被称之为展开运算符。
   </para>
 
   <para>
