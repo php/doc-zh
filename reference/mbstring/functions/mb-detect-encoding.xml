@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 34f90a65914c900173f9a42331acc45bc53d8eee Maintainer: daijie Status: ready -->
+<!-- EN-Revision: 7c4b5fb40ac3149a5b931f1e31b1050ab5eaab7e Maintainer: daijie Status: ready -->
 <!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="function.mb-detect-encoding" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
@@ -17,13 +17,16 @@
    <methodparam choice="opt"><type>bool</type><parameter>strict</parameter><initializer>&false;</initializer></methodparam>
   </methodsynopsis>
   <para>
-   从有序的候选列表中检测 <type>string</type> <parameter>string</parameter> 最可能的字符编码。
+   从候选列表中检测 <type>string</type> <parameter>string</parameter> 最可能的字符编码。
+  </para>
+  <para>
+   自 PHP 8.1 起，此函数使用启发式检测指定列表中最有可能正确的有效文本编码，且可能不按照提供的 <parameter>encodings</parameter> 顺序进行检测。
   </para>
   <para>
    对预期（intended）字符编码的自动检测不可能永远完全可靠；没有额外的信息，就类似于在没有密钥的情况下解码已编码的字符串。最好使用与数据一起存储或传输的字符编码表示，例如“Content-Type” HTTP 头。
   </para>
   <para>
-   此函数适用于多字节编码，但并非所有字节顺序都构成有效字符串。如果输入字符串包含这样的顺序，则将会拒绝该编码，并检查下一个编码。
+   此函数适用于多字节编码，但并非所有字节顺序都构成有效字符串。如果输入字符串包含这样的顺序，则将会拒绝该编码。
   </para>
 
   <warning>
@@ -53,7 +56,7 @@
      <term><parameter>encodings</parameter></term>
      <listitem>
       <para>
-       按顺序尝试的字符编码列表。该列表可以指定为字符串数组，或以逗号分隔的单个字符串。
+       尝试的字符编码列表。该列表可以指定为字符串数组，或以逗号分隔的单个字符串。
       </para>
       <para>
        如果省略 <parameter>encodings</parameter> 被或为 &null;，则将使用当前的 detect_order（使用
@@ -206,8 +209,9 @@ string(10) "ISO-8859-1"
 <?php
 $str = "\xC4\xA2";
 
-// 该字符串在所有三种编码中均有效，因此将返回列出的第一个
-var_dump(mb_detect_encoding($str, ['UTF-8', 'ISO-8859-1', 'ISO-8859-5']));
+// 该字符串在所有三种编码中均有效，但返回的可能并不总是列表中的第一个编码
+var_dump(mb_detect_encoding($str, ['UTF-8']));
+var_dump(mb_detect_encoding($str, ['UTF-8', 'ISO-8859-1', 'ISO-8859-5'])); // 自 php8.1 起返回 ISO-8859-1 而不是 UTF-8
 var_dump(mb_detect_encoding($str, ['ISO-8859-1', 'ISO-8859-5', 'UTF-8']));
 var_dump(mb_detect_encoding($str, ['ISO-8859-5', 'UTF-8', 'ISO-8859-1']));
 ?>
@@ -217,6 +221,7 @@ var_dump(mb_detect_encoding($str, ['ISO-8859-5', 'UTF-8', 'ISO-8859-1']));
     <screen>
 <![CDATA[
 string(5) "UTF-8"
+string(10) "ISO-8859-1"
 string(10) "ISO-8859-1"
 string(10) "ISO-8859-5"
 ]]>
