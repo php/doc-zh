@@ -1,28 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: 6b09bb638aa64d1fad5f4a630a8da9a2692ce733 Maintainer: verdana  Status:ready -->
-<!-- CREDITS: dallas -->
-<chapter xml:id="language.basic-syntax" xmlns="http://docbook.org/ns/docbook">
- <title>基本语法</title>
- <sect1 xml:id="language.basic-syntax.phptags">
-  <title>PHP 标记</title>
-  <para>
-   当解析一个文件时，PHP 会寻找起始和结束标记，也就是
-   <literal>&lt;?php</literal> 和 <literal>?&gt;</literal>，这告诉
-   PHP 开始和停止解析二者之间的代码。此种解析方式使得 PHP
-   可以被嵌入到各种不同的文档中去，而任何起始和结束标记之外的部分都会被
-   PHP 解析器忽略。
-  </para>
-
-  <para>
-    PHP 有一个 echo 标记简写 <literal>&lt;?=</literal>，
-    它是更完整的 <code>&lt;?php echo</code> 的简写形式。
+<!-- EN-Revision: 0e618211e53c66f33762be225a4d57c08ef4b2f7 Maintainer: verdana Status:ready -->
+<!-- CREDITS: dallas, mowangjuanzi -->
+ <chapter xml:id="language.basic-syntax" xmlns="http://docbook.org/ns/docbook" annotations="interactive">
+  <title>基本语法</title>
+  <sect1 xml:id="language.basic-syntax.phptags">
+   <title>PHP 标签</title>
+   <para>
+   当 PHP 处理文件时，通过识别起始和结束标签 <literal>&lt;?php</literal> 和 <literal>?&gt;</literal> 来定义
+   PHP 代码执行的边界。PHP 解析器会忽略这些标签之外的内容，从而使 PHP 能够无缝嵌入到各种文档类型中。
    </para>
 
    <para>
+    必须在 <literal>&lt;?php</literal> 后跟随一个空白字符（空格、制表符或换行符），以确保正确的 token 分隔。省略此空白字符将导致语法错误。
+   </para>
+
+   <para>
+    PHP 还包含短输出标签 <literal>&lt;?=</literal>，这是 <code>&lt;?php echo</code> 的简写形式。
+   </para>
+   <para>
     <example>
-     <title>PHP 开始和结束标记</title>
+     <title>PHP 开始和结束标签</title>
      <programlisting role="php">
 <![CDATA[
 1.  <?php echo 'if you want to serve PHP code in XHTML or XML documents,
@@ -39,7 +37,7 @@
    </para>
 
    <para>
-    短标记 (第三个例子) 是被默认开启的，但是也可以通过
+    短标签 (第三个示例) 是被默认开启的，但是也可以通过
     <link linkend="ini.short-open-tag">short_open_tag</link>
     &php.ini; 来直接禁用。如果 PHP 在被安装时使用了 <option>--disable-short-tags</option>
     的配置，该功能则是被默认禁用的。
@@ -47,39 +45,44 @@
    <para>
     <note>
      <para>
-      因为短标记可以被禁用，所以建议使用普通标记 (<code>&lt;?php ?&gt;</code> 和 <code>&lt;?= ?&gt;</code>) 来最大化兼容性。
+      因为短标签可以被禁用，所以建议使用普通标签 (<code>&lt;?php ?&gt;</code> 和 <code>&lt;?= ?&gt;</code>) 来最大化兼容性。
      </para>
     </note>
    </para>
 
   <para>
-    如果文件内容仅仅包含 PHP 代码，最好在文件末尾删除 PHP
-    结束标记。这可以避免在 PHP 结束标记之后万一意外加入了空格或者换行符，会导致
-    PHP 开始输出这些空白，而脚本中此时并无输出的意图。
-    <informalexample>
+    如果文件以 PHP 代码结尾，最好在文件末尾删除 PHP 结束标签。这可以避免在 PHP
+    结束标签之后意外添加空白字符或者换行符，导致
+    PHP 开始输出缓冲，进而引发不必要的影响，而脚本中此时并无输出的意图。
+   </para>
+   <para>
+    <example>
+     <title>仅包含 PHP 代码的文件</title>
      <programlisting role="php">
 <![CDATA[
 <?php
-echo "Hello world";
+echo "Hello world\n";
 
 // ... 更多代码
 
-echo "Last statement";
+echo "Last statement\n";
 
-// 脚本在此处结束，没有 PHP 结束标记
+// 脚本在此结束，未使用 PHP 结束标签
 ]]>
      </programlisting>
-    </informalexample>
+    </example>
    </para>
   </sect1>
 
   <sect1 xml:id="language.basic-syntax.phpmode">
    <title>从 HTML 中分离</title>
    <para>
-    凡是在一对开始和结束标记之外的内容都会被
-    PHP 解析器忽略，这使得 PHP 文件可以具备混合内容。 可以使 PHP
-    嵌入到 HTML 文档中去，如下例所示。
-    <informalexample>
+    PHP 解析器会忽略一对开始和结束标签之外的内容，这使得 PHP 文件可以具备混合内容。可以使 PHP
+    嵌入到 HTML 文档中去，例如创建模板。
+   </para>
+   <para>
+    <example>
+     <title>HTML 中嵌入 PHP</title>
      <programlisting role="php">
 <![CDATA[
 <p>This is going to be ignored by PHP and displayed by the browser.</p>
@@ -87,10 +90,12 @@ echo "Last statement";
 <p>This will also be ignored by PHP and displayed by the browser.</p>
 ]]>
      </programlisting>
-    </informalexample>
+    </example>
+   </para>
+   <para>
     这将如预期中的运行，因为当 PHP 解释器碰到 ?&gt;
-    结束标记时就简单地将其后内容原样输出（除非马上紧接换行 - 见
-    <link linkend="language.basic-syntax.instruction-separation">指令分隔符</link>）直到碰到下一个开始标记；例外是处于条件语句中间时，此时
+    结束标签时就简单地将其后内容原样输出（除非马上紧接换行 - 见
+    <link linkend="language.basic-syntax.instruction-separation">指令分隔符</link>）直到碰到下一个开始标签；例外是处于条件语句中间时，此时
     PHP 解释器会根据条件判断来决定哪些输出，哪些跳过。见下例。
    </para>
    <para>
@@ -107,34 +112,33 @@ echo "Last statement";
 ]]>
      </programlisting>
     </example>
-    上例中 PHP 将跳过条件语句未达成的段落，即使该段落位于 PHP 开始和结束标记之外。由于
+    上例中 PHP 将跳过条件语句未达成的段落，即使该段落位于 PHP 开始和结束标签之外。由于
     PHP 解释器会在条件未达成时直接跳过该段条件语句块，因此 PHP 会根据条件来忽略之。
-  </para>
-  <para>
-   要输出大段文本时，跳出 PHP 解析模式通常比将文本通过
-   <function>echo</function> 或 <function>print</function> 输出更有效率。
-  </para>
-  <para>
+   </para>
+   <para>
+    要输出大段文本时，跳出 PHP 解析模式通常比将文本通过
+    <function>echo</function> 或 <function>print</function> 输出更有效率。
+   </para>
+   <para>
     <note>
      <para>
-      此外注意如果将 PHP 嵌入到 XML 或 XHTML 中则需要使用
-      <code>&lt;?php ?&gt;</code> 标记以保持符合标准。
+      如果 PHP 嵌入到 XML 或 XHTML 中，必须使用标准的 PHP <code>&lt;?php ?&gt;</code> 标签以保持与标准的兼容性。
      </para>
     </note>
    </para>
   </sect1>
 
- <sect1 xml:id="language.basic-syntax.instruction-separation">
-  <title>指令分隔符</title>
-  <para>
+  <sect1 xml:id="language.basic-syntax.instruction-separation">
+   <title>指令分隔符</title>
+   <para>
    同 C 或 Perl 一样，PHP 需要在每个语句后用分号结束指令。一段 PHP
-   代码中的结束标记隐含表示了一个分号；在一个 PHP
-   代码段中的最后一行可以不用分号结束。如果后面还有新行，则代码段的结束标记包含了行结束。
+   代码中的结束标签隐含表示了一个分号；在一个 PHP
+   代码段中的最后一行可以不用分号结束。如果后面还有新行，则代码段的结束标签包含了行结束。
    </para>
 
    <para>
     <example>
-     <title>包含末尾换行符的结束标记的例子</title>
+     <title>包含末尾换行符的结束标签的示例</title>
      <programlisting role="php">
 <![CDATA[
 <?php echo "Some text"; ?>
@@ -153,48 +157,52 @@ But newline now
    </para>
 
    <para>
-    进入和退出 PHP 解析的例子：
-
-    <informalexample>
+    <example>
+     <title>进入和退出 PHP 解析的示例</title>
      <programlisting role="php">
 <![CDATA[
 <?php
-    echo 'This is a test';
+    echo "This is a test\n";
 ?>
 
-<?php echo 'This is a test' ?>
+<?php echo "This is a test\n" ?>
 
-<?php echo 'We omitted the last closing tag';
+<?php echo "We omitted the last closing tag\n";
 ]]>
-    </programlisting>
-   </informalexample>
-   <note>
-    <para>
-     文件末尾的 PHP 代码段结束标记可以不要，有些情况下当使用
-     <function>include</function> 或者 <function>require</function>
-     时省略掉会更好些，这样不期望的空白符就不会出现在文件末尾，之后仍然可以输出响应标头。在使用输出缓冲时也很便利，就不会看到由包含文件生成的不期望的空白符。
-    </para>
-   </note>
-  </para>
- </sect1>
- <sect1 xml:id="language.basic-syntax.comments">
-  <title>注释</title>
-  <para>
-   PHP 支持 C，C++ 和 Unix Shell 风格（Perl 风格）的注释。例如:
-
-    <informalexample>
+     </programlisting>
+    </example>
+   </para>
+   <para>
+    <note>
+     <para>
+      文件末尾的 PHP 代码段结束标签可以不要，有些情况下当使用
+      <function>include</function> 或者 <function>require</function>
+      时省略掉会更好些，这样不期望的空白字符就不会出现在文件末尾，之后仍然可以输出响应
+      header。在使用输出缓冲时也很便利，就不会看到由包含文件生成的不期望的空白符。
+     </para>
+    </note>
+   </para>
+  </sect1>
+  <sect1 xml:id="language.basic-syntax.comments">
+   <title>注释</title>
+   <para>
+    PHP 支持 C，C++ 和 Unix Shell 风格（Perl 风格）的注释。例如:
+   </para>
+   <para>
+    <example>
+     <title>注释</title>
      <programlisting role="php">
 <![CDATA[
 <?php
-    echo 'This is a test'; // 这是单行 c++ 样式注释
+    echo "This is a test\n"; // 这是单行 c++ 样式注释
     /* 这是一条多行注释
        另一行也是注释 */
-    echo 'This is yet another test';
-    echo 'One Final Test'; # 这是单行 shell 风格的注释
+    echo "This is yet another test\n";
+    echo "One Final Test\n"; # 这是单行 shell 风格的注释
 ?>
 ]]>
      </programlisting>
-    </informalexample>
+    </example>
    </para>
    <simpara>
     单行注释仅仅注释到行末或者当前的 PHP 代码块，视乎哪个首先出现。这意味着在
@@ -204,14 +212,15 @@ But newline now
     并不能影响到这一点。
    </simpara>
    <para>
-    <informalexample>
+    <example>
+     <title>单行注释</title>
      <programlisting role="php">
 <![CDATA[
 <h1>This is an <?php # echo 'simple';?> example</h1>
 <p>The header above will say 'This is an  example'.</p>
 ]]>
      </programlisting>
-    </informalexample>
+    </example>
    </para>
    <simpara>
     C 风格的注释在碰到第一个 <literal>*/</literal>

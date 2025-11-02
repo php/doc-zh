@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision: $ -->
-<!-- EN-Revision: 9155d793178b5fcd5131b734cd174fecc34c1ae6 Maintainer: daijie Status: ready -->
-
+<!-- EN-Revision: 0f14761ba340c6e49797706ac3f0cf1147d97253 Maintainer: daijie Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
  <chapter xml:id="language.attributes" xmlns="http://docbook.org/ns/docbook">
   <title>注解</title>
   <sect1 xml:id="language.attributes.overview">
@@ -9,29 +9,17 @@
    <?phpdoc print-version-for="attributes"?>
 
    <para>
-    注解功能提供了代码中的声明部分都可以添加结构化、机器可读的元数据的能力，
-    注解的目标可以是类、方法、函数、参数、属性、类常量。
-    
-    通过 <link linkend="book.reflection">反射 API</link> 可在运行时获取注解所定义的元数据。
-    因此注解可以成为直接嵌入代码的配置式语言。
+    PHP 注解为类、方法、函数、参数、属性和常量提供了结构化且机器可读的元数据。它们可以通过<link linkend="book.reflection">反射
+    API</link> 在运行时进行检查，从而实现动态行为而无需修改代码。注解提供了声明式的方式来为代码添加元数据注释。
    </para>
-
    <para>
-    通过注解的使用，在应用中实现功能、使用功能可以相互解耦。
-    某种程度上讲，它可以和接口（interface）与其实现（implementation）相比较。
-    但接口与实现是代码相关的，注解则与声明额外信息和配置相关。
-    接口可以通过类来实现，而注解也可以声明到方法、函数、参数、属性、类常量中。
-    因此它们比接口更灵活。
+    注解使得功能实现与其使用之间实现解耦。接口通过强制定义方法来规范结构，而注解则为方法、函数、属性和常量在内的多个元素提供元数据。与接口不同，接口强制实现方法，而注解则在不改变代码结构的情况下为其添加注释。
    </para>
-
-    <para>
-     注解使用的一个简单例子：将接口（interface）的可选方法改用注解实现。
-     我们假设接口 <literal>ActionHandler</literal> 代表了应用的一个操作：
-     部分 action handler 的实现需要 setup，部分不需要。
-     我们可以使用注解，而不用要求所有类必须实现 <literal>ActionHandler</literal> 
-     接口并实现 <literal>setUp()</literal> 方法。
-     因此带来一个好处——可以多次使用注解。
-    </para>
+   <para>
+    注解可以通过提供元数据而非强制结构来补充或替代可选的接口方法。以表示应用程序中操作的 <literal>ActionHandler</literal>
+    接口为例。某些实现可能需要设置步骤，而其他实现则不需要。与其强制所有实现（implementing）<literal>ActionHandler</literal> 的类都定义
+    <literal>setUp()</literal> 方法，不如使用注解来表明设置需求。这种方法提高了灵活性，并允许在必要时多次应用属性。
+   </para>
 
    <example>
     <title>用注解实现接口的可选方法</title>
@@ -106,20 +94,14 @@ executeAction($copyAction);
    <title>注解语法</title>
 
    <para>
-    注解语法包含以下几部分。
-    首先，注解声明总是以 <literal>#[</literal> 开头，以
-    <literal>]</literal> 结尾来包围。
-    内部则是一个或以逗号包含的多个注解。
-    注解的名称按 <link linkend="language.namespaces.basics">使用命名空间：基础</link> 
-    章节中描述，可以是非限定、限定、完全限定的名称。
-    注解的参数是可以选的，以常见的括号<literal>()</literal>包围。
-    注解的参数只能是字面值或者常量表达式。
-    它同时接受位置参数和命名参数两种语法。
+    注解语法由几个关键组件组成。属性声明以 <literal>#[</literal> 开始，以 <literal>]</literal>
+    结束。内部可以列出一个或多个注解，注解之间用逗号分隔。注解名称如<link
+    linkend="language.namespaces.basics">使用命名空间基础</link>中所述，可以是未限定、限定或完全限定的。注解的参数是可选的，并用圆括号
+    <literal>()</literal> 括起来。参数只能是字面值或常量表达式，同时支持位置参数和命名参数语法。
    </para>
 
    <para>
-    通过反射 API 请求注解实例时，注解的名称会被解析到一个类，注解的参数则传入该类的构造器中。
-    因此每个注解都需要引入一个类。
+    注解名称及其参数会解析为类，并在通过反射 API 请求注解实例时，将参数传递给其构造方法。因此，建议为每个注解都引入对应的类。
    </para>
 
    <example>
@@ -177,15 +159,13 @@ class AnotherThing
    <title>使用反射 API 读取注解</title>
 
    <para>
-    反射 API 提供了 <function>getAttributes</function> 方法，
-    类、方法、函数、参数、属性、类常量的反射对象可通过它获取相应的注解。
-    该方法返回了 <classname>ReflectionAttribute</classname> 实例的数组，
-    可用于查询注解名称、参数、也可以实例化一个注解。
+    要访问类、方法、函数、参数、属性以及类常量中的注解，可以使用反射 API 提供的 <function>getAttributes</function>
+    方法。该方法返回包含 <classname>ReflectionAttribute</classname> 实例的数组。这些实例可用于查询注解名称和参数，并可用于实例化所表示注解的对象。
    </para>
 
    <para>
-    实例和反射注解的分离使得程序员增加了在丢失反射类、类型错误、丢失参数等情况下的处理能力，也能处理错误。
-    只有调用 <function>ReflectionAttribute::newInstance</function> 后，注解类的对象才会以验证过匹配的参数来实例化。
+    将反射注解表示与其实际实例分离，可以更好地控制错误处理，例如缺失的注解类、参数拼写错误或缺少值等问题。注解类的对象只有在调用
+    <function>ReflectionAttribute::newInstance</function> 之后才会实例化，从而确保参数验证在此时进行。
    </para>
 
    <example>
@@ -239,8 +219,7 @@ object(MyAttribute)#3 (1) {
    </example>
 
    <para>
-    通过传入参数：待搜索的注解类名，可返回指定的注解类，
-    而不需要再到反射类中迭代循环获取所有注解。
+    无需遍历反射实例上的所有注解，可以通过将注解类名作为参数传递，来仅检索特定注解类的注解。
    </para>
 
    <example>
@@ -270,8 +249,8 @@ dumpMyAttributeData(new ReflectionClass(Thing::class));
    <title>声明注解类</title>
 
    <para>
-    虽然没有严格要求，推荐为每个注解创建一个实际的类。
-    在这个最简单的例子中，通过 use 语法从全局命名空间引入 <literal>#[Attribute]</literal> 注解所需要全空的类。
+    建议为每个注解定义单独的类。在最简单的情况下，带有 <literal>#[Attribute]</literal> 声明的空类即可满足需求。可以使用
+    <literal>use</literal> 语句从全局命名空间导入该注解。
    </para>
 
   <example>
@@ -294,7 +273,7 @@ class MyAttribute
   </example>
 
   <para>
-   要限制指定注解的声明类型，可为 <literal>#[Attribute]</literal> 注解第一个参数传入字节位掩码设置。
+   要限制注解可以应用的声明类型，可以将位掩码作为第一个参数传递给 <literal>#[Attribute]</literal> 声明。
   </para>
 
   <example>
@@ -334,8 +313,8 @@ class MyAttribute
    </simplelist>
 
    <para>
-    注解在每个声明中默认情况下只能使用一次。
-    如果需要重复，可以在 <literal>#[Attribute]</literal> 声明中设置字节位掩码。
+    默认情况下，每个声明中一个注解只能使用一次。要允许注解可重复使用，可以在 <literal>#[Attribute]</literal>
+    声明的位掩码中使用 <constant>Attribute::IS_REPEATABLE</constant> flag 进行指定。
    </para>
 
    <example>
