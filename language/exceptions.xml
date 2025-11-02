@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 7a75b854c8c52226d38397e7e8177e339fdb273f Maintainer: daijie Status: ready -->
+<!-- EN-Revision: c81a48e58fc530a74827316027fae74668d17a1d Maintainer: daijie Status: ready -->
 <!-- CREDITS: mowangjuanzi -->
 <chapter xml:id="language.exceptions" xmlns="http://docbook.org/ns/docbook">
  <title>异常</title>
@@ -61,6 +61,11 @@
     如果在 &try; 或 &catch; 里遇到 &return;，仍然会执行 &finally; 里的代码。
     而且，遇到 &return; 语句时，会先执行 &finally; 再返回结果。
     此外，如果 &finally; 里也包含了 &return; 语句，将返回 &finally; 里的值。
+   </para>
+   <para>
+    另一个值得注意的交互是发生在 &try; 块内抛出的异常与 &finally;
+    块内抛出的异常之间。如果两个块都抛出异常，则会传播来自 &finally;
+    块的异常，而来自 &try; 块的异常将作为其前一个异常。
    </para>
   </sect1>
 
@@ -304,6 +309,12 @@ try {
 ?>
 ]]>
     </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+A SpecificException was thrown, but we don't care about the details.
+]]>
+    </screen>
    </example>
    <example>
     <title>以表达式的形式抛出</title>
@@ -318,6 +329,10 @@ function test() {
     do_something_risky() or throw new Exception('It did not work');
 }
 
+function do_something_risky() {
+    return false; // 模拟失败
+}
+
 try {
     test();
 } catch (Exception $e) {
@@ -326,6 +341,44 @@ try {
 ?>
 ]]>
     </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+It did not work
+]]>
+    </screen>
+   </example>
+   <example>
+    <title>try 和 finally 中的异常</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+
+try {
+    try {
+        throw new Exception(message: 'Third', previous: new Exception('Fourth'));
+    } finally {
+        throw new Exception(message: 'First', previous: new Exception('Second'));
+    }
+} catch (Exception $e) {
+    var_dump(
+        $e->getMessage(),
+        $e->getPrevious()->getMessage(),
+        $e->getPrevious()->getPrevious()->getMessage(),
+        $e->getPrevious()->getPrevious()->getPrevious()->getMessage(),
+    );
+}
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+string(5) "First"
+string(6) "Second"
+string(5) "Third"
+string(6) "Fourth"
+]]>
+    </screen>
    </example>
   </sect1>
 
@@ -350,7 +403,7 @@ class Exception implements Throwable
     private   $trace;                           // backtrace
     private   $previous;                        // 如果是嵌套异常，则是之前的 exception
 
-    public function __construct($message = '', $code = 0, Throwable $previous = null);
+    public function __construct($message = '', $code = 0, ?Throwable $previous = null);
 
     final private function __clone();           // 禁止克隆异常。
 
@@ -393,7 +446,7 @@ class Exception implements Throwable
 class MyException extends Exception
 {
     // 重定义构造器使 message 变为必须被指定的属性
-    public function __construct($message, $code = 0, Throwable $previous = null) {
+    public function __construct($message, $code = 0, ?Throwable $previous = null) {
         // 这里写用户的代码
 
         // 确保所有变量都被正确赋值

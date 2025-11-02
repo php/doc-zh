@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- EN-Revision: 06e4d8f936c5b102e60b59c02a048601e9beaf82 Maintainer: daijie Status: ready -->
+<!-- EN-Revision: 2e5f2910f3a2a95dcbdaf580ba57a0b60b072c2a Maintainer: daijie Status: ready -->
 <!-- CREDITS: Luffy, mowangjuanzi -->
 <chapter xml:id="language.enumerations" xmlns="http://docbook.org/ns/docbook">
  <title>枚举</title>
@@ -111,8 +111,8 @@ $a instanceof Suit;  // true
   </programlisting>
 
   <para>
-   由于对象间的大小比较毫无意义，这也意味着 enum 值从来不会 <literal>&lt;</literal> 或 <literal>&gt;</literal> 其他值。
-   当 enum 的值用于比较时，总是返回 &false;。
+   由于对象间的大小比较毫无意义，这也意味着 enum 值从来不会 <literal>&lt;</literal> 或 <literal>&gt;</literal>
+   其他值。当 enum 的值用于比较时，总是返回 &false;。
   </para>
 
   <para>
@@ -121,8 +121,7 @@ $a instanceof Suit;  // true
   </para>
 
   <para>
-   枚举类型里所有的纯粹条目都是自身的实例。
-   枚举类型在内部的实现形式是一个 class。
+   枚举类型里所有的纯粹条目都是自身的实例。枚举类型在内部的实现形式是 class。
   </para>
 
   <para>
@@ -141,25 +140,21 @@ print Suit::Spades->name;
   </programlisting>
 
    <para>
-    It is also possible to use the <function>defined</function> and <function>constant</function>
-    functions to check for the existence of or read an enum case if the name is obtained dynamically.
-    This is, however, discouraged as using <link linkend="language.enumerations.backed">Backed enums</link>
-    should work for most use cases.
+    如果名称是动态获取的，也可以使用 <function>defined</function> 和 <function>constant</function>
+    函数来检查枚举成员是否存在或读取其值。然而，这种方法并不推荐，因为对于大多数使用场景，使用<link
+    linkend="language.enumerations.backed">带值枚举</link>即可满足需求。
    </para>
 
   </sect1>
 
  <sect1 xml:id="language.enumerations.backed">
-  <title>回退（Backed）枚举</title>
+  <title>带值（回退）枚举</title>
 
   <para>
-   默认情况下枚举条目实现形式不是标量。
-   它们是纯粹的对象实例。
-   不过，很多时候也需要在数据库、数据存储对象中来回读写枚举条目。
-   因此，能够内置支持标量形式也很有用（更易序列化）。
+   默认情况下，枚举成员没有对应的标量值。它们仅仅是单例对象。然而，在许多情况下，枚举成员需要能够与数据库或类似的数据存储进行往返操作，因此内置一个本质上定义的标量值（从而可以轻松序列化）是非常有用的。
   </para>
 
-  <para>按以下语法，定义标量形式的枚举：</para>
+  <para>定义标量形式的枚举的语法如下：</para>
 
   <programlisting role="php">
 <![CDATA[
@@ -457,12 +452,12 @@ enum Size
     case Medium;
     case Large;
 
-    public static function fromLength(int $cm): static
+    public static function fromLength(int $cm): self
     {
         return match(true) {
-            $cm < 50 => static::Small,
-            $cm < 100 => static::Medium,
-            default => static::Large,
+            $cm < 50 => self::Small,
+            $cm < 100 => self::Medium,
+            default => self::Large,
         };
     }
 }
@@ -816,7 +811,7 @@ function quux(ErrorCode $errorCode)
     // 编写时，此代码似乎涵盖了所有情况
     match ($errorCode) {
         ErrorCode::SOMETHING_BROKE => true,
-    }
+    };
 }
 
 ?>
@@ -916,10 +911,10 @@ enum UserStatus: string
     public function label(): string
     {
         return match($this) {
-            static::Pending => 'Pending',
-            static::Active => 'Active',
-            static::Suspended => 'Suspended',
-            static::CanceledByUser => 'Canceled by user',
+            self::Pending => 'Pending',
+            self::Active => 'Active',
+            self::Suspended => 'Suspended',
+            self::CanceledByUser => 'Canceled by user',
         };
     }
 }
@@ -928,7 +923,7 @@ enum UserStatus: string
     </programlisting>
 
     <para>
-    这个例子中，用户的状态是 <literal>UserStatus::Pending</literal>、
+     这个例子中，用户的状态是 <literal>UserStatus::Pending</literal>、
      <literal>UserStatus::Active</literal>、<literal>UserStatus::Suspended</literal>、
      <literal>UserStatus::CanceledByUser</literal> 中的一个，具有独占性。
      函数可以根据 <literal>UserStatus</literal> 设置参数类型，仅支持这四种值。
