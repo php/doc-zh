@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- EN-Revision: c999c7066ede7dc2df80e0bd3364bfa0ef1f9533 Maintainer: mowangjuanzi Status: ready -->
+<sect1 xml:id="language.operators.functional">
+ <title>函数式运算符</title>
+ <titleabbrev>函数式</titleabbrev>
+ <para>
+  PHP 8.5 及更高版本支持可直接作用于可调用对象的操作符。<literal>|&gt;</literal>
+  操作符（或称为“管道”），在右侧接受单个参数的可调用对象，并将左侧的值传递给它，最终返回该可调用对象的结果。右侧的可调用对象可以是任何有效的
+  PHP 可调用对象：<classname>Closure</classname>、<link
+  linkend="functions.first_class_callable_syntax">一等可调用对象</link>、实现了 <link
+  linkend="object.invoke">__invoke()</link> 方法的对象等。
+ </para>
+ <para>
+  这意味着以下两行在逻辑上是等价的。
+  <example>
+   <title>使用 <literal>|&gt;</literal></title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+$result = "Hello World" |> strlen(...);
+echo $result, PHP_EOL;
+
+$result = strlen("Hello World");
+echo $result, PHP_EOL;
+?>
+]]>
+   </programlisting>
+   &example.outputs;
+   <screen>
+<![CDATA[
+11
+11
+]]>
+   </screen>
+  </example>
+ </para>
+ <para>
+  对于单次调用，并不特别有用。当多个调用链式组合时，其作用才得以体现。也就是说，以下两段代码在逻辑上是等价的：
+  <example>
+   <title>链式 |&gt; 调用</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+$result = "PHP Rocks"
+    |> htmlentities(...)
+    |> str_split(...)
+    |> (fn($x) => array_map(strtoupper(...), $x))
+    |> (fn($x) => array_filter($x, fn($v) => $v != 'O'))
+;
+echo $result, PHP_EOL;
+
+$temp = "PHP Rocks";
+$temp = htmlentities($temp);
+$temp = str_split($temp);
+$temp = array_map(strtoupper(...), $temp);
+$temp = array_filter($temp, fn($v) => $v != 'O');
+$result = $temp;
+echo $result, PHP_EOL;
+?>
+]]>
+   </programlisting>
+   &example.outputs;
+   <screen>
+<![CDATA[
+Array
+(
+    [0] => P
+    [1] => H
+    [2] => P
+    [3] =>
+    [4] => R
+    [6] => C
+    [7] => K
+    [8] => S
+)
+Array
+(
+    [0] => P
+    [1] => H
+    [2] => P
+    [3] =>
+    [4] => R
+    [6] => C
+    [7] => K
+    [8] => S
+)
+]]>
+   </screen>
+  </example>
+ </para>
+ <para>
+  管道的左侧可以是任何值或表达式。右侧可以是任何接受单个参数的有效 PHP
+  可调用对象，或是任何能够解析为这种可调用对象的表达式。不允许超过一个必需参数的函数，此类情况将如同普通调用时参数不足一样导致失败。不允许通过引用传递变量的函数。如果右侧无法解析为有效的可调用对象，则会抛出 Error。
+ </para>
+ <note>
+  <para>
+   需要注意，为了避免语法歧义，<link linkend="functions.arrow">箭头函数</link>在与管道操作符一起使用时必须用括号包裹，如上述示例所示。未遵循此要求将导致核心错误。
+  </para>
+ </note>
+
+ <sect2 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><classname>Closure</classname></member>
+   </simplelist>
+  </para>
+ </sect2>
+</sect1>
