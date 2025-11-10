@@ -1,22 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 0799f7789c50a11b746ad713cc8787e4b04dd926 Maintainer: Haohappy Status: ready -->
+<!-- EN-Revision: e7e4ffe9a10a4dcd9903a7abf125a811d0eda023 Maintainer: Haohappy Status: ready -->
 <!-- CREDITS: mowangjuanzi -->
 <chapter xml:id="features.persistent-connections" xmlns="http://docbook.org/ns/docbook">
   <title>持久数据库连接</title>
 
+ <simplesect>
+  <title>什么是持久连接？</title>
   <simpara>
    持久数据库连接是指在脚本结束运行时不关闭的连接。当收到持久连接的请求时，PHP
    将检查是否已经存在相同的持久连接（前面已经开启的）——如果存在，将直接使用这个连接。如果不存在，则建立新的连接。所谓“相同”的连接是指用相同的用户名和密码连接到相同主机的连接。
   </simpara>
   <simpara>
-   对 web 服务器的工作方式和负载分配方式没有完全理解可能会错误地理解持久连接。特别是持久连接<emphasis>不会</emphasis>在相同的连接上提供建立“用户会话”的能力，也不提供有效建立事务的能力。实际上，要非常清楚的了解持久连接不会提供<emphasis>任何</emphasis>非持久连接无法实现的功能。
+   目前无法请求特定的连接，也无法保证获取的是现有连接还是全新的连接（如果所有现有连接都在使用中，或者请求由不同的
+   worker 进程处理，而该 worker 进程拥有独立的连接池）。
   </simpara>
   <simpara>
-   为什么？
+   这意味着无法使用 PHP 持久连接来实现以下目的，例如：
   </simpara>
+  <simplelist>
+   <member>为特定的 Web 用户分配特定的数据库会话</member>
+   <member>创建跨多个请求的大型事务</member>
+   <member>在一个请求中发起查询并在另一个请求中收集结果</member>
+  </simplelist>
   <simpara>
-   这和 web 服务器的工作方式有关。web 服务器可以通过三种方法来利用 PHP 生成 web 页面。
+   持久连接并没有提供非持久连接无法实现的<emphasis>任何</emphasis>功能。
+  </simpara>
+ </simplesect>
+
+ <simplesect xml:id="persistent-connections.web">
+  <title>Web 请求</title>
+  <simpara>
+   web 服务器可以通过两种方法来利用 PHP 生成 web 页面。
   </simpara>
   <simpara>
    第一种方法是将 PHP 自以为 CGI“包装器”用作一个单独运行的语言解释器(CGI Wapper)。当以这种方法运行时，PHP 会为向 web
@@ -24,44 +39,115 @@
    SQL 数据库服务器的链接）都会在销毁时关闭。在这种情况下，不会从使用持久连接中获得任何好处——因为根本不会持久。
   </simpara>
   <simpara>
-   第二，也是最流行的方法是把 PHP 用作多进程 web 服务器的一个模块，这种方法目前只适用于
+   第二，也是最流行的方法是运行 PHP-FPM，或将 PHP 用作多进程 web 服务器的一个模块，目前只适用于
    Apache。多进程的服务器通常有一个父进程和一组子进程协调运行，子进程负责提供网页的工作。每当接收达到客户端提出请求时，该请求会传递给尚未给其它客户端提供服务的某个子进程。这也就是说当相同的客户端第二次向服务端发出请求时，它将有可能由与第一次不同的某个子进程提供服务。在开启了一个持久连接后，所有请求
    SQL 服务的后继页面都能够重用与 SQL 服务器建立的相同连接。
   </simpara>
+  <note>
+   <para>
+   通过检查 <function>phpinfo</function> 输出中的“Server API”值，或者在 Web 请求中运行
+   <constant>PHP_SAPI</constant> 的值，可以确认 Web 请求所使用的方法。
+   </para>
+   <para>
+    如果服务器 API 为“Apache 2 Handler”或“FPM/FastCGI”，则持久连接将在同一 worker
+    进程处理的请求之间使用。对于其他任何值，持久连接在每次请求后将不会保持。
+   </para>
+  </note>
+ </simplesect>
+
+ <simplesect xml:id="persistent-connections.cli">
+  <title>命令行进程</title>
   <simpara>
-   最后一种方法是将 PHP 用作多线程 web 服务器的插件。目前 PHP 支持 WSAPI 和 NSAPI（在 Windows 上），允许
-   PHP 作为 Netscape FastTrack（iPlanet）、Microsoft 的 Internet Information Server (IIS) 和 O'Reilly 的
-   WebSite Pro 等多线程服务器的插件使用。该行为与前面描述的多过程模型相同。
+   由于命令行 PHP 为每个脚本使用新进程，持久连接不会在命令行脚本之间共享，因此在诸如定时任务或命令之类的临时脚本中使用持久连接并无意义。然而，如果正在编写长时间运行的应用服务器，该服务器处理大量请求或任务，并且每个任务可能需要各自的数据库连接，那么持久连接可能会很有用。
   </simpara>
+ </simplesect>
+
+ <simplesect xml:id="persistent-connections.why">
+  <title>为何使用它们？</title>
   <simpara>
-   如果持久连接并没有任何附加的功能，那么使用它有什么好处？
-  </simpara>
-  <simpara>
-   答案非常简单——效率。如果创建链接到 SQL 服务器的开销很高，则持久连接是好的。开销高低取决于很多因素。例如，数据库的类型，数据库服务和
+   如果创建链接到服务器的开销很高，则持久连接是好的。开销高低取决于很多因素。例如，数据库的类型，数据库服务和
    web 服务是否在同一台服务器上，SQL 服务器负载状况等。事实是，如果连接开销很高，持久连接将显著的提高效率。它使得子进程在其整个生命周期中只做一次连接操作，而非每次在处理页面时都要向
    SQL 服务器提出连接请求。这意味着，每个打开持久连接的子进程将对服务器建立各自的持久连接。例如，如果有 20
    个不同的子进程运行与 SQL 服务器建立持久连接的脚本，那么将有 20 个与 SQL 服务器建立的不同连接，每个进程一个。
   </simpara>
+ </simplesect>
+
+ <simplesect xml:id="persistent-connections.drawbacks.conn-limits">
+  <title>潜在缺点：连接限制</title>
   <simpara>
    注意，如果持久连接的数量超过了数据库设定的连接数限制，系统将会产生一些问题。如果数据库的同时连接数限制为
    16，而在繁忙会话的情况下，有 17
    个线程试图连接，那么有一个线程将无法连接。如果这个时候，在脚本中出现了不允许关闭连接的错误（例如无限循环），则该数据库的
    16 个连接将迅速地受到影响。请查阅数据库文档以获取关于如何处理废弃及空闲连接的信息。
   </simpara>
-  <warning>
-   <simpara>
-    在使用持久连接时还有一些特别的问题需要牢记。例如在持久连接中使用数据表锁时，如果脚本由于某种原因无法释放数据表锁，那么随后使用相同连接的脚本将会被持久的阻塞，可能需要重新启动
-    httpd 服务或者数据库服务。另外，在使用事务时，如果脚本在事务提交前结束，则该事务也会影响到使用相同连接的下一个脚本。不管在什么情况下，都可以通过使用
-    <function>register_shutdown_function</function> 函数来注册一个简单的清理函数来释放数据表锁，或者回滚事务。或者更好的处理方法，是不在使用数据表锁或者事务处理的脚本中使用持久连接，这可以从根本上解决这个问题（当然还可以在其它地方使用持久连接）。
-   </simpara>
-  </warning>
   <simpara>
-   以下是一点重要的总结。持久连接与常规的非持久连接应该是可以互相替换的。即将持久连接替换为非持久连接时，脚本的行为不应该发生改变。使用持久连接只应该改变脚本的效率，不应该改变其行为！
+   持久连接通常会增加任意时刻的打开连接数，因为处于空闲状态的 worker 进程仍会保留其之前处理请求时所建立的连接。如果启动了大量
+   worker 进程以应对请求激增，这些进程所打开的连接将会一直保留，直到 worker 进程终止或数据库服务器关闭连接为止。
   </simpara>
-  <para>
-   参见 <function>ibase_pconnect</function>、<function>ociplogon</function>、<function>odbc_pconnect</function>、<function>oci_pconnect</function>、<function>pfsockopen</function>
-   和 <function>pg_pconnect</function>。
-  </para>
+  <simpara>
+   确保数据库服务器允许的最大连接数大于 Web 请求工作进程的最大数量（以及任何其他用途，例如定时任务或管理连接）。
+  </simpara>
+  <simpara>
+   查阅数据库文档以获取有关处理遗弃或空闲连接（超时）的信息。较长的超时时间可能会显著增加任意时刻打开的持久连接数量。
+  </simpara>
+ </simplesect>
+
+ <simplesect xml:id="persistent-connections.drawbacks.state">
+  <title>潜在缺点：维护连接状态</title>
+  <simpara>
+   某些数据库扩展在重用连接时会自动执行清理操作，而其他扩展则将此任务交由应用程序开发者决定。根据所选的数据库扩展和应用程序设计，可能需要在脚本退出前进行手动清理。可能导致连接处于意外状态的更改包括：
+  </simpara>
+  <simplelist>
+   <member>已选择或默认的数据库</member>
+   <member>表锁</member>
+   <member>未提交的事务</member>
+   <member>临时表</member>
+   <member>与连接相关的特定设置或功能（例如性能分析）</member>
+  </simplelist>
+  <simpara>
+   未清理或未关闭的表锁和事务可能会导致无限期阻塞其他查询，或导致连接的后续重用引发意外更改。
+  </simpara>
+  <simpara>
+   选择了错误的数据库将导致连接的后续重用无法按预期执行查询（或者在数据库模式足够相似的情况下，可能会对错误的数据库执行查询）。
+  </simpara>
+  <simpara>
+   如果未清理临时表，后续请求将无法重新创建相同的表。
+  </simpara>
+  <simpara>
+   可以使用类析构方法或 <function>register_shutdown_function</function>
+   来实现清理操作。还可以考虑使用包含此功能的专用连接池代理。
+  </simpara>
+ </simplesect>
+
+ <simplesect xml:id="persistent-connections.final-words">
+  <title>结语</title>
+  <simpara>
+   鉴于上述行为及潜在缺点，不应未经慎重考虑就使用持久连接。在没有对应用程序进行额外更改，以及未对数据库服务器和
+   Web 服务器及/或 PHP-FPM 进行谨慎配置的情况下，不应使用持久连接。
+  </simpara>
+  <simpara>
+   可以考虑其他解决方案，例如调查并修复导致连接创建开销的原因（例如，在数据库服务器上禁用反向 DNS
+   查找），或使用专用的连接池代理。
+  </simpara>
+  <simpara>
+   对于高流量的 Web API，可以考虑使用其他运行时环境或长时间运行的应用服务器。
+  </simpara>
+ </simplesect>
+
+ <simplesect role="seealso" xml:id="persistent-connections.seealso">
+   &reftitle.seealso;
+   <para>
+    <simplelist>
+     <member><function>ibase_pconnect</function></member>
+     <member><function>oci_pconnect</function></member>
+     <member><function>odbc_pconnect</function></member>
+     <member><function>pfsockopen</function></member>
+     <member><function>pg_connect</function></member>
+     <member><link linkend="mysqli.persistconns">MySQLi 与持久连接</link></member>
+     <member><link linkend="pdo.connections">PDO 连接管理</link></member>
+    </simplelist>
+   </para>
+  </simplesect>
  </chapter>
 
 <!-- Keep this comment at the end of the file
