@@ -1,0 +1,484 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- EN-Revision: ec45af749649dc0d6a23eaedeed1b601f7460813 Maintainer: mowangjuanzi Status: partial -->
+<sect1 xml:id="migration85.new-features" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <title>新功能</title>
+
+ <sect2 xml:id="migration85.new-features.core">
+  <title>PHP 核心</title>
+
+  <sect3 xml:id="migration85.new-features.core.pipe-operator">
+   <title>管道运算法</title>
+
+   <simpara>
+    新增<link linkend="language.operators.functional">管道（<literal>|&gt;</literal>）运算法</link>.
+    <!-- RFC: https://wiki.php.net/rfc/pipe-operator-v3 -->
+   </simpara>
+
+   <informalexample>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$result = "Hello World" |> strlen(...);
+print $result . PHP_EOL;  // Prints "11"
+]]>
+    </programlisting>
+   </informalexample>
+  </sect3>
+
+  <sect3 xml:id="migration85.new-features.core.closures-in-constexpr">
+   <title>常量表达式中的闭包</title>
+
+   <para>
+    在常量表达式中新增对<link linkend="class.closure">闭包</link>和<link
+    linkend="functions.first_class_callable_syntax">一级可调用对象</link>的支持，包括：
+
+    <simplelist>
+     <member>注解参数。</member>
+     <member>属性和参数的默认值。</member>
+     <member>常量和类常量。</member>
+    </simplelist>
+
+    <!-- RFC: https://wiki.php.net/rfc/closures_in_const_expr -->
+    <!-- RFC: https://wiki.php.net/rfc/fcc_in_const_expr -->
+   </para>
+  </sect3>
+
+  <sect3 xml:id="migration85.new-features.core.nodiscard-attribute">
+   <title>#[\NoDiscard] 注解</title>
+
+   <simpara>
+    新增了 <classname>NoDiscard</classname> 注解，用于表示函数的返回值是重要的，应当使用它。
+    <!-- RFC: https://wiki.php.net/rfc/marking_return_value_as_important -->
+   </simpara>
+
+   <simpara>
+    同时，新增 <literal>(void)</literal> 转换以表明不使用某个值是故意的。<literal>(void)</literal>
+    转换本身对程序执行没有任何影响，但可以用来抑制 <code>#[\NoDiscard]</code> 发出的警告，也可能用于消除外部
+    IDE 或静态分析工具发出的诊断信息。
+    <!-- RFC: https://wiki.php.net/rfc/marking_return_value_as_important -->
+   </simpara>
+
+   <informalexample>
+    <programlisting role="php">
+<![CDATA[
+<?php
+
+#[\NoDiscard]
+function concat(string $a, string $b): string {
+     return a + b;
+}
+
+// concat() 的返回值应要么被使用，要么通过在 xxx.php 中将其强制转换为 (void) 来有意忽略。
+concat("a", "b");
+
+// 不会发出警告，因为返回值已被赋值操作使用。
+$results = concat("a", "b");
+
+// 不会发出警告，因为使用了 (void) 转换。
+(void)concat("a", "b");
+]]>
+    </programlisting>
+   </informalexample>
+
+  </sect3>
+
+  <sect3 xml:id="migration85.new-features.core.attributes-on-constants">
+   <title>常量上的注解</title>
+
+   <simpara>
+    新增对编译时非类常量的注解支持（例如，<code>const MY_CONST = 1;</code> 而非 <code>define('MY_CONST', 1);</code>）。
+    <!-- RFC: https://wiki.php.net/rfc/attributes-on-constants -->
+   </simpara>
+
+   <simpara>
+    <classname>Deprecated</classname> 注解现在可以用于常量。
+    <!-- RFC: https://wiki.php.net/rfc/attributes-on-constants -->
+   </simpara>
+
+  </sect3>
+
+  <sect3 xml:id="migration85.new-features.core.delayedtargetvalidation-attribute">
+   <title><code>#[\DelayedTargetValidation]</code> 注解</title>
+
+   <simpara>
+    新增的 <classname>DelayedTargetValidation</classname>
+    注解可用于抑制在无效目标上使用核心（或扩展）注解时产生的编译时错误。这些错误会在调用
+    <methodname>ReflectionAttribute::newInstance</methodname> 时于运行时报告（如果需要）。
+    <!-- RFC: https://wiki.php.net/rfc/delayedtargetvalidation_attribute -->
+   </simpara>
+
+  </sect3>
+
+  <sect3 xml:id="migration85.new-features.core.override-for-properties">
+   <title>用于属性的 <code>#[\Override]</code></title>
+
+   <simpara>
+    <classname>Override</classname> 注解现在可应用于属性。
+    <!-- RFC: https://wiki.php.net/rfc/override_properties -->
+   </simpara>
+
+  </sect3>
+
+  <sect3 xml:id="migration85.new-features.core.static-aviz">
+   <title>静态非对称可见性</title>
+
+   <simpara>
+    新增对静态属性的<link linkend="language.oop5.visibility-members-aviz">非对称可见性支持</link>。
+    <!-- RFC: https://wiki.php.net/rfc/static-aviz -->
+   </simpara>
+
+  </sect3>
+
+  <sect3 xml:id="migration85.new-features.core.backtraces-for-fatal-errors">
+   <title>Fatal Error 的 Backtraces</title>
+
+   <simpara>
+    Fatal Error（例如超出最大执行时间）现在包含回溯信息。
+    <!-- RFC: https://wiki.php.net/rfc/error_backtraces_v2 -->
+   </simpara>
+
+  </sect3>
+
+  <sect3 xml:id="migration85.new-features.core.final-property-promotion">
+   <title>final 属性的构造方法提升</title>
+
+   <simpara>
+    <link linkend="language.oop5.decon.constructor.promotion">构造方法属性提升</link>现在可以用于最终属性。
+    <!-- RFC: https://wiki.php.net/rfc/final_promotion -->
+   </simpara>
+
+  </sect3>
+
+  <sect3 xml:id="migration85.new-features.core.casts-in-constexpr">
+   <title>常量表达式中的类型转换</title>
+
+   <simpara>
+    新增对常量表达式中类型转换的支持。
+   </simpara>
+
+   <informalexample>
+    <programlisting role="php">
+<![CDATA[
+<?php
+const T1 = (int) 0.3; // 之前：“Fatal error: Constant expression contains invalid operations”
+print T1 . PHP_EOL;   // 打印“0”
+]]>
+    </programlisting>
+   </informalexample>
+
+  </sect3>
+
+  <sect3 xml:id="migration85.new-features.core.clone-function">
+   <title>Clone function</title>
+
+   <simpara>
+    <link linkend="language.oop5.cloning">clone 语言结构</link>现在是函数，并通过新的
+    <property>$withProperties</property> 参数支持在克隆期间重新分配（只读）属性。
+    <!-- RFC: https://wiki.php.net/rfc/clone_with_v2 -->
+   </simpara>
+
+  </sect3>
+
+ </sect2>
+
+ <sect2 xml:id="migration85.new-features.curl">
+  <title>cURL</title>
+
+  <simpara>
+   新增对多个 PHP 请求之间持久化的<link
+   linkend="class.curlsharepersistenthandle">共享句柄</link>的支持，从而安全地实现更高效的连接复用。
+   <!-- RFC: https://wiki.php.net/rfc/curl_share_persistence_improvement -->
+  </simpara>
+
+  <simpara>
+   Added support for <constant>CURLINFO_USED_PROXY</constant> (libcurl >= 8.7.0),
+   <constant>CURLINFO_HTTPAUTH_USED</constant>,
+   and <constant>CURLINFO_PROXYAUTH_USED</constant> (libcurl >= 8.12.0)
+   to the <function>curl_getinfo</function> function.
+   When <function>curl_getinfo</function> returns an array, the same information
+   is available as <literal>"used_proxy"</literal>,
+   <literal>"httpauth_used"</literal>, and <literal>"proxyauth_used"</literal>
+   keys.
+   <constant>CURLINFO_USED_PROXY</constant> gets zero set if no proxy was used in the
+   previous transfer or a non-zero value if a proxy was used.
+   <constant>CURLINFO_HTTPAUTH_USED</constant> and
+   <constant>CURLINFO_PROXYAUTH_USED</constant> get bitmasks
+   indicating the HTTP and proxy authentication methods that were
+   used in the previous request.
+   See <constant>CURLAUTH_<replaceable>*</replaceable></constant> constants for
+   possible values.
+  </simpara>
+
+  <simpara>
+   Added <constant>CURLOPT_INFILESIZE_LARGE</constant> Curl option, which is a safe
+   replacement for <constant>CURLOPT_INFILESIZE</constant>. On certain systems,
+   <constant>CURLOPT_INFILESIZE</constant> only accepts a 32-bit signed integer as
+   the file size (2.0 GiB) even on 64-bit systems.
+   <constant>CURLOPT_INFILESIZE_LARGE</constant> accepts the largest integer value
+   the system can handle.
+  </simpara>
+
+  <simpara>
+   Added <constant>CURLFOLLOW_OBEYCODE</constant>,
+   <constant>CURLFOLLOW_FIRSTONLY</constant> and <constant>CURLFOLLOW_ALL</constant>
+   values for <constant>CURLOPT_FOLLOWLOCATION</constant>
+   <function>curl_setopt</function> option.
+   <constant>CURLFOLLOW_OBEYCODE</constant> to follow more strictly in regard to
+   redirect if they are allowed.
+   <constant>CURLFOLLOW_FIRSTONLY</constant> to follow only the first redirect thus
+   if there is any follow up redirect, it won't go any further.
+   <constant>CURLFOLLOW_ALL</constant> is equivalent to setting
+   <constant>CURLOPT_FOLLOWLOCATION</constant> to true.
+  </simpara>
+
+  <simpara>
+   Added support for <constant>CURLINFO_CONN_ID</constant> (libcurl >= 8.2.0)
+   to the <function>curl_getinfo</function> function. This constant allows retrieving
+   the unique ID of the connection used by a cURL transfer. It is primarily
+   useful when connection reuse or connection pooling logic is needed in
+   PHP-level applications. When <function>curl_getinfo</function> returns an array,
+   this value is available as the <literal>"conn_id"</literal> key.
+  </simpara>
+
+  <simpara>
+   Added support for <constant>CURLINFO_QUEUE_TIME_T</constant> (libcurl >= 8.6.0)
+   to the <function>curl_getinfo</function> function. This constant allows
+   retrieving the time (in microseconds) that the request spent in libcurl’s
+   connection queue before it was sent.
+   This value can also be retrieved by passing
+   <constant>CURLINFO_QUEUE_TIME_T</constant> to the <function>curl_getinfo</function>
+   <parameter>option</parameter> parameter.
+  </simpara>
+
+  <simpara>
+   Added support for <constant>CURLOPT_SSL_SIGNATURE_ALGORITHMS</constant> to
+   specify the signature algorithms to use for TLS.
+  </simpara>
+
+ </sect2>
+
+ <sect2 xml:id="migration85.new-features.dom">
+  <title>DOM</title>
+
+  <simpara>
+   Added <property>Dom\Element::$outerHTML</property>.
+  </simpara>
+
+  <simpara>
+   Added <property>$children</property> property to
+   <interfacename>Dom\ParentNode</interfacename> implementations.
+  </simpara>
+
+ </sect2>
+
+ <sect2 xml:id="migration85.new-features.exif">
+  <title>EXIF</title>
+
+  <simpara>
+   Added support for <literal>OffsetTime*</literal> Exif tags.
+  </simpara>
+
+  <simpara>
+   Added support for HEIF/HEIC.
+  </simpara>
+
+ </sect2>
+
+ <sect2 xml:id="migration85.new-features.filter">
+  <title>Filter</title>
+
+  <simpara>
+   Added new <constant>FILTER_THROW_ON_FAILURE</constant> flag which can be
+   passed to the filter functions and will force an exception to be triggered
+   when validation fails.
+   The new flag cannot be combined with
+   <constant>FILTER_NULL_ON_FAILURE</constant>; trying to do so will result
+   in a <exceptionname>ValueError</exceptionname> being thrown.
+   <!-- RFC: https://wiki.php.net/rfc/filter_throw_on_failure -->
+  </simpara>
+
+ </sect2>
+
+ <sect2 xml:id="migration85.new-features.intl">
+  <title>Intl</title>
+
+  <simpara>
+   Added class constants <constant>NumberFormatter::CURRENCY_ISO</constant>,
+   <constant>NumberFormatter::CURRENCY_PLURAL</constant>,
+   <constant>NumberFormatter::CASH_CURRENCY</constant>,
+   and <constant>NumberFormatter::CURRENCY_STANDARD</constant>
+   for various currency-related number formats.
+  </simpara>
+
+  <simpara>
+   Added <methodname>Locale::addLikelySubtags</methodname> and
+   <methodname>Locale::minimizeSubtags</methodname> to handle likely tags
+   on a given locale.
+  </simpara>
+
+  <simpara>
+   Added <classname>IntlListFormatter</classname> class to format, order,
+   and punctuate a list of items with a given locale,
+   <constant>IntlListFormatter::TYPE_AND</constant>,
+   <constant>IntlListFormatter::TYPE_OR</constant>,
+   <constant>IntlListFormatter::TYPE_UNITS</constant> operands and
+   <constant>IntlListFormatter::WIDTH_WIDE</constant>,
+   <constant>IntlListFormatter::WIDTH_SHORT</constant> and
+   <constant>IntlListFormatter::WIDTH_NARROW</constant> widths.
+   It is supported from icu 67.
+  </simpara>
+
+ </sect2>
+
+ <sect2 xml:id="migration85.new-features.pdo-sqlite">
+  <title>PDO_Sqlite</title>
+
+  <simpara>
+   Added class constant <constant>Pdo\Sqlite::ATTR_BUSY_STATEMENT</constant>.
+  </simpara>
+
+  <simpara>
+   Added class constants <constant>Pdo\Sqlite::ATTR_EXPLAIN_STATEMENT</constant>,
+   <constant>Pdo\Sqlite::EXPLAIN_MODE_PREPARED</constant>,
+   <constant>Pdo\Sqlite::EXPLAIN_MODE_EXPLAIN</constant>,
+   <constant>Pdo\Sqlite::EXPLAIN_MODE_EXPLAIN_QUERY_PLAN</constant>.
+  </simpara>
+
+  <simpara>
+   Added <constant>Pdo\Sqlite::ATTR_TRANSACTION_MODE</constant> connection attribute
+   with possible values <constant>Pdo\Sqlite::TRANSACTION_MODE_DEFERRED</constant>,
+   <constant>Pdo\Sqlite::TRANSACTION_MODE_IMMEDIATE</constant>,
+   and <constant>Pdo\Sqlite::TRANSACTION_MODE_EXCLUSIVE</constant>,
+   allowing to configure the transaction mode to use when calling beginTransaction().
+  </simpara>
+
+ </sect2>
+
+ <sect2 xml:id="migration85.new-features.session">
+  <title>Session</title>
+
+  <simpara>
+   <function>session_set_cookie_params</function>,
+   <function>session_get_cookie_params</function>,
+   and <function>session_start</function> now support partitioned cookies via the
+   <literal>"partitioned"</literal> key.
+   <!-- RFC: https://wiki.php.net/rfc/CHIPS -->
+  </simpara>
+
+ </sect2>
+
+ <sect2 xml:id="migration85.new-features.soap">
+  <title>SOAP</title>
+
+  <simpara>
+   Enumeration cases are now dumped in <methodname>SoapClient::__getTypes</methodname>.
+  </simpara>
+
+  <simpara>
+   Added support for Soap 1.2 Reason Text xml:lang attribute.
+  </simpara>
+
+  <simpara>
+   The signature of <methodname>SoapFault::__construct</methodname> and
+   <methodname>SoapServer::fault</methodname> therefore
+   now have an optional <parameter>$lang</parameter> parameter.
+   This support solves compatibility with .NET SOAP clients.
+  </simpara>
+
+ </sect2>
+
+ <sect2 xml:id="migration85.new-features.standard">
+  <title>Standard</title>
+
+  <simpara>
+   <function>mail</function> now returns the actual sendmail error and detects
+   if the sendmail process was terminated unexpectedly.
+   In such cases, a warning is emitted and the function returns false.
+   Previously, these errors were silently ignored.
+   This change affects only the sendmail transport.
+  </simpara>
+
+  <simpara>
+   <function>getimagesize</function> now supports HEIF/HEIC images.
+  </simpara>
+
+  <simpara>
+   <function>getimagesize</function> now supports SVG images when ext-libxml
+   is also loaded.
+   Similarly, <function>image_type_to_extension</function> and
+   <function>image_type_to_mime_type</function>
+   now also handle IMAGETYPE_SVG.
+  </simpara>
+
+  <simpara>
+   The array returned by <function>getimagesize</function> now has two additional entries:
+   <literal>"width_unit"</literal> and <literal>"height_unit"</literal> to indicate in
+   which units the dimensions are expressed. These units are px by default. They are not
+   necessarily the same (just to give one example: one may be cm and the other may be px).
+  </simpara>
+
+  <simpara>
+   <function>setcookie</function> and <function>setrawcookie</function> now support the
+   <literal>"partitioned"</literal> key.
+   <!-- RFC: https://wiki.php.net/rfc/CHIPS -->
+  </simpara>
+
+ </sect2>
+
+ <sect2 xml:id="migration85.new-features.uri">
+  <title>URI</title>
+
+  <simpara>
+   An always enabled uri extension is added that can be used for handling
+   URIs and URLs according to RFC 3986 and WHATWG URL.
+   <!-- RFC: https://wiki.php.net/rfc/url_parsing_api -->
+  </simpara>
+
+ </sect2>
+
+ <sect2 xml:id="migration85.new-features.xsl">
+  <title>XSL</title>
+
+  <simpara>
+   The <parameter>$namespace</parameter> argument of <methodname>XSLTProcessor::getParameter</methodname>,
+   <methodname>XSLTProcessor::setParameter</methodname> and
+   <methodname>XSLTProcessor::removeParameter</methodname> now actually works
+   instead of being treated as empty.
+   This only works if the <parameter>$name</parameter> argument does not use Clark notation and is not a
+   QName because in those cases the namespace is taken from the namespace href or
+   prefix respectively.
+  </simpara>
+
+ </sect2>
+
+ <sect2 xml:id="migration85.new-features.zlib">
+  <title>Zlib</title>
+
+  <simpara>
+   <function>flock</function> is now supported on zlib streams. Previously,
+   this always failed to perform any locking action.
+  </simpara>
+
+ </sect2>
+
+</sect1>
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
