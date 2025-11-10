@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 9ee9eccf455188ab6eb352194eb6f9eb99e15606 Maintainer: Haohappy Status: ready -->
+<!-- EN-Revision: 009f215fc983eeded6161676bcffdd8cf3b6b080 Maintainer: Haohappy Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
  <sect1 xml:id="language.oop5.late-static-bindings" xmlns="http://docbook.org/ns/docbook">
   <title>后期静态绑定</title>
   <para>
@@ -33,22 +34,30 @@
     <programlisting role="php">
 <![CDATA[
 <?php
-class A {
-    public static function who() {
+
+class A
+{
+    public static function who()
+    {
         echo __CLASS__;
     }
-    public static function test() {
+
+    public static function test()
+    {
         self::who();
     }
 }
 
-class B extends A {
-    public static function who() {
+class B extends A
+{
+    public static function who()
+    {
         echo __CLASS__;
     }
 }
 
 B::test();
+
 ?>
 ]]>
     </programlisting>
@@ -76,22 +85,30 @@ A
     <programlisting role="php">
 <![CDATA[
 <?php
-class A {
-    public static function who() {
+
+class A
+{
+    public static function who()
+    {
         echo __CLASS__;
     }
-    public static function test() {
-        static::who(); // 后期静态绑定从这里开始
+
+    public static function test()
+    {
+        static::who(); // 接下来是延迟静态绑定
     }
 }
 
-class B extends A {
-    public static function who() {
+class B extends A
+{
+    public static function who()
+    {
         echo __CLASS__;
     }
 }
 
 B::test();
+
 ?>
 ]]>
     </programlisting>
@@ -114,42 +131,54 @@ B
     <programlisting role="php">
 <![CDATA[
 <?php
-class A {
-    private function foo() {
-        echo "success!\n";
+
+class A
+{
+    private function foo()
+    {
+        echo "Success!\n";
     }
-    public function test() {
+
+    public function test()
+    {
         $this->foo();
         static::foo();
     }
 }
 
-class B extends A {
-   /* foo() 将复制给 B，因此它的作用域将是 A 并调用成功 */
+class B extends A
+{
+    /* foo() 将被复制到 B，因此其作用域仍为 A，调用也会成功 */
 }
 
-class C extends A {
-    private function foo() {
-        /* 替换原来的方法；新的作用域是 C */
+class C extends A
+{
+    private function foo()
+    {
+        /* 已替换原始方法，新方法的作用域为 C*/
     }
 }
 
 $b = new B();
 $b->test();
+
 $c = new C();
-$c->test();   //fails
+try {
+    $c->test();
+} catch (Error $e) {
+    echo $e->getMessage();
+}
+
 ?>
 ]]>
     </programlisting>
     &example.outputs;
     <screen>
 <![CDATA[
-success!
-success!
-success!
-
-
-Fatal error:  Call to private method C::foo() from context 'A' in /tmp/test.php on line 9
+Success!
+Success!
+Success!
+Call to private method C::foo() from scope A
 ]]>
     </screen>
    </example>
@@ -163,34 +192,45 @@ Fatal error:  Call to private method C::foo() from context 'A' in /tmp/test.php 
      <programlisting role="php">
 <![CDATA[
 <?php
-class A {
-    public static function foo() {
+
+class A
+{
+    public static function foo()
+    {
         static::who();
     }
 
-    public static function who() {
-        echo __CLASS__."\n";
+    public static function who()
+    {
+        echo __CLASS__ . "\n";
     }
 }
 
-class B extends A {
-    public static function test() {
+class B extends A
+{
+    public static function test()
+    {
         A::foo();
         parent::foo();
         self::foo();
     }
 
-    public static function who() {
-        echo __CLASS__."\n";
+    public static function who()
+    {
+        echo __CLASS__ . "\n";
     }
 }
-class C extends B {
-    public static function who() {
-        echo __CLASS__."\n";
+
+class C extends B
+{
+    public static function who()
+    {
+        echo __CLASS__ . "\n";
     }
 }
 
 C::test();
+
 ?>
 ]]>
      </programlisting>

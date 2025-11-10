@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: e50e79746736dbdfbabe9bd3566793b3ddf38f58 Maintainer: z warmwinter Status: ready -->
+<!-- EN-Revision: 3abd17e61d5022d503604cc06894254e3281acf5 Maintainer: z warmwinter Status: ready -->
 <!-- CREDITS: Jader, mowangjuanzi, Luffy -->
 <refentry xml:id="context.http" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" annotations="verify_info:false" role="stream_context_option">
  <refnamediv>
@@ -47,6 +47,11 @@
         即使在执行 <literal>Location:</literal> 重定向时也是如此。
         所以，如果启用了 <parameter>follow_location</parameter>
         就不建议设置 <literal>Host:</literal> header。
+      </para>
+      <para>
+       字符串值是以 <literal>\r\n</literal> 分隔的 <literal>Key: value</literal>，例如 <literal>"Content-Type:
+       application/json\r\nConnection: close"</literal>。数组值应为 <literal>Key: value</literal>
+       的列表，例如 <literal>["Content-Type: application/json", "Connection: close"]</literal>。
       </para>
      </listitem>
     </varlistentry>
@@ -188,19 +193,19 @@
 <?php
 
 $postdata = http_build_query(
-    array(
+    [
         'var1' => 'some content',
-        'var2' => 'doh'
-    )
+        'var2' => 'doh',
+    ]
 );
 
-$opts = array('http' =>
-    array(
+$opts = [
+    'http' => [
         'method'  => 'POST',
         'header'  => 'Content-type: application/x-www-form-urlencoded',
-        'content' => $postdata
-    )
-);
+        'content' => $postdata,
+    ]
+];
 
 $context = stream_context_create($opts);
 
@@ -220,13 +225,13 @@ $result = file_get_contents('http://example.com/submit.php', false, $context);
 
 $url = "http://www.example.org/header.php";
 
-$opts = array('http' =>
-    array(
-        'method' => 'GET',
+$opts = [
+    'http' => [
+        'method'        => 'GET',
         'max_redirects' => '0',
-        'ignore_errors' => '1'
-    )
-);
+        'ignore_errors' => '1',
+    ]
+];
 
 $context = stream_context_create($opts);
 $stream = fopen($url, 'r', false, $context);

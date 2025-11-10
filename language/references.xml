@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: f4f96ef8b2a95283c92ea2183fe1dedf06f3ad22 Maintainer: Altair Status: ready -->
+<!-- EN-Revision: 9463e5b660c4883b91a30f07ff68731bbcc48346 Maintainer: Altair Status: ready -->
 <!-- CREDITS: dallas, Luffy -->
 <chapter xml:id="language.references" xmlns="http://docbook.org/ns/docbook">
  <title>引用的解释</title>
@@ -384,17 +384,18 @@ foo(new Foobar()) // 自 PHP 7.0.7 起生成通知
   </para>
  </sect1>
 
- <sect1 xml:id="language.references.return">
-  <title>引用返回</title>
-  <para>
-   引用返回用在当想用函数找到引用应该被绑定在哪一个变量上面时。
+  <sect1 xml:id="language.references.return">
+   <title>引用返回</title>
+   <para>
+    引用返回用在当想用函数找到引用应该被绑定在哪一个变量上面时。
     <emphasis>不要</emphasis>用返回引用来增加性能，引擎足够聪明来自己进行优化。
     仅在有合理的技术原因时才返回引用！
     使用此语法返回引用：
-   <informalexample>
+    <informalexample>
      <programlisting role="php">
 <![CDATA[
 <?php
+
 class Foo
 {
     public $value = 42;
@@ -413,31 +414,32 @@ echo $myValue;                // 打印 $obj->value 的新值，即 2
 ?> 
 ]]>
      </programlisting>
-   </informalexample>
-   本例中 <varname>getValue</varname> 函数所返回的对象的属性将被赋值，
+    </informalexample>
+    本例中 <varname>getValue</varname> 函数所返回的对象的属性将被赋值，
     而不是拷贝，就和没有用引用语法一样。
-  </para>
-  <note>
-   <simpara>
-    和参数传递不同，这里必须在两个地方都用 <literal>&amp;</literal>
-    符号——指出返回的是一个引用，而不是通常的一个拷贝，同样也指出 <varname>$myValue</varname>
-    是作为引用的绑定，而不是通常的赋值。
-   </simpara>
-  </note>
-  <note>
-   <simpara>
-    如果试图这样从函数返回引用：<literal>return
-    ($this->value);</literal>，这将<emphasis>不会</emphasis>起作用，
+   </para>
+   <note>
+    <simpara>
+     和参数传递不同，这里必须在两个地方都用 <literal>&amp;</literal>
+     符号——指出返回的是一个引用，而不是通常的一个拷贝，同样也指出 <varname>$myValue</varname>
+     是作为引用的绑定，而不是通常的赋值。
+    </simpara>
+   </note>
+   <note>
+    <simpara>
+     如果试图这样从函数返回引用：<literal>return
+     ($this->value);</literal>，这将<emphasis>不会</emphasis>起作用，
      因为在试图返回一个<emphasis>表达式</emphasis>的结果而不是一个引用的变量。
      只能从函数返回引用变量——没别的方法。
-   </simpara>
-  </note>
+    </simpara>
+   </note>
    <para>
-     要使用返回的引用，必须使用引用赋值：
-     <informalexample>
-       <programlisting role="php">
-         <![CDATA[
+    要使用返回的引用，必须使用引用赋值：
+    <informalexample>
+     <programlisting role="php">
+<![CDATA[
 <?php
+
 function &collector()
 {
     static $collection = array();
@@ -445,17 +447,32 @@ function &collector()
 }
 
 $collection = &collector();
+// 现在，$collection 是引用变量，引用了函数内部的静态数组
+
 $collection[] = 'foo';
 
-?>
+print_r(collector());
+// Array
+// (
+//    [0] => foo
+// )
+
+?> 
 ]]>
-       </programlisting>
-     </informalexample>
+     </programlisting>
+    </informalexample>
+   <note>
+    <simpara>
+     如果赋值操作未使用 <literal>&amp;</literal> 符号，例如 <code>$collection = collector();</code>，则
+     <varname>$collection</varname> 变量将接收值的副本，而非函数返回的引用。
+    </simpara>
+   </note>
      要将返回的引用传递给另外一个需要引用的函数，可以使用如下语法：
-     <informalexample>
-       <programlisting role="php">
-         <![CDATA[
+    <informalexample>
+     <programlisting role="php">
+<![CDATA[
 <?php
+
 function &collector()
 {
     static $collection = array();
@@ -464,18 +481,18 @@ function &collector()
 
 array_push(collector(), 'foo');
 
-?>
+?> 
 ]]>
-       </programlisting>
-     </informalexample>
+     </programlisting>
+    </informalexample>
    </para>
    <note>
-     <simpara>
-       注意 <literal>array_push(&amp;collector(), 'foo');</literal> 将 
-       <emphasis>不</emphasis> 起作用，它会导致 Fatal 错误。
-     </simpara>
+    <simpara>
+     注意 <literal>array_push(&amp;collector(), 'foo');</literal> 将 
+     <emphasis>不</emphasis> 起作用，它会导致 Fatal 错误。
+    </simpara>
    </note>
- </sect1>
+  </sect1>
 
  <sect1 xml:id="language.references.unset">
   <title>取消引用</title>
