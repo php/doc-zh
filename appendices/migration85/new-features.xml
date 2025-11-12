@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- EN-Revision: ec45af749649dc0d6a23eaedeed1b601f7460813 Maintainer: mowangjuanzi Status: partial -->
+<!-- EN-Revision: ec45af749649dc0d6a23eaedeed1b601f7460813 Maintainer: mowangjuanzi Status: ready -->
 <sect1 xml:id="migration85.new-features" xmlns:xlink="http://www.w3.org/1999/xlink">
  <title>新功能</title>
 
@@ -7,10 +7,10 @@
   <title>PHP 核心</title>
 
   <sect3 xml:id="migration85.new-features.core.pipe-operator">
-   <title>管道运算法</title>
+   <title>管道运算符</title>
 
    <simpara>
-    新增<link linkend="language.operators.functional">管道（<literal>|&gt;</literal>）运算法</link>.
+    新增<link linkend="language.operators.functional">管道（<literal>|&gt;</literal>）运算符</link>。
     <!-- RFC: https://wiki.php.net/rfc/pipe-operator-v3 -->
    </simpara>
 
@@ -169,7 +169,7 @@ print T1 . PHP_EOL;   // 打印“0”
   </sect3>
 
   <sect3 xml:id="migration85.new-features.core.clone-function">
-   <title>Clone function</title>
+   <title>Clone 函数</title>
 
    <simpara>
     <link linkend="language.oop5.cloning">clone 语言结构</link>现在是函数，并通过新的
@@ -191,68 +191,45 @@ print T1 . PHP_EOL;   // 打印“0”
   </simpara>
 
   <simpara>
-   Added support for <constant>CURLINFO_USED_PROXY</constant> (libcurl >= 8.7.0),
-   <constant>CURLINFO_HTTPAUTH_USED</constant>,
-   and <constant>CURLINFO_PROXYAUTH_USED</constant> (libcurl >= 8.12.0)
-   to the <function>curl_getinfo</function> function.
-   When <function>curl_getinfo</function> returns an array, the same information
-   is available as <literal>"used_proxy"</literal>,
-   <literal>"httpauth_used"</literal>, and <literal>"proxyauth_used"</literal>
-   keys.
-   <constant>CURLINFO_USED_PROXY</constant> gets zero set if no proxy was used in the
-   previous transfer or a non-zero value if a proxy was used.
-   <constant>CURLINFO_HTTPAUTH_USED</constant> and
-   <constant>CURLINFO_PROXYAUTH_USED</constant> get bitmasks
-   indicating the HTTP and proxy authentication methods that were
-   used in the previous request.
-   See <constant>CURLAUTH_<replaceable>*</replaceable></constant> constants for
-   possible values.
+   <function>curl_getinfo</function> 函数新增对 <constant>CURLINFO_USED_PROXY</constant>（libcurl
+   >= 8.7.0）、<constant>CURLINFO_HTTPAUTH_USED</constant> 和 <constant>CURLINFO_PROXYAUTH_USED</constant>（libcurl
+   >= 8.12.0）的支持。当 <function>curl_getinfo</function> 返回数组时，相同的信息可通过
+   <literal>"used_proxy"</literal>、<literal>"httpauth_used"</literal> 和 <literal>"proxyauth_used"</literal> key
+   获取。如果上一次传输未使用代理，将设置 <constant>CURLINFO_USED_PROXY</constant>
+   为零；如果使用了代理，则为非零值。<constant>CURLINFO_HTTPAUTH_USED</constant> 和 <constant>CURLINFO_PROXYAUTH_USED</constant>
+   将返回位掩码，表示上一次请求中使用的 HTTP 和代理认证方法。有关可能的值，请参阅
+   <constant>CURLAUTH_<replaceable>*</replaceable></constant> 常量。
   </simpara>
 
   <simpara>
-   Added <constant>CURLOPT_INFILESIZE_LARGE</constant> Curl option, which is a safe
-   replacement for <constant>CURLOPT_INFILESIZE</constant>. On certain systems,
-   <constant>CURLOPT_INFILESIZE</constant> only accepts a 32-bit signed integer as
-   the file size (2.0 GiB) even on 64-bit systems.
-   <constant>CURLOPT_INFILESIZE_LARGE</constant> accepts the largest integer value
-   the system can handle.
+   新增 <constant>CURLOPT_INFILESIZE_LARGE</constant> Curl 选项，作为 <constant>CURLOPT_INFILESIZE</constant>
+   的安全替代。在某些系统上，即使是在 64 位系统中，<constant>CURLOPT_INFILESIZE</constant> 也仅接受 32
+   位有符号整数作为文件大小（2.0 GiB）。而 <constant>CURLOPT_INFILESIZE_LARGE</constant> 可接受系统能够处理的最大整数值。
   </simpara>
 
   <simpara>
-   Added <constant>CURLFOLLOW_OBEYCODE</constant>,
-   <constant>CURLFOLLOW_FIRSTONLY</constant> and <constant>CURLFOLLOW_ALL</constant>
-   values for <constant>CURLOPT_FOLLOWLOCATION</constant>
-   <function>curl_setopt</function> option.
-   <constant>CURLFOLLOW_OBEYCODE</constant> to follow more strictly in regard to
-   redirect if they are allowed.
-   <constant>CURLFOLLOW_FIRSTONLY</constant> to follow only the first redirect thus
-   if there is any follow up redirect, it won't go any further.
-   <constant>CURLFOLLOW_ALL</constant> is equivalent to setting
-   <constant>CURLOPT_FOLLOWLOCATION</constant> to true.
+   为 <function>curl_setopt</function> 的 <constant>CURLOPT_FOLLOWLOCATION</constant> 选项新增了
+   <constant>CURLFOLLOW_OBEYCODE</constant>、<constant>CURLFOLLOW_FIRSTONLY</constant> 和 <constant>CURLFOLLOW_ALL</constant>
+   值。<constant>CURLFOLLOW_OBEYCODE</constant> 在允许重定向的情况下，会更严格地遵循重定向规则。<constant>CURLFOLLOW_FIRSTONLY</constant>
+   仅跟随第一次重定向，因此如果有后续的重定向，则不会继续跟进。<constant>CURLFOLLOW_ALL</constant> 等同于将
+   <constant>CURLOPT_FOLLOWLOCATION</constant> 设置为 true。
   </simpara>
 
   <simpara>
-   Added support for <constant>CURLINFO_CONN_ID</constant> (libcurl >= 8.2.0)
-   to the <function>curl_getinfo</function> function. This constant allows retrieving
-   the unique ID of the connection used by a cURL transfer. It is primarily
-   useful when connection reuse or connection pooling logic is needed in
-   PHP-level applications. When <function>curl_getinfo</function> returns an array,
-   this value is available as the <literal>"conn_id"</literal> key.
+   <function>curl_getinfo</function> 函数新增对 <constant>CURLINFO_CONN_ID</constant>（libcurl >= 8.2.0）的支持。该常量可用于获取 cURL
+   传输的连接唯一 ID。当需要在 PHP 层面实现连接复用或连接池逻辑时，该功能尤其有用。当 <function>curl_getinfo</function> 返回数组时，该值可通过
+   <literal>"conn_id"</literal> key 获取。
   </simpara>
 
   <simpara>
-   Added support for <constant>CURLINFO_QUEUE_TIME_T</constant> (libcurl >= 8.6.0)
-   to the <function>curl_getinfo</function> function. This constant allows
-   retrieving the time (in microseconds) that the request spent in libcurl’s
-   connection queue before it was sent.
-   This value can also be retrieved by passing
-   <constant>CURLINFO_QUEUE_TIME_T</constant> to the <function>curl_getinfo</function>
-   <parameter>option</parameter> parameter.
+   <function>curl_getinfo</function> 函数新增对 <constant>CURLINFO_QUEUE_TIME_T</constant>（libcurl >=
+   8.6.0）的支持。该常量可用于获取请求发送之前在 libcurl 的连接队列中等待的时间（以微秒为单位）。通过将
+   <constant>CURLINFO_QUEUE_TIME_T</constant> 传递给 <function>curl_getinfo</function> 的
+   <parameter>option</parameter> 参数，也可以获取该值。
   </simpara>
 
   <simpara>
-   Added support for <constant>CURLOPT_SSL_SIGNATURE_ALGORITHMS</constant> to
-   specify the signature algorithms to use for TLS.
+   新增对 <constant>CURLOPT_SSL_SIGNATURE_ALGORITHMS</constant> 的支持，用于指定 TLS 的签名算法。
   </simpara>
 
  </sect2>
@@ -261,12 +238,11 @@ print T1 . PHP_EOL;   // 打印“0”
   <title>DOM</title>
 
   <simpara>
-   Added <property>Dom\Element::$outerHTML</property>.
+   新增 <property>Dom\Element::$outerHTML</property>。
   </simpara>
 
   <simpara>
-   Added <property>$children</property> property to
-   <interfacename>Dom\ParentNode</interfacename> implementations.
+   在 <interfacename>Dom\ParentNode</interfacename> 实现中新增了 <property>$children</property> 属性。
   </simpara>
 
  </sect2>
@@ -275,11 +251,11 @@ print T1 . PHP_EOL;   // 打印“0”
   <title>EXIF</title>
 
   <simpara>
-   Added support for <literal>OffsetTime*</literal> Exif tags.
+   新增对 <literal>OffsetTime*</literal> Exif 标签的支持。
   </simpara>
 
   <simpara>
-   Added support for HEIF/HEIC.
+   新增对 HEIF/HEIC 的支持。
   </simpara>
 
  </sect2>
@@ -288,12 +264,9 @@ print T1 . PHP_EOL;   // 打印“0”
   <title>Filter</title>
 
   <simpara>
-   Added new <constant>FILTER_THROW_ON_FAILURE</constant> flag which can be
-   passed to the filter functions and will force an exception to be triggered
-   when validation fails.
-   The new flag cannot be combined with
-   <constant>FILTER_NULL_ON_FAILURE</constant>; trying to do so will result
-   in a <exceptionname>ValueError</exceptionname> being thrown.
+   新增 <constant>FILTER_THROW_ON_FAILURE</constant> flag，可传递给过滤函数，并在验证失败时强制触发异常。此
+   flag 无法与 <constant>FILTER_NULL_ON_FAILURE</constant> 结合使用，尝试这样做将导致抛出
+   <exceptionname>ValueError</exceptionname>。
    <!-- RFC: https://wiki.php.net/rfc/filter_throw_on_failure -->
   </simpara>
 
@@ -303,29 +276,20 @@ print T1 . PHP_EOL;   // 打印“0”
   <title>Intl</title>
 
   <simpara>
-   Added class constants <constant>NumberFormatter::CURRENCY_ISO</constant>,
-   <constant>NumberFormatter::CURRENCY_PLURAL</constant>,
-   <constant>NumberFormatter::CASH_CURRENCY</constant>,
-   and <constant>NumberFormatter::CURRENCY_STANDARD</constant>
-   for various currency-related number formats.
+   新增与多种货币相关数字格式对应的类常量：<constant>NumberFormatter::CURRENCY_ISO</constant>、<constant>NumberFormatter::CURRENCY_PLURAL</constant>、<constant>NumberFormatter::CASH_CURRENCY</constant>,
+   和 <constant>NumberFormatter::CURRENCY_STANDARD</constant>。
   </simpara>
 
   <simpara>
-   Added <methodname>Locale::addLikelySubtags</methodname> and
-   <methodname>Locale::minimizeSubtags</methodname> to handle likely tags
-   on a given locale.
+   新增 <methodname>Locale::addLikelySubtags</methodname> 和 <methodname>Locale::minimizeSubtags</methodname>
+   方法，用于处理指定 locale 的可能标签。
   </simpara>
 
   <simpara>
-   Added <classname>IntlListFormatter</classname> class to format, order,
-   and punctuate a list of items with a given locale,
-   <constant>IntlListFormatter::TYPE_AND</constant>,
-   <constant>IntlListFormatter::TYPE_OR</constant>,
-   <constant>IntlListFormatter::TYPE_UNITS</constant> operands and
-   <constant>IntlListFormatter::WIDTH_WIDE</constant>,
-   <constant>IntlListFormatter::WIDTH_SHORT</constant> and
-   <constant>IntlListFormatter::WIDTH_NARROW</constant> widths.
-   It is supported from icu 67.
+   新增 <classname>IntlListFormatter</classname> 类，用于根据指定 locale 对项目列表进行格式化、排序和标点处理，支持
+   <constant>IntlListFormatter::TYPE_AND</constant>、<constant>IntlListFormatter::TYPE_OR</constant>、<constant>IntlListFormatter::TYPE_UNITS</constant>
+   操作数，以及 <constant>IntlListFormatter::WIDTH_WIDE</constant>、<constant>IntlListFormatter::WIDTH_SHORT</constant> 和
+   <constant>IntlListFormatter::WIDTH_NARROW</constant> 宽度。该功能从 icu 67 版本开始支持。
   </simpara>
 
  </sect2>
@@ -334,22 +298,18 @@ print T1 . PHP_EOL;   // 打印“0”
   <title>PDO_Sqlite</title>
 
   <simpara>
-   Added class constant <constant>Pdo\Sqlite::ATTR_BUSY_STATEMENT</constant>.
+   新增类常量 <constant>Pdo\Sqlite::ATTR_BUSY_STATEMENT</constant>。
   </simpara>
 
   <simpara>
-   Added class constants <constant>Pdo\Sqlite::ATTR_EXPLAIN_STATEMENT</constant>,
-   <constant>Pdo\Sqlite::EXPLAIN_MODE_PREPARED</constant>,
-   <constant>Pdo\Sqlite::EXPLAIN_MODE_EXPLAIN</constant>,
-   <constant>Pdo\Sqlite::EXPLAIN_MODE_EXPLAIN_QUERY_PLAN</constant>.
+   新增类常量 <constant>Pdo\Sqlite::ATTR_EXPLAIN_STATEMENT</constant>、<constant>Pdo\Sqlite::EXPLAIN_MODE_PREPARED</constant>、<constant>Pdo\Sqlite::EXPLAIN_MODE_EXPLAIN</constant>
+   和 <constant>Pdo\Sqlite::EXPLAIN_MODE_EXPLAIN_QUERY_PLAN</constant>。
   </simpara>
 
   <simpara>
-   Added <constant>Pdo\Sqlite::ATTR_TRANSACTION_MODE</constant> connection attribute
-   with possible values <constant>Pdo\Sqlite::TRANSACTION_MODE_DEFERRED</constant>,
-   <constant>Pdo\Sqlite::TRANSACTION_MODE_IMMEDIATE</constant>,
-   and <constant>Pdo\Sqlite::TRANSACTION_MODE_EXCLUSIVE</constant>,
-   allowing to configure the transaction mode to use when calling beginTransaction().
+   新增 <constant>Pdo\Sqlite::ATTR_TRANSACTION_MODE</constant> 连接注解，可选值包括
+   <constant>Pdo\Sqlite::TRANSACTION_MODE_DEFERRED</constant>、<constant>Pdo\Sqlite::TRANSACTION_MODE_IMMEDIATE</constant>
+   和 <constant>Pdo\Sqlite::TRANSACTION_MODE_EXCLUSIVE</constant>，用于配置调用 beginTransaction() 时使用的事务模式。
   </simpara>
 
  </sect2>
@@ -358,10 +318,8 @@ print T1 . PHP_EOL;   // 打印“0”
   <title>Session</title>
 
   <simpara>
-   <function>session_set_cookie_params</function>,
-   <function>session_get_cookie_params</function>,
-   and <function>session_start</function> now support partitioned cookies via the
-   <literal>"partitioned"</literal> key.
+   <function>session_set_cookie_params</function>、<function>session_get_cookie_params</function>
+   和 <function>session_start</function> 现在通过 <literal>"partitioned"</literal> key 支持分区 cookie。
    <!-- RFC: https://wiki.php.net/rfc/CHIPS -->
   </simpara>
 
@@ -371,55 +329,46 @@ print T1 . PHP_EOL;   // 打印“0”
   <title>SOAP</title>
 
   <simpara>
-   Enumeration cases are now dumped in <methodname>SoapClient::__getTypes</methodname>.
+   枚举项现在会在 <methodname>SoapClient::__getTypes</methodname> 中输出。
   </simpara>
 
   <simpara>
-   Added support for Soap 1.2 Reason Text xml:lang attribute.
+   新增对 SOAP 1.2 Reason Text 的 xml:lang 属性的支持。
   </simpara>
 
   <simpara>
-   The signature of <methodname>SoapFault::__construct</methodname> and
-   <methodname>SoapServer::fault</methodname> therefore
-   now have an optional <parameter>$lang</parameter> parameter.
-   This support solves compatibility with .NET SOAP clients.
+   因此，<methodname>SoapFault::__construct</methodname> 和 <methodname>SoapServer::fault</methodname>
+   的签名现在包含可选的 <parameter>$lang</parameter> 参数。该支持解决了与 .NET SOAP 客户端的兼容性问题。
   </simpara>
 
  </sect2>
 
  <sect2 xml:id="migration85.new-features.standard">
-  <title>Standard</title>
+  <title>标准</title>
 
   <simpara>
-   <function>mail</function> now returns the actual sendmail error and detects
-   if the sendmail process was terminated unexpectedly.
-   In such cases, a warning is emitted and the function returns false.
-   Previously, these errors were silently ignored.
-   This change affects only the sendmail transport.
+   <function>mail</function> 函数现在会返回实际的 sendmail 错误，并能检测 sendmail
+   进程是否意外终止。若发生此类情况，将发出警告并返回 false。此前会静默忽略这些错误。此变更仅影响 sendmail 的传输。
   </simpara>
 
   <simpara>
-   <function>getimagesize</function> now supports HEIF/HEIC images.
+   <function>getimagesize</function> 现在支持 HEIF/HEIC 图像。
   </simpara>
 
   <simpara>
-   <function>getimagesize</function> now supports SVG images when ext-libxml
-   is also loaded.
-   Similarly, <function>image_type_to_extension</function> and
-   <function>image_type_to_mime_type</function>
-   now also handle IMAGETYPE_SVG.
+   当加载 ext-libxml 扩展时，<function>getimagesize</function> 现已支持 SVG
+   图像。同样，<function>image_type_to_extension</function> 和 <function>image_type_to_mime_type</function> 现也处理 IMAGETYPE_SVG。
   </simpara>
 
   <simpara>
-   The array returned by <function>getimagesize</function> now has two additional entries:
-   <literal>"width_unit"</literal> and <literal>"height_unit"</literal> to indicate in
-   which units the dimensions are expressed. These units are px by default. They are not
-   necessarily the same (just to give one example: one may be cm and the other may be px).
+   <function>getimagesize</function> 返回的数组现在包含两个额外的条目：<literal>"width_unit"</literal> 和
+   <literal>"height_unit"</literal>，用于表示尺寸所使用的单位。这些单位默认为 px。这两个单位不一定相同（例如，一个可能是
+   cm，另一个可能是 px）。
   </simpara>
 
   <simpara>
-   <function>setcookie</function> and <function>setrawcookie</function> now support the
-   <literal>"partitioned"</literal> key.
+   <function>setcookie</function> 和 <function>setrawcookie</function> 现在支持
+   <literal>"partitioned"</literal> key。
    <!-- RFC: https://wiki.php.net/rfc/CHIPS -->
   </simpara>
 
@@ -429,8 +378,7 @@ print T1 . PHP_EOL;   // 打印“0”
   <title>URI</title>
 
   <simpara>
-   An always enabled uri extension is added that can be used for handling
-   URIs and URLs according to RFC 3986 and WHATWG URL.
+   新增始终启用的 URI 扩展，可用于根据 RFC 3986 和 WHATWG URL 规范处理 URI 和 URL。
    <!-- RFC: https://wiki.php.net/rfc/url_parsing_api -->
   </simpara>
 
@@ -440,13 +388,10 @@ print T1 . PHP_EOL;   // 打印“0”
   <title>XSL</title>
 
   <simpara>
-   The <parameter>$namespace</parameter> argument of <methodname>XSLTProcessor::getParameter</methodname>,
-   <methodname>XSLTProcessor::setParameter</methodname> and
-   <methodname>XSLTProcessor::removeParameter</methodname> now actually works
-   instead of being treated as empty.
-   This only works if the <parameter>$name</parameter> argument does not use Clark notation and is not a
-   QName because in those cases the namespace is taken from the namespace href or
-   prefix respectively.
+   <methodname>XSLTProcessor::getParameter</methodname>、<methodname>XSLTProcessor::setParameter</methodname> 和
+   <methodname>XSLTProcessor::removeParameter</methodname> 的 <parameter>$namespace</parameter>
+   参数现已生效，不再视为空值。此功能仅在 <parameter>$name</parameter> 参数未使用 Clark 表示法且不是 QName
+   时有效，因为在这些情况下，命名空间分别取自命名空间的 href 或前缀。
   </simpara>
 
  </sect2>
@@ -455,8 +400,7 @@ print T1 . PHP_EOL;   // 打印“0”
   <title>Zlib</title>
 
   <simpara>
-   <function>flock</function> is now supported on zlib streams. Previously,
-   this always failed to perform any locking action.
+   <function>flock</function> 现已支持 zlib 流。此前，该函数始终无法执行任何锁定操作。
   </simpara>
 
  </sect2>

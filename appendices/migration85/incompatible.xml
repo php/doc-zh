@@ -36,89 +36,77 @@
   </sect3>
 
   <sect3 xml:id="migration85.incompatible.core.substitute-final-subclasses">
-   <title>Substitute static keyword in final subclass</title>
+   <title>在 final 子类中替换 static 关键字</title>
 
    <simpara>
-    It is now allowed to substitute <type>static</type> with <type>self</type> or the concrete class name
-    in final subclasses.
+    现在允许在 final 子类中将 <type>static</type> 替换为 <type>self</type> 或具体类名。
    </simpara>
 
   </sect3>
 
   <sect3 xml:id="migration85.incompatible.core.tick-handlers">
-   <title>Tick handlers</title>
+   <title>tick 处理程序</title>
 
    <simpara>
-    The tick handlers are now deactivated after all shutdown functions,
-    destructors have run and the output handlers have been cleaned up.
+    tick 处理程序现在会在所有关闭函数和析构方法执行完毕、输出处理程序清理完成后停用。
    </simpara>
 
   </sect3>
 
   <sect3 xml:id="migration85.incompatible.core.trait-binding">
-   <title>Traits binding</title>
+   <title>Trait 绑定</title>
 
    <simpara>
-    Traits are now bound before the parent class. This is a subtle behavioral
-    change, but should more closely match user expectations.
+    Trait 现在会在父类之前绑定。这是一个细微的行为变更，但更符合用户的预期。
     <!-- https://github.com/php/php-src/pull/15878 -->
    </simpara>
 
   </sect3>
 
   <sect3 xml:id="migration85.incompatible.core.errors-compilation-and-linking">
-   <title>Errors during compilation and class linking</title>
+   <title>编译和类链接过程中的错误</title>
 
    <simpara>
-    Errors emitted during compilation and class linking are now always delayed
-    and handled after compilation or class linking. Fatal errors emitted during
-    compilation or class linking cause any delayed errors to be handled
-    immediately, without calling user-defined error handlers.
+    编译和类链接过程中产生的错误现在一律延迟处理，并在编译或类链接完成后统一处理。若在编译或类链接期间产生致命错误，将立即处理所有已延迟的错误，且不调用用户定义的错误处理程序。
    </simpara>
 
   </sect3>
 
   <sect3 xml:id="migration85.incompatible.core.exception-by-userdefined-handler">
-   <title>Exceptions thrown by user-defined error handler</title>
+   <title>用户定义的错误处理程序抛出的异常</title>
 
    <simpara>
-    Exceptions thrown by user-defined error handlers when handling class linking
-    errors are not promoted to fatal errors anymore and do not prevent linking.
+    用户定义的错误处理程序在处理类链接错误时抛出的异常，不再升级为致命错误，也不会阻止链接过程。
    </simpara>
 
   </sect3>
 
   <sect3 xml:id="migration85.incompatible.core.attribute-during-compilation">
-   <title>Attribute apply error during compilation</title>
+   <title>应用的注解在编译期间出错</title>
 
    <simpara>
-    Applying <code>#[\Attribute]</code> to an abstract class, enum, interface, or trait
-    triggers an error during compilation. Previously, the attribute could be
-    added, but when <methodname>ReflectionAttribute::newInstance</methodname>
-    was called an error would be thrown.
-    The error can be delayed from compilation to runtime using the new
-    <code>#[\DelayedTargetValidation]</code> attribute.
+    将 <code>#[\Attribute]</code> 应用于抽象类、枚举、接口或 Trait 时，会在编译期间触发错误。此前，该注解虽可添加，但在调用
+    <methodname>ReflectionAttribute::newInstance</methodname> 时才会抛出错误。通过使用新的
+    <code>#[\DelayedTargetValidation]</code> 注解，可将此错误从编译期延迟至运行时。
    </simpara>
 
   </sect3>
 
   <sect3 xml:id="migration85.incompatible.core.disable-ini-setting">
-   <title>disable_classes INI setting</title>
+   <title>disable_classes INI 配置项</title>
 
    <simpara>
-    The <link linkend="ini.disable-classes">disable_classes</link> INI setting
-    has been removed as it causes various engine assumptions to be broken.
+    已移除 <link linkend="ini.disable-classes">disable_classes</link> INI 配置项，因其会导致引擎的多项假设失效。
     <!-- RFC: https://wiki.php.net/rfc/deprecations_php_8_5#remove_disable_classes_ini_setting -->
    </simpara>
 
   </sect3>
 
   <sect3 xml:id="migration85.incompatible.core.destruct-non-array-values">
-   <title>Destructing non-array values</title>
+   <title>解构非数组值</title>
 
    <simpara>
-    Destructing non-array values (other than &null;) using <literal>[]</literal> or <function>list</function> now
-    emits a warning.
+    使用 <literal>[]</literal> 或 <function>list</function> 解构非数组值（&null; 除外）时，现在会发出警告。
     <!-- RFC: https://wiki.php.net/rfc/warnings-php-8-5#destructuring_non-array_values -->
    </simpara>
 
@@ -128,14 +116,12 @@
    <title>Warnings related to cast</title>
 
    <simpara>
-    A warning is now emitted when casting floats (or strings that look like
-    floats) to int if they cannot be represented as one. This affects explicit
-    int casts and implicit int casts.
+    当浮点数（或看起来像浮点数的字符串）无法精确表示为整数时，将其转换为整型会发出警告。此行为适用于显式和隐式的整型转换。
     <!-- RFC: https://wiki.php.net/rfc/warnings-php-8-5#casting_out_of_range_floats_to_int -->
    </simpara>
 
    <simpara>
-    A warning is now emitted when casting NAN to other types.
+    将 NAN 转换为其他类型时，现在会发出警告。
     <!-- RFC: https://wiki.php.net/rfc/warnings-php-8-5#coercing_nan_to_other_types -->
    </simpara>
 
@@ -147,13 +133,13 @@
   <title>Bzip2</title>
 
   <simpara>
-   <function>bzcompress</function> now throws a <classname>ValueError</classname>
-   when <parameter>$block_size</parameter> is not between 1 and 9.
+   当 <parameter>$block_size</parameter> 不在 1 到 9 之间时，<function>bzcompress</function>
+   现在会抛出 <classname>ValueError</classname>。
   </simpara>
 
   <simpara>
-   <function>bzcompress</function> now throws a <classname>ValueError</classname>
-   when <parameter>$work_factor</parameter> is not between 0 and 250.
+   当 <parameter>$work_factor</parameter> 不在 0 到 250 之间时，<function>bzcompress</function>
+   现在会抛出 <classname>ValueError</classname>。
   </simpara>
 
  </sect2>
@@ -162,11 +148,8 @@
   <title>DOM</title>
 
   <simpara>
-   Cloning a <classname>DOMNamedNodeMap</classname>,
-   <classname>DOMNodeList</classname>, <classname>Dom\NamedNodeMap</classname>,
-   <classname>Dom\NodeList</classname>, <classname>Dom\HTMLCollection</classname>,
-   and <classname>Dom\DtdNamedNodeMap</classname> now fails.
-   This never actually resulted in a working object, therefore no impact is expected.
+   现在克隆 <classname>DOMNamedNodeMap</classname>、<classname>DOMNodeList</classname>、<classname>Dom\NamedNodeMap</classname>、<classname>Dom\NodeList</classname>、<classname>Dom\HTMLCollection</classname>
+   和 <classname>Dom\DtdNamedNodeMap</classname> 会失败。此前此类操作从未生成有效的对象，因此预计不会产生实际影响。
   </simpara>
 
  </sect2>
@@ -175,12 +158,9 @@
   <title>FileInfo</title>
 
   <simpara>
-   <function>finfo_file</function> and <methodname>finfo::file</methodname>
-   now throws a <exceptionname>ValueError</exceptionname> instead of a
-   <exceptionname>TypeError</exceptionname> when <parameter>$filename</parameter>
-   contains nul bytes.
-   This aligns the type of Error thrown to be consistent with the rest of
-   the language.
+   当 <parameter>$filename</parameter> 包含 nul 字节时，<function>finfo_file</function> 和
+   <methodname>finfo::file</methodname> 现在抛出 <exceptionname>ValueError</exceptionname>
+   而非 <exceptionname>TypeError</exceptionname>，以使抛出的错误类型与语言其他部分保持一致。
   </simpara>
 
  </sect2>
@@ -189,24 +169,21 @@
   <title>Intl</title>
 
   <simpara>
-   The extension now requires at least ICU 57.1.
+   该扩展现在要求最低 ICU 57.1。
   </simpara>
 
   <simpara>
    <methodname>IntlDateFormatter::setTimeZone</methodname>/<function>datefmt_set_timezone</function>
-   now throws an <exceptionname>IntlException</exceptionname> on uninitialised
-   classes/clone failures.
+   在类未初始化或克隆失败时，现在会抛出 <exceptionname>IntlException</exceptionname>。
   </simpara>
 
   <simpara>
-   All <classname>Locale</classname> methods now throw a
-   <exceptionname>ValueError</exceptionname> when the locale argument contain null bytes.
+   所有 <classname>Locale</classname> 方法在 locale 参数包含 null 字节时，现在均抛出 <exceptionname>ValueError</exceptionname>。
   </simpara>
 
   <simpara>
-   The behaviour of <constant>Collator::SORT_REGULAR</constant> with respect to
-   handling numeric strings is now aligned with the behaviour of
-   <constant>SORT_REGULAR</constant> in ext/standard.
+   <constant>Collator::SORT_REGULAR</constant>在处理数字字符串时的行为现已与
+   ext/standard 中的 <constant>SORT_REGULAR</constant> 保持一致。
   </simpara>
 
  </sect2>
@@ -215,8 +192,8 @@
   <title>LDAP</title>
 
   <simpara>
-   <function>ldap_get_option</function> and <function>ldap_set_option</function>
-   now throw a <exceptionname>ValueError</exceptionname> when passing an invalid option.
+   <function>ldap_get_option</function> 和 <function>ldap_set_option</function>
+   当传递无效选项时现在抛出 <exceptionname>ValueError</exceptionname>。
   </simpara>
 
  </sect2>
@@ -225,7 +202,7 @@
   <title>MBString</title>
 
   <simpara>
-   Unicode data tables have been updated to Unicode 17.0
+   Unicode 数据表已更新至 Unicode 17.0
   </simpara>
 
  </sect2>
@@ -234,8 +211,7 @@
   <title>MySQLi</title>
 
   <simpara>
-   Calling the mysqli constructor on an already-constructed object
-   is now no longer possible and throws an <exceptionname>Error</exceptionname>.
+   对已构造的对象再次调用 mysqli 构造方法现已不可行，并会抛出 <exceptionname>Error</exceptionname>。
   </simpara>
 
  </sect2>
