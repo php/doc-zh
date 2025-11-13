@@ -1,89 +1,206 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: eac9eff7b66d8c2b168c25c72de0422126daf8cb Maintainer: dallas Status: ready -->
+<!-- EN-Revision: 312c0c7b39d0722c419f6784cbda24823220dfb3 Maintainer: dallas Status: ready -->
 <!-- CREDITS: Luffy -->
 <sect1 xml:id="language.types.callable">
- <title>Callback / Callable 类型</title>
- 
- <para>
- 回调可以通过 <type>callable</type> 类型声明来表示。
- </para>
+ <title>Callable</title>
 
- <para>
-  一些函数如 <function>call_user_func</function> 或
-  <function>usort</function> 可以接受用户自定义的回调函数作为参数。回调函数不止可以是简单函数，还可以是对象的方法，包括静态类方法。
- </para>
+ <simpara>
+  callable 是对函数或方法的引用，作为参数传递给其他函数，使用 <type>callable</type> 类型声明来表示。
+ </simpara>
+ <informalexample>
+  <programlisting role="php" annotations="non-interactive">
+<![CDATA[
+<?php
+function foo(callable $callback) {
+    $callback();
+}
+?>
+]]>
+  </programlisting>
+ </informalexample>
+
+ <simpara>
+  一些函数接受回调函数作为参数，例如 <function>array_map</function>、<function>usort</function>
+  或 <function>preg_replace_callback</function>。
+ </simpara>
 
  <sect2 xml:id="language.types.callable.passing">
-  <title>传递</title>
+  <title>callable 的创建</title>
 
-  <para>
-   PHP是将函数以 <type>string</type> 形式传递或通过 <link linkend="functions.first_class_callable_syntax">first-class callable</link>。
-   可以使用任何内置或用户自定义函数，但除了语言结构例如：<function>array</function>，<function>echo</function>，
-   <function>empty</function>，<function>eval</function>，
-   <function>exit</function>，<function>isset</function>，
-   <function>list</function>，<function>print</function>
-   或 <function>unset</function>。
-  </para>
+  <simpara>
+   callable 是一种表示可调用内容的类型。Callable 可作为参数传递给需要回调参数的函数或方法，也可直接调用。<type>callable</type>
+   类型不能用于类属性的类型声明，此时应使用 <classname>Closure</classname> 类型声明。
+  </simpara>
 
-  <para>
-   一个已实例化的 <type>object</type> 的方法被作为 <type>array</type> 传递，下标 0 包含该 <type>object</type>，下标 1 包含方法名。
-   在同一个类里可以访问 protected 和 private 方法。
-  </para>
+  <simpara>
+   Callable 可通过多种方式创建：
+  </simpara>
 
-  <para>
-   静态类方法可以不实例化 <type>object</type> 传递，只需要在下标为 0 的位置传递类名而不是 
-   <type>object</type> ，或者传递 <literal>'ClassName::methodName'</literal>。
-  </para>
+  <itemizedlist>
+   <listitem>
+    <simpara><classname>Closure</classname> 对象</simpara>
+   </listitem>
+   <listitem>
+    <simpara>包含函数名或方法名的 &string;</simpara>
+   </listitem>
+   <listitem>
+    <simpara>
+     索引 0 为类名或者 <type>object</type>，索引 1 是方法名的 &array;
+    </simpara>
+   </listitem>
+   <listitem>
+    <simpara>
+     实现了 <link linkend="object.invoke">__invoke()</link> 魔术方法的 &object;
+    </simpara>
+   </listitem>
+  </itemizedlist>
 
-  <para>
-   回调参数不仅可以使用普通的用户自定义函数，也接受 <link linkend="functions.anonymous">匿名函数</link> 
-   和 <link linkend="functions.arrow">箭头函数</link>。
-  </para>
+  <simpara>
+   <classname>Closure</classname> 对象可通过<link
+   linkend="functions.anonymous">匿名函数</link>语法、<link linkend="functions.arrow">箭头函数</link>语法、<link
+   linkend="functions.first_class_callable_syntax">一级可调用语法</link>，或
+   <methodname>Closure::fromCallable</methodname> 方法创建。
+  </simpara>
 
   <note>
-   <para>
-    从 PHP 8.1.0 开始，还可以使用 <link linkend="functions.first_class_callable_syntax">First-class 可调用语法</link> 创建匿名函数。
-   </para>
+   <simpara>
+    <link linkend="functions.first_class_callable_syntax">一级可调用语法</link> 仅自 PHP 8.1.0 起可用。
+   </simpara>
   </note>
 
-  <para>
-   通常情况下，任何实现了 <link linkend="object.invoke">__invoke()</link> 的对象都可以传入回调参数。
-  </para>
-
-  <para>
-   <example>
-    <title>回调函数示例</title>
-    <programlisting role="php">
+  <example>
+   <title>
+    使用 <classname>Closure</classname> 的 Callback 示例
+   </title>
+   <programlisting role="php">
 <![CDATA[
-<?php 
+<?php
+// 使用匿名函数语法
+$double1 = function ($a) {
+    return $a * 2;
+};
 
-// 回调函数示范
+// 使用一级可调用语法
+function double_function($a) {
+    return $a * 2;
+}
+$double2 = double_function(...);
+
+// 使用箭头函数语法
+$double3 = fn($a) => $a * 2;
+
+// 使用 Closure::fromCallable
+$double4 = Closure::fromCallable('double_function');
+
+// 此处使用 closure 作为回调，将范围内每个元素的值翻倍。
+$new_numbers = array_map($double1, range(1, 5));
+print implode(' ', $new_numbers) . PHP_EOL;
+
+$new_numbers = array_map($double2, range(1, 5));
+print implode(' ', $new_numbers) . PHP_EOL;
+
+$new_numbers = array_map($double3, range(1, 5));
+print implode(' ', $new_numbers) . PHP_EOL;
+
+$new_numbers = array_map($double4, range(1, 5));
+print implode(' ', $new_numbers);
+
+?>
+]]>
+   </programlisting>
+   &example.outputs.81;
+   <screen>
+<![CDATA[
+2 4 6 8 10
+2 4 6 8 10
+2 4 6 8 10
+2 4 6 8 10
+]]>
+   </screen>
+  </example>
+
+  <simpara>
+   callable 也可以是包含函数名或静态方法名的字符串。除语言结构（如
+   <function>array</function>、<function>echo</function>、<function>empty</function>、<function>eval</function>、<function>isset</function>、<function>list</function>、<function>print</function>
+   或 <function>unset</function>）外，任何内置或用户自定义函数均可使用。
+  </simpara>
+
+  <simpara>
+   静态类方法可在不实例化该类 <type>object</type> 的情况下使用，方式包括：创建数组，其中索引 0
+   为类名，索引 1 为方法名；或使用作用域解析运算符 <literal>::</literal>
+   的特殊语法，例如 <literal>'ClassName::methodName'</literal>。
+  </simpara>
+
+  <simpara>
+   已实例化 <type>object</type> 的方法在以数组形式提供时可作为 callable，其中索引 0
+   为该 <type>object</type>，索引 1 为方法名。
+  </simpara>
+
+  <simpara>
+   <classname>Closure</classname> 对象与 <type>callable</type> 类型的主要区别在于，<classname>Closure</classname>
+   对象与作用域无关，始终可直接调用，而 callable 类型可能依赖于作用域，不一定能直接调用。创建 callable
+   时，推荐使用 <classname>Closure</classname>。
+  </simpara>
+
+  <note>
+   <simpara>
+    <classname>Closure</classname> 对象绑定于其创建时所在的作用域，而以字符串或数组形式引用类方法的 callable
+    则在其被调用的作用域中解析。若需从 private 或 protected 方法创建可在类作用域外部调用的可调用项，应使用
+    <methodname>Closure::fromCallable</methodname> 或<link linkend="functions.first_class_callable_syntax">一级可调用语法</link>。
+   </simpara>
+  </note>
+
+  <simpara>
+   PHP 允许创建 callable，可用作回调参数，但无法直接调用。它们是上下文相关的 callable，引用类继承层次中的某个类方法，例如
+   <literal>'parent::method'</literal> 或 <literal>["static", "method"]</literal>。
+  </simpara>
+
+  <note>
+   <simpara>
+    自 PHP 8.2.0 起，已弃用上下文相关的 callable 。应通过将 <literal>'parent::method'</literal> 替换为
+    <literal>parent::class . '::method'</literal>，或使用<link
+    linkend="functions.first_class_callable_syntax">一级可调用语法</link>，以消除上下文依赖。
+   </simpara>
+  </note>
+
+  <example>
+   <title>
+    使用 <function>call_user_function</function> 调用各类 callable
+   </title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+
+// callback 函数示例
 function my_callback_function() {
     echo 'hello world!', PHP_EOL;
 }
 
-// 回调方法示范
+// callback 方法示例
 class MyClass {
     static function myCallbackMethod() {
         echo 'Hello World!', PHP_EOL;
     }
 }
 
-// 类型 1：简单的回调
-call_user_func('my_callback_function'); 
+// 类型 1：简单回调
+call_user_func('my_callback_function');
 
-// 类型 2：静态类方法回调
-call_user_func(array('MyClass', 'myCallbackMethod')); 
+// 类型2：静态类方法回调
+call_user_func(['MyClass', 'myCallbackMethod']);
 
 // 类型 3：对象方法回调
 $obj = new MyClass();
-call_user_func(array($obj, 'myCallbackMethod'));
+call_user_func([$obj, 'myCallbackMethod']);
 
 // 类型 4：静态类方法回调
 call_user_func('MyClass::myCallbackMethod');
 
-// 类型 5：父级静态类回调
+// 类型 5：使用 ::class 关键字的静态类方法回调
+call_user_func([MyClass::class, 'myCallbackMethod']);
+
+// Type 6: Relative static class method call
 class A {
     public static function who() {
         echo 'A', PHP_EOL;
@@ -96,12 +213,12 @@ class B extends A {
     }
 }
 
-call_user_func(array('B', 'parent::who')); // A，从 PHP 8.2.0 起弃用。
+call_user_func(['B', 'parent::who']); // 自 PHP 8.2.0 起弃用
 
-// 类型 6：实现 __invoke 的对象用于回调
+// 类型 7：实现 __invoke 的对象用于 callable
 class C {
     public function __invoke($name) {
-        echo 'Hello ', $name, PHP_EOL;
+        echo 'Hello ', $name;
     }
 }
 
@@ -109,45 +226,27 @@ $c = new C();
 call_user_func($c, 'PHP!');
 ?>
 ]]>
-    </programlisting>
-   </example>
-  </para>
-  <para>
-   <example>
-    <title>使用 <classname>Closure</classname> 的示例</title>
-   <programlisting role="php">
+   </programlisting>
+   &example.outputs;
+   <screen>
 <![CDATA[
-<?php
-// 闭包
-$double = function($a) {
-    return $a * 2;
-};
+hello world!
+Hello World!
+Hello World!
+Hello World!
+Hello World!
 
-// 这是数字范围
-$numbers = range(1, 5);
-
-// 这里使用闭包作为回调，
-// 将范围内的每个元素数值翻倍
-$new_numbers = array_map($double, $numbers);
-
-print implode(' ', $new_numbers);
-?>
+Deprecated: Callables of the form ["B", "parent::who"] are deprecated in script on line 41
+A
+Hello PHP!
 ]]>
-    </programlisting>
-    &example.outputs;
-    <screen>
-<![CDATA[
-2 4 6 8 10
-]]>
-    </screen>
-   </example>
-  </para>
+   </screen>
+  </example>
 
   &note.func-callback-exceptions;
  </sect2>
 
 </sect1>
- 
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml

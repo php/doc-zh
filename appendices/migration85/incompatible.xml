@@ -113,7 +113,7 @@
   </sect3>
 
   <sect3 xml:id="migration85.incompatible.core.warning-related-to-cast">
-   <title>Warnings related to cast</title>
+   <title>与类型转换相关的警告</title>
 
    <simpara>
     当浮点数（或看起来像浮点数的字符串）无法精确表示为整数时，将其转换为整型会发出警告。此行为适用于显式和隐式的整型转换。
@@ -220,14 +220,12 @@
   <title>ODBC</title>
 
   <simpara>
-   ODBC now assumes that at least ODBC 3.5 functionality is available.
-   The ODBCVER definition and build system flags to control it have been removed.
+   ODBC 现在假定至少支持 ODBC 3.5 的功能，已移除用于控制相关 ODBCVER 定义及构建系统 flag。
   </simpara>
 
   <simpara>
-   ODBC no longer has build flags to build against specific drivers (except
-   for DB2) and removes special cases for those drivers. It is strongly
-   recommended to use a driver manager like iODBC or unixODBC on non-Windows.
+   ODBC 不再提供针对特定驱动（DB2 除外）的构建 flag，并移除了针对这些驱动的特殊处理。在非
+   Windows 系统上，强烈建议使用 iODBC 或 unixODBC 等驱动管理程序。
   </simpara>
 
  </sect2>
@@ -236,23 +234,20 @@
   <title>Opcache</title>
 
   <simpara>
-   The Opcache extension is now always built into the PHP binary and is always
-   loaded.
-   The INI directives <link linkend="ini.opcache.enable">opcache.enable</link>
-   and <link linkend="ini.opcache.enable-cli">opcache.enable_cli</link> are still
-   honored.
+   Opcache 扩展现已始终内置于 PHP 二进制文件中，并始终加载。INI 配置项 <link
+   linkend="ini.opcache.enable">opcache.enable</link> 和 <link
+   linkend="ini.opcache.enable-cli">opcache.enable_cli</link> 仍会生效。
   </simpara>
 
   <simpara>
-   The <option role="configure">--enable-opcache</option>/<option role="configure">--disable-opcache</option>
-   configure flags have been removed, and the build does not produce <filename>opcache.so</filename>
-   or <filename>php_opcache.dll</filename> objects anymore.
+   已移除 <option role="configure">--enable-opcache</option>/<option role="configure">--disable-opcache</option>
+   配置选项，构建过程不再生成 <filename>opcache.so</filename> 或 <filename>php_opcache.dll</filename> 文件。
   </simpara>
 
   <simpara>
-   Using <literal>zend_extension=opcache.so</literal> or
-   <literal>zend_extension=php_opcache.dll</literal> INI directives
-   will emit a warning.
+   使用 <literal>zend_extension=opcache.so</literal> 或
+   <literal>zend_extension=php_opcache.dll</literal> 的 INI 配置项会触发警告。
+
   </simpara>
 
  </sect2>
@@ -261,14 +256,13 @@
   <title>PCNTL</title>
 
   <simpara>
-   <function>pcntl_exec</function> now throws <exceptionname>ValueError</exceptionname>
-   when entries of the <parameter>$args</parameter> parameter contain null bytes.
+   <function>pcntl_exec</function> 在 <parameter>$args</parameter> 参数的元素包含
+   null 字节时会抛出 <exceptionname>ValueError</exceptionname>。
   </simpara>
 
   <simpara>
-   <function>pcntl_exec</function> now throws <exceptionname>ValueError</exceptionname>
-   when entries or keys of the <parameter>$env_vars</parameter> parameter
-   contain null bytes.
+   <function>pcntl_exec</function> 在 <parameter>$env_vars</parameter>
+   参数的元素或 key 包含 null 字节时会抛出 <exceptionname>ValueError</exceptionname>。
   </simpara>
 
  </sect2>
@@ -277,8 +271,7 @@
   <title>PCRE</title>
 
   <simpara>
-   The extension is compiled without semi-deprecated
-   PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK compile option.
+   该扩展在编译时未启用半废弃的 PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK 编译选项。
    <!-- https://github.com/PCRE2Project/pcre2/issues/736#issuecomment-2754024651 -->
   </simpara>
 
@@ -288,46 +281,32 @@
   <title>PDO</title>
 
   <simpara>
-   The constructor arguments set in conjunction with
-   <constant>PDO::FETCH_CLASS</constant> now follow the usual CUFA
-   (<function>call_user_func_array</function>) semantics.
-   This means string keys will act like a named argument.
-   Moreover, automatic wrapping for by-value arguments passed to a by-ref
-   parameter has been removed, and the usual <constant>E_WARNING</constant>
-   about this is now emitted.
-   To pass a variable by-ref to a constructor argument use the general
-   array value reference assignment: <code>$ctor_args = [&amp;$valByRef]</code>
+   与 <constant>PDO::FETCH_CLASS</constant> 结合使用的构造方法参数现在遵循标准的
+   CUFA（<function>call_user_func_array</function>）语义。这意味着字符串 key
+   将作为命名参数。此外，不再自动包装按值参数，传递给引用参数，而是会发出常规的 <constant>E_WARNING</constant>
+   警告。若需将变量以引用方式传入构造方法参数，应使用通用的数组值引用赋值方式：<code>$ctor_args = [&amp;$valByRef]</code>。
   </simpara>
 
   <simpara>
-   Attempting to call <methodname>PDOStatement::setFetchMode</methodname> during
-   a call to <methodname>PDO::fetch</methodname>,
-   <methodname>PDO::fetchObject</methodname>,
-   <methodname>PDO::fetchAll</methodname>, for example using tricks such as
-   passing the statement object as a constructor argument when fetching into an
-   object, will now throw an <exceptionname>Error</exceptionname>.
+   在调用 <methodname>PDO::fetch</methodname>、<methodname>PDO::fetchObject</methodname> 或 <methodname>PDO::fetchAll</methodname>
+   期间尝试调用 <methodname>PDOStatement::setFetchMode</methodname>，例如通过将语句对象作为构造方法参数传入以实现对象映射等技巧，现在会抛出
+   <exceptionname>Error</exceptionname>。
   </simpara>
 
   <simpara>
-   The value of the constants <constant>PDO::FETCH_GROUP</constant>,
-   <constant>PDO::FETCH_UNIQUE</constant>,
-   <constant>PDO::FETCH_CLASSTYPE</constant>,
-   <constant>PDO::FETCH_PROPS_LATE</constant>, and
-   <constant>PDO::FETCH_SERIALIZE</constant> have changed.
+   常量 <constant>PDO::FETCH_GROUP</constant>、<constant>PDO::FETCH_UNIQUE</constant>、<constant>PDO::FETCH_CLASSTYPE</constant>、<constant>PDO::FETCH_PROPS_LATE</constant>
+   和 <constant>PDO::FETCH_SERIALIZE</constant> 的值已发生变化。
   </simpara>
 
   <simpara>
-   A <exceptionname>ValueError</exceptionname> is now thrown if
-   <constant>PDO::FETCH_PROPS_LATE</constant> is used with a fetch mode
-   different than <constant>PDO::FETCH_CLASS</constant>, consistent with
-   other fetch flags.
+   若 <constant>PDO::FETCH_PROPS_LATE</constant> 与非 <constant>PDO::FETCH_CLASS</constant>
+   的获取模式一同使用，现在会抛出 <exceptionname>ValueError</exceptionname>，与其他获取 flag 的行为保持一致。
   </simpara>
 
   <simpara>
-   A <exceptionname>ValueError</exceptionname> is now thrown if
-   <constant>PDO::FETCH_INTO</constant> is used as a fetch mode in
-   <methodname>PDO::fetchAll</methodname>,
-   similar to <constant>PDO::FETCH_LAZY</constant>.
+   若在 <methodname>PDO::fetchAll</methodname> 中将 <constant>PDO::FETCH_INTO</constant>
+   用作获取模式，现在会抛出 <exceptionname>ValueError</exceptionname>，与
+   <constant>PDO::FETCH_LAZY</constant> 的行为类似。
   </simpara>
 
  </sect2>
