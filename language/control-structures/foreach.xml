@@ -1,21 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- $Author$ -->
-<!-- EN-Revision: e49940b757b35b8ef26bb64380c231eda7b49fc4 Maintainer: dallas Status: ready -->
-
+<!-- EN-Revision: ba7093cf7f30dbcd301c62536ac7ef8664d891f4 Maintainer: dallas Status: ready -->
+<!-- CREDITS: mowangjuanzi -->
 <sect1 xml:id="control-structures.foreach" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <title>foreach</title>
  <?phpdoc print-version-for="foreach"?>
  <para>
-  <literal>foreach</literal> 语法结构提供了遍历数组的简单方式。<literal>foreach</literal>
-  仅能够应用于数组和对象，如果尝试应用于其他数据类型的变量，或者未初始化的变量将发出错误信息。有两种语法：
+  <literal>foreach</literal> 结构提供了一种遍历 <type>array</type> 和 <interfacename>Traversable</interfacename>
+  object 的简便方式。当用于其他数据类型的变量，或未初始化的变量时，<literal>foreach</literal> 会触发错误。
   <informalexample>
+   <simpara>
+    <literal>foreach</literal> 可选择性的获取每个元素的 <literal>key</literal>：
+   </simpara>
    <programlisting>
 <![CDATA[
-foreach (iterable_expression as $value)
-    statement
-foreach (iterable_expression as $key => $value)
-    statement
+foreach (iterable_expression as $value) {
+    statement_list
+}
+
+foreach (iterable_expression as $key => $value) {
+    statement_list
+}
 ]]>
    </programlisting>
   </informalexample>
@@ -36,159 +41,80 @@ foreach (iterable_expression as $key => $value)
   还能够自定义<link linkend="language.oop5.iterations">遍历对象</link>。
  </simpara>
 
- <para>
-  可以很容易地通过在 <literal>$value</literal> 之前加上
-  &amp; 来修改数组的元素。此方法将以<link
-  linkend="language.references">引用</link>赋值而不是拷贝一个值。
-  <informalexample>
-   <programlisting role="php">
+ <example>
+  <title>常见的  <literal>foreach</literal> 用法</title>
+  <programlisting role="php">
 <![CDATA[
 <?php
-$arr = array(1, 2, 3, 4);
-foreach ($arr as &$value) {
-    $value = $value * 2;
-}
-// 现在 $arr 是 array(2, 4, 6, 8)
-unset($value); // 最后取消掉引用
-?>
-]]>
-   </programlisting>
-  </informalexample>
- </para>
- <warning>
-  <para>
-   数组最后一个元素的 <literal>$value</literal> 引用在
-   <literal>foreach</literal> 循环之后仍会保留。建议使用
-   <function>unset</function> 来将其销毁。
-    否则你会遇到下面的情况：
-  </para>
-   <informalexample>
-   <programlisting role="php">
-     <![CDATA[
-<?php
-$arr = array(1, 2, 3, 4);
-foreach ($arr as &$value) {
-    $value = $value * 2;
-}
-// 现在 $arr 是 array(2, 4, 6, 8)
 
-// 未使用 unset($value) 时，$value 仍然引用到最后一项 $arr[3]
+/* 示例：仅有值 */
+$array = [1, 2, 3, 17];
 
-foreach ($arr as $key => $value) {
-    // $arr[3] 会被 $arr 的每一项值更新掉…
-    echo "{$key} => {$value} ";
-    print_r($arr);
-}
-// 直到最终倒数第二个值被复制到最后一个值
-
-// output:
-// 0 => 2 Array ( [0] => 2, [1] => 4, [2] => 6, [3] => 2 )
-// 1 => 4 Array ( [0] => 2, [1] => 4, [2] => 6, [3] => 4 )
-// 2 => 6 Array ( [0] => 2, [1] => 4, [2] => 6, [3] => 6 )
-// 3 => 6 Array ( [0] => 2, [1] => 4, [2] => 6, [3] => 6 )
-?>
-]]>
-   </programlisting>
- </informalexample>
- </warning>
- <para>
-   可以通过引用来遍历数组常量的值：
-    <informalexample>
-      <programlisting role="php">
-        <![CDATA[
-<?php
-foreach (array(1, 2, 3, 4) as &$value) {
-    $value = $value * 2;
-}
-?>
-]]>
-      </programlisting>
-    </informalexample>
-  </para>
-  <para>
-    <note>
-      <para>
-        <literal>foreach</literal> 不支持用
-        “<literal linkend="language.operators.errorcontrol">@</literal>”
-        来抑制错误信息的能力。
-      </para>
-    </note>
-  </para>
- <para>
-  示范用法的更多例子：
-  <informalexample>
-   <programlisting role="php">
-<![CDATA[
-<?php
-/* foreach 示例 1：仅 value */
-
-$a = array(1, 2, 3, 17);
-
-foreach ($a as $v) {
-   echo "Current value of \$a: $v.\n";
+foreach ($array as $value) {
+    echo "Current element of \$array: $value.\n";
 }
 
-/* foreach 示例 2：value （打印手动访问的符号以供说明） */
-
-$a = array(1, 2, 3, 17);
-
-$i = 0; /* 仅供说明 */
-
-foreach ($a as $v) {
-    echo "\$a[$i] => $v.\n";
-    $i++;
-}
-
-/* foreach 示例 3：key 和 value */
-
-$a = array(
+/* 示例：key 和值 */
+$array = [
     "one" => 1,
     "two" => 2,
     "three" => 3,
     "seventeen" => 17
-);
+];
 
-foreach ($a as $k => $v) {
-    echo "\$a[$k] => $v.\n";
+foreach ($array as $key => $value) {
+    echo "Key: $key => Value: $value\n";
 }
 
-/* foreach 示例 4：多维数组 */
-$a = array();
-$a[0][0] = "a";
-$a[0][1] = "b";
-$a[1][0] = "y";
-$a[1][1] = "z";
+/* 示例：多维 key-value 数组 */
+$grid = [];
+$grid[0][0] = "a";
+$grid[0][1] = "b";
+$grid[1][0] = "y";
+$grid[1][1] = "z";
 
-foreach ($a as $v1) {
-    foreach ($v1 as $v2) {
-        echo "$v2\n";
+foreach ($grid as $y => $row) {
+    foreach ($row as $x => $value) {
+        echo "Value at position x=$x and y=$y: $value\n";
     }
 }
 
-/* foreach 示例 5：动态数组 */
-
-foreach (array(1, 2, 3, 4, 5) as $v) {
-    echo "$v\n";
+/* 示例：动态数组 */
+foreach (range(1, 5) as $value) {
+    echo "$value\n";
 }
 ?>
 ]]>
-   </programlisting>
-  </informalexample>
- </para>
- 
- 
- <sect2 xml:id="control-structures.foreach.list">
-  <title>用 list() 给嵌套的数组解包</title>
-  <?phpdoc print-version-for="foreach.list"?>
-
+  </programlisting>
+ </example>
+ <note>
   <para>
-   可以遍历一个数组的数组并且把嵌套的数组解包到循环变量中，只需将
-   <function>list</function> 作为值提供。
+   <literal>foreach</literal> 不支持使用 <link
+   linkend="language.operators.errorcontrol"><literal>@</literal></link> 运算符来抑制错误消息。
+  </para>
+ </note>
+
+ <sect2 xml:id="control-structures.foreach.list">
+  <title>解包嵌套数组</title>
+  <?phpdoc print-version-for="foreach.list"?>
+  <para>
+   可以通过遍历数组中的数组，在 value 的位置使用<link
+   linkend="language.types.array.syntax.destructuring">数组解构</link>（<literal>[]</literal>）或
+   <function>list</function> 语言结构将嵌套数组解包到循环变量中。
+
+   <note>
+    <simpara>
+     请注意，通过 <literal>[]</literal> 进行<link
+     linkend="language.types.array.syntax.destructuring">数组解构</link>仅在 PHP 7.1.0 及以上版本中可用。
+    </simpara>
+   </note>
   </para>
 
   <para>
-   例如：
    <informalexample>
+    <simpara>
+     在以下两个示例中，将设 <literal>$a</literal> 为嵌套数组的第一个元素，<literal>$b</literal> 将包含第二个元素：
+    </simpara>
     <programlisting role="php">
 <![CDATA[
 <?php
@@ -197,9 +123,11 @@ $array = [
     [3, 4],
 ];
 
+foreach ($array as [$a, $b]) {
+    echo "A: $a; B: $b\n";
+}
+
 foreach ($array as list($a, $b)) {
-    // $a 包含嵌套数组的第一个元素，
-    // $b 包含嵌套数组的第二个元素。
     echo "A: $a; B: $b\n";
 }
 ?>
@@ -215,20 +143,25 @@ A: 3; B: 4
    </informalexample>
   </para>
 
-  <para>
-   <function>list</function> 中的单元可以少于嵌套数组的，此时多出来的数组单元将被忽略：
+   <para>
+   当提供的变量数量少于数组中的元素数量时，将会忽略多余的元素。类似地，可通过使用逗号跳过某些元素：
    <informalexample>
     <programlisting role="php">
 <![CDATA[
 <?php
 $array = [
-    [1, 2],
-    [3, 4],
+    [1, 2, 5],
+    [3, 4, 6],
 ];
 
-foreach ($array as list($a)) {
-    // 注意这里没有 $b。
-    echo "$a\n";
+foreach ($array as [$a, $b]) {
+    // 注意此处没有 $c
+    echo "$a $b\n";
+}
+
+foreach ($array as [, , $c]) {
+    // 跳过 $a 和 $b
+    echo "$c\n";
 }
 ?>
 ]]>
@@ -236,15 +169,18 @@ foreach ($array as list($a)) {
     &example.outputs;
     <screen>
 <![CDATA[
-1
-3
+1 2
+3 4
+5
+6
 ]]>
     </screen>
    </informalexample>
   </para>
 
   <para>
-   如果 <function>list</function> 中列出的单元多于嵌套数组则会发出一条消息级别的错误信息：
+   如果数组元素数量不足以填充 <function>list</function>，将生成一条 notice 级别的错误消息。
+
    <informalexample>
     <programlisting role="php">
 <![CDATA[
@@ -254,7 +190,7 @@ $array = [
     [3, 4],
 ];
 
-foreach ($array as list($a, $b, $c)) {
+foreach ($array as [$a, $b, $c]) {
     echo "A: $a; B: $b; C: $c\n";
 }
 ?>
@@ -263,16 +199,97 @@ foreach ($array as list($a, $b, $c)) {
     &example.outputs;
     <screen>
 <![CDATA[
+Notice: Undefined offset: 2 in example.php on line 7
+A: 1; B: 2; C:
 
 Notice: Undefined offset: 2 in example.php on line 7
-A: 1; B: 2; C: 
-
-Notice: Undefined offset: 2 in example.php on line 7
-A: 3; B: 4; C: 
+A: 3; B: 4; C:
 ]]>
     </screen>
    </informalexample>
   </para>
+ </sect2>
+
+ <sect2 xml:id="control-structures.foreach.reference">
+  <title>foreach 和引用</title>
+  <para>
+   可以通过在 <literal>$value</literal> 前加上
+   <literal>&amp;</literal>，就可以在循环中直接修改数组元素。此时，值将以<link
+   linkend="language.references">引用</link>的方式赋值。
+   <informalexample>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$arr = [1, 2, 3, 4];
+foreach ($arr as &$value) {
+    $value = $value * 2;
+}
+// $arr is now [2, 4, 6, 8]
+unset($value); // 断开与最后一个元素的引用
+?>
+]]>
+    </programlisting>
+   </informalexample>
+  </para>
+  <warning>
+   <simpara>
+    对数组最后一个元素的 <literal>$value</literal> 的引用在 <literal>foreach</literal>
+    循环结束后仍然存在。建议使用 <function>unset</function> 将其销毁，否则将出现以下行为：
+   </simpara>
+   <informalexample>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$arr = [1, 2, 3, 4];
+foreach ($arr as &$value) {
+    $value = $value * 2;
+}
+// $arr 现在是 [2, 4, 6, 8]
+
+// 如果没有使用 unset(value)，$value 仍会引用最后一个元素：$arr[3]
+
+foreach ($arr as $key => $value) {
+    // $arr[3] 会随着 $arr 中的每个值而更新……
+    echo "{$key} => {$value} ";
+    print_r($arr);
+}
+// ……最终会复制倒数第二个值到最后一个值上
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+0 => 2 Array ( [0] => 2, [1] => 4, [2] => 6, [3] => 2 )
+1 => 4 Array ( [0] => 2, [1] => 4, [2] => 6, [3] => 4 )
+2 => 6 Array ( [0] => 2, [1] => 4, [2] => 6, [3] => 6 )
+3 => 6 Array ( [0] => 2, [1] => 4, [2] => 6, [3] => 6 )
+]]>
+    </screen>
+   </informalexample>
+  </warning>
+  <example>
+  <title>通过引用遍历常量数组的值</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+foreach ([1, 2, 3, 4] as &$value) {
+    $value = $value * 2;
+}
+?>
+]]>
+   </programlisting>
+  </example>
+ </sect2>
+
+ <sect2 role="seealso">
+  &reftitle.seealso;
+  <simplelist>
+   <member><link linkend="language.types.array">array</link></member>
+   <member><interfacename>Traversable</interfacename></member>
+   <member><link linkend="language.types.iterable">iterable</link></member>
+   <member><function>list</function></member>
+  </simplelist>
  </sect2>
 
 </sect1>
