@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 8fee3ae9715ffa15922469eb7d98f4878917a6ee Maintainer: 邹松 Status: ready -->
+<!-- EN-Revision: 873a99f094902ad72129ab391b1fb80525fab30e Maintainer: 邹松 Status: ready -->
 <!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="generator.rewind" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
   <refname>Generator::rewind</refname>
-  <refpurpose>重置迭代器</refpurpose>
+  <refpurpose>将生成器重置到第一个 yield 位置</refpurpose>
  </refnamediv>
 
  <refsect1 role="description">
@@ -15,9 +15,14 @@
    <void/>
   </methodsynopsis>
   <para>
-   如果迭代已经开始了，这里会抛出一个异常。
+   该方法将生成器重置到第一个 &yield; 的位置。若调用此方法时生成器尚未到达第一个 &yield; 表达式，会先执行至第一个
+   &yield; 表达式，再进行重置。若生成器已处于第二个 &yield; 的起始位置，则会抛出 <classname>Exception</classname>。
   </para>
-
+  <note>
+   <para>
+    这是开始  &foreach; 循环时调用的<emphasis>第一个</emphasis>方法，不会在 &foreach; 循环<emphasis>结束后</emphasis>执行。
+   </para>
+  </note>
  </refsect1>
 
  <refsect1 role="parameters">
@@ -32,6 +37,74 @@
   </para>
  </refsect1>
 
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title><methodname>Generator::rewind</methodname> 示例</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+
+function generator(): Generator
+{
+    echo "I'm a generator!\n";
+
+    for ($i = 1; $i <= 3; $i++) {
+        yield $i;
+    }
+}
+
+// 初始化生成器
+$generator = generator();
+
+// 将生成器重置到第一个 yield 表达式的起始位置（如果尚未处于该位置）
+$generator->rewind(); // I'm a generator!
+
+// 此处无任何操作；生成器已处于重置状态
+$generator->rewind(); // 没有输出（NULL）
+
+// 会将生成器重置到第一个 yield 表达式（如果尚未处于该位置），并对其进行遍历
+foreach ($generator as $value) {
+    // 在生成第一个值后，生成器会停留在第一个 yield 表达式处，直到恢复执行并继续前进到下一个 yield
+    echo $value, PHP_EOL; // 1
+
+    break;
+}
+
+// 恢复执行后再次重置，不会产生错误，因为生成器尚未越过第一个 yield
+$generator->rewind();
+
+echo $generator->current(), PHP_EOL; // 1
+
+// 不会产生错误，生成器仍处于第一个 yield 处
+$generator->rewind();
+
+// 此操作将生成器推进至第二个 yield 表达式
+$generator->next();
+
+try {
+    // 此操作会抛出异常，因为生成器已推进至第二个 yield
+    $generator->rewind(); // Fatal error: Uncaught Exception: Cannot rewind a generator that was already run
+} catch (Exception $e) {
+    echo $e->getMessage();
+}
+
+?>
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+I'm a generator!
+1
+1
+Cannot rewind a generator that was already run
+]]>
+    </screen>
+   </example>
+  </para>
+ </refsect1>
 
 </refentry>
 <!-- Keep this comment at the end of the file
