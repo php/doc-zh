@@ -973,27 +973,20 @@ while ($stmt->fetch(\PDO::FETCH_BOUND)) {
  <section xml:id="pdo.constants.fetch-into" annotations="chunk:false">
   <title>PDO::FETCH_INTO (<type>int</type>)</title>
   <simpara>
-   This fetch mode cannot be used with
-   <methodname>PDOStatement::fetchAll</methodname>.
+   此获取模式无法与 <methodname>PDOStatement::fetchAll</methodname> 一起使用。
   </simpara>
   <simpara>
-   This fetch mode updates properties in the specified object. The object is
-   returned on success.
+   此获取模式会更新指定对象中的属性。成功后，将返回该对象。
   </simpara>
   <simpara>
-   If a property does not exist with the name of a returned column, it will be
-   dynamically declared. This behavior is deprecated and will cause an error
-   from PHP 9.0.
+   如果返回的列名对应的属性不存在，则会动态声明该属性。已弃用此行为，自 PHP 9.0 起会导致错误。
   </simpara>
   <simpara>
-   Properties must be <literal>public</literal> and cannot be
-   <literal>readonly</literal>.
+   属性必须是 <literal>public</literal> 并且不能是 <literal>readonly</literal>。
   </simpara>
   <caution>
    <simpara>
-    There's no way to change the object to be updated without using
-    <methodname>PDOStatement::setFetchMode</methodname> between retrieving each
-    record.
+    若不在每次获取记录之间使用 <methodname>PDOStatement::setFetchMode</methodname>，则无法更改待更新的对象。
    </simpara>
   </caution>
   <informalexample>
@@ -1040,32 +1033,26 @@ object(TestEntity)#3 (4) {
  <section xml:id="pdo.constants.fetch-lazy" annotations="chunk:false">
   <title>PDO::FETCH_LAZY (<type>int</type>)</title>
   <simpara>
-   This fetch mode cannot be used with
-   <methodname>PDOStatement::fetchAll</methodname>.
+   此获取模式无法与 <methodname>PDOStatement::fetchAll</methodname> 一起使用。
   </simpara>
   <simpara>
-   This fetch mode returns a <classname>PDORow</classname> object which provides
-   both array- and object-like access to values (i.e. combines the behavior of
-   <constant>PDO::FETCH_BOTH</constant> and
-   <constant>PDO::FETCH_OBJ</constant>), retrieved in a lazy manner.
+   此获取模式返回 <classname>PDORow</classname>
+   对象，以延迟方式检索，并同时支持类似数组和对象访问值的方式（即结合了
+   <constant>PDO::FETCH_BOTH</constant> 与 <constant>PDO::FETCH_OBJ</constant> 的行为）。
   </simpara>
   <simpara>
-   This can provide memory efficient access (on the PHP side) to unbuffered
-   results on the database server. Whether PDO uses client-side buffering for
-   results depends on the database-specific driver used (and its configuration).
+   这种方式可在 PHP 端实现对数据库服务器上非缓冲结果的内存高效访问。PDO
+   是否对结果使用客户端缓冲，取决于所使用的数据库特定驱动及其配置。
   </simpara>
   <caution>
    <simpara>
-    <classname>PDORow</classname> will return <literal>NULL</literal> without
-    any error or warning when accessing properties or keys that are not defined.
-    This can make errors such as typos or queries not returning expected data
-    harder to spot and debug.
+    <classname>PDORow</classname> 在访问未定义的属性或 key 时会返回
+    <literal>NULL</literal>，且不产生任何错误或警告，这可能导致拼写错误或查询未返回预期数据等问题更难发现和调试。
    </simpara>
   </caution>
   <caution>
    <simpara>
-    The returned <classname>PDORow</classname> object is updated each time a
-    result is retrieved.
+    返回的 <classname>PDORow</classname> 对象在每次获取结果时都会更新。
    </simpara>
   </caution>
   <programlisting role="php">
@@ -1077,11 +1064,11 @@ $result = $stmt->fetch(\PDO::FETCH_LAZY);
 print "ID: ". $result[0] ."\n";
 print "Name: {$result->name}\n";
 print "Country: " . $result['country'] ."\n";
-// Returns NULL. No warning or error is raised.
+// 返回 NULL，不触发警告或错误
 print "Does not exist: " . var_export($result->does_not_exist, true) . "\n";
 
 $differentResult = $stmt->fetch(\PDO::FETCH_LAZY);
-// The previously retrieved PDORow now points to the newly retrieved result
+// 先前检索的 PDORow 现在指向新的检索结果
 print "ID: ". $result[0] ."\n";
 
 ]]>
@@ -1101,24 +1088,18 @@ ID: 105
  <section xml:id="pdo.constants.fetch-group" annotations="chunk:false">
   <title>PDO::FETCH_GROUP (<type>int</type>)</title>
   <simpara>
-   <constant>PDO::FETCH_GROUP</constant> returns lists of associative arrays,
-   indexed by a (non-unique) column. This fetch mode only works with
-   <methodname>PDOStatement::fetchAll</methodname>.
+   <constant>PDO::FETCH_GROUP</constant> 返回以某一（非唯一）列作为索引的关联数组列表。此获取模式仅适用于
+   <methodname>PDOStatement::fetchAll</methodname>。
   </simpara>
   <simpara>
-   When combined with <constant>PDO::FETCH_UNIQUE</constant>, both modes will
-   use the same column, rendering the combination of these modes useless.
+   当与 <constant>PDO::FETCH_UNIQUE</constant> 组合使用时，两种模式会使用同一列，导致该组合失去实际作用。
   </simpara>
   <simpara>
-   This fetch should be combined with one of
-   <constant>PDO::FETCH_ASSOC</constant>, <constant>PDO::FETCH_BOTH</constant>,
-   <constant>PDO::FETCH_NAMED</constant>, <constant>PDO::FETCH_NUM</constant>,
-   <constant>PDO::FETCH_COLUMN</constant> or
-   <constant>PDO::FETCH_FUNC</constant>.
+   此获取模式应与 <constant>PDO::FETCH_ASSOC</constant>、<constant>PDO::FETCH_BOTH</constant>、<constant>PDO::FETCH_NAMED</constant>、<constant>PDO::FETCH_NUM</constant>、<constant>PDO::FETCH_COLUMN</constant>
+   或 <constant>PDO::FETCH_FUNC</constant> 中的一种组合使用。
   </simpara>
   <simpara>
-   If no fetch mode from the above list is given, the current default fetch mode
-   for the <classname>PDOStatement</classname> will be used.
+   若未指定上述列表中的获取模式，则当前的默认获取模式用于 <classname>PDOStatement</classname>。
   </simpara>
   <informalexample>
    <programlisting role="php">
@@ -1178,9 +1159,7 @@ Array
    </screen>
   </informalexample>
   <simpara>
-   In the above example one should note that the first column is omitted from the
-   array for each row, only available as the key. It can be included by
-   repeating the column, as in the following example:
+   在上述示例中需注意，每行数组中会省略第一列，该列仅作为 key 存在。若要将其包含在数组中，可重复该列，如下例所示：
   </simpara>
   <informalexample>
    <programlisting role="php">
@@ -1323,9 +1302,7 @@ Array
    </screen>
   </informalexample>
   <simpara>
-   In the above example one should note that the first column is omitted from the
-   array for each row, only available as the key. It can be included by
-   repeating the column, as in the following example:
+   在上述示例中需注意，每行数组中会省略第一列，该列仅作为 key 存在。若要将其包含在数组中，可重复该列，如下例所示：
   </simpara>
   <informalexample>
    <programlisting role="php">

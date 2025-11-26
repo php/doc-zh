@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- EN-Revision: 43d07782b514d0c7a8487f2c74063739f302df8d Maintainer: mowangjuanzi Status: ready -->
+<!-- EN-Revision: 16934048f79c6e117cd16a23c09c1b2ea502e284 Maintainer: mowangjuanzi Status: ready -->
 <sect1 xml:id="language.operators.precedence">
  <title>运算符优先级</title>
  <titleabbrev>运算符优先级</titleabbrev>
@@ -282,12 +282,31 @@
 <![CDATA[
 <?php
 $a = 3 * 3 % 5; // (3 * 3) % 5 = 4
-// PHP 的三元操作符跟 C/C++ 有区别
-$a = true ? 0 : true ? 1 : 2; // (true ? 0 : true) ? 1 : 2 = 2 (PHP 8.0.0 前可用)
+var_dump($a);
 
 $a = 1;
 $b = 2;
 $a = $b += 3; // $a = ($b += 3) -> $a = 5, $b = 5
+var_dump($a, $b);
+?>
+]]>
+   </programlisting>
+  </example>
+ </para>
+ <para>
+  三元运算符特别要求使用括号来消除优先级歧义。
+ </para>
+ <para>
+  <example>
+   <title>明确优先级</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+$a = true ? 0 : (true ? 1 : 2);
+var_dump($a);
+
+// 自 PHP 8 起，这样不允许
+// $a = true ? 0 : true ? 1 : 2;
 ?>
 ]]>
    </programlisting>
@@ -299,7 +318,7 @@ $a = $b += 3; // $a = ($b += 3) -> $a = 5, $b = 5
   因为行为会在 PHP 版本间发生变化或者依赖于旁边的代码。
   <example>
    <title>未定义执行顺序</title>
-   <programlisting role="php">
+   <programlisting role="php" annotations="non-interactive">
 <![CDATA[
 <?php
 $a = 1;
@@ -312,15 +331,43 @@ $array[$i] = $i++; // 可能会设置索引 1 或 2
    </programlisting>
   </example>
   <example>
-   <title><literal>+</literal>、<literal>-</literal> 、<literal>.</literal> 具有相同的优先级</title>
+   <title><literal>+</literal>、<literal>-</literal> 和 <literal>.</literal> 优先级</title>
    <programlisting role="php">
 <![CDATA[
 <?php
 $x = 4;
 // 这行可能会导致不可预料的输出：
 echo "x minus one equals " . $x-1 . ", or so I hope\n";
+
+// 通过使用括号执行所需的优先级：
+echo "x minus one equals " . ($x-1) . ", or so I hope\n";
+
+// 这样不允许，会抛出 TypeError：
+echo (("x minus one equals " . $x) - 1) . ", or so I hope\n";
+?>
+]]>
+   </programlisting>
+   &example.outputs;
+   <screen>
+<![CDATA[
+-1, or so I hope
+-1, or so I hope
+Fatal error: Uncaught TypeError: Unsupported operand types: string - int
+]]>
+   </screen>
+  </example>
+  <example>
+   <title>PHP 8 之前，<literal>+</literal>、<literal>-</literal> 和 <literal>.</literal> 具有相同的优先级</title>
+   <programlisting role="php" annotations="non-interactive">
+<![CDATA[
+<?php
+$x = 4;
+// 此行可能会导致意想不到的输出：
+echo "x minus one equals " . $x-1 . ", or so I hope\n";
+
 // 因为它是这样计算的：（PHP 8.0.0 之前版本）
 echo (("x minus one equals " . $x) - 1) . ", or so I hope\n";
+
 // 可以使用括号来强制指定优先级：
 echo "x minus one equals " . ($x-1) . ", or so I hope\n";
 ?>
