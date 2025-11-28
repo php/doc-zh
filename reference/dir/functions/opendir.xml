@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- $Revision$ -->
-<!-- EN-Revision: b0b19b66183b28cebc1ffbcf1e2b8763f9d9c7b3 Maintainer: dallas Status: ready -->
+<!-- EN-Revision: 5c7e9e1351240b5f9e0858cdeba8f754a366d1b7 Maintainer: dallas Status: ready -->
 <!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="function.opendir" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
@@ -15,51 +14,49 @@
    <methodparam><type>string</type><parameter>directory</parameter></methodparam>
    <methodparam choice="opt"><type class="union"><type>resource</type><type>null</type></type><parameter>context</parameter><initializer>&null;</initializer></methodparam>
   </methodsynopsis>
-  <para>
+  <simpara>
    打开一个目录句柄，可用于之后的
    <function>closedir</function>，<function>readdir</function> 和
    <function>rewinddir</function> 调用中。
-  </para>
+  </simpara>
  </refsect1>
 
  <refsect1 role="parameters">
   &reftitle.parameters;
-  <para>
-   <variablelist>
-    <varlistentry>
-     <term><parameter>directory</parameter></term>
-     <listitem>
-      <para>
-       要打开的目录路径
-      </para>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
-     <term><parameter>context</parameter></term>
-     <listitem>
-      <para>
-       <parameter>context</parameter> 参数的说明见手册中的
-       <link linkend="ref.stream">Streams API</link> 一章。
-      </para>
-     </listitem>
-    </varlistentry>
-   </variablelist>
-  </para>
+  <variablelist>
+   <varlistentry>
+    <term><parameter>directory</parameter></term>
+    <listitem>
+     <simpara>
+      要打开的目录路径。
+     </simpara>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><parameter>context</parameter></term>
+    <listitem>
+     <simpara>
+      <parameter>context</parameter> 参数的说明见手册中的
+      <link linkend="ref.stream">Streams API</link> 一章。
+     </simpara>
+    </listitem>
+   </varlistentry>
+  </variablelist>
  </refsect1>
 
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
-  <para>
-   如果成功则返回目录句柄的 <type>resource</type>，&return.falseforfailure;。
-  </para>
+  <simpara>
+   成功时返回目录句柄，&return.falseforfailure;。
+  </simpara>
  </refsect1>
 
  <refsect1 role="errors">
   &reftitle.errors;
   &fs.emits.warning.on.failure;
-  <para>
+  <simpara>
    如果 <parameter>directory</parameter> 不是有效的目录，由于权限不足或文件系统错误而无法打开目录，则可能会发生这种情况。
-  </para>
+  </simpara>
  </refsect1>
 
  <refsect1 role="changelog">
@@ -86,49 +83,60 @@
 
  <refsect1 role="examples">
   &reftitle.examples;
-  <para>
-   <example>
-    <title><function>opendir</function> 示例</title>
-    <programlisting role="php">
+  <example>
+   <title>
+    列出目录中的所有条目，跳过特殊目录 <literal>.</literal> 和 <literal>..</literal>
+   </title>
+   <simpara>
+    由于文件和目录名称可能是 PHP 视为“假值”的字符串（例如名为 <literal>"0"</literal>
+    的目录），而 <function>readdir</function> 在读取完目录中所有条目后会返回 &false;，因此需使用
+    <literal>===</literal> <link linkend="language.operators.comparison">比较运算符</link>，才能准确区分名称为“假值”的目录条目与已读取完所有目录条目的情况。
+   </simpara>
+   <programlisting role="php">
 <![CDATA[
 <?php
-$dir = "/etc/php5/";
 
-// 打开已知目录，然后继续读取内容
-if (is_dir($dir)) {
-    if ($dh = opendir($dir)) {
-        while (($file = readdir($dh)) !== false) {
-            echo "filename: $file : filetype: " . filetype($dir . $file) . "\n";
+if ($handle = opendir('/path/to/files')) {
+    echo "Entries:\n";
+
+    /* 正确处理可能会视为假值的目录条目 */
+    while (false !== ($entry = readdir($handle))) {
+        if ($entry === '.' || $entry === '..') {
+            continue;
         }
-        closedir($dh);
+        echo "$entry\n";
     }
+
+    closedir($handle);
 }
 ?>
 ]]>
-    </programlisting>
-    &example.outputs.similar;
-    <screen>
+   </programlisting>
+   &example.outputs.similar;
+   <screen>
 <![CDATA[
-filename: . : filetype: dir
-filename: .. : filetype: dir
-filename: apache : filetype: dir
-filename: cgi : filetype: dir
-filename: cli : filetype: dir
+Entries:
+base
+en
+fr
+output.md
+test.php
 ]]>
-    </screen>
-   </example>
-  </para>
+   </screen>
+  </example>
  </refsect1>
 
  <refsect1 role="seealso">
   &reftitle.seealso;
-  <para>
-   <simplelist>
-    <member><function>is_dir</function></member>
-    <member><function>readdir</function></member>
-    <member><function>dir</function></member>
-   </simplelist>
-  </para>
+  <simplelist>
+   <member><function>readdir</function></member>
+   <member><function>rewinddir</function></member>
+   <member><function>closedir</function></member>
+   <member><function>dir</function></member>
+   <member><function>is_dir</function></member>
+   <member><function>glob</function></member>
+   <member><function>scandir</function></member>
+  </simplelist>
  </refsect1>
 </refentry>
 <!-- Keep this comment at the end of the file
