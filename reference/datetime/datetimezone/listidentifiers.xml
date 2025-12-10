@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 02ff7fef5b34cf8f5395180d9d39fb64d9398d00 Maintainer: duanxiaoqiang Status: ready -->
+<!-- EN-Revision: c018a4d2c85ac429f238f78679eca46d86c63a31 Maintainer: duanxiaoqiang Status: ready -->
 <!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="datetimezone.listidentifiers" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
@@ -22,6 +22,17 @@
    <methodparam choice="opt"><type>int</type><parameter>timezoneGroup</parameter><initializer>DateTimeZone::ALL</initializer></methodparam>
    <methodparam choice="opt"><type class="union"><type>string</type><type>null</type></type><parameter>countryCode</parameter><initializer>&null;</initializer></methodparam>
   </methodsynopsis>
+  <simpara>
+   返回 <link xlink:href="&url.wiki.tzdb.names;">IANA 时区标识符</link>列表。
+  </simpara>
+
+  <note>
+   <simpara>
+    可通过 JavaScript 使用 <link xlink:href="&url.js.intl-datetimeformat;">Intl.DateTimeFormat</link> 或
+    <link xlink:href="&url.js.temporal-zoneddatetime;">Temporal.ZonedDateTime</link> 检测客户端（浏览器）时区。
+   </simpara>
+  </note>
+
  </refsect1>
 
  <refsect1 role="parameters">
@@ -97,25 +108,28 @@
   &reftitle.examples;
   <para>
    <example>
-    <title><methodname>timezone_identifiers_list</methodname> 示例</title>
+    <title>列出带位置注释的标识符</title>
     <programlisting role="php">
 <![CDATA[
 <?php
-$timezone_identifiers = DateTimeZone::listIdentifiers();
-for ($i=0; $i < 5; $i++) {
-    echo "$timezone_identifiers[$i]\n";
+$identifiers = DateTimeZone::listIdentifiers(DateTimeZone::ALL);
+
+foreach ($identifiers as $tzid) {
+    $tz = new DateTimeZone($tzid);
+    $comments = $tz->getLocation()['comments'];
+    echo $tzid . " (" . ($comments ?: 'Whole region') . ")\n";
 }
-?>
 ]]>
     </programlisting>
     &example.outputs.similar;
     <screen>
 <![CDATA[
-Africa/Abidjan
-Africa/Accra
-Africa/Addis_Ababa
-Africa/Algiers
-Africa/Asmara
+America/Antigua (Whole region)
+America/Araguaina (Tocantins)
+America/Argentina/Buenos_Aires (Buenos Aires (BA, CF))
+America/Argentina/Catamarca (Catamarca (CT), Chubut (CH))
+America/Argentina/Cordoba (Argentina (most areas: CB, CC, CN, ER, FM, MN, SE, SF))
+// (Output trimmed due to length)
 ]]>
     </screen>
    </example>
@@ -131,7 +145,6 @@ $timezone_identifiers = DateTimeZone::listIdentifiers( DateTimeZone::ASIA );
 for ($i=0; $i < 5; $i++) {
     echo "$timezone_identifiers[$i]\n";
 }
-?>
 ]]>
     </programlisting>
     &example.outputs.similar;
@@ -155,7 +168,6 @@ Asia/Aqtau
 <?php
 $timezone_identifiers = DateTimeZone::listIdentifiers( DateTimeZone::ASIA | DateTimeZone::PACIFIC );
 echo join( ', ', $timezone_identifiers );
-?>
 ]]>
     </programlisting>
     &example.outputs.similar;
@@ -202,7 +214,6 @@ $timezone_identifiers = DateTimeZone::listIdentifiers( DateTimeZone::PER_COUNTRY
 foreach( $timezone_identifiers as $identifier ) {
     echo "$identifier\n";
 }
-?>
 ]]>
     </programlisting>
     &example.outputs.similar;
