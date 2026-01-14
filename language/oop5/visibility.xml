@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 5c04cf0fd637b258d2a3bf7f4b7aba1beef6d823 Maintainer: lm92 Status: ready -->
+<!-- EN-Revision: b9af4bd4eef9a501e9a6787d5d8998bce9f37dfb Maintainer: lm92 Status: ready -->
 <!-- CREDITS: Luffy, mowangjuanzi -->
  <sect1 xml:id="language.oop5.visibility" xmlns="http://docbook.org/ns/docbook">
   <title>访问控制（可见性）</title>
@@ -75,7 +75,7 @@ $obj2->printHello(); // 输出 Public2、Protected2 和 Undefined
    <sect3 xml:id="language.oop5.visibility-members-aviz">
     <title>不对称属性可见性</title>
     <simpara>
-     从 PHP 8.4 开始，属性也可以设置不对称的可见性，读取（<literal>get</literal>）
+     从 PHP 8.4 开始，对象属性也可以设置不对称的可见性，读取（<literal>get</literal>）
      和写入（<literal>set</literal>）可以有不同的范围。
      具体来说，可以单独指定<literal>set</literal>可见性，只要它不比默认可见性更宽。
     </simpara>
@@ -115,6 +115,42 @@ $b->pubYear = 2023; // Fatal Error
 ]]>
      </programlisting>
    </example>
+    <simpara>
+     从 PHP 8.5 开始，<literal>set</literal> 可见性也可以应用于类的静态属性。
+    </simpara>
+    <example>
+     <title>不对称静态属性可见性</title>
+     <programlisting role="php" annotations="non-interactive">
+<![CDATA[
+<?php
+class Manager
+{
+    public private(set) static int $calls = 0;
+
+    public function doAThing(): string
+    {
+        self::$calls++;
+        // Do other stuff.
+        return "some string";
+    }
+}
+
+$m = new Manager();
+
+$m->doAThing(); // Works
+echo Manager::$calls; // Works
+Manager::$calls = 5; // Fatal error
+?>
+]]>
+     </programlisting>
+     &example.outputs;
+     <screen>
+<![CDATA[
+1
+Fatal error: Uncaught Error: Cannot modify private(set) property Manager::$calls from global scope in /some/file.php
+]]>
+     </screen>
+    </example>
    <para>关于不对称可见性有一些注意事项：</para>
     <itemizedlist>
      <listitem>
