@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 1c3a0a021e0d97acce54fda55f6e941557056afe Maintainer: mowangjuanzi Status: ready -->
-<refentry xml:id="memcache.addserver" xmlns="http://docbook.org/ns/docbook">
+<!-- EN-Revision: f77acbec03e0937e560e9f901a26bb5f6f6992fb Maintainer: mowangjuanzi Status: ready -->
+<refentry xmlns="http://docbook.org/ns/docbook" xml:id="memcache.addserver">
  <refnamediv>
   <refname>Memcache::addServer</refname>
   <refname>memcache_add_server</refname>
   <refpurpose>新增 memcached 服务器到连接池</refpurpose>
  </refnamediv>
- 
+
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
@@ -39,12 +39,12 @@
   <para>
    <function>Memcache::addServer</function> 增加服务器到连接池。
   </para>
-  
+
   <para>
    当使用这个方法的时候(与<function>Memcache::connect</function>和<function>Memcache::pconnect</function>相反)
    网络连接并不会立刻建立，而是直到真正使用的时候才建立。 因此在加入大量服务器到连接池中时也是没有开销的，因为它们可能并不会被使用。
   </para>
-  
+
   <para>
   故障转移可能在方法的任何一个层次发生，通常只要其他服务器可用用户就不会感受到。任何的socket或memcache服务器级别的错误
   （比如内存溢出）都可能导致故障转移。而一般的客户端错误比如使用Memcache::add尝试增加一个已经存在的key则不会导致故障转移。
@@ -60,97 +60,95 @@
 
  <refsect1 role="parameters">
   &reftitle.parameters;
-  <para>
-   <variablelist>
-    <varlistentry>
-     <term><parameter>host</parameter></term>
-     <listitem>
-      <para>
-      要连接的memcached服务端监听的主机位置。这个参数通常指定其他类型的传输比如Unix域套接字使用
-      <literal>unix:///path/to/memcached.sock</literal>，这种情况下参数<parameter>port</parameter>
-       必须设置为<literal>0</literal>。
-      </para>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
-     <term><parameter>port</parameter></term>
-     <listitem>
-      <para>
-      要连接的memcached服务端监听的端口。当使用UNIX域套接字连接时设置为<literal>0</literal>。
-      </para>
-      <para>
-       注意：如果未指定 <parameter>port</parameter>，默认为 <link linkend="ini.memcache.default-port">memcache.default_port</link>。因此，明智的做法是调用此方法时明确指定端口。
-      </para>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
-     <term><parameter>persistent</parameter></term>
-     <listitem>
-      <para>
-      控制是否使用持久化连接。默认&true;。
-      </para>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
-     <term><parameter>weight</parameter></term>
-     <listitem>
-      <para>
-      为此服务器创建的桶的数量，用来控制此服务器被选中的权重，单个服务器被选中的概率是相对于所有服务器weight总和而言的。
-      </para>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
-     <term><parameter>timeout</parameter></term>
-     <listitem>
-      <para>
-      连接持续（超时）时间（单位秒），默认值1秒，修改此值之前请三思，过长的连接持续时间可能会导致失去所有的缓存优势。
-      </para>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
-     <term><parameter>retry_interval</parameter></term>
-     <listitem>
-      <para>
-      服务器连接失败时重试的间隔时间，默认值15秒。如果此参数设置为-1表示不重试。此参数和<parameter>persistent</parameter>参数在扩展以
-      <function>dl</function>函数动态加载的时候无效。
-      </para>
-      <para>
-      每个失败的连接结构有自己的超时时间，并且在它失效之前选择后端服务请求时该结构会被跳过。一旦一个连接失效，
-      它将会被成功重新连接或被标记为失败连接以在下一个<parameter>retry_interval</parameter>秒重连。
-      典型的影响是每个web服务子进程在服务于一个页面时将会每<parameter>retry_interval</parameter>秒
-      尝试重新连接一次。
-      </para>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
-     <term><parameter>status</parameter></term>
-     <listitem>
-      <para>
-      控制此服务器是否可以被标记为在线状态。设置此参数值为&false;并且<parameter>retry_interval</parameter>参数
-      设置为-1时允许将失败的服务器保留在一个池中以免影响key的分配算法。对于这个服务器的请求会进行故障转移或者立即失败，
-      这受限于<parameter>memcache.allow_failover</parameter>参数的设置。该参数默认&true;，表明允许进行故障转移。
-      </para>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
-     <term><parameter>failure_callback</parameter></term>
-     <listitem>
-      <para>
-      允许用户指定一个运行时发生错误后的回调函数。回调函数会在故障转移之前运行。回调函数会接受到两个参数，分别是失败主机的
-      主机名和端口号。
-      </para>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
-     <term><parameter>timeoutms</parameter></term>
-     <listitem>
-      <para>
-       
-      </para>
-     </listitem>
-    </varlistentry>
-   </variablelist>
-  </para>
+  <variablelist>
+   <varlistentry>
+    <term><parameter>host</parameter></term>
+    <listitem>
+     <para>
+     要连接的memcached服务端监听的主机位置。这个参数通常指定其他类型的传输比如Unix域套接字使用
+     <literal>unix:///path/to/memcached.sock</literal>，这种情况下参数<parameter>port</parameter>
+      必须设置为<literal>0</literal>。
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><parameter>port</parameter></term>
+    <listitem>
+     <para>
+     要连接的memcached服务端监听的端口。当使用UNIX域套接字连接时设置为<literal>0</literal>。
+     </para>
+     <para>
+      注意：如果未指定 <parameter>port</parameter>，默认为 <link linkend="ini.memcache.default-port">memcache.default_port</link>。因此，明智的做法是调用此方法时明确指定端口。
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><parameter>persistent</parameter></term>
+    <listitem>
+     <para>
+     控制是否使用持久化连接。默认&true;。
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><parameter>weight</parameter></term>
+    <listitem>
+     <para>
+     为此服务器创建的桶的数量，用来控制此服务器被选中的权重，单个服务器被选中的概率是相对于所有服务器weight总和而言的。
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><parameter>timeout</parameter></term>
+    <listitem>
+     <para>
+     连接持续（超时）时间（单位秒），默认值1秒，修改此值之前请三思，过长的连接持续时间可能会导致失去所有的缓存优势。
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><parameter>retry_interval</parameter></term>
+    <listitem>
+     <para>
+     服务器连接失败时重试的间隔时间，默认值15秒。如果此参数设置为-1表示不重试。此参数和<parameter>persistent</parameter>参数在扩展以
+     <function>dl</function>函数动态加载的时候无效。
+     </para>
+     <para>
+     每个失败的连接结构有自己的超时时间，并且在它失效之前选择后端服务请求时该结构会被跳过。一旦一个连接失效，
+     它将会被成功重新连接或被标记为失败连接以在下一个<parameter>retry_interval</parameter>秒重连。
+     典型的影响是每个web服务子进程在服务于一个页面时将会每<parameter>retry_interval</parameter>秒
+     尝试重新连接一次。
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><parameter>status</parameter></term>
+    <listitem>
+     <para>
+     控制此服务器是否可以被标记为在线状态。设置此参数值为&false;并且<parameter>retry_interval</parameter>参数
+     设置为-1时允许将失败的服务器保留在一个池中以免影响key的分配算法。对于这个服务器的请求会进行故障转移或者立即失败，
+     这受限于<parameter>memcache.allow_failover</parameter>参数的设置。该参数默认&true;，表明允许进行故障转移。
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><parameter>failure_callback</parameter></term>
+    <listitem>
+     <para>
+     允许用户指定一个运行时发生错误后的回调函数。回调函数会在故障转移之前运行。回调函数会接受到两个参数，分别是失败主机的
+     主机名和端口号。
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><parameter>timeoutms</parameter></term>
+    <listitem>
+     <para>
+
+     </para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
  </refsect1>
 
  <refsect1 role="returnvalues">
@@ -162,10 +160,9 @@
 
 <refsect1 role="examples">
   &reftitle.examples;
-  <para>
-   <example>
-    <title><function>Memcache::addServer</function> 示例</title>
-    <programlisting role="php">
+  <example>
+   <title><function>Memcache::addServer</function> 示例</title>
+   <programlisting role="php">
 <![CDATA[
 <?php
 
@@ -182,9 +179,8 @@ memcache_add_server($memcache_obj, 'memcache_host2', 11211);
 
 ?>
 ]]>
-    </programlisting>
-   </example>
-  </para>
+   </programlisting>
+  </example>
  </refsect1>
 
  <refsect1 role="notes">
@@ -199,19 +195,16 @@ memcache_add_server($memcache_obj, 'memcache_host2', 11211);
 
  <refsect1 role="seealso">
   &reftitle.seealso;
-  <para>
-   <simplelist>
-    <member><function>Memcache::connect</function></member>
-    <member><function>Memcache::pconnect</function></member>
-    <member><function>Memcache::close</function></member>
-    <member><function>Memcache::setServerParams</function></member>
-    <member><function>Memcache::getServerStatus</function></member>
-   </simplelist>
-  </para>
+  <simplelist>
+   <member><function>Memcache::connect</function></member>
+   <member><function>Memcache::pconnect</function></member>
+   <member><function>Memcache::close</function></member>
+   <member><function>Memcache::setServerParams</function></member>
+   <member><function>Memcache::getServerStatus</function></member>
+  </simplelist>
  </refsect1>
 
 </refentry>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml
