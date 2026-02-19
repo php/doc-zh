@@ -5,7 +5,7 @@
   <title>安装常见问题</title>
   <titleabbrev>安装</titleabbrev>
 
-  <para>本章包括了安装 PHP 的常见问题。PHP 可以用于几乎任何操作系统（可能除了 OS X 之前的 MacOS 之外），以及几乎任何 web 服务器。</para>
+  <para>本章包括了安装 PHP 的常见问题。PHP 可以用于几乎任何操作系统，以及几乎任何 web 服务器。</para>
   <para>要安装 PHP，请按照
   <link linkend="install">安装与配置</link>一章中的指示进行。</para>
   <qandaset>
@@ -16,7 +16,6 @@
       <answer>
         <para>PHP 是粘合剂。它将几十种第三方的库粘合到一起来创建很酷的 web 应用，并通过很直观且易于学习的语言界面使其看上去好像一个整体。PHP 的灵活与强大依赖于底层平台的稳定与耐用。起码需要将一个可运作的操作系统，一个可运作的 web 服务器以及可运作的第三方库粘合起来。其中任何一方不运作了，PHP 都需要有方法来识别出问题并且快速解决。如果没有完全独立的执行线程，完全独立的内存单元和稳定的空间对付每个请求，那底层架构就太复杂以至于不稳定因素更容易进入到 PHP 系统中。</para>
         <para>如果必须要用线程化的 MPM，看看 FastCGI 配置，使 PHP 运行于自己独立的内存空间中。</para>
-        <para>最后需要指出，不使用线程化 MPM 的警告在 Windows 系统中没那么强烈，因为 Windows 中的大多数库都理应在多线程下安全运行。</para>
       </answer>
     </qandaentry>
     <qandaentry xml:id="faq.installation.phpini">
@@ -29,7 +28,7 @@
         <filename>&lt;install-path&gt;/lib</filename>。很多人会在编译时通过 
         <link linkend="configure.with-config-file-path">--with-config-file-path</link>标记来改变路径。例如可以将路径设为： 
         <programlisting role="shell">--with-config-file-path=/etc</programlisting>然后从发行包中将 
-        <filename>php.ini-dist</filename>拷贝为 
+        <filename>php.ini-development</filename>拷贝为 
         <filename>/etc/php.ini</filename>并编辑它来作出想要的修改。</para>
         <programlisting role="shell">--with-config-file-scan-dir=PATH</programlisting>
         <para>Windows 中 &php.ini; 文件的默认路径在 Windows 目录下。如果使用的是 Apache 服务器，则会首先在 Apache 的安装目录中寻找 &php.ini;，例如 
@@ -75,7 +74,7 @@
           </listitem>
         </itemizedlist></para>
         <para>如果你的脚本使用了正则表达式函数（
-        <function>ereg</function>等），应该确认在编译 PHP 和 Apache 时使用了同一个正则表达式包。在 PHP 和 Apache 1.3.x 中应该自动就是这样。</para>
+        <function>preg_match</function> 等），应该确认在编译 PHP 和 Apache 时使用了同一个正则表达式包。在 PHP 和 Apache 1.3.x 中应该自动就是这样。</para>
       </answer>
     </qandaentry>
     <qandaentry xml:id="faq.installation.processing">
@@ -133,7 +132,7 @@ AddType application/x-httpd-php .php
     <qandaentry xml:id="faq.installation.undefinedsyms">
       <question>
         <para>某些操作系统：我已经在不出错的情况下安装了 PHP，但当我试着启动 Apache 时得到了一个未定义符号错误： 
-        <programlisting role="shell">[mybox:user /src/php4] root# apachectl configtest apachectl: /usr/local/apache/bin/httpd Undefined symbols: _compress _uncompress</programlisting></para>
+        <programlisting role="shell">[mybox:user /src/php5] root# apachectl configtest apachectl: /usr/local/apache/bin/httpd Undefined symbols: _compress _uncompress</programlisting></para>
       </question>
       <answer>
         <para>这实际上和 PHP 没有关系，而和 MySQL 的客户端库有关。有的需要 
@@ -155,7 +154,7 @@ AddType application/x-httpd-php .php
           <listitem>
             <simpara>文件权限问题，你的 PHP 脚本，
             <filename>php.exe</filename>，
-            <filename>php4ts.dll</filename>，&php.ini; 或任何你要加载的 PHP 扩展库是匿名 internet 用户 
+            <filename>php5ts.dll</filename>，&php.ini; 或任何你要加载的 PHP 扩展库是匿名 internet 用户 
             <literal>ISUR_&lt;machinename&gt;</literal>无权访问的。</simpara>
           </listitem>
           <listitem>
@@ -201,6 +200,7 @@ AddType application/x-httpd-php .php
         <function>phpinfo</function>，在接近开头的位置有一项叫做 
         <literal>Configuration File (php.ini)</literal>。这里将告诉你 PHP 在哪里找到了 &php.ini; 并且是否使用了。如果只显示一个目录则 没有使用任何 &php.ini; 文件，你应将你的 &php.ini; 文件放到该目录中。如果 &php.ini; 包括在该路径中则它已被应用了。</para>
         <para>如果 &php.ini; 被使用了并且你是以模块方式运行 PHP 的，确保在修改了 &php.ini; 之后重新启动你的 web server。</para>
+        <para>参见 <function>php_ini_loaded_file</function>。</para>
       </answer>
     </qandaentry>
     <qandaentry xml:id="faq.installation.addtopath">
@@ -209,19 +209,19 @@ AddType application/x-httpd-php .php
         <varname>PATH</varname>中去？</para>
       </question>
       <answer>
-        <para>在 Windows NT，2000，XP 和 2003 下： 
+        <para>在 Windows 下：
         <itemizedlist>
           <listitem>
-            <para>进入控制面板并打开“系统”图标（开始 -&gt; 设置 -&gt; 控制面板 -&gt; 系统，Windows XP/2003 中是：开始 -&gt; 控制面板 -&gt; 系统）</para>
+            <para>进入控制面板并打开”系统”图标（开始 → 控制面板）</para>
           </listitem>
           <listitem>
-            <para>选择“高级”标签页</para>
+            <para>选择”高级”标签页</para>
           </listitem>
           <listitem>
-            <para>点击“环境变量”按钮</para>
+            <para>点击”环境变量”按钮</para>
           </listitem>
           <listitem>
-            <para>在“系统变量”栏中</para>
+            <para>在”系统变量”栏中</para>
           </listitem>
           <listitem>
             <para>找到 Path 这一项（可能需要向下滚动才能找到）</para>
@@ -230,38 +230,17 @@ AddType application/x-httpd-php .php
             <para>鼠标双击 Path 这一项</para>
           </listitem>
           <listitem>
-            <para>在最后加入你的 PHP 目录，包括前面的“;”（例如：
+            <para>在最后加入你的 PHP 目录，包括前面的”;”（例如：
             <literal>;C:\php</literal>）</para>
           </listitem>
           <listitem>
-            <para>点击“确定”并重新启动电脑</para>
-          </listitem>
-        </itemizedlist></para>
-        <para>在 Windows 98/Me 中需要编辑 
-        <filename>autoexec.bat</filename>文件： 
-        <itemizedlist>
-          <listitem>
-            <para>打开记事本（开始 -&gt; 运行，然后输入 notepad 并点确定）</para>
-          </listitem>
-          <listitem>
-            <para>打开 
-            <filename>C:\autoexec.bat</filename>文件</para>
-          </listitem>
-          <listitem>
-            <para>找到这么一行：PATH=C:\WINDOWS;C:\WINDOWS\COMMAND;..... 并在最后加上 
-            <literal>;C:\php</literal></para>
-          </listitem>
-          <listitem>
-            <para>保存文件并重新启动电脑</para>
+            <para>点击”确定”</para>
           </listitem>
         </itemizedlist></para>
         <note>
-          <simpara>记住在上述修改之后重新启动，以确保对 
-          <varname>PATH</varname>的改变生效。</simpara>
+          <simpara>记住在上述修改之后重新启动，以确保对
+          <varname>PATH</varname> 的改变生效。</simpara>
         </note>
-        <para>PHP 手册过去提倡把文件拷贝到 Windows 系统目录中去，这是因为该目录（
-        <filename>C:\Windows</filename>，
-        <filename>C:\WINNT</filename>，等等）默认就在系统路径中。但是把文件拷贝到 Windows 系统目录中这一方式早已不被提倡，还可能造成问题。</para>
       </answer>
     </qandaentry>
 
@@ -310,11 +289,6 @@ AddType application/x-httpd-php .php
         <literal>AddType application/x-httpd-php .php</literal>替换为： 
         <programlisting role="apache-conf">
           <![CDATA[
-# PHP 4
-AddHandler php-script php
-AddType text/html php
-
-# PHP 5
 AddHandler php5-script php
 AddType text/html php
 ]]>
