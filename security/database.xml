@@ -33,10 +33,6 @@
      <simpara>
       应该为程序的每个方面创建不同的数据库帐号，并赋予对数据库对象的极有限的权限。仅分配给能完成其功能所需的权限，避免同一个用户可以完成另一个用户的事情。这样即使攻击者利用程序漏洞取得了数据库的访问权限，也最多只能做到和该程序一样的影响范围。
      </simpara>
-     <simpara>
-      鼓励用户不要把所有的事务逻辑都用 web
-      应用程序（即用户的脚本）来实现。最好用视图（view）、触发器（trigger）或者规则（rule）在数据库层面完成。当系统升级的时候，需要为数据库开辟新的接口，这时就必须重做所有的数据库客户端。除此之外，触发器还可以透明和自动地处理字段，并在调试程序和跟踪事实时提供有用的信息。
-     </simpara>
    </sect1>
 
    <sect1 xml:id="security.database.connection">
@@ -70,24 +66,20 @@
     </simpara>
 
     <sect2 xml:id="security.database.storage.hashing">
-    <title>Hashing</title>
+    <title>散列</title>
      <simpara>
-      In the case of truly hidden data, if its raw representation is not needed
-      (i.e. will not be displayed), hashing should be taken into consideration.
-      The well-known example for hashing is storing the cryptographic hash of a
-      password in a database, instead of the password itself.
+      对于真正隐藏的数据，如果不需要其原始表示形式（即不需要显示），应该考虑使用散列。
+      散列的典型例子是将密码的加密散列值存储在数据库中，而不是存储密码本身。
      </simpara>
      <simpara>
-      The <link linkend="ref.password">password</link> functions
-      provide a convenient way to hash sensitive data and work with these hashes.
+      <link linkend="ref.password">password</link> 函数提供了一种便捷的方式来对敏感数据进行散列处理，并使用这些散列值进行验证。
      </simpara>
      <simpara>
-      <function>password_hash</function> is used to hash a given string using the
-      strongest algorithm currently available and <function>password_verify</function>
-      checks whether the given password matches the hash stored in database.
+      <function>password_hash</function> 用于使用当前可用的最强算法对给定字符串进行散列，
+      <function>password_verify</function> 用于检查给定密码是否与存储在数据库中的散列值匹配。
      </simpara>
      <example>
-      <title>Hashing password field</title>
+      <title>对密码字段进行散列</title>
       <programlisting role="php">
 <![CDATA[
 <?php
@@ -231,8 +223,7 @@ $query = "UPDATE usertable SET pwd='hehehe', trusted=100, admin='yes' WHERE
      </informalexample>
     </para>
     <simpara>
-     虽然攻击者必须具备至少一些关于数据库架构的知识才能进行成功的攻击，但获取这些信息通常非常简单。例如代码可以是开源软件的一部分并且公开可用。这些信息也可能通过闭源代码泄露——即使它经过了编码、混淆或编译——甚至通过自己的代码显示错误消息来泄露。其他方法包括使用典型的
-     table 和列名。例如，使用“users” table 和列名“id”、“username”和“password”的登录表单。
+     虽然攻击者必须具备至少一些关于数据库架构的知识才能进行成功的攻击，但获取这些信息通常非常简单。例如代码可以是开源软件的一部分并且公开可用。这些信息也可能通过闭源代码泄露 —— 即使它经过了编码、混淆或编译 —— 甚至通过自己的代码显示错误消息来泄露。其他方法包括使用典型的表名和列名。例如，使用 ”users” 表以及列名”id”、 ”username” 和 ”password” 的登录表单。
     </simpara>
     <para>
      <example>
@@ -307,12 +298,12 @@ $result = mssql_query($query);
 <![CDATA[
 <?php
 
-// The dynamic SQL part is validated against expected values
+// 动态 SQL 部分根据预期值进行验证
 $sortingOrder = $_GET['sortingOrder'] === 'DESC' ? 'DESC' : 'ASC';
 $productId = $_GET['productId'];
-// The SQL is prepared with a placeholder
+// 使用占位符准备 SQL
 $stmt = $pdo->prepare("SELECT * FROM products WHERE id LIKE ? ORDER BY price {$sortingOrder}");
-// The value is provided with LIKE wildcards
+// 使用 LIKE 通配符提供值
 $stmt->execute(["%{$productId}%"]);
 
 ?>
