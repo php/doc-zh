@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision$ -->
+<!-- EN-Revision: 31e56c25f90ebedf9aa4aa4877fbc859e1e0529c Maintainer: mowangjuanzi Status: ready -->
+<refentry xml:id="closure.getcurrent" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <refnamediv>
+  <refname>Closure::getCurrent</refname>
+  <refpurpose>返回当前正在执行的闭包</refpurpose>
+ </refnamediv>
+
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis role="Closure">
+   <modifier>public</modifier> <modifier>static</modifier> <type>Closure</type><methodname>Closure::getCurrent</methodname>
+   <void/>
+  </methodsynopsis>
+  <para>
+   返回当前正在执行的闭包。此方法主要用于实现递归闭包，无需使用 <literal>use</literal> 关键字捕获对闭包变量的引用。
+  </para>
+  <para>
+   此方法必须在闭包内部调用；在闭包上下文之外调用将导致 <literal>Error: Current function is not a closure.</literal>
+  </para>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  &no.function.parameters;
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   返回当前正在执行的 <classname>Closure</classname> 实例。
+  </para>
+ </refsect1>
+
+ <refsect1 role="errors">
+  &reftitle.errors;
+  <para>
+   如果在闭包上下文之外调用，则抛出 <classname>Error</classname>。
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <example xml:id="closure.getcurrent.example.basic">
+   <title><methodname>Closure::getCurrent</methodname> 示例</title>
+   <para>
+    使用 <methodname>Closure::getCurrent</methodname> 实现递归斐波那契函数：
+   </para>
+   <programlisting role="php">
+<![CDATA[
+<?php
+$fibonacci = function (int $n) {
+    if ($n === 0 || $n === 1) {
+        return $n;
+    }
+
+    $fn = Closure::getCurrent();
+    return $fn($n - 1) + $fn($n - 2);
+};
+
+echo $fibonacci(10); // Outputs: 55
+?>
+]]>
+   </programlisting>
+  </example>
+  <example xml:id="closure.getcurrent.example.comparison">
+   <title>与传统方法的比较</title>
+   <para>
+    在 PHP 8.5 之前，实现递归闭包需要使用 <literal>use</literal> 关键字捕获对闭包变量的引用：
+   </para>
+   <programlisting role="php">
+<![CDATA[
+<?php
+// Traditional approach (still works in PHP 8.5)
+$fibonacci = function (int $n) use (&$fibonacci) {
+    if ($n === 0) return 0;
+    if ($n === 1) return 1;
+    return $fibonacci($n - 1) + $fibonacci($n - 2);
+};
+
+echo $fibonacci(10); // Outputs: 55
+?>
+]]>
+   </programlisting>
+   <para>
+    <methodname>Closure::getCurrent</methodname> 方法消除了在 <literal>use</literal> 子句中使用引用声明变量的需要，使代码更简洁且不易出错。
+   </para>
+  </example>
+ </refsect1>
+
+</refentry>
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
