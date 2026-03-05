@@ -277,15 +277,11 @@ foreach ($_FILES["pictures"]["error"] as $key => $error) {
    <literal>post_max_size</literal> 的值足够的大。
   </simpara>
   <simpara>
-   The
-   <link linkend="ini.max-file-uploads">max_file_uploads</link> configuration
-   setting controls the maximum number of files that can uploaded in one
-   request. If more files are uploaded than the limit, then
-   <varname>$_FILES</varname> will stop processing files once the limit is
-   reached. For example, if
-   <link linkend="ini.max-file-uploads">max_file_uploads</link> is set to
-   <literal>10</literal>, then <varname>$_FILES</varname> will never contain
-   more than 10 items.
+   <link linkend="ini.max-file-uploads">max_file_uploads</link>
+   配置选项控制单个请求中可上传的最大文件数量。如果上传的文件数量超过限制，
+   <varname>$_FILES</varname> 将在达到限制后停止处理文件。例如，如果
+   <link linkend="ini.max-file-uploads">max_file_uploads</link> 设置为
+   <literal>10</literal>，则 <varname>$_FILES</varname> 将永远不会包含超过 10 个条目。
   </simpara>
   <simpara>
    不对正在操作的文件进行验证可能意味着用户能够访问其它目录下的敏感信息。
@@ -345,13 +341,46 @@ foreach ($_FILES["pictures"]["error"] as $key => $error) {
   </simpara>
   <warning>
    <simpara>
-    The
     <link linkend="ini.max-file-uploads">max_file_uploads</link>
-    configuration setting acts as a limit on the number of files that can be
-    uploaded in one request. You will need to ensure that your form does not
-    try to upload more files in one request than this limit.
+    配置选项对单次请求中可上传的文件数量进行了限制。需要确保表单在单次请求中上传的文件数量不超过此限制。
    </simpara>
   </warning>
+  <para>
+   <example>
+    <title>上传整个目录</title>
+    <simpara>
+     在 HTML 文件上传字段中，可以使用 <literal>webkitdirectory</literal> 属性上传整个目录。
+     大多数现代浏览器都支持此功能。
+    </simpara>
+    <simpara>
+     利用 <literal>full_path</literal> 信息，可以存储相对路径，
+     或者在服务器上重建相同的目录结构。
+    </simpara>
+    <programlisting role="html">
+<![CDATA[
+<form action="file-upload.php" method="post" enctype="multipart/form-data">
+  Send this directory:<br />
+  <input name="userfile[]" type="file" webkitdirectory multiple />
+  <input type="submit" value="Send files" />
+</form>
+]]>
+    </programlisting>
+   </example>
+
+   <warning>
+    <simpara>
+     <literal>webkitdirectory</literal> 属性是非标准的，也不在标准化进程中。
+     不要在面向公众的生产环境中使用它：它不会对所有用户都有效。
+     各实现之间可能存在很大的不兼容性，将来行为可能会发生变化。
+    </simpara>
+    <simpara>
+     PHP 仅解析浏览器/用户代理提交的相对路径信息，
+     并将该信息传递到 <varname>$_FILES</varname> 数组中。
+     不能保证 <literal>full_path</literal> 数组中的值包含真实的目录结构，
+     PHP 应用程序不得信任此信息。
+    </simpara>
+   </warning>
+  </para>
  </sect1>
 
  <sect1 xml:id="features.file-upload.put-method">
