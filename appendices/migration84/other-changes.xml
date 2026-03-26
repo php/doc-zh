@@ -1,0 +1,734 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- EN-Revision: 0f1d7fba407bd1385616508a1e42e31fe009bff2 Maintainer: mowangjuanzi Status: ready -->
+<sect1 xml:id="migration84.other-changes">
+ <title>其他变更</title>
+
+ <sect2 xml:id="migration84.other-changes.core">
+  <title>核心变更</title>
+
+  <sect3 xml:id="migration84.other-changes.core.closures">
+   <title>闭包</title>
+
+   <simpara>
+    闭包名称已调整为包含父函数的名称和定义所在的行号，以便于区分，例如在堆栈跟踪中。
+   </simpara>
+  </sect3>
+
+  <sect3 xml:id="migration84.other-changes.core.fibers">
+   <title>Fiber</title>
+
+   <simpara>
+    现在允许在析构函数执行期间进行 Fiber 切换。此前由于与垃圾回收冲突而被阻止。
+   </simpara>
+
+   <simpara>
+    析构函数现在可以在单独的 Fiber 中执行：
+   </simpara>
+
+   <simpara>
+    当在 Fiber 中触发垃圾回收时，GC 调用的析构函数将在单独的 Fiber 中执行：即
+    gc_destructor_fiber。如果该 Fiber 挂起，将创建一个新的 Fiber
+    来执行剩余的析构函数。之前的 gc_destructor_fiber 不再被 GC
+    引用，如果没有在其他地方被引用，则可能被回收。析构函数被挂起的对象在析构函数返回或
+    <classname>Fiber</classname> 被回收之前不会被回收。
+   </simpara>
+  </sect3>
+
+  <sect3 xml:id="migration84.other-changes.core.output">
+   <title>输出处理器</title>
+
+   <simpara>
+    传递给 <function>ob_start</function> 的 <parameter>flags</parameter>
+    参数的输出处理器状态标志现在会被清除。
+   </simpara>
+
+   <simpara>
+    <function>output_add_rewrite_var</function> 现在使用
+    <link linkend="ini.url-rewriter.hosts"><literal>url_rewriter.hosts</literal></link>
+    代替
+    <link linkend="ini.session.trans-sid-hosts"><literal>session.trans_sid_hosts</literal></link>
+    来选择将要被重写的主机。
+   </simpara>
+  </sect3>
+ </sect2>
+
+ <sect2 xml:id="migration84.other-changes.sapi">
+  <title>SAPI 模块变更</title>
+
+  <sect3 xml:id="migration84.other-changes.sapi.apache">
+   <title>apache2handler</title>
+
+   <simpara>
+    已移除对已停止支持的 Apache 2.0 和 2.2 的支持。最低要求的 Apache 版本现在是 2.4。
+   </simpara>
+  </sect3>
+
+  <sect3 xml:id="migration84.other-changes.sapi.cli">
+   <title>CLI</title>
+
+   <simpara>
+    内置服务器在指定文件无法找到时，会通过遍历父目录递归查找索引文件。此前，如果路径看起来像是指向一个文件（即最后一个路径部分包含句点），则会跳过此过程，并返回
+    404 错误。现在的行为已变更为在所有情况下都查找索引文件。
+   </simpara>
+  </sect3>
+
+  <sect3 xml:id="migration84.other-changes.sapi.fpm">
+   <title>FPM</title>
+
+   <simpara>
+    刷新不带正文的头信息现在将成功。
+    <!-- See GH-12785. -->
+   </simpara>
+
+   <simpara>
+    状态页面新增了一个字段来显示内存峰值。
+   </simpara>
+
+   <simpara>
+    <!-- TODO Does this need a link? -->
+    用于 Solaris/Illumos 的 <filename>/dev/poll</filename>
+    <literal>events.mechanism</literal> 设置已被废弃。
+   </simpara>
+  </sect3>
+ </sect2>
+
+ <sect2 xml:id="migration84.other-changes.functions">
+  <title>变更的函数</title>
+
+  <sect3 xml:id="migration84.other-changes.functions.core">
+   <title>核心</title>
+
+   <simpara>
+    <function>trigger_error</function> 和 <function>user_error</function>
+    的返回类型现在是 <type>true</type> 而不是 <type>bool</type>。
+   </simpara>
+  </sect3>
+
+  <sect3 xml:id="migration84.other-changes.functions.dom">
+   <title>DOM</title>
+
+   <simpara>
+    <methodname>DOMDocument::registerNodeClass</methodname>
+    现在的暂定返回类型为 <type>true</type> 而不是 <type>bool</type>。
+    实际上它只可能返回 &true;。
+   </simpara>
+  </sect3>
+
+  <sect3 xml:id="migration84.other-changes.functions.hash">
+   <title>Hash</title>
+
+   <simpara>
+    <function>hash_update</function>
+    现在的暂定返回类型为 <type>true</type> 而不是 <type>bool</type>。
+    实际上它只可能返回 &true;。
+   </simpara>
+  </sect3>
+
+  <sect3 xml:id="migration84.other-changes.functions.intl">
+   <title>Intl</title>
+
+   <simpara>
+    <constant>NumberFormatter::ROUND_TOWARD_ZERO</constant> 和
+    <constant>NumberFormatter::ROUND_AWAY_FROM_ZERO</constant>
+    已作为 <constant>NumberFormatter::ROUND_DOWN</constant> 和
+    <constant>NumberFormatter::ROUND_UP</constant>
+    的别名添加，以与新的
+    <constant>PHP_ROUND_<replaceable>*</replaceable></constant> 模式保持一致。
+   </simpara>
+
+   <simpara>
+    <methodname>ResourceBundle::get</methodname>
+    <!-- TODO Use a proper union type for the return type -->
+    现在的暂定返回类型为 <literal>ResourceBundle|array|string|int|null</literal>。
+   </simpara>
+
+   <simpara>
+    <function>idn_to_ascii</function> 和 <function>idn_to_utf8</function>
+    函数在 <parameter>domain</parameter> 名称为空或过长时，现在始终抛出
+    <exceptionname>ValueError</exceptionname>。
+   </simpara>
+
+   <simpara>
+    <function>idn_to_ascii</function> 和 <function>idn_to_utf8</function>
+    函数在 <parameter>variant</parameter> 参数不是
+    <constant>INTL_IDNA_VARIANT_UTS46</constant> 时，现在始终抛出
+    <exceptionname>ValueError</exceptionname>。
+   </simpara>
+  </sect3>
+
+  <sect3 xml:id="migration84.other-changes.functions.libxml">
+   <title>LibXML</title>
+
+   <simpara>
+    <function>libxml_set_streams_context</function> 现在在将非流上下文资源传递给函数时立即抛出
+    <exceptionname>TypeError</exceptionname>，而不是在使用流上下文时才抛出。
+   </simpara>
+  </sect3>
+
+  <sect3 xml:id="migration84.other-changes.functions.mbstring">
+   <title>MBString</title>
+
+   <simpara>
+    <function>mb_strcut</function> 在处理无效的 UTF-8 和 UTF-16
+    字符串时的行为现在更加一致。对于有效的 UTF-8 和 UTF-16 字符串没有行为变化。
+   </simpara>
+  </sect3>
+
+  <sect3 xml:id="migration84.other-changes.functions.odbc">
+   <title>ODBC</title>
+
+   <simpara>
+    <function>odbc_fetch_object</function>、<function>odbc_fetch_array</function>
+    和 <function>odbc_fetch_into</function> 的 <parameter>row</parameter>
+    参数现在的默认值为 &null;，与 <function>odbc_fetch_row</function>
+    保持一致。此前默认值分别为
+    <literal>-1</literal>、<literal>-1</literal> 和 <literal>0</literal>。
+   </simpara>
+  </sect3>
+
+  <sect3 xml:id="migration84.other-changes.functions.openssl">
+   <title>OpenSSL</title>
+
+   <simpara>
+    <function>openssl_csr_new</function> 中的
+    <parameter>extra_attributes</parameter> 现在设置 <acronym>CSR</acronym>
+    属性而非主题 DN，修正了之前的错误行为。
+   </simpara>
+
+   <simpara>
+    <function>openssl_csr_new</function> 中的 <parameter>dn</parameter>
+    现在允许为单个条目设置 <type>array</type> 类型的值。
+   </simpara>
+
+   <simpara>
+    <function>openssl_csr_sign</function> 新增了
+    <parameter>serial_hex</parameter> 参数，允许以十六进制格式设置序列号。
+   </simpara>
+
+   <simpara>
+    在 OpenSSL 3.2 以下版本中，使用 <function>openssl_x509_parse</function>
+    解析省略秒数的 ASN.1 UTCTime 时会失败（相关字段返回
+    <literal>-1</literal>）。OpenSSL 3.3 及以上版本已无法加载此类证书。
+   </simpara>
+  </sect3>
+
+  <sect3 xml:id="migration84.other-changes.functions.pdo">
+   <title>PDO</title>
+
+   <simpara>
+    现在可以通过 <methodname>PDO::getAttribute</methodname> 获取
+    <constant>PDO::ATTR_STRINGIFY_FETCHES</constant> 属性的值。
+   </simpara>
+
+   <simpara>
+    新增了 <constant>PDO::PGSQL_ATTR_RESULT_MEMORY_SIZE</constant>
+    常量，用于通过 <methodname>PDO::getAttribute</methodname>
+    获取支持该功能的驱动程序的查询结果内存使用量。
+   </simpara>
+  </sect3>
+
+  <sect3 xml:id="migration84.other-changes.functions.pdo-firebird">
+   <title>PDO_FIREBIRD</title>
+
+   <simpara>
+    现在可以通过
+    <!-- TODO Is this a class constant of the driver class? -->
+    <methodname>PDO::getAttribute</methodname> 获取
+    <constant>FB_ATTR_DATE_FORMAT</constant>、<constant>FB_ATTR_TIME_FORMAT</constant>、<constant>FB_ATTR_TIMESTAMP_FORMAT</constant>
+    <!-- TODO Only for the specific driver class? -->
+    属性的值。
+   </simpara>
+
+   <para>
+    新增了用于指定事务隔离级别和访问模式的属性。与此功能相关的五个常量已被添加：
+
+    <simplelist>
+     <member><constant>Pdo\Firebird::TRANSACTION_ISOLATION_LEVEL</constant></member>
+     <member><constant>Pdo\Firebird::READ_COMMITTED</constant></member>
+     <member><constant>Pdo\Firebird::REPEATABLE_READ</constant></member>
+     <member><constant>Pdo\Firebird::SERIALIZABLE</constant></member>
+     <member><constant>Pdo\Firebird::WRITABLE_TRANSACTION</constant></member>
+    </simplelist>
+   </para>
+
+   <simpara>
+    使用持久连接时，构造函数中现在会进行活跃性检查。
+   </simpara>
+
+   <simpara>
+    构建的内容会根据 <filename class="headerfile">ibase.h</filename> 中
+    <constant>FB_API_VER</constant> 的值而变化。可以使用新的静态方法
+    <methodname>Pdo\Firebird::getApiVersion</methodname> 来获取此信息。此信息现在也在
+    <function>phpinfo</function> 中显示。
+   </simpara>
+
+   <para>
+    五种新数据类型现已可用：
+    <simplelist type="inline">
+     <member><literal>INT128</literal></member>
+     <member><literal>DEC16</literal></member>
+     <member><literal>DEC34</literal></member>
+     <member><literal>TIMESTAMP_TZ</literal></member>
+     <member><literal>TIME_TZ</literal></member>
+    </simplelist>
+    。
+    这些类型从 Firebird 4.0 开始可用。
+   </para>
+  </sect3>
+
+  <sect3 xml:id="migration84.other-changes.functions.pdo-mysql">
+   <title>PDO_MYSQL</title>
+
+   <simpara>
+    现在可以通过
+    <!-- TODO Only for the specific driver class? -->
+    <methodname>PDO::getAttribute</methodname> 获取
+    <constant>PDO::ATTR_FETCH_TABLE_NAMES</constant> 属性的值。
+   </simpara>
+  </sect3>
+
+  <sect3 xml:id="migration84.other-changes.functions.pdo-pgsql">
+   <title>PDO_PGSQL</title>
+
+   <simpara>
+    支持通过 <constant>PDO::PGSQL_ATTR_RESULT_MEMORY_SIZE</constant>
+    获取查询的内存使用量。
+   </simpara>
+
+   <simpara>
+    如果列的类型为 <literal>FLOAT4OID</literal> 或
+    <literal>FLOAT8OID</literal>，其值现在将作为 <type>float</type>
+    而不是 <type>string</type> 返回。
+   </simpara>
+  </sect3>
+
+  <sect3 xml:id="migration84.other-changes.functions.pgsql">
+   <title>PGSQL</title>
+
+   <simpara>
+    <function>pg_select</function> 的 <parameter>conditions</parameter>
+    参数现在是可选的，并接受空数组。
+   </simpara>
+  </sect3>
+
+  <sect3 xml:id="migration84.other-changes.functions.phar">
+   <title>Phar</title>
+
+   <para>
+    <simplelist type="inline">
+     <member><methodname>Phar::setAlias</methodname></member>
+     <member><methodname>Phar::setDefaultStub</methodname></member>
+    </simplelist>
+    方法现在的暂定返回类型为 <type>true</type> 而不是 <type>bool</type>。
+   </para>
+  </sect3>
+
+  <sect3 xml:id="migration84.other-changes.functions.posix">
+   <title>POSIX</title>
+
+   <simpara>
+    <function>posix_isatty</function>
+    现在在文件描述符/流参数无效时会设置错误号。
+   </simpara>
+  </sect3>
+
+  <sect3 xml:id="migration84.other-changes.functions.reflection">
+   <title>Reflection</title>
+
+   <simpara>
+    <methodname>ReflectionGenerator::getFunction</methodname>
+    现在可以在生成器执行完毕后调用。
+   </simpara>
+  </sect3>
+
+  <sect3 xml:id="migration84.other-changes.functions.sockets">
+   <title>Sockets</title>
+
+   <simpara>
+    <function>socket_create_listen</function> 的
+    <parameter>backlog</parameter> 参数的默认值现在为
+    <constant>SOMAXCONN</constant>。此前为 <literal>128</literal>。
+   </simpara>
+  </sect3>
+
+  <sect3 xml:id="migration84.other-changes.functions.sodium">
+   <title>Sodium</title>
+
+   <simpara>
+    <function>sodium_crypto_aead_aes256gcm_<replaceable>*</replaceable></function>
+    函数现在可在具有 ARM 加密扩展的 aarch64 CPU 上使用。
+   </simpara>
+  </sect3>
+
+  <sect3 xml:id="migration84.other-changes.functions.spl">
+   <title>SPL</title>
+
+   <para>
+    <simplelist type="inline">
+     <member><methodname>SplPriorityQueue::insert</methodname></member>
+     <member><methodname>SplPriorityQueue::recoverFromCorruption</methodname></member>
+     <member><methodname>SplHeap::insert</methodname></member>
+     <member><methodname>SplHeap::recoverFromCorruption</methodname></member>
+    </simplelist>
+    方法现在的暂定返回类型为 <type>true</type> 而不是 <type>bool</type>。
+   </para>
+
+   <simpara>
+    <classname>SplObjectStorage</classname> 现在实现了
+    <interfacename>SeekableIterator</interfacename>。
+   </simpara>
+  </sect3>
+
+  <sect3 xml:id="migration84.other-changes.functions.standard">
+   <title>Standard</title>
+
+   <simpara>
+
+    <function>password_hash</function> 中 <constant>PASSWORD_BCRYPT</constant>
+    散列算法的默认 <literal>'cost'</literal> 值已从 <literal>10</literal>
+    增加到 <literal>12</literal>。
+    <!-- RFC: https://wiki.php.net/rfc/bcrypt_cost_2023 -->
+   </simpara>
+
+   <simpara>
+    <function>debug_zval_dump</function> 现在会指示数组是否为紧凑（packed）数组。
+   </simpara>
+
+   <simpara>
+    <function>long2ip</function> 的返回类型现在为 <type>string</type>，
+    <!-- TODO Proper union type -->
+    而不是 <literal>string|false</literal>。
+   </simpara>
+
+   <simpara>
+    <!-- TODO Proper union type -->
+    <function>highlight_string</function> 的返回类型现在为
+    <type>string|true</type>，而不是 <literal>string|bool</literal>。
+   </simpara>
+
+   <simpara>
+    <!-- TODO Proper union type -->
+    <function>print_r</function> 的返回类型现在为
+    <type>string|true</type>，而不是 <literal>string|bool</literal>。
+   </simpara>
+
+   <!-- TODO: Someone else take care of this - Girgias -->
+   <sect4>
+    <title>使用 <function>round</function> 进行四舍五入</title>
+
+    <simpara>
+     <function>round</function> 函数的 <parameter>mode</parameter>
+     参数已扩展为
+     <!-- TODO Proper union type -->
+     <literal>RoundingMode|int</literal>，
+     <!-- TODO should be <enumname> ? -->
+     接受新的 <classname>RoundingMode</classname> 枚举实例。
+     <!-- RFC: https://wiki.php.net/rfc/correctly_name_the_rounding_mode_and_make_it_an_enum -->
+    </simpara>
+
+    <para>
+     <function>round</function> 函数新增了四种模式：
+     <simplelist type="inline">
+      <member><!-- <enumidentifier> -->RoundingMode::PositiveInfinity<!-- </enumidentifier> --></member>
+      <member><!-- <enumidentifier> -->RoundingMode::NegativeInfinity<!-- </enumidentifier> --></member>
+      <member><!-- <enumidentifier> -->RoundingMode::TowardsZero<!-- </enumidentifier> --></member>
+      <member><!-- <enumidentifier> -->RoundingMode::AwayFromZero<!-- </enumidentifier> --></member>
+     </simplelist>
+     <!-- RFC: https://wiki.php.net/rfc/new_rounding_modes_to_round_function -->
+    </para>
+
+    <simpara>
+     整数舍入的内部实现已被重写，使其更易于验证正确性和维护。作为重写的结果，一些舍入错误已被修复。例如，此前将
+     <literal>0.49999999999999994</literal> 舍入到最近的整数会得到
+     <literal>1.0</literal>，而不是正确的结果
+     <literal>0.0</literal>。其他输入也可能受到影响，与早期 PHP
+     版本相比可能产生不同的输出。
+    </simpara>
+
+    <simpara>
+     修复了 <function>round</function>
+     函数的"预舍入"导致的错误。此前，使用"预舍入"将诸如
+     <literal>0.285</literal>（实际为
+     <literal>0.28499999999999998</literal>）的值视为十进制数并舍入为
+     <literal>0.29</literal>。然而，"预舍入"会错误地舍入某些数字，因此此修复移除了"预舍入"并更改了数字的比较方式，使值能作为十进制数正确舍入。
+    </simpara>
+
+    <simpara>
+     <function>round</function> 能够处理的最大精度已扩展了一位数字。例如，<code>round(4503599627370495.5)</code>
+     此前返回 <literal>4503599627370495.5</literal>，现在返回
+     <literal>4503599627370496</literal>。
+    </simpara>
+
+   </sect4>
+  </sect3>
+
+ </sect2>
+
+ <sect2 xml:id="migration84.other-changes.extensions">
+  <title>对扩展的其他变更</title>
+
+  <sect3 xml:id="migration84.other-changes.extensions.curl">
+   <title>cURL</title>
+
+   <simpara>
+    要求的最低 libcurl 版本现在为 7.61.0。
+   </simpara>
+
+   <simpara>
+    <constant>CURLOPT_DNS_USE_GLOBAL_CACHE</constant>
+    选项不再有任何效果，会被静默忽略。该底层功能在 libcurl 7.11.1
+    中被弃用，在 libcurl 7.62.0 中被移除。
+   </simpara>
+  </sect3>
+
+  <sect3 xml:id="migration84.other-changes.extensions.gmp">
+   <title>GMP</title>
+
+   <!-- RFC: https://wiki.php.net/rfc/fix_up_bcmath_number_class -->
+   <simpara>
+    现在可以将 <classname>GMP</classname> 对象转换为 <type>bool</type>，而不是发出
+    <constant>E_RECOVERABLE_ERROR</constant>。转换行为已重载，使得表示值
+    <literal>0</literal> 的 <classname>GMP</classname> 对象被转换为 &false;。
+   </simpara>
+  </sect3>
+
+  <sect3 xml:id="migration84.other-changes.extensions.libxml">
+   <title>LibXML</title>
+
+   <simpara>
+    要求的最低 libxml2 版本现在为 2.9.4。
+   </simpara>
+  </sect3>
+
+  <sect3 xml:id="migration84.other-changes.extensions.intl">
+   <title>Intl</title>
+
+   <simpara>
+    Intl 类的行为已规范化，在尝试使用未初始化的对象或克隆失败时，始终抛出
+    <exceptionname>Error</exceptionname> 异常。
+   </simpara>
+  </sect3>
+
+  <sect3 xml:id="migration84.other-changes.extensions.mbstring">
+   <title>MBString</title>
+
+   <simpara>
+    Unicode 数据表已更新至 Unicode 16.0。
+   </simpara>
+  </sect3>
+
+  <sect3 xml:id="migration84.other-changes.extensions.mysqlnd">
+   <title>MySQLnd</title>
+
+   <simpara>
+    支持来自 MySQL 9 的新 VECTOR 数据类型。
+   </simpara>
+  </sect3>
+
+  <sect3 xml:id="migration84.other-changes.extensions.openssl">
+   <title>OpenSSL</title>
+
+   <simpara>
+    要求的最低 OpenSSL 版本现在为 1.1.1。
+   </simpara>
+  </sect3>
+
+  <sect3 xml:id="migration84.other-changes.extensions.pdo-pgsql">
+   <title>PDO_PGSQL</title>
+
+   <simpara>
+    要求的最低 libpq 版本现在为 10.0。
+   </simpara>
+  </sect3>
+
+  <sect3 xml:id="migration84.other-changes.extensions.pgsql">
+   <title>PGSQL</title>
+
+   <simpara>
+    要求的最低 libpq 版本现在为 10.0。
+   </simpara>
+  </sect3>
+
+  <sect3 xml:id="migration84.other-changes.extensions.spl">
+   <title>SPL</title>
+
+   <simpara>
+    <classname>SplFixedArray</classname> 中的越界访问现在抛出
+    <exceptionname>OutOfBoundsException</exceptionname> 类型的异常，而不是
+    <exceptionname>RuntimeException</exceptionname>。由于
+    <exceptionname>OutOfBoundsException</exceptionname> 是
+    <exceptionname>RuntimeException</exceptionname>
+    的子类，在尝试捕获这些异常时不会产生行为变化。
+   </simpara>
+  </sect3>
+
+  <sect3 xml:id="migration84.other-changes.extensions.xsl">
+   <title>XSL</title>
+
+   <simpara>
+    类型化属性 <property>XSLTProcessor::$cloneDocument</property> 和
+    <property>XSLTProcessor::$doXInclude</property> 现在已声明。
+   </simpara>
+  </sect3>
+
+  <sect3 xml:id="migration84.other-changes.extensions.zlib">
+   <title>Zlib</title>
+
+   <simpara>
+    要求的最低 zlib 版本现在为 1.2.11。
+   </simpara>
+  </sect3>
+ </sect2>
+
+ <sect2 xml:id="migration84.other-changes.performance">
+  <title>性能</title>
+
+  <sect3 xml:id="migration84.other-changes.performance.core">
+   <title>核心</title>
+
+   <simpara>
+    改进了在高并发负载下 ZTS 构建中浮点数解析和格式化的性能。这影响了
+    <function>printf</function> 系列函数以及序列化函数，如
+    <function>json_encode</function> 或 <function>serialize</function>。
+   </simpara>
+
+   <simpara>
+    仅使用 <literal>%s</literal> 和 <literal>%d</literal> 格式说明符的
+    <function>sprintf</function>
+    将被编译为等效的字符串插值，避免了函数调用和重复解析格式字符串的开销。
+   </simpara>
+  </sect3>
+
+  <sect3 xml:id="migration84.other-changes.performance.bcmath">
+   <title>BCMath</title>
+
+   <simpara>
+    改进了数字转换和运算的性能。
+   </simpara>
+  </sect3>
+
+  <sect3 xml:id="migration84.other-changes.performance.dom">
+   <title>DOM</title>
+
+   <simpara>
+    <methodname>DOMNode::C14N</methodname>
+    在不使用 xpath 查询的情况下性能大幅提升。对于有数万个节点的文档，时间性能可以轻松提升两个数量级。
+   </simpara>
+
+   <simpara>
+    改进了 XML 序列化的性能并减少了内存消耗。
+   </simpara>
+
+   <simpara>
+    减少了节点类的内存使用。
+   </simpara>
+  </sect3>
+
+  <sect3 xml:id="migration84.other-changes.performance.ftp">
+   <title>FTP</title>
+
+   <simpara>
+    改进了 FTP 上传的性能，大文件上传速度最高可提升 10 倍。
+   </simpara>
+  </sect3>
+
+  <sect3 xml:id="migration84.other-changes.performance.hash">
+   <title>Hash</title>
+
+   <simpara>
+    新增了 SHA-256 的 SSE2 和 SHA-NI 实现。在支持的 CPU
+    上性能提升约 1.3 倍（SSE2）和 3 至 5 倍（SHA-NI）。感谢 Colin Percival /
+    Tarsnap 提供了此优化。
+   </simpara>
+  </sect3>
+
+  <sect3 xml:id="migration84.other-changes.performance.mbstring">
+   <title>MBString</title>
+
+   <simpara>
+    <function>mb_strcut</function> 在处理 UTF-8 和 UTF-16 字符串时速度大幅提升。
+   </simpara>
+
+   <simpara>
+    查找 mbstring 编码名称的速度大幅提升。
+   </simpara>
+
+   <simpara>
+    SJIS-win 到 Unicode 的转换性能大幅提升。
+   </simpara>
+  </sect3>
+
+  <sect3 xml:id="migration84.other-changes.performance.mysqlnd">
+   <title>MySQLnd</title>
+
+   <simpara>
+    改进了 MySQLnd 转义的性能。
+   </simpara>
+  </sect3>
+
+  <sect3 xml:id="migration84.other-changes.performance.pcre">
+   <title>PCRE</title>
+
+   <simpara>
+    改进了命名捕获组的性能。
+   </simpara>
+  </sect3>
+
+  <sect3 xml:id="migration84.other-changes.performance.random">
+   <title>Random</title>
+
+   <simpara>
+    改进了 <classname>Random\Randomizer</classname> 的性能，特别针对
+    <methodname>Random\Randomizer::getBytes</methodname> 和
+    <methodname>Random\Randomizer::getBytesFromString</methodname> 方法。
+   </simpara>
+  </sect3>
+
+  <sect3 xml:id="migration84.other-changes.performance.simplexml">
+   <title>SimpleXML</title>
+
+   <simpara>
+    改进了 XML 序列化的性能并减少了内存消耗。
+   </simpara>
+  </sect3>
+
+  <sect3 xml:id="migration84.other-changes.performance.standard">
+   <title>Standard</title>
+
+   <simpara>
+    <function>strspn</function> 和 <function>strcspn</function>
+    的性能大幅提升。它们现在以线性时间运行，而不是受二次时间限制。
+   </simpara>
+
+   <simpara>
+    改进了 <function>strpbrk</function> 的性能。
+   </simpara>
+
+   <simpara>
+    <function>get_browser</function>
+    的速度大幅提升，在某些测试用例中最高可提升 1.5 至 2.5 倍。
+   </simpara>
+  </sect3>
+ </sect2>
+
+</sect1>
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
