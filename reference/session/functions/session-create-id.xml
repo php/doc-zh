@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision$ -->
+<!-- EN-Revision: f5c124befdf7c2791877694a86ead123b179d935 Maintainer: lacatoire Status: ready -->
+<refentry xml:id="function.session-create-id" xmlns="http://docbook.org/ns/docbook">
+ <refnamediv>
+  <refname>session_create_id</refname>
+  <refpurpose>创建新的会话 ID</refpurpose>
+ </refnamediv>
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <type class="union"><type>string</type><type>false</type></type><methodname>session_create_id</methodname>
+   <methodparam choice="opt"><type>string</type><parameter>prefix</parameter><initializer>""</initializer></methodparam>
+  </methodsynopsis>
+  <para>
+   <function>session_create_id</function> 用于为当前会话创建新的会话
+   ID。它返回无冲突的会话 ID。
+  </para>
+  <para>
+   如果会话未处于活动状态，则会省略冲突检查。
+  </para>
+  <para>
+   会话 ID 根据 php.ini 的设置来创建。
+  </para>
+  <para>
+   重要的是，GC 任务脚本需要使用与 Web 服务器相同的用户 ID。
+   否则，可能会遇到权限问题，尤其是在使用文件保存处理程序时。
+  </para>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>prefix</parameter></term>
+      <listitem>
+       <para>
+        如果指定了 <parameter>prefix</parameter>，新的会话 ID
+        将以 <parameter>prefix</parameter> 作为前缀。会话 ID
+        中并非所有字符都被允许。允许的字符范围为
+        <literal>[a-zA-Z0-9,-]</literal>。最大长度为 256 个字符。
+       </para>
+      </listitem>
+     </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <para>
+   <function>session_create_id</function> 返回当前会话的新的无冲突会话
+   ID。如果在没有活动会话的情况下使用，则会省略冲突检查。
+   失败时返回 &false;。
+  </para>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title><function>session_create_id</function> 与 <function>session_regenerate_id</function> 的使用示例</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+// 自定义会话启动函数，支持时间戳管理
+function my_session_start() {
+    session_start();
+    // 不允许使用过期的会话 ID
+    if (!empty($_SESSION['deleted_time']) && $_SESSION['deleted_time'] < time() - 180) {
+        session_destroy();
+        session_start();
+    }
+}
+
+// 自定义会话 ID 重新生成函数
+function my_session_regenerate_id() {
+    // 在会话活动时调用 session_create_id()
+    // 以确保不会产生冲突。
+    if (session_status() != PHP_SESSION_ACTIVE) {
+        session_start();
+    }
+    // 警告：切勿使用机密字符串作为前缀！
+    $newid = session_create_id('myprefix-');
+    // 设置删除时间戳。会话数据不能立即删除，原因如下。
+    $_SESSION['deleted_time'] = time();
+    // 结束会话
+    session_commit();
+    // 确保接受用户定义的会话 ID
+    // 注意：正常操作必须启用 use_strict_mode。
+    ini_set('session.use_strict_mode', 0);
+    // 设置新的自定义会话 ID
+    session_id($newid);
+    // 使用自定义会话 ID 启动
+    session_start();
+}
+
+// 确保启用了 use_strict_mode。
+// 出于安全原因，use_strict_mode 是必需的。
+ini_set('session.use_strict_mode', 1);
+my_session_start();
+
+// 在以下情况下必须重新生成会话 ID：
+//  - 用户登录时
+//  - 用户登出时
+//  - 经过一段时间后
+my_session_regenerate_id();
+
+// 编写有用的代码
+?>
+]]>
+    </programlisting>
+   </example>
+  </para>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>session_regenerate_id</function></member>
+    <member><function>session_start</function></member>
+    <member><link linkend="ini.session.use-strict-mode">session.use_strict_mode</link></member>
+    <member><methodname>SessionHandler::create_sid</methodname></member>
+   </simplelist>
+  </para>
+ </refsect1>
+</refentry>
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
