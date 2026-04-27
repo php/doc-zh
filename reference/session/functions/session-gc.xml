@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- EN-Revision: 372350f3bfad45ba01db850a1a3be40c803e196b Maintainer: lacatoire Status: ready -->
+<refentry xml:id="function.session-gc" xmlns="http://docbook.org/ns/docbook">
+ <refnamediv>
+  <refname>session_gc</refname>
+  <refpurpose>执行会话数据垃圾回收</refpurpose>
+ </refnamediv>
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <type class="union"><type>int</type><type>false</type></type><methodname>session_gc</methodname>
+   <void/>
+  </methodsynopsis>
+  <simpara>
+   默认情况下，PHP 使用 <link linkend="ini.session.gc-probability">session.gc_probability</link>
+   在每次请求时以概率方式运行会话垃圾回收器。这种方法存在一些局限性：
+  </simpara>
+  <simplelist>
+   <member>低流量站点的会话数据可能无法在预期时间内被删除。</member>
+   <member>高流量站点的垃圾回收器可能运行过于频繁，执行不必要的额外工作。</member>
+   <member>垃圾回收在用户请求时执行，用户可能会感受到延迟。</member>
+  </simplelist>
+  <simpara>
+   对于生产系统，建议通过将
+   <link linkend="ini.session.gc-probability">session.gc_probability</link> 设置为 <literal>0</literal>
+   来禁用基于概率的垃圾回收，并定期显式触发垃圾回收器，例如在类 UNIX 系统上使用
+   "cron" 运行调用 <function>session_gc</function> 的脚本。
+  </simpara>
+
+  <note>
+   <simpara>
+    从命令行 PHP 脚本调用 <function>session_gc</function> 时，
+    <link linkend="ini.session.save-path">session.save_path</link> 必须设置为与
+    Web 请求相同的值，并且脚本必须对会话文件具有访问和删除权限。这可能受到脚本运行用户的影响，
+    以及容器或沙箱功能（如 systemd 的 <literal>PrivateTmp=</literal> 选项）的影响。
+   </simpara>
+  </note>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  &no.function.parameters;
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <simpara>
+   <function>session_gc</function> 成功时返回删除的会话条目数，&return.falseforfailure;。
+  </simpara>
+  <note>
+   <simpara>
+    旧的会话保存处理程序不返回删除的会话条目数，而只返回成功/失败标志。在这种情况下，
+    无论实际删除了多少会话条目，都会返回 <literal>1</literal>。
+   </simpara>
+  </note>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <example>
+   <title>用于 cron 等任务管理器的 <function>session_gc</function> 示例</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+// Note: This script should be executed by the same user of web server process.
+
+// Need active session to initialize session data storage access.
+session_start();
+
+// Executes GC immediately
+session_gc();
+
+// Clean up session ID created by session_start()
+session_destroy();
+?>
+]]>
+   </programlisting>
+  </example>
+  <example>
+   <title>用于用户可访问脚本的 <function>session_gc</function> 示例</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+// Note: session_gc() is recommended to be used by a task manager script, but
+// it may be used as follows.
+
+// Used for last GC time check
+$gc_time = '/tmp/php_session_last_gc';
+$gc_period = 1800;
+
+session_start();
+// Execute GC only when GC period elapsed.
+// i.e. Calling session_gc() every request is waste of resources.
+if (file_exists($gc_time)) {
+    if (filemtime($gc_time) < time() - $gc_period) {
+        session_gc();
+        touch($gc_time);
+    }
+} else {
+    touch($gc_time);
+}
+?>
+]]>
+   </programlisting>
+  </example>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <simplelist>
+   <member><function>session_start</function></member>
+   <member><function>session_destroy</function></member>
+   <member><link linkend="ini.session.gc-probability">session.gc_probability</link></member>
+  </simplelist>
+ </refsect1>
+</refentry>
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
