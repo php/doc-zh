@@ -1,0 +1,338 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision$ -->
+<!-- EN-Revision: 9f4cb232d01a06077a2324e38f767d63f87f2e5f Maintainer: Singi Status: ready -->
+<section xmlns="http://docbook.org/ns/docbook" xml:id="apcu.configuration">
+ &reftitle.runtime;
+ &extension.runtime;
+ <simpara>
+  虽然默认的 APCu 设置对许多安装来说都很好，但认真的用户应该考虑调整以下参数。
+ </simpara>
+ <simpara>
+  配置 APCu 时需要做一个决定。
+  要为 APCu 分配多少内存。
+  控制此的 ini 指令是 <literal>apc.shm_size</literal>
+  请仔细阅读下面的相关部分。
+ </simpara>
+ <simpara>
+  一旦服务器运行，扩展包中捆绑的 <literal>apc.php</literal> 脚本应该被复制到 docroot 中的某个位置，
+  并在浏览器中查看，因为它提供了 APCu 内部工作机制的详细分析。如果在 PHP 中启用了 GD，它甚至会显示一些有趣的图表。</simpara>
+  <simpara>
+  如果 APCu 正在工作，<literal>Cache full count
+  </literal> 数字（在左侧）将显示缓存达到最大容量并必须驱逐条目以释放内存的次数。
+  在驱逐期间，如果指定了 <literal>apc.ttl</literal>，APCu 将首先尝试移除过期的条目，即 TTL 已过期或没有设置 TTL 且在最后
+  <literal>apc.ttl</literal> 秒内未被访问的条目。如果未设置 <literal>apc.ttl</literal>，
+  或者移除过期条目没有释放足够的空间，APCu 将清除整个缓存。
+  </simpara>
+  <simpara>
+  在配置良好的缓存中，驱逐次数应该最小。如果缓存不断被填满，从而被迫释放，结果的翻腾将对脚本性能产生负面影响。
+  最小化此数字的最简单方法是为 APCu 分配更多内存。
+ </simpara>
+ <simpara>
+  当 APCu 使用 mmap 支持（内存映射）编译时，它将只使用一个内存段，
+  与使用 SHM（SysV 共享内存）支持构建 APCu 时使用多个内存段不同。
+  MMAP 没有像 SHM 在 <literal>/proc/sys/kernel/shmmax</literal> 中的最大限制。
+  一般来说，推荐使用 MMAP 支持，因为它会在 Web 服务器重启时更快地回收内存，并且总体上减少启动时的内存分配影响。
+ </simpara>
+ <para>
+  <table>
+   <title>APCu 配置选项</title>
+   <tgroup cols="4">
+    <thead>
+     <row>
+      <entry>&Name;</entry>
+      <entry>&Default;</entry>
+      <entry>&Changeable;</entry>
+      <entry>&Changelog;</entry>
+     </row>
+    </thead>
+    <tbody>
+     <row>
+      <entry><link linkend="ini.apcu.enabled">apc.enabled</link></entry>
+      <entry>1</entry>
+      <entry><constant>INI_SYSTEM</constant></entry>
+      <entry/>
+     </row>
+     <row>
+      <entry><link linkend="ini.apcu.shm-segments">apc.shm_segments</link></entry>
+      <entry>1</entry>
+      <entry><constant>INI_SYSTEM</constant></entry>
+      <entry/>
+     </row>
+     <row>
+      <entry><link linkend="ini.apcu.shm-size">apc.shm_size</link></entry>
+      <entry>"32M"</entry>
+      <entry><constant>INI_SYSTEM</constant></entry>
+      <entry/>
+     </row>
+     <row>
+      <entry><link linkend="ini.apcu.entries-hint">apc.entries_hint</link></entry>
+      <entry>512 * apc.shm_size</entry>
+      <entry><constant>INI_SYSTEM</constant></entry>
+      <entry>Prior to APcu 5.1.25, the default was 4096</entry>
+     </row>
+     <row>
+      <entry><link linkend="ini.apcu.ttl">apc.ttl</link></entry>
+      <entry>0</entry>
+      <entry><constant>INI_SYSTEM</constant></entry>
+      <entry/>
+     </row>
+     <row>
+      <entry><link linkend="ini.apcu.gc-ttl">apc.gc_ttl</link></entry>
+      <entry>3600</entry>
+      <entry><constant>INI_SYSTEM</constant></entry>
+      <entry/>
+     </row>
+     <row>
+      <entry><link linkend="ini.apcu.mmap-file-mask">apc.mmap_file_mask</link></entry>
+      <entry>NULL</entry>
+      <entry><constant>INI_SYSTEM</constant></entry>
+      <entry/>
+     </row>
+     <row>
+      <entry><link linkend="ini.apcu.slam-defense">apc.slam_defense</link></entry>
+      <entry>0</entry>
+      <entry><constant>INI_SYSTEM</constant></entry>
+      <entry/>
+     </row>
+     <row>
+      <entry><link linkend="ini.apcu.enable-cli">apc.enable_cli</link></entry>
+      <entry>0</entry>
+      <entry><constant>INI_SYSTEM</constant></entry>
+      <entry/>
+     </row>
+     <row>
+      <entry><link linkend="ini.apcu.use-request-time">apc.use_request_time</link></entry>
+      <entry>0</entry>
+      <entry><constant>INI_ALL</constant></entry>
+      <entry>Prior to APCu 5.1.19, the default was <literal>1</literal>.</entry>
+     </row>
+     <row>
+      <entry><link linkend="ini.apcu.serializer">apc.serializer</link></entry>
+      <entry>"php"</entry>
+      <entry><constant>INI_SYSTEM</constant></entry>
+      <entry>Prior to APCu 5.1.15, the default was <literal>"default"</literal>.</entry>
+     </row>
+     <row>
+      <entry><link linkend="ini.apcu.coredump-unmap">apc.coredump_unmap</link></entry>
+      <entry>0</entry>
+      <entry><constant>INI_SYSTEM</constant></entry>
+      <entry/>
+     </row>
+     <row>
+      <entry><link linkend="ini.apcu.preload-path">apc.preload_path</link></entry>
+      <entry>NULL</entry>
+      <entry><constant>INI_SYSTEM</constant></entry>
+      <entry/>
+     </row>
+    </tbody>
+   </tgroup>
+  </table>
+  &ini.php.constants;
+ </para>
+
+ &ini.descriptions.title;
+
+ <variablelist>
+  <varlistentry xml:id="ini.apcu.enabled">
+   <term>
+    <parameter>apc.enabled</parameter>
+    <type>bool</type>
+   </term>
+   <listitem>
+    <simpara>
+     <literal>apc.enabled</literal> 可以设置为 0 来禁用 APC。这主要在 APC 静态编译到 PHP 中时有用，
+     因为没有其他方法来禁用它（当作为 DSO 编译时，<literal>php.ini</literal> 中的 <literal>extension</literal>
+     行可以被注释掉）。
+    </simpara>
+   </listitem>
+  </varlistentry>
+  <varlistentry xml:id="ini.apcu.shm-segments">
+   <term>
+    <parameter>apc.shm_segments</parameter>
+    <type>int</type>
+   </term>
+   <listitem>
+    <simpara>
+     要为编译器缓存分配的共享内存段的数量。
+     如果 APC 耗尽了共享内存但 <literal>apc.shm_size</literal>
+     已设置为系统允许的最大值，则提高此值可能会阻止 APC 耗尽其内存。
+    </simpara>
+   </listitem>
+  </varlistentry>
+  <varlistentry xml:id="ini.apcu.shm-size">
+   <term>
+    <parameter>apc.shm_size</parameter>
+    <type>string</type>
+   </term>
+   <listitem>
+    <simpara>
+     每个共享内存段的大小，使用如<link linkend="faq.using.shorthandbytes">此 FAQ</link> 中描述的简写表示法。
+     默认情况下，一些系统（包括大多数 BSD 变体）对共享内存段的大小有非常低的限制。
+    </simpara>
+   </listitem>
+  </varlistentry>
+  <varlistentry xml:id="ini.apcu.entries-hint">
+   <term>
+    <parameter>apc.entries_hint</parameter>
+    <type>int</type>
+   </term>
+   <listitem>
+    <simpara>
+     关于可能存储的不同变量数量的“提示”。
+     如果不确定，请设置为零或省略。
+    </simpara>
+   </listitem>
+  </varlistentry>
+  <varlistentry xml:id="ini.apcu.ttl">
+   <term>
+    <parameter>apc.ttl</parameter>
+    <type>int</type>
+   </term>
+   <listitem>
+    <simpara>
+     如果没有显式 TTL 的缓存条目在此秒数内未被访问，则认为它们已过期。
+     有效地，这允许在缓存插入期间或在完全清除之前机会性地移除此类条目。
+     请注意，由于移除是机会性的，即使条目比 <literal>apc.ttl</literal> 秒更旧，它们仍然可以读取。
+     此设置对具有显式 TTL 的缓存条目没有影响。
+    </simpara>
+   </listitem>
+  </varlistentry>
+  <varlistentry xml:id="ini.apcu.gc-ttl">
+   <term>
+    <parameter>apc.gc_ttl</parameter>
+    <type>int</type>
+   </term>
+   <listitem>
+    <simpara>
+     缓存条目在被移除或失效后可以在垃圾回收列表上保留的秒数。
+     如果它们的引用计数为零，或者超过此时间限制，则条目有资格被移除。
+     如果设置为 <literal>0</literal>，则禁用基于时间的清理，
+     并且仅在引用计数降至零时移除条目。
+    </simpara>
+   </listitem>
+  </varlistentry>
+  <varlistentry xml:id="ini.apcu.mmap-file-mask">
+   <term>
+    <parameter>apc.mmap_file_mask</parameter>
+    <type>string</type>
+   </term>
+   <listitem>
+    <simpara>
+     如果使用 <literal>--enable-mmap</literal> 编译时启用了 MMAP 支持，
+     这是传递给 mmap 模块的 mktemp 风格 file_mask，用于确定您的 mmap 内存区域是文件支持还是共享内存支持。
+     对于直接文件支持的 mmap，将其设置为类似 <literal>/tmp/apc.XXXXXX</literal>
+     的内容（正好 6 个 <literal>X</literal>）。
+     要使用 POSIX 风格的 shm_open/mmap，请在您的掩码中放置 <literal>.shm</literal>。
+     例如 <literal>/apc.shm.XXXXXX</literal>
+     您也可以将其设置为 <literal>/dev/zero</literal> 以使用您的内核的 <literal>/dev/zero</literal> 接口进行匿名 mmap 内存。
+     保持未定义将强制匿名 mmap。
+    </simpara>
+   </listitem>
+  </varlistentry>
+  <varlistentry xml:id="ini.apcu.slam-defense">
+   <term>
+    <parameter>apc.slam_defense</parameter>
+    <type>bool</type>
+   </term>
+   <listitem>
+    <simpara>
+     在非常繁忙的服务器上，每当您启动服务器或修改文件时，您可以创建许多进程同时尝试缓存同一文件的竞争。
+     将 <literal>apc.slam_defense</literal> 设置为 <literal>1</literal>
+     可以通过引入概率机制来帮助防止多个进程同时缓存同一文件。
+     如果在短时间内由不同进程尝试缓存相同的键，则跳过当前进程的缓存以减轻潜在的缓存冲击。
+    </simpara>
+   </listitem>
+  </varlistentry>
+  <varlistentry xml:id="ini.apcu.enable-cli">
+   <term>
+    <parameter>apc.enable_cli</parameter>
+    <type>int</type>
+   </term>
+   <listitem>
+    <simpara>
+     主要用于测试和调试。设置此项为 CLI 版本的 PHP 启用 APC。
+     在正常情况下，在每个 CLI 请求上创建、填充和销毁 APC 缓存并不是理想的，
+     但对于各种测试场景，能够轻松为 CLI 版本的 PHP 启用 APC 是有用的。
+    </simpara>
+   </listitem>
+  </varlistentry>
+  <varlistentry xml:id="ini.apcu.serializer">
+   <term>
+    <parameter>apc.serializer</parameter>
+    <type>string</type>
+   </term>
+   <listitem>
+    <simpara>
+     用于配置 APC 使用第三方序列化器。
+    </simpara>
+   </listitem>
+  </varlistentry>
+  <varlistentry xml:id="ini.apcu.coredump-unmap">
+   <term>
+    <parameter>apc.coredump_unmap</parameter>
+    <type>bool</type>
+   </term>
+   <listitem>
+    <simpara>
+     启用 APC 处理信号，例如 SIGSEGV，这些信号在被信号触发时写入核心文件。
+     当接收到这些信号时，APC 将尝试取消映射共享内存段，以将其从核心文件中排除。
+     当配置了大的 APC 共享内存段时，此设置可能会提高系统稳定性。
+    </simpara>
+    <warning>
+     <simpara>
+      此功能可能很危险。在致命信号处理程序中取消映射共享内存段可能会导致未定义的行为，如果发生致命错误。
+     </simpara>
+    </warning>
+    <note>
+     <simpara>
+      虽然某些内核可能提供在生成核心转储文件时忽略各种类型的共享内存的功能，
+      但这些实现也可能忽略重要的共享内存段，例如 Apache 记分板。
+     </simpara>
+    </note>
+   </listitem>
+  </varlistentry>
+  <varlistentry xml:id="ini.apcu.preload-path">
+   <term>
+    <parameter>apc.preload_path</parameter>
+    <type>string</type>
+   </term>
+   <listitem>
+    <simpara>
+     可选地，设置 APC 在启动时加载缓存数据的目录路径。
+    </simpara>
+   </listitem>
+  </varlistentry>
+
+  <varlistentry xml:id="ini.apcu.use-request-time">
+   <term>
+    <parameter>apc.use_request_time</parameter>
+    <type>bool</type>
+   </term>
+   <listitem>
+    <simpara>
+     使用 <acronym>SAPI</acronym> 请求开始时间作为 <acronym>TTL</acronym>。
+    </simpara>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</section>
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
