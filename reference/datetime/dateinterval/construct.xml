@@ -1,0 +1,340 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision$ -->
+<!-- EN-Revision: 9f4cb232d01a06077a2324e38f767d63f87f2e5f Maintainer: Singi Status: ready -->
+<refentry xml:id="dateinterval.construct" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <refnamediv>
+  <refname>DateInterval::__construct</refname>
+  <refpurpose>创建一个新的 DateInterval 对象</refpurpose>
+ </refnamediv>
+
+ <refsect1 role="description">
+  &reftitle.description;
+  <constructorsynopsis role="DateInterval">
+   <modifier>public</modifier> <methodname>DateInterval::__construct</methodname>
+   <methodparam><type>string</type><parameter>duration</parameter></methodparam>
+  </constructorsynopsis>
+  <para>
+   创建一个新的 DateInterval 对象。
+  </para>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <para>
+   <variablelist>
+    <varlistentry>
+     <term><parameter>duration</parameter></term>
+     <listitem>
+      <para>
+       时间间隔规范。
+      </para>
+      <para>
+       该格式以字母 <literal>P</literal> 开头，表示 <quote>period</quote>。
+       每个持续时间段由一个整数值后跟一个周期设计符组成。
+       如果持续时间包含时间部分，则该部分以字母 <literal>T</literal> 开头。
+      </para>
+      <para>
+       <table>
+        <title>
+         <parameter>duration</parameter> 周期设计符
+        </title>
+        <tgroup cols="2">
+         <thead>
+          <row>
+           <entry>周期设计符</entry>
+           <entry>说明</entry>
+          </row>
+         </thead>
+         <tbody>
+          <row>
+           <entry><literal>Y</literal></entry>
+           <entry>年</entry>
+          </row>
+          <row>
+           <entry><literal>M</literal></entry>
+           <entry>月</entry>
+          </row>
+          <row>
+           <entry><literal>D</literal></entry>
+           <entry>天</entry>
+          </row>
+          <row>
+           <entry><literal>W</literal></entry>
+           <entry>
+            周。转换为天。
+            在 PHP 8.0.0 之前，不能与 <literal>D</literal> 组合使用。
+           </entry>
+          </row>
+          <row>
+           <entry><literal>H</literal></entry>
+           <entry>小时</entry>
+          </row>
+          <row>
+           <entry><literal>M</literal></entry>
+           <entry>分钟</entry>
+          </row>
+          <row>
+           <entry><literal>S</literal></entry>
+           <entry>秒</entry>
+          </row>
+         </tbody>
+        </tgroup>
+       </table>
+      </para>
+      <para>
+       以下是一些简单示例。
+       两天为 <literal>P2D</literal>。
+       两秒为 <literal>PT2S</literal>。
+       六年五分钟为 <literal>P6YT5M</literal>。
+      </para>
+      <note>
+       <para>
+        单位必须从左到右按从大到小的顺序输入。
+        因此年在月之前，月在天之前，天在小时之前，依次类推。
+        所以一年四天应表示为 <literal>P1Y4D</literal>，而非 <literal>P4D1Y</literal>。
+       </para>
+      </note>
+      <para>
+       该规范也可以使用日期时间格式表示。
+       示例为一年四天：<literal>P0001-00-04T00:00:00</literal>。
+       但此格式中的值不能超过对应周期的进位点（例如 <literal>25</literal> 小时是无效的）。
+      </para>
+      <para>
+       这些格式基于 <link xlink:href="&url.iso-8601.duration;">ISO 8601 持续时间规范</link>。
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </para>
+ </refsect1>
+
+ <refsect1 role="errors">
+  &reftitle.errors;
+  <para>
+   当 <parameter>duration</parameter> 无法解析为时间间隔时，抛出
+   <classname>DateMalformedIntervalStringException</classname>。
+   在 PHP 8.3 之前，抛出的是 <exceptionname>Exception</exceptionname>。
+  </para>
+ </refsect1>
+
+ <refsect1 role="changelog">
+  &reftitle.changelog;
+  <informaltable>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>&Version;</entry>
+      <entry>&Description;</entry>
+     </row>
+    </thead>
+    <tbody>
+     <row>
+      <entry>8.3.0</entry>
+      <entry>
+       现在在解析失败时抛出
+       <exceptionname>DateMalformedIntervalStringException</exceptionname>，
+       而不是 <exceptionname>Exception</exceptionname>。
+      </entry>
+     </row>
+     <row>
+      <entry>8.2.0</entry>
+      <entry>
+       当通过该方法创建 <classname>DateInterval</classname> 时，
+       仅会显示 <literal>y</literal> 到 <literal>f</literal>、
+       <literal>invert</literal> 和 <literal>days</literal>，
+       并新增 <literal>from_string</literal> 布尔属性。
+      </entry>
+     </row>
+     <row>
+      <entry>8.0.0</entry>
+      <entry>
+       <literal>W</literal> 可以与 <literal>D</literal> 组合使用。
+      </entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </informaltable>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <para>
+   <example>
+    <title>Constructing and using <classname>DateInterval</classname> objects</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+// Create a specific date
+$someDate = \DateTime::createFromFormat("Y-m-d H:i", "2022-08-25 14:18");
+
+// Create interval
+$interval = new \DateInterval("P7D");
+
+// Add interval
+$someDate->add($interval);
+
+// Convert interval to string
+echo $interval->format("%d");
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen role="php">
+<![CDATA[
+7
+]]>
+    </screen>
+   </example>
+  </para>
+
+  <para>
+   <example>
+    <title><classname>DateInterval</classname> example</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$interval = new DateInterval('P1W2D');
+var_dump($interval);
+]]>
+    </programlisting>
+    &example.outputs.82;
+    <screen role="php">
+<![CDATA[
+object(DateInterval)#1 (10) {
+  ["y"]=>
+  int(0)
+  ["m"]=>
+  int(0)
+  ["d"]=>
+  int(9)
+  ["h"]=>
+  int(0)
+  ["i"]=>
+  int(0)
+  ["s"]=>
+  int(0)
+  ["f"]=>
+  float(0)
+  ["invert"]=>
+  int(0)
+  ["days"]=>
+  bool(false)
+  ["from_string"]=>
+  bool(false)
+}
+]]>
+    </screen>
+    &example.outputs.8;
+    <screen role="php">
+<![CDATA[
+object(DateInterval)#1 (16) {
+  ["y"]=>
+  int(0)
+  ["m"]=>
+  int(0)
+  ["d"]=>
+  int(9)
+  ["h"]=>
+  int(0)
+  ["i"]=>
+  int(0)
+  ["s"]=>
+  int(0)
+  ["f"]=>
+  float(0)
+  ["weekday"]=>
+  int(0)
+  ["weekday_behavior"]=>
+  int(0)
+  ["first_last_day_of"]=>
+  int(0)
+  ["invert"]=>
+  int(0)
+  ["days"]=>
+  bool(false)
+  ["special_type"]=>
+  int(0)
+  ["special_amount"]=>
+  int(0)
+  ["have_weekday_relative"]=>
+  int(0)
+  ["have_special_relative"]=>
+  int(0)
+}
+]]>
+    </screen>
+    &example.outputs.7;
+    <screen role="php">
+     <![CDATA[
+object(DateInterval)#1 (16) {
+  ["y"]=>
+  int(0)
+  ["m"]=>
+  int(0)
+  ["d"]=>
+  int(2)
+  ["h"]=>
+  int(0)
+  ["i"]=>
+  int(0)
+  ["s"]=>
+  int(0)
+  ["f"]=>
+  float(0)
+  ["weekday"]=>
+  int(0)
+  ["weekday_behavior"]=>
+  int(0)
+  ["first_last_day_of"]=>
+  int(0)
+  ["invert"]=>
+  int(0)
+  ["days"]=>
+  bool(false)
+  ["special_type"]=>
+  int(0)
+  ["special_amount"]=>
+  int(0)
+  ["have_weekday_relative"]=>
+  int(0)
+  ["have_special_relative"]=>
+  int(0)
+}
+]]>
+    </screen>
+   </example>
+  </para>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>DateInterval::format</function></member>
+    <member><function>DateTime::add</function></member>
+    <member><function>DateTime::sub</function></member>
+    <member><function>DateTime::diff</function></member>
+   </simplelist>
+  </para>
+ </refsect1>
+
+</refentry>
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
