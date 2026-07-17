@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
 <!-- EN-Revision: 679cf93fa1e54cde82fc9cf545966eb13bcb0638 Maintainer: Singi Status: ready -->
-<refentry xml:id="function.array-all" xmlns="http://docbook.org/ns/docbook">
+<refentry xml:id="function.array-any" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
-  <refname>array_all</refname>
-  <refpurpose>检查数组所有元素是否都满足回调函数的条件</refpurpose>
+  <refname>array_any</refname>
+  <refpurpose>检查数组中是否至少有一个元素满足回调函数的条件</refpurpose>
  </refnamediv>
 
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <type>bool</type><methodname>array_all</methodname>
+   <type>bool</type><methodname>array_any</methodname>
    <methodparam><type>array</type><parameter>array</parameter></methodparam>
    <methodparam><type>callable</type><parameter>callback</parameter></methodparam>
   </methodsynopsis>
   <simpara>
-   当 <parameter>callback</parameter> 对全部元素均返回 &true; 时，<function>array_all</function> 返回 &true;，否则返回 &false;。
+   如果指定的 <parameter>callback</parameter> 对任意一个元素返回 &true;，则 <function>array_any</function> 函数返回 &true;；否则该函数返回 &false;。
   </simpara>
  </refsect1>
 
@@ -40,7 +40,7 @@
        <methodparam><type>mixed</type><parameter>value</parameter></methodparam>
        <methodparam><type>mixed</type><parameter>key</parameter></methodparam>
       </methodsynopsis>
-      如果该回调函数返回 &false;，则 <function>array_all</function> 会立即返回 &false;，并且不会再对后续元素执行该回调。
+      如果该函数返回 &true;，则 <function>array_any</function> 会立即返回 &true;，并且不会再为后续元素调用该回调函数。
      </para>
     </listitem>
    </varlistentry>
@@ -50,14 +50,14 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <simpara>
-   如果 <parameter>callback</parameter> 对所有元素都返回 &true;，则该函数返回 &true;；否则返回 &false;。
+   如果数组中至少存在一个元素能让 <parameter>callback</parameter> 返回 &true;，则该函数返回 &true;；否则返回 &false;。
   </simpara>
  </refsect1>
 
  <refsect1 role="examples">
   &reftitle.examples;
   <example>
-   <title><function>array_all</function> 示例</title>
+   <title><function>array_any</function> 示例</title>
    <programlisting role="php">
 <![CDATA[
 <?php
@@ -70,19 +70,19 @@ $array = [
     'f' => 'elephant'
 ];
 
-// Check, if all animal names are shorter than 12 letters.
-var_dump(array_all($array, function (string $value) {
-    return strlen($value) < 12;
-}));
-
-// Check, if all animal names are longer than 5 letters.
-var_dump(array_all($array, function (string $value) {
+// Check, if any animal name is longer than 5 letters.
+var_dump(array_any($array, function (string $value) {
     return strlen($value) > 5;
 }));
 
-// Check, if all array keys are strings.
-var_dump(array_all($array, function (string $value, $key) {
-   return is_string($key);
+// Check, if any animal name is shorter than 3 letters.
+var_dump(array_any($array, function (string $value) {
+    return strlen($value) < 3;
+}));
+
+// Check, if any array key is not a string.
+var_dump(array_any($array, function (string $value, $key) {
+   return !is_string($key);
 }));
 ?>
 ]]>
@@ -92,7 +92,7 @@ var_dump(array_all($array, function (string $value, $key) {
 <![CDATA[
 bool(true)
 bool(false)
-bool(true)
+bool(false)
 ]]>
    </screen>
   </example>
@@ -101,7 +101,7 @@ bool(true)
  <refsect1 role="seealso">
   &reftitle.seealso;
   <simplelist>
-   <member><function>array_any</function></member>
+   <member><function>array_all</function></member>
    <member><function>array_filter</function></member>
    <member><function>array_find</function></member>
    <member><function>array_find_key</function></member>

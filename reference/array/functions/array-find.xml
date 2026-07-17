@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 679cf93fa1e54cde82fc9cf545966eb13bcb0638 Maintainer: Singi Status: ready -->
-<refentry xml:id="function.array-all" xmlns="http://docbook.org/ns/docbook">
+<!-- EN-Revision: 596c11440dc232b8ed1836d7e3afe2ed5b225a7b Maintainer: Singi Status: ready -->
+<refentry xml:id="function.array-find" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
-  <refname>array_all</refname>
-  <refpurpose>检查数组所有元素是否都满足回调函数的条件</refpurpose>
+  <refname>array_find</refname>
+  <refpurpose>返回满足回调函数条件的第一个元素</refpurpose>
  </refnamediv>
 
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <type>bool</type><methodname>array_all</methodname>
+   <type>mixed</type><methodname>array_find</methodname>
    <methodparam><type>array</type><parameter>array</parameter></methodparam>
    <methodparam><type>callable</type><parameter>callback</parameter></methodparam>
   </methodsynopsis>
   <simpara>
-   当 <parameter>callback</parameter> 对全部元素均返回 &true; 时，<function>array_all</function> 返回 &true;，否则返回 &false;。
+   <function>array_find</function> 返回 &array; 中第一个使指定 <parameter>callback</parameter> 返回 &true; 的元素的值。如果未找到匹配的元素，则该函数返回 &null;。
   </simpara>
  </refsect1>
 
@@ -40,7 +40,7 @@
        <methodparam><type>mixed</type><parameter>value</parameter></methodparam>
        <methodparam><type>mixed</type><parameter>key</parameter></methodparam>
       </methodsynopsis>
-      如果该回调函数返回 &false;，则 <function>array_all</function> 会立即返回 &false;，并且不会再对后续元素执行该回调。
+      如果该回调函数返回 &true;，<function>array_find</function> 就会返回对应元素的值，并且不再对后续元素执行该回调。
      </para>
     </listitem>
    </varlistentry>
@@ -50,14 +50,14 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <simpara>
-   如果 <parameter>callback</parameter> 对所有元素都返回 &true;，则该函数返回 &true;；否则返回 &false;。
+   该函数返回第一个使 <parameter>callback</parameter> 返回 &true; 的元素的值。如果未找到匹配的元素，则函数返回 &null;。
   </simpara>
  </refsect1>
 
  <refsect1 role="examples">
   &reftitle.examples;
   <example>
-   <title><function>array_all</function> 示例</title>
+   <title><function>array_find</function> 示例</title>
    <programlisting role="php">
 <![CDATA[
 <?php
@@ -70,19 +70,24 @@ $array = [
     'f' => 'elephant'
 ];
 
-// Check, if all animal names are shorter than 12 letters.
-var_dump(array_all($array, function (string $value) {
-    return strlen($value) < 12;
+// Find the first animal with a name longer than 4 characters.
+var_dump(array_find($array, function (string $value) {
+    return strlen($value) > 4;
 }));
 
-// Check, if all animal names are longer than 5 letters.
-var_dump(array_all($array, function (string $value) {
-    return strlen($value) > 5;
+// Find the first animal whose name begins with f.
+var_dump(array_find($array, function (string $value) {
+    return str_starts_with($value, 'f');
 }));
 
-// Check, if all array keys are strings.
-var_dump(array_all($array, function (string $value, $key) {
-   return is_string($key);
+// Find the first animal where the array key is the first symbol of the animal.
+var_dump(array_find($array, function (string $value, $key) {
+   return $value[0] === $key;
+}));
+
+// Find the first animal where the array key matching a RegEx.
+var_dump(array_find($array, function ($value, $key) {
+   return preg_match('/^([a-f])$/', $key);
 }));
 ?>
 ]]>
@@ -90,9 +95,10 @@ var_dump(array_all($array, function (string $value, $key) {
    &example.outputs;
    <screen>
 <![CDATA[
-bool(true)
-bool(false)
-bool(true)
+string(5) "goose"
+NULL
+string(3) "cow"
+string(3) "dog"
 ]]>
    </screen>
   </example>
@@ -101,10 +107,11 @@ bool(true)
  <refsect1 role="seealso">
   &reftitle.seealso;
   <simplelist>
+   <member><function>array_find_key</function></member>
+   <member><function>array_all</function></member>
    <member><function>array_any</function></member>
    <member><function>array_filter</function></member>
-   <member><function>array_find</function></member>
-   <member><function>array_find_key</function></member>
+   <member><function>array_reduce</function></member>
   </simplelist>
  </refsect1>
 </refentry>
