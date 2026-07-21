@@ -1,0 +1,39 @@
+# https://docs.github.com/en/actions
+# Checks that the block skeleton of the .xml files changed in a PR stays a mirror
+# of doc-en. Each file is compared to doc-en at the revision it declares to mirror
+# (EN-Revision), so a lagging file does not raise a false positive. The script
+# emits its own ::error annotations.
+
+name: "Structure"
+
+on:
+  pull_request:
+    branches: ["master"]
+    types: [opened, synchronize]
+
+permissions:
+  contents: read
+
+jobs:
+  structure:
+    name: "Check XML"
+    runs-on: ubuntu-24.04
+    steps:
+      - name: "Checkout translation"
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: "Checkout php/doc-en"
+        uses: actions/checkout@v7
+        with:
+          path: en
+          repository: php/doc-en
+          fetch-depth: 0
+
+      - name: "Check structure"
+        run: |
+          BASE="${{ github.event.pull_request.base.sha }}"
+          git fetch --no-tags --depth=1 origin "$BASE"
+          git diff --name-only "$BASE"...HEAD -- '*.xml' \
+            | php8.3 .github/scripts/check-structure.php
