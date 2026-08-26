@@ -1,28 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 331fbfeac522d4ad00de1e043cc11610d66b88f9 Maintainer: mowangjuanzi Status: ready -->
+<!-- EN-Revision: 75d48299ef85693f10eee31af1be88488fb84c6f Maintainer: mowangjuanzi Status: ready -->
 <refentry xml:id="yar-server.handle" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
   <refname>Yar_Server::handle</refname>
-  <refpurpose>启动HTTP RPC Server</refpurpose>
+  <refpurpose>启动 RPC 服务端</refpurpose>
  </refnamediv>
 
  <refsect1 role="description">
   &reftitle.description;
-  <methodsynopsis>
-   <modifier>public</modifier> <type>bool</type> <methodname>Yar_Server::handle</methodname>
-   <void/>
+  <methodsynopsis role="Yar_Server">
+   <modifier>public</modifier> <type>bool</type><methodname>Yar_Server::handle</methodname>
+   <void />
   </methodsynopsis>
-  <para>
-   启动服务, 开始接受客户端的调用请求.
-   <note>
-    <para>
-     来自客户端的调用, 都是通过 POST 请求发送过来的.
-     如果一个 GET 请求访问到这个 Server, 那在 yar.expose_info 开启的情况下,
-     这个服务的 Server Info 信息会被展现.
-    </para>
-   </note>
-  </para>
+  <simpara>
+   开始处理传入的 RPC 请求。
+  </simpara>
+  <note>
+   <simpara>
+    普通的 RPC 调用以 HTTP POST 请求的方式发起。
+    如果发起的是 HTTP GET 请求，则会根据执行对象的公开方法及其文档注释生成并输出服务信息页面。
+    该行为可以通过
+    <link linkend="ini.yar.expose-info">yar.expose_info</link>
+    配置项禁用；禁用后，GET 请求会抛出
+    <exceptionname>Yar_Server_Exception</exceptionname> 异常。
+   </simpara>
+  </note>
  </refsect1>
 
  <refsect1 role="parameters">
@@ -32,25 +35,98 @@
 
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
+  <simpara>
+   返回 &true;。
+  </simpara>
+ </refsect1>
+
+ <refsect1 role="errors">
+  &reftitle.errors;
   <para>
-   boolean
+   <table>
+    <title><methodname>Yar_Server::handle</methodname> 抛出的异常</title>
+    <tgroup cols="2">
+     <thead>
+      <row>
+       <entry>触发条件</entry>
+       <entry>异常</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>
+        远程方法抛出了异常。
+       </entry>
+       <entry>
+        <exceptionname>Yar_Server_Exception</exceptionname>（其
+        <literal>_type</literal> 属性中携带原始异常的类名）。
+       </entry>
+      </row>
+      <row>
+       <entry>
+        找不到远程方法，或该方法不是公开方法。
+       </entry>
+       <entry>
+        <exceptionname>Yar_Server_Request_Exception</exceptionname>。
+       </entry>
+      </row>
+      <row>
+       <entry>
+        无法解包请求体。
+       </entry>
+       <entry>
+        <exceptionname>Yar_Server_Packager_Exception</exceptionname>。
+       </entry>
+      </row>
+      <row>
+       <entry>
+        请求在协议层面格式错误。
+       </entry>
+       <entry>
+        <exceptionname>Yar_Server_Protocol_Exception</exceptionname>。
+       </entry>
+      </row>
+      <row>
+       <entry>
+        无法捕获服务器的输出。
+       </entry>
+       <entry>
+        <exceptionname>Yar_Server_Output_Exception</exceptionname>。
+       </entry>
+      </row>
+      <row>
+       <entry>
+        身份验证失败，或在
+        <link linkend="ini.yar.expose-info">yar.expose_info</link>
+        关闭时请求了信息页面。
+       </entry>
+       <entry>
+        错误码为
+        <constant>YAR_ERR_FORBIDDEN</constant> 的
+        <exceptionname>Yar_Server_Exception</exceptionname>。
+       </entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </table>
   </para>
  </refsect1>
 
  <refsect1 role="examples">
   &reftitle.examples;
   <example>
-   <title><function>Yar_Server::handle</function> 示例</title>
+   <title><methodname>Yar_Server::handle</methodname> 示例</title>
    <programlisting role="php">
 <![CDATA[
 <?php
 class API {
     /**
-     * the doc info will be generated automatically into service info page.
-     * @params 
-     * @return
+     * The doc block is shown on the service info page.
+     * @param string $parameter
+     * @return string
      */
     public function some_method($parameter, $option = "foo") {
+        return "some_method";
     }
 
     protected function client_can_not_see() {
@@ -62,20 +138,16 @@ $service->handle();
 ?>
 ]]>
    </programlisting>
-   &example.outputs.similar;
-   <screen>
-<![CDATA[
-]]>
-   </screen>
   </example>
  </refsect1>
 
-
  <refsect1 role="seealso">
   &reftitle.seealso;
-  <simplelist>
-   <member><methodname>Yar_Server::__construct</methodname></member>
-  </simplelist>
+  <para>
+   <simplelist>
+    <member><methodname>Yar_Server::__construct</methodname></member>
+   </simplelist>
+  </para>
  </refsect1>
 
 </refentry>

@@ -1,23 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 8cc7e649de5889a9029139587962320e2794addd Maintainer: mowangjuanzi Status: ready -->
+<!-- EN-Revision: 75d48299ef85693f10eee31af1be88488fb84c6f Maintainer: mowangjuanzi Status: ready -->
 <refentry xml:id="yar-server-exception.gettype" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
   <refname>Yar_Server_Exception::getType</refname>
-  <refpurpose>检索异常的原始类型</refpurpose>
+  <refpurpose>获取异常的类型</refpurpose>
  </refnamediv>
 
  <refsect1 role="description">
   &reftitle.description;
-  <methodsynopsis>
-   <modifier>public</modifier> <type>string</type><methodname>Yar_Server_Exception::getType</methodname>
+  <methodsynopsis role="Yar_Server_Exception">
+   <modifier>public</modifier> <type class="union"><type>string</type><type>int</type></type><methodname>Yar_Server_Exception::getType</methodname>
    <void />
   </methodsynopsis>
-  <para>
-   当服务端的服务函数抛出异常的时候,
-   客户端本地会响应的抛出一个 <classname>Yar_Server_Exception</classname> 异常.
-   有一个属性, 标明了服务端异常的类型. 这个方法就是获取这个异常类型.
-  </para>
+  <simpara>
+   当远程方法抛出异常时，服务器会把原始异常嵌入响应中，
+   客户端会将其作为
+   <exceptionname>Yar_Server_Exception</exceptionname> 重新抛出。
+   此方法返回该原始异常的类名。
+  </simpara>
  </refsect1>
 
  <refsect1 role="parameters">
@@ -27,19 +28,20 @@
 
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
-  <para>
-   string
-  </para>
+  <simpara>
+   远程服务抛出的异常的类名；如果服务器端的异常不携带类名，
+   则返回 <literal>"Yar_Exception_Server"</literal>。
+  </simpara>
  </refsect1>
 
  <refsect1 role="examples">
   &reftitle.examples;
   <example>
-   <title><function>Yar_Server_Exception::getType</function> 示例</title>
+   <title><methodname>Yar_Server_Exception::getType</methodname> 示例</title>
    <programlisting role="php">
 <![CDATA[
-//Server.php
 <?php
+/* Server.php */
 class Custom_Exception extends Exception {};
 
 class API {
@@ -51,9 +53,12 @@ class API {
 $service = new Yar_Server(new API());
 $service->handle();
 ?>
-
-//Client.php
+]]>
+   </programlisting>
+   <programlisting role="php">
+<![CDATA[
 <?php
+/* Client.php */
 $client = new Yar_Client("http://host/api.php");
 
 try {
@@ -62,6 +67,7 @@ try {
     var_dump($e->getType());
     var_dump($e->getMessage());
 }
+?>
 ]]>
    </programlisting>
    &example.outputs.similar;
@@ -74,11 +80,10 @@ string(6) "client"
   </example>
  </refsect1>
 
-
  <refsect1 role="seealso">
   &reftitle.seealso;
   <simplelist>
-   <member></member>
+   <member><methodname>Yar_Client_Exception::getType</methodname></member>
   </simplelist>
  </refsect1>
 

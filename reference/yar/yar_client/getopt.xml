@@ -1,63 +1,68 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
 <!-- EN-Revision: 75d48299ef85693f10eee31af1be88488fb84c6f Maintainer: mowangjuanzi Status: ready -->
-<refentry xml:id="yar-client-exception.gettype" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+<refentry xml:id="yar-client.getopt" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
-  <refname>Yar_Client_Exception::getType</refname>
-  <refpurpose>获取异常的类型</refpurpose>
+  <refname>Yar_Client::getOpt</refname>
+  <refpurpose>读取客户端选项</refpurpose>
  </refnamediv>
 
  <refsect1 role="description">
   &reftitle.description;
-  <methodsynopsis role="Yar_Client_Exception">
-   <modifier>public</modifier> <type>string</type><methodname>Yar_Client_Exception::getType</methodname>
-   <void />
+  <methodsynopsis role="Yar_Client">
+   <modifier>public</modifier> <type>mixed</type><methodname>Yar_Client::getOpt</methodname>
+   <methodparam><type>int</type><parameter>name</parameter></methodparam>
   </methodsynopsis>
   <simpara>
-   返回异常的类型。客户端异常由客户端自身产生（传输失败、协议错误等），
-   因此类型始终是固定的字符串
-   <literal>"Yar_Exception_Client"</literal>。
-   要区分具体的失败类型，请使用
-   <methodname>Exception::getCode</methodname>；
-   错误码为 <literal>YAR_ERR_*</literal> 常量之一。
+   返回先前通过
+   <methodname>Yar_Client::setOpt</methodname> 设置的值，或者通过
+   <methodname>Yar_Client::__construct</methodname> 的
+   <literal>options</literal> 参数设置的值。
   </simpara>
  </refsect1>
 
  <refsect1 role="parameters">
   &reftitle.parameters;
-  &no.function.parameters;
+  <variablelist>
+   <varlistentry>
+    <term><parameter>name</parameter></term>
+    <listitem>
+     <simpara>
+      <literal>YAR_OPT_*</literal> 常量之一，参见
+      <methodname>Yar_Client::setOpt</methodname>。
+     </simpara>
+    </listitem>
+   </varlistentry>
+  </variablelist>
  </refsect1>
 
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <simpara>
-   返回 <literal>"Yar_Exception_Client"</literal>。
+   选项的值；如果此客户端未设置过该选项，或选项名称未知，则返回 &false;。
   </simpara>
  </refsect1>
 
  <refsect1 role="examples">
   &reftitle.examples;
   <example>
-   <title><methodname>Yar_Client_Exception::getType</methodname> 示例</title>
+   <title><methodname>Yar_Client::getOpt</methodname> 示例</title>
    <programlisting role="php">
 <![CDATA[
 <?php
 $client = new Yar_Client("http://host/api/");
+$client->setOpt(YAR_OPT_TIMEOUT, 1000);
 
-try {
-    $client->some_method("parameter");
-} catch (Yar_Client_Exception $e) {
-    var_dump($e->getType());
-    var_dump($e->getCode());
-}
+var_dump($client->getOpt(YAR_OPT_TIMEOUT));
+var_dump($client->getOpt(YAR_OPT_PACKAGER));
 ?>
 ]]>
    </programlisting>
    &example.outputs.similar;
    <screen>
 <![CDATA[
-string(20) "Yar_Exception_Client"
-int(16)
+int(1000)
+bool(false)
 ]]>
    </screen>
   </example>
@@ -66,7 +71,7 @@ int(16)
  <refsect1 role="seealso">
   &reftitle.seealso;
   <simplelist>
-   <member><methodname>Yar_Server_Exception::getType</methodname></member>
+   <member><methodname>Yar_Client::setOpt</methodname></member>
   </simplelist>
  </refsect1>
 

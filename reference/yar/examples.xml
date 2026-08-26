@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: df78bd1d232f2cd8df673accf5ba0e280695639b Maintainer: mowangjuanzi Status: ready -->
+<!-- EN-Revision: 75d48299ef85693f10eee31af1be88488fb84c6f Maintainer: mowangjuanzi Status: ready -->
 <!-- CREDITS: Luffy -->
 <chapter xml:id="yar.examples" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  &reftitle.examples;
  <example>
-  <title>Yar Server示例</title>
+  <title>Yar 服务端示例</title>
   <programlisting role="php">
 <![CDATA[
 <?php
 
-/* 假设这个页面的访问路径是: http://example.com/operator.php */
+/* 假设这个页面可以通过 http://example.com/operator.php 访问 */
 
 class Operator {
 
@@ -24,7 +24,7 @@ class Operator {
     }
 
     /**
-     * Sub 
+     * Sub
      */
     public function sub($a, $b) {
         return $a - $b;
@@ -55,7 +55,13 @@ $server->handle();
  </example>
 
  <example>
-  <title>通过浏览器访问(GET请求)</title>
+  <title>通过浏览器访问服务端（GET 请求）</title>
+  <simpara>
+   当向服务地址发起 GET 请求时，Yar 会渲染一个信息页面，
+   列出执行对象的每一个公开方法及其文档注释。
+   该行为由
+   <link linkend="ini.yar.expose-info">yar.expose_info</link> 配置项控制。
+  </simpara>
   &example.outputs.similar;
   <mediaobject>
    <alt>Yar Server Info</alt>
@@ -66,50 +72,53 @@ $server->handle();
  </example>
 
  <example>
-  <title>Yar Client示例</title>
+  <title>Yar 客户端示例</title>
   <programlisting role="php">
 <![CDATA[
 <?php
-$client = new yar_client("http://example.com/operator.php");
+$client = new Yar_Client("http://example.com/operator.php");
 
-/* call directly */
+/* 直接调用 */
 var_dump($client->add(1, 2));
 
-/* call via call */
+/* 通过 call() 调用 */
 var_dump($client->call("add", array(3, 2)));
 
-
-/* _add cannot be called */
+/* _add 无法被调用: 它不是公开方法 */
 var_dump($client->_add(1, 2));
 ?>
 ]]>
   </programlisting>
   &example.outputs.similar;
-   <screen>
+  <screen>
 <![CDATA[
 int(3)
 int(5)
-PHP Fatal error:  Uncaught exception 'Yar_Server_Exception' with message 'call to api Operator::_add() failed' in *
+PHP Fatal error:  Uncaught Yar_Server_Request_Exception: call to undefined api Operator::_add() in *
 ]]>
-   </screen>
+  </screen>
  </example>
 
  <example>
-  <title>Yar Concurrent Client示例</title>
+  <title>Yar 并发客户端示例</title>
   <programlisting role="php">
 <![CDATA[
 <?php
 function callback($ret, $callinfo) {
-    echo $callinfo['method'] , " result: ", $ret , "\n";
+    echo $callinfo['method'], " result: ", $ret, "\n";
 }
 
-/* 注册一个异步调用 */
+function error_callback($type, $error, $callinfo) {
+    error_log("[$type] $error");
+}
+
+/* 注册对远程服务的异步调用 */
 Yar_Concurrent_Client::call("http://example.com/operator.php", "add", array(1, 2), "callback");
 Yar_Concurrent_Client::call("http://example.com/operator.php", "sub", array(2, 1), "callback");
 Yar_Concurrent_Client::call("http://example.com/operator.php", "mul", array(2, 2), "callback");
 
-/* 发送所有注册的调用, 等待返回, 返回后Yar会调用callback回掉函数 */
-Yar_Concurrent_Client::loop();
+/* 发送所有请求并等待响应 */
+Yar_Concurrent_Client::loop("callback", "error_callback");
 ?>
 ]]>
   </programlisting>
@@ -120,7 +129,26 @@ mul result: 4
 sub result: 1
 add result: 3
 ]]>
-   </screen>
+  </screen>
+ </example>
+
+ <example>
+  <title>Yar TCP 客户端示例</title>
+  <simpara>
+   除了 HTTP 之外，<classname>Yar_Client</classname> 还可以
+   通过 TCP 或 Unix socket 与兼容 Yar 协议的服务器通信，
+   例如一个由 Yar C 框架实现的服务。
+   远程服务器必须实现相同的 Yar 二进制协议。
+  </simpara>
+  <programlisting role="php">
+<![CDATA[
+<?php
+$client = new Yar_Client("tcp://127.0.0.1:8600");
+
+var_dump($client->add(1, 2));
+?>
+]]>
+  </programlisting>
  </example>
 
 </chapter>
