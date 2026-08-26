@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision$ -->
+<!-- EN-Revision: befe2b9fbe37b0925498f336632742651386b151 Maintainer: laruence Status: ready -->
+
+<refentry xml:id="function.untaint" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <refnamediv>
+  <refname>untaint</refname>
+  <refpurpose>清除字符串上的污点标记</refpurpose>
+ </refnamediv>
+
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <type>bool</type><methodname>untaint</methodname>
+   <methodparam><type>string</type><parameter role="reference">string</parameter></methodparam>
+   <methodparam rep="repeat"><type>string</type><parameter role="reference">strings</parameter></methodparam>
+  </methodsynopsis>
+  <simpara>
+   清除指定字符串上的污点标记。
+  </simpara>
+  <simpara>
+   标记存储于字符串本身而非变量之上，因此一次调用即可同时清除
+   所有共享同一字符串的变量上的标记。可用它来为已经自行校验过的值
+   放行，例如在严格的白名单检查之后。
+  </simpara>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <variablelist>
+   <varlistentry>
+    <term><parameter>string</parameter></term>
+    <listitem>
+     <simpara>
+      持有待清除标记的字符串的变量。
+     </simpara>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><parameter>strings</parameter></term>
+    <listitem>
+     <simpara>
+      更多待清除标记的变量。
+     </simpara>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <simpara>
+   始终返回 &true;。当
+   <link linkend="ini.taint.enable">taint.enable</link> 未开启时，
+   该函数不做任何事，但仍然返回 &true;。
+  </simpara>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <example>
+   <title><function>untaint</function> 示例</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+$id = "42";
+taint($id);
+if (preg_match('/^\d+$/', $id)) {
+    // strictly validated as digits: safe to trust
+    untaint($id);
+}
+var_dump(is_tainted($id));
+?>
+]]>
+   </programlisting>
+   &example.outputs.similar;
+   <screen>
+<![CDATA[
+bool(false)
+]]>
+   </screen>
+  </example>
+ </refsect1>
+
+ <refsect1 role="notes">
+  &reftitle.notes;
+  <note>
+   <simpara>
+    只有字符串能携带标记；传入非字符串值时不做任何事。
+   </simpara>
+  </note>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><function>taint</function></member>
+    <member><function>is_tainted</function></member>
+   </simplelist>
+  </para>
+ </refsect1>
+
+</refentry>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
