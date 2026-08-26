@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision$ -->
+<!-- EN-Revision: 3b052562d228be18fa6dce221df7e375469fb7ad Maintainer: laruence Status: ready -->
+
+<refentry xml:id="yaconf.debug-info" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <refnamediv>
+  <refname>Yaconf::__debug_info</refname>
+  <refpurpose>查看某个配置值的存储方式</refpurpose>
+ </refnamediv>
+
+ <refsect1 role="description">
+  &reftitle.description;
+  <methodsynopsis>
+   <modifier>public</modifier> <modifier>static</modifier> <type class="union"><type>array</type><type>null</type></type><methodname>Yaconf::__debug_info</methodname>
+   <methodparam><type>string</type><parameter>name</parameter></methodparam>
+  </methodsynopsis>
+  <simpara>
+   返回以 <parameter>name</parameter>
+   该值在内存中的地址，以及该值是否仍然存放在 Yaconf
+   压缩后的存储块中。
+  </simpara>
+  <warning>
+   <simpara>
+    该方法存在的唯一目的是供 Yaconf 自身的测试套件使用，
+    测试用它来验证扩展是否工作正常。请勿在生产代码中使用它，
+    也不要依赖其输出格式：返回的数组可能随时变化。
+   </simpara>
+  </warning>
+ </refsect1>
+
+ <refsect1 role="parameters">
+  &reftitle.parameters;
+  <variablelist>
+   <varlistentry>
+    <term><parameter>name</parameter></term>
+    <listitem>
+     <simpara>
+      要查看的配置名，使用与 <methodname>Yaconf::get</methodname>
+      相同的点号记法。
+     </simpara>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+ </refsect1>
+
+ <refsect1 role="returnvalues">
+  &reftitle.returnvalues;
+  <simpara>
+   当配置存在时，返回一个包含四个元素的 <type>array</type>；
+   否则返回 &null;：
+  </simpara>
+  <itemizedlist>
+   <listitem>
+    <simpara>
+     <literal>key</literal> —— 被查找的配置名。
+    </simpara>
+   </listitem>
+   <listitem>
+    <simpara>
+     <literal>address</literal> —— 该值在内存中的地址。
+     配置值以驻留字符串（interned string）或不可变数组的形式存储，
+     因此在配置被重新加载之前，该地址保持不变。
+    </simpara>
+   </listitem>
+   <listitem>
+    <simpara>
+     <literal>val</literal> —— 存储的值本身。
+    </simpara>
+   </listitem>
+   <listitem>
+    <simpara>
+     <literal>changed</literal> —— 当该值的数据仍存放在压缩存储块内时
+     为 &false;，表示操作系统尚未复制过该内存页（写时复制仍然有效）；
+     当该值被重新分配到存储块之外时为 &true;。
+    </simpara>
+   </listitem>
+  </itemizedlist>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <example>
+   <title><methodname>Yaconf::__debug_info</methodname> 示例</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+// 假设 app.ini 中包含 name="shop"
+var_dump(Yaconf::__debug_info("app.name"));
+/*
+array(4) {
+  ["key"]=>
+  string(8) "app.name"
+  ["address"]=>
+  string(14) "0x7f8b1c0a3d20"
+  ["val"]=>
+  string(4) "shop"
+  ["changed"]=>
+  bool(false)
+}
+*/
+
+var_dump(Yaconf::__debug_info("app.missing")); // NULL
+?>
+]]>
+   </programlisting>
+  </example>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><methodname>Yaconf::get</methodname></member>
+    <member><methodname>Yaconf::has</methodname></member>
+   </simplelist>
+  </para>
+ </refsect1>
+
+</refentry>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
