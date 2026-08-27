@@ -1,24 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: e2f2172bf114599926878017ab2dce356956fa9e Maintainer: mowangjuanzi Status: ready -->
+<!-- EN-Revision: ddcf673c59d1708557680946fbffeee361d7fca6 Maintainer: mowangjuanzi Status: ready -->
 <refentry xml:id="yaf-config-ini.get" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
-  <refname>Yaf_Config_Ini::__get</refname>
-  <refpurpose>检索元素</refpurpose>
+<refname>Yaf_Config_Ini::get</refname>
+<refpurpose>获取配置值</refpurpose>
  </refnamediv>
 
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <modifier>public</modifier> <type>void</type><methodname>Yaf_Config_Ini::__get</methodname>
-   <methodparam choice="opt"><type>string</type><parameter>name</parameter></methodparam>
+   <modifier>public</modifier> <type>mixed</type><methodname>Yaf_Config_Ini::get</methodname>
+   <methodparam choice="opt"><type>string</type><parameter>name</parameter><initializer>NULL</initializer></methodparam>
   </methodsynopsis>
-  <para>
-
-  </para>
-
-  &warn.undocumented.func;
-
+  <simpara>根据名称获取配置值。可以使用点号表示法（例如 <literal>database.host</literal>）来访问嵌套的值。如果省略 <parameter>name</parameter> 或为 &null;，则返回配置对象本身。</simpara>
  </refsect1>
 
  <refsect1 role="parameters">
@@ -27,24 +22,65 @@
    <varlistentry>
     <term><parameter>name</parameter></term>
     <listitem>
-     <para>
-      
-     </para>
+<simpara>配置键名，可以使用点号表示法来访问嵌套的值。</simpara>
     </listitem>
    </varlistentry>
   </variablelist>
  </refsect1>
-
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
-  <para>
-
-  </para>
+<simpara>与 <parameter>name</parameter> 关联的值。数组值会被包装成 <classname>Yaf_Config_Ini</classname> 对象。如果键不存在则返回 &null;，当 <parameter>name</parameter> 为 &null; 时返回配置对象本身。</simpara>
  </refsect1>
 
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <example>
+   <title><methodname>Yaf_Config_Ini::get</methodname> 示例</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+/**
+ * 假设 /etc/myapp/application.ini 包含：
+ * [common]
+ * application.name = "MyApp"
+ * database.host    = "localhost"
+ * database.port    = 3306
+ */
+$config = new Yaf_Config_Ini('/etc/myapp/application.ini', 'common');
 
+// 使用点号表示法访问嵌套的值
+echo $config->get('database.host'), "\n";
+
+// 数组值会被包装成 Yaf_Config_Ini 对象
+echo $config->get('database')->port, "\n";
+
+// 不传参数时，返回配置对象本身
+echo $config->get()->application->name, "\n";
+
+var_dump($config->get('missing.key'));
+?>
+]]>
+   </programlisting>
+   &example.outputs.similar;
+   <screen>
+<![CDATA[
+localhost
+3306
+MyApp
+NULL
+]]>
+   </screen>
+  </example>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <simplelist>
+   <member><methodname>Yaf_Config_Ini::set</methodname></member>
+   <member><methodname>Yaf_Config_Ini::toArray</methodname></member>
+  </simplelist>
+ </refsect1>
 </refentry>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml

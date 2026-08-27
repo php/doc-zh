@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 37a12bad6c625be2f4df088dfadb72ded9a3389e Maintainer: mowangjuanzi Status: ready -->
+<!-- EN-Revision: ddcf673c59d1708557680946fbffeee361d7fca6 Maintainer: mowangjuanzi Status: ready -->
 <refentry xml:id="yaf-route-regex.route" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
-  <refname>Yaf_Route_Regex::route</refname>
-  <refpurpose>The route purpose</refpurpose>
+<refname>Yaf_Route_Regex::route</refname>
+<refpurpose>路由请求</refpurpose>
  </refnamediv>
 
  <refsect1 role="description">
@@ -13,12 +13,7 @@
    <modifier>public</modifier> <type>bool</type><methodname>Yaf_Route_Regex::route</methodname>
    <methodparam><type>Yaf_Request_Abstract</type><parameter>request</parameter></methodparam>
   </methodsynopsis>
-  <para>
-   路由一个传进来的请求。
-  </para>
-
-  &warn.undocumented.func;
-
+  <simpara>用正则表达式路由请求：将 URI 与传给构造函数的模式进行匹配，路由结果（module、controller 和 action）取自捕获的变量，并按 map 参数进行映射。</simpara>
  </refsect1>
 
  <refsect1 role="parameters">
@@ -27,22 +22,62 @@
    <varlistentry>
     <term><parameter>request</parameter></term>
     <listitem>
-     <para>
-      
-     </para>
+<simpara>要路由的 <classname>Yaf_Request_Abstract</classname> 实例。</simpara>
     </listitem>
    </varlistentry>
   </variablelist>
  </refsect1>
-
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
-  <para>
-   如果 <methodname>Yaf_Route_Regex::_construct</methodname> 的第一个参数给出的模式与请求 uri 匹配，则返回 &true;，否则返回 &false;。
-  </para>
+<simpara>若 URI 匹配则返回 &true;，否则返回 &false;，路由器将尝试下一个路由。</simpara>
  </refsect1>
 
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <example>
+   <title><methodname>Yaf_Route_Regex::route</methodname> 示例</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+/* 假设请求 URI 为 "/product/php-book" */
+$request = new Yaf_Request_Http("/product/php-book");
 
+$route = new Yaf_Route_Regex(
+    "#^/product/([^/]+)/?$#", // 匹配以 "/product" 开头的 URI
+    array(
+        'controller' => "product", // 路由到 product 控制器
+    ),
+    array(
+        1 => "name", // $request->getParam("name") 的值将是 "php-book"
+    )
+);
+
+var_dump($route->route($request));
+
+var_dump($request->getControllerName());
+var_dump($request->getParam("name"));
+?>
+]]>
+   </programlisting>
+   &example.outputs.similar;
+   <screen>
+<![CDATA[
+bool(true)
+string(7) "product"
+string(8) "php-book"
+]]>
+   </screen>
+  </example>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <simplelist>
+   <member><methodname>Yaf_Route_Regex::__construct</methodname></member>
+   <member><methodname>Yaf_Route_Regex::match</methodname></member>
+   <member><methodname>Yaf_Route_Regex::assemble</methodname></member>
+  </simplelist>
+ </refsect1>
 </refentry>
 
 <!-- Keep this comment at the end of the file

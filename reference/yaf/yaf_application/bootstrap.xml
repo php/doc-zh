@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 4a211b7c8fb2b4410851d06c6f90f751d1f670d0 Maintainer: mowangjuanzi Status: ready -->
+<!-- EN-Revision: ddcf673c59d1708557680946fbffeee361d7fca6 Maintainer: mowangjuanzi Status: ready -->
 <!-- CREDITS: Luffy -->
 <refentry xml:id="yaf-application.bootstrap" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
@@ -11,35 +11,44 @@
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <modifier>public</modifier> <type>void</type><methodname>Yaf_Application::bootstrap</methodname>
-   <methodparam choice="opt"><type>Yaf_Bootstrap_Abstract</type><parameter>bootstrap</parameter></methodparam>
+   <modifier>public</modifier> <type class="union"><type>Yaf_Application</type><type>false</type></type><methodname>Yaf_Application::bootstrap</methodname>
+   <void />
   </methodsynopsis>
-  <para>
-    运行 Bootstrap，所有在 Bootstrap 中定义并以“_init”前缀命名的方法都将按照声明的顺序调用，如果没有提供参数
-    bootstrap，Yaf 将在 application.directory 下寻找 Bootstrap。
-  </para>
-
+  <simpara>
+   运行 Bootstrap。Bootstrap 类中所有名称以 <literal>_init</literal>
+   开头的公共方法都会按照声明的顺序被调用，每个方法都接收
+   <classname>Yaf_Dispatcher</classname> 实例作为唯一参数。
+  </simpara>
+  <simpara>
+   Bootstrap 类必须命名为 <literal>Bootstrap</literal> 并继承
+   <classname>Yaf_Bootstrap_Abstract</classname>。如果该类尚未定义，
+   则会从应用目录下的 <filename>Bootstrap.php</filename> 加载；
+   <literal>application.bootstrap</literal> 配置项可以覆盖其位置。
+  </simpara>
  </refsect1>
 
  <refsect1 role="parameters">
   &reftitle.parameters;
-  <variablelist>
-   <varlistentry>
-    <term><parameter>bootstrap</parameter></term>
-    <listitem>
-     <para>
-      <classname>Yaf_Bootstrap_Abstract</classname> 实例      
-     </para>
-    </listitem>
-   </varlistentry>
-  </variablelist>
+  &no.function.parameters;
  </refsect1>
 
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
-  <para>
-   <classname>Yaf_Application</classname> 实例
-  </para>
+  <simpara>
+   成功时返回 <classname>Yaf_Application</classname> 对象本身，
+   失败时返回 &false;（例如无法加载 Bootstrap 类，
+   或者某个 <literal>_init*</literal> 方法抛出了未捕获的异常）。
+  </simpara>
+ </refsect1>
+
+ <refsect1 role="errors">
+  &reftitle.errors;
+  <simpara>
+   如果找到的类不是 <classname>Yaf_Bootstrap_Abstract</classname>
+   的子类，会触发 <constant>YAF_ERR_TYPE_ERROR</constant> 错误；
+   如果找不到 bootstrap 文件或 <literal>Bootstrap</literal> 类，
+   会触发一个 <constant>E_WARNING</constant>。
+  </simpara>
  </refsect1>
 
  <refsect1 role="examples">
@@ -50,15 +59,16 @@
 <![CDATA[
 <?php
 /**
- * This file should be under the APPLICATION_PATH . "/application/"(which was defined in the config passed to Yaf_Application).
- * and named Bootstrap.php,  so the Yaf_Application can find it 
+ * This file should be under APPLICATION_PATH . "/application/" (which was
+ * defined in the config passed to Yaf_Application), and named
+ * Bootstrap.php, so the Yaf_Application can find it.
  */
 class Bootstrap extends Yaf_Bootstrap_Abstract {
-    function _initConfig(Yaf_Dispatcher $dispatcher) {
+    public function _initConfig(Yaf_Dispatcher $dispatcher) {
         echo "1st called\n";
     }
 
-    function _initPlugin($dispatcher) {
+    public function _initPlugin(Yaf_Dispatcher $dispatcher) {
         echo "2nd called\n";
     }
 }
@@ -71,7 +81,6 @@ class Bootstrap extends Yaf_Bootstrap_Abstract {
    <programlisting role="php">
 <![CDATA[
 <?php
-
 defined('APPLICATION_PATH') // APPLICATION_PATH will be used in the ini config file
     || define('APPLICATION_PATH', __DIR__);
 
@@ -92,9 +101,12 @@ $application->bootstrap();
 
  <refsect1 role="seealso">
   &reftitle.seealso;
-  <simplelist>
-   <member><classname>Yaf_Bootstrap_Abstract</classname></member>
-  </simplelist>
+  <para>
+   <simplelist>
+    <member><classname>Yaf_Bootstrap_Abstract</classname></member>
+    <member><methodname>Yaf_Application::run</methodname></member>
+   </simplelist>
+  </para>
  </refsect1>
 
 </refentry>

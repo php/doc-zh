@@ -1,40 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: c9389e4a0e96801fd14d91336ff3f12e45929a73 Maintainer: mowangjuanzi Status: ready -->
+<!-- EN-Revision: ddcf673c59d1708557680946fbffeee361d7fca6 Maintainer: mowangjuanzi Status: ready -->
 <refentry xml:id="yaf-controller-abstract.forward" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
   <refname>Yaf_Controller_Abstract::forward</refname>
-  <refpurpose>转发到另一个动作</refpurpose>
+  <refpurpose>将当前请求转发到另一个动作</refpurpose>
  </refnamediv>
 
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <modifier>public</modifier> <type>bool</type><methodname>Yaf_Controller_Abstract::forward</methodname>
+   <modifier>public</modifier> <type class="union"><type>bool</type><type>null</type></type><methodname>Yaf_Controller_Abstract::forward</methodname>
    <methodparam><type>string</type><parameter>action</parameter></methodparam>
-   <methodparam choice="opt"><type>array</type><parameter>paramters</parameter></methodparam>
+   <methodparam choice="opt"><type class="union"><type>array</type><type>null</type></type><parameter>parameters</parameter></methodparam>
   </methodsynopsis>
   <methodsynopsis>
-   <modifier>public</modifier> <type>bool</type><methodname>Yaf_Controller_Abstract::forward</methodname>
+   <modifier>public</modifier> <type class="union"><type>bool</type><type>null</type></type><methodname>Yaf_Controller_Abstract::forward</methodname>
    <methodparam><type>string</type><parameter>controller</parameter></methodparam>
    <methodparam><type>string</type><parameter>action</parameter></methodparam>
-   <methodparam choice="opt"><type>array</type><parameter>paramters</parameter></methodparam>
+   <methodparam choice="opt"><type class="union"><type>array</type><type>null</type></type><parameter>parameters</parameter></methodparam>
   </methodsynopsis>
   <methodsynopsis>
-   <modifier>public</modifier> <type>bool</type><methodname>Yaf_Controller_Abstract::forward</methodname>
+   <modifier>public</modifier> <type class="union"><type>bool</type><type>null</type></type><methodname>Yaf_Controller_Abstract::forward</methodname>
    <methodparam><type>string</type><parameter>module</parameter></methodparam>
    <methodparam><type>string</type><parameter>controller</parameter></methodparam>
    <methodparam><type>string</type><parameter>action</parameter></methodparam>
-   <methodparam choice="opt"><type>array</type><parameter>paramters</parameter></methodparam>
+   <methodparam choice="opt"><type class="union"><type>array</type><type>null</type></type><parameter>parameters</parameter></methodparam>
   </methodsynopsis>
-  <para>
-   转发当前处理过程到其他动作。
-   <note>
-    <para>
-      此方法不会立即切换到目标操作，而是会在当前流程结束后发生。
-    </para>
-   </note>
-  </para>
+  <simpara>
+   将当前请求转发到另一个动作。目标根据参数的数量和类型确定：
+  </simpara>
+  <simplelist>
+   <member>只有 <parameter>action</parameter>：转发到当前控制器的另一个动作。</member>
+   <member><parameter>controller</parameter> 和 <parameter>action</parameter>：转发到另一个控制器。</member>
+   <member><parameter>module</parameter>、<parameter>controller</parameter> 和 <parameter>action</parameter>：转发到另一个模块。</member>
+   <member>可选的 <parameter>parameters</parameter> 数组携带调用参数，可以通过 <methodname>Yaf_Request_Abstract::getParam</methodname> 获取。</member>
+  </simplelist>
+  <note>
+   <simpara>
+    此方法不会立即切换到目标动作，切换会在当前流程结束后发生。
+    如果想立即交出控制权，请从当前动作方法中返回
+    （返回 &false; 还会告诉 Yaf 不要自动渲染当前视图）。
+   </simpara>
+  </note>
  </refsect1>
 
  <refsect1 role="parameters">
@@ -43,33 +51,34 @@
    <varlistentry>
     <term><parameter>module</parameter></term>
     <listitem>
-     <para>
-      目标模块名称，如果是 NULL，则采用默认模块名
-     </para>
+     <simpara>
+      目标模块名。如果指定了当前模块，则原样使用。
+     </simpara>
     </listitem>
    </varlistentry>
    <varlistentry>
     <term><parameter>controller</parameter></term>
     <listitem>
-     <para>
-      目标控制器名称
-     </para>
+     <simpara>
+      目标控制器名。
+     </simpara>
     </listitem>
    </varlistentry>
    <varlistentry>
     <term><parameter>action</parameter></term>
     <listitem>
-     <para>
-      目标动作名称
-     </para>
+     <simpara>
+      目标动作名。
+     </simpara>
     </listitem>
    </varlistentry>
    <varlistentry>
-    <term><parameter>paramters</parameter></term>
+    <term><parameter>parameters</parameter></term>
     <listitem>
-     <para>
-      调用参数
-     </para>
+     <simpara>
+      目标动作的调用参数，可以通过
+      <methodname>Yaf_Request_Abstract::getParam</methodname> 获取。
+     </simpara>
     </listitem>
    </varlistentry>
   </variablelist>
@@ -77,9 +86,9 @@
 
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
-  <para>
-   &return.success;
-  </para>
+  <simpara>
+   成功时返回 &true;，失败时返回 &false; / &null;。
+  </simpara>
  </refsect1>
 
  <refsect1 role="examples">
@@ -91,19 +100,19 @@
 <?php
 class IndexController extends Yaf_Controller_Abstract
 {
-    public function indexAction(){   
-         $logined = $_SESSION["login"];
-         if (!$logined) {
-             $this->forward("login", array("from" => "Index")); // 转发到 login 动作
-             return FALSE;  // 这非常重要，这会结束当前工作流
-                            // 然后告诉 Yaf 不要自动渲染
-         }
+    public function indexAction() {
+        $logined = $_SESSION["login"];
+        if (!$logined) {
+            $this->forward("login", array("from" => "Index")); // 转发到 login 动作
+            return false; // 这一点很重要：结束当前流程，
+                          // 并告诉 Yaf 不要自动渲染
+        }
 
-         // other processes
+        // 其他处理
     }
 
     public function loginAction() {
-         echo "login, redirected from ", $this->_request->getParam("from") , " action";
+        echo "login, redirected from ", $this->_request->getParam("from") , " action";
     }
 }
 ?>
@@ -120,9 +129,11 @@ class IndexController extends Yaf_Controller_Abstract
 
  <refsect1 role="seealso">
   &reftitle.seealso;
-  <simplelist>
-   <member><methodname>Yaf_Request_Abstrace::getParam</methodname></member>
-  </simplelist>
+  <para>
+   <simplelist>
+    <member><methodname>Yaf_Request_Abstract::getParam</methodname></member>
+   </simplelist>
+  </para>
  </refsect1>
 
 </refentry>

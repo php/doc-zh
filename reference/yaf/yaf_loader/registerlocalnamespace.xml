@@ -1,82 +1,83 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: e2f2172bf114599926878017ab2dce356956fa9e Maintainer: mowangjuanzi Status: ready -->
+<!-- EN-Revision: ddcf673c59d1708557680946fbffeee361d7fca6 Maintainer: mowangjuanzi Status: ready -->
 <refentry xml:id="yaf-loader.registerlocalnamespace" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
-  <refname>Yaf_Loader::registerLocalNamespace</refname>
-  <refpurpose>注册本地类前缀</refpurpose>
+<refname>Yaf_Loader::registerLocalNamespace</refname>
+<refpurpose>注册本地命名空间</refpurpose>
  </refnamediv>
 
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <modifier>public</modifier> <type>void</type><methodname>Yaf_Loader::registerLocalNamespace</methodname>
-   <methodparam><type>mixed</type><parameter>prefix</parameter></methodparam>
+   <modifier>public</modifier> <type class="union"><type>Yaf_Loader</type><type>false</type><type>null</type></type><methodname>Yaf_Loader::registerLocalNamespace</methodname>
+   <methodparam><type>string|array</type><parameter>namespace</parameter></methodparam>
+   <methodparam choice="opt"><type>string</type><parameter>path</parameter><initializer>null</initializer></methodparam>
   </methodsynopsis>
-  <para>
-   注册本地类前缀，<classname>Yaf_Loader</classname> 在两个库目录下搜索类，一个是通过 <link
-   linkend="configuration.yaf.library">application.library.directory</link>（在
-   application.ini 中）配置，称为本地库目录；另一个是通过 <link
-   linkend="ini.yaf.library">yaf.library</link>（在 php.ini
-   中），成为全局库目录，因为它可以在同一个服务器中的许多应用程序共享。
-  </para>
-  <para>
-   当触发自动加载时，<classname>Yaf_Loader</classname> 将通过检查丢失类名的前缀来确定应该在哪个库目录中去搜索。
-
-   如果前缀名注册为 localnamespack，则在本地库目录中查找，否则在全局库目录中查找。
-   <note>
-    <para>
-     如果未配置 yaf.library，则假定全局库目录为本地库目录。在这种情况下，所有自动加载都将查找本地库目录。
-
-     但如果希望 Yaf 应用程序更加健壮，那么请始终将类注册为本地类。
-    </para>
-   </note>
-  </para>
+  <simpara>注册本地命名空间。前缀属于本地命名空间的类，将在给定的路径下查找（未指定路径时为本地库目录），而不是全局库目录。</simpara>
+  <simpara>这样，你就可以把自己的类放在本地库目录中，而共享类则存放在全局库目录中（参见 <literal>yaf.library</literal> ini 配置项）。</simpara>
  </refsect1>
 
  <refsect1 role="parameters">
   &reftitle.parameters;
   <variablelist>
    <varlistentry>
-    <term><parameter>prefix</parameter></term>
+    <term><parameter>namespace</parameter></term>
     <listitem>
-     <para>
-      字符串或者是数组格式的类名前缀，所有拥有和这些前缀相同前缀的类将被加载到本地 library 路径。
-     </para>
+<simpara>命名空间前缀字符串，或者前缀/路径对的数组（值为路径字符串时），或前缀字符串的数组。</simpara>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><parameter>path</parameter></term>
+    <listitem>
+<simpara>查找该命名空间的目录。未指定时使用本地库目录。</simpara>
     </listitem>
    </varlistentry>
   </variablelist>
  </refsect1>
-
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
-  <para>
-   bool
-  </para>
+<simpara>成功时返回加载器实例自身；如果提供了无效的参数，则返回 &false;。</simpara>
  </refsect1>
 
  <refsect1 role="examples">
   &reftitle.examples;
   <example>
-   <title><function>Yaf_Loader::registerLocalNamespace</function> 示例</title>
+   <title><methodname>Yaf_Loader::registerLocalNamespace</methodname> 示例</title>
    <programlisting role="php">
 <![CDATA[
 <?php
-$loader = Yaf_Loader::getInstance('/local/library/', '/global/library');
-$loader->registerLocalNamespace("Baidu");
-$loader->registerLocalNamespace(array("Sina", "Weibo"));
+class Bootstrap extends Yaf_Bootstrap_Abstract
+{
+    public function _initLoader()
+    {
+        $loader = Yaf_Loader::getInstance();
 
-$loader->autoload("Baidu_Name"); // search in '/local/library/'
-$loader->autoload("Sina");       // search '/local/library/'
-$loader->autoload("Global_Name");// search in '/global/library/'
-$loader->autoload("Foo_Bar");    // search in '/global/library/'
+        /* Models_User 现在将在
+         * APPLICATION_PATH/library/Models/User.php 中查找 */
+        $loader->registerLocalNamespace("Models");
 
+        /* 一次注册多个前缀，每个都有自己的查找目录 */
+        $loader->registerLocalNamespace(array(
+            "Services" => APPLICATION_PATH . "/services",
+            "Vendor"   => APPLICATION_PATH . "/vendor",
+        ));
+    }
+}
 ?>
 ]]>
    </programlisting>
   </example>
  </refsect1>
 
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <simplelist>
+   <member><methodname>Yaf_Loader::getLocalNamespace</methodname></member>
+   <member><methodname>Yaf_Loader::clearLocalNamespace</methodname></member>
+   <member><methodname>Yaf_Loader::isLocalName</methodname></member>
+  </simplelist>
+ </refsect1>
 </refentry>
 
 <!-- Keep this comment at the end of the file

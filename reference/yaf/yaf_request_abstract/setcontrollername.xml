@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 85ff795121d5ce5380ff65efff532adfe705f5e8 Maintainer: mowangjuanzi Status: ready -->
+<!-- EN-Revision: ddcf673c59d1708557680946fbffeee361d7fca6 Maintainer: mowangjuanzi Status: ready -->
 <refentry xml:id="yaf-request-abstract.setcontrollername" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
   <refname>Yaf_Request_Abstract::setControllerName</refname>
@@ -10,12 +10,12 @@
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <modifier>public</modifier> <type>void</type><methodname>Yaf_Request_Abstract::setControllerName</methodname>
+   <modifier>public</modifier> <type class="union"><type>Yaf_Request_Abstract</type><type>null</type></type><methodname>Yaf_Request_Abstract::setControllerName</methodname>
    <methodparam><type>string</type><parameter>controller</parameter></methodparam>
    <methodparam choice="opt"><type>bool</type><parameter>format_name</parameter><initializer>true</initializer></methodparam>
   </methodsynopsis>
   <para>
-    set controller name to request, this is usually used by custom router to set route result controller name.
+    设置请求对象的控制器名，通常由自定义路由器用于设置路由结果的控制器名。
   </para>
 
  </refsect1>
@@ -27,7 +27,7 @@
     <term><parameter>controller</parameter></term>
     <listitem>
      <para>
-      &string;，controller 名，应该是骆驼样式，比如“Index”或“Foo_Bar”  
+      &string;，控制器名，应该是骆驼（camel）风格，比如 "Index" 或 "Foo_Bar" 
      </para>
     </listitem>
    </varlistentry>
@@ -35,7 +35,8 @@
     <term><parameter>format_name</parameter></term>
     <listitem>
      <para>
-      在 Yaf 3.2.0 中引入，Yaf 默认会将名称格式化为骆驼样式，如果设置为 &false;，Yaf 将设置原始名称来请求。
+      该参数自 Yaf 3.2.0 引入，默认情况下 Yaf 会将名称格式化为骆驼风格，
+      如果设置为 &false;，Yaf 将直接使用原始名称。
      </para>
     </listitem>
    </varlistentry>
@@ -44,12 +45,48 @@
 
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
-  <para>
-
-  </para>
+  <simpara>
+   成功时返回请求对象自身，失败时返回 &null;。
+  </simpara>
  </refsect1>
 
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <example>
+   <title><methodname>Yaf_Request_Abstract::setControllerName</methodname> 示例</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+class RestRouter extends Yaf_Route_Interface
+{
+    public function route(Yaf_Request_Abstract $request)
+    {
+        if (0 === strpos($request->getRequestUri(), "/api")) {
+            // 默认情况下名称会被格式化为骆驼风格，
+            // 因此 "order_item" 会变成 "Order_Item"
+            $request->setControllerName("order_item")
+                    ->setActionName("list");
+            return true;
+        }
 
+        return false;
+    }
+
+    public function assemble(array $info, array $query = null) {}
+}
+?>]]>
+   </programlisting>
+  </example>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <simplelist>
+   <member><methodname>Yaf_Request_Abstract::setModuleName</methodname></member>
+   <member><methodname>Yaf_Request_Abstract::setActionName</methodname></member>
+   <member><methodname>Yaf_Request_Abstract::getControllerName</methodname></member>
+  </simplelist>
+ </refsect1>
 </refentry>
 
 <!-- Keep this comment at the end of the file

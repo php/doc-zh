@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 94f2f851f015535e58fd84bc2accac402f21a48e Maintainer: mowangjuanzi Status: ready -->
+<!-- EN-Revision: ddcf673c59d1708557680946fbffeee361d7fca6 Maintainer: mowangjuanzi Status: ready -->
 <refentry xml:id="yaf-controller-abstract.render" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
   <refname>Yaf_Controller_Abstract::render</refname>
@@ -10,13 +10,14 @@
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <modifier>protected</modifier> <type>string</type><methodname>Yaf_Controller_Abstract::render</methodname>
+   <modifier>protected</modifier> <type class="union"><type>string</type><type>bool</type><type>null</type></type><methodname>Yaf_Controller_Abstract::render</methodname>
    <methodparam><type>string</type><parameter>tpl</parameter></methodparam>
-   <methodparam choice="opt"><type>array</type><parameter>parameters</parameter></methodparam>
+   <methodparam choice="opt"><type class="union"><type>array</type><type>null</type></type><parameter>parameters</parameter></methodparam>
   </methodsynopsis>
-  <para>
-
-  </para>
+  <simpara>
+   渲染视图脚本 <parameter>tpl</parameter> 并返回其输出，这点与
+   <methodname>Yaf_Controller_Abstract::display</methodname> 不同。
+  </simpara>
  </refsect1>
 
  <refsect1 role="parameters">
@@ -25,17 +26,17 @@
    <varlistentry>
     <term><parameter>tpl</parameter></term>
     <listitem>
-     <para>
-      
-     </para>
+     <simpara>
+      视图脚本名，相对于视图路径。
+     </simpara>
     </listitem>
    </varlistentry>
    <varlistentry>
     <term><parameter>parameters</parameter></term>
     <listitem>
-     <para>
-      
-     </para>
+     <simpara>
+      本次渲染要导出到视图脚本的变量关联数组。
+     </simpara>
     </listitem>
    </varlistentry>
   </variablelist>
@@ -43,11 +44,49 @@
 
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
-  <para>
-
-  </para>
+  <simpara>
+   成功时返回渲染结果（&string;），失败时返回 &false;。
+  </simpara>
  </refsect1>
 
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <example>
+   <title><methodname>Yaf_Controller_Abstract::render</methodname> 示例</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+class ProductController extends Yaf_Controller_Abstract
+{
+    public function indexAction() {
+        // 不自动渲染默认模板
+        Yaf_Dispatcher::getInstance()->disableView();
+
+        // 渲染 product/index.phtml 并返回输出，
+        // 而不是像 display() 那样直接发送
+        $html = $this->render("product/index.phtml", array(
+            "products" => array("yaf", "php"),
+        ));
+
+        // 后处理后设置为响应主体
+        $this->getResponse()->setBody($html);
+    }
+}
+?>
+]]>
+   </programlisting>
+  </example>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><methodname>Yaf_Controller_Abstract::display</methodname></member>
+    <member><methodname>Yaf_Dispatcher::autoRender</methodname></member>
+   </simplelist>
+  </para>
+ </refsect1>
 
 </refentry>
 

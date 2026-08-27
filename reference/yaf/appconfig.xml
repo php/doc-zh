@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: f4ff30a7a6a555fc825577d2cb877e3a07094d6b Maintainer: Carbyn Wu Status: ready -->
-<!-- CREDITS: mowangjuanzi -->
+<!-- EN-Revision: ddcf673c59d1708557680946fbffeee361d7fca6 Maintainer: mowangjuanzi Status: ready -->
 <chapter xml:id="yaf.appconfig" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <title xmlns="http://docbook.org/ns/docbook">应用程序配置</title>
  <para>
@@ -46,6 +45,30 @@ yaf.dispatcher.catchException = 0
 ]]>
    </programlisting>
   </example>
+  <tip>
+   <simpara>
+    当配置变得庞大时，每次请求都会重新解析 ini 文件的 <classname>Yaf_Config_Ini</classname>
+    会带来明显的开销。
+    <link xlink:href="&url.pecl.package;yaconf">Yaconf</link> 只在 PHP 启动时
+    把某个目录下的所有 ini 文件解析一次，并把解析结果保存在共享内存中。
+    将 <literal>yaconf.directory</literal> 设置为存放配置的目录，然后把返回的数组传给
+    <methodname>Yaf_Application::__construct</methodname>：
+   </simpara>
+   <programlisting role="php">
+<![CDATA[
+<?php
+// in php.ini: yaconf.directory = /path/to/app/conf
+$app = new Yaf_Application(Yaconf::get("application"));
+?>
+]]>
+   </programlisting>
+   <simpara>
+    包含 <literal>[section]</literal> 标头的文件会按分节暴露为多个条目（继承关系，
+    如 <literal>[product : yaf]</literal>，会被自动解析）。可以用点号获取单个分节，
+    <literal>Yaconf::get("application.product")</literal>，然后改传该数组；
+    它的键恰好是该分节合并后的各个条目。
+   </simpara>
+  </tip>
   </para>
   <para>
   <table>
@@ -159,9 +182,9 @@ yaf.dispatcher.catchException = 0
       </para>
       <para>
        <note>
-        <para>
-         此为唯一没有默认值的配置条目，应该始终手动定义它。
-        </para>
+        <simpara>
+            此为唯一没有默认值的配置条目，应该始终手动定义它。
+        </simpara>
        </note>
       </para>
      </listitem>
@@ -213,10 +236,10 @@ yaf.dispatcher.catchException = 0
        <link linkend="ini.yaf.library">yaf.library</link>。
        </para>
        <note>
-        <para>
-         Yaf 2.1.6 以后，该配置项可以是数组。类库的路径将尝试使用 <link
-          linkend="configuration.yaf.library.directory">application.library.directory</link> 中设置的条目。
-        </para>
+        <simpara>
+            Yaf 2.1.6 以后，该配置项可以是数组。类库的路径将尝试使用 <link
+            linkend="configuration.yaf.library.directory">application.library.directory</link> 中设置的条目。
+        </simpara>
        </note>
      </listitem>
     </varlistentry>
@@ -227,9 +250,8 @@ yaf.dispatcher.catchException = 0
      </term>
      <listitem>
       <para>
-       Alias of <link
-        linkend="configuration.yaf.library">application.library</link>. Introduced
-       in Yaf 2.1.6
+       <link linkend="configuration.yaf.library">application.library</link> 的别名。
+       自 Yaf 2.1.6 引入
       </para>
      </listitem>
     </varlistentry>
@@ -355,9 +377,9 @@ yaf.dispatcher.catchException = 0
        在application.ini中设置Yaf运行时配置，如：
        <link linkend="ini.yaf.lowcase-path">application.system.lowcase_path</link>
        <note>
-        <para>
+        <simpara>
         仅有 <constant>INI_ALL</constant> 配置项能这样设置
-       </para>
+       </simpara>
        </note>
       </para>
      </listitem>

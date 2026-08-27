@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 40ec84c3b39ae43075e2f98238907ae72cbd4bf8 Maintainer: mowangjuanzi Status: ready -->
+<!-- EN-Revision: ddcf673c59d1708557680946fbffeee361d7fca6 Maintainer: mowangjuanzi Status: ready -->
 <reference xml:id="class.yaf-plugin-abstract" role="class" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude">
 
  <title>Yaf_Plugin_Abstract 类</title>
@@ -11,16 +11,18 @@
 <!-- {{{ Yaf_Plugin_Abstract intro -->
   <section xml:id="yaf-plugin-abstract.intro">
    &reftitle.intro;
-   <para>
-     Plugins 允许轻松地定制和扩展框架。
-   </para>
-   <para>
-    插件（Plugin）是类。实际定义的类将会基于组件变化——需要实现这些接口，但该插件（Plugin）本身就是一个类。
-   </para>
-   <para>
-     插件（plugin）通过使用 <methodname>Yaf_Dispatcher::registerPlugin</methodname> 加载到 Yaf
-     中，在框架注册后，插件根据接口实现的所有方法将会在恰当的时间被调用。
-   </para>
+   <simpara>
+    插件（Plugin）使得框架的扩展和定制变得简单。插件是一个继承
+    <classname>Yaf_Plugin_Abstract</classname>
+    并覆盖了一个或多个钩子（hook）方法的类，这些钩子方法会在调度周期的固定时点被自动调用：
+    路由前后、调度循环（dispatch loop）前后，以及每次单独调度（dispatch）的前后。
+   </simpara>
+   <simpara>
+    插件通过 <methodname>Yaf_Dispatcher::registerPlugin</methodname>
+    挂载到调度器上，通常在 Bootstrap 中完成；注册之后，该插件实现的所有钩子方法都会在恰当的时机被调用，
+    每个钩子方法都会接收到当前的 <classname>Yaf_Request_Abstract</classname> 和
+    <classname>Yaf_Response_Abstract</classname> 实例。
+   </simpara>
   </section>
 <!-- }}} -->
 
@@ -42,11 +44,11 @@
    /* plugin class should be placed under ./application/plugins/ */
    class TestPlugin extends Yaf_Plugin_Abstract {
         public function routerStartup(Yaf_Request_Abstract $request, Yaf_Response_Abstract $response) {
-            /* 在路由之前执行,这个钩子里，你可以做url重写等功能 */
+            /* 在路由之前执行，在这个钩子里，用户可以做一些 URL 重写 */
             var_dump("routerStartup");
         }
         public function routerShutdown(Yaf_Request_Abstract $request, Yaf_Response_Abstract $response) {
-           /* 路由完成后，在这个钩子里，你可以做登陆检测等功能*/
+            /* 路由完成，在这个钩子里，用户可以做登录检测 */
             var_dump("routerShutdown");
         }
         public function dispatchLoopStartup(Yaf_Request_Abstract $request, Yaf_Response_Abstract $response) {
@@ -59,8 +61,7 @@
             var_dump("postDispatch");
         }
         public function dispatchLoopShutdown(Yaf_Request_Abstract $request, Yaf_Response_Abstract $response) {
-            /* final hook
-               in this hook user can do logging or implement layout */
+            /* 最后一个钩子，在这个钩子里，用户可以记录日志或实现布局（layout） */
             var_dump("dispatchLoopShutdown");
         }
    }
@@ -76,7 +77,7 @@
            "directory" => dirname(__FILE__) . "/application/",
        ),
    );
- 
+
    $app = new Yaf_Application($config);
    $app->bootstrap()->run();
 ?>
@@ -111,7 +112,7 @@ string(20) "dispatchLoopShutdown"
      </ooclass>
     </classsynopsisinfo>
 <!-- }}} -->
-    
+
     <classsynopsisinfo role="comment">&Methods;</classsynopsisinfo>
     <xi:include xpointer="xmlns(db=http://docbook.org/ns/docbook) xpointer(id('class.yaf-plugin-abstract')/db:refentry/db:refsect1[@role='description']/descendant::db:methodsynopsis[1])" />
    </classsynopsis>

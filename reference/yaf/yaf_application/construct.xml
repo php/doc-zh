@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 330a38c4d45556b49e06ebe6d39e0e311534cd8c Maintainer: mowangjuanzi Status: ready -->
+<!-- EN-Revision: ddcf673c59d1708557680946fbffeee361d7fca6 Maintainer: mowangjuanzi Status: ready -->
 <!-- CREDITS: Luffy -->
 <refentry xml:id="yaf-application.construct" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
@@ -12,15 +12,14 @@
   &reftitle.description;
   <constructorsynopsis>
    <modifier>public</modifier> <methodname>Yaf_Application::__construct</methodname>
-   <methodparam><type>mixed</type><parameter>config</parameter></methodparam>
-   <methodparam choice="opt"><type>string</type><parameter>envrion</parameter></methodparam>
+   <methodparam><type class="union"><type>string</type><type>array</type></type><parameter>config</parameter></methodparam>
+   <methodparam choice="opt"><type class="union"><type>string</type><type>null</type></type><parameter>environ</parameter><initializer>null</initializer></methodparam>
   </constructorsynopsis>
-  <para>
-   初始化一个 <classname>Yaf_Application</classname>.
-  </para>
-
-
-
+  <simpara>
+   实例化一个 <classname>Yaf_Application</classname>。构造函数同时会初始化
+   单例应用、<classname>Yaf_Loader</classname> 和
+   <classname>Yaf_Dispatcher</classname>，因此在使用它们之前必须先调用构造函数。
+  </simpara>
  </refsect1>
 
  <refsect1 role="parameters">
@@ -29,48 +28,46 @@
    <varlistentry>
     <term><parameter>config</parameter></term>
     <listitem>
+     <simpara>
+      INI 配置文件的路径，或者配置数组。
+     </simpara>
+     <simpara>
+      如果是 INI 配置文件，其中应该有一个以
+      <link linkend="ini.yaf.environ">yaf.environ</link> 定义的名称命名的配置节，
+      默认是 <literal>"product"</literal>。
+     </simpara>
+     <simpara>
+      应用程序配置项（及其默认值）在
+      <link linkend="yaf.appconfig">应用程序配置</link>中有说明：
+     </simpara>
      <para>
-       关联数组的配置, 或者一个指向 ini 格式的配置文件的路径的字符串。
-     </para>
-     <para>
-       如果是一个 ini 配置文件，那配置文件中应该有一个定义了 <link linkend="ini.yaf.environ">yaf.environ</link>
-       的配置节。这个在生产环境中是默认的。
-      <note>
-       <para>
-        如果你使用了 ini 配置文件作为你应用配置的容器，你需要打开 <link linkend="ini.yaf.cache-config">yaf.cache_config</link>
-        来提升性能。
-       </para>
-      </note>
-     </para>
-     <para>
-       And the config entry(and there default value) list blow:
       <example>
-       <title>A ini config file example</title>
+       <title>INI 配置文件示例</title>
        <programlisting role="ini" xml:id="yaf.application.ini">
 <![CDATA[
 [product]
-;this one should alway be defined, and have no default value
+;这一项必须始终定义，且没有默认值
 application.directory=APPLICATION_PATH
 
-;following configs have default value, you may no need to define them
+;以下配置项有默认值，可能不需要定义
 application.library = APPLICATION_PATH . "/library"
 application.dispatcher.throwException=1
 application.dispatcher.catchException=1
 
 application.baseUri=""
 
-;the php script ext name
-ap.ext=php
+;php 脚本的扩展名
+application.ext=php
 
-;the view template ext name
-ap.view.ext=phtml
+;视图模板的扩展名
+application.view.ext=phtml
 
-ap.dispatcher.defaultModule=Index
-ap.dispatcher.defaultController=Index
-ap.dispatcher.defaultAction=index
+application.dispatcher.defaultModule=Index
+application.dispatcher.defaultController=Index
+application.dispatcher.defaultAction=index
 
-;defined modules
-ap.modules=Index
+;定义的模块
+application.modules=Index
 ]]>
        </programlisting>
       </example>
@@ -80,19 +77,24 @@ ap.modules=Index
    <varlistentry>
     <term><parameter>environ</parameter></term>
     <listitem>
-     <para>
-      Which section will be loaded as the final config
-     </para>
+     <simpara>
+      指定哪个配置节将作为最终配置被加载。如果未提供，
+      则使用 <link linkend="ini.yaf.environ">yaf.environ</link>
+      指令的值。
+     </simpara>
     </listitem>
    </varlistentry>
   </variablelist>
  </refsect1>
 
- <refsect1 role="returnvalues">
-  &reftitle.returnvalues;
-  <para>
-
-  </para>
+ <refsect1 role="errors">
+  &reftitle.errors;
+  <simpara>
+   如果 <classname>Yaf_Application</classname> 已经被实例化，或者配置无效，
+   将抛出 <exceptionname>Yaf_Exception_StartupError</exceptionname> 异常
+   （当 <methodname>Yaf_Dispatcher::throwException</methodname> 关闭时，
+   则触发 <constant>YAF_ERR_STARTUP_FAILED</constant> 错误）。
+  </simpara>
  </refsect1>
 
  <refsect1 role="examples">
@@ -102,7 +104,7 @@ ap.modules=Index
    <programlisting role="php">
 <![CDATA[
 <?php
-defined('APPLICATION_PATH')                  // APPLICATION_PATH will be used in the ini config file
+defined('APPLICATION_PATH')                  // APPLICATION_PATH 将在 ini 配置文件中使用
     || define('APPLICATION_PATH', __DIR__);
 
 $application = new Yaf_Application(APPLICATION_PATH.'/conf/application.ini');
@@ -110,11 +112,6 @@ $application->bootstrap()->run();
 ?>
 ]]>
    </programlisting>
-   &example.outputs.similar;
-   <screen>
-<![CDATA[
-]]>
-   </screen>
   </example>
   <example>
    <title><function>Yaf_Application::__construct</function> 示例</title>
@@ -133,19 +130,17 @@ $application->bootstrap()->run();
 ?>
 ]]>
    </programlisting>
-   &example.outputs.similar;
-   <screen>
-<![CDATA[
-]]>
-   </screen>
   </example>
  </refsect1>
 
  <refsect1 role="seealso">
   &reftitle.seealso;
-  <simplelist>
-   <member><classname>Yaf_Config_Ini</classname></member>
-  </simplelist>
+  <para>
+   <simplelist>
+    <member><classname>Yaf_Config_Ini</classname></member>
+    <member><link linkend="yaf.appconfig">应用程序配置</link></member>
+   </simplelist>
+  </para>
  </refsect1>
 
 </refentry>

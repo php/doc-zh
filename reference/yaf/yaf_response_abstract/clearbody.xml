@@ -1,21 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: bdcd9cd0940af35cb31799ff2637aaa7c5ffbfdc Maintainer: mowangjuanzi Status: ready -->
+<!-- EN-Revision: ddcf673c59d1708557680946fbffeee361d7fca6 Maintainer: mowangjuanzi Status: ready -->
 <refentry xml:id="yaf-response-abstract.clearbody" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
-  <refname>Yaf_Response_Abstract::clearBody</refname>
-  <refpurpose>丢弃所有已存在的响应 body</refpurpose>
+<refname>Yaf_Response_Abstract::clearBody</refname>
+<refpurpose>丢弃所有已存在的响应 body</refpurpose>
  </refnamediv>
 
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <modifier>public</modifier> <type>bool</type><methodname>Yaf_Response_Abstract::clearBody</methodname>
+   <modifier>public</modifier> <type class="union"><type>Yaf_Response_Abstract</type><type>false</type><type>null</type></type><methodname>Yaf_Response_Abstract::clearBody</methodname>
    <methodparam choice="opt"><type>string</type><parameter>key</parameter></methodparam>
   </methodsynopsis>
-  <para>
-   清除已存在的内容
-  </para>
+  <simpara>丢弃所有已存在的响应 body。</simpara>
  </refsect1>
 
  <refsect1 role="parameters">
@@ -24,24 +22,53 @@
    <varlistentry>
     <term><parameter>key</parameter></term>
     <listitem>
-     <para>
-      内容 key，如果没有指定，将会清除所有内容。
-      <note>
-       <para>
-        此参数自 2.2.0 起引入
-      </para>
-      </note>
-     </para>
+<simpara>内容 key。若指定，则只清除该内容块；否则清除所有内容块。</simpara>
     </listitem>
    </varlistentry>
   </variablelist>
  </refsect1>
-
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
-  <para>
+<simpara>成功时返回响应对象自身，失败时返回 &null;。</simpara>
+ </refsect1>
 
-  </para>
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <example>
+   <title><methodname>Yaf_Response_Abstract::clearBody</methodname> 示例</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+class IndexController extends Yaf_Controller_Abstract
+{
+    public function indexAction()
+    {
+        $response = $this->getResponse();
+
+        $response->setBody("Hello", "intro");
+        $response->setBody("World");
+
+        $response->clearBody("intro"); // 仅丢弃 "intro" 块
+        var_dump($response->getBody(null));
+
+        $response->clearBody(); // 丢弃所有 body 块
+        var_dump($response->getBody(null));
+    }
+}
+?>
+]]>
+   </programlisting>
+   &example.outputs.similar;
+   <screen>
+<![CDATA[
+array(1) {
+  ["content"]=>
+  string(5) "World"
+}
+array(0) {
+}]]>
+   </screen>
+  </example>
  </refsect1>
 
  <refsect1 role="seealso">
@@ -53,7 +80,6 @@
    <member><methodname>Yaf_Response_Abstract::getBody</methodname></member>
   </simplelist>
  </refsect1>
-
 </refentry>
 
 <!-- Keep this comment at the end of the file

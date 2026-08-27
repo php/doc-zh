@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 7418592d82d6cde8d052effd3607e5761d6c4e67 Maintainer: anonymous #47025 Status: ready -->
-<!-- CREDITS: mowangjuanzi -->
+<!-- EN-Revision: ddcf673c59d1708557680946fbffeee361d7fca6 Maintainer: mowangjuanzi Status: ready -->
+<!-- CREDITS: anonymous #47025 -->
 <refentry xml:id="yaf-route-interface.assemble" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
   <refname>Yaf_Route_Interface::assemble</refname>
-  <refpurpose>将指定路由规则组合成一个 url</refpurpose>
+  <refpurpose>组装一个请求</refpurpose>
  </refnamediv>
 
  <refsect1 role="description">
@@ -16,7 +16,7 @@
    <methodparam choice="opt"><type>array</type><parameter>query</parameter></methodparam>
   </methodsynopsis>
   <para>
-   此方法根据参数 info 返回 url，并根据参数 query 向 url 追加查询字符串。
+   此方法根据参数 info 返回一个 url，并根据参数 query 向 url 追加查询字符串。
   </para>
   <para>
    路由应该根据自己的路由规则来实现这个方法，做一个逆向的过程。
@@ -45,7 +45,7 @@
    </varlistentry>
   </variablelist>
  </refsect1>
-    
+
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
@@ -53,6 +53,85 @@
   </para>
  </refsect1>
 
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <example>
+   <title><methodname>Yaf_Route_Interface::assemble</methodname> 示例</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+class RewriteRoute implements Yaf_Route_Interface {
+
+    private $_match;
+    private $_route;
+
+    public function __construct(string $match, array $route) {
+        $this->_match = $match;
+        $this->_route = $route;
+    }
+
+    public function route(Yaf_Request_Abstract $request): bool {
+        if (!preg_match($this->_match, $request->getRequestUri(), $matches)) {
+            return false;
+        }
+
+        foreach ($this->_route as $key => $value) {
+            if (is_string($value) && ':' === $value[0]) {
+                $value = $matches[substr($value, 1)];
+            }
+            $request->setParam($key, $value);
+        }
+        $request->setRouted();
+
+        return true;
+    }
+
+    /* 将路由规则逆向还原为一个 URL */
+    public function assemble(array $info, ?array $query = null): string {
+        $url = "/product";
+        if (isset($info[':name'])) {
+            $url .= "/" . $info[':name'];
+        }
+
+        if (!empty($query)) {
+            $url .= "?" . http_build_query($query);
+        }
+
+        return $url;
+    }
+}
+
+$router = new Yaf_Router();
+$router->addRoute("custom",
+    new RewriteRoute("#^/product#", array("controller" => "product"))
+);
+
+var_dump($router->getRoute("custom")->assemble(
+    array(':name' => 'book'),
+    array('page' => 2)
+));
+?>
+]]>
+   </programlisting>
+   &example.outputs.similar;
+   <screen>
+<![CDATA[
+string(20) "/product/book?page=2"
+]]>
+   </screen>
+  </example>
+ </refsect1>
+
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <simplelist>
+   <member><methodname>Yaf_Route_Interface::route</methodname></member>
+   <member><methodname>Yaf_Route_Rewrite::assemble</methodname></member>
+   <member><methodname>Yaf_Route_Map::assemble</methodname></member>
+  </simplelist>
+ </refsect1>
 
 </refentry>
 

@@ -1,27 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 49d4fb555745d1981edac87a5a2d8ae53b5f75df Maintainer: mowangjuanzi Status: ready -->
+<!-- EN-Revision: ddcf673c59d1708557680946fbffeee361d7fca6 Maintainer: mowangjuanzi Status: ready -->
 <refentry xml:id="yaf-dispatcher.catchexception" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
   <refname>Yaf_Dispatcher::catchException</refname>
-  <refpurpose>开启/关闭自动异常捕获</refpurpose>
+  <refpurpose>开启/关闭异常捕获</refpurpose>
  </refnamediv>
 
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <modifier>public</modifier> <type>Yaf_Dispatcher</type><methodname>Yaf_Dispatcher::catchException</methodname>
-   <methodparam choice="opt"><type>bool</type><parameter>flag</parameter></methodparam>
+   <modifier>public</modifier> <type class="union"><type>Yaf_Dispatcher</type><type>bool</type></type><methodname>Yaf_Dispatcher::catchException</methodname>
+   <methodparam choice="opt"><type class="union"><type>bool</type><type>null</type></type><parameter>flag</parameter><initializer>null</initializer></methodparam>
   </methodsynopsis>
-  <para>
-     当 application.dispatcher.throwException 开启的时候（也可以通过调用 <methodname>Yaf_Dispatcher::throwException(TRUE)</methodname>
-     来开启），Yaf 会在错误发生时抛出 Exception 而不是触发错误。
-  </para>
-  <para>   
-     如果开启了 <methodname>Yaf_Dispatcher::catchException</methodname> （可以通过设置 <link
-     linkend="configuration.yaf.dispatcher.catchexception">application.dispatcher.catchException</link> 来开启），如果已经定义，所有未捕获的
-     Exception 都将被 ErrorController::error 捕获。
-  </para>
+  <simpara>
+   当
+   <link linkend="configuration.yaf.dispatcher.throwexception">application.dispatcher.throwException</link>
+   开启时（也可以通过调用
+   <methodname>Yaf_Dispatcher::throwException</methodname> 来开启），Yaf 会在错误
+   发生时抛出异常而不是触发错误。
+  </simpara>
+  <simpara>
+   如果通过此方法（或通过
+   <link linkend="configuration.yaf.dispatcher.catchexception">application.dispatcher.catchException</link>）
+   额外开启了异常捕获，所有未捕获的异常都会被捕获并分发到
+   <literal>ErrorController::error</literal>（如果已定义）。
+  </simpara>
  </refsect1>
 
  <refsect1 role="parameters">
@@ -30,9 +34,15 @@
    <varlistentry>
     <term><parameter>flag</parameter></term>
     <listitem>
-     <para>
-       bool
-     </para>
+     <simpara>
+      Yaf 是否应该捕获未捕获的异常并将它们分发到
+      <literal>ErrorController::error</literal>。
+     </simpara>
+     <note>
+      <simpara>
+       自 Yaf 2.2.0 起，如果未给出该参数，则会返回当前状态。
+      </simpara>
+     </note>
     </listitem>
    </varlistentry>
   </variablelist>
@@ -40,9 +50,10 @@
 
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
-  <para>
-
-  </para>
+  <simpara>
+   <classname>Yaf_Dispatcher</classname> 对象自身会在给出 <parameter>flag</parameter> 时
+   返回；未给出该参数时则返回 &boolean;，指示异常捕获是否开启。
+  </simpara>
  </refsect1>
 
  <refsect1 role="examples">
@@ -51,15 +62,15 @@
    <title><function>Yaf_Dispatcher::catchException</function> 示例</title>
    <programlisting role="php">
 <![CDATA[
-/* if you defined a ErrorController like following */
 <?php
+/* 如果你定义了如下的 ErrorController */
 class ErrorController extends Yaf_Controller_Abstract {
-     /** 
-      * you can also call to Yaf_Request_Abstract::getException to get the 
-      * un-caught exception.
+     /**
+      * 你也可以调用 Yaf_Request_Abstract::getException 来获取
+      * 未捕获的异常。
       */
      public function errorAction($exception) {
-        /* error occurs */
+        /* 发生了一个错误 */
         switch ($exception->getCode()) {
             case YAF_ERR_NOTFOUND_MODULE:
             case YAF_ERR_NOTFOUND_CONTROLLER:
@@ -72,7 +83,7 @@ class ErrorController extends Yaf_Controller_Abstract {
                 echo 0, ":", $exception->getMessage();
                 break;
         }
-     } 
+     }
 }
 ?>
 ]]>
@@ -80,7 +91,8 @@ class ErrorController extends Yaf_Controller_Abstract {
    &example.outputs.similar;
    <screen>
 <![CDATA[
-/* now if some error occur, assuming access a non-exists controller(or you can throw a exception yourself): */
+/* 现在如果发生了一些错误，假设访问了一个不存在的控制器
+   （或者你自己抛出一个异常）： */
 404:Could not find controller script **/application/controllers/No-exists-controller.php
 ]]>
    </screen>
@@ -89,10 +101,12 @@ class ErrorController extends Yaf_Controller_Abstract {
 
  <refsect1 role="seealso">
   &reftitle.seealso;
-  <simplelist>
-   <member><methodname>Yaf_Dispatcher::throwException</methodname></member>
-   <member><methodname>Yaf_Dispatcher::setErrorHandler</methodname></member>
-  </simplelist>
+  <para>
+   <simplelist>
+    <member><methodname>Yaf_Dispatcher::throwException</methodname></member>
+    <member><methodname>Yaf_Dispatcher::setErrorHandler</methodname></member>
+   </simplelist>
+  </para>
  </refsect1>
 
 </refentry>

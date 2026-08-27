@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 49d4fb555745d1981edac87a5a2d8ae53b5f75df Maintainer: mowangjuanzi Status: ready -->
+<!-- EN-Revision: ddcf673c59d1708557680946fbffeee361d7fca6 Maintainer: mowangjuanzi Status: ready -->
 <refentry xml:id="yaf-dispatcher.flushinstantly" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
   <refname>Yaf_Dispatcher::flushInstantly</refname>
@@ -10,15 +10,14 @@
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <modifier>public</modifier> <type>Yaf_Dispatcher</type><methodname>Yaf_Dispatcher::flushInstantly</methodname>
-   <methodparam choice="opt"><type>bool</type><parameter>flag</parameter></methodparam>
+   <modifier>public</modifier> <type class="union"><type>Yaf_Dispatcher</type><type>bool</type></type><methodname>Yaf_Dispatcher::flushInstantly</methodname>
+   <methodparam choice="opt"><type class="union"><type>bool</type><type>null</type></type><parameter>flag</parameter><initializer>null</initializer></methodparam>
   </methodsynopsis>
-  <para>
-
-  </para>
-
-
-
+  <simpara>
+   打开/关闭即时刷新。开启时（默认），一旦响应主体通过
+   <methodname>Yaf_Response_Abstract::setBody</methodname> 设置，就会立即被刷新
+   （输出）到客户端。
+  </simpara>
  </refsect1>
 
  <refsect1 role="parameters">
@@ -27,14 +26,14 @@
    <varlistentry>
     <term><parameter>flag</parameter></term>
     <listitem>
-     <para>
-      bool
-       <note>
-       <para>
-        自 2.2.0 起，如果未指定参数，然后返回当前状态
-       </para>
-      </note>     
-     </para>
+     <simpara>
+      是否即时刷新响应主体。
+     </simpara>
+     <note>
+      <simpara>
+       自 Yaf 2.2.0 起，如果未给出该参数，则会返回当前状态。
+      </simpara>
+     </note>
     </listitem>
    </varlistentry>
   </variablelist>
@@ -42,11 +41,51 @@
 
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
-  <para>
-
-  </para>
+  <simpara>
+   <classname>Yaf_Dispatcher</classname> 对象自身会在给出 <parameter>flag</parameter> 时
+   返回；未给出该参数时则返回 &boolean;，指示当前状态。
+  </simpara>
  </refsect1>
 
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <example>
+   <title><methodname>Yaf_Dispatcher::flushInstantly</methodname> 示例</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+$app = new Yaf_Application(dirname(__FILE__) . "/conf/application.ini");
+
+$dispatcher = Yaf_Dispatcher::getInstance();
+
+// 响应主体被设置后不立即刷新到客户端
+$dispatcher->flushInstantly(false);
+
+// 自 Yaf 2.2.0 起，不带参数调用会查询当前状态
+var_dump($dispatcher->flushInstantly());
+
+$app->run();
+?>
+]]>
+   </programlisting>
+   &example.outputs.similar;
+   <screen>
+<![CDATA[
+bool(false)
+]]>
+   </screen>
+  </example>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><methodname>Yaf_Dispatcher::returnResponse</methodname></member>
+    <member><methodname>Yaf_Response_Abstract::setBody</methodname></member>
+   </simplelist>
+  </para>
+ </refsect1>
 
 </refentry>
 

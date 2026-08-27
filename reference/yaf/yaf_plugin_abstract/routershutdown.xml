@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 73fae4ee51b644b72028e610abefefced57c18ad Maintainer: avenger Status: ready -->
-<!-- CREDITS: mowangjuanzi -->
+<!-- EN-Revision: ddcf673c59d1708557680946fbffeee361d7fca6 Maintainer: mowangjuanzi Status: ready -->
 <refentry xml:id="yaf-plugin-abstract.routershutdown" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
-  <refname>Yaf_Plugin_Abstract::routerShutdown</refname>
-  <refpurpose>The routerShutdown purpose</refpurpose>
+<refname>Yaf_Plugin_Abstract::routerShutdown</refname>
+<refpurpose>路由完成后的钩子</refpurpose>
  </refnamediv>
 
  <refsect1 role="description">
@@ -15,10 +14,7 @@
    <methodparam><type>Yaf_Request_Abstract</type><parameter>request</parameter></methodparam>
    <methodparam><type>Yaf_Response_Abstract</type><parameter>response</parameter></methodparam>
   </methodsynopsis>
-  <para>
-    这个钩子在路由结束之后触发，通常被用于登陆检查。
-  </para>
-
+  <simpara>该钩子在路由过程完成、控制器和动作名称已经解析之后触发，但在调度循环开始之前。由于目标控制器和动作已知，它通常用于访问控制检查，例如登录检查。</simpara>
  </refsect1>
 
  <refsect1 role="parameters">
@@ -27,57 +23,57 @@
    <varlistentry>
     <term><parameter>request</parameter></term>
     <listitem>
-     <para>
-
-     </para>
+<simpara>正在被调度的 <classname>Yaf_Request_Abstract</classname> 实例。</simpara>
     </listitem>
    </varlistentry>
    <varlistentry>
     <term><parameter>response</parameter></term>
     <listitem>
-     <para>
-
-     </para>
+<simpara><classname>Yaf_Response_Abstract</classname> 实例。</simpara>
     </listitem>
    </varlistentry>
   </variablelist>
  </refsect1>
-
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
-  <para>
-
-  </para>
+<simpara>没有返回值。</simpara>
  </refsect1>
 
  <refsect1 role="examples">
   &reftitle.examples;
   <example>
-   <title><function>Yaf_Plugin_Abstract::routerShutdown</function> 示例</title>
+   <title><methodname>Yaf_Plugin_Abstract::routerShutdown</methodname> 示例</title>
    <programlisting role="php">
 <![CDATA[
 <?php
-class UserInitPlugin extends Yaf_Plugin_Abstract {
+class AuthPlugin extends Yaf_Plugin_Abstract
+{
+    public function routerShutdown(Yaf_Request_Abstract $request, Yaf_Response_Abstract $response)
+    {
+        /* 路由已经完成，目标控制器和动作已知：
+         * 检查用户是否有权限访问它们 */
+        $public = array("Index" => array("index"), "User" => array("login"));
 
-    public function routerShutdown(Yaf_Request_Abstract $request, Yaf_Response_Abstract $response) {
         $controller = $request->getControllerName();
+        $action = $request->getActionName();
 
-        /**
-         * Use access controller is unecessary for APIs
-         */
-        if (in_array(strtolower($controller), array(
-            'api',  
-        ))) {
-            return TRUE;
+        if (isset($public[$controller]) && in_array($action, $public[$controller])) {
+            return;
         }
-       
-        if (Yaf_Session::getInstance()->has("login")) {
-            return TRUE;
+
+        if (!Yaf_Session::getInstance()->has("login")) {
+            $response->setRedirect("/user/login");
+            $request->setDispatched(true); // 不再调度该请求
         }
- 
-        /* Use access check failed, need to login */
-        $response->setRedirect("http://yourdomain.com/login/");
-        return FALSE;
+    }
+}
+
+/* 插件在引导类中注册 */
+class Bootstrap extends Yaf_Bootstrap_Abstract
+{
+    public function _initPlugin(Yaf_Dispatcher $dispatcher)
+    {
+        $dispatcher->registerPlugin(new AuthPlugin());
     }
 }
 ?>
@@ -94,9 +90,9 @@ class UserInitPlugin extends Yaf_Plugin_Abstract {
    <member><methodname>Yaf_Plugin_Abstract::preDispatch</methodname></member>
    <member><methodname>Yaf_Plugin_Abstract::postDispatch</methodname></member>
    <member><methodname>Yaf_Plugin_Abstract::dispatchLoopShutdown</methodname></member>
+   <member><methodname>Yaf_Plugin_Abstract::preResponse</methodname></member>
   </simplelist>
  </refsect1>
-
 </refentry>
 
 <!-- Keep this comment at the end of the file

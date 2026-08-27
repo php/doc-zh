@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: df78bd1d232f2cd8df673accf5ba0e280695639b Maintainer: mowangjuanzi Status: ready -->
-<!-- CREDITS: Luffy -->
+<!-- EN-Revision: ddcf673c59d1708557680946fbffeee361d7fca6 Maintainer: mowangjuanzi Status: ready -->
 <reference xml:id="class.yaf-config-ini" role="class" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude">
 
  <title>Yaf_Config_Ini 类</title>
@@ -12,19 +11,38 @@
 <!-- {{{ Yaf_Config_Ini intro -->
   <section xml:id="yaf-config-ini.intro">
    &reftitle.intro;
-   <para>
-   Yaf_Config_Ini 允许开发者通过嵌套的对象属性语法在应用程序中用熟悉的INI格式存储和读取配置数据。
-   INI格式在提供拥有配置数据键的等级结构和配置数据节之间的继承能力方面具有专长。
-   配置数据等级结构通过用点或者句号（“.”）分离键值。
-   一个节可以扩展或者通过在节的名称之后带一个冒号（“:”）和被继承的配置数据的节的名称来从另一个节继承。
-  <note>
-   <para>
-   Yaf_Config_Ini 利用 PHP 的函数 parse_ini_file() 来解析配置文件的。
-   请仔细查看这个函数的文档，注意它的一些特殊用途。以及它传递给 Yaf_Config_Ini 的一些比如
-   “&true;”、“&false;”、“yes”、“no”和“&null;”的特殊值的处理方式。
-   </para>
-  </note>
-  </para>
+   <simpara>
+    <classname>Yaf_Config_Ini</classname> 允许开发者把配置数据存储在熟悉的 INI 格式中，
+    并在应用程序中使用嵌套的对象属性语法来读取它。
+    INI 格式在提供配置数据键的层级结构以及配置数据节之间的继承能力方面具有专长。
+    配置数据层级结构通过使用点号（"<literal>.</literal>"）分隔键名来实现。
+    一个节可以在节的名称之后加一个冒号（"<literal>:</literal>"）
+    以及要继承数据的节的名称，来扩展或继承另一个节。
+   </simpara>
+   <note>
+    <simpara>
+     <classname>Yaf_Config_Ini</classname> 利用了 PHP 的
+     <function>parse_ini_file</function> 函数。请仔细查看该函数的文档，
+     了解它的特定行为，这些行为会传递到
+     <classname>Yaf_Config_Ini</classname>，
+     比如特殊值 "&true;"、"&false;"、"yes"、"no" 和 "&null;" 的处理方式。
+    </simpara>
+   </note>
+   <tip>
+    <simpara>
+     <classname>Yaf_Config_Ini</classname> 会在每次请求时解析配置文件。
+     如果应用管理着大量的（基本静态的）配置，可以考虑使用
+     <link linkend="book.yaconf">Yaconf</link> 扩展：它将配置保存在
+     整个 PHP 生命周期内的共享内存中，因此只需解析一次，
+     访问效率也要高得多。
+     Yaconf 理解完全相同的 INI 语法——用点号分隔的键，
+     以及通过 "<literal>[section : parent]</literal>" 实现的分节继承——
+     因此现有的 <filename>application.ini</filename> 可以原样由 Yaconf 使用；
+     变化的只是把它传给
+     <methodname>Yaf_Application::__construct</methodname> 的方式
+     （参见 <link linkend="yaf.appconfig">应用程序配置</link> 中的提示）。
+    </simpara>
+   </tip>
   </section>
 <!-- }}} -->
 
@@ -40,12 +58,12 @@
      <ooclass>
       <classname>Yaf_Config_Ini</classname>
      </ooclass>
-     
+
      <ooclass>
       <modifier>extends</modifier>
       <classname>Yaf_Config_Abstract</classname>
      </ooclass>
-     
+
      <oointerface>
       <interfacename>Iterator</interfacename>
      </oointerface>
@@ -61,11 +79,11 @@
 <!-- }}} -->
     <classsynopsisinfo role="comment">&Properties;</classsynopsisinfo>
 
-    
+
     <classsynopsisinfo role="comment">&Methods;</classsynopsisinfo>
     <xi:include xpointer="xmlns(db=http://docbook.org/ns/docbook) xpointer(id('class.yaf-config-ini')/db:refentry/db:refsect1[@role='description']/descendant::db:constructorsynopsis[not(@role='procedural')])" />
     <xi:include xpointer="xmlns(db=http://docbook.org/ns/docbook) xpointer(id('class.yaf-config-ini')/db:refentry/db:refsect1[@role='description']/descendant::db:methodsynopsis[1])" />
-    
+
     <classsynopsisinfo role="comment">&InheritedMethods;</classsynopsisinfo>
     <xi:include xpointer="xmlns(db=http://docbook.org/ns/docbook) xpointer(id('class.yaf-config-abstract')/db:refentry/db:refsect1[@role='description']/descendant::db:methodsynopsis[1])" />
 
@@ -74,7 +92,7 @@
 
   </section>
 
-  
+
 <!-- {{{ Yaf_Config_Ini properties -->
   <section xml:id="yaf-config-ini.props">
    &reftitle.properties;
@@ -100,11 +118,12 @@
   <example>
    <title><function>Yaf_Config_Ini</function> 示例</title>
    <para>
-    这个例子说明了使用 Yaf_Config_Ini 从一个 INI 配置文件中获取配置数据的基本用法。
-    这个例子中既有生产环境的配置方法也有演示环境的配置方法。
-    因为演示环境的配置跟生产环境的非常类似，所以演示环境的配置继承了生产环境的配置。
-    在复杂的情况下，决定是任意的，也可以写成相反的。在更复杂的情况下，生产环境继承自演示环境不是不可能的。
-    假设，以下配置数据都包含在 /path/to/config.ini 中：
+    这个例子说明了使用 Yaf_Config_Ini 从 INI 文件中加载配置数据的基本用法。
+    这个例子中既有生产环境的配置数据，也有预发布（staging）环境的配置数据。
+    因为预发布环境的配置数据与生产环境的非常相似，所以预发布节继承自生产节。
+    在这里这个决定是任意的，也可以反过来写，让生产节继承自预发布节，
+    不过在更复杂的情况下可能就不是这样了。
+    假设以下配置数据包含在 /path/to/config.ini 中：
    </para>
    <programlisting role="ini">
 <![CDATA[

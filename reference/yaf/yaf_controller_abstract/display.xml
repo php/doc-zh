@@ -1,22 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 94f2f851f015535e58fd84bc2accac402f21a48e Maintainer: mowangjuanzi Status: ready -->
+<!-- EN-Revision: ddcf673c59d1708557680946fbffeee361d7fca6 Maintainer: mowangjuanzi Status: ready -->
 <refentry xml:id="yaf-controller-abstract.display" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
   <refname>Yaf_Controller_Abstract::display</refname>
-  <refpurpose>The display purpose</refpurpose>
+  <refpurpose>渲染并直接显示视图</refpurpose>
  </refnamediv>
 
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <modifier>protected</modifier> <type>bool</type><methodname>Yaf_Controller_Abstract::display</methodname>
+   <modifier>protected</modifier> <type class="union"><type>bool</type><type>null</type></type><methodname>Yaf_Controller_Abstract::display</methodname>
    <methodparam><type>string</type><parameter>tpl</parameter></methodparam>
-   <methodparam choice="opt"><type>array</type><parameter>parameters</parameter></methodparam>
+   <methodparam choice="opt"><type class="union"><type>array</type><type>null</type></type><parameter>parameters</parameter></methodparam>
   </methodsynopsis>
-  <para>
-
-  </para>
+  <simpara>
+   渲染视图脚本 <parameter>tpl</parameter> 并直接发送结果，这与
+   <methodname>Yaf_Controller_Abstract::render</methodname> 不同，
+   后者会返回渲染后的输出。默认动作模板的自动渲染由
+   <methodname>Yaf_Dispatcher::autoRender</methodname> 控制。
+  </simpara>
  </refsect1>
 
  <refsect1 role="parameters">
@@ -25,17 +28,18 @@
    <varlistentry>
     <term><parameter>tpl</parameter></term>
     <listitem>
-     <para>
-      
-     </para>
+     <simpara>
+      视图脚本名称，相对于视图路径。
+     </simpara>
     </listitem>
    </varlistentry>
    <varlistentry>
     <term><parameter>parameters</parameter></term>
     <listitem>
-     <para>
-      
-     </para>
+     <simpara>
+      一个关联数组，其中的变量会被导出到本次渲染的视图脚本中，
+      覆盖通过视图引擎分配的变量。
+     </simpara>
     </listitem>
    </varlistentry>
   </variablelist>
@@ -43,11 +47,65 @@
 
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
-  <para>
-
-  </para>
+  <simpara>
+   成功时返回 &true;，失败时返回 &false; / &null;。
+  </simpara>
  </refsect1>
 
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <example>
+   <title><methodname>Yaf_Controller_Abstract::display</methodname> 示例</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+class ProductController extends Yaf_Controller_Abstract
+{
+    public function listAction() {
+        // 渲染 product/list.phtml 并把结果直接发送给客户端，
+        // 同时把 $products 导出到本次渲染中
+        $this->display("product/list.phtml", array(
+            "products" => array("yaf", "php"),
+        ));
+    }
+}
+?>
+]]>
+   </programlisting>
+  </example>
+  <example>
+   <title>模板示例</title>
+   <programlisting role="php">
+<![CDATA[
+<!-- application/views/product/list.phtml -->
+<ul>
+<?php foreach ($products as $product) { ?>
+    <li><?php echo $product; ?></li>
+<?php } ?>
+</ul>
+]]>
+   </programlisting>
+   &example.outputs.similar;
+   <screen>
+<![CDATA[
+<ul>
+    <li>yaf</li>
+    <li>php</li>
+</ul>
+]]>
+   </screen>
+  </example>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><methodname>Yaf_Controller_Abstract::render</methodname></member>
+    <member><methodname>Yaf_Dispatcher::autoRender</methodname></member>
+   </simplelist>
+  </para>
+ </refsect1>
 
 </refentry>
 

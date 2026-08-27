@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: c789d27148560a4095b7e66096b5a12f9abdb840 Maintainer: mowangjuanzi Status: ready -->
+<!-- EN-Revision: ddcf673c59d1708557680946fbffeee361d7fca6 Maintainer: mowangjuanzi Status: ready -->
 <refentry xml:id="yaf-controller-abstract.redirect" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
   <refname>Yaf_Controller_Abstract::redirect</refname>
@@ -10,12 +10,13 @@
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <modifier>public</modifier> <type>bool</type><methodname>Yaf_Controller_Abstract::redirect</methodname>
+   <modifier>public</modifier> <type class="union"><type>bool</type><type>null</type></type><methodname>Yaf_Controller_Abstract::redirect</methodname>
    <methodparam><type>string</type><parameter>url</parameter></methodparam>
   </methodsynopsis>
-  <para>
-   通过发送 302 标头重定向到 URL
-  </para>
+  <simpara>
+   通过发送 <literal>Location</literal> 头（HTTP 状态 302）将客户端重定向到另一个
+   URL。
+  </simpara>
  </refsect1>
 
  <refsect1 role="parameters">
@@ -24,9 +25,9 @@
    <varlistentry>
     <term><parameter>url</parameter></term>
     <listitem>
-     <para>
-      位置 URL
-     </para>
+     <simpara>
+      要重定向到的 URL。
+     </simpara>
     </listitem>
    </varlistentry>
   </variablelist>
@@ -34,11 +35,43 @@
 
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
-  <para>
-   bool
-  </para>
+  <simpara>
+   成功时返回 &true;，失败时返回 &false; / &null;。
+  </simpara>
  </refsect1>
 
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <example>
+   <title><methodname>Yaf_Controller_Abstract::redirect</methodname> 示例</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+class AccountController extends Yaf_Controller_Abstract
+{
+    public function loginAction() {
+        if (!$this->getRequest()->getParam("user")) {
+            // 发送带 302 状态的 Location 头
+            $this->redirect("http://www.example.com/account/login/");
+            return false; // 跳过自动渲染
+        }
+    }
+}
+?>
+]]>
+   </programlisting>
+  </example>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><methodname>Yaf_Controller_Abstract::forward</methodname></member>
+    <member><methodname>Yaf_Response_Abstract::setRedirect</methodname></member>
+   </simplelist>
+  </para>
+ </refsect1>
 
 </refentry>
 

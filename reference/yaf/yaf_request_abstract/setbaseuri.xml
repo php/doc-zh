@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 7418592d82d6cde8d052effd3607e5761d6c4e67 Maintainer: mowangjuanzi Status: ready -->
+<!-- EN-Revision: ddcf673c59d1708557680946fbffeee361d7fca6 Maintainer: mowangjuanzi Status: ready -->
 <refentry xml:id="yaf-request-abstract.setbaseuri" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
   <refname>Yaf_Request_Abstract::setBaseUri</refname>
@@ -10,18 +10,19 @@
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <modifier>public</modifier> <type>bool</type><methodname>Yaf_Request_Abstract::setBaseUri</methodname>
+   <modifier>public</modifier> <type class="union"><type>Yaf_Request_Abstract</type><type>false</type></type><methodname>Yaf_Request_Abstract::setBaseUri</methodname>
    <methodparam><type>string</type><parameter>uir</parameter></methodparam>
   </methodsynopsis>
   <para>
-   设置基础 URI，在路由时使用基础 URI，在路由阶段，请求 URI 用于路由请求，而基础 URI
-   用户跳过请求 URI 的前置部分（基础 URI）。
+   设置基础 URI，基础 URI 用于路由，在路由阶段，请求 URI 用于路由请求，
+   而基础 URI 用于跳过请求 URI 的前置部分（基础 URI）。
 
-   也就是说，如果请求 URI 是 a/b/c，然后设置基础 URI 为 “a/b”，则路由阶段只会使用“/c”
+   也就是说，如果请求 URI 是 a/b/c，设置基础 URI 为 "a/b"，
+   那么路由阶段只会使用 "/c"。
    <note>
-    <para>
-     一般不需要设置，Yaf 会自动判断。
-    </para>
+    <simpara>
+     一般情况下不需要设置，Yaf 会自动判断。
+    </simpara>
    </note>
   </para>
 
@@ -43,12 +44,45 @@
 
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
-  <para>
-   bool
-  </para>
+  <simpara>成功时返回请求对象自身，失败时返回 &false;。</simpara>
  </refsect1>
 
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <example>
+   <title><methodname>Yaf_Request_Abstract::setBaseUri</methodname> 示例</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+$request = new Yaf_Request_Simple("GET", "Index", "Product", "View");
 
+// 应用部署在 /myapp 下，
+// 请求以 /myapp/product/view 的形式进来
+$request->setBaseUri("/myapp");
+$request->setRequestUri("/myapp/product/view");
+
+var_dump($request->getBaseUri());
+var_dump($request->getRequestUri());
+?>]]>
+   </programlisting>
+   &example.outputs.similar;
+   <screen>
+<![CDATA[
+string(6) "/myapp"
+string(19) "/myapp/product/view"
+]]>
+   </screen>
+  </example>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <simplelist>
+   <member><methodname>Yaf_Request_Abstract::getBaseUri</methodname></member>
+   <member><methodname>Yaf_Request_Abstract::setRequestUri</methodname></member>
+   <member><methodname>Yaf_Request_Abstract::getRequestUri</methodname></member>
+  </simplelist>
+ </refsect1>
 </refentry>
 
 <!-- Keep this comment at the end of the file
