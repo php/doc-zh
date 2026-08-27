@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: a023d0b2477a34b665318759194f64e4eeaa2262 Maintainer: mowangjuanzi Status: ready -->
+<!-- EN-Revision: ddcf673c59d1708557680946fbffeee361d7fca6 Maintainer: mowangjuanzi Status: ready -->
 <refentry xml:id="yaf-view-simple.eval" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
-  <refname>Yaf_View_Simple::eval</refname>
-  <refpurpose>渲染模板</refpurpose>
+<refname>Yaf_View_Simple::eval</refname>
+<refpurpose>渲染模板字符串</refpurpose>
  </refnamediv>
 
  <refsect1 role="description">
@@ -12,11 +12,12 @@
   <methodsynopsis>
    <modifier>public</modifier> <type>string</type><methodname>Yaf_View_Simple::eval</methodname>
    <methodparam><type>string</type><parameter>tpl_content</parameter></methodparam>
-   <methodparam choice="opt"><type>array</type><parameter>tpl_vars</parameter></methodparam>
+   <methodparam choice="opt"><type>array</type><parameter>vars</parameter><initializer>NULL</initializer></methodparam>
   </methodsynopsis>
-  <para>
-    渲染一个字符串模板，然后返回结果。
-  </para>
+  <simpara>渲染以字符串形式给出的模板，并返回结果。</simpara>
+   <note>
+   <simpara>由于不涉及模板文件，因此不会查找模板目录。</simpara>
+  </note>
  </refsect1>
 
  <refsect1 role="parameters">
@@ -25,30 +26,60 @@
    <varlistentry>
     <term><parameter>tpl_content</parameter></term>
     <listitem>
-     <para>
-       字符串模板
-     </para>
+<simpara>以字符串形式给出的模板内容。</simpara>
     </listitem>
    </varlistentry>
    <varlistentry>
-    <term><parameter>tpl_vars</parameter></term>
+    <term><parameter>vars</parameter></term>
     <listitem>
-     <para>
-      
-     </para>
+<simpara>仅供本次渲染使用的可选变量；它们会覆盖同名的已分配变量。</simpara>
     </listitem>
    </varlistentry>
   </variablelist>
  </refsect1>
-
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
-  <para>
-
-  </para>
+<simpara>以字符串形式返回渲染结果，失败时返回 &false;。</simpara>
  </refsect1>
 
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <example>
+   <title><methodname>Yaf_View_Simple::eval</methodname> 示例</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+class IndexController extends Yaf_Controller_Abstract
+{
+    public function indexAction()
+    {
+        $template = "<h1><?php echo htmlspecialchars($title); ?></h1>";
 
+        /* 渲染模板字符串，不触碰文件系统 */
+        $html = $this->getView()->eval($template, array("title" => "Breaking News"));
+
+        $this->getResponse()->setBody($html);
+        return false; // 跳过自动渲染
+    }
+}
+?>
+]]>
+   </programlisting>
+   &example.outputs.similar;
+   <screen>
+<![CDATA[
+<h1>Breaking News</h1>]]>
+   </screen>
+  </example>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <simplelist>
+   <member><methodname>Yaf_View_Simple::render</methodname></member>
+   <member><methodname>Yaf_View_Simple::display</methodname></member>
+  </simplelist>
+ </refsect1>
 </refentry>
 
 <!-- Keep this comment at the end of the file

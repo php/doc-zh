@@ -1,24 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 1f71c647dd6e32a7e4f03c33bac449c69ed2135b Maintainer: mowangjuanzi Status: ready -->
+<!-- EN-Revision: ddcf673c59d1708557680946fbffeee361d7fca6 Maintainer: mowangjuanzi Status: ready -->
 <refentry xml:id="yaf-request-abstract.setrouted" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
-  <refname>Yaf_Request_Abstract::setRouted</refname>
-  <refpurpose>The setRouted purpose</refpurpose>
+<refname>Yaf_Request_Abstract::setRouted</refname>
+<refpurpose>将请求标记为已路由</refpurpose>
  </refnamediv>
 
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <modifier>public</modifier> <type>void</type><methodname>Yaf_Request_Abstract::setRouted</methodname>
-   <methodparam choice="opt"><type>string</type><parameter>flag</parameter></methodparam>
+   <modifier>final</modifier> <modifier>public</modifier> <type>Yaf_Request_Abstract</type><methodname>Yaf_Request_Abstract::setRouted</methodname>
+   <methodparam choice="opt"><type>bool</type><parameter>flag</parameter><initializer>true</initializer></methodparam>
   </methodsynopsis>
-  <para>
-
-  </para>
-
-  &warn.undocumented.func;
-
+  <simpara>将请求标记为已路由。</simpara>
+  <simpara>路由成功后路由器会调用该方法。手动调用可以阻止后续的自定义路由器继续执行。</simpara>
  </refsect1>
 
  <refsect1 role="parameters">
@@ -27,22 +23,54 @@
    <varlistentry>
     <term><parameter>flag</parameter></term>
     <listitem>
-     <para>
-      
-     </para>
+<simpara>要设置的状态，默认为 &true;。</simpara>
     </listitem>
    </varlistentry>
   </variablelist>
  </refsect1>
-
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
-  <para>
-
-  </para>
+<simpara>返回请求对象自身。</simpara>
  </refsect1>
 
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <example>
+   <title><methodname>Yaf_Request_Abstract::setRouted</methodname> 示例</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+class ApiRouter extends Yaf_Route_Interface
+{
+    public function route(Yaf_Request_Abstract $request)
+    {
+        if (0 !== strpos($request->getRequestUri(), "/api/")) {
+            return false;
+        }
 
+        $request->setControllerName("Api")
+                ->setActionName("handle");
+
+        // 阻止在此之后注册的路由器继续执行
+        $request->setRouted();
+
+        return true;
+    }
+
+    public function assemble(array $info, array $query = null) {}
+}
+?>]]>
+   </programlisting>
+  </example>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <simplelist>
+   <member><methodname>Yaf_Request_Abstract::isRouted</methodname></member>
+   <member><methodname>Yaf_Router::route</methodname></member>
+  </simplelist>
+ </refsect1>
 </refentry>
 
 <!-- Keep this comment at the end of the file

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: a023d0b2477a34b665318759194f64e4eeaa2262 Maintainer: mowangjuanzi Status: ready -->
+<!-- EN-Revision: ddcf673c59d1708557680946fbffeee361d7fca6 Maintainer: mowangjuanzi Status: ready -->
 <refentry xml:id="yaf-application.clearlasterror" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
   <refname>Yaf_Application::clearLastError</refname>
@@ -10,15 +10,14 @@
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <modifier>public</modifier> <type>Yaf_Application</type><methodname>Yaf_Application::clearLastError</methodname>
+   <modifier>public</modifier> <type class="union"><type>Yaf_Application</type><type>null</type></type><methodname>Yaf_Application::clearLastError</methodname>
    <void />
   </methodsynopsis>
-  <para>
-
-  </para>
-
-
-
+  <simpara>
+   清除最后一次错误的代码和信息，将其重置为
+   <literal>0</literal> 和空字符串。这在错误处理器中很有用，
+   已处理的错误不应该被再次报告。
+  </simpara>
  </refsect1>
 
  <refsect1 role="parameters">
@@ -28,9 +27,10 @@
 
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
-  <para>
-
-  </para>
+  <simpara>
+   成功时返回 <classname>Yaf_Application</classname> 对象本身，
+   如果应用没有正确初始化则返回 &null;。
+  </simpara>
  </refsect1>
 
  <refsect1 role="examples">
@@ -44,16 +44,16 @@ function error_handler($errno, $errstr, $errfile, $errline) {
    Yaf_Application::app()->clearLastError();
    var_dump(Yaf_Application::app()->getLastErrorNo());
 }
- 
-$config = array(                   
+
+$config = array(
  "application" => array(
    "directory" => "/tmp/notexists",
      "dispatcher" => array(
-       "throwException" => 0, //trigger error instead of throw exception when error occure
+       "throwException" => 0, //trigger error instead of throwing an exception when an error occurs
       ),
   ),
 );
-  
+
 $app = new Yaf_Application($config);
 $app->getDispatcher()->setErrorHandler("error_handler", E_RECOVERABLE_ERROR);
 $app->run();
@@ -67,6 +67,16 @@ int(0)
 ]]>
    </screen>
   </example>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><methodname>Yaf_Application::getLastErrorNo</methodname></member>
+    <member><methodname>Yaf_Application::getLastErrorMsg</methodname></member>
+   </simplelist>
+  </para>
  </refsect1>
 
 </refentry>

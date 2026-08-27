@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 9e0f03ac354d797d1d16c0fcc1663e5e170f2727 Maintainer: mowangjuanzi Status: ready -->
+<!-- EN-Revision: ddcf673c59d1708557680946fbffeee361d7fca6 Maintainer: mowangjuanzi Status: ready -->
 <refentry xml:id="yaf-application.execute" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
   <refname>Yaf_Application::execute</refname>
@@ -10,33 +10,33 @@
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <modifier>public</modifier> <type>void</type><methodname>Yaf_Application::execute</methodname>
-   <methodparam><type>callable</type><parameter>entry</parameter></methodparam>
-   <methodparam rep="repeat"><type>string</type><parameter>args</parameter></methodparam>
+   <modifier>public</modifier> <type>mixed</type><methodname>Yaf_Application::execute</methodname>
+   <methodparam><type>callable</type><parameter>callback</parameter></methodparam>
+   <methodparam rep="repeat"><type>mixed</type><parameter>args</parameter></methodparam>
   </methodsynopsis>
-  <para>
-   这个方法通常用于在 cron 任务中运行 Yaf_Application。
-   在 cron 任务中也可以使用 autoloader 和 Bootstrap 机制。
-  </para>
+  <simpara>
+   运行一个回调。这个方法通常用于在 cron 任务或其他 CLI 脚本中运行
+   Yaf，使脚本可以重用 autoloader 和 bootstrap 机制。
+  </simpara>
  </refsect1>
 
  <refsect1 role="parameters">
   &reftitle.parameters;
   <variablelist>
    <varlistentry>
-    <term><parameter>entry</parameter></term>
+    <term><parameter>callback</parameter></term>
     <listitem>
-     <para>  
-       一个有效的回调函数
-     </para>
+     <simpara>
+      一个有效的回调函数。
+     </simpara>
     </listitem>
    </varlistentry>
    <varlistentry>
-    <term><parameter>...</parameter></term>
+    <term><parameter>args</parameter></term>
     <listitem>
-     <para>
-      要传递给函数的参数
-     </para>
+     <simpara>
+      传递给回调函数的可选参数。
+     </simpara>
     </listitem>
    </varlistentry>
   </variablelist>
@@ -44,9 +44,9 @@
 
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
-  <para>
-
-  </para>
+  <simpara>
+   返回回调函数的返回值，如果调用回调失败则返回 &false;。
+  </simpara>
  </refsect1>
 
  <refsect1 role="examples">
@@ -57,6 +57,8 @@
 <![CDATA[
 <?php
 function main($argc, $argv) {
+    var_dump($argc);
+    var_dump($argv);
 }
 
 $config = array(
@@ -67,16 +69,32 @@ $config = array(
 
 /** Yaf_Application */
 $application = new Yaf_Application($config);
-$application->execute("main", $argc,  $argv);
+$application->execute("main", $argc, $argv);
 ?>
 ]]>
    </programlisting>
    &example.outputs.similar;
    <screen>
 <![CDATA[
+int(2)
+array(2) {
+  [0]=>
+  string(11) "execute.php"
+  [1]=>
+  string(3) "arg"
+}
 ]]>
    </screen>
   </example>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <para>
+   <simplelist>
+    <member><methodname>Yaf_Application::bootstrap</methodname></member>
+   </simplelist>
+  </para>
  </refsect1>
 
 </refentry>

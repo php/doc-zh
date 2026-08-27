@@ -1,39 +1,88 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 1f71c647dd6e32a7e4f03c33bac449c69ed2135b Maintainer: mowangjuanzi Status: ready -->
+<!-- EN-Revision: ddcf673c59d1708557680946fbffeee361d7fca6 Maintainer: mowangjuanzi Status: ready -->
 <refentry xml:id="yaf-loader.import" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
-  <refname>Yaf_Loader::import</refname>
-  <refpurpose>The import purpose</refpurpose>
+<refname>Yaf_Loader::import</refname>
+<refpurpose>加载 PHP 脚本</refpurpose>
  </refnamediv>
 
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <modifier>public</modifier> <modifier>static</modifier> <type>void</type><methodname>Yaf_Loader::import</methodname>
-   <void />
+   <modifier>public static</modifier> <type>bool</type><methodname>Yaf_Loader::import</methodname>
+   <methodparam><type>string</type><parameter>file</parameter></methodparam>
   </methodsynopsis>
-  <para>
-
-  </para>
-
-  &warn.undocumented.func;
-
+  <simpara>加载一次 PHP 脚本文件。如果文件不是绝对路径，则在本地库目录下查找。</simpara>
+  <simpara>一个文件只会被包含一次；再次用相同的文件调用 <methodname>Yaf_Loader::import</methodname> 会返回 &true; 而不会重复包含。</simpara>
  </refsect1>
 
  <refsect1 role="parameters">
   &reftitle.parameters;
-  &no.function.parameters;
+  <variablelist>
+   <varlistentry>
+    <term><parameter>file</parameter></term>
+    <listitem>
+<simpara>要加载的文件。</simpara>
+    </listitem>
+   </varlistentry>
+  </variablelist>
  </refsect1>
-
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
-  <para>
-
-  </para>
+<simpara>成功时返回 &true;（包括文件已经加载过的情况），失败时返回 &false;。</simpara>
  </refsect1>
 
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <example>
+   <title><methodname>Yaf_Loader::import</methodname> 示例</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+class Bootstrap extends Yaf_Bootstrap_Abstract
+{
+    public function _initHelpers()
+    {
+        /* 相对路径在库目录下查找，
+         * 即 APPLICATION_PATH/library/functions/format.php */
+        Yaf_Loader::import("functions/format.php");
+    }
+}
+?>
+]]>
+   </programlisting>
+  </example>
+  <example>
+   <title>文件只会被导入一次</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+/* 绝对路径直接使用 */
+Yaf_Loader::import("/var/www/shop/application/library/Legacy/csv_export.php");
 
+/* 再次导入相同的文件不会有任何操作，直接返回 true */
+var_dump(
+    Yaf_Loader::import("/var/www/shop/application/library/Legacy/csv_export.php")
+);
+?>
+]]>
+   </programlisting>
+   &example.outputs.similar;
+   <screen>
+<![CDATA[
+bool(true)
+]]>
+   </screen>
+  </example>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <simplelist>
+   <member><methodname>Yaf_Loader::autoload</methodname></member>
+  </simplelist>
+ </refsect1>
 </refentry>
 
 <!-- Keep this comment at the end of the file

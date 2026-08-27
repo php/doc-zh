@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: cf91547d76c5656ac2fb2c8e4e0efe47c52cf332 Maintainer: mowangjuanzi Status: ready -->
+<!-- EN-Revision: ddcf673c59d1708557680946fbffeee361d7fca6 Maintainer: mowangjuanzi Status: ready -->
 <!-- CREDITS: Luffy -->
 <refentry xml:id="yaf-application.app" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
@@ -11,13 +11,13 @@
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <modifier>public</modifier> <modifier>static</modifier> <type>mixed</type><methodname>Yaf_Application::app</methodname>
+   <modifier>public</modifier> <modifier>static</modifier> <type class="union"><type>Yaf_Application</type><type>null</type></type><methodname>Yaf_Application::app</methodname>
    <void />
   </methodsynopsis>
-  <para>
-    检索 <classname>Yaf_Application</classname> 实例。也可以使用 <methodname>Yaf_Dispatcher::getApplication</methodname>。
-  </para>
-
+  <simpara>
+   检索 <classname>Yaf_Application</classname> 实例。
+   也可以使用 <methodname>Yaf_Dispatcher::getApplication</methodname>。
+  </simpara>
  </refsect1>
 
  <refsect1 role="parameters">
@@ -27,16 +27,65 @@
 
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
-  <para>
-   <classname>Yaf_Application</classname> 实例，Yaf_Application 没有初始化之前，返回 &null;。
-  </para>
+  <simpara>
+   返回 <classname>Yaf_Application</classname> 实例，
+   如果还没有初始化过应用则返回 &null;。
+  </simpara>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <example>
+   <title><methodname>Yaf_Application::app</methodname> 示例</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+/* index.php, the application entry */
+$config = new Yaf_Config_Ini(__DIR__ . "/conf/application.ini", "product");
+$application = new Yaf_Application($config);
+$application->bootstrap()->run();
+?>
+]]>
+   </programlisting>
+  </example>
+  <example>
+   <title>在其它地方获取应用实例</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+class IndexController extends Yaf_Controller_Abstract
+{
+    public function indexAction()
+    {
+        /* Yaf_Application::app() is an alias of getInstance() */
+        $app = Yaf_Application::app();
+
+        var_dump($app->environ());
+        var_dump(Yaf_Application::getInstance() === $app);
+
+        return false;
+    }
+}
+?>
+]]>
+   </programlisting>
+   &example.outputs.similar;
+   <screen>
+<![CDATA[
+string(7) "product"
+bool(true)
+]]>
+   </screen>
+  </example>
  </refsect1>
 
  <refsect1 role="seealso">
   &reftitle.seealso;
-  <simplelist>
-   <member><methodname>Yaf_Dispatcher::getApplication</methodname></member>
-  </simplelist>
+  <para>
+   <simplelist>
+    <member><methodname>Yaf_Dispatcher::getApplication</methodname></member>
+   </simplelist>
+  </para>
  </refsect1>
 
 </refentry>

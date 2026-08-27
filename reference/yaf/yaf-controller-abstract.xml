@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 73fae4ee51b644b72028e610abefefced57c18ad Maintainer: mowangjuanzi Status: ready -->
+<!-- EN-Revision: ddcf673c59d1708557680946fbffeee361d7fca6 Maintainer: mowangjuanzi Status: ready -->
 <reference xml:id="class.yaf-controller-abstract" role="class" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude">
 
  <title>Yaf_Controller_Abstract 类</title>
@@ -12,26 +12,36 @@
   <section xml:id="yaf-controller-abstract.intro">
    &reftitle.intro;
    <para>
-    <classname>Yaf_Controller_Abstract</classname> 是 Yaf 系统的 MVC 体系的核心部分。MVC
-    是指 Model-View-Controller，是一个用于分离应用逻辑和表现逻辑的设计模式。
+    <classname>Yaf_Controller_Abstract</classname> 是 Yaf 系统的核心部分。
+    MVC 是 Model-View-Controller（模型-视图-控制器）的缩写，
+    是一种旨在分离应用逻辑与显示逻辑的设计模式。
    </para>
    <para>
-    每个自定义 controller 都应当继承 <classname>Yaf_Controller_Abstract</classname>。
+    每个自定义控制器都应当继承
+    <classname>Yaf_Controller_Abstract</classname>。
+   </para>
+   <simpara>
+    由于 <methodname>Yaf_Controller_Abstract::__construct</methodname>
+    是由 Yaf 不带参数调用的，
+    <classname>Yaf_Controller_Abstract</classname> 提供了一个替代的
+    类构造函数钩子：
+    <methodname>Yaf_Controller_Abstract::init</methodname>。
+   </simpara>
+   <para>
+    如果你在自定义控制器中定义了 init() 方法，
+    那么当控制器被实例化时它将被调用。
    </para>
    <para>
-    自定义 controller 中无法定义 __construct 方法。因此，<classname>Yaf_Controller_Abstract</classname>
-    提供了一个魔术方法 <methodname>Yaf_Controller_Abstract::init</methodname>。
-   </para>
-   <para>
-    如果自定义 controller 里已经定义了 init() 方法，当实例化 controller 的时候，它将被调用。
-   </para>
-   <para>
-    Action 可能需要参数，当请求来到的时候，在路由中如果请求的参数有相同名称的变量（例如：<methodname>Yaf_Request_Abstract::getParam</methodname>），Yaf
-    将把他们传递给 action 方法（参阅 <methodname>Yaf_Action_Abstract::execute</methodname>）。
+    动作（action）可以带参数。当请求到来时，如果经过路由之后
+    请求参数（参见
+    <methodname>Yaf_Request_Abstract::getParam</methodname>）中
+    存在同名的变量，Yaf 将会把它们传递给动作方法
+    （参见 <methodname>Yaf_Action_Abstract::execute</methodname>）。
     <note>
-     <para>
-      这些参数是直接获取的，没有过滤，使用他们之前应该仔细处理。
-     </para>
+     <simpara>
+      这些参数是直接获取的，没有经过过滤，
+      在使用之前应当仔细处理。
+     </simpara>
     </note>
    </para>
   </section>
@@ -54,7 +64,7 @@
 <!-- }}} -->
     <classsynopsisinfo role="comment">&Properties;</classsynopsisinfo>
     <fieldsynopsis>
-     <modifier>public</modifier>
+     <modifier>protected</modifier>
      <varname linkend="yaf-controller-abstract.props.actions">actions</varname>
     </fieldsynopsis>
     <fieldsynopsis>
@@ -82,7 +92,7 @@
      <varname linkend="yaf-controller-abstract.props.view">_view</varname>
     </fieldsynopsis>
 
-    
+
     <classsynopsisinfo role="comment">&Methods;</classsynopsisinfo>
     <xi:include xpointer="xmlns(db=http://docbook.org/ns/docbook) xpointer(id('class.yaf-controller-abstract')/db:refentry/db:refsect1[@role='description']/descendant::db:constructorsynopsis[not(@role='procedural')])" />
     <xi:include xpointer="xmlns(db=http://docbook.org/ns/docbook) xpointer(id('class.yaf-controller-abstract')/db:refentry/db:refsect1[@role='description']/descendant::db:methodsynopsis[1])" />
@@ -91,7 +101,7 @@
 
   </section>
 
-  
+
 <!-- {{{ Yaf_Controller_Abstract properties -->
   <section xml:id="yaf-controller-abstract.props">
    &reftitle.properties;
@@ -100,7 +110,8 @@
      <term><varname>actions</varname></term>
      <listitem>
       <para>
-       也可以通过使用此属性和 <classname>Yaf_Action_Abstract</classname> 在一个单独的 PHP 脚本中定义 action 方法。
+      你也可以通过使用此属性和 <classname>Yaf_Action_Abstract</classname>
+      在一个单独的 PHP 脚本中定义动作方法。
       <example>
        <title>在单独的文件中定义 action</title>
         <programlisting role="php">
@@ -143,47 +154,50 @@ class DummyAction extends Yaf_Action_Abstract {
     <varlistentry xml:id="yaf-controller-abstract.props.module">
      <term><varname>_module</varname></term>
      <listitem>
-      <para>
-        模块名
-      </para>
+      <simpara>
+        该控制器所属的模块名。
+      </simpara>
      </listitem>
     </varlistentry>
     <varlistentry xml:id="yaf-controller-abstract.props.name">
      <term><varname>_name</varname></term>
      <listitem>
-      <para>
-        控制器名
-      </para>
+      <simpara>
+        控制器名。
+      </simpara>
      </listitem>
     </varlistentry>
     <varlistentry xml:id="yaf-controller-abstract.props.request">
      <term><varname>_request</varname></term>
      <listitem>
-      <para>
-       当前请求实例
-      </para>
+      <simpara>
+      当前的 <classname>Yaf_Request_Abstract</classname> 对象。
+      </simpara>
      </listitem>
     </varlistentry>
     <varlistentry xml:id="yaf-controller-abstract.props.response">
      <term><varname>_response</varname></term>
      <listitem>
-      <para>
-       当前响应对象
-      </para>
+      <simpara>
+      当前的 <classname>Yaf_Response_Abstract</classname> 对象。
+      </simpara>
      </listitem>
     </varlistentry>
     <varlistentry xml:id="yaf-controller-abstract.props.invoke-args">
      <term><varname>_invoke_args</varname></term>
      <listitem>
-      <para></para>
+      <simpara>
+      通过 <methodname>Yaf_Controller_Abstract::forward</methodname>
+      传递给动作的调用参数，是一个以参数名为键的数组。
+      </simpara>
      </listitem>
     </varlistentry>
     <varlistentry xml:id="yaf-controller-abstract.props.view">
      <term><varname>_view</varname></term>
      <listitem>
-      <para>
-      视图引擎
-      </para>
+      <simpara>
+      用于渲染视图的 <classname>Yaf_View_Interface</classname> 对象。
+      </simpara>
      </listitem>
     </varlistentry>
    </variablelist>

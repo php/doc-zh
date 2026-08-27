@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 37a12bad6c625be2f4df088dfadb72ded9a3389e Maintainer: mowangjuanzi Status: ready -->
+<!-- EN-Revision: ddcf673c59d1708557680946fbffeee361d7fca6 Maintainer: mowangjuanzi Status: ready -->
 <refentry xml:id="yaf-route-static.route" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
-  <refname>Yaf_Route_Static::route</refname>
-  <refpurpose>路由请求</refpurpose>
+<refname>Yaf_Route_Static::route</refname>
+<refpurpose>路由请求</refpurpose>
  </refnamediv>
 
  <refsect1 role="description">
@@ -13,12 +13,8 @@
    <modifier>public</modifier> <type>bool</type><methodname>Yaf_Route_Static::route</methodname>
    <methodparam><type>Yaf_Request_Abstract</type><parameter>request</parameter></methodparam>
   </methodsynopsis>
-  <para>
-
-  </para>
-
-  &warn.undocumented.func;
-
+  <simpara>按照 PATH_INFO 风格的 URI 对请求进行路由：只有当第一段路径是已注册的模块之一时，才将其视为模块名，否则按顺序将各段路径映射为控制器和动作。剩余的路径段成为请求参数。</simpara>
+  <simpara>例如，在没有名为 <literal>foo</literal> 的模块时，<literal>/foo/bar/age/10</literal> 会路由到控制器 <literal>Foo</literal>、动作 <literal>bar</literal>，其中参数 <literal>age</literal> 的值为 <literal>10</literal>。</simpara>
  </refsect1>
 
  <refsect1 role="parameters">
@@ -27,59 +23,55 @@
    <varlistentry>
     <term><parameter>request</parameter></term>
     <listitem>
-     <para>
-      
-     </para>
+<simpara>要路由的 <classname>Yaf_Request_Abstract</classname> 实例。</simpara>
     </listitem>
    </varlistentry>
   </variablelist>
  </refsect1>
-
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
-  <para>
-   总是返回 &true;
-  </para>
+<simpara>总是返回 &true;。</simpara>
  </refsect1>
 
  <refsect1 role="examples">
   &reftitle.examples;
   <example>
-   <title><function>Yaf_Route_Static::route</function>example</title>
-   <programlisting role="shell">
+   <title><methodname>Yaf_Route_Static::route</methodname> 示例</title>
+   <programlisting role="php">
 <![CDATA[
-// assuming there is only one module defined:Index
-Request: http://yourdomain.com/a/b
-=> module = index, controller=a, action=b
+<?php
+$request = new Yaf_Request_Http("/product/detail/id/10");
 
-//assuming ap.action_prefer = On
-Request: http://yourdomain.com/b
-=> module = default(index), controller = default(index), action = b
+/* 静态路由是 Yaf_Router 的默认路由，
+ * 注册在 "_default" 这个名字下 */
+$route = Yaf_Dispatcher::getInstance()->getRouter()->getRoute("_default");
+var_dump($route->route($request));
 
-//assuming ap.action_prefer = Off
-Request: http://yourdomain.com/b
-=> module = default(index), controller = b, action = default(index)
-
-
-Request: http://yourdomain.com/a/b/foo/bar/test/a/id/4
-=> module = default(index), controller = a, action = b, request parameters: foo = bar, test = a, id = 4
+var_dump($request->getControllerName());
+var_dump($request->getActionName());
+var_dump($request->getParam("id"));
+?>
 ]]>
    </programlisting>
+   &example.outputs.similar;
+   <screen>
+<![CDATA[
+bool(true)
+string(7) "product"
+string(6) "detail"
+string(2) "10"
+]]>
+   </screen>
   </example>
  </refsect1>
 
  <refsect1 role="seealso">
   &reftitle.seealso;
   <simplelist>
-   <member><methodname>Yaf_Route_Supervar::route</methodname></member>
-   <member><methodname>Yaf_Route_Simple::route</methodname></member>
-   <member><methodname>Yaf_Route_Regex::route</methodname></member>
-   <member><methodname>Yaf_Route_Rewrite::route</methodname></member>
-   <member><methodname>Yaf_Route_Map::route</methodname></member>
-  </simplelist>                       
- </refsect1>  
-
-
+   <member><methodname>Yaf_Route_Static::match</methodname></member>
+   <member><methodname>Yaf_Route_Static::assemble</methodname></member>
+  </simplelist>
+ </refsect1>
 </refentry>
 
 <!-- Keep this comment at the end of the file

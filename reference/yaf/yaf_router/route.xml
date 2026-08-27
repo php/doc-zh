@@ -1,39 +1,94 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 2d04efd3203278143d16de23df2df37758a49368 Maintainer: mowangjuanzi Status: ready -->
+<!-- EN-Revision: ddcf673c59d1708557680946fbffeee361d7fca6 Maintainer: mowangjuanzi Status: ready -->
 <refentry xml:id="yaf-router.route" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
-  <refname>Yaf_Router::route</refname>
-  <refpurpose>The route purpose</refpurpose>
+<refname>Yaf_Router::route</refname>
+<refpurpose>路由请求</refpurpose>
  </refnamediv>
 
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <modifier>public</modifier> <type>bool</type><methodname>Yaf_Router::route</methodname>
+   <modifier>public</modifier> <type class="union"><type>bool</type><type>null</type></type><methodname>Yaf_Router::route</methodname>
    <methodparam><type>Yaf_Request_Abstract</type><parameter>request</parameter></methodparam>
   </methodsynopsis>
-  <para>
-
-  </para>
-
-  &warn.undocumented.func;
-
+  <simpara>使用已注册的路由对请求进行路由。</simpara>
+  <simpara>路由按注册顺序的倒序依次尝试。第一个认领该请求的路由胜出；随后请求被标记为已路由（参见 <methodname>Yaf_Request_Abstract::setRouted</methodname>），并记录胜出的路由名，可通过 <methodname>Yaf_Router::getCurrentRoute</methodname> 获取。</simpara>
+  <simpara>除非配置了自定义的默认路由，否则默认路由注册为 <literal>_default</literal>，即 <classname>Yaf_Route_Static</classname>。</simpara>
  </refsect1>
 
  <refsect1 role="parameters">
   &reftitle.parameters;
-  &no.function.parameters;
+  <variablelist>
+   <varlistentry>
+    <term><parameter>request</parameter></term>
+    <listitem>
+<simpara>要路由的 <classname>Yaf_Request_Abstract</classname> 实例。</simpara>
+    </listitem>
+   </varlistentry>
+  </variablelist>
  </refsect1>
-
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
-  <para>
-
-  </para>
+<simpara>请求成功路由时返回 &true;，没有路由匹配时（例如畸形的 URI）返回 &false;，此时调度器会停止。</simpara>
  </refsect1>
 
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <example>
+   <title><methodname>Yaf_Router::route</methodname> 示例</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+class Bootstrap extends Yaf_Bootstrap_Abstract
+{
+    public function _initRoute(Yaf_Dispatcher $dispatcher)
+    {
+        $router = $dispatcher->getRouter();
 
+        $router->addRoute("rewrite", new Yaf_Route_Rewrite(
+            "/product/:id",
+            ["controller" => "product", "action" => "detail"]
+        ));
+
+        /* 路由一个手工构造的请求，例如在单元测试中 */
+        $request = new Yaf_Request_Simple("CLI", null, "index.php",
+            "/product/123", null);
+
+        if ($router->route($request)) {
+            var_dump($router->getCurrentRoute());
+            var_dump($request->getControllerName());
+            var_dump($request->getActionName());
+            var_dump($request->getParam("id"));
+        } else {
+            /* 没有路由匹配 */
+        }
+    }
+}
+?>
+]]>
+   </programlisting>
+   &example.outputs.similar;
+   <screen>
+<![CDATA[
+string(7) "rewrite"
+string(7) "product"
+string(6) "detail"
+string(3) "123"
+]]>
+   </screen>
+  </example>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <simplelist>
+   <member><methodname>Yaf_Router::addRoute</methodname></member>
+   <member><methodname>Yaf_Router::getCurrentRoute</methodname></member>
+   <member><methodname>Yaf_Dispatcher::dispatch</methodname></member>
+  </simplelist>
+ </refsect1>
 </refentry>
 
 <!-- Keep this comment at the end of the file

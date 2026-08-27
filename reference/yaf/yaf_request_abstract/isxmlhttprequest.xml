@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: f9aaf5817f4dfe7ca901b75571ef47d9b4255167 Maintainer: mowangjuanzi Status: ready -->
+<!-- EN-Revision: ddcf673c59d1708557680946fbffeee361d7fca6 Maintainer: mowangjuanzi Status: ready -->
 <refentry xml:id="yaf-request-abstract.isxmlhttprequest" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
-  <refname>Yaf_Request_Abstract::isXmlHttpRequest</refname>
-  <refpurpose>判断请求是否是 AJAX 请求</refpurpose>
+<refname>Yaf_Request_Abstract::isXmlHttpRequest</refname>
+<refpurpose>判断请求是否是 AJAX 请求</refpurpose>
  </refnamediv>
 
  <refsect1 role="description">
@@ -13,35 +13,68 @@
    <modifier>public</modifier> <type>bool</type><methodname>Yaf_Request_Abstract::isXmlHttpRequest</methodname>
    <void />
   </methodsynopsis>
-  <para>
-
-  </para>
+  <simpara>通过检查 HTTP_X_REQUESTED_WITH 请求头来判断请求是否是 Ajax 请求。</simpara>
+  <note>
+   <simpara>
+    <classname>Yaf_Request_Simple</classname> 重写了该方法并始终返回
+    &false;，因为命令行请求不可能是 Ajax 请求。
+   </simpara>
+  </note>
  </refsect1>
 
  <refsect1 role="parameters">
   &reftitle.parameters;
   &no.function.parameters;
  </refsect1>
-
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
-  <para>
-   boolean
-  </para>
+<simpara>如果请求是 Ajax 请求（<literal>X-Requested-With</literal> 头等于 <literal>XMLHttpRequest</literal>）则返回 &true;，否则返回 &false;。</simpara>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <example>
+   <title><methodname>Yaf_Request_Abstract::isXmlHttpRequest</methodname> 示例</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+class ProductController extends Yaf_Controller_Abstract
+{
+    public function viewAction()
+    {
+        // 假设请求携带了 "X-Requested-With: XMLHttpRequest"
+        if ($this->getRequest()->isXmlHttpRequest()) {
+            $this->getResponse()
+                 ->setHeader("Content-Type", "application/json")
+                 ->setBody(json_encode(["id" => 17, "name" => "Yaf in Action"]));
+            return false;
+        }
+    }
+}
+?>]]>
+   </programlisting>
+   &example.outputs.similar;
+   <screen>
+<![CDATA[
+{"id":17,"name":"Yaf in Action"}
+]]>
+   </screen>
+  </example>
  </refsect1>
 
  <refsect1 role="seealso">
   &reftitle.seealso;
   <simplelist>
-   <member><methodname>Yaf_Request_Abstract::isHead</methodname></member>
-   <member><methodname>Yaf_Request_Abstract::isCli</methodname></member>
+   <member><methodname>Yaf_Request_Abstract::isGet</methodname></member>
    <member><methodname>Yaf_Request_Abstract::isPost</methodname></member>
    <member><methodname>Yaf_Request_Abstract::isPut</methodname></member>
+   <member><methodname>Yaf_Request_Abstract::isHead</methodname></member>
    <member><methodname>Yaf_Request_Abstract::isOptions</methodname></member>
-   <member><methodname>Yaf_Request_Abstract::isGet</methodname></member>
+   <member><methodname>Yaf_Request_Abstract::isDelete</methodname></member>
+   <member><methodname>Yaf_Request_Abstract::isPatch</methodname></member>
+   <member><methodname>Yaf_Request_Abstract::isCli</methodname></member>
   </simplelist>
  </refsect1>
-
 </refentry>
 
 <!-- Keep this comment at the end of the file

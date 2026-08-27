@@ -1,39 +1,104 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 1f71c647dd6e32a7e4f03c33bac449c69ed2135b Maintainer: mowangjuanzi Status: ready -->
+<!-- EN-Revision: ddcf673c59d1708557680946fbffeee361d7fca6 Maintainer: mowangjuanzi Status: ready -->
 <refentry xml:id="yaf-view-interface.getscriptpath" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
-  <refname>Yaf_View_Interface::getScriptPath</refname>
-  <refpurpose>The getScriptPath purpose</refpurpose>
+<refname>Yaf_View_Interface::getScriptPath</refname>
+<refpurpose>获取模板目录</refpurpose>
  </refnamediv>
 
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <modifier>abstract</modifier> <modifier>public</modifier> <type>void</type><methodname>Yaf_View_Interface::getScriptPath</methodname>
+   <modifier>abstract</modifier> <modifier>public</modifier> <type>string</type><methodname>Yaf_View_Interface::getScriptPath</methodname>
    <void />
   </methodsynopsis>
-  <para>
-
-  </para>
-
-  &warn.undocumented.func;
-
+  <simpara>获取查找模板时使用的目录。</simpara>
  </refsect1>
 
  <refsect1 role="parameters">
   &reftitle.parameters;
   &no.function.parameters;
  </refsect1>
-
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
-  <para>
-
-  </para>
+<simpara>以字符串形式返回模板目录；如果尚未设置，则返回 &null;。</simpara>
  </refsect1>
 
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <example>
+   <title><methodname>Yaf_View_Interface::getScriptPath</methodname> 示例</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+class MyView implements Yaf_View_Interface
+{
+    private $tpl_dir;
+    private $vars = array();
 
+    public function __construct($template_dir, $options = null)
+    {
+        $this->tpl_dir = $template_dir;
+    }
+
+    public function assign($name, $value = null)
+    {
+        $this->vars[$name] = $value;
+        return true;
+    }
+
+    public function display($tpl, $tpl_vars = null)
+    {
+        echo $this->render($tpl, $tpl_vars);
+        return true;
+    }
+
+    public function render($tpl, $tpl_vars = null)
+    {
+        extract($this->vars);
+        if ($tpl_vars !== null) {
+            extract($tpl_vars);
+        }
+        ob_start();
+        include $this->tpl_dir . "/" . $tpl;
+        return ob_get_clean();
+    }
+
+    public function setScriptPath($template_dir)
+    {
+        $this->tpl_dir = $template_dir;
+        return $this;
+    }
+
+    public function getScriptPath()
+    {
+        return $this->tpl_dir;
+    }
+}
+
+/* 在 bootstrap 中将自定义视图引擎挂载到 dispatcher */
+class Bootstrap extends Yaf_Bootstrap_Abstract
+{
+    public function _initView(Yaf_Dispatcher $dispatcher)
+    {
+        $dispatcher->setView(new MyView(APPLICATION_PATH . "/views"));
+    }
+}
+?>
+]]>
+   </programlisting>
+  </example>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <simplelist>
+   <member><methodname>Yaf_View_Interface::setScriptPath</methodname></member>
+   <member><methodname>Yaf_View_Interface::render</methodname></member>
+   <member><methodname>Yaf_View_Interface::display</methodname></member>
+  </simplelist>
+ </refsect1>
 </refentry>
 
 <!-- Keep this comment at the end of the file

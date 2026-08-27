@@ -1,26 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 49d4fb555745d1981edac87a5a2d8ae53b5f75df Maintainer: mowangjuanzi Status: ready -->
+<!-- EN-Revision: ddcf673c59d1708557680946fbffeee361d7fca6 Maintainer: mowangjuanzi Status: ready -->
 <refentry xml:id="yaf-dispatcher.seterrorhandler" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
   <refname>Yaf_Dispatcher::setErrorHandler</refname>
-  <refpurpose>设置错误处理</refpurpose>
+  <refpurpose>设置错误处理器</refpurpose>
  </refnamediv>
 
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
-   <modifier>public</modifier> <type>Yaf_Dispatcher</type><methodname>Yaf_Dispatcher::setErrorHandler</methodname>
-   <methodparam><type>call</type><parameter>callback</parameter></methodparam>
-   <methodparam><type>int</type><parameter>error_types</parameter></methodparam>
+   <modifier>public</modifier> <type class="union"><type>Yaf_Dispatcher</type><type>null</type><type>false</type></type><methodname>Yaf_Dispatcher::setErrorHandler</methodname>
+   <methodparam><type>mixed</type><parameter>callback</parameter></methodparam>
+   <methodparam choice="opt"><type>int</type><parameter>error_types</parameter><initializer>0</initializer></methodparam>
   </methodsynopsis>
-  <para>
-   为 Yaf 设置错误处理程序，当 <link linkend="configuration.yaf.dispatcher.throwexception">application.dispatcher.throwException</link>
-   关闭时，Yaf 将在发生意外错误时触发可捕获错误。
-  </para>
-  <para>
-   因此，将在错误出现时调用该错误处理程序。
-  </para>
+  <simpara>
+   为 Yaf 设置错误处理器。当
+   <link linkend="configuration.yaf.dispatcher.throwexception">application.dispatcher.throwException</link>
+   关闭时，Yaf 将在发生意外错误时触发可捕获的错误。
+  </simpara>
+  <simpara>
+   此方法是 <function>set_error_handler</function> 的包装；每当引发此类错误时，
+   都会调用该错误处理器。
+  </simpara>
  </refsect1>
 
  <refsect1 role="parameters">
@@ -29,17 +31,18 @@
    <varlistentry>
     <term><parameter>callback</parameter></term>
     <listitem>
-     <para>
-      可调用的回调
-     </para>
+     <simpara>
+      可调用的回调，语义与传给 <function>set_error_handler</function> 的回调相同。
+     </simpara>
     </listitem>
    </varlistentry>
    <varlistentry>
     <term><parameter>error_types</parameter></term>
     <listitem>
-     <para>
-      
-     </para>
+     <simpara>
+      要处理的错误类型，即 <parameter>error_levels</parameter> 参数，
+      与 <function>set_error_handler</function> 的同名参数语义相同。默认处理所有错误类型。
+     </simpara>
     </listitem>
    </varlistentry>
   </variablelist>
@@ -47,18 +50,45 @@
 
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
-  <para>
+  <simpara>
+   成功时返回 <classname>Yaf_Dispatcher</classname> 对象本身；
+   调用 <function>set_error_handler</function> 失败时返回 &false;；
+   应用未初始化时返回 &null;。
+  </simpara>
+ </refsect1>
 
-  </para>
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <example>
+   <title><methodname>Yaf_Dispatcher::setErrorHandler</methodname> 示例</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+$app = new Yaf_Application(dirname(__FILE__) . "/conf/application.ini");
+
+Yaf_Dispatcher::getInstance()->setErrorHandler(function ($errno, $errstr) {
+    // 将错误路由到 ErrorController::errorAction
+    $request = Yaf_Dispatcher::getInstance()->getRequest();
+    $request->setControllerName("Error");
+    $request->setActionName("error");
+});
+
+$app->run();
+?>
+]]>
+   </programlisting>
+  </example>
  </refsect1>
 
  <refsect1 role="seealso">
   &reftitle.seealso;
-  <simplelist>
-   <member><methodname>Yaf_Dispatcher::throwException</methodname></member>
-   <member><methodname>Yaf_Application::getLastErrorNo</methodname></member>
-   <member><methodname>Yaf_Application::getLastErrorMsg</methodname></member>
-  </simplelist>
+  <para>
+   <simplelist>
+    <member><methodname>Yaf_Dispatcher::throwException</methodname></member>
+    <member><methodname>Yaf_Application::getLastErrorNo</methodname></member>
+    <member><methodname>Yaf_Application::getLastErrorMsg</methodname></member>
+   </simplelist>
+  </para>
  </refsect1>
 
 </refentry>

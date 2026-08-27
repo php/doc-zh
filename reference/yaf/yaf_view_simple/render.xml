@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: e275d3930f206216d7b3163c97913c5178b6aa9c Maintainer: mowangjuanzi Status: ready -->
+<!-- EN-Revision: ddcf673c59d1708557680946fbffeee361d7fca6 Maintainer: mowangjuanzi Status: ready -->
 <refentry xml:id="yaf-view-simple.render" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
-  <refname>Yaf_View_Simple::render</refname>
-  <refpurpose>渲染模板</refpurpose>
+<refname>Yaf_View_Simple::render</refname>
+<refpurpose>渲染模板</refpurpose>
  </refnamediv>
 
  <refsect1 role="description">
@@ -12,11 +12,12 @@
   <methodsynopsis>
    <modifier>public</modifier> <type>string</type><methodname>Yaf_View_Simple::render</methodname>
    <methodparam><type>string</type><parameter>tpl</parameter></methodparam>
-   <methodparam choice="opt"><type>array</type><parameter>tpl_vars</parameter></methodparam>
+   <methodparam choice="opt"><type>array</type><parameter>vars</parameter><initializer>NULL</initializer></methodparam>
   </methodsynopsis>
-  <para>
-    渲染模板并返回结果
-  </para>
+  <simpara>渲染模板并将结果作为字符串返回。模板被当作普通的 PHP 脚本来包含，因此其中的任何 PHP 代码都会执行，已赋值的变量也可以按各自的名称使用。</simpara>
+   <note>
+   <simpara>与 <methodname>Yaf_View_Simple::display</methodname> 不同，渲染结果会被返回，而不是追加到 <classname>Yaf_Response_Abstract</classname> 的响应体中。</simpara>
+  </note>
  </refsect1>
 
  <refsect1 role="parameters">
@@ -25,30 +26,72 @@
    <varlistentry>
     <term><parameter>tpl</parameter></term>
     <listitem>
-     <para>
-      
-     </para>
+<simpara>模板的路径，相对于 <methodname>Yaf_View_Simple::setScriptPath</methodname> 或 <literal>application.view.directory</literal> 所设置的模板目录。</simpara>
     </listitem>
    </varlistentry>
    <varlistentry>
-    <term><parameter>tpl_vars</parameter></term>
+    <term><parameter>vars</parameter></term>
     <listitem>
-     <para>
-      
-     </para>
+<simpara>本次渲染可选赋值的变量，它们会覆盖同名的已赋值变量。</simpara>
     </listitem>
    </varlistentry>
   </variablelist>
  </refsect1>
-
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
-  <para>
-
-  </para>
+<simpara>返回渲染结果的字符串，失败时返回 &false;。</simpara>
  </refsect1>
 
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <example>
+   <title><methodname>Yaf_View_Simple::render</methodname> 示例</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+class ProductController extends Yaf_Controller_Abstract
+{
+    public function detailAction()
+    {
+        /* 渲染模板并对结果做后处理 */
+        $html = $this->getView()->render("product/detail.phtml", array(
+            "name"  => "Yaf in Action",
+            "price" => "29.90",
+        ));
 
+        $this->getResponse()->setBody($html);
+        return false; // 跳过自动渲染
+    }
+}
+?>
+]]>
+   </programlisting>
+  </example>
+  <example>
+   <title>模板示例</title>
+   <programlisting role="php">
+<![CDATA[
+<h1><?php echo $name; ?></h1>
+<p>Price: <?php echo $price; ?> EUR</p>
+]]>
+   </programlisting>
+   &example.outputs.similar;
+   <screen>
+<![CDATA[
+<h1>Yaf in Action</h1>
+<p>Price: 29.90 EUR</p>]]>
+   </screen>
+  </example>
+ </refsect1>
+
+ <refsect1 role="seealso">
+  &reftitle.seealso;
+  <simplelist>
+   <member><methodname>Yaf_View_Simple::display</methodname></member>
+   <member><methodname>Yaf_View_Simple::eval</methodname></member>
+   <member><methodname>Yaf_View_Simple::assign</methodname></member>
+  </simplelist>
+ </refsect1>
 </refentry>
 
 <!-- Keep this comment at the end of the file

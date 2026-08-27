@@ -1,22 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: ecaa2146429a7f88de40dfce14718afc896b74c5 Maintainer: mowangjuanzi Status: ready -->
+<!-- EN-Revision: ddcf673c59d1708557680946fbffeee361d7fca6 Maintainer: mowangjuanzi Status: ready -->
 <refentry xml:id="yaf-controller-abstract.construct" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
   <refname>Yaf_Controller_Abstract::__construct</refname>
-  <refpurpose>Yaf_Controller_Abstract 构造方法</refpurpose>
+  <refpurpose>Yaf_Controller_Abstract 的构造函数</refpurpose>
  </refnamediv>
 
  <refsect1 role="description">
   &reftitle.description;
   <constructorsynopsis>
-   <modifier>final</modifier> <modifier>private</modifier> <methodname>Yaf_Controller_Abstract::__construct</methodname>
+   <modifier>public</modifier> <methodname>Yaf_Controller_Abstract::__construct</methodname>
    <void />
   </constructorsynopsis>
-  <para>
-    <methodname>Yaf_Controller_Abstract::__construct</methodname> 是 final，这意味着不能重写。可以考虑查看 
-    <methodname>Yaf_Controller_Abstract::init</methodname>。
-  </para>
+  <simpara>
+   <methodname>Yaf_Controller_Abstract::__construct</methodname> 会在分发
+   过程中创建控制器对象时由 Yaf 调用。它不接受任何参数，用户不应该
+   直接调用它。由于不建议用自定义逻辑覆盖它，
+   <methodname>Yaf_Controller_Abstract::init</methodname> 被作为
+   用户层的初始化钩子提供。
+  </simpara>
  </refsect1>
 
  <refsect1 role="parameters">
@@ -26,16 +29,57 @@
 
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
-  <para>
+  <simpara>
+   没有返回值。
+  </simpara>
+ </refsect1>
 
-  </para>
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <example>
+   <title><methodname>Yaf_Controller_Abstract::__construct</methodname> 示例</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+class IndexController extends Yaf_Controller_Abstract
+{
+    // __construct() 在分发过程中实例化控制器时由 Yaf_Dispatcher
+    // 调用，既不应该手动调用，也不应该被覆盖。
+    // 请改用 init()：
+
+    public function init() {
+        // 当 init() 运行时，分发器已经装配好了控制器：
+        // 请求、响应和视图引擎都已就绪
+        var_dump($this->getRequest() instanceof Yaf_Request_Abstract);
+        var_dump($this->getResponse() instanceof Yaf_Response_Abstract);
+        var_dump($this->getView() instanceof Yaf_View_Interface);
+    }
+
+    public function indexAction() {
+        // ...
+    }
+}
+?>
+]]>
+   </programlisting>
+   &example.outputs.similar;
+   <screen>
+<![CDATA[
+bool(true)
+bool(true)
+bool(true)
+]]>
+   </screen>
+  </example>
  </refsect1>
 
  <refsect1 role="seealso">
   &reftitle.seealso;
-  <simplelist>
-   <member><methodname>Yaf_Controller_Abstract::init</methodname></member>
-  </simplelist>
+  <para>
+   <simplelist>
+    <member><methodname>Yaf_Controller_Abstract::init</methodname></member>
+   </simplelist>
+  </para>
  </refsect1>
 
 </refentry>
