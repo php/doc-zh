@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision$ -->
+<!-- EN-Revision: d3a03f8f542cd083d793bbd8ef3d7756aae7711f Maintainer: Laruence Status: ready -->
+
+<book xml:id="book.yac" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <?phpdoc extension-membership="pecl" ?>
+ <title>Yac</title>
+ <titleabbrev>Yac</titleabbrev>
+
+ <preface xml:id="intro.yac">
+  &reftitle.intro;
+  <simpara>
+   Yac（Yet Another Cache）是一个无锁（lock-free）的共享内存用户数据缓存，
+   可以用来替代 APC 或本地 memcached。
+  </simpara>
+  <simpara>
+   Yac 将数据存储在共享内存中，同一台机器上的每个 PHP 工作进程
+   都能直接访问，无需任何进程间通信。
+   Yac 不加锁，而是依靠原子的槽位更新加上少量的冲突探测，
+   因此缓存未命中（cache miss）绝不会阻塞请求；
+   并发写入最坏的情况也只是某次存储失败或某次读取落空，
+   调用方直接重试即可。
+  </simpara>
+  <simpara>
+   访问路径上没有锁，也没有进程间通信，一次读取本质上就是
+   在共享内存中做一次哈希查找。因此，Yac 极其快，
+   读取延迟在微秒级；只要写入分散在不同的键上，
+   吞吐量还能随着访问缓存的 worker 数量增长。
+  </simpara>
+  <simpara>
+   由于 Yac 用正确性保证换取速度和吞吐量，
+   它最适合缓存那些生成代价高但可以轻易重建的数据：
+   页面片段、配置快照、小型服务响应等本地缓存。
+   不要把它用作不可替代数据的权威存储。
+  </simpara>
+  <simpara>
+   从 yac 2.4.0 开始，小标量值——<constant>NULL</constant>、
+   布尔值、整数、最长 7 字节的短字符串和空数组——
+   直接存储在哈希槽（hash slot）里，而不是单独的值块
+   （即“嵌入值”，embedded values）。这样每次访问都省去了
+   值内存的分配和块拷贝，显著提升性能的同时减少了内存占用。
+   2.4.0 还把压缩后端从 FastLZ 换成了 LZ4，
+   使压缩数据的读取快了好几倍。
+  </simpara>
+  <note>
+   <simpara>
+    共享内存仅在同一台机器内可见。
+    如果需要在多台服务器之间共享缓存，
+    请使用 Memcached 或 Redis 等网络缓存。
+   </simpara>
+  </note>
+ </preface>
+
+ &reference.yac.setup;
+ &reference.yac.constants;
+ <!-- &reference.yac.examples; -->
+ &reference.yac.yac;
+
+</book>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
