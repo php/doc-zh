@@ -1,23 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: fade73b9ec1424cbbfcd5d075a21d30445ce8a23 Maintainer: mowangjuanzi Status: ready -->
+<!-- EN-Revision: 75d48299ef85693f10eee31af1be88488fb84c6f Maintainer: mowangjuanzi Status: ready -->
 <!-- CREDITS: Luffy -->
 <refentry xml:id="yar-client.setopt" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
   <refname>Yar_Client::setOpt</refname>
-  <refpurpose>设置调用的配置</refpurpose>
+  <refpurpose>设置客户端选项</refpurpose>
  </refnamediv>
 
  <refsect1 role="description">
   &reftitle.description;
-  <methodsynopsis>
-   <modifier>public</modifier> <type class="union"><type>Yar_Client</type><type>false</type></type><methodname>Yar_Client::setOpt</methodname>
+  <methodsynopsis role="Yar_Client">
+   <modifier>public</modifier> <type class="union"><type>Yar_Client</type><type>bool</type></type><methodname>Yar_Client::setOpt</methodname>
    <methodparam><type>int</type><parameter>name</parameter></methodparam>
    <methodparam><type>mixed</type><parameter>value</parameter></methodparam>
   </methodsynopsis>
-  <para>
-   设置调用远程服务的一些配置，比如超时值、打包类型等。
-  </para>
+  <simpara>
+   设置客户端选项。选项在每次调用发起时才会被求值，
+   因此可以在两次调用之间随时修改。
+  </simpara>
  </refsect1>
 
  <refsect1 role="parameters">
@@ -26,23 +27,28 @@
    <varlistentry>
     <term><parameter>name</parameter></term>
     <listitem>
-     <para>
-      可以是：
-       <constant>YAR_OPT_PACKAGER</constant>、
-       <constant>YAR_OPT_PERSISTENT</constant>（需要服务端支持）、
-       <constant>YAR_OPT_TIMEOUT</constant>、
-       <constant>YAR_OPT_CONNECT_TIMEOUT</constant>、
-       <constant>YAR_OPT_HEADER</constant>（自 2.0.4 起）、
-       <constant>YAR_OPT_PROXY</constant>（自 2.2.0 起）
-     </para>
+     <simpara>
+      <literal>YAR_OPT_*</literal> 常量之一：
+     </simpara>
+     <simplelist>
+      <member><constant>YAR_OPT_PACKAGER</constant> — 打包器名称：<literal>php</literal>、<literal>json</literal>，或者在编译时启用了 msgpack 支持时的 <literal>msgpack</literal></member>
+      <member><constant>YAR_OPT_PERSISTENT</constant> — 持久连接布尔开关（HTTP keep-alive）</member>
+      <member><constant>YAR_OPT_TIMEOUT</constant> — 超时时间，单位为毫秒，覆盖 <link linkend="ini.yar.timeout">yar.timeout</link></member>
+      <member><constant>YAR_OPT_CONNECT_TIMEOUT</constant> — 连接超时时间，单位为毫秒，覆盖 <link linkend="ini.yar.connect-timeout">yar.connect_timeout</link></member>
+      <member><constant>YAR_OPT_HEADER</constant>（自 2.0.4 起）— 附加 HTTP 头行的 &array;</member>
+      <member><constant>YAR_OPT_RESOLVE</constant>（自 2.1.0 起）— 主机名解析条目的 &array;</member>
+      <member><constant>YAR_OPT_PROXY</constant>（自 2.2.0 起）— HTTP 代理地址</member>
+      <member><constant>YAR_OPT_PROVIDER</constant>（自 2.3.0 起）— 服务提供方标识，长度不超过 32 字节</member>
+      <member><constant>YAR_OPT_TOKEN</constant>（自 2.3.0 起）— 身份验证令牌，长度不超过 32 字节</member>
+     </simplelist>
     </listitem>
    </varlistentry>
    <varlistentry>
     <term><parameter>value</parameter></term>
     <listitem>
-     <para>
-      
-     </para>
+     <simpara>
+      选项的值。无效的值会产生一条警告，并使调用返回 &false;。
+     </simpara>
     </listitem>
    </varlistentry>
   </variablelist>
@@ -50,50 +56,76 @@
 
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
-  <para>
-   成功时返回 <varname>$this</varname>&return.falseforfailure;。
-  </para>
+  <simpara>
+   返回客户端对象自身，从而支持流畅接口（fluent interface）；
+   当选项名称未知、值无效，或者该选项不适用于客户端创建时所用的协议时，返回 &false;。
+  </simpara>
+ </refsect1>
+
+ <refsect1 role="errors">
+  &reftitle.errors;
+  <simpara>
+   以下情况会使调用返回 &false;，同时产生一条警告：
+  </simpara>
+  <itemizedlist>
+   <listitem>
+    <simpara>
+     <constant>YAR_OPT_HEADER</constant>、
+     <constant>YAR_OPT_RESOLVE</constant> 和
+     <constant>YAR_OPT_PROXY</constant> 仅对 HTTP 协议有效；
+     在 <literal>tcp://</literal> 或
+     <literal>unix://</literal> 客户端上使用它们会产生警告。
+    </simpara>
+   </listitem>
+   <listitem>
+    <simpara>
+     <constant>YAR_OPT_RESOLVE</constant> 还要求 libcurl
+     &gt;= 7.21.3。
+    </simpara>
+   </listitem>
+   <listitem>
+    <simpara>
+     每个选项都要求特定类型的值（字符串、布尔、整型或数组），
+     具体说明见常量页。
+    </simpara>
+   </listitem>
+  </itemizedlist>
  </refsect1>
 
  <refsect1 role="examples">
   &reftitle.examples;
   <example>
-   <title><function>Yar_Client::setOpt</function> 示例</title>
+   <title><methodname>Yar_Client::setOpt</methodname> 示例</title>
    <programlisting role="php">
 <![CDATA[
 <?php
 
-$cient = new Yar_Client("http://host/api/");
+$client = new Yar_Client("http://host/api/");
 
-//Set timeout to 1s
-$client->SetOpt(YAR_OPT_CONNECT_TIMEOUT, 1000);
+/* 设置超时时间为 1 秒 */
+$client->setOpt(YAR_OPT_TIMEOUT, 1000);
 
-//Set packager to JSON
-$client->SetOpt(YAR_OPT_PACKAGER, "json");
+/* 设置打包器为 JSON */
+$client->setOpt(YAR_OPT_PACKAGER, "json");
 
-//Set Custom headers
-$client->SetOpt(YAR_OPT_HEADER, array("hr1: val1", "hd2: val2"));
+/* 设置自定义 HTTP 头 */
+$client->setOpt(YAR_OPT_HEADER, ["X-Api-Key: value"]);
 
-// Set Http Proxy
-$client->SetOpt(YAR_OPT_PROXY, "127.0.0.1:8888");
+/* 通过 HTTP 代理转发请求 */
+$client->setOpt(YAR_OPT_PROXY, "127.0.0.1:8888");
 
-/* call remote service */
+/* 调用远程服务 */
 $result = $client->some_method("parameter");
 ?>
 ]]>
    </programlisting>
-   &example.outputs.similar;
-   <screen>
-<![CDATA[
-]]>
-   </screen>
   </example>
  </refsect1>
-
 
  <refsect1 role="seealso">
   &reftitle.seealso;
   <simplelist>
+   <member><methodname>Yar_Client::getOpt</methodname></member>
    <member><methodname>Yar_Client::__call</methodname></member>
   </simplelist>
  </refsect1>

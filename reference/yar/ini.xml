@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 86e6094e86b84a51d00ab217ac50ce8dde33d82a Maintainer: mowangjuanzi Status: ready -->
+<!-- EN-Revision: 75d48299ef85693f10eee31af1be88488fb84c6f Maintainer: mowangjuanzi Status: ready -->
 <section xml:id="yar.configuration" xmlns="http://docbook.org/ns/docbook">
  &reftitle.runtime;
  &extension.runtime;
@@ -18,9 +18,15 @@
     </thead>
     <tbody>
      <row>
-      <entry><link linkend="ini.yar.packager">yar.packager</link></entry>
-      <entry>php</entry>
-      <entry><constant>INI_SYSTEM</constant></entry>
+      <entry><link linkend="ini.yar.connect-timeout">yar.connect_timeout</link></entry>
+      <entry>1000</entry>
+      <entry><constant>INI_ALL</constant></entry>
+      <entry><!-- leave empty, this will be filled by an automatic script --></entry>
+     </row>
+     <row>
+      <entry><link linkend="ini.yar.content-type">yar.content_type</link></entry>
+      <entry>application/octet-stream</entry>
+      <entry><constant>INI_ALL</constant></entry>
       <entry><!-- leave empty, this will be filled by an automatic script --></entry>
      </row>
      <row>
@@ -30,8 +36,20 @@
       <entry><!-- leave empty, this will be filled by an automatic script --></entry>
      </row>
      <row>
-      <entry><link linkend="ini.yar.connect-timeout">yar.connect_timeout</link></entry>
-      <entry>1000</entry>
+      <entry><link linkend="ini.yar.expose-info">yar.expose_info</link></entry>
+      <entry>On</entry>
+      <entry><constant>INI_PERDIR</constant></entry>
+      <entry><!-- leave empty, this will be filled by an automatic script --></entry>
+     </row>
+     <row>
+      <entry><link linkend="ini.yar.packager">yar.packager</link></entry>
+      <entry>php</entry>
+      <entry><constant>INI_PERDIR</constant></entry>
+      <entry><!-- leave empty, this will be filled by an automatic script --></entry>
+     </row>
+     <row>
+      <entry><link linkend="ini.yar.ssl-verify">yar.ssl_verify</link></entry>
+      <entry>Off</entry>
       <entry><constant>INI_ALL</constant></entry>
       <entry><!-- leave empty, this will be filled by an automatic script --></entry>
      </row>
@@ -39,12 +57,6 @@
       <entry><link linkend="ini.yar.timeout">yar.timeout</link></entry>
       <entry>5000</entry>
       <entry><constant>INI_ALL</constant></entry>
-      <entry><!-- leave empty, this will be filled by an automatic script --></entry>
-     </row>
-     <row>
-      <entry><link linkend="ini.yar.expose-info">yar.expose_info</link></entry>
-      <entry>On</entry>
-      <entry><constant>INI_SYSTEM</constant></entry>
       <entry><!-- leave empty, this will be filled by an automatic script --></entry>
      </row>
     </tbody>
@@ -56,49 +68,52 @@
 
  <para>
   <variablelist>
-   <varlistentry xml:id="ini.yar.packager">
-     <term>
-      <parameter>yar.packager</parameter>
-      <type>string</type>
-     </term>
-     <listitem>
-      <para>
-       设置Yar的打包工具, 可以是PHP(serialize), JSON,
-       Msgpack(这个需要编译的时候指定--enable-msgpack).
-      </para>
-     </listitem>
-    </varlistentry>
-    <varlistentry xml:id="ini.yar.debug">
-     <term>
-      <parameter>yar.debug</parameter>
-      <type>string</type>
-     </term>
-     <listitem>
-      <para>
-       打开的时候, Yar会把请求过程的日志都打印出来(到stderr).
-      </para>
-     </listitem>
-    </varlistentry>
-    <varlistentry xml:id="ini.yar.connect-timeout">
+   <varlistentry xml:id="ini.yar.connect-timeout">
      <term>
       <parameter>yar.connect_timeout</parameter>
       <type>int</type>
      </term>
      <listitem>
-      <para>
-       连接超时(毫秒为单位)
-      </para>
+      <simpara>
+       通过 <classname>Yar_Client</classname> 和
+       <classname>Yar_Concurrent_Client</classname> 发起 HTTP
+       调用时的连接超时时间，单位为毫秒。
+      </simpara>
+      <note>
+       <simpara>
+        该值以毫秒为单位。在 Yar 1.2.1
+        之前，它以秒为单位（默认值为
+        <literal>1</literal>）。
+       </simpara>
+      </note>
      </listitem>
     </varlistentry>
-    <varlistentry xml:id="ini.yar.timeout">
+    <varlistentry xml:id="ini.yar.content-type">
      <term>
-      <parameter>yar.timeout</parameter>
-      <type>int</type>
+      <parameter>yar.content_type</parameter>
+      <type>string</type>
      </term>
      <listitem>
-      <para>
-       处理超时(毫秒为单位)
-      </para>
+      <simpara>
+       <classname>Yar_Server</classname> 发送的
+       <literal>Content-Type</literal> 响应头的值。Yar
+       使用二进制协议，因此默认值为
+       <literal>application/octet-stream</literal>。
+      </simpara>
+     </listitem>
+    </varlistentry>
+    <varlistentry xml:id="ini.yar.debug">
+     <term>
+      <parameter>yar.debug</parameter>
+      <type>bool</type>
+     </term>
+     <listitem>
+      <simpara>
+       启用调试模式。开启后，Yar 会为每一个请求和响应输出带有协议级细节的
+       <constant>E_WARNING</constant> 消息，并以
+       <literal>[Debug Yar_Server]</literal> 或
+       <literal>[Debug Yar_Client]</literal> 前缀以及时间戳开头。
+      </simpara>
      </listitem>
     </varlistentry>
     <varlistentry xml:id="ini.yar.expose-info">
@@ -107,9 +122,64 @@
       <type>bool</type>
      </term>
      <listitem>
-      <para>
-       如果关闭, 则当通过浏览器访问Server的时候, 不会出现Server Info信息.
-      </para>
+      <simpara>
+       对于非 POST（通常是 GET）请求，
+       <methodname>Yar_Server::handle</methodname> 是否输出服务信息页面。
+       当此配置项关闭时，这类请求会抛出
+       <exceptionname>Yar_Server_Exception</exceptionname> 异常。
+      </simpara>
+     </listitem>
+    </varlistentry>
+    <varlistentry xml:id="ini.yar.packager">
+     <term>
+      <parameter>yar.packager</parameter>
+      <type>string</type>
+     </term>
+     <listitem>
+      <simpara>
+       用于序列化请求体和响应体的默认打包器。可用的值有
+       <literal>php</literal>（PHP
+       序列化）、<literal>json</literal>，以及
+       <literal>msgpack</literal>（仅当 Yar 使用
+       <option role="configure">--enable-msgpack</option> 编译时可用）。
+      </simpara>
+      <simpara>
+       当 Yar 编译时启用了 msgpack 支持，默认值变为
+       <literal>msgpack</literal>。
+      </simpara>
+      <simpara>
+       该值可以在客户端通过
+       <constant>YAR_OPT_PACKAGER</constant> 选项按客户端单独覆盖。
+      </simpara>
+     </listitem>
+    </varlistentry>
+    <varlistentry xml:id="ini.yar.ssl-verify">
+     <term>
+      <parameter>yar.ssl_verify</parameter>
+      <type>bool</type>
+     </term>
+     <listitem>
+      <simpara>
+       是否验证 HTTPS 服务器的 TLS 证书。开启后，
+       curl 传输方式会设置
+       <constant>CURLOPT_SSL_VERIFYPEER</constant> 和
+       <constant>CURLOPT_SSL_VERIFYHOST</constant>，
+       指向证书无效的服务器的请求将会失败。
+       出于向后兼容的考虑，默认关闭。自 Yar 2.4.0 起可用。
+      </simpara>
+     </listitem>
+    </varlistentry>
+    <varlistentry xml:id="ini.yar.timeout">
+     <term>
+      <parameter>yar.timeout</parameter>
+      <type>int</type>
+     </term>
+     <listitem>
+      <simpara>
+       通过 <classname>Yar_Client</classname> 和
+       <classname>Yar_Concurrent_Client</classname> 发起 RPC
+       调用时的超时时间，单位为毫秒。
+      </simpara>
      </listitem>
     </varlistentry>
 

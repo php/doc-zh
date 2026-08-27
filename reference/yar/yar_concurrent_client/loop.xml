@@ -1,23 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 331fbfeac522d4ad00de1e043cc11610d66b88f9 Maintainer: mowangjuanzi Status: ready -->
+<!-- EN-Revision: 75d48299ef85693f10eee31af1be88488fb84c6f Maintainer: mowangjuanzi Status: ready -->
 <refentry xml:id="yar-concurrent-client.loop" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
   <refname>Yar_Concurrent_Client::loop</refname>
-  <refpurpose>发送所有注册的并行调用</refpurpose>
+  <refpurpose>发送并等待所有已注册的调用</refpurpose>
  </refnamediv>
 
  <refsect1 role="description">
   &reftitle.description;
-  <methodsynopsis>
-   <modifier>public</modifier> <modifier>static</modifier> <type>bool</type><methodname>Yar_Concurrent_Client::loop</methodname>
-   <methodparam choice="opt"><type>callable</type><parameter>callback</parameter></methodparam>
-   <methodparam choice="opt"><type>callable</type><parameter>error_callback</parameter></methodparam>
+  <methodsynopsis role="Yar_Concurrent_Client">
+   <modifier>public</modifier> <modifier>static</modifier> <type class="union"><type>bool</type><type>null</type></type><methodname>Yar_Concurrent_Client::loop</methodname>
+   <methodparam choice="opt"><type class="union"><type>callable</type><type>null</type></type><parameter>callback</parameter><initializer>null</initializer></methodparam>
+   <methodparam choice="opt"><type class="union"><type>callable</type><type>null</type></type><parameter>error_callback</parameter><initializer>null</initializer></methodparam>
+   <methodparam choice="opt"><type class="union"><type>array</type><type>null</type></type><parameter>options</parameter><initializer>null</initializer></methodparam>
   </methodsynopsis>
-  <para>
-   发送所有的已经通过
-   <methodname>Yar_Concurrent_Client::call</methodname> 注册的并行调用, 并且等待返回.
-  </para>
+  <simpara>
+   并行发送所有通过
+   <methodname>Yar_Concurrent_Client::call</methodname> 注册的调用，
+   并阻塞直到每一个响应都已到达并被处理完毕。
+   此方法返回时，调用列表会被清空。
+  </simpara>
  </refsect1>
 
  <refsect1 role="parameters">
@@ -26,22 +29,31 @@
    <varlistentry>
     <term><parameter>callback</parameter></term>
     <listitem>
-     <para>
-      如果这个回掉函数被设置,
-      那么 Yar 在发送出所有的请求之后立即调用一次这个回掉函数(此时还没有任何请求返回),
-      调用的时候 $callinfo 参数是 NULL。
-     </para>
-     <para>
-      如果在注册并行调用的时候制定了 callback, 那么那个 callback 有更高的优先级.
-     </para>
+     <simpara>
+      用于处理注册时没有指定自身回调的调用的响应的 <type>callable</type>。
+      在全部请求发送完毕后，它还会先于任何响应到达之前，
+      额外被调用一次，此时两个参数均为 &null;。
+     </simpara>
     </listitem>
    </varlistentry>
    <varlistentry>
     <term><parameter>error_callback</parameter></term>
     <listitem>
-     <para>
-      错误回掉函数, 如果设置了, 那么 Yar 在出错的时候会调用这个回掉函数.
-     </para>
+     <simpara>
+      用于处理注册时没有指定自身错误回调的调用的错误的 <type>callable</type>。
+      接收三个参数：错误类型（<literal>YAR_ERR_*</literal>
+      错误码之一）、错误消息，以及 <literal>callinfo</literal> &array;。
+     </simpara>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><parameter>options</parameter></term>
+    <listitem>
+     <simpara>
+      客户端选项的 &array;，以
+      <literal>YAR_OPT_*</literal> 常量作为键，
+      应用于每一个未自行覆盖这些选项的已注册调用。
+     </simpara>
     </listitem>
    </varlistentry>
   </variablelist>
@@ -49,70 +61,61 @@
 
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
-  <para>
-
-  </para>
+  <simpara>
+   当所有已注册的调用都已处理完毕，或者根本没有注册任何调用时，返回 &true;。
+   如果并发客户端已经在另一个 loop 中运行，则返回 &false;；
+   此时会产生一条警告。
+  </simpara>
  </refsect1>
 
  <refsect1 role="examples">
   &reftitle.examples;
   <example>
-   <title><function>Yar_Concurrent_Client::loop</function> 示例</title>
+   <title><methodname>Yar_Concurrent_Client::loop</methodname> 示例</title>
    <programlisting role="php">
 <![CDATA[
 <?php
 function callback($retval, $callinfo) {
-     if ($callinfo == NULL) {
-        echo "现在, 所有的请求都发出去了, 还没有任何请求返回\n";
-     } else {
-        echo "这是一个远程调用的返回, 调用的服务名是 ", $callinfo["method"], 
-             ". 调用的 sequence 是 " , $callinfo["sequence"] , "\n";
+    if ($callinfo == NULL) {
+        echo "Now, all requests are sent, and no response available\n";
+    } else {
+        echo "This is a remote call response, the method name is ", $callinfo["method"],
+             ". calling sequence is ", $callinfo["sequence"], "\n";
         var_dump($retval);
-     }
-} 
+    }
+}
 
 function error_callback($type, $error, $callinfo) {
     error_log($error);
 }
 
 Yar_Concurrent_Client::call("http://host/api/", "some_method", array("parameters"), "callback");
-Yar_Concurrent_Client::call("http://host/api/", "some_method", array("parameters"));   // if the callback is not specificed, 
-                                                                               // callback in loop will be used
-Yar_Concurrent_Client::call("http://host/api/", "some_method", array("parameters"), "callback", NULL, array(YAR_OPT_PACKAGER => "json"));
-                                                                               //this server accept json packager
-Yar_Concurrent_Client::call("http://host/api/", "some_method", array("parameters"), "callback", NULL, array(YAR_OPT_TIMEOUT=>1));
-                                                                               //custom timeout 
 
-Yar_Concurrent_Client::loop("callback", "error_callback"); //send the requests, 
-                                                           //the error_callback is optional
+/* 如果不指定回调, 将使用 loop() 的回调 */
+Yar_Concurrent_Client::call("http://host/api/", "some_method", array("parameters"));
+
+Yar_Concurrent_Client::loop("callback", "error_callback");
 ?>
 ]]>
    </programlisting>
    &example.outputs.similar;
    <screen>
 <![CDATA[
-现在, 所有的请求都发出去了, 还没有任何请求返回
-这是一个远程调用的返回, 调用的服务名是 some_method, 调用的 sequence 是 4
+Now, all requests are sent, and no response available
+This is a remote call response, the method name is some_method. calling sequence is 2
 string(11) "some_method"
-这是一个远程调用的返回, 调用的服务名是 some_method, 调用的 sequence 是 1
-string(11) "some_method"
-这是一个远程调用的返回, 调用的服务名是 some_method, 调用的 sequence 是 2
-string(11) "some_method"
-这是一个远程调用的返回, 调用的服务名是 some_method, 调用的 sequence 是 3
+This is a remote call response, the method name is some_method. calling sequence is 1
 string(11) "some_method"
 ]]>
    </screen>
   </example>
  </refsect1>
 
-
  <refsect1 role="seealso">
   &reftitle.seealso;
   <simplelist>
    <member><methodname>Yar_Concurrent_Client::call</methodname></member>
    <member><methodname>Yar_Concurrent_Client::reset</methodname></member>
-   <member><methodname>Yar_Server::__construct</methodname></member>
-   <member><methodname>Yar_Server::handle</methodname></member>
   </simplelist>
  </refsect1>
 
