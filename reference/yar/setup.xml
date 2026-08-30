@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 75d48299ef85693f10eee31af1be88488fb84c6f Maintainer: mowangjuanzi Status: ready -->
+<!-- EN-Revision: 60ce1c5c7cc6d340191828de21f1d6b48cd83807 Maintainer: mowangjuanzi Status: ready -->
 <!-- CREDITS: Luffy -->
 <chapter xml:id="yar.setup" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  &reftitle.setup;
@@ -27,6 +27,9 @@
  <section xml:id="yar.installation">
   &reftitle.install;
   <simpara>
+   Yar 有三种安装方式：通过 PECL、通过 PIE，或从源码构建。
+  </simpara>
+  <simpara>
    &pecl.moved;
   </simpara>
   <simpara>
@@ -36,64 +39,97 @@
   <simpara>
    &pecl.windows.download.avail;
   </simpara>
-  <para>
-   源代码托管在
-   <link xlink:href="&url.git.hub;laruence/yar">GitHub</link> 上。从源码构建该扩展：
-   <screen>
+  <example>
+   <title>用 PECL 安装 Yar</title>
+   <programlisting role="shell">
 <![CDATA[
-$ git clone https://github.com/laruence/yar.git
-$ cd yar
-$ phpize
-$ ./configure
-$ make
-$ sudo make install
+pecl install yar
 ]]>
-   </screen>
-  </para>
-  <para>
-   可以使用以下 <literal>configure</literal> 选项：
-   <variablelist>
-    <varlistentry>
-     <term>
-      <option role="configure">--with-curl</option>
-     </term>
-     <listitem>
-      <simpara>
-       当 cURL 不在默认的 include 路径中时，
-       指定 cURL 的安装位置。
-      </simpara>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
-     <term>
-      <option role="configure">--enable-msgpack</option>
-     </term>
-     <listitem>
-      <simpara>
-       启用 <literal>msgpack</literal> 打包器，并将
-       <literal>msgpack</literal> 扩展作为可选依赖。当
-       Yar 使用该选项编译时，
-       <link linkend="ini.yar.packager">yar.packager</link> 的默认值变为
-       <literal>msgpack</literal>。
-      </simpara>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
-     <term>
-      <option role="configure">--enable-epoll</option>
-     </term>
-     <listitem>
-      <simpara>
-       使用 Linux <literal>epoll</literal> 代替
-       <literal>select()</literal> 进行 I/O 多路复用，自
-       Yar 2.1.2 起可用。在高并发场景下，该选项可以提升
-       <classname>Yar_Concurrent_Client</classname> 的性能。
-       它仅在 Linux 上生效；在其他平台上会被静默忽略。
-      </simpara>
-     </listitem>
-    </varlistentry>
-   </variablelist>
-  </para>
+   </programlisting>
+  </example>
+  <simpara>
+   自 Yar 2.4.0 起，也可以使用 &link.pie;（PHP Installer for
+   Extensions，PHP 扩展安装器）安装本扩展。在命令行执行以下命令：
+  </simpara>
+  <example>
+   <title>用 PIE 安装 Yar</title>
+   <programlisting role="shell">
+<![CDATA[
+pie install laruence/yar
+]]>
+   </programlisting>
+  </example>
+  <simpara>
+   安装时可以同时启用 msgpack 打包器：
+  </simpara>
+  <example>
+   <title>用 PIE 安装 Yar 并启用 msgpack</title>
+   <programlisting role="shell">
+<![CDATA[
+pie install laruence/yar --enable-msgpack
+]]>
+   </programlisting>
+  </example>
+  <simpara>
+   源代码托管在
+   <link xlink:href="&url.git.hub;laruence/yar">GitHub</link> 上。
+   若要自源码构建该扩展，请在命令行执行以下命令，
+   并把其中的路径替换为本地 PHP 安装的实际路径：
+  </simpara>
+  <example>
+   <title>从源码构建 Yar</title>
+   <programlisting role="shell">
+<![CDATA[
+/path/to/phpize
+./configure --with-php-config=/path/to/php-config
+make && make install
+]]>
+   </programlisting>
+  </example>
+  <simpara>
+   可用的 <literal>configure</literal> 选项如下：
+  </simpara>
+  <variablelist>
+   <varlistentry>
+    <term>
+     <option role="configure">--with-curl</option>
+    </term>
+    <listitem>
+     <simpara>
+      当 cURL 不在默认的 include 路径中时，
+      指定 cURL 的安装位置。
+     </simpara>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>
+     <option role="configure">--enable-msgpack</option>
+    </term>
+    <listitem>
+     <simpara>
+      启用 <literal>msgpack</literal> 打包器，并将
+      <literal>msgpack</literal> 扩展作为可选依赖。当
+      Yar 使用该选项编译时，
+      <link linkend="ini.yar.packager">yar.packager</link> 的默认值变为
+      <literal>msgpack</literal>。
+     </simpara>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>
+     <option role="configure">--enable-epoll</option>
+    </term>
+    <listitem>
+     <simpara>
+      使用 Linux <literal>epoll</literal> 代替
+      <literal>select()</literal> 进行 I/O 多路复用，自
+      Yar 2.1.2 起可用。在高并发场景下，该选项可以提升
+      <classname>Yar_Concurrent_Client</classname> 的性能。
+      它仅在 Linux 上生效；在其他平台上会被静默忽略。
+     </simpara>
+    </listitem>
+   </varlistentry>
+  </variablelist>
  </section>
  <!-- }}} -->
 

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 75d48299ef85693f10eee31af1be88488fb84c6f Maintainer: mowangjuanzi Status: ready -->
+<!-- EN-Revision: 60ce1c5c7cc6d340191828de21f1d6b48cd83807 Maintainer: mowangjuanzi Status: ready -->
 <refentry xml:id="yar-concurrent-client.call" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
   <refname>Yar_Concurrent_Client::call</refname>
@@ -25,7 +25,8 @@
   </simpara>
   <note>
    <simpara>
-    仅支持 HTTP 和 HTTPS URI。并发调用不支持 TCP 和 Unix socket 传输方式。
+    仅支持 HTTP 和 HTTPS URI。并发调用通过 curl 的 multi-handle 接口同时发出，
+    TCP/Unix socket 传输方式没有提供该能力。
    </simpara>
   </note>
  </refsect1>
@@ -63,12 +64,18 @@
     <listitem>
      <simpara>
       当此次调用的响应到达时调用的 <type>callable</type>，
-      接收两个参数：响应值，以及一个包含
-      <literal>sequence</literal>、<literal>uri</literal> 和
-      <literal>method</literal> 三个键的 <literal>callinfo</literal> &array;。
+      接收两个参数：响应值，以及一个描述该调用的
+      <literal>callinfo</literal> &array;：
+     </simpara>
+     <simplelist>
+      <member><literal>sequence</literal> ——注册该调用时返回的序列号</member>
+      <member><literal>uri</literal> ——服务的地址</member>
+      <member><literal>method</literal> ——远程方法的名称</member>
+     </simplelist>
+     <simpara>
       如果省略，则使用
       <methodname>Yar_Concurrent_Client::loop</methodname> 的
-      <literal>callback</literal>。
+      <literal>callback</literal>；两者都不设置时的行为参见该方法。
      </simpara>
     </listitem>
    </varlistentry>
@@ -78,10 +85,10 @@
      <simpara>
       当此次调用失败时调用的 <type>callable</type>，
       接收三个参数：错误类型（<literal>YAR_ERR_*</literal>
-      错误码之一）、错误消息，以及 <literal>callinfo</literal> &array;。
+      错误码之一）、错误消息，以及上述的 <literal>callinfo</literal> &array;。
       如果省略，则使用
       <methodname>Yar_Concurrent_Client::loop</methodname> 的
-      <literal>error_callback</literal>。
+      <literal>error_callback</literal>；两者都不设置时的行为参见该方法。
      </simpara>
     </listitem>
    </varlistentry>
@@ -129,16 +136,16 @@ function error_callback($type, $error, $callinfo)
     error_log($error);
 }
 
-Yar_Concurrent_Client::call("http://host/api/", "some_method", array("parameters"), "callback");
+Yar_Concurrent_Client::call("http://api.example.com/operator.php", "some_method", array("parameters"), "callback");
 
-/* 如果不指定回调, 将使用 loop() 的回调 */
-Yar_Concurrent_Client::call("http://host/api/", "some_method", array("parameters"));
+/* 如果不指定回调，将使用 loop() 的回调 */
+Yar_Concurrent_Client::call("http://api.example.com/operator.php", "some_method", array("parameters"));
 
 /* 该服务器接受 JSON 打包器 */
-Yar_Concurrent_Client::call("http://host/api/", "some_method", array("parameters"), "callback", NULL, array(YAR_OPT_PACKAGER => "json"));
+Yar_Concurrent_Client::call("http://api.example.com/operator.php", "some_method", array("parameters"), "callback", NULL, array(YAR_OPT_PACKAGER => "json"));
 
 /* 自定义超时时间 */
-Yar_Concurrent_Client::call("http://host/api/", "some_method", array("parameters"), "callback", NULL, array(YAR_OPT_TIMEOUT => 1000));
+Yar_Concurrent_Client::call("http://api.example.com/operator.php", "some_method", array("parameters"), "callback", NULL, array(YAR_OPT_TIMEOUT => 1000));
 
 /* 此时请求尚未发送 */
 ]]>
