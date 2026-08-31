@@ -1,38 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: e51792efe0f103ec8724ad199524d7543610c978 Maintainer: Avenger Status: ready -->
+<!-- EN-Revision: ee7185a089f266a9475b069aa199314811fad8a8 Maintainer: Avenger Status: ready -->
 <!-- CREDITS: Luffy, mowangjuanzi -->
 <sect1 xml:id="install.unix.apache2" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
- <title>Unix 系统下的 Apache 2.x</title>
+ <title>Unix 系统上的 Apache httpd 2.x</title>
 
- <para>
-  本节包括在 Unix 平台的 Apache 2.x 下安装 PHP 的说明和提示。
- </para>
-   
- &warn.apache2.compat;
-    
- <para>
-  推荐阅读 <link xlink:href="&url.apache2.docs;">Apache 文档</link>，了解一下
-  Apache 2.x 服务器，以及详细的安装参数。
- </para>
+ <simpara>
+  本节包含在 Linux 和类 Unix 系统上使用 Apache HTTP Server
+  2.x 安装 PHP 的说明和提示。
+ </simpara>
 
- <para>
-  可以从 <link xlink:href="&url.apache;">Apache 下载站点</link>下载最新版本的Apache，并且根据上文选择合适版本的
-  PHP 下载。本向导仅包含最基础的内容，只能让 Apache 2.x 和 PHP
-  能够正常工作。更多信息请阅读 <link xlink:href="&url.apache2.docs;">Apache
-  文档</link>。这里省略所有的版本号，以保证本文的正确性。需要将本文的“NN”替换为相应的版本号。
- </para>
+ <warning>
+  <title>请改用 PHP-FPM</title>
+  <simpara>
+   <emphasis role="strong">不要在新安装中使用 <literal>mod_php</literal>。</emphasis>
+   保留本页说明是为了提供历史参考，以及满足少数确实需要将 PHP
+   直接嵌入 Apache httpd 进程的情况。
+  </simpara>
+  <simpara>
+   对于所有现代部署，请将 <link linkend="install.fpm">PHP-FPM</link>
+   （FastCGI 进程管理器）与 Apache httpd 的 <literal>mod_proxy_fcgi</literal>
+   模块配合使用。PHP-FPM 可提供更好的资源管理和进程隔离，能够在不重启
+   Apache httpd 的情况下单独重启 PHP，并兼容 Apache httpd 的
+   <literal>event</literal> MPM（自 Apache httpd 2.4 起为默认 MPM）。
+   主流 Linux 发行版均以此作为默认配置。
+  </simpara>
+  <simpara>
+   <literal>mod_php</literal> 方式会将 PHP 直接嵌入每个 Apache httpd
+   工作进程。除非编译 PHP 时启用了线程安全（<literal>--enable-zts</literal>），
+   否则 <literal>mod_php</literal> 要求使用 <literal>prefork</literal> MPM，
+   这会显著限制并发能力。如果仍要使用 <literal>mod_php</literal>，
+   应充分了解其性能和安全影响。
+  </simpara>
+ </warning>
 
- <para>
-  当前 Apache 2.x 有两个流行的版本 - 2.4 和 2.2。虽然选择某个版本会有种种原因，但是如果可以考虑的话，我们还是建议使用最新的
-  Apache 2.4 版本。当然，以下的介绍同样适合 Apache 2.4 和 2.2。请注意 Apache 2.2 已经不再被官方支持，并且不再发布新功能和补丁更新。
- </para>
+ <simpara>
+  <link xlink:href="&url.apache2.docs;">Apache 文档</link>是有关
+  Apache httpd 2.x 服务器最权威的信息来源，其中包含 Apache httpd
+  安装选项的更多说明。
+ </simpara>
+
+ <simpara>
+  可从 <link xlink:href="&url.apache;">Apache 下载站点</link>获取最新版本的
+  Apache httpd，并从前述位置获取合适的 PHP 版本。本快速指南仅介绍开始使用
+  Apache httpd 2.x 和 PHP 所需的基础知识。更多信息请阅读
+  <link xlink:href="&url.apache2.docs;">Apache 文档</link>。
+  为避免说明因版本变化而失效，这里省略了版本号。以下示例中的“NN”
+  应替换为所使用 Apache httpd 的具体版本号。
+ </simpara>
+
+ <simpara>
+  这些说明适用于 Apache httpd 2.4，这是 Apache httpd 当前唯一受支持的
+  发布分支。更早的版本（2.2 及以下）已经终止生命周期，不应再使用。
+ </simpara>
+
+ <note>
+  <simpara>
+   截止到 PHP 8.4.0，apache2handler SAPI 至少需要 Apache 2.4；
+   不再支持已终止生命周期的 Apache 2.0 和 2.2。
+  </simpara>
+ </note>
 
  <orderedlist>
   <listitem>
-   <para>
-    从上面列出的地方获取 Apache 源码包，然后解压：
-   </para>
+   <simpara>
+    从上面列出的位置获取 Apache httpd，并将其解压：
+   </simpara>
 
    <informalexample>
     <screen>
@@ -44,9 +77,9 @@ tar -xzf httpd-2.x.NN.tar.gz
   </listitem>
 
   <listitem>
-   <para>
-    同样，获取 PHP 源码包并解压：
-   </para>
+   <simpara>
+    同样，获取并解压 PHP 源码：
+   </simpara>
 
    <informalexample>
     <screen>
@@ -56,17 +89,22 @@ tar -xzf php-NN.tar.gz
     </screen>
    </informalexample>
   </listitem>
-   
+
   <listitem>
-   <para>
-    编译并安装 Apache。请参考 Apache 安装文档了解编译 Apache 的更多细节。
-   </para>
+   <simpara>
+    编译并安装 Apache httpd。有关编译 Apache httpd 的更多细节，请查阅
+    Apache httpd 安装文档。请注意，除非编译 PHP 时启用了线程安全
+    （<literal>--enable-zts</literal>），否则 <literal>mod_php</literal>
+    要求使用 <literal>prefork</literal> MPM。如果打算改用 PHP-FPM（推荐），
+    可以使用默认的 <literal>event</literal> MPM，并直接参阅
+    <link linkend="install.fpm">PHP-FPM 安装说明</link>。
+   </simpara>
 
    <informalexample>
     <screen>
 <![CDATA[
 cd httpd-2_x_NN
-./configure --enable-so
+./configure --enable-so --with-mpm=prefork
 make
 make install
 ]]>
@@ -76,8 +114,9 @@ make install
 
   <listitem>
    <para>
-    现在已经将 Apache 2.x.NN 安装在 /usr/local/apache2。本安装支持可装载模块和标准的
-    MPM prefork。之后，可以使用如下命令启动 Apache 服务器：
+    现在 Apache httpd 2.x.NN 已安装到 /usr/local/apache2，
+    并配置了可加载模块支持和 prefork MPM。要测试安装，请按常规方式启动
+    Apache httpd 服务器，例如：
 
     <informalexample>
      <screen>
@@ -87,7 +126,7 @@ make install
      </screen>
     </informalexample>
 
-    如果成功，可以停止 Apache 服务器并继续安装 PHP：
+    然后停止服务器，继续配置 PHP：
 
     <informalexample>
      <screen>
@@ -100,18 +139,18 @@ make install
   </listitem>
 
   <listitem>
-   <para>
-    现在需要配置并编译 PHP。在这里可以用各种各样的参数来自定义
-    PHP，例如启动哪些扩展功能包的支持等。用 <command>./configure --help</command>
-    命令可以列出当前可用的所有参数。在此例中，将给出一个在有
-    MySQL 支持的 Apache 2 上进行配置的范例。
-   </para>
+   <simpara>
+    现在配置并编译 PHP。可以在这里使用各种选项自定义 PHP，
+    例如启用哪些扩展。运行 <command>./configure --help</command>
+    可列出所有可用选项。本例使用支持 Apache httpd 和 MySQL 的简单配置。
+   </simpara>
 
-   <para>
-    如果按照上面的说明从源代码编译了 Apache，下面的例子会正确匹配 <command>apxs</command>
-    的路径。如果通过其他方式安装了 Apache，需要相应的调整 <command>apxs</command> 
-    的路径。注意，在有些发行版本中，可能将 <command>apxs</command> 更名为 <command>apxs2</command>。
-   </para>
+   <simpara>
+    如果按上述说明从源码编译 Apache httpd，下面示例中的
+    <command>apxs</command> 路径会与之匹配；如果以其他方式安装 Apache httpd，
+    则需要相应调整 <command>apxs</command> 的路径。请注意，某些发行版可能将
+    <command>apxs</command> 重命名为 <command>apxs2</command>。
+   </simpara>
 
    <informalexample>
     <screen>
@@ -124,23 +163,25 @@ make install
     </screen>
    </informalexample>
 
+   <simpara>
+    如果安装后决定更改配置选项，需要重新运行 <command>configure</command>、
+    <command>make</command> 和 <command>make install</command>。
+    只需重启 Apache 即可使新模块生效，无需重新编译 Apache httpd。
+   </simpara>
+
    <para>
-    如果决定在安装后改变配置选项，只需重复最后的三步
-    <command>configure</command>，<command>make</command>，以及 <command>make install</command>，然后需要重新启动 Apache
-    使新模块生效。Apache 不需要重新编译。
-   </para>
-         
-   <para>
-    请注意，除非明确有提示，否则“make install”命令将安装 PEAR、各种
-    PHP 工具诸如 phpize，并安装 PHP CLI 等等。
+    请注意，除非另有说明，<command>make install</command> 还会安装
+    <link xlink:href="&url.php.pear;">PEAR</link>、
+    <link linkend="install.pecl.phpize">phpize</link> 等各种 PHP 工具、
+    PHP CLI 以及其他组件。
    </para>
   </listitem>
 
   <listitem>
-   <para>
+   <simpara>
     配置 <filename>php.ini</filename>。
-   </para>
-    
+   </simpara>
+
    <informalexample>
     <screen>
 <![CDATA[
@@ -149,58 +190,42 @@ cp php.ini-development /usr/local/lib/php.ini
     </screen>
    </informalexample>
 
-   <para>
-    可以编辑 <literal>.ini</literal> 来设置 PHP
-    选项。如果想要把 <filename>php.ini</filename> 放到另外的位置，需要在步骤
-    5 使用 <literal>--with-config-file-path=/some/path</literal> 选项。
-   </para>
-   
-   <para>
-    如果选择了 <filename>php.ini-production</filename>，请务必阅读其中的变更列表，它们将如何影响
-    PHP 的行为。
-   </para>
+   <simpara>
+    可以编辑 <literal>.ini</literal> 文件来设置 PHP 选项。如果希望将
+    <filename>php.ini</filename> 放在其他位置，请在第 5 步使用
+    <literal>--with-config-file-path=/some/path</literal>。
+   </simpara>
+
+   <simpara>
+    如果改用 <filename>php.ini-production</filename>，请务必阅读其中的变更列表，
+    因为这些设置会影响 PHP 的行为。
+   </simpara>
   </listitem>
 
   <listitem>
-   <para>
-    编辑 <filename>httpd.conf</filename> 文件以调用 PHP 模块。<literal>LoadModule</literal>
-    表达式右边的路径必须指向系统中的 PHP 模块。以上的 <command>make install</command>
-    命令可能已经完成了这些，但务必要检查。
-   </para>
+   <simpara>
+    编辑 <filename>httpd.conf</filename> 以加载 PHP 模块。
+    <literal>LoadModule</literal> 语句右侧的路径必须指向系统中的 PHP 模块。
+    上述 <command>make install</command> 可能已经添加了此配置，但务必检查。
+   </simpara>
 
    <informalexample>
-    <para>
-     PHP 8 版本:
-    </para>
-
     <programlisting role="apache-conf">
 <![CDATA[
 LoadModule php_module modules/libphp.so
 ]]>
     </programlisting>
    </informalexample>
-
-   <informalexample>
-    <para>
-     PHP 7 版本:
-    </para>
-
-    <programlisting role="apache-conf">
-<![CDATA[
-LoadModule php7_module modules/libphp7.so
-]]>
-    </programlisting>
-   </informalexample>
   </listitem>
 
   <listitem>
-   <para>
-    告知 Apache 将特定的扩展名解析成 PHP，例如，让 Apache 将扩展名 <literal>.php</literal>
-    解析成 PHP。为了避免潜在的危险，例如上传或者创建类似 <filename>exploit.php.jpg</filename>
-    的文件并被当做 PHP 执行，我们不再使用 Apache 的 <literal>AddType</literal>
-    指令来设置。参考下面的例子，你可以简单的将需要的扩展名解释为 PHP。
-    下面将添加 <literal>.php</literal> 来进行演示。
-   </para>
+   <simpara>
+    让 Apache httpd 将特定扩展名解析为 PHP。例如，让 Apache httpd
+    将 <literal>.php</literal> 文件解析为 PHP。不要仅使用 <literal>AddType</literal>
+    指令，以免上传或创建的 <filename>exploit.php.jpg</filename> 等潜在危险文件
+    被当作 PHP 执行。使用以下方式，只需添加扩展名即可将其解析为 PHP。
+    本例添加 <literal>.php</literal> 进行演示。
+   </simpara>
 
    <informalexample>
     <programlisting role="apache-conf">
@@ -212,15 +237,17 @@ LoadModule php7_module modules/libphp7.so
     </programlisting>
    </informalexample>
 
-   <para>
-    或者也想将 <literal>.php</literal>、<literal>.php2</literal>、<literal>.php3</literal>、<literal>.php4</literal>、<literal>.php5</literal>、<literal>.php6</literal>
-    以及 <literal>.phtml</literal> 文件都当做 PHP 来运行，我们无需额外的设置，仅需按照下面这样来：
-   </para>
+   <simpara>
+    如果只允许 <literal>.php</literal>、<literal>.php2</literal>、
+    <literal>.php3</literal>、<literal>.php4</literal>、<literal>.php5</literal>、
+    <literal>.php6</literal> 和 <literal>.phtml</literal> 文件作为 PHP 执行，
+    可以使用以下配置：
+   </simpara>
 
    <informalexample>
     <programlisting role="apache-conf">
 <![CDATA[
-<FilesMatch "\.ph(p[2-6]?|tml)$">
+<FilesMatch "\.(php[2-6]?|phtml)$">
     SetHandler application/x-httpd-php
 </FilesMatch>
 ]]>
@@ -228,7 +255,8 @@ LoadModule php7_module modules/libphp7.so
    </informalexample>
 
    <para>
-    然后，可以将 <literal>.phps</literal> 文件由 PHP 源码过滤器处理，使得其在显示时可以高亮源码，设置如下：
+    要让 PHP 源码过滤器处理 <literal>.phps</literal> 文件并以语法高亮方式
+    显示源代码，请使用以下配置：
    </para>
 
    <informalexample>
@@ -241,8 +269,36 @@ LoadModule php7_module modules/libphp7.so
     </programlisting>
    </informalexample>
 
+   <simpara>
+    要在找不到其他处理程序时将 PHP 文件用作默认处理程序（例如使用路由引擎时），
+    可以使用 <literal>FallbackResource</literal> 指令。
+   </simpara>
+
+   <simpara>
+    由于无论文件是否存在都会应用 <literal>SetHandler</literal> 指令，
+    而 <literal>FallbackResource</literal> 仅在尚未设置处理程序时应用，
+    因此可能需要使用 <literal>If</literal> 指令确保只在文件存在时应用处理程序。
+    这样，<literal>FallbackResource</literal> 就能处理以 <literal>.php</literal>
+    结尾但实际不存在的路径，这对错误处理和路由很有用。
+   </simpara>
+
+   <informalexample>
+    <programlisting role="apache-conf">
+<![CDATA[
+<FilesMatch "\.php$">
+    <If "-f %{REQUEST_FILENAME}">
+        SetHandler application/x-httpd-php
+    </If>
+</FilesMatch>
+FallbackResource /index.php
+]]>
+    </programlisting>
+   </informalexample>
+
    <para>
-    <literal>mod_rewrite</literal> 也有助于将那些不需要运行的 <literal>.php</literal> 文件的源码高亮显示，而并不需要将他们更名为 <literal>.phps</literal> 文件：
+    可以使用 <literal>mod_rewrite</literal> 将任意 <literal>.php</literal> 文件
+    以语法高亮方式显示为源代码，而无需将其重命名或复制为
+    <literal>.phps</literal> 文件：
    </para>
 
    <informalexample>
@@ -255,15 +311,16 @@ RewriteRule (.*\.php)s$ $1 [H=application/x-httpd-php-source]
    </informalexample>
 
    <para>
-    不要在正式生产运营的系统上启动 PHP 源码过滤器，因为这可能泄露系统机密或者嵌入的代码中的敏感信息。
+    不应在生产系统上启用 PHP 源码过滤器，因为它可能暴露源代码中嵌入的
+    机密信息或其他敏感信息。
    </para>
   </listitem>
 
   <listitem>
-   <para>
-    按照通常的方式启动 Apache 服务：
-   </para>
-  
+   <simpara>
+    按常规方式启动 Apache httpd，例如：
+   </simpara>
+
    <informalexample>
     <screen>
 <![CDATA[
@@ -284,44 +341,37 @@ service httpd restart
   </listitem>
  </orderedlist>
 
- <para>
-  按照上面的步骤便可以使 Apache 2.ｘ 将 PHP 作为 <literal>SAPI</literal>
-  模块。当然 Apache 和 PHP 都还有很多配置选项，可以在相应的源代码目录中使用
-  <command>./configure --help</command> 获得更多信息。
- </para>
-
- <para>
-  可以选择 <filename>worker</filename> MPM 而不是标准的
-  <filename>prefork</filename> MPM 来编译多线程版本的 Apache。只需在上面的第
-  3 步，将选项使用如下参数传递到 <command>./configure</command>中：
- </para>
-
- <informalexample>
-  <screen>
-<![CDATA[
---with-mpm=worker
-]]>
-  </screen>
- </informalexample>
-
- <para>
-  如果不是很明确这样做的后果并且大概理解其含义的话，最好不要进行这一步。更多信息请参考
-  Apache 文档中关于 <link xlink:href="&url.apache2.mpm;">MPM-Modules</link> 的部分。
- </para>
+ <simpara>
+  完成上述步骤后，将得到一个正在运行的 Apache httpd Web 服务器，
+  并以 <literal>SAPI</literal> 模块形式支持 PHP。Apache httpd 和 PHP
+  还有许多其他配置选项。要了解更多信息，请在相应源码树中运行
+  <command>./configure --help</command>。
+ </simpara>
 
  <note>
-  <para>
-   <link linkend="faq.installation.apache.multiviews">Apache MultiViews
-   常见问题</link>中讨论了在 PHP 中使用 MultiViews。
-  </para>
+  <title>MPM 兼容性</title>
+  <simpara>
+   除非编译 PHP 时启用了 Zend 线程安全
+   （<literal>--enable-zts</literal>），否则 <literal>mod_php</literal>
+   要求使用 <literal>prefork</literal> MPM。有关原因，请阅读
+   <link linkend="faq.installation.apache2">在线程化 MPM 中使用
+   Apache httpd</link>的相关常见问题。
+  </simpara>
+
+  <simpara>
+   大多数发行版提供的 <literal>mod_php</literal> 软件包未启用 ZTS，
+   因此通常需要 <literal>prefork</literal>。如果需要线程化 MPM
+   （建议在负载下使用以获得更好的性能），请改用
+   <link linkend="install.fpm">PHP-FPM</link> 和
+   <literal>mod_proxy_fcgi</literal>。
+  </simpara>
  </note>
 
  <note>
-  <para>
-   要编译多线程版本的 Apache，系统必须支持多线程。这也意味着需要将 PHP
-   编译为 Zend 线程安全（ZTS）。在此配置下。并不是所有的扩展都可以使用。推荐设置是使用默认的
-   <filename>prefork</filename> MPM-Module 编译 Apache。
-  </para>
+  <simpara>
+   <link linkend="faq.installation.apache.multiviews">Apache MultiViews
+   常见问题</link>讨论了在 PHP 中使用 MultiViews。
+  </simpara>
  </note>
 </sect1>
 
