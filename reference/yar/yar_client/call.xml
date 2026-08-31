@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 75d48299ef85693f10eee31af1be88488fb84c6f Maintainer: mowangjuanzi Status: ready -->
+<!-- EN-Revision: 60ce1c5c7cc6d340191828de21f1d6b48cd83807 Maintainer: mowangjuanzi Status: ready -->
 <refentry xml:id="yar-client.call" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
   <refname>Yar_Client::call</refname>
@@ -16,8 +16,8 @@
   </methodsynopsis>
   <simpara>
    对远程方法 <literal>method</literal> 发起一次 RPC 调用。
-   这与在 <classname>Yar_Client</classname> 对象上调用一个不存在的方法时发生的事情完全相同（参见
-   <methodname>Yar_Client::__call</methodname>）；
+   这与在 <classname>Yar_Client</classname> 对象上调用一个不存在的方法时发生的事情完全相同
+   （通过 PHP 的 <literal>__call</literal> 魔法方法）；
    <methodname>Yar_Client::call</methodname> 的存在只是为了让名字恰好叫
    <literal>call</literal> 或 <literal>__call</literal> 的远程方法仍然可以被调用。
   </simpara>
@@ -55,17 +55,50 @@
  <refsect1 role="errors">
   &reftitle.errors;
   <simpara>
-   如果服务器端不存在 <literal>call</literal> 方法，会抛出
-   <exceptionname>Yar_Server_Request_Exception</exceptionname> 异常。
-   各种失败情况及其对应的异常类的完整列表，参见
-   <methodname>Yar_Client::__call</methodname>。
+   当远程方法在服务器上不存在，或不是公开方法时，客户端会抛出错误码为
+   <constant>YAR_ERR_REQUEST</constant> 的
+   <exceptionname>Yar_Client_Exception</exceptionname>。
+   其他客户端侧的失败情况及其对应的异常类，参见
+   <link linkend="class.yar-client-exception">Yar_Client_Exception</link>。
   </simpara>
+ </refsect1>
+
+ <refsect1 role="examples">
+  &reftitle.examples;
+  <example>
+   <title><methodname>Yar_Client::call</methodname> 示例</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+$client = new Yar_Client("http://api.example.com/operator.php");
+
+/* The usual way: invoke the remote method as if it were local.
+ * This is translated into call("add", array(1, 2)) behind the scenes. */
+var_dump($client->add(1, 2));
+
+/* Equivalent: call the method explicitly by name */
+var_dump($client->call("add", array(1, 2)));
+
+/* Needed only when the remote service literally exposes a method
+ * named call (or __call), which the magic __call cannot reach */
+var_dump($client->call("call", array($some_argument)));
+?>
+]]>
+   </programlisting>
+   &example.outputs.similar;
+   <screen>
+<![CDATA[
+int(3)
+int(3)
+...
+]]>
+   </screen>
+  </example>
  </refsect1>
 
  <refsect1 role="seealso">
   &reftitle.seealso;
   <simplelist>
-   <member><methodname>Yar_Client::__call</methodname></member>
    <member><methodname>Yar_Client::setOpt</methodname></member>
   </simplelist>
  </refsect1>

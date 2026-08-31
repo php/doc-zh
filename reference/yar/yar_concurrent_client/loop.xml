@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 75d48299ef85693f10eee31af1be88488fb84c6f Maintainer: mowangjuanzi Status: ready -->
+<!-- EN-Revision: 60ce1c5c7cc6d340191828de21f1d6b48cd83807 Maintainer: mowangjuanzi Status: ready -->
 <refentry xml:id="yar-concurrent-client.loop" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
   <refname>Yar_Concurrent_Client::loop</refname>
@@ -21,6 +21,18 @@
    并阻塞直到每一个响应都已到达并被处理完毕。
    此方法返回时，调用列表会被清空。
   </simpara>
+  <simpara>
+   由于这些调用是同时执行的，loop 的耗时只等于最慢单次调用的耗时，
+   而不是所有调用耗时之和。但回调不会按照调用注册的顺序触发：
+   哪个响应先到达，就先触发哪个回调。要确定某个响应属于哪次调用，
+   可以将 <literal>callinfo</literal> 参数中的
+   <literal>sequence</literal> 与
+   <methodname>Yar_Concurrent_Client::call</methodname>
+   返回的序列号进行对照。<literal>callinfo</literal> &array;
+   包含该调用的 <literal>sequence</literal>、<literal>uri</literal> 和
+   <literal>method</literal>；参见
+   <methodname>Yar_Concurrent_Client::call</methodname>。
+  </simpara>
  </refsect1>
 
  <refsect1 role="parameters">
@@ -30,9 +42,12 @@
     <term><parameter>callback</parameter></term>
     <listitem>
      <simpara>
-      用于处理注册时没有指定自身回调的调用的响应的 <type>callable</type>。
-      在全部请求发送完毕后，它还会先于任何响应到达之前，
-      额外被调用一次，此时两个参数均为 &null;。
+      <type>callable</type>，用于处理未指定自身回调的调用的响应。
+      在全部请求发送完毕后、任何响应到达之前，它还会额外被调用一次，
+      此时两个参数均为 &null;。
+     </simpara>
+     <simpara>
+      如果省略该参数，成功调用的返回值会在其响应到达时被直接打印输出。
      </simpara>
     </listitem>
    </varlistentry>
@@ -40,9 +55,14 @@
     <term><parameter>error_callback</parameter></term>
     <listitem>
      <simpara>
-      用于处理注册时没有指定自身错误回调的调用的错误的 <type>callable</type>。
+      <type>callable</type>，用于处理未指定自身错误回调的调用的错误。
       接收三个参数：错误类型（<literal>YAR_ERR_*</literal>
       错误码之一）、错误消息，以及 <literal>callinfo</literal> &array;。
+     </simpara>
+     <simpara>
+      如果省略该参数，失败的调用会改为触发一条 PHP 警告；
+      这一点与同步的 <classname>Yar_Client</classname> 不同，
+      后者会抛出异常。
      </simpara>
     </listitem>
    </varlistentry>
@@ -89,10 +109,10 @@ function error_callback($type, $error, $callinfo) {
     error_log($error);
 }
 
-Yar_Concurrent_Client::call("http://host/api/", "some_method", array("parameters"), "callback");
+Yar_Concurrent_Client::call("http://api.example.com/operator.php", "some_method", array("parameters"), "callback");
 
-/* 如果不指定回调, 将使用 loop() 的回调 */
-Yar_Concurrent_Client::call("http://host/api/", "some_method", array("parameters"));
+/* 如果不指定回调，将使用 loop() 的回调 */
+Yar_Concurrent_Client::call("http://api.example.com/operator.php", "some_method", array("parameters"));
 
 Yar_Concurrent_Client::loop("callback", "error_callback");
 ?>
