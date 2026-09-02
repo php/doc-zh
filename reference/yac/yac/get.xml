@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 1a42637cd40d0f75af1435ff051c7caa9b1c83e0 Maintainer: Laruence Status: ready -->
+<!-- EN-Revision: c05fbe7250c43b75034ac776ed78f4e67163e4d3 Maintainer: Laruence Status: ready -->
 
 <refentry xml:id="yac.get" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
@@ -12,7 +12,7 @@
   &reftitle.description;
   <methodsynopsis>
    <modifier>public</modifier> <type>mixed</type><methodname>Yac::get</methodname>
-   <methodparam><type class="union"><type>string</type><type>array</type></type><parameter>keys</parameter></methodparam>
+   <methodparam><type class="union"><type>string</type><type>array</type></type><parameter>key</parameter></methodparam>
    <methodparam choice="opt"><type>mixed</type><parameter>default</parameter><initializer>&null;</initializer></methodparam>
   </methodsynopsis>
   <simpara>
@@ -24,7 +24,7 @@
   &reftitle.parameters;
   <variablelist>
    <varlistentry>
-    <term><parameter>keys</parameter></term>
+    <term><parameter>key</parameter></term>
     <listitem>
      <simpara>
       <type>string</type> 类型的键，或者由键组成的 <type>array</type>。
@@ -35,14 +35,12 @@
     <term><parameter>default</parameter></term>
     <listitem>
      <simpara>
-      当请求的键（或多个键）不在缓存中时返回的值，
-      自 yac 2.4.0 起可用。省略时，未命中返回 &false;。
+      当请求的键（或多个键）不在缓存中时返回的值，自 yac 2.4.0 起可用。省略时，未命中返回 &false;。
      </simpara>
      <note>
       <simpara>
        在 yac 2.4.0 之前，该参数位置是一个引用形式的
-       <literal>$cas</literal> 令牌，而不是默认值。
-       传递过或依赖该令牌的代码在升级到 2.4.0 时必须更新。
+       <literal>$cas</literal> 令牌，而不是默认值。传递过或依赖该令牌的代码在升级到 2.4.0 时必须更新。
       </simpara>
      </note>
     </listitem>
@@ -53,15 +51,10 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <simpara>
-   对于 <type>string</type> 类型的键，命中时返回缓存的值，
-   否则返回 <parameter>default</parameter>（未指定默认值时返回 &false;）。
+   对于 <type>string</type> 类型的键，命中时返回缓存的值，否则返回 <parameter>default</parameter>（未指定默认值时返回 &false;）。
   </simpara>
   <simpara>
-   对于由键组成的 <type>array</type>，返回一个数组，
-   其中包含所有命中的值，以各自的键为索引。
-   自 yac 2.4.0 起，不在缓存中的键会被直接忽略
-   （若指定了 <parameter>default</parameter>，则用默认值填充）；
-   在 2.4.0 之前，每个缺失的键都会插入一个 &false; 占位值。
+   对于由键组成的 <type>array</type>，返回一个数组，其中包含所有命中的值，以各自的键为索引。自 yac 2.4.0 起，不在缓存中的键会被直接忽略（若指定了 <parameter>default</parameter>，则用默认值填充）；在 2.4.0 之前，每个缺失的键都会插入一个 &false; 占位值。
   </simpara>
  </refsect1>
 
@@ -78,6 +71,16 @@ $yac = new Yac();
 $yac->set("foo", "bar");
 var_dump($yac->get("foo"));                 // string(3) "bar"
 var_dump($yac->get("missing"));             // bool(false)：未命中
+?>
+]]>
+   </programlisting>
+  </example>
+  <example>
+   <title>区分存进去的 false 和未命中</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+$yac = new Yac();
 
 // 没有默认值时，未命中和存了 false 无法区分；
 // 哨兵默认值（自 yac 2.4.0 起可用）可以区分二者
@@ -86,9 +89,21 @@ var_dump($yac->get("flag"));                // bool(false)：存的就是这个�
 var_dump($yac->get("missing", false));      // bool(false)：未命中，形态相同
 var_dump($yac->get("flag", "__NONE__"));    // bool(false)：存的就是这个值
 var_dump($yac->get("missing", "__NONE__")); // string(8) "__NONE__"：未命中
+?>
+]]>
+   </programlisting>
+  </example>
+  <example>
+   <title>一次获取多个键</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+$yac = new Yac();
+
+$yac->set("foo", "bar");
+$yac->set("foo2", "bar2");
 
 // 传入键数组时，结果中只包含命中的键
-$yac->set("foo2", "bar2");
 var_dump($yac->get(array("foo", "foo2", "missing")));
 // array(2) { ["foo"]=> string(3) "bar" ["foo2"]=> string(4) "bar2" }
 ?>

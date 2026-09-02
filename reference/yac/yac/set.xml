@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 1a42637cd40d0f75af1435ff051c7caa9b1c83e0 Maintainer: Laruence Status: ready -->
+<!-- EN-Revision: c05fbe7250c43b75034ac776ed78f4e67163e4d3 Maintainer: Laruence Status: ready -->
 
 <refentry xml:id="yac.set" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
@@ -12,7 +12,7 @@
   &reftitle.description;
   <methodsynopsis>
    <modifier>public</modifier> <type>bool</type><methodname>Yac::set</methodname>
-   <methodparam><type class="union"><type>string</type><type>array</type></type><parameter>keys</parameter></methodparam>
+   <methodparam><type class="union"><type>string</type><type>array</type></type><parameter>key</parameter></methodparam>
    <methodparam><type>mixed</type><parameter>value</parameter></methodparam>
    <methodparam choice="opt"><type>int</type><parameter>ttl</parameter><initializer>0</initializer></methodparam>
   </methodsynopsis>
@@ -22,8 +22,7 @@
    <methodparam choice="opt"><type>int</type><parameter>ttl</parameter><initializer>0</initializer></methodparam>
   </methodsynopsis>
   <simpara>
-   向缓存中存储一个值。如果键已存在，
-   则覆盖已有条目，无论其是否已过期。
+   向缓存中存储一个值。如果键已存在，则覆盖已有条目，无论其是否已过期。
   </simpara>
  </refsect1>
 
@@ -31,7 +30,7 @@
   &reftitle.parameters;
   <variablelist>
    <varlistentry>
-    <term><parameter>keys</parameter></term>
+    <term><parameter>key</parameter></term>
     <listitem>
      <simpara>
       <type>string</type> 类型的键，或者一个由
@@ -44,9 +43,7 @@
     <term><parameter>value</parameter></term>
     <listitem>
      <simpara>
-      要存储的值。除 <type>resource</type> 外的所有 PHP 类型都可以存储。
-      仅在单键形式下使用；当 <parameter>keys</parameter> 是数组时，
-      该参数位置实际上是可选的 <parameter>ttl</parameter>。
+      要存储的值。除 <type>resource</type> 外的所有 PHP 类型都可以存储。仅在单键形式下使用；当 <parameter>key</parameter> 是数组时，该参数位置实际上是可选的 <parameter>ttl</parameter>。
      </simpara>
     </listitem>
    </varlistentry>
@@ -79,11 +76,31 @@ $yac = new Yac();
 
 $yac->set("foo", "bar");                    // 存储单个值
 $yac->set("foo", "baz");                    // 覆盖已有条目
+?>
+]]>
+   </programlisting>
+  </example>
+  <example>
+   <title>存储带 TTL 的条目</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+$yac = new Yac();
 
 // ttl 以秒为单位：该条目 5 秒后过期
 $yac->set("short-lived", "value", 5);
 sleep(6);
 var_dump($yac->get("short-lived"));        // bool(false)：已过期
+?>
+]]>
+   </programlisting>
+  </example>
+  <example>
+   <title>一次存储多个条目</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+$yac = new Yac();
 
 // 一次调用存储多个键值对
 $yac->set(array("a" => 1, "b" => 2));

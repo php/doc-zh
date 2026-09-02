@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: d3a03f8f542cd083d793bbd8ef3d7756aae7711f Maintainer: Laruence Status: ready -->
+<!-- EN-Revision: c05fbe7250c43b75034ac776ed78f4e67163e4d3 Maintainer: Laruence Status: ready -->
 
 <refentry xml:id="yac.delete" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
@@ -12,7 +12,7 @@
   &reftitle.description;
   <methodsynopsis>
    <modifier>public</modifier> <type>bool</type><methodname>Yac::delete</methodname>
-   <methodparam><type class="union"><type>string</type><type>array</type></type><parameter>keys</parameter></methodparam>
+   <methodparam><type class="union"><type>string</type><type>array</type></type><parameter>key</parameter></methodparam>
    <methodparam choice="opt"><type>int</type><parameter>delay</parameter><initializer>0</initializer></methodparam>
   </methodsynopsis>
   <simpara>
@@ -20,14 +20,9 @@
   </simpara>
   <note>
    <simpara>
-    注意，Yac 并不会真正把条目从缓存中移除：删除只是把条目标记为
-    过期——<literal>delay</literal> 为 <literal>0</literal> 时立即过期——
-    只有当后续的写入恰好复用了这个哈希槽时，该条目才会被覆盖：
-    要么是同一个键被重新写入，要么是另一个键的插入恰好落在了这个槽上。
-    在那之前，槽位一直被占用，所以 <methodname>Yac::info</methodname>
+    注意，Yac 并不会真正把条目从缓存中移除：删除只是把条目标记为过期——<literal>delay</literal> 为 <literal>0</literal> 时立即过期——只有当后续的写入恰好复用了这个哈希槽时，该条目才会被覆盖：要么是同一个键被重新写入，要么是另一个键的插入恰好落在了这个槽上。在那之前，槽位一直被占用，所以 <methodname>Yac::info</methodname>
     报告的 <literal>slots_used</literal> 计数不会减少，
-    <methodname>Yac::dump</methodname> 也仍会列出这些已删除的条目；
-    检视 dump 输出时，需要自己检查 <literal>ttl</literal> 值把它们过滤掉。
+    <methodname>Yac::dump</methodname> 也仍会列出这些已删除的条目；检视 dump 输出时，需要自己检查 <literal>ttl</literal> 值把它们过滤掉。
    </simpara>
   </note>
  </refsect1>
@@ -36,7 +31,7 @@
   &reftitle.parameters;
   <variablelist>
    <varlistentry>
-    <term><parameter>keys</parameter></term>
+    <term><parameter>key</parameter></term>
     <listitem>
      <simpara>
       <type>string</type> 类型的键，或者由待删除的键组成的
@@ -49,8 +44,7 @@
     <listitem>
      <simpara>
       条目变为失效前等待的秒数。省略或为 <literal>0</literal>
-      时，条目立即失效。正数值表示条目在这段时间内仍可读，
-      到期后才失效。
+      时，条目立即失效。正数值表示条目在这段时间内仍可读，到期后才失效。
      </simpara>
     </listitem>
    </varlistentry>
@@ -60,9 +54,7 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <simpara>
-   成功时返回 &true;；键不在缓存中时返回 &false;。
-   由于删除只是把条目标记为过期，一个已删除但尚未被覆盖的键
-   仍然算作存在：再次删除同一个键会返回 &true;。
+   成功时返回 &true;；键不在缓存中时返回 &false;。由于删除只是把条目标记为过期，一个已删除但尚未被覆盖的键仍然算作存在：再次删除同一个键会返回 &true;。
   </simpara>
   <simpara>
    传入键的 <type>array</type> 时，只有当每个键都存在才返回
@@ -89,12 +81,33 @@ var_dump($yac->delete("never"));    // bool(false)：从未存储过
 // 已过期的条目仍然出现在 dump 里
 var_dump($yac->info()["slots_used"]); // int(1)
 print_r($yac->dump());                // "foo" 仍在列表中；其 ttl 已过期
+?>
+]]>
+   </programlisting>
+  </example>
+  <example>
+   <title>延迟删除</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+$yac = new Yac();
 
-// 延迟删除：让条目再保持可读 60 秒
+// 条目在过期前再保持可读 60 秒
 $yac->set("tmp", "value");
 var_dump($yac->delete("tmp", 60));    // bool(true)
+?>
+]]>
+   </programlisting>
+  </example>
+  <example>
+   <title>一次删除多个键</title>
+   <programlisting role="php">
+<![CDATA[
+<?php
+$yac = new Yac();
+$yac->set("tmp", "value");
 
-// 一次删除多个键时，只有当每个键都存在才返回 true
+// 只有当每个键都存在才返回 true
 var_dump($yac->delete(array("tmp", "nope"))); // bool(false)："nope" 不存在
 ?>
 ]]>

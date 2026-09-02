@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- $Revision$ -->
+<!-- EN-Revision: c05fbe7250c43b75034ac776ed78f4e67163e4d3 Maintainer: Laruence Status: ready -->
+
+<chapter xml:id="yac.memory-management" xmlns="http://docbook.org/ns/docbook">
+ <title>内存管理</title>
+
+ <simpara>
+  Yac 把数据存放在两个相互独立的共享内存池里，分别由
+  <link linkend="ini.yac.keys-memory-size">yac.keys_memory_size</link>
+  和
+  <link linkend="ini.yac.values-memory-size">yac.values_memory_size</link>
+  配置。两个池写满和释放的方式各不相同，因此在调整任何一个参数之前，先弄清楚症状属于哪个池会很有帮助。
+ </simpara>
+
+ <section xml:id="yac.memory-layout" annotations="chunk:false">
+  <title>每个池各存放什么</title>
+  <simpara>
+   两个池分别存放一个条目的两半。键池存放键：每个被缓存的键占一个槽位，槽位里带着键本身（最长 48 字节）、哈希值、TTL、命中次数和最后访问时间；值只通过一个指向值池的指针被引用。值池存放值：每个存储的值占用一块序列化后的字节——如果条目经过了
+   <link linkend="ini.yac.compress-threshold">yac.compress_threshold</link>，则是压缩后的形式。
+  </simpara>
+  <simpara>
+   唯一的例外是嵌入值（embedded values）：极小的标量——&null;、
+   &true;、&false;、大多数整数（在 64 位构建下能装进 60 个有符号位的整数）、最长 7 字节的字符串和空数组——直接存放在槽位内部，用的正是本来要引用值块的那个指针。这样的值在值池中完全不占空间，只有它们的键占位。
+  </simpara>
+  <para>
+   粗略的容量规划方法：
+   <itemizedlist>
+    <listitem>
+     <simpara>
+      键池每 MB 大约能容纳 8,000 个键，因此
+      <link linkend="ini.yac.keys-memory-size">yac.keys_memory_size</link>
+      可以按不同键的数量除以每 MB 8,000 个、再向上取整来估算——默认的 <literal>8M</literal> 大约能容纳 64,000 个键；
+     </simpara>
+    </listitem>
+    <listitem>
+     <simpara>
+      值池必须容纳所有仍可能被读取的值，因此
+      <link linkend="ini.yac.values-memory-size">yac.values_memory_size</link>
+      可以按存活值的数量乘以平均序列化（压缩后）大小来估算，并预留大约两倍的空间：这个池是一个环，只有当分配器的游标绕回来覆盖某个值时，它才算消亡。
+     </simpara>
+    </listitem>
+   </itemizedlist>
+   嵌入值和其他条目一样占用槽位，但在值池中不占空间，因此计算第二项时不必把它们算进去。
+  </para>
+ </section>
+
+ <section xml:id="yac.memory-keys" annotations="chunk:false">
+  <title>键池（槽位）</title>
+  <simpara>
+   <link linkend="ini.yac.keys-memory-size">yac.keys_memory_size</link>
+   维护着一张固定大小的槽位表——默认的 <literal>8M</literal>
+   大约有 65,536 个槽位。每个存储的键恰好占用一个槽位，因此这个池限制了同时能存在的条目数量；与值池不同，槽位永远不会被单独释放。过期的槽位——TTL 已过的，或者 <methodname>Yac::delete</methodname> 留下的墓碑——在新键需要时会被免费回收。只有当某条探测路径上的四个候选槽位全部被存活条目占据时，才会驱逐其中一个来腾出空间——这记一次 <literal>kick</literal>（对应
+   <methodname>Yac::info</methodname> 的
+   <literal>kicks</literal> 计数器）。
+  </simpara>
+  <para>
+   驱逐只在发生碰撞的探测路径上的四个存活候选者中挑选：
+   <itemizedlist>
+    <listitem>
+     <simpara>
+      最近最少使用的那个（<literal>atime</literal> 最旧）会被驱逐；
+     </simpara>
+    </listitem>
+    <listitem>
+     <simpara>
+      打平时选命中次数最少的，再打平选探测位置最靠前的。
+     </simpara>
+    </listitem>
+   </itemizedlist>
+  </para>
+  <simpara>
+   一个常见的误解：<literal>slots_used</literal> 达到
+   <literal>slots_size</literal> <emphasis>并不</emphasis>是错误状态。一个键的工作集大于槽位表的缓存，此后只是以 100% 的占用率运行，按需驱逐和重新插入而已。判断键池大小是否合适的唯一指标是命中率（<literal>hits / (hits + miss)</literal>，按两次
+   <methodname>Yac::info</methodname> 快照之间的增量计算，而不是全生命周期的平均值）。单看 <literal>kicks</literal> 计数很高并不能说明有问题——只是键的分布不均匀，某些探测路径碰撞更多而已。只有当命中率和 <literal>kicks</literal> <emphasis>同时</emphasis>很糟时，才说明槽位表对这个键集合来说太小了，解决办法是调大
+   <link linkend="ini.yac.keys-memory-size">yac.keys_memory_size</link>。
+  </simpara>
+  <simpara>
+   槽位永不释放还有一个后果：没有 TTL（<literal>ttl = 0</literal>）又再也没被读取过的条目会一直占着槽位，直到某次驱逐恰好选中它。如果应用要存放大量这类一次性数据，请给这些条目设置 TTL，让它们过期后被回收，而不是挤掉存活的条目；或者干脆按全部键集合的大小来规划键池。
+  </simpara>
+ </section>
+
+ <section xml:id="yac.memory-values" annotations="chunk:false">
+  <title>值池（段）</title>
+  <simpara>
+   <link linkend="ini.yac.values-memory-size">yac.values_memory_size</link>
+   被切分成每段 4M，按环形管理：写入推进各段的游标，空间从不按条目释放。当一次分配放不下时，游标绕回某段的起点——这记一次 <literal>recycle</literal>（对应
+   <methodname>Yac::info</methodname> 的
+   <literal>recycles</literal> 计数器）。一次回收并不会立即使整段失效：被覆盖的值在绕回的游标真正覆盖到它们之前仍然可读，一旦被覆盖，对它们的读取就会通不过完整性校验而退化为未命中。
+  </simpara>
+  <simpara>
+   这个池有两个大小值得关注：总的
+   <link linkend="ini.yac.values-memory-size">yac.values_memory_size</link>
+   必须装得下存活值的工作集，而单个条目存储后最多占 1 MB
+   （<constant>YAC_MAX_RAW_COMPRESSED_LEN</constant>）。因此更大的值在存储前总会被压缩；一个压不进 1 MB 以内的值——最常见的原因是数据本身是随机的——会被拒绝，并使 <literal>fails</literal> 计数器加一。值本身的绝对上限要高得多：序列化后超过 64 MB
+   （<constant>YAC_MAX_VALUE_RAW_LEN</constant>，即
+   <literal>(1 &lt;&lt; 26) - 1</literal> 字节）的值会被直接拒绝。
+  </simpara>
+ </section>
+
+ <section xml:id="yac.memory-tuning" annotations="chunk:false">
+  <title>容量规划与观察指标</title>
+  <simpara>
+   从默认值起步，然后观察
+   <methodname>Yac::info</methodname> 的各计数器——它们从 <literal>start_time</literal> 起累加，所以要比较相隔一段时间的两个快照：
+  </simpara>
+  <itemizedlist>
+   <listitem>
+    <simpara>
+     命中率健康（比如 &gt;= 90%）：缓存工作正常，无论其他计数器显示什么，都不用管；
+    </simpara>
+   </listitem>
+   <listitem>
+    <simpara>
+     命中率低且 <literal>kicks</literal> 攀升：键池对这个键集合来说太小——存活条目在被重新读取之前就被驱逐了。调大
+     <link linkend="ini.yac.keys-memory-size">yac.keys_memory_size</link>；
+    </simpara>
+   </listitem>
+   <listitem>
+    <para>
+     <literal>recycles</literal> 频繁：这是真问题，不是无害的计数。一次回收意味着值分配器已经绕回、即将覆盖条目——被覆盖的值在重新读取之前就消亡了，存它花掉的字节白花了，命中率也会受损。这说明值池对存活数据的体量来说太小了。按效果排序：
+     <itemizedlist>
+      <listitem>
+       <simpara>
+        给条目设置 TTL。以 <literal>ttl = 0</literal> 写入的值永远存活，一直占着池子，迫使游标更早绕回。TTL 限定了每个条目的存活时长，缩小了池子必须容纳的存活工作集；
+       </simpara>
+      </listitem>
+      <listitem>
+       <simpara>
+        调大
+        <link linkend="ini.yac.values-memory-size">yac.values_memory_size</link>，让池子装得下整个存活值集合（记住要按存活占用大约两倍来预算——值只有在游标绕回来覆盖它时才消亡）；
+       </simpara>
+      </listitem>
+      <listitem>
+       <simpara>
+        减少单个条目的存储量：如果
+        <link linkend="ini.yac.compress-threshold">yac.compress_threshold</link>
+        设置得高于 <literal>1024</literal> 这个下限，把它调低，让大的载荷被压缩；精简那些不需要完整缓存的值；
+       </simpara>
+      </listitem>
+     </itemizedlist>
+    </para>
+   </listitem>
+   <listitem>
+    <simpara>
+     <literal>fails</literal> 增长：有值存不进去，最常见的是单个值压缩后仍超过 1 MB 的存储上限——把值拆分。
+    </simpara>
+   </listitem>
+  </itemizedlist>
+ </section>
+
+</chapter>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
