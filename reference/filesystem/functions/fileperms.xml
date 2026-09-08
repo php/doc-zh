@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<!-- EN-Revision: 871a231f4a1caa5fb258ae53b1bb7d1fb2a0f949 Maintainer: HonestQiao Status: ready -->
+<!-- EN-Revision: f5c4950be0ef12e84eea5276b15a7d143885286c Maintainer: HonestQiao Status: ready -->
 <!-- CREDITS: mowangjuanzi -->
 <refentry xml:id="function.fileperms" xmlns="http://docbook.org/ns/docbook">
  <refnamediv>
@@ -88,51 +88,35 @@ echo substr(sprintf('%o', fileperms('/etc/passwd')), -4);
 $perms = fileperms('/etc/passwd');
 
 switch ($perms & 0xF000) {
-    case 0xC000: // 套接字
-        $info = 's';
-        break;
-    case 0xA000: // 符号链接
-        $info = 'l';
-        break;
-    case 0x8000: // regular
-        $info = 'r';
-        break;
-    case 0x6000: // 块设备
-        $info = 'b';
-        break;
-    case 0x4000: // 目录
-        $info = 'd';
-        break;
-    case 0x2000: // 字符设备
-        $info = 'c';
-        break;
-    case 0x1000: // FIFO 管道
-        $info = 'p';
-        break;
-    default: // 位置
-        $info = 'u';
+    case 0x1000: $info = 'p'; break; // FIFO 管道
+    case 0x2000: $info = 'c'; break; // 字符设备
+    case 0x4000: $info = 'd'; break; // 目录
+    case 0x6000: $info = 'b'; break; // 块设备
+    case 0x8000: $info = '-'; break; // regular
+    case 0xA000: $info = 'l'; break; // 符号链接
+    case 0xC000: $info = 's'; break; // 套接字
+
+    // 位置
+    default: $info = 'u';
 }
 
 // 所有者
+$setuid = $perms & 0x0800;
 $info .= (($perms & 0x0100) ? 'r' : '-');
 $info .= (($perms & 0x0080) ? 'w' : '-');
-$info .= (($perms & 0x0040) ?
-            (($perms & 0x0800) ? 's' : 'x' ) :
-            (($perms & 0x0800) ? 'S' : '-'));
+$info .= (($perms & 0x0040) ? ($setuid ? 's' : 'x') : ($setuid ? 'S' : '-'));
 
 // 组
+$setgid = $perms & 0x0400;
 $info .= (($perms & 0x0020) ? 'r' : '-');
 $info .= (($perms & 0x0010) ? 'w' : '-');
-$info .= (($perms & 0x0008) ?
-            (($perms & 0x0400) ? 's' : 'x' ) :
-            (($perms & 0x0400) ? 'S' : '-'));
+$info .= (($perms & 0x0008) ? ($setgid ? 's' : 'x') : ($setgid ? 'S' : '-'));
 
 // 其它
+$sticky = $perms & 0x0200;
 $info .= (($perms & 0x0004) ? 'r' : '-');
 $info .= (($perms & 0x0002) ? 'w' : '-');
-$info .= (($perms & 0x0001) ?
-            (($perms & 0x0200) ? 't' : 'x' ) :
-            (($perms & 0x0200) ? 'T' : '-'));
+$info .= (($perms & 0x0001) ? ($sticky ? 't' : 'x') : ($sticky ? 'T' : '-'));
 
 echo $info;
 ?>
