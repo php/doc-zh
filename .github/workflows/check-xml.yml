@@ -3,6 +3,9 @@
 # of doc-en. Each file is compared to doc-en at the revision it declares to mirror
 # (EN-Revision), so a lagging file does not raise a false positive. The script
 # emits its own ::error annotations.
+#
+# The script is the one from doc-base, shared by all translations, and no longer
+# a copy local to this repository.
 
 name: "Structure"
 
@@ -19,9 +22,18 @@ jobs:
     name: "Check XML"
     runs-on: ubuntu-24.04
     steps:
+      # zh/, en/ and doc-base/ side by side: this is the layout expected by
+      # the doc-base scripts, the same as the one the build workflow uses. The
+      # explicit ref takes the real head of the pull request, not the merge commit
+      # actions/checkout builds by default: that one has master as its second
+      # parent, so the diff below would also list every file landed on master
+      # since the last push of the PR.
+
       - name: "Checkout translation"
         uses: actions/checkout@v7
         with:
+          path: zh
+          ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
 
       - name: "Checkout php/doc-en"
@@ -31,9 +43,16 @@ jobs:
           repository: php/doc-en
           fetch-depth: 0
 
+      - name: "Checkout php/doc-base"
+        uses: actions/checkout@v7
+        with:
+          path: doc-base
+          repository: php/doc-base
+
       - name: "Check structure"
         run: |
           BASE="${{ github.event.pull_request.base.sha }}"
-          git fetch --no-tags --depth=1 origin "$BASE"
-          git diff --name-only "$BASE"...HEAD -- '*.xml' \
-            | php8.3 .github/scripts/check-structure.php
+          git -C zh fetch --no-tags --depth=1 origin "$BASE"
+          git -C zh diff --name-only "$BASE"...HEAD -- '*.xml' \
+            | php8.3 doc-base/scripts/translation/check-structure.php \
+                --lang=zh --github
