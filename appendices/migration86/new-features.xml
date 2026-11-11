@@ -1,0 +1,614 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- EN-Revision: 09e39c586d1fa47d499807f911ff92d69d175db7 Maintainer: mowangjuanzi Status: ready -->
+<sect1 xml:id="migration86.new-features" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <title>新功能</title>
+
+ <sect2 xml:id="migration86.new-features.core">
+  <title>PHP 核心</title>
+
+  <sect3 xml:id="migration86.new-features.core.readonly-property-defaults">
+   <title>只读属性默认值</title>
+
+   <simpara>
+    <link linkend="language.oop5.properties.readonly-properties">只读属性</link>现在可以声明默认值。
+    <!-- RFC: https://wiki.php.net/rfc/readonly_property_defaults -->
+   </simpara>
+
+   <informalexample>
+    <programlisting role="php">
+<![CDATA[
+<?php
+class Config
+{
+    public readonly int $timeout = 30;
+}
+
+$config = new Config();
+var_dump($config->timeout); // int(30)
+]]>
+    </programlisting>
+   </informalexample>
+
+  </sect3>
+
+  <sect3 xml:id="migration86.new-features.core.weakmap-reference-assignment">
+   <title>WeakMap 上的引用赋值</title>
+
+   <simpara>
+    现在可以在 <classname>WeakMap</classname> 上使用引用赋值，而无需事先存在对应的键。
+   </simpara>
+
+   <informalexample>
+    <programlisting role="php">
+<![CDATA[
+<?php
+$obj = new stdClass();
+$map = new WeakMap();
+$count = 0;
+
+// 此前：Error: "Object stdClass#1 not contained in WeakMap"
+$map[$obj] = &$count;
+$count++;
+
+var_dump($map[$obj]); // int(1)
+]]>
+    </programlisting>
+   </informalexample>
+
+  </sect3>
+
+  <sect3 xml:id="migration86.new-features.core.debuginfo-on-enums">
+   <title><methodname>__debugInfo</methodname> 与枚举</title>
+
+   <simpara>
+    现在可以在<link linkend="language.enumerations">枚举</link>上定义
+    <link linkend="language.oop5.magic.debuginfo">__debugInfo()</link>
+    魔术方法。此前这会导致致命错误。
+    <!-- RFC: https://wiki.php.net/rfc/debugable-enums -->
+   </simpara>
+
+   <informalexample>
+    <programlisting role="php">
+<![CDATA[
+<?php
+enum Suit: string
+{
+    case Hearts = 'H';
+    case Spades = 'S';
+
+    public function __debugInfo(): array
+    {
+        return ['suit' => $this->name, 'symbol' => $this->value];
+    }
+}
+
+var_dump(Suit::Hearts);
+]]>
+    </programlisting>
+    &example.outputs;
+    <screen>
+<![CDATA[
+enum(Suit::Hearts) (2) {
+  ["suit"]=>
+  string(6) "Hearts"
+  ["symbol"]=>
+  string(1) "H"
+}
+]]>
+    </screen>
+   </informalexample>
+
+  </sect3>
+
+  <sect3 xml:id="migration86.new-features.core.override-for-constants">
+   <title><code>#[\Override]</code> 用于类常量</title>
+
+   <simpara>
+    <classname>Override</classname> 属性现在可以应用于类常量，包括枚举成员。与方法、属性一样，如果父类或实现的接口中不存在匹配的常量，则会引发编译时错误。
+    <!-- RFC: https://wiki.php.net/rfc/override_constants -->
+   </simpara>
+
+   <informalexample>
+    <programlisting role="php">
+<![CDATA[
+<?php
+interface HasVersion
+{
+    const VERSION = '1.0';
+}
+
+class Package implements HasVersion
+{
+    #[\Override]
+    const VERSION = '2.0';
+
+    // 致命错误：Package::NAME 具有 #[\Override] 属性，
+    // 但不存在匹配的父类常量
+    // #[\Override]
+    // const NAME = 'package';
+}
+]]>
+    </programlisting>
+   </informalexample>
+
+  </sect3>
+
+  <sect3 xml:id="migration86.new-features.core.partial-function-application">
+   <title>部分函数应用</title>
+
+   <simpara>
+    新增对部分函数应用的支持。调用时用一个或多个参数替换为 <literal>?</literal>
+    占位符，或用 <literal>...</literal> 占位符替换其余参数，会创建一个接受缺失参数的
+    <classname>Closure</classname>。
+    <!-- RFC: https://wiki.php.net/rfc/partial_function_application_v2 -->
+   </simpara>
+
+   <informalexample>
+    <programlisting role="php">
+<![CDATA[
+<?php
+function add(int $a, int $b, int $c = 0): int
+{
+    return $a + $b + $c;
+}
+
+// "?" 恰好替换一个参数
+$addOne = add(1, ?);
+var_dump($addOne(5)); // int(6)
+
+// "..." 替换所有剩余参数
+$addToOne = add(1, ...);
+var_dump($addToOne(2, 3)); // int(6)
+
+// 适用于任何可调用对象，包括内部函数
+$stripSpaces = str_replace(' ', '', ?);
+var_dump($stripSpaces('a b c')); // string(3) "abc"
+]]>
+    </programlisting>
+   </informalexample>
+
+  </sect3>
+
+  <sect3 xml:id="migration86.new-features.core.const-object-property-write">
+   <title>修改常量中存储的对象</title>
+
+   <simpara>
+    存储在常量或类常量中的对象现在可以通过 <code>OBJ->prop = $val</code> 直接修改。
+    <!-- RFC: https://wiki.php.net/rfc/const_object_property_write -->
+   </simpara>
+
+   <informalexample>
+    <programlisting role="php">
+<![CDATA[
+<?php
+const CONFIG = new stdClass();
+
+// 此前："Fatal error: Cannot use temporary expression in write context"
+CONFIG->debug = true;
+
+var_dump(CONFIG->debug); // bool(true)
+]]>
+    </programlisting>
+   </informalexample>
+
+  </sect3>
+
+  <sect3 xml:id="migration86.new-features.core.pack-unpack-endianness">
+   <title>pack() 和 unpack() 的字节序修饰符</title>
+
+   <simpara>
+    <function>pack</function> 和 <function>unpack</function> 现在接受在
+    <literal>s</literal>、<literal>S</literal>、<literal>l</literal>、<literal>L</literal>、<literal>q</literal>
+    和 <literal>Q</literal> 整型格式代码之后，以及在 <literal>f</literal> 和 <literal>d</literal>
+    浮点及双精度格式代码之后使用 <literal>&lt;</literal>（小端）和 <literal>&gt;</literal>（大端）修饰符。
+    <!-- RFC: https://wiki.php.net/rfc/pack-unpack-endianness-signed-integers-support -->
+    <!-- RFC: https://wiki.php.net/rfc/pack-unpack-float-endianness-modifier -->
+   </simpara>
+
+   <informalexample>
+    <programlisting role="php">
+<![CDATA[
+<?php
+echo bin2hex(pack('l>', 1)), PHP_EOL;   // 输出 "00000001"
+echo bin2hex(pack('l<', 1)), PHP_EOL;   // 输出 "01000000"
+echo bin2hex(pack('f>', 1.5)), PHP_EOL; // 输出 "3fc00000"
+
+var_dump(unpack('s>value', "\xff\xfe")); // ["value" => int(-2)]
+]]>
+    </programlisting>
+   </informalexample>
+
+  </sect3>
+
+ </sect2>
+
+ <sect2 xml:id="migration86.new-features.curl">
+  <title>cURL</title>
+
+  <simpara>
+   <function>curl_getinfo</function> 返回的数组现在包含新的 <literal>"size_delivered"</literal>
+   key，表示传递给下载写入回调的总字节数。还可以通过将 <constant>CURLINFO_SIZE_DELIVERED</constant>
+   作为 <parameter>option</parameter> 参数传入来获取该值。需要 libcurl 8.20.0 或更高版本。
+  </simpara>
+
+  <simpara>
+   新增 <constant>CURLOPT_SEEKFUNCTION</constant>，用于注册重新定位通过 stream 发送的请求体的回调，使
+   libcurl 在重定向、多轮认证或重试复用连接时能够回退并重新发送请求体，而不是以
+   <constant>CURLE_SEND_FAIL_REWIND</constant> 失败。该回调接收
+   <classname>CurlHandle</classname>、偏移量和起点，必须返回
+   <constant>CURL_SEEKFUNC_OK</constant>、<constant>CURL_SEEKFUNC_FAIL</constant> 或
+   <constant>CURL_SEEKFUNC_CANTSEEK</constant> 之一。
+  </simpara>
+
+ </sect2>
+
+ <sect2 xml:id="migration86.new-features.date">
+  <title>Date</title>
+
+  <simpara>
+   新增 <classname>Time\Duration</classname> 类，用于表示固定长度的经过时间（例如超时），精度为纳秒。与
+   <classname>DateInterval</classname> 不同，它没有天或月等日历单位，因此其长度没有歧义。
+   <!-- RFC: https://wiki.php.net/rfc/duration_class -->
+  </simpara>
+
+  <para>
+   持续时间不可变，并且可以使用比较运算符进行比较。该类提供：
+   <simplelist>
+    <member>
+     诸如 <methodname>Time\Duration::fromSeconds</methodname>、<methodname>Time\Duration::fromMilliseconds</methodname> 和
+     <methodname>Time\Duration::fromIso8601DurationString</methodname> 的工厂方法
+    </member>
+    <member>
+     使用 <methodname>Time\Duration::add</methodname>、<methodname>Time\Duration::sub</methodname>、<methodname>Time\Duration::multiplyBy</methodname> 和
+     <methodname>Time\Duration::divideBy</methodname> 进行算术运算
+    </member>
+    <member>
+     用于改变符号的 <methodname>Time\Duration::negate</methodname> 和
+     <methodname>Time\Duration::absolute</methodname>
+    </member>
+    <member>
+     用于作为排序回调的 <methodname>Time\Duration::compare</methodname>
+    </member>
+   </simplelist>
+  </para>
+
+  <simpara>
+   当持续时间超出约 292 年的可表示范围，或 <acronym>ISO</acronym> 8601 持续时间字符串无效时，会抛出
+   <exceptionname>Time\TimeException</exceptionname>。
+  </simpara>
+
+  <informalexample>
+   <programlisting role="php">
+<![CDATA[
+<?php
+$timeout = \Time\Duration::fromSeconds(2)->add(\Time\Duration::fromMilliseconds(500));
+
+printf("%d.%09d seconds\n", $timeout->seconds, $timeout->nanoseconds);
+var_dump($timeout > \Time\Duration::fromSeconds(2));
+]]>
+   </programlisting>
+   &example.outputs;
+   <screen>
+<![CDATA[
+2.500000000 seconds
+bool(true)
+]]>
+   </screen>
+  </informalexample>
+
+ </sect2>
+
+ <sect2 xml:id="migration86.new-features.fileinfo">
+  <title>FileInfo</title>
+
+  <simpara>
+   <function>finfo_file</function> 现在可用于远程 stream。
+  </simpara>
+
+ </sect2>
+
+ <sect2 xml:id="migration86.new-features.gmp">
+  <title>GMP</title>
+
+  <simpara>
+   新增 <function>gmp_powm_sec</function>，用于抗侧信道的模幂运算。需要 GNU MP 5.0.0 或更高版本；使用 MPIR
+   的官方 Windows 构建不提供该函数。
+  </simpara>
+
+  <simpara>
+   新增 <function>gmp_prevprime</function>，用于获取小于指定数字的最大素数。可选的
+   <parameter>definitely_prime</parameter> 输出参数指示返回的数字是确定为素数还是可能为素数。如果不存在这样的素数，则抛出
+   <exceptionname>ValueError</exceptionname>。此函数仅在 PHP 针对 GNU MP 6.3.0 或更高版本构建时可用；使用
+   MPIR 的官方 Windows 构建不提供该函数。
+  </simpara>
+
+ </sect2>
+
+ <sect2 xml:id="migration86.new-features.intl">
+  <title>Intl</title>
+
+  <simpara>
+   新增静态方法 <methodname>IntlDatePatternGenerator::getSkeleton</methodname> 和
+   <methodname>IntlDatePatternGenerator::getBaseSkeleton</methodname>，用于为日期/时间模式生成唯一的骨架和基础骨架。
+  </simpara>
+
+  <simpara>
+   新增 <methodname>Locale::getDisplayKeyword</methodname> 和
+   <methodname>Locale::getDisplayKeywordValue</methodname>，分别带有别名
+   <function>locale_get_display_keyword</function> 和
+   <function>locale_get_display_keyword_value</function>。
+   <!-- RFC: https://wiki.php.net/rfc/getdisplaykeyword_and_getdisplaykeywordvalue -->
+  </simpara>
+
+  <para>
+   新增 <classname>IntlNumberRangeFormatter</classname> 类，用于使用指定的骨架和区域设置格式化两个数字组成的区间。自
+   <acronym>ICU</acronym> 63 起受支持。折叠行为为以下之一：
+   <simplelist>
+    <member><constant>IntlNumberRangeFormatter::COLLAPSE_AUTO</constant></member>
+    <member><constant>IntlNumberRangeFormatter::COLLAPSE_NONE</constant></member>
+    <member><constant>IntlNumberRangeFormatter::COLLAPSE_UNIT</constant></member>
+    <member><constant>IntlNumberRangeFormatter::COLLAPSE_ALL</constant></member>
+   </simplelist>
+   同一性回退为以下之一：
+   <simplelist>
+    <member><constant>IntlNumberRangeFormatter::IDENTITY_FALLBACK_SINGLE_VALUE</constant></member>
+    <member><constant>IntlNumberRangeFormatter::IDENTITY_FALLBACK_APPROXIMATELY_OR_SINGLE_VALUE</constant></member>
+    <member><constant>IntlNumberRangeFormatter::IDENTITY_FALLBACK_APPROXIMATELY</constant></member>
+    <member><constant>IntlNumberRangeFormatter::IDENTITY_FALLBACK_RANGE</constant></member>
+   </simplelist>
+  </para>
+
+  <simpara>
+   新增 <methodname>SpoofChecker::areBidiConfusable</methodname>，用于检查两个字符串在指定文本方向下是否易混淆，同时新增
+   <constant>SpoofChecker::LTR</constant> 和 <constant>SpoofChecker::RTL</constant> 方向常量。自 <acronym>ICU</acronym> 74 起受支持。
+  </simpara>
+
+  <simpara>
+   新增 <methodname>SpoofChecker::getBidiSkeleton</methodname>，用于为指定的文本方向生成易混淆骨架。自
+   <acronym>ICU</acronym> 74 起受支持。
+  </simpara>
+
+  <simpara>
+   新增 <methodname>SpoofChecker::getSkeleton</methodname>，用于为指定的字符串生成易混淆骨架。
+  </simpara>
+
+ </sect2>
+
+ <sect2 xml:id="migration86.new-features.io">
+  <title>IO</title>
+
+  <para>
+   新增轮询 <acronym>API</acronym>，包括：
+   <simplelist>
+    <member><classname>Io\Poll\Context</classname> 和 <classname>Io\Poll\Watcher</classname> 类</member>
+    <member><enumname>Io\Poll\Backend</enumname> 和 <enumname>Io\Poll\Event</enumname> 枚举</member>
+    <member><interfacename>Io\Poll\Handle</interfacename> 接口</member>
+    <member>用于监视 stream 的 <classname>StreamPollHandle</classname> 类</member>
+   </simplelist>
+   <!-- RFC: https://wiki.php.net/rfc/poll_api -->
+  </para>
+
+ </sect2>
+
+ <sect2 xml:id="migration86.new-features.json">
+  <title>JSON</title>
+
+  <simpara>
+   为 <function>json_last_error_msg</function> 返回的错误消息以及
+   <exceptionname>JsonException</exceptionname> 的消息新增了关于错误位置的额外信息。
+  </simpara>
+
+ </sect2>
+
+ <sect2 xml:id="migration86.new-features.openssl">
+  <title>OpenSSL</title>
+
+  <para>
+   为 stream 新增 <acronym>TLS</acronym> 会话恢复支持。通过以下新的
+   <link linkend="context.ssl">SSL 上下文</link>选项，可以跨请求保存和恢复客户端会话、实现自定义的服务器端会话存储，并控制会话缓存行为：
+   <simplelist>
+    <member><literal>session_data</literal></member>
+    <member><literal>session_new_cb</literal></member>
+    <member><literal>session_cache</literal></member>
+    <member><literal>session_cache_size</literal></member>
+    <member><literal>session_timeout</literal></member>
+    <member><literal>session_id_context</literal></member>
+    <member><literal>session_get_cb</literal></member>
+    <member><literal>session_remove_cb</literal></member>
+    <member><literal>num_tickets</literal></member>
+   </simplelist>
+   <!-- RFC: https://wiki.php.net/rfc/tls_session_resumption -->
+  </para>
+
+  <simpara>
+   通过新的 <link linkend="context.ssl">SSL 上下文</link>选项
+   <literal>psk_client_cb</literal> 和 <literal>psk_server_cb</literal>，为 stream 新增
+   <acronym>TLS</acronym> 外部 <acronym>PSK</acronym> 支持。这样可以设置和接收预共享密钥。
+  </simpara>
+
+  <simpara>
+   为 stream 新增 <acronym>TLS</acronym> 1.3 早期数据（0-RTT）支持。客户端通过 <literal>early_data</literal>
+   <link linkend="context.ssl">SSL 上下文</link>选项发送早期数据；服务器通过 <literal>max_early_data</literal> 接受，并通过
+   <literal>early_data_cb</literal> 回调接收。结果会在 <function>stream_get_meta_data</function> 数组的
+   <literal>"crypto"</literal> 条目的 <literal>"early_data"</literal> 键中报告为 <literal>"accepted"</literal>、<literal>"rejected"</literal> 或
+   <literal>"not_sent"</literal>。
+  </simpara>
+
+ </sect2>
+
+ <sect2 xml:id="migration86.new-features.pdo-pgsql">
+  <title>PDO_PGSQL</title>
+
+  <simpara>
+   新增 <constant>Pdo\Pgsql::ATTR_CHUNK_SIZE</constant>，表示语句每次分块获取的行数。值为 1 或更大时会进入
+   <code>PDO::ATTR_PREFETCH => 0</code> 的延迟获取模式。设置 <constant>PDO::ATTR_PREFETCH</constant>
+   会替换块大小。如果准备语句时既未设置该选项也未设置 <constant>PDO::ATTR_PREFETCH</constant>，则回退到连接上设置的值。需要
+   libpq 17 或更高版本。
+  </simpara>
+
+ </sect2>
+
+ <sect2 xml:id="migration86.new-features.phar">
+  <title>Phar</title>
+
+  <simpara>
+   重写 <methodname>SplFileInfo::getMTime</methodname> 和 <methodname>SplFileInfo::getPathname</methodname>
+   方法现在会影响 <methodname>Phar::buildFromDirectory</methodname> 和
+   <methodname>Phar::buildFromIterator</methodname> 系列方法的结果。这样可以重写文件的时间戳和名称。
+  </simpara>
+
+ </sect2>
+
+ <sect2 xml:id="migration86.new-features.snmp">
+  <title>SNMP</title>
+
+  <simpara>
+   如果底层库支持，现在可以将 <literal>AES192</literal>、<literal>AES192C</literal>、<literal>AES256</literal> 和
+   <literal>AES256C</literal> 用作 SNMPv3 安全协议。
+   <!-- RFC: https://wiki.php.net/rfc/snmp_improvements_2026#increase_the_number_of_snmpv3_security_protocols_supported -->
+  </simpara>
+
+  <simpara>
+   现在可以使用新的 <function>snmp_init_mib</function> 函数重置 <acronym>MIB</acronym> 树。
+   <!-- RFC: https://wiki.php.net/rfc/snmp_improvements_2026#allow_the_snmp_mib_to_be_reset -->
+  </simpara>
+
+  <para>
+   通过以下内容公开了额外的 <acronym>MIB</acronym> 解析和输出控制功能：
+   <simplelist>
+    <member><function>snmp_set_mib_option</function></member>
+    <member><function>snmp_set_output_option</function></member>
+    <member><function>snmp_set_string_output_format</function></member>
+    <member><property>SNMP::$numeric_index</property></member>
+    <member><property>SNMP::$numeric_timeticks</property></member>
+    <member><property>SNMP::$extended_index</property></member>
+    <member><property>SNMP::$dont_print_units</property></member>
+    <member><property>SNMP::$escape_quotes</property></member>
+    <member><property>SNMP::$print_hex_text</property></member>
+    <member><methodname>SNMP::setOidOutputFormat</methodname></member>
+    <member><methodname>SNMP::setStringOutputFormat</methodname></member>
+   </simplelist>
+   <!-- RFC: https://wiki.php.net/rfc/snmp_improvements_2026#implement_more_mib_parsing_and_value_output_controls -->
+  </para>
+
+ </sect2>
+
+ <sect2 xml:id="migration86.new-features.soap">
+  <title>SOAP</title>
+
+  <simpara>
+   为 <methodname>SoapClient::__construct</methodname> 新增 <literal>"keep_headers"</literal> 选项，用于指定
+   <classname>SoapClient</classname> 在从与原始主机不同的主机导入 <acronym>WSDL</acronym> 时应保留哪些
+   <acronym>HTTP</acronym> 头。默认情况下，此类请求会隐去 <literal>Authorization</literal>、<literal>Proxy-Authorization</literal> 和
+   <literal>Cookie</literal> 头。该选项接受要保留的头名称数组，例如 <code>['keep_headers' => ['authorization']]</code>。
+  </simpara>
+
+ </sect2>
+
+ <sect2 xml:id="migration86.new-features.streams">
+  <title>Streams</title>
+
+  <para>
+   新增 stream 错误 <acronym>API</acronym>，包括：
+   <simplelist>
+    <member><exceptionname>StreamError</exceptionname> 和 <exceptionname>StreamException</exceptionname> 类</member>
+    <member><enumname>StreamErrorStore</enumname>、<enumname>StreamErrorMode</enumname> 和 <enumname>StreamErrorCode</enumname> 枚举</member>
+    <member><function>stream_last_errors</function> 和 <function>stream_clear_errors</function> 函数</member>
+   </simplelist>
+   它通过 <literal>error_mode</literal>、<literal>error_store</literal> 和 <literal>error_handler</literal>
+   stream 上下文选项进行控制。
+   <!-- RFC: https://wiki.php.net/rfc/stream_errors -->
+  </para>
+
+  <simpara>
+   为 <link linkend="wrappers.php">php://filter</link> URL 新增 <literal>filter.max_filter_count</literal>
+   stream 上下文选项。设置后，如果该 URL 添加的过滤器数量超过配置值，打开 stream 会失败并发出警告。负值会禁用此检查。
+   <!-- RFC: https://wiki.php.net/rfc/limit-maximum-number-of-filter-chains -->
+  </simpara>
+
+  <simpara>
+   新增 <link linkend="context.socket">socket 上下文</link>选项 <literal>so_reuseaddr</literal>，用于禁用地址重用（<literal>SO_REUSEADDR</literal>），并在 Windows 上显式使用
+   <literal>SO_EXCLUSIVEADDRUSE</literal>。
+  </simpara>
+
+  <simpara>
+   新增 <link linkend="context.socket">socket 上下文</link>选项 <literal>so_keepalive</literal>、<literal>tcp_keepidle</literal>、<literal>tcp_keepintvl</literal>
+   和 <literal>tcp_keepcnt</literal>，用于设置 socket 保活选项。
+  </simpara>
+
+  <simpara>
+   新增 <link linkend="context.socket">socket 上下文</link>选项 <literal>so_linger</literal>，用于在 <acronym>TCP</acronym> socket 上设置
+   <literal>SO_LINGER</literal>。正值会启用对应秒数的延迟关闭，零或负值则禁用。由于某些平台上延迟关闭时间限制为无符号 short，超过 65535 的值会被截断。
+  </simpara>
+
+  <simpara>
+   新增 <link linkend="context.socket">socket 上下文</link>选项 <literal>so_rcvbuf</literal> 和 <literal>so_sndbuf</literal>，用于在
+   <acronym>TCP</acronym> 和 <acronym>UDP</acronym> socket 上以字节为单位设置 socket 接收和发送缓冲区大小（<literal>SO_RCVBUF</literal> 和 <literal>SO_SNDBUF</literal>）。值必须是
+   1 到 2147483647 之间的整数，其他值会导致 stream 创建失败。操作系统可能会对请求的大小进行取整、设上限或其他调整，并可能停止自动调整该缓冲区大小，因此读回的大小可能与请求的大小不同。
+  </simpara>
+
+  <simpara>
+   过滤后的 stream 现在可以转换为文件描述符，以便与 <function>stream_select</function> 一起使用。
+  </simpara>
+
+  <para>
+   为 bz2、iconv、zlib 和 <link linkend="filters.convert">convert</link> stream 过滤器新增
+   <literal>"write_seek_mode"</literal> 过滤器参数。该参数必须通过关联数组设置，其中键为
+   <literal>"write_seek_mode"</literal>，值为以下字符串之一：
+   <simplelist>
+    <member><literal>"preserve"</literal></member>
+    <member><literal>"reset"</literal></member>
+    <member><literal>"strict"</literal></member>
+   </simplelist>
+  </para>
+
+ </sect2>
+
+ <sect2 xml:id="migration86.new-features.uri">
+  <title>URI</title>
+
+  <simpara>
+   新增 <methodname>Uri\Rfc3986\Uri::getUriType</methodname> 和
+   <methodname>Uri\WhatWg\Url::isSpecialScheme</methodname>。
+   <!-- RFC: https://wiki.php.net/rfc/uri_followup#uri_type_detection -->
+  </simpara>
+
+  <simpara>
+   新增 <methodname>Uri\Rfc3986\Uri::getHostType</methodname> 和
+   <methodname>Uri\WhatWg\Url::getHostType</methodname>。
+   <!-- RFC: https://wiki.php.net/rfc/uri_followup#host_type_detection -->
+  </simpara>
+
+  <simpara>
+   新增 <classname>Uri\Rfc3986\UriBuilder</classname> 和 <classname>Uri\WhatWg\UrlBuilder</classname> 类。
+   <!-- RFC: https://wiki.php.net/rfc/uri_followup#uri_building -->
+  </simpara>
+
+  <simpara>
+   新增 <function>Uri\WhatWg\url_percent_encode</function>。
+   <!-- RFC: https://wiki.php.net/rfc/uri_followup#percent-encoding_support -->
+  </simpara>
+
+ </sect2>
+
+</sect1>
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+-->
