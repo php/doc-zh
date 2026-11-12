@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- EN-Revision: 603435cd84951fc720eded819c62ef2466d21b5c Maintainer: mowangjuanzi Status: ready -->
+<!-- EN-Revision: a65a5e6f1911958433899d22bfe252dedec57b69 Maintainer: mowangjuanzi Status: ready -->
 <!-- CREDITS: Luffy -->
 <reference xml:id="class.override" role="class" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude">
  <title>Override 注解</title>
@@ -10,10 +10,10 @@
   <section xml:id="override.intro">
    &reftitle.intro;
    <simpara>
-    此注解用于表明某个方法或属性意图重写父类中的方法或属性，或实现接口中定义的方法或属性。
+    此注解用于表明某个方法、属性或类常量（包括枚举 case）意图重写父类中的方法、属性或类常量，或实现接口中定义的方法、属性或类常量。
    </simpara>
    <simpara>
-    如果父类或实现的接口中不存在同名方法或属性，则会引发编译时错误。
+    如果父类或实现的接口中不存在同名的方法、属性或类常量，则会引发编译时错误。
    </simpara>
    <simpara>
     此注解不能用于 <link linkend="object.construct">__construct()</link>
@@ -26,7 +26,7 @@
 
    <classsynopsis class="class">
     <ooclass>
-     <modifier role="attribute">#[\Attribute]</modifier>
+     <modifier role="attribute">#[\Attribute(\Attribute::TARGET_METHOD | \Attribute::TARGET_PROPERTY | \Attribute::TARGET_CLASS_CONSTANT)]</modifier>
      <modifier>final</modifier>
      <classname>Override</classname>
     </ooclass>
@@ -48,6 +48,12 @@
       </row>
      </thead>
      <tbody>
+      <row>
+       <entry>8.6.0</entry>
+       <entry>
+        <classname>Override</classname> 可以应用于类常量，包括枚举 case。
+       </entry>
+      </row>
       <row>
        <entry>8.5.0</entry>
        <entry>
@@ -108,6 +114,31 @@ final class Extended extends Base {
     <screen>
 <![CDATA[
 Fatal error: Extended::$boo has #[\Override] attribute, but no matching parent property exists
+]]>
+    </screen>
+   </example>
+   <example>
+    <title>与类常量一起使用</title>
+    <programlisting role="php">
+<![CDATA[
+<?php
+
+class Base {
+    protected const FOO = 'foo';
+}
+
+final class Extended extends Base {
+    #[\Override]
+    protected const BOO = 'boo';
+}
+
+?>
+]]>
+    </programlisting>
+    &example.outputs.86.similar;
+    <screen>
+<![CDATA[
+Fatal error: Extended::BOO has #[\Override] attribute, but no matching parent constant exists
 ]]>
     </screen>
    </example>
